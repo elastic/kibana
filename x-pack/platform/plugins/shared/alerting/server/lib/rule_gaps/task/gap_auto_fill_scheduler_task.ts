@@ -12,7 +12,6 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { withSpan } from '@kbn/apm-utils';
 import dateMath from '@kbn/datemath';
-import { getRuleIdsWithGaps } from '../../../application/rule/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
 import { findGapsSearchAfter } from '../find_gaps';
 import { processGapsBatch } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
 
@@ -148,17 +147,17 @@ async function initRun({
   startTime,
 }: {
   fakeRequest: KibanaRequest | undefined;
-  getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClient>;
+  getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClient> | undefined;
   eventLogger: IEventLogger;
   taskInstance: {
     id: string;
     scheduledAt: Date;
     state?: Record<string, unknown>;
-    params?: unknown;
+    params?: { configId?: string };
   };
   startTime: Date;
 }): Promise<{
-  rulesClientWithContext: RulesClient;
+  rulesClient: RulesClient;
   rulesClientContext: RulesClientContext;
   config: {
     name: string;
@@ -172,17 +171,22 @@ async function initRun({
   if (!getRulesClientWithRequest || !fakeRequest) {
     throw new Error('Missing request or rules client factory');
   }
-  const rulesClientWithContext = await getRulesClientWithRequest(fakeRequest);
-  const rulesClientContext = (
-    rulesClientWithContext as unknown as { getContext: () => RulesClientContext }
-  ).getContext();
-  const { configId } = ((taskInstance.params as { configId?: string }) || {}) as {
-    configId?: string;
-  };
+  const rulesClient = await getRulesClientWithRequest(fakeRequest);
+  if (!rulesClient) {
+    throw new Error('Missing rules client');
+  }
+  const rulesClientContext = rulesClient.getContext();
+  const configId = taskInstance?.params?.configId;
+
+  if (!configId) {
+    throw new Error('Missing configId');
+  }
+
   const soClient = rulesClientContext.unsecuredSavedObjectsClient;
   const schedulerSo = configId
     ? await soClient.get(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, configId)
     : null;
+
   if (!schedulerSo) {
     throw new Error('Missing gap_auto_fill_scheduler saved object');
   }
@@ -196,22 +200,24 @@ async function initRun({
   };
   const logEvent = createGapAutoFillSchedulerEventLogger({
     eventLogger,
-    context: rulesClientContext as unknown as { spaceId: string },
+    context: rulesClientContext,
     taskInstance,
     startTime,
     config: soAttrs,
   });
-  return { rulesClientWithContext, rulesClientContext, config, logEvent };
+  return { rulesClient, rulesClientContext, config, logEvent };
 }
 
 async function checkBackfillCapacity({
   rulesClient,
   maxBackfills,
   logger,
+  initiatorId,
 }: {
   rulesClient: RulesClient;
   maxBackfills: number;
   logger: Logger;
+  initiatorId: string;
 }): Promise<{
   canSchedule: boolean;
   currentCount: number;
@@ -222,7 +228,8 @@ async function checkBackfillCapacity({
     const findRes = await rulesClient.findBackfill({
       page: 1,
       perPage: 1,
-      initiator: 'system',
+      initiator: backfillInitiator.SYSTEM,
+      initiatorId,
     });
     const currentCount = findRes.total;
     const remainingCapacity = Math.max(0, maxBackfills - currentCount);
@@ -301,16 +308,21 @@ export function registerGapAutoFillSchedulerTask({
   logger,
   getRulesClientWithRequest,
   eventLogger,
+  schedulerConfig,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClient> | undefined;
   eventLogger: IEventLogger;
+  schedulerConfig?: {
+    timeout?: string;
+    sortOrder?: 'asc' | 'desc';
+  };
 }) {
   taskManager.registerTaskDefinitions({
     [GAP_AUTO_FILL_SCHEDULER_TASK_TYPE]: {
       title: 'Gap Auto Fill Scheduler',
-      timeout: '1m',
+      timeout: schedulerConfig?.timeout ?? '40s',
       createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
         let wasCancelled = false;
 
@@ -324,7 +336,7 @@ export function registerGapAutoFillSchedulerTask({
           async run() {
             const startTime = new Date();
             // Step 1: Initialization
-            let rulesClientWithContext: RulesClient;
+            let rulesClient: RulesClient;
             let rulesClientContext: RulesClientContext;
             let config: {
               name: string;
@@ -342,7 +354,7 @@ export function registerGapAutoFillSchedulerTask({
                 taskInstance,
                 startTime,
               });
-              rulesClientWithContext = initResult.rulesClientWithContext;
+              rulesClient = initResult.rulesClient;
               rulesClientContext = initResult.rulesClientContext;
               config = initResult.config;
               logEvent = initResult.logEvent;
@@ -356,9 +368,10 @@ export function registerGapAutoFillSchedulerTask({
               const now = new Date();
               // Step 2: Capacity pre-check
               const capacityCheckInitial = await checkBackfillCapacity({
-                rulesClient: rulesClientWithContext,
+                rulesClient,
                 maxBackfills: config.maxBackfills,
                 logger,
+                initiatorId: taskInstance.id,
               });
               if (!capacityCheckInitial.canSchedule) {
                 await finalizeRun({
@@ -371,11 +384,13 @@ export function registerGapAutoFillSchedulerTask({
               }
 
               let remainingBackfills = capacityCheckInitial.remainingCapacity;
-              // Step 3: Fetch rule IDs with gaps (oldest gaps first)
+              // Step 3: Fetch rule IDs with gaps
               const startDate: Date = resolveStartDate(config.gapFillRange, logger);
-              const { ruleIds } = await getRuleIdsWithGaps(rulesClientContext, {
+              const sortOrder = schedulerConfig?.sortOrder ?? 'asc';
+              const { ruleIds } = await rulesClient.getRuleIdsWithGaps({
                 start: startDate.toISOString(),
                 end: now.toISOString(),
+                sortOrder,
               });
 
               if (!ruleIds.length) {
@@ -428,7 +443,7 @@ export function registerGapAutoFillSchedulerTask({
 
                 const currentRuleIds = ruleIds.slice(startIdx, startIdx + DEFAULT_RULES_BATCH_SIZE);
 
-                const { data: rules } = await rulesClientWithContext.find({
+                const { data: rules } = await rulesClient.find({
                   options: {
                     page: 1,
                     perPage: currentRuleIds.length,
@@ -458,6 +473,8 @@ export function registerGapAutoFillSchedulerTask({
                     let searchAfter: SortResults[] | undefined;
                     let pitId: string | undefined;
 
+                    const gapsPerPage = DEFAULT_GAPS_PER_PAGE;
+
                     while (true) {
                       if (
                         await handleCancellation({
@@ -481,9 +498,9 @@ export function registerGapAutoFillSchedulerTask({
                           ruleIds: toProcessRuleIds,
                           start: startDate.toISOString(),
                           end: now.toISOString(),
-                          perPage: DEFAULT_GAPS_PER_PAGE,
+                          perPage: gapsPerPage,
                           sortField: '@timestamp',
-                          sortOrder: 'asc',
+                          sortOrder,
                           statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
                           searchAfter,
                           pitId,
@@ -505,7 +522,7 @@ export function registerGapAutoFillSchedulerTask({
                       );
 
                       if (!filteredGaps.length) {
-                        if (gapsPage.length < DEFAULT_GAPS_PER_PAGE) {
+                        if (gapsPage.length < gapsPerPage) {
                           break;
                         }
                         continue;
@@ -515,20 +532,22 @@ export function registerGapAutoFillSchedulerTask({
                         gapsBatch: filteredGaps,
                         range: { start: startDate.toISOString(), end: now.toISOString() },
                         initiator: backfillInitiator.SYSTEM,
+                        initiatorId: taskInstance.id,
                       });
                       addChunkResultsToAggregation(aggregatedByRule, chunkResults);
 
                       // If fewer than gapsPerPage gaps returned, we've reached the end for this batch
-                      if (gapsPage.length < DEFAULT_GAPS_PER_PAGE) {
+                      if (gapsPage.length < gapsPerPage) {
                         break;
                       }
                     }
 
                     // After finishing this rule batch, re-check backfill capacity
                     const capacityCheckPostBatch = await checkBackfillCapacity({
-                      rulesClient: rulesClientWithContext,
+                      rulesClient,
                       maxBackfills: config.maxBackfills,
                       logger,
+                      initiatorId: taskInstance.id,
                     });
                     if (!capacityCheckPostBatch.canSchedule) {
                       const consolidated = resultsFromMap(aggregatedByRule);

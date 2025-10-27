@@ -264,5 +264,7 @@ export class RulesClient {
   public createGapAutoFillScheduler = (params: CreateGapAutoFillSchedulerParams) =>
     createGapAutoFillScheduler(this.context, params);
 
-  public getContext = () => this.context;
+  public getContext() {
+    return this.context;
+  }
 }

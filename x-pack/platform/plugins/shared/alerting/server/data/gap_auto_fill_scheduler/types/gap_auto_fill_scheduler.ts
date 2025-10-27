@@ -11,6 +11,7 @@ export interface GapAutoFillSchedulerSO extends Record<string, unknown> {
   enabled: boolean;
   schedule: { interval: string };
   gapFillRange: string;
+  maxBackfills: number;
   amountOfRetries: number;
   createdBy?: string;
   updatedBy?: string;
@@ -25,6 +26,7 @@ export interface GapAutoFillScheduler {
   enabled: boolean;
   schedule: { interval: string };
   gapFillRange: string;
+  maxBackfills: number;
   amountOfRetries: number;
   createdBy?: string;
   updatedBy?: string;

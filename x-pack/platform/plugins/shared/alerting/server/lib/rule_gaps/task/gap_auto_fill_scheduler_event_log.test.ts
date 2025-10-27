@@ -36,9 +36,13 @@ describe('gap_auto_fill_scheduler_event_log', () => {
       startTime: fixedStart,
       config: {
         name: 'gap-fill-auto-fill-name',
+        enabled: true,
         amountOfRetries: 3,
         gapFillRange: 'now-7d',
+        maxBackfills: 10,
         schedule: { interval: '1h' },
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
       },
     } as const);
 
@@ -51,12 +55,6 @@ describe('gap_auto_fill_scheduler_event_log', () => {
         { ruleId: 'r-1', processedGaps: 5, status: 'success' },
         { ruleId: 'r-2', processedGaps: 2, status: 'error', error: 'boom' },
       ],
-      summary: {
-        totalRules: 2,
-        successfulRules: 1,
-        failedRules: 1,
-        totalGapsProcessed: 7,
-      },
       message: 'done',
     });
 
@@ -106,7 +104,6 @@ describe('gap_auto_fill_scheduler_event_log', () => {
     log({
       status: 'skipped',
       results: [],
-      summary: { totalRules: 0, successfulRules: 0, failedRules: 0, totalGapsProcessed: 0 },
       message: 'nothing to do',
     });
 

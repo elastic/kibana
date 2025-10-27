@@ -7,4 +7,4 @@
 
 export { createGapAutoFillScheduler } from './create_gap_auto_fill_scheduler';
 export * from './schemas';
-export * from './types';
+export type * from './types';

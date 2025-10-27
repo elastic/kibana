@@ -135,6 +135,168 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             }
           });
 
+          it('should return rules ordered by oldest gap first by default', async () => {
+            const rresponse1 = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(getRule())
+              .expect(200);
+            const ruleId1 = rresponse1.body.id;
+            objectRemover.add(apiOptions.spaceId, ruleId1, 'rule', 'alerting');
+
+            const rresponse2 = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(getRule())
+              .expect(200);
+            const ruleId2 = rresponse2.body.id;
+            objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
+
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId: ruleId1,
+                start: gap1Start,
+                end: gap1End,
+                spaceId: apiOptions.spaceId,
+              });
+            // Additional gap for rule 1 (later than first)
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId: ruleId1,
+                start: '2024-01-08T00:00:00.000Z',
+                end: '2024-01-09T00:00:00.000Z',
+                spaceId: apiOptions.spaceId,
+              });
+
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId: ruleId2,
+                start: gap2Start,
+                end: gap2End,
+                spaceId: apiOptions.spaceId,
+              });
+            // Additional gap for rule 2 (later than first)
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId: ruleId2,
+                start: '2024-01-18T00:00:00.000Z',
+                end: '2024-01-19T00:00:00.000Z',
+                spaceId: apiOptions.spaceId,
+              });
+
+            const response = await supertestWithoutAuth
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
+              .set('kbn-xsrf', 'foo')
+              .auth(apiOptions.username, apiOptions.password)
+              .send({ start: searchStart, end: searchEnd });
+
+            switch (scenario.id) {
+              case 'global_read at space1':
+              case 'space_1_all_alerts_none_actions at space1':
+              case 'superuser at space1':
+              case 'space_1_all at space1':
+              case 'space_1_all_with_restricted_fixture at space1':
+                expect(response.statusCode).to.eql(200);
+                expect(response.body.rule_ids).to.eql([ruleId1, ruleId2]);
+                break;
+              case 'no_kibana_privileges at space1':
+              case 'space_1_all at space2':
+                expect(response.statusCode).to.eql(403);
+                break;
+              default:
+                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+            }
+          });
+
+          it('should return rules ordered by newest gap first when sort_order is desc', async () => {
+            const rresponse1 = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(getRule())
+              .expect(200);
+            const ruleId1 = rresponse1.body.id;
+            objectRemover.add(apiOptions.spaceId, ruleId1, 'rule', 'alerting');
+
+            const rresponse2 = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(getRule())
+              .expect(200);
+            const ruleId2 = rresponse2.body.id;
+            objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
+
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId: ruleId1,
+                start: gap1Start,
+                end: gap1End,
+                spaceId: apiOptions.spaceId,
+              });
+            // Additional gap for rule 1 (later than first)
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId: ruleId1,
+                start: '2024-01-08T00:00:00.000Z',
+                end: '2024-01-09T00:00:00.000Z',
+                spaceId: apiOptions.spaceId,
+              });
+
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId: ruleId2,
+                start: gap2Start,
+                end: gap2End,
+                spaceId: apiOptions.spaceId,
+              });
+            // Additional gap for rule 2 (later than first)
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId: ruleId2,
+                start: '2024-01-18T00:00:00.000Z',
+                end: '2024-01-19T00:00:00.000Z',
+                spaceId: apiOptions.spaceId,
+              });
+
+            const response = await supertestWithoutAuth
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
+              .set('kbn-xsrf', 'foo')
+              .auth(apiOptions.username, apiOptions.password)
+              .send({ start: searchStart, end: searchEnd, sort_order: 'desc' });
+
+            switch (scenario.id) {
+              case 'global_read at space1':
+              case 'space_1_all_alerts_none_actions at space1':
+              case 'superuser at space1':
+              case 'space_1_all at space1':
+              case 'space_1_all_with_restricted_fixture at space1':
+                expect(response.statusCode).to.eql(200);
+                expect(response.body.rule_ids).to.eql([ruleId2, ruleId1]);
+                break;
+              case 'no_kibana_privileges at space1':
+              case 'space_1_all at space2':
+                expect(response.statusCode).to.eql(403);
+                break;
+              default:
+                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+            }
+          });
+
           it('should filter rules by gap status', async () => {
             // Create a rule
             const ruleResponse = await supertest

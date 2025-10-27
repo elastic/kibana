@@ -6,10 +6,10 @@
  */
 
 import type { GapAutoFillSchedulerResponseBodyV1 } from '../../../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import type { GapFillAutoSchedulerResponse } from '../../../../../../../application/gap_auto_fill_scheduler/result/types';
+import type { GapAutoFillSchedulerResponse } from '../../../../../../../application/gap_auto_fill_scheduler/result/types';
 
 export const transformResponse = (
-  result: GapFillAutoSchedulerResponse
+  result: GapAutoFillSchedulerResponse
 ): GapAutoFillSchedulerResponseBodyV1 => ({
   id: result.id,
   name: result.name,
