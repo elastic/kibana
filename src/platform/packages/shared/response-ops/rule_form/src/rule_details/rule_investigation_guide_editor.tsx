@@ -20,13 +20,24 @@ interface Props {
 }
 
 export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
-  const [isTooLong, setIsTooLong] = React.useState<boolean>(false);
+  const [errorMessages, setErrorMessages] = React.useState<string[]>([]);
   const onParse = useCallback(
     (_: EuiMarkdownParseError | null, { ast }: { ast: EuiMarkdownAstNode }) => {
       const length = ast.position?.end.offset ?? 0;
-      setIsTooLong(length > MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH);
+      // Update the error message with the current length
+      if (length > MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH) {
+        setErrorMessages([
+          i18n.translate('responseOpsRuleForm.investigationGuide.editor.errorMessage', {
+            defaultMessage:
+              'The investigation guide is too long. Please shorten it.\nCurrent length: {length}.\nMax length: {maxLength}.',
+            values: { length, maxLength: MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH },
+          }),
+        ]);
+      } else if (errorMessages.length) {
+        setErrorMessages([]);
+      }
     },
-    []
+    [errorMessages.length]
   );
   return (
     <EuiMarkdownEditor
@@ -50,19 +61,10 @@ export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
       value={value}
       onChange={(blob) => setRuleParams({ investigation_guide: { blob } })}
       onParse={onParse}
-      errors={isTooLong ? [CONTENT_TOO_LONG_ERROR_MESSAGE] : []}
+      errors={errorMessages}
       height={200}
       data-test-subj="investigationGuideEditor"
       initialViewMode="editing"
     />
   );
 }
-
-const CONTENT_TOO_LONG_ERROR_MESSAGE = i18n.translate(
-  'responseOpsRuleForm.investigationGuide.editor.errorMessage',
-  {
-    defaultMessage:
-      'The investigation guide is too long. Please shorten it.\nCurrent length: {length}.\nMax length: {maxLength}.',
-    values: { length, maxLength: MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH },
-  }
-);
