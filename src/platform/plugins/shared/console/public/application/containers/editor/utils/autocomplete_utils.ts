@@ -313,15 +313,47 @@ const getSuggestions = (
   if (lineContentAfterPosition.startsWith('"')) {
     endColumn = endColumn + 1;
   }
+  // Check if we're typing a field name with a trailing dot
+  const lineContentBeforePosition = model.getValueInRange({
+    startLineNumber: position.lineNumber,
+    startColumn: 1,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  });
+
+  // Check if we're typing a nested field name (contains a dot)
+  // This handles both "category." (trailing dot) and "category.keywor" (partial field after dot)
+  const fieldWithDotMatch = lineContentBeforePosition.match(/"([^"]*\.[^"]*)$/);
+  const fieldBeingTyped = fieldWithDotMatch ? fieldWithDotMatch[1] : null;
+
+  // Adjust the range start column if we have a field with a dot
+  let startColumn = wordUntilPosition.startColumn;
+  if (fieldBeingTyped) {
+    // Find where the field name starts
+    const fieldIndex = lineContentBeforePosition.lastIndexOf('"' + fieldBeingTyped);
+    if (fieldIndex >= 0) {
+      startColumn = fieldIndex + 2; // +2 to skip the quote and start at the field name
+    }
+  }
+
   const range = {
     startLineNumber: position.lineNumber,
     // replace the whole word with the suggestion
-    startColumn: wordUntilPosition.startColumn,
+    startColumn,
     endLineNumber: position.lineNumber,
     endColumn,
   };
+
   return (
     filterTermsWithoutName(autocompleteSet)
+      // Filter suggestions to only show nested fields when there's a field being typed with a dot
+      .filter((item) => {
+        if (fieldBeingTyped) {
+          // Only show fields that start with what the user has typed so far
+          return typeof item.name === 'string' && item.name.startsWith(fieldBeingTyped);
+        }
+        return true;
+      })
       // map autocomplete items to completion items
       .map((item) => {
         const suggestion = {
