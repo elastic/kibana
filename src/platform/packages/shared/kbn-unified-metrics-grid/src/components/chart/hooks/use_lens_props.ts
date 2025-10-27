@@ -17,11 +17,11 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useStableCallback } from '@kbn/unified-histogram';
 import {
   debounceTime,
-  filter,
+  // filter,
   startWith,
   Observable,
   distinctUntilChanged,
-  withLatestFrom,
+  // withLatestFrom,
   from,
   merge,
   shareReplay,
@@ -141,14 +141,14 @@ export const useLensProps = ({
     const subscription = merge(
       // initial load on mount
       defer(() => from(loadAttributes())),
-      triggers$,
-      intersecting$
+      triggers$
+      // intersecting$
     )
       .pipe(
         // debounce to avoid multiple updates in quick succession
-        debounceTime(100),
-        withLatestFrom(intersecting$),
-        filter(([, isIntersecting]) => isIntersecting)
+        debounceTime(100)
+        // withLatestFrom(intersecting$),
+        // filter(([, isIntersecting]) => isIntersecting)
       )
       .subscribe(() => {
         updateLensPropsContext();

@@ -51,7 +51,7 @@ export const usePaginatedFields = ({
     const end = start + pageSize;
 
     return {
-      currentPageFields: filteredFields.slice(start, end),
+      currentPageFields: filteredFields.slice(0, end),
       filteredFieldsCount: filteredFields.length,
       totalPages,
     };
