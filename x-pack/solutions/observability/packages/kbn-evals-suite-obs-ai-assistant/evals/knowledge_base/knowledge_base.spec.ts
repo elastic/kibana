@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { evaluate } from '../../src/evaluate';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type {
   InstallationStatusResponse,
@@ -12,11 +13,10 @@ import type {
   UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';
 import { testDocs } from '../../src/sample_data/knowledge_base';
-import { evaluate } from '../../src/evaluate';
 
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
- * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/documentation/index.spec.ts
+ * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/kb/index.spec.ts
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
 
