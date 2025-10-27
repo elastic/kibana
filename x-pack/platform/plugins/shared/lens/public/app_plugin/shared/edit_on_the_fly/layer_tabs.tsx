@@ -7,8 +7,6 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { EuiSpacer } from '@elastic/eui';
-
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getLensLayerTypeTabDisplayName } from '@kbn/lens-common';
 import type { AddLayerFunction, LayerAction, Visualization } from '@kbn/lens-common';
@@ -365,7 +363,6 @@ export function LayerTabs({
 
   return !hideAddLayerButton ? (
     <>
-      <EuiSpacer size="s" />
       <UnifiedTabs
         items={managedItems}
         selectedItemId={selectedLayerId ?? undefined}
