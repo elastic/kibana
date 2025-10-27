@@ -15,6 +15,7 @@ import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { AttachmentServiceSetup } from './services/attachments';
 
 export interface OnechatSetupDependencies {
   cloud?: CloudSetup;
@@ -29,6 +30,13 @@ export interface OnechatStartDependencies {
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
+}
+
+export interface AttachmentsSetup {
+  /**
+   * Register an attachment type to be available in onechat.
+   */
+  register: AttachmentServiceSetup['register'];
 }
 
 /**
@@ -67,13 +75,17 @@ export interface AgentsSetup {
  */
 export interface OnechatPluginSetup {
   /**
-   * Agents setup contract, can be used to register built-in agents.
+   * Agents setup contract, which can be used to register built-in agents.
    */
   agents: AgentsSetup;
   /**
-   * Tools setup contract, can be used to register built-in tools.
+   * Tools setup contract, which can be used to register built-in tools.
    */
   tools: ToolsSetup;
+  /**
+   * Attachments setup contract, which can be used to register attachment types.
+   */
+  attachments: AttachmentsSetup;
 }
 
 /**
