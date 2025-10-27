@@ -11,7 +11,7 @@ import { ArtifactType } from './artifacts';
 // TODO: fix all of this - we need strong typed for internal + loose typed for external...
 
 export enum AttachmentType {
-  context = 'context',
+  screenContext = 'screen_context',
   text = ArtifactType.text,
   dashboard = ArtifactType.dashboard,
 }
@@ -19,7 +19,7 @@ export enum AttachmentType {
 interface AttachmentDataMap {
   [AttachmentType.text]: TextArtifact;
   [AttachmentType.dashboard]: {};
-  [AttachmentType.context]: {};
+  [AttachmentType.screenContext]: {};
 }
 
 type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
@@ -31,6 +31,11 @@ export interface AttachmentMixin<Type extends AttachmentType> {
   type: AttachmentType;
   /** data bound to the attachment */
   data: AttachmentDataOf<Type>;
+
+  // TODO: hidden in the UI
+  hidden?: boolean;
+  // TODO: transient - only displayed for current round
+  transient?: boolean;
 }
 
 // Attachments
@@ -47,3 +52,8 @@ export type Attachment = TextAttachment | DashboardAttachment;
 // AttachmentInput
 
 export type AttachmentInput = Omit<Attachment, 'id'> & Partial<Pick<Attachment, 'id'>>;
+
+export type UnvalidatedAttachment = Omit<AttachmentInput, 'data' | 'type'> & {
+  type: string;
+  data: unknown;
+};

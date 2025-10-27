@@ -10,16 +10,16 @@ import { AttachmentType } from '@kbn/onechat-common/artifacts/attachments';
 import type { InlineAttachmentTypeDefinition } from '@kbn/onechat-server/artifacts';
 
 const contextDataSchema = z.object({
-  context: z.string(),
+  text: z.string(),
 });
 
 export interface ContextData {
-  context: string;
+  text: string;
 }
 
-export const createContextAttachmentType = (): InlineAttachmentTypeDefinition<ContextData> => {
+export const createTextAttachmentType = (): InlineAttachmentTypeDefinition<ContextData> => {
   return {
-    id: AttachmentType.context,
+    id: AttachmentType.text,
     type: 'inline',
     validate: (input) => {
       const parseResult = contextDataSchema.safeParse(input);
@@ -31,7 +31,7 @@ export const createContextAttachmentType = (): InlineAttachmentTypeDefinition<Co
     },
     format: (input) => {
       // simplest formatting now, need to improve later.
-      return { type: 'text', value: input.context };
+      return { type: 'text', value: input.text };
     },
   };
 };

@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import type { UnvalidatedAttachment } from '@kbn/onechat-common/artifacts/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/artifacts';
+import type { ValidateAttachmentResult } from './validate_attachment';
 
 export interface AttachmentServiceSetup {
   register(attachmentType: AttachmentTypeDefinition): void;
 }
-export interface AttachmentServiceStart {}
+export interface AttachmentServiceStart {
+  validate(attachment: UnvalidatedAttachment): Promise<ValidateAttachmentResult>;
+}

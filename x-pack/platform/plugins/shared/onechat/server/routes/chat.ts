@@ -19,10 +19,12 @@ import {
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
 } from '@kbn/onechat-common';
+import type { AttachmentInput, UnvalidatedAttachment } from '@kbn/onechat-common/artifacts';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
+import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 
@@ -61,9 +63,8 @@ export function registerChatRoutes({
         schema.object({
           id: schema.maybe(schema.string()),
           type: schema.string(),
-          data: schema.any(),
-        }),
-        {}
+          data: schema.recordOf(schema.string(), schema.any()),
+        })
       )
     ),
     input: schema.string({
@@ -91,15 +92,37 @@ export function registerChatRoutes({
     ),
   });
 
+  const validateAttachments = async ({
+    attachments,
+    attachmentsService,
+  }: {
+    attachments: UnvalidatedAttachment[];
+    attachmentsService: AttachmentServiceStart;
+  }) => {
+    const results: AttachmentInput[] = [];
+    for (const attachment of attachments) {
+      const validation = await attachmentsService.validate(attachment);
+      if (validation.valid) {
+        results.push(validation.attachment);
+      } else {
+        // TODO: merge errors for each attachment
+        throw new Error(`Attachment validation failed: ${validation.error}`);
+      }
+    }
+    return results;
+  };
+
   const callConverse = ({
     payload,
+    attachments,
     request,
     chatService,
     abortSignal,
   }: {
-    chatService: ChatService;
-    payload: ChatRequestBodyPayload;
+    payload: Omit<ChatRequestBodyPayload, 'attachments'>;
+    attachments: AttachmentInput[];
     request: KibanaRequest;
+    chatService: ChatService;
     abortSignal: AbortSignal;
   }) => {
     const {
@@ -108,7 +131,6 @@ export function registerChatRoutes({
       conversation_id: conversationId,
       input,
       capabilities,
-      attachments,
     } = payload;
 
     return chatService.converse({
@@ -154,7 +176,7 @@ export function registerChatRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { chat: chatService } = getInternalServices();
+        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
 
         const abortController = new AbortController();
@@ -162,9 +184,17 @@ export function registerChatRoutes({
           abortController.abort();
         });
 
+        const attachments = payload.attachments
+          ? await validateAttachments({
+              attachments: payload.attachments,
+              attachmentsService,
+            })
+          : [];
+
         const chatEvents$ = callConverse({
-          chatService,
           payload,
+          attachments,
+          chatService,
           request,
           abortSignal: abortController.signal,
         });

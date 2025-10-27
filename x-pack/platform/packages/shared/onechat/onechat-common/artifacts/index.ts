@@ -11,4 +11,5 @@ export type {
   TextAttachment,
   DashboardAttachment,
   AttachmentInput,
+  UnvalidatedAttachment,
 } from './attachments';

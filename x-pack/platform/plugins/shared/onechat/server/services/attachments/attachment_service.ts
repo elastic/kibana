@@ -11,6 +11,7 @@ import {
 } from './attachment_type_registry';
 import { registerAttachmentTypes } from './definitions';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
+import { validateAttachment } from './validate_attachment';
 
 export interface AttachmentService {
   setup: () => AttachmentServiceSetup;
@@ -37,6 +38,10 @@ export class AttachmentServiceImpl implements AttachmentService {
   }
 
   start(): AttachmentServiceStart {
-    return {};
+    return {
+      validate: (attachment) => {
+        return validateAttachment({ attachment, registry: this.attachmentTypeRegistry });
+      },
+    };
   }
 }

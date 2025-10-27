@@ -7,10 +7,10 @@
 
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/artifacts';
 import type { AttachmentTypeRegistry } from '../attachment_type_registry';
-import { createContextAttachmentType } from './context';
+import { createTextAttachmentType } from './text';
 
 export const registerAttachmentTypes = ({ registry }: { registry: AttachmentTypeRegistry }) => {
-  const attachmentTypes: AttachmentTypeDefinition<any>[] = [createContextAttachmentType()];
+  const attachmentTypes: AttachmentTypeDefinition<any>[] = [createTextAttachmentType()];
 
   attachmentTypes.forEach((attachmentType) => {
     registry.register(attachmentType);
