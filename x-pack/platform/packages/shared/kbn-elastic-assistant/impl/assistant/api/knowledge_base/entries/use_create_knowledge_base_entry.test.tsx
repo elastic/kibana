@@ -14,7 +14,7 @@ jest.mock('./use_knowledge_base_entries', () => ({
   useInvalidateKnowledgeBaseEntries: jest.fn(),
 }));
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useMutation: jest.fn().mockImplementation((queryKey, fn, opts) => {
     return {
       mutate: async (variables: unknown) => {
