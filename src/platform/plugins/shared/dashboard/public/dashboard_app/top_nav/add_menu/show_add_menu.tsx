@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import {
@@ -20,9 +20,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { coreServices } from '../../../services/kibana_services';
-import { executeCreateTimeSliderControlPanelAction } from '../../../dashboard_actions/execute_create_time_slider_control_panel_action';
-import { executeCreateESQLControlPanelAction } from '../../../dashboard_actions/execute_create_esql_control_panel_action';
+import {
+  executeCreateTimeSliderControlPanelAction,
+  isTimeSliderControlCreationCompatible,
+} from '../../../dashboard_actions/execute_create_time_slider_control_panel_action';
 import { executeCreateControlPanelAction } from '../../../dashboard_actions/execute_create_control_panel_action';
+import { executeCreateESQLControlPanelAction } from '../../../dashboard_actions/execute_create_esql_control_panel_action';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_library';
@@ -66,8 +69,11 @@ function cleanup() {
 }
 
 export const AddMenu = ({ dashboardApi, anchorElement }: AddMenuProps) => {
-  /** TODO: Set this as part of the timeslider conversion */
-  const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
+  const [canCreateTimeSlider, setCanCreateTimeSlider] = useState(false);
+
+  useEffect(() => {
+    isTimeSliderControlCreationCompatible(dashboardApi).then(setCanCreateTimeSlider);
+  }, [dashboardApi]);
 
   const closePopover = useCallback(() => {
     cleanup();
@@ -183,7 +189,7 @@ export const AddMenu = ({ dashboardApi, anchorElement }: AddMenuProps) => {
           name: getAddTimeSliderControlButtonTitle(),
           icon: 'empty',
           'data-test-subj': 'controls-create-timeslider-button',
-          disabled: hasTimeSliderControl,
+          disabled: !canCreateTimeSlider,
           onClick: async () => {
             await executeCreateTimeSliderControlPanelAction(dashboardApi);
             closePopover();

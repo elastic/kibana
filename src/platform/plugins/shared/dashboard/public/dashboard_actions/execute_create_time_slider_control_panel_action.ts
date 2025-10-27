@@ -28,3 +28,17 @@ export async function executeCreateTimeSliderControlPanelAction(dashboardApi: Da
     );
   }
 }
+
+export async function isTimeSliderControlCreationCompatible(
+  dashboardApi: DashboardApi
+): Promise<boolean> {
+  try {
+    const createControlPanelAction = await uiActionsService.getAction('createTimeSlider');
+    return await createControlPanelAction.isCompatible({
+      embeddable: dashboardApi,
+      trigger: addPanelMenuTrigger,
+    } as ActionExecutionContext);
+  } catch (error) {
+    return false;
+  }
+}
