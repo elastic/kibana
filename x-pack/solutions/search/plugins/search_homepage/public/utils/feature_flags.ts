@@ -6,7 +6,7 @@
  */
 
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { SEARCH_GETTING_STARTED_FEATURE_FLAG_ID } from '../../common';
+import { SEARCH_GETTING_STARTED_FEATURE_FLAG } from '@kbn/search-shared-ui';
 
 /**
  * Check if the Getting Started feature is enabled via feature flag.
@@ -17,5 +17,5 @@ import { SEARCH_GETTING_STARTED_FEATURE_FLAG_ID } from '../../common';
  * @returns boolean indicating if the feature is enabled
  */
 export function isGettingStartedEnabled(featureFlags: FeatureFlagsStart): boolean {
-  return featureFlags.getBooleanValue(SEARCH_GETTING_STARTED_FEATURE_FLAG_ID, false);
+  return featureFlags.getBooleanValue(SEARCH_GETTING_STARTED_FEATURE_FLAG, false);
 }

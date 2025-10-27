@@ -10,12 +10,8 @@ import { BehaviorSubject, type Subscription } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES, type AppUpdater } from '@kbn/core/public';
 import { QueryClient } from '@kbn/react-query';
-import {
-  PLUGIN_ID,
-  PLUGIN_NAME,
-  PLUGIN_PATH,
-  SEARCH_GETTING_STARTED_FEATURE_FLAG_ID,
-} from '../common';
+import { SEARCH_GETTING_STARTED_FEATURE_FLAG } from '@kbn/search-shared-ui/src/constants';
+import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {
   SearchGettingStartedPluginSetup,
@@ -73,7 +69,7 @@ export class SearchGettingStartedPlugin
   public start(core: CoreStart) {
     // Create a subscription for the value of our feature flag
     this.featureFlagSubscription = core.featureFlags
-      .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG_ID, false)
+      .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, false)
       .subscribe((featureFlagEnabled) => {
         const status: AppStatus = featureFlagEnabled
           ? AppStatus.accessible

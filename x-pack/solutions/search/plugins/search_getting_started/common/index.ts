@@ -13,8 +13,6 @@ export const PLUGIN_NAME = i18n.translate('xpack.search.gettingStarted.plugin.na
 });
 export const PLUGIN_PATH = '/app/elasticsearch/getting_started';
 
-export const SEARCH_GETTING_STARTED_FEATURE_FLAG_ID = 'searchSolution.gettingStarted';
-
 export enum AnalyticsEvents {
   gettingStartedLoaded = 'getting_started_loaded',
 }
