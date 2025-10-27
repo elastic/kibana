@@ -35,7 +35,7 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
 
   const visibleMenuItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
   const overflowMenuItems = useMemo(() => items.slice(visibleCount), [items, visibleCount]);
-  const stableHeightItems = useStableHeightItems(items);
+  const stableHeightItems = useStableItemsReference(items);
 
   const recalculateMenuLayout = useCallback(() => {
     if (!primaryMenuRef.current) return;
@@ -161,13 +161,13 @@ const countVisibleItems = (heights: number[], gap: number, menuHeight: number): 
  * Get a stable reference to the items array that changes only when we need to recalculate the height.
  * @param items - menu items
  */
-const useStableHeightItems = (items: MenuItem[]): MenuItem[] => {
+const useStableItemsReference = (items: MenuItem[]): MenuItem[] => {
   const ref = useRef<MenuItem[]>(items);
-  const out = isItemsHeightsEqual(ref.current, items) ? ref.current : items;
+  const out = haveSameHeightSignature(ref.current, items) ? ref.current : items;
 
   // don’t write to a ref during render
   useLayoutEffect(() => {
-    if (!isItemsHeightsEqual(ref.current, items)) {
+    if (!haveSameHeightSignature(ref.current, items)) {
       ref.current = items;
     }
   }, [items]);
@@ -180,7 +180,7 @@ const useStableHeightItems = (items: MenuItem[]): MenuItem[] => {
  * @param prev - prev menu items
  * @param next - next menu items
  */
-const isItemsHeightsEqual = (prev: MenuItem[], next: MenuItem[]): boolean => {
+const haveSameHeightSignature = (prev: MenuItem[], next: MenuItem[]): boolean => {
   if (prev === next) return true;
   if (prev.length !== next.length) return false;
   for (let i = 0; i < prev.length; i++) {
