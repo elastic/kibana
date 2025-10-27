@@ -12,6 +12,7 @@ import type {
   CloudConnectorVar,
   CloudConnectorSecretVar,
 } from '../types/models/cloud_connector';
+
 import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
 
 describe('cloud_connector_helpers', () => {
