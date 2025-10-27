@@ -6,12 +6,12 @@
  */
 
 import { expect } from '@kbn/scout';
-import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
+import type { RemoveProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
-  'Streamlang to ES|QL - RemoveByPrefix Processor',
+  'Streamlang to ES|QL - Remove Processor with by_prefix',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     apiTest('should remove a field', async ({ testBed, esql }) => {
@@ -20,9 +20,10 @@ apiTest.describe(
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
+            by_prefix: true,
             from: 'temp_field',
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -47,9 +48,10 @@ apiTest.describe(
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
-              action: 'remove_by_prefix',
+              action: 'remove',
+              by_prefix: true,
               from: 'host',
-            } as RemoveByPrefixProcessor,
+            } as RemoveProcessor,
           ],
         };
 
@@ -89,9 +91,10 @@ apiTest.describe(
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
+            by_prefix: true,
             from: 'temp_field',
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -115,10 +118,11 @@ apiTest.describe(
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
+            by_prefix: true,
             from: 'temp_field',
             ignore_missing: true,
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -144,9 +148,10 @@ apiTest.describe(
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
-              action: 'remove_by_prefix',
+              action: 'remove',
+              by_prefix: true,
               from: '{{field.name}}',
-            } as RemoveByPrefixProcessor,
+            } as RemoveProcessor,
           ],
         };
         expect(() => transpile(streamlangDSL)).toThrow(

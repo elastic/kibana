@@ -48,6 +48,7 @@ import { SetProcessorForm } from './set';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
 import { ConvertProcessorForm } from './convert';
+import { RemoveProcessorForm } from './remove';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -182,6 +183,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
               {type === 'grok' && <GrokProcessorForm />}
               {type === 'dissect' && <DissectProcessorForm />}
               {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
+              {type === 'remove' && <RemoveProcessorForm />}
               {type === 'set' && <SetProcessorForm />}
               {!SPECIALISED_TYPES.includes(type) && (
                 <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />

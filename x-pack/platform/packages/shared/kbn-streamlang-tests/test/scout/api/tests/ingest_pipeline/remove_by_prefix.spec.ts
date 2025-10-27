@@ -12,9 +12,9 @@
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove', by_prefix: true,
             from: 'labels',
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };e contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
@@ -22,12 +22,12 @@
  */
 
 import { expect } from '@kbn/scout';
-import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
+import type { RemoveProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
-  'Streamlang to Ingest Pipeline - RemoveByPrefix Processor',
+  'Streamlang to Ingest Pipeline - Remove Processor with by_prefix',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     apiTest('should remove a field', async ({ testBed }) => {
@@ -36,9 +36,10 @@ apiTest.describe(
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
+            by_prefix: true,
             from: 'temp_field',
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -60,9 +61,10 @@ apiTest.describe(
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
+            by_prefix: true,
             from: 'host',
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -101,9 +103,10 @@ apiTest.describe(
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
+            by_prefix: true,
             from: 'labels',
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -136,10 +139,11 @@ apiTest.describe(
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
+            by_prefix: true,
             from: 'nonexistent',
             ignore_missing: true,
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -160,10 +164,11 @@ apiTest.describe(
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
+            by_prefix: true,
             from: 'nonexistent',
             ignore_missing: false,
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -186,9 +191,10 @@ apiTest.describe(
               eq: 'test',
               steps: [
                 {
-                  action: 'remove_by_prefix',
+                  action: 'remove',
+                  by_prefix: true,
                   from: 'temp_data',
-                } as RemoveByPrefixProcessor,
+                } as RemoveProcessor,
               ],
             },
           },
@@ -223,9 +229,10 @@ apiTest.describe(
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
-            action: 'remove_by_prefix',
+            action: 'remove',
+            by_prefix: true,
             from: 'nonexistent',
-          } as RemoveByPrefixProcessor,
+          } as RemoveProcessor,
         ],
       };
 
@@ -252,9 +259,10 @@ apiTest.describe(
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
-              action: 'remove_by_prefix',
+              action: 'remove',
+              by_prefix: true,
               from: templateField,
-            } as RemoveByPrefixProcessor,
+            } as RemoveProcessor,
           ],
         };
 

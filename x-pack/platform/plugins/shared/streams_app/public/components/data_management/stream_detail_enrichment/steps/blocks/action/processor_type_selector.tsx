@@ -221,6 +221,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  remove: {
+    type: 'remove' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeInputDisplay',
+      {
+        defaultMessage: 'Remove',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.removeHelpText"
+          defaultMessage="{removeLink} from documents. Can remove a single field or fields matching a prefix."
+          values={{
+            removeLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsRemoveLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.remove}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.removeLinkLabel', {
+                  defaultMessage: 'Removes fields',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -236,12 +267,6 @@ const getAvailableProcessors: (
           ),
         },
       }),
-  // Remove remove_by_prefix from available processors when inside a where block
-  ...(isWithinWhereBlock
-    ? {
-        remove_by_prefix: undefined,
-      }
-    : {}),
 });
 
 const getProcessorDescription =

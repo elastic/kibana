@@ -87,23 +87,14 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           }
         );
       }
-    } else if (step.action === 'remove_by_prefix') {
-      return i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.removeByPrefixProcessorDescription',
-        {
-          defaultMessage: 'Removes {field} and all nested fields',
-          values: {
-            field: step.from,
-          },
-        }
-      );
     } else if (step.action === 'remove') {
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.removeProcessorDescription',
         {
-          defaultMessage: 'Removes {field}',
+          defaultMessage: 'Removes {field}{nested}',
           values: {
             field: step.from,
+            nested: step.by_prefix ? ' and all nested fields' : '',
           },
         }
       );

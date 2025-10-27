@@ -16,10 +16,12 @@ import { conditionToESQLAst } from '../condition_to_esql';
  *
  * For unconditional removal (no 'where' or 'where: always'):
  *   Uses DROP command to remove the field
+ *   When by_prefix is true: Uses DROP to remove both field and field.* (nested fields)
  *
  * For conditional removal (with 'where' condition):
  *   Uses EVAL with CASE to set field to null when condition matches:
  *   EVAL field = CASE(<condition>, null, field)
+ *   Note: by_prefix should not be used with conditional removal
  *
  * Filters applied for Ingest Pipeline parity:
  * - When `ignore_missing: false`: `WHERE NOT(field IS NULL)` filters missing fields
@@ -39,6 +41,24 @@ import { conditionToESQLAst } from '../condition_to_esql';
  *    Generates:
  *    ```txt
  *    | DROP temp_field
+ *    ```
+ *
+ * @example Unconditional with by_prefix:
+ *    ```typescript
+ *    const streamlangDSL: StreamlangDSL = {
+ *      steps: [
+ *        {
+ *          action: 'remove',
+ *          from: 'host',
+ *          by_prefix: true,
+ *        } as RemoveProcessor,
+ *      ],
+ *    };
+ *    ```
+ *
+ *    Generates:
+ *    ```txt
+ *    | DROP host, host.*
  *    ```
  *
  * @example Conditional:
@@ -64,6 +84,8 @@ export function convertRemoveProcessorToESQL(processor: RemoveProcessor): ESQLAs
     from,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     ignore_missing = false, // default: false (field must exist)
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    by_prefix = false, // default: false (remove only the field)
   } = processor;
 
   const commands: ESQLAstCommand[] = [];
@@ -97,9 +119,14 @@ export function convertRemoveProcessorToESQL(processor: RemoveProcessor): ESQLAs
       commands.push(missingFieldFilter);
     }
 
+    // When by_prefix is true, also drop all nested fields (field.*)
+    const dropArgs = by_prefix
+      ? [Builder.expression.column(from), Builder.expression.column(`${from}.*`)]
+      : [Builder.expression.column(from)];
+
     const dropCommand = Builder.command({
       name: 'drop',
-      args: [Builder.expression.column(from)],
+      args: dropArgs,
     });
 
     commands.push(dropCommand);
