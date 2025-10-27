@@ -8,7 +8,7 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import produce from 'immer';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type {

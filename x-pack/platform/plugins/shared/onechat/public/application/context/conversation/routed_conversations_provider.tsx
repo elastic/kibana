@@ -8,7 +8,7 @@
 import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom-v5-compat';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import produce from 'immer';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type {
