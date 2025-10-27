@@ -365,7 +365,7 @@ export class Authenticator {
       return AuthenticationResult.notHandled();
     }
 
-    for (const [providerName, provider] of providers) {
+    for (const [providerName, provider] of filteredProviders) {
       const startTime = performance.now();
       // Check if current session has been set by this provider.
       const ownsSession =

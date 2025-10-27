@@ -1556,16 +1556,18 @@ describe('Authenticator', () => {
           ...mockHTTPAuthenticationProvider,
         }));
 
-        const mockSamlAuthenticationProvider = jest
-          .requireMock('./providers/saml')
-          .SAMLAuthenticationProvider.mockImplementation(() => ({
-            type: 'saml',
-            origin: 'http://127.0.0.1:5601',
-            login: jest.fn(),
-            authenticate: jest.fn(),
-            logout: jest.fn(),
-            getHTTPAuthenticationScheme: jest.fn(),
-          }));
+        const mockSamlAuthenticationProvider = {
+          type: 'saml',
+          origin: 'http://127.0.0.1:5601',
+          login: jest.fn(),
+          authenticate: jest.fn(),
+          logout: jest.fn(),
+          getHTTPAuthenticationScheme: jest.fn(),
+        };
+
+        jest.requireMock('./providers/saml').SAMLAuthenticationProvider.mockImplementation(() => ({
+          ...mockSamlAuthenticationProvider,
+        }));
 
         authenticator = new Authenticator(
           getMockOptions({
