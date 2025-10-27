@@ -1426,7 +1426,7 @@ describe('execute()', () => {
     await connectorType.executor(customExecutorOptions);
     expect(sendEmailMock.mock.calls[0][1].content.message.length).toBeLessThan(LongString.length);
 
-    const expectedMessage = `email parameter message length ${LongString.length} exceeds 100 bytes and has been trimmed`;
+    const expectedMessage = `connector some-id email parameter message length ${LongString.length} exceeds 100 bytes and has been trimmed`;
     expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
   });
 
@@ -1452,7 +1452,7 @@ describe('execute()', () => {
       LongString.length
     );
 
-    const expectedMessage = `email parameter messageHTML length ${LongString.length} exceeds 100 bytes and has been trimmed`;
+    const expectedMessage = `connector some-id email parameter messageHTML length ${LongString.length} exceeds 100 bytes and has been trimmed`;
     expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
   });
 });

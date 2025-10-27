@@ -408,9 +408,16 @@ async function executor(
   let actualMessage: string | null | undefined = params.message;
   let actualHTMLMessage: string | null | undefined = params.messageHTML;
 
-  actualMessage = trimMessageIfRequired(logger, 'message', actualMessage, configurationUtilities);
+  actualMessage = trimMessageIfRequired(
+    actionId,
+    logger,
+    'message',
+    actualMessage,
+    configurationUtilities
+  );
 
   actualHTMLMessage = trimMessageIfRequired(
+    actionId,
     logger,
     'messageHTML',
     actualHTMLMessage,
@@ -482,6 +489,7 @@ async function executor(
 // utilities
 
 function trimMessageIfRequired(
+  connectorId: string,
   logger: Logger,
   paramName: string,
   message: string | null | undefined,
@@ -495,7 +503,7 @@ function trimMessageIfRequired(
     return message;
   }
 
-  const warningMessage = `email parameter ${paramName} length ${message.length} exceeds ${maxLength} bytes and has been trimmed`;
+  const warningMessage = `connector ${connectorId} email parameter ${paramName} length ${message.length} exceeds ${maxLength} bytes and has been trimmed`;
   logger.warn(warningMessage);
   const trimmedMessage = message.slice(0, maxLength);
   return `${warningMessage}\n\n${trimmedMessage}`;
