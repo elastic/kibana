@@ -10,7 +10,7 @@ import { RULE_CCR_READ_EXCEPTIONS } from '../../common/constants';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 type ICCRReadExceptionsRuleMock = CCRReadExceptionsRule & {
   defaultParams: {
@@ -136,137 +136,6 @@ describe('CCRReadExceptionsRule', () => {
     it('should fire action', async () => {
       const rule = new CCRReadExceptionsRule() as ICCRReadExceptionsRuleMock;
       const type = rule.getRuleType();
-
-      // use a shared alertStates constant for both state and payload
-      const alertStates = [
-        {
-          ccs: undefined,
-          cluster: { clusterName: 'testCluster', clusterUuid: 'abc123' },
-          itemLabel: '.follower_index_1',
-          meta: {
-            followerIndex: '.follower_index_1',
-            instanceId: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
-            itemLabel: '.follower_index_1',
-            lastReadException: undefined,
-            leaderIndex: '.leader_index_1',
-            remoteCluster: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1',
-            shardId: undefined,
-          },
-          nodeId: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
-          nodeName: '.follower_index_1',
-          ui: {
-            isFiring: true,
-            lastCheckedMS: 0,
-            message: {
-              code: undefined,
-              nextSteps: [
-                {
-                  text: '#start_linkIdentify CCR usage/stats#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      startToken: '#start_link',
-                      type: 'link',
-                      url: 'elasticsearch/ccr',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkManage CCR follower indices#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{basePath}management/data/cross_cluster_replication/follower_indices',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkCreate auto-follow patterns#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{basePath}management/data/cross_cluster_replication/auto_follow_patterns',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkAdd follower index API (Docs)#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/ccr-put-follow.html',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkCross-cluster replication (Docs)#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/xpack-ccr.html',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkBi-directional replication (Blog)#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{elasticWebsiteUrl}blog/bi-directional-replication-with-elasticsearch-cross-cluster-replication-ccr',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkFollow the Leader (Blog)#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{elasticWebsiteUrl}blog/follow-the-leader-an-introduction-to-cross-cluster-replication-in-elasticsearch',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-              ],
-              text: 'Follower index #start_link.follower_index_1#end_link is reporting CCR read exceptions on remote cluster: BcK-0pmsQniyPQfZuauuXw_remote_cluster_1 at #absolute',
-              tokens: [
-                {
-                  isAbsolute: true,
-                  isRelative: false,
-                  startToken: '#absolute',
-                  timestamp: 1,
-                  type: 'time',
-                },
-                {
-                  endToken: '#end_link',
-                  startToken: '#start_link',
-                  type: 'link',
-                  url: 'elasticsearch/ccr/.follower_index_1/shard/undefined',
-                },
-              ],
-            },
-            severity: 'danger',
-            triggeredMS: 1,
-          },
-        },
-      ];
-
       await type.executor({
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
@@ -276,9 +145,135 @@ describe('CCRReadExceptionsRule', () => {
         actionGroup: 'default',
         id: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
         state: {
-          alertStates,
+          alertStates: [
+            {
+              ccs: undefined,
+              cluster: { clusterName: 'testCluster', clusterUuid: 'abc123' },
+              itemLabel: '.follower_index_1',
+              meta: {
+                followerIndex: '.follower_index_1',
+                instanceId: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
+                itemLabel: '.follower_index_1',
+                lastReadException: undefined,
+                leaderIndex: '.leader_index_1',
+                remoteCluster: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1',
+                shardId: undefined,
+              },
+              nodeId: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
+              nodeName: '.follower_index_1',
+              ui: {
+                isFiring: true,
+                lastCheckedMS: 0,
+                message: {
+                  code: undefined,
+                  nextSteps: [
+                    {
+                      text: '#start_linkIdentify CCR usage/stats#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          startToken: '#start_link',
+                          type: 'link',
+                          url: 'elasticsearch/ccr',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkManage CCR follower indices#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{basePath}management/data/cross_cluster_replication/follower_indices',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkCreate auto-follow patterns#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{basePath}management/data/cross_cluster_replication/auto_follow_patterns',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkAdd follower index API (Docs)#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/ccr-put-follow.html',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkCross-cluster replication (Docs)#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/xpack-ccr.html',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkBi-directional replication (Blog)#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{elasticWebsiteUrl}blog/bi-directional-replication-with-elasticsearch-cross-cluster-replication-ccr',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkFollow the Leader (Blog)#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{elasticWebsiteUrl}blog/follow-the-leader-an-introduction-to-cross-cluster-replication-in-elasticsearch',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                  ],
+                  text: 'Follower index #start_link.follower_index_1#end_link is reporting CCR read exceptions on remote cluster: BcK-0pmsQniyPQfZuauuXw_remote_cluster_1 at #absolute',
+                  tokens: [
+                    {
+                      isAbsolute: true,
+                      isRelative: false,
+                      startToken: '#absolute',
+                      timestamp: 1,
+                      type: 'time',
+                    },
+                    {
+                      endToken: '#end_link',
+                      startToken: '#start_link',
+                      type: 'link',
+                      url: 'elasticsearch/ccr/.follower_index_1/shard/undefined',
+                    },
+                  ],
+                },
+                severity: 'danger',
+                triggeredMS: 1,
+              },
+            },
+          ],
         },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -318,144 +313,140 @@ describe('CCRReadExceptionsRule', () => {
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
       } as any);
-
-      const alertStates = [
-        {
-          ccs: 'testCluster',
-          cluster: { clusterName: 'testCluster', clusterUuid: 'abc123' },
-          itemLabel: '.follower_index_1',
-          meta: {
-            followerIndex: '.follower_index_1',
-            instanceId: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
-            itemLabel: '.follower_index_1',
-            lastReadException: undefined,
-            leaderIndex: '.leader_index_1',
-            remoteCluster: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1',
-            shardId: undefined,
-          },
-          nodeId: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
-          nodeName: '.follower_index_1',
-          ui: {
-            isFiring: true,
-            lastCheckedMS: 0,
-            message: {
-              code: undefined,
-              nextSteps: [
-                {
-                  text: '#start_linkIdentify CCR usage/stats#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      startToken: '#start_link',
-                      type: 'link',
-                      url: 'elasticsearch/ccr',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkManage CCR follower indices#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{basePath}management/data/cross_cluster_replication/follower_indices',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkCreate auto-follow patterns#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{basePath}management/data/cross_cluster_replication/auto_follow_patterns',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkAdd follower index API (Docs)#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/ccr-put-follow.html',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkCross-cluster replication (Docs)#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/xpack-ccr.html',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkBi-directional replication (Blog)#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{elasticWebsiteUrl}blog/bi-directional-replication-with-elasticsearch-cross-cluster-replication-ccr',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkFollow the Leader (Blog)#end_link',
-                  tokens: [
-                    {
-                      endToken: '#end_link',
-                      partialUrl:
-                        '{elasticWebsiteUrl}blog/follow-the-leader-an-introduction-to-cross-cluster-replication-in-elasticsearch',
-                      startToken: '#start_link',
-                      type: 'docLink',
-                    },
-                  ],
-                },
-              ],
-              text: 'Follower index #start_link.follower_index_1#end_link is reporting CCR read exceptions on remote cluster: BcK-0pmsQniyPQfZuauuXw_remote_cluster_1 at #absolute',
-              tokens: [
-                {
-                  isAbsolute: true,
-                  isRelative: false,
-                  startToken: '#absolute',
-                  timestamp: 1,
-                  type: 'time',
-                },
-                {
-                  endToken: '#end_link',
-                  startToken: '#start_link',
-                  type: 'link',
-                  url: 'elasticsearch/ccr/.follower_index_1/shard/undefined',
-                },
-              ],
-            },
-            severity: 'danger',
-            triggeredMS: 1,
-          },
-        },
-      ];
-
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         actionGroup: 'default',
         id: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
         state: {
-          alertStates,
+          alertStates: [
+            {
+              ccs: 'testCluster',
+              cluster: { clusterName: 'testCluster', clusterUuid: 'abc123' },
+              itemLabel: '.follower_index_1',
+              meta: {
+                followerIndex: '.follower_index_1',
+                instanceId: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
+                itemLabel: '.follower_index_1',
+                lastReadException: undefined,
+                leaderIndex: '.leader_index_1',
+                remoteCluster: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1',
+                shardId: undefined,
+              },
+              nodeId: 'BcK-0pmsQniyPQfZuauuXw_remote_cluster_1:.follower_index_1',
+              nodeName: '.follower_index_1',
+              ui: {
+                isFiring: true,
+                lastCheckedMS: 0,
+                message: {
+                  code: undefined,
+                  nextSteps: [
+                    {
+                      text: '#start_linkIdentify CCR usage/stats#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          startToken: '#start_link',
+                          type: 'link',
+                          url: 'elasticsearch/ccr',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkManage CCR follower indices#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{basePath}management/data/cross_cluster_replication/follower_indices',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkCreate auto-follow patterns#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{basePath}management/data/cross_cluster_replication/auto_follow_patterns',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkAdd follower index API (Docs)#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/ccr-put-follow.html',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkCross-cluster replication (Docs)#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/xpack-ccr.html',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkBi-directional replication (Blog)#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{elasticWebsiteUrl}blog/bi-directional-replication-with-elasticsearch-cross-cluster-replication-ccr',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkFollow the Leader (Blog)#end_link',
+                      tokens: [
+                        {
+                          endToken: '#end_link',
+                          partialUrl:
+                            '{elasticWebsiteUrl}blog/follow-the-leader-an-introduction-to-cross-cluster-replication-in-elasticsearch',
+                          startToken: '#start_link',
+                          type: 'docLink',
+                        },
+                      ],
+                    },
+                  ],
+                  text: 'Follower index #start_link.follower_index_1#end_link is reporting CCR read exceptions on remote cluster: BcK-0pmsQniyPQfZuauuXw_remote_cluster_1 at #absolute',
+                  tokens: [
+                    {
+                      isAbsolute: true,
+                      isRelative: false,
+                      startToken: '#absolute',
+                      timestamp: 1,
+                      type: 'time',
+                    },
+                    {
+                      endToken: '#end_link',
+                      startToken: '#start_link',
+                      type: 'link',
+                      url: 'elasticsearch/ccr/.follower_index_1/shard/undefined',
+                    },
+                  ],
+                },
+                severity: 'danger',
+                triggeredMS: 1,
+              },
+            },
+          ],
         },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({

@@ -23,7 +23,6 @@ import {
 } from '../../../rule_types/__mocks__/es_results';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../../../common/constants';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
-import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 
 jest.mock('./build_signals_query');
 
@@ -138,9 +137,6 @@ const reported = {
   id: '1111',
   state: {
     signals_count: 1,
-  },
-  payload: {
-    [ALERT_STATE_NAMESPACE]: { signals_count: 1 },
   },
 };
 
@@ -362,9 +358,6 @@ describe('legacyRules_notification_rule_type', () => {
         },
         state: {
           signals_count: 100,
-        },
-        payload: {
-          [ALERT_STATE_NAMESPACE]: { signals_count: 100 },
         },
       });
     });

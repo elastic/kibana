@@ -131,7 +131,6 @@ export interface SubActionConnectorType<Config, Secrets> {
   preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
-  isDeprecated?: boolean;
 }
 
 export interface ExecutorParams extends ActionTypeParams {

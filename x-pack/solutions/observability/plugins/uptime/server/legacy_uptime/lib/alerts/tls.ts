@@ -18,13 +18,13 @@ import {
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import { ALERT_REASON, ALERT_STATE_NAMESPACE, ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { asyncForEach } from '@kbn/std';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { uptimeTLSRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_tls';
 
 import { formatFilterString } from './status_check';
-import type { TlsAlert, UptimeAlertTypeFactory } from './types';
+import type { UptimeAlertTypeFactory } from './types';
 import {
   updateState,
   generateAlertMessage,
@@ -115,7 +115,7 @@ export const getCertSummary = (
   };
 };
 
-export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds, TlsAlert> = (
+export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   _server,
   libs,
   plugins
@@ -211,17 +211,12 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds, TlsAlert> =
 
         const alertId = `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`;
 
-        const alertState = {
-          ...updateState(state, true),
-          ...summary,
-        };
-
         const { uuid, start } = alertsClient.report({
           id: alertId,
           actionGroup: TLS.id,
-          state: alertState,
-          payload: {
-            [ALERT_STATE_NAMESPACE]: alertState,
+          state: {
+            ...updateState(state, foundCerts),
+            ...summary,
           },
         });
 

@@ -10,7 +10,7 @@ import { RULE_NODES_CHANGED } from '../../common/constants';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -152,51 +152,49 @@ describe('NodesChangedAlert', () => {
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
       } as any);
-      const alertStates = [
-        {
-          cluster: { clusterUuid, clusterName },
-          ccs,
-          itemLabel: undefined,
-          nodeId: undefined,
-          nodeName: undefined,
-          meta: {
-            ccs,
-            clusterUuid,
-            recentNodes: [
-              {
-                nodeUuid,
-                nodeEphemeralId: nodeEphemeralIdChanged,
-                nodeName,
-              },
-            ],
-            priorNodes: [
-              {
-                nodeUuid,
-                nodeEphemeralId,
-                nodeName,
-              },
-            ],
-          },
-          ui: {
-            isFiring: true,
-            message: {
-              text: "Elasticsearch nodes 'test' restarted in this cluster.",
-            },
-            severity: 'warning',
-            triggeredMS: 1,
-            lastCheckedMS: 0,
-          },
-        },
-      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123',
         actionGroup: 'default',
         state: {
-          alertStates,
+          alertStates: [
+            {
+              cluster: { clusterUuid, clusterName },
+              ccs,
+              itemLabel: undefined,
+              nodeId: undefined,
+              nodeName: undefined,
+              meta: {
+                ccs,
+                clusterUuid,
+                recentNodes: [
+                  {
+                    nodeUuid,
+                    nodeEphemeralId: nodeEphemeralIdChanged,
+                    nodeName,
+                  },
+                ],
+                priorNodes: [
+                  {
+                    nodeUuid,
+                    nodeEphemeralId,
+                    nodeName,
+                  },
+                ],
+              },
+              ui: {
+                isFiring: true,
+                message: {
+                  text: "Elasticsearch nodes 'test' restarted in this cluster.",
+                },
+                severity: 'warning',
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
         },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
@@ -229,61 +227,59 @@ describe('NodesChangedAlert', () => {
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
       } as any);
-      const alertStates = [
-        {
-          cluster: { clusterUuid, clusterName },
-          ccs,
-          itemLabel: undefined,
-          nodeId: undefined,
-          nodeName: undefined,
-          meta: {
-            ccs,
-            clusterUuid,
-            recentNodes: [
-              {
-                nodeUuid,
-                nodeEphemeralId: nodeEphemeralIdChanged,
-                nodeName,
-              },
-              {
-                nodeUuid: 'newNodeId',
-                nodeEphemeralId: 'newNodeEmpheralId',
-                nodeName: 'newNodeName',
-              },
-            ],
-            priorNodes: [
-              {
-                nodeUuid,
-                nodeEphemeralId,
-                nodeName,
-              },
-              {
-                nodeUuid: 'removedNodeId',
-                nodeEphemeralId: 'removedNodeEmpheralId',
-                nodeName: 'removedNodeName',
-              },
-            ],
-          },
-          ui: {
-            isFiring: true,
-            message: {
-              text: "Elasticsearch nodes 'newNodeName' added to this cluster. Elasticsearch nodes 'removedNodeName' removed from this cluster. Elasticsearch nodes 'test' restarted in this cluster.",
-            },
-            severity: 'warning',
-            triggeredMS: 1,
-            lastCheckedMS: 0,
-          },
-        },
-      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123',
         actionGroup: 'default',
         state: {
-          alertStates,
+          alertStates: [
+            {
+              cluster: { clusterUuid, clusterName },
+              ccs,
+              itemLabel: undefined,
+              nodeId: undefined,
+              nodeName: undefined,
+              meta: {
+                ccs,
+                clusterUuid,
+                recentNodes: [
+                  {
+                    nodeUuid,
+                    nodeEphemeralId: nodeEphemeralIdChanged,
+                    nodeName,
+                  },
+                  {
+                    nodeUuid: 'newNodeId',
+                    nodeEphemeralId: 'newNodeEmpheralId',
+                    nodeName: 'newNodeName',
+                  },
+                ],
+                priorNodes: [
+                  {
+                    nodeUuid,
+                    nodeEphemeralId,
+                    nodeName,
+                  },
+                  {
+                    nodeUuid: 'removedNodeId',
+                    nodeEphemeralId: 'removedNodeEmpheralId',
+                    nodeName: 'removedNodeName',
+                  },
+                ],
+              },
+              ui: {
+                isFiring: true,
+                message: {
+                  text: "Elasticsearch nodes 'newNodeName' added to this cluster. Elasticsearch nodes 'removedNodeName' removed from this cluster. Elasticsearch nodes 'test' restarted in this cluster.",
+                },
+                severity: 'warning',
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
         },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',

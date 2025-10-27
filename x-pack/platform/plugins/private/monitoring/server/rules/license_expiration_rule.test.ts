@@ -10,7 +10,7 @@ import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -107,63 +107,59 @@ describe('LicenseExpirationRule', () => {
         ...executorOptions,
         params: alert.ruleOptions.defaultParams,
       } as any);
-
-      const alertStates = [
-        {
-          cluster: { clusterUuid, clusterName },
-          ccs: undefined,
-          itemLabel: undefined,
-          meta: {
-            clusterUuid: 'abc123',
-            expiryDateMS: 5097600000,
-            status: 'expired',
-            type: 'gold',
-          },
-          nodeId: undefined,
-          nodeName: undefined,
-          ui: {
-            isFiring: true,
-            message: {
-              text: 'The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link',
-              tokens: [
-                {
-                  startToken: '#relative',
-                  type: 'time',
-                  isRelative: true,
-                  isAbsolute: false,
-                  timestamp: 5097600000,
-                },
-                {
-                  startToken: '#absolute',
-                  type: 'time',
-                  isAbsolute: true,
-                  isRelative: false,
-                  timestamp: 5097600000,
-                },
-                {
-                  startToken: '#start_link',
-                  endToken: '#end_link',
-                  type: 'link',
-                  url: 'license',
-                },
-              ],
-            },
-            severity: 'danger',
-            triggeredMS: 1680134400000,
-            lastCheckedMS: 0,
-          },
-        },
-      ];
-
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123',
         actionGroup: 'default',
         state: {
-          alertStates,
+          alertStates: [
+            {
+              cluster: { clusterUuid, clusterName },
+              ccs: undefined,
+              itemLabel: undefined,
+              meta: {
+                clusterUuid: 'abc123',
+                expiryDateMS: 5097600000,
+                status: 'expired',
+                type: 'gold',
+              },
+              nodeId: undefined,
+              nodeName: undefined,
+              ui: {
+                isFiring: true,
+                message: {
+                  text: 'The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link',
+                  tokens: [
+                    {
+                      startToken: '#relative',
+                      type: 'time',
+                      isRelative: true,
+                      isAbsolute: false,
+                      timestamp: 5097600000,
+                    },
+                    {
+                      startToken: '#absolute',
+                      type: 'time',
+                      isAbsolute: true,
+                      isRelative: false,
+                      timestamp: 5097600000,
+                    },
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'license',
+                    },
+                  ],
+                },
+                severity: 'danger',
+                triggeredMS: 1680134400000,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
         },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
@@ -223,62 +219,59 @@ describe('LicenseExpirationRule', () => {
         ...executorOptions,
         params: rule.ruleOptions.defaultParams,
       } as any);
-      const alertStates = [
-        {
-          cluster: { clusterUuid, clusterName },
-          ccs: undefined,
-          itemLabel: undefined,
-          meta: {
-            clusterUuid: 'abc123',
-            expiryDateMS: 172800000,
-            status: 'active',
-            type: 'gold',
-          },
-          nodeId: undefined,
-          nodeName: undefined,
-          ui: {
-            isFiring: true,
-            message: {
-              text: 'The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link',
-              tokens: [
-                {
-                  startToken: '#relative',
-                  type: 'time',
-                  isRelative: true,
-                  isAbsolute: false,
-                  timestamp: 172800000,
-                },
-                {
-                  startToken: '#absolute',
-                  type: 'time',
-                  isAbsolute: true,
-                  isRelative: false,
-                  timestamp: 172800000,
-                },
-                {
-                  startToken: '#start_link',
-                  endToken: '#end_link',
-                  type: 'link',
-                  url: 'license',
-                },
-              ],
-            },
-            severity: 'danger',
-            triggeredMS: 1,
-            lastCheckedMS: 0,
-          },
-        },
-      ];
-
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123',
         actionGroup: 'default',
         state: {
-          alertStates,
+          alertStates: [
+            {
+              cluster: { clusterUuid, clusterName },
+              ccs: undefined,
+              itemLabel: undefined,
+              meta: {
+                clusterUuid: 'abc123',
+                expiryDateMS: 172800000,
+                status: 'active',
+                type: 'gold',
+              },
+              nodeId: undefined,
+              nodeName: undefined,
+              ui: {
+                isFiring: true,
+                message: {
+                  text: 'The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link',
+                  tokens: [
+                    {
+                      startToken: '#relative',
+                      type: 'time',
+                      isRelative: true,
+                      isAbsolute: false,
+                      timestamp: 172800000,
+                    },
+                    {
+                      startToken: '#absolute',
+                      type: 'time',
+                      isAbsolute: true,
+                      isRelative: false,
+                      timestamp: 172800000,
+                    },
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'license',
+                    },
+                  ],
+                },
+                severity: 'danger',
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
         },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',
@@ -319,58 +312,57 @@ describe('LicenseExpirationRule', () => {
       } as any);
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
-
-      const alertStates = [
-        {
-          cluster: { clusterUuid, clusterName },
-          ccs: undefined,
-          itemLabel: undefined,
-          meta: {
-            clusterUuid: 'abc123',
-            expiryDateMS: 2678400000,
-            status: 'active',
-            type: 'gold',
-          },
-          nodeId: undefined,
-          nodeName: undefined,
-          ui: {
-            isFiring: true,
-            message: {
-              text: 'The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link',
-              tokens: [
-                {
-                  startToken: '#relative',
-                  type: 'time',
-                  isRelative: true,
-                  isAbsolute: false,
-                  timestamp: 2678400000,
-                },
-                {
-                  startToken: '#absolute',
-                  type: 'time',
-                  isAbsolute: true,
-                  isRelative: false,
-                  timestamp: 2678400000,
-                },
-                {
-                  startToken: '#start_link',
-                  endToken: '#end_link',
-                  type: 'link',
-                  url: 'license',
-                },
-              ],
-            },
-            severity: 'warning',
-            triggeredMS: 1,
-            lastCheckedMS: 0,
-          },
-        },
-      ];
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'abc123',
         actionGroup: 'default',
-        state: { alertStates },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
+        state: {
+          alertStates: [
+            {
+              cluster: { clusterUuid, clusterName },
+              ccs: undefined,
+              itemLabel: undefined,
+              meta: {
+                clusterUuid: 'abc123',
+                expiryDateMS: 2678400000,
+                status: 'active',
+                type: 'gold',
+              },
+              nodeId: undefined,
+              nodeName: undefined,
+              ui: {
+                isFiring: true,
+                message: {
+                  text: 'The license for this cluster expires in #relative at #absolute. #start_linkPlease update your license.#end_link',
+                  tokens: [
+                    {
+                      startToken: '#relative',
+                      type: 'time',
+                      isRelative: true,
+                      isAbsolute: false,
+                      timestamp: 2678400000,
+                    },
+                    {
+                      startToken: '#absolute',
+                      type: 'time',
+                      isAbsolute: true,
+                      isRelative: false,
+                      timestamp: 2678400000,
+                    },
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'license',
+                    },
+                  ],
+                },
+                severity: 'warning',
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
+        },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'abc123',

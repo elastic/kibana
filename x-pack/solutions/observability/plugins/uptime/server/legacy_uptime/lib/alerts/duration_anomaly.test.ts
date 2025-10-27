@@ -8,7 +8,6 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
-  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import { durationAnomalyAlertFactory } from './duration_anomaly';
 import { DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
@@ -201,28 +200,7 @@ describe('duration anomaly alert', () => {
       mockAnomaliesResult.anomalies.forEach((anomaly, index) => {
         const slowestResponse = Math.round(anomaly.actualSort / 1000);
         const typicalResponse = Math.round(anomaly.typicalSort / 1000);
-
-        const alertState = {
-          firstCheckedAt: 'date',
-          firstTriggeredAt: undefined,
-          lastCheckedAt: 'date',
-          lastResolvedAt: undefined,
-          isTriggered: false,
-          anomalyStartTimestamp: 'date',
-          currentTriggerStarted: undefined,
-          expectedResponseTime: `${typicalResponse} ms`,
-          lastTriggeredAt: undefined,
-          monitor: monitorId,
-          monitorUrl: mockPing.url?.full,
-          observerLocation: anomaly.entityValue,
-          severity: getSeverityType(anomaly.severity),
-          severityScore: anomaly.severity,
-          slowestAnomalyResponse: `${slowestResponse} ms`,
-          bucketSpan: anomaly.source.bucket_span,
-        };
-
-        const nthCall = index + 1;
-        expect(alertsClient.report).toHaveBeenNthCalledWith(nthCall, {
+        expect(alertsClient.report).toHaveBeenCalledWith({
           id: `${DURATION_ANOMALY.id}${index}`,
           actionGroup: DURATION_ANOMALY.id,
           payload: {
@@ -241,9 +219,25 @@ describe('duration anomaly alert', () => {
 Response times as high as ${slowestResponse} ms have been detected from location ${
               anomaly.entityValue
             }. Expected response time is ${typicalResponse} ms.`,
-            [ALERT_STATE_NAMESPACE]: alertState,
           },
-          state: alertState,
+          state: {
+            firstCheckedAt: 'date',
+            firstTriggeredAt: undefined,
+            lastCheckedAt: 'date',
+            lastResolvedAt: undefined,
+            isTriggered: false,
+            anomalyStartTimestamp: 'date',
+            currentTriggerStarted: undefined,
+            expectedResponseTime: `${typicalResponse} ms`,
+            lastTriggeredAt: undefined,
+            monitor: monitorId,
+            monitorUrl: mockPing.url?.full,
+            observerLocation: anomaly.entityValue,
+            severity: getSeverityType(anomaly.severity),
+            severityScore: anomaly.severity,
+            slowestAnomalyResponse: `${slowestResponse} ms`,
+            bucketSpan: anomaly.source.bucket_span,
+          },
         });
 
         const reasonMsg = `Abnormal (${getSeverityType(

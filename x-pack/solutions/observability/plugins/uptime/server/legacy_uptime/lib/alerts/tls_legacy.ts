@@ -12,8 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
-import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
-import type { LegacyTlsAlert, LegacyUptimeRuleTypeFactory } from './types';
+import type { LegacyUptimeRuleTypeFactory } from './types';
 import { updateState } from './common';
 import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
@@ -93,7 +92,7 @@ export const getCertSummary = (
   };
 };
 
-export const tlsLegacyRuleFactory: LegacyUptimeRuleTypeFactory<ActionGroupIds, LegacyTlsAlert> = (
+export const tlsLegacyRuleFactory: LegacyUptimeRuleTypeFactory<ActionGroupIds> = (
   _server,
   libs
 ) => ({
@@ -166,18 +165,12 @@ export const tlsLegacyRuleFactory: LegacyUptimeRuleTypeFactory<ActionGroupIds, L
         )
         .valueOf();
       const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
-
-      const alertState = {
-        ...updateState(state, true),
-        ...summary,
-      };
-
       alertsClient.report({
         id: TLS_LEGACY.id,
         actionGroup: TLS_LEGACY.id,
-        state: alertState,
-        payload: {
-          [ALERT_STATE_NAMESPACE]: alertState,
+        state: {
+          ...updateState(state, foundCerts),
+          ...summary,
         },
       });
     }

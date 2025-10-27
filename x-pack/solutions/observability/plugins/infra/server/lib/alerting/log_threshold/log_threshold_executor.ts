@@ -16,7 +16,6 @@ import {
   ALERT_GROUPING,
   ALERT_INDEX_PATTERN,
   ALERT_REASON,
-  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import type {
@@ -101,7 +100,6 @@ export type LogThresholdAlert = Omit<
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   'kibana.alert.evaluation.values'?: Array<number | null>;
   [ALERT_GROUP]?: Group[];
-  [ALERT_STATE_NAMESPACE]: { alertState: AlertStates };
 };
 
 export type LogThresholdAlertReporter = (
@@ -219,7 +217,6 @@ export const createLogThresholdExecutor =
               [ALERT_GROUP]: groups,
               [ALERT_GROUPING]: grouping,
               [ALERT_INDEX_PATTERN]: indices,
-              [ALERT_STATE_NAMESPACE]: { alertState: AlertStates.ALERT },
               ...flattenAdditionalContext(rootLevelContext),
               ...getEcsGroupsFromFlattenGrouping(flattenGrouping),
             };

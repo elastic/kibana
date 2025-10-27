@@ -11,7 +11,6 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import type { RuleType } from '@kbn/alerting-plugin/server';
 import type { DefaultAlert, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
-import type { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import type { UMServerLibs } from '../lib';
 import type { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
 
@@ -21,27 +20,7 @@ import type { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
  *
  * When we register all the alerts we can inject this field.
  */
-
-export type DurationAnomalyAlert = ObservabilityUptimeAlert & {
-  [ALERT_STATE_NAMESPACE]: AlertInstanceState;
-};
-
-export type StatusCheckAlert = ObservabilityUptimeAlert & {
-  [ALERT_STATE_NAMESPACE]: AlertInstanceState;
-};
-
-export type LegacyTlsAlert = ObservabilityUptimeAlert & {
-  [ALERT_STATE_NAMESPACE]: AlertInstanceState;
-};
-
-export type TlsAlert = ObservabilityUptimeAlert & {
-  [ALERT_STATE_NAMESPACE]: AlertInstanceState;
-};
-
-export type DefaultUptimeAlertInstance<
-  TActionGroupIds extends string,
-  TAlert extends ObservabilityUptimeAlert
-> = RuleType<
+export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = RuleType<
   Record<string, any>,
   never,
   Record<string, any>,
@@ -49,22 +28,16 @@ export type DefaultUptimeAlertInstance<
   AlertInstanceContext,
   TActionGroupIds,
   RecoveredActionGroupId,
-  TAlert
+  ObservabilityUptimeAlert
 >;
 
-export type UptimeAlertTypeFactory<
-  TActionGroupIds extends string,
-  TAlert extends ObservabilityUptimeAlert
-> = (
+export type UptimeAlertTypeFactory<TActionGroupIds extends string> = (
   server: UptimeServerSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePluginsSetup
-) => DefaultUptimeAlertInstance<TActionGroupIds, TAlert>;
+) => DefaultUptimeAlertInstance<TActionGroupIds>;
 
-export type LegacyUptimeRuleTypeFactory<
-  TActionGroupIds extends string,
-  TAlert extends DefaultAlert
-> = (
+export type LegacyUptimeRuleTypeFactory<TActionGroupIds extends string> = (
   server: UptimeServerSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePluginsSetup
@@ -76,7 +49,7 @@ export type LegacyUptimeRuleTypeFactory<
   AlertInstanceContext,
   TActionGroupIds,
   RecoveredActionGroupId,
-  TAlert
+  DefaultAlert
 >;
 
 export interface MonitorSummary {

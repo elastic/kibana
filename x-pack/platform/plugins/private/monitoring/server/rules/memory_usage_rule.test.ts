@@ -10,7 +10,7 @@ import { RULE_MEMORY_USAGE } from '../../common/constants';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -105,115 +105,113 @@ describe('MemoryUsageRule', () => {
         params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
-      const alertStates = [
-        {
-          ccs: undefined,
-          cluster: { clusterUuid, clusterName },
-          memoryUsage,
-          itemLabel: undefined,
-          meta: {
-            clusterUuid,
-            memoryUsage,
-            nodeId,
-            nodeName,
-          },
-          nodeId,
-          nodeName,
-          ui: {
-            isFiring: true,
-            message: {
-              text: `Node #start_link${nodeName}#end_link is reporting JVM memory usage of ${memoryUsage}% at #absolute`,
-              nextSteps: [
-                {
-                  text: '#start_linkTune thread pools#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkManaging ES Heap#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl: '{elasticWebsiteUrl}blog/a-heap-of-trouble',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkIdentify large indices/shards#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'link',
-                      url: 'elasticsearch/indices',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkAdd more data nodes#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkResize your deployment (ECE)#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html',
-                    },
-                  ],
-                },
-              ],
-              tokens: [
-                {
-                  startToken: '#absolute',
-                  type: 'time',
-                  isAbsolute: true,
-                  isRelative: false,
-                  timestamp: 1,
-                },
-                {
-                  startToken: '#start_link',
-                  endToken: '#end_link',
-                  type: 'link',
-                  url: 'elasticsearch/nodes/myNodeId',
-                },
-              ],
-            },
-            severity: 'danger',
-            triggeredMS: 1,
-            lastCheckedMS: 0,
-          },
-        },
-      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'myNodeId',
         actionGroup: 'default',
         state: {
-          alertStates,
+          alertStates: [
+            {
+              ccs: undefined,
+              cluster: { clusterUuid, clusterName },
+              memoryUsage,
+              itemLabel: undefined,
+              meta: {
+                clusterUuid,
+                memoryUsage,
+                nodeId,
+                nodeName,
+              },
+              nodeId,
+              nodeName,
+              ui: {
+                isFiring: true,
+                message: {
+                  text: `Node #start_link${nodeName}#end_link is reporting JVM memory usage of ${memoryUsage}% at #absolute`,
+                  nextSteps: [
+                    {
+                      text: '#start_linkTune thread pools#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkManaging ES Heap#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl: '{elasticWebsiteUrl}blog/a-heap-of-trouble',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkIdentify large indices/shards#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'link',
+                          url: 'elasticsearch/indices',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkAdd more data nodes#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkResize your deployment (ECE)#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html',
+                        },
+                      ],
+                    },
+                  ],
+                  tokens: [
+                    {
+                      startToken: '#absolute',
+                      type: 'time',
+                      isAbsolute: true,
+                      isRelative: false,
+                      timestamp: 1,
+                    },
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'elasticsearch/nodes/myNodeId',
+                    },
+                  ],
+                },
+                severity: 'danger',
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
         },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'myNodeId',
@@ -270,116 +268,114 @@ describe('MemoryUsageRule', () => {
         params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
-      const alertStates = [
-        {
-          ccs: 'testCluster',
-          cluster: { clusterUuid, clusterName },
-          memoryUsage,
-          itemLabel: undefined,
-          meta: {
-            ccs: 'testCluster',
-            clusterUuid,
-            memoryUsage,
-            nodeId,
-            nodeName,
-          },
-          nodeId,
-          nodeName,
-          ui: {
-            isFiring: true,
-            message: {
-              text: `Node #start_link${nodeName}#end_link is reporting JVM memory usage of ${memoryUsage}% at #absolute`,
-              nextSteps: [
-                {
-                  text: '#start_linkTune thread pools#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkManaging ES Heap#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl: '{elasticWebsiteUrl}blog/a-heap-of-trouble',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkIdentify large indices/shards#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'link',
-                      url: 'elasticsearch/indices',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkAdd more data nodes#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkResize your deployment (ECE)#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html',
-                    },
-                  ],
-                },
-              ],
-              tokens: [
-                {
-                  startToken: '#absolute',
-                  type: 'time',
-                  isAbsolute: true,
-                  isRelative: false,
-                  timestamp: 1,
-                },
-                {
-                  startToken: '#start_link',
-                  endToken: '#end_link',
-                  type: 'link',
-                  url: 'elasticsearch/nodes/myNodeId',
-                },
-              ],
-            },
-            severity: 'danger',
-            triggeredMS: 1,
-            lastCheckedMS: 0,
-          },
-        },
-      ];
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: 'myNodeId',
         actionGroup: 'default',
         state: {
-          alertStates,
+          alertStates: [
+            {
+              ccs: 'testCluster',
+              cluster: { clusterUuid, clusterName },
+              memoryUsage,
+              itemLabel: undefined,
+              meta: {
+                ccs: 'testCluster',
+                clusterUuid,
+                memoryUsage,
+                nodeId,
+                nodeName,
+              },
+              nodeId,
+              nodeName,
+              ui: {
+                isFiring: true,
+                message: {
+                  text: `Node #start_link${nodeName}#end_link is reporting JVM memory usage of ${memoryUsage}% at #absolute`,
+                  nextSteps: [
+                    {
+                      text: '#start_linkTune thread pools#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/modules-threadpool.html',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkManaging ES Heap#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl: '{elasticWebsiteUrl}blog/a-heap-of-trouble',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkIdentify large indices/shards#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'link',
+                          url: 'elasticsearch/indices',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkAdd more data nodes#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/add-elasticsearch-nodes.html',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkResize your deployment (ECE)#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/cloud-enterprise/current/ece-resize-deployment.html',
+                        },
+                      ],
+                    },
+                  ],
+                  tokens: [
+                    {
+                      startToken: '#absolute',
+                      type: 'time',
+                      isAbsolute: true,
+                      isRelative: false,
+                      timestamp: 1,
+                    },
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'elasticsearch/nodes/myNodeId',
+                    },
+                  ],
+                },
+                severity: 'danger',
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
         },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: 'myNodeId',

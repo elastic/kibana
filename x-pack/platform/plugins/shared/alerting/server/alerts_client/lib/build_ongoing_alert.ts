@@ -25,6 +25,7 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get, omit } from 'lodash';
@@ -140,6 +141,7 @@ export const buildOngoingAlert = <
         ...(rule[ALERT_RULE_TAGS] ?? []),
       ])
     ),
+    [ALERT_STATE_NAMESPACE]: legacyAlert.getState(),
   };
 
   // Clean the existing alert document so any nested fields that will be updated

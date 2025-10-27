@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import {
   generateFilterDSL,
   hasFilters,
@@ -117,8 +117,6 @@ const mockCommonAlertDocumentFields = (monitorInfo: GetMonitorStatusResult['moni
     ? [monitorInfo.observer.geo.name]
     : undefined,
   'observer.name': [],
-  'observer.hostname': monitorInfo.observer?.hostname,
-  [ALERT_STATE_NAMESPACE]: expect.any(Object),
 });
 
 const mockStatusAlertDocument = (

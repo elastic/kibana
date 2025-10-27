@@ -10,7 +10,7 @@ import { RULE_CPU_USAGE } from '../../common/constants';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -108,82 +108,78 @@ describe('CpuUsageRule', () => {
         params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
-
-      const alertStates = [
-        {
-          ccs: undefined,
-          cluster: { clusterUuid, clusterName },
-          cpuUsage,
-          itemLabel: undefined,
-          meta: {
-            clusterUuid,
-            cpuUsage,
-            nodeId,
-            nodeName,
-          },
-          nodeId,
-          nodeName,
-          ui: {
-            isFiring: true,
-            message: {
-              text: `Node #start_link${nodeName}#end_link is reporting cpu usage of ${cpuUsage}% at #absolute`,
-              nextSteps: [
-                {
-                  text: '#start_linkCheck hot threads#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkCheck long running tasks#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
-                    },
-                  ],
-                },
-              ],
-              tokens: [
-                {
-                  startToken: '#absolute',
-                  type: 'time',
-                  isAbsolute: true,
-                  isRelative: false,
-                  timestamp: 1,
-                },
-                {
-                  startToken: '#start_link',
-                  endToken: '#end_link',
-                  type: 'link',
-                  url: 'elasticsearch/nodes/myNodeId',
-                },
-              ],
-            },
-            severity: 'danger',
-            triggeredMS: 1,
-            lastCheckedMS: 0,
-          },
-        },
-      ];
-
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         actionGroup: 'default',
         id: 'myNodeId',
         state: {
-          alertStates,
+          alertStates: [
+            {
+              ccs: undefined,
+              cluster: { clusterUuid, clusterName },
+              cpuUsage,
+              itemLabel: undefined,
+              meta: {
+                clusterUuid,
+                cpuUsage,
+                nodeId,
+                nodeName,
+              },
+              nodeId,
+              nodeName,
+              ui: {
+                isFiring: true,
+                message: {
+                  text: `Node #start_link${nodeName}#end_link is reporting cpu usage of ${cpuUsage}% at #absolute`,
+                  nextSteps: [
+                    {
+                      text: '#start_linkCheck hot threads#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkCheck long running tasks#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
+                        },
+                      ],
+                    },
+                  ],
+                  tokens: [
+                    {
+                      startToken: '#absolute',
+                      type: 'time',
+                      isAbsolute: true,
+                      isRelative: false,
+                      timestamp: 1,
+                    },
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'elasticsearch/nodes/myNodeId',
+                    },
+                  ],
+                },
+                severity: 'danger',
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
         },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
@@ -241,83 +237,79 @@ describe('CpuUsageRule', () => {
         params: rule.ruleOptions.defaultParams,
       } as any);
       const count = 1;
-
-      const alertStates = [
-        {
-          ccs: 'testCluster',
-          cluster: { clusterUuid, clusterName },
-          cpuUsage,
-          itemLabel: undefined,
-          meta: {
-            ccs: 'testCluster',
-            clusterUuid,
-            cpuUsage,
-            nodeId,
-            nodeName,
-          },
-          nodeId,
-          nodeName,
-          ui: {
-            isFiring: true,
-            message: {
-              text: `Node #start_link${nodeName}#end_link is reporting cpu usage of ${cpuUsage}% at #absolute`,
-              nextSteps: [
-                {
-                  text: '#start_linkCheck hot threads#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
-                    },
-                  ],
-                },
-                {
-                  text: '#start_linkCheck long running tasks#end_link',
-                  tokens: [
-                    {
-                      startToken: '#start_link',
-                      endToken: '#end_link',
-                      type: 'docLink',
-                      partialUrl:
-                        '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
-                    },
-                  ],
-                },
-              ],
-              tokens: [
-                {
-                  startToken: '#absolute',
-                  type: 'time',
-                  isAbsolute: true,
-                  isRelative: false,
-                  timestamp: 1,
-                },
-                {
-                  startToken: '#start_link',
-                  endToken: '#end_link',
-                  type: 'link',
-                  url: 'elasticsearch/nodes/myNodeId',
-                },
-              ],
-            },
-            severity: 'danger',
-            triggeredMS: 1,
-            lastCheckedMS: 0,
-          },
-        },
-      ];
-
       expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         actionGroup: 'default',
         id: 'myNodeId',
         state: {
-          alertStates,
+          alertStates: [
+            {
+              ccs: 'testCluster',
+              cluster: { clusterUuid, clusterName },
+              cpuUsage,
+              itemLabel: undefined,
+              meta: {
+                ccs: 'testCluster',
+                clusterUuid,
+                cpuUsage,
+                nodeId,
+                nodeName,
+              },
+              nodeId,
+              nodeName,
+              ui: {
+                isFiring: true,
+                message: {
+                  text: `Node #start_link${nodeName}#end_link is reporting cpu usage of ${cpuUsage}% at #absolute`,
+                  nextSteps: [
+                    {
+                      text: '#start_linkCheck hot threads#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
+                        },
+                      ],
+                    },
+                    {
+                      text: '#start_linkCheck long running tasks#end_link',
+                      tokens: [
+                        {
+                          startToken: '#start_link',
+                          endToken: '#end_link',
+                          type: 'docLink',
+                          partialUrl:
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
+                        },
+                      ],
+                    },
+                  ],
+                  tokens: [
+                    {
+                      startToken: '#absolute',
+                      type: 'time',
+                      isAbsolute: true,
+                      isRelative: false,
+                      timestamp: 1,
+                    },
+                    {
+                      startToken: '#start_link',
+                      endToken: '#end_link',
+                      type: 'link',
+                      url: 'elasticsearch/nodes/myNodeId',
+                    },
+                  ],
+                },
+                severity: 'danger',
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
         },
-        payload: { [ALERT_STATE_NAMESPACE]: { alertStates } },
       });
       expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({

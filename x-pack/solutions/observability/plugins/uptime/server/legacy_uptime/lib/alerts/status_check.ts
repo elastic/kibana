@@ -14,7 +14,7 @@ import datemath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import type { JsonObject } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { ALERT_REASON, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { uptimeMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_monitor_status';
 import type { AlertsLocatorParams, TimeUnitChar } from '@kbn/observability-plugin/common';
@@ -27,7 +27,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import type { MonitorSummary, StatusCheckAlert, UptimeAlertTypeFactory } from './types';
+import type { MonitorSummary, UptimeAlertTypeFactory } from './types';
 import type {
   StatusCheckFilters,
   Ping,
@@ -284,7 +284,7 @@ const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<strin
     new Set<string>()
   );
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds, StatusCheckAlert> = (
+export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   server,
   libs,
   plugins
@@ -398,27 +398,21 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds, Sta
 
         const statusMessage = getStatusMessage(monitorStatusMessageParams);
         const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
-
         const alertId = getInstanceId(monitorInfo, monitorLoc.location);
         const context = {
           ...monitorSummary,
           statusMessage,
         };
 
-        const alertState = {
-          ...state,
-          ...context,
-          ...updateState(state, true),
-        };
-
         const { uuid, start } = alertsClient.report({
           id: alertId,
           actionGroup: MONITOR_STATUS.id,
-          payload: {
-            ...getMonitorAlertDocument(monitorSummary),
-            [ALERT_STATE_NAMESPACE]: alertState,
+          payload: getMonitorAlertDocument(monitorSummary),
+          state: {
+            ...state,
+            ...context,
+            ...updateState(state, true),
           },
-          state: alertState,
         });
 
         const indexedStartedAt = start ?? startedAt.toISOString();
@@ -505,19 +499,14 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds, Sta
         statusMessage,
       };
 
-      const alertState = {
-        ...updateState(state, true),
-        ...context,
-      };
-
       const { uuid, start } = alertsClient.report({
         id: alertId,
         actionGroup: MONITOR_STATUS.id,
-        payload: {
-          ...getMonitorAlertDocument(monitorSummary),
-          [ALERT_STATE_NAMESPACE]: alertState,
+        payload: getMonitorAlertDocument(monitorSummary),
+        state: {
+          ...updateState(state, true),
+          ...context,
         },
-        state: alertState,
       });
 
       const indexedStartedAt = start ?? startedAt.toISOString();

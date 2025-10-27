@@ -10,7 +10,6 @@ import type { Logger } from '@kbn/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
-import { ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
   LEGACY_NOTIFICATIONS_ID,
@@ -148,9 +147,6 @@ export const legacyRulesNotificationRuleType = ({
         actionGroup: 'default',
         state: {
           signals_count: signalsCount,
-        },
-        payload: {
-          [ALERT_STATE_NAMESPACE]: { signals_count: signalsCount },
         },
         context: {
           results_link: resultsLink,

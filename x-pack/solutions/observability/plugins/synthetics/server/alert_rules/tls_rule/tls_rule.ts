@@ -14,7 +14,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { asyncForEach } from '@kbn/std';
-import { ALERT_STATE_NAMESPACE, SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
+import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import {
   tlsRuleParamsSchema,
   type TLSRuleParams,
@@ -38,9 +38,7 @@ type TLSActionGroups = ActionGroupIdsOf<typeof TLS_CERTIFICATE>;
 type TLSRuleTypeState = SyntheticsCommonState;
 type TLSAlertState = ReturnType<typeof getCertSummary>;
 type TLSAlertContext = AlertContext;
-type TLSAlert = ObservabilityUptimeAlert & {
-  [ALERT_STATE_NAMESPACE]: TLSAlertState;
-};
+type TLSAlert = ObservabilityUptimeAlert;
 
 export const registerSyntheticsTLSCheckRule = (
   server: SyntheticsServerSetup,
@@ -106,16 +104,11 @@ export const registerSyntheticsTLSCheckRule = (
           return;
         }
 
-        const legacyState = updateState(ruleState, true);
-
         const alertId = cert.sha256;
         const { uuid } = alertsClient.report({
           id: alertId,
           actionGroup: TLS_CERTIFICATE.id,
-          state: { ...legacyState, ...summary },
-          payload: {
-            [ALERT_STATE_NAMESPACE]: { ...legacyState, ...summary },
-          },
+          state: { ...updateState(ruleState, foundCerts), ...summary },
         });
 
         const payload = getTLSAlertDocument(cert, summary, uuid);

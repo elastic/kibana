@@ -19,7 +19,6 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_GROUPING,
   ALERT_REASON,
-  ALERT_STATE_NAMESPACE,
   ALERT_URL,
 } from '@kbn/rule-data-utils';
 
@@ -197,7 +196,6 @@ export async function executor(
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
         [ALERT_GROUPING]: groupingObject,
-        [ALERT_STATE_NAMESPACE]: { latestTimestamp, dateStart, dateEnd },
         ...ecsGroups,
         ...actionContext.sourceFields,
       },

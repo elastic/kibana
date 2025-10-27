@@ -29,6 +29,7 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS_RECOVERED,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { get } from 'lodash';
@@ -138,6 +139,7 @@ export const buildRecoveredAlert = <
         ...(rule[ALERT_RULE_TAGS] ?? []),
       ])
     ),
+    [ALERT_STATE_NAMESPACE]: legacyAlert.getState(),
   };
 
   // Clean the existing alert document so any nested fields that will be updated
