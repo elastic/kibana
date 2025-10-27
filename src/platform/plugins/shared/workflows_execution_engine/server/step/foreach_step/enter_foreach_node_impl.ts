@@ -105,6 +105,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
         this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);
     }
 
+    // Try to parse again if the expression resolved to a string
+    if (typeof resolvedValue === 'string') {
+      resolvedValue = this.tryParseJSON(resolvedValue) ?? resolvedValue;
+    }
+
     if (!Array.isArray(resolvedValue)) {
       throw new Error(
         `Foreach expression must evaluate to an array. ` +
