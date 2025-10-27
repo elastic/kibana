@@ -1802,7 +1802,6 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error readonly prop assignment
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         false;
-
       await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
         `'runscript' response action not supported for [sentinel_one]. Feature disabled`
       );
@@ -2309,7 +2308,6 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error update readonly property
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         false;
-
       await expect(s1ActionsClient.getCustomScripts()).rejects.toThrow(
         "'runscript' response action not supported for [sentinel_one]"
       );
@@ -2371,10 +2369,6 @@ describe('SentinelOneActionsClient class', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assignment to readonly prop
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       getActionDetailsByIdMock.mockResolvedValue({});
 
       (

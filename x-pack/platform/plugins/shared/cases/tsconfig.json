@@ -98,7 +98,8 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/zod",
+    "@kbn/react-query",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*"

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useQuery } from '@kbn/react-query';
 import type { ConnectorInstance, ConnectorTypeInfo } from '@kbn/workflows';
 import { addDynamicConnectorsToCache } from '../../../../common/schema';
 
