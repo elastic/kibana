@@ -158,10 +158,11 @@ export const createPrebuildFields = ({
             }
 
             try {
-              const dataViewIndexPattern = data.result.result.item.attributes.title;
+              const dataViewIndexPatterns = data.result.result.item.attributes.title.split(',');
+
               return (
                 <IndexPattern
-                  patterns={[dataViewIndexPattern]}
+                  patterns={dataViewIndexPatterns}
                   data-test-subj="description-detail-data-view-pattern"
                 />
               );
