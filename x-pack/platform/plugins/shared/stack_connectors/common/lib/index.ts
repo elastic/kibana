@@ -4,8 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { z } from '@kbn/zod';
-
-const PORT_MAX = 256 * 256 - 1;
-export const portSchema = () => z.coerce.number().min(1).max(PORT_MAX);
+export { Coerced } from './utils';
