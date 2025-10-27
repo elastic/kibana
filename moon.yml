@@ -18,6 +18,26 @@ tasks:
       cache: false
   bootstrap:
     script: yarn kbn bootstrap
+  type_check:
+    # Run the repository TypeScript composite build that is used for type checking.
+    # Moon will capture the produced `target/types` folders and TypeScript's
+    # `.tsbuildinfo` files so these artifacts can be stored in the remote cache
+    # and restored on other machines or CI runs.
+    command: node
+    args:
+      - scripts/type_check
+    # Limit the cache key to Git state so we don't need to enumerate every TS
+    # source file. Any commit change (or staged change) invalidates the cache.
+    inputs:
+      - '/.git/HEAD'
+      - '/.git/refs/**/*'
+      - '/.git/index'
+    # Make sure Moon captures the TypeScript outputs that are required to
+    # accelerate subsequent composite builds: emitted declaration files and
+    # TypeScript's incremental build info files.
+    outputs:
+      - '/**/target/types/**'
+      - '/**/target/**/tsconfig.type_check.tsbuildinfo'
 
 workspace:
   inheritedTasks:

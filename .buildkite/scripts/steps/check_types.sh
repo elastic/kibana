@@ -7,4 +7,4 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo --- Check Types
-node scripts/type_check
+MOON_CACHE=read-write yarn run moon run kibana:type_check
