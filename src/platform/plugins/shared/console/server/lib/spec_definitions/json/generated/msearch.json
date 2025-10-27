@@ -23,7 +23,6 @@
         "5"
       ],
       "pre_filter_shard_size": "",
-      "project_routing": "",
       "rest_total_hits_as_int": "__flag__",
       "routing": "",
       "search_type": [
