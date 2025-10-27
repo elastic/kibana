@@ -82,9 +82,15 @@ describe('PipelineTreeNodeLabel', () => {
   });
 
   it('truncates long pipeline names', () => {
+    const handleClick = jest.fn();
     const longName = 'a'.repeat(100);
     const { getByTestId } = render(
-      <PipelineTreeNodeLabel pipelineName={longName} isManaged={false} isDeprecated={false} />
+      <PipelineTreeNodeLabel
+        pipelineName={longName}
+        isManaged={false}
+        isDeprecated={false}
+        onClick={handleClick}
+      />
     );
 
     const label = getByTestId(`pipelineTreeNode-${longName}-link`);
