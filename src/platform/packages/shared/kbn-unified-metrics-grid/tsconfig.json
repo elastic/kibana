@@ -28,6 +28,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/apm-types",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/field-utils"
   ]
 }

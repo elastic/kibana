@@ -122,6 +122,7 @@ export interface EsqlPluginStartBase {
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
   getInferenceEndpointsAutocomplete: () => Promise<InferenceEndpointsAutocompleteResult>;
+  isServerless: boolean;
 }
 
 export interface ESQLEditorDeps {

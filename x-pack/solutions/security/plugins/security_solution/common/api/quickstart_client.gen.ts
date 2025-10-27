@@ -110,10 +110,6 @@ import type {
   SetAlertsStatusResponse,
 } from './detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
-import type {
-  EndpointGetActionsDetailsRequestParamsInput,
-  EndpointGetActionsDetailsResponse,
-} from './endpoint/actions/details/details.gen';
 import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
   EndpointFileInfoRequestParamsInput,
@@ -222,6 +218,10 @@ import type {
   InternalUploadAssetCriticalityRecordsResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type {
+  EntityDetailsHighlightsRequestBodyInput,
+  EntityDetailsHighlightsResponse,
+} from './entity_analytics/entity_details/highlights.gen';
 import type {
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
@@ -1191,21 +1191,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get the details of a response action using the action ID.
-   */
-  async endpointGetActionsDetails(props: EndpointGetActionsDetailsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsDetails`);
-    return this.kbnClient
-      .request<EndpointGetActionsDetailsResponse>({
-        path: replaceParams('/api/endpoint/action/{action_id}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Get a list of all response actions.
    */
   async endpointGetActionsList(props: EndpointGetActionsListProps) {
@@ -1379,6 +1364,19 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async entityDetailsHighlights(props: EntityDetailsHighlightsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EntityDetailsHighlights`);
+    return this.kbnClient
+      .request<EntityDetailsHighlightsResponse>({
+        path: '/internal/entity_details/highlights',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3243,9 +3241,6 @@ export interface EndpointFileDownloadProps {
 export interface EndpointFileInfoProps {
   params: EndpointFileInfoRequestParamsInput;
 }
-export interface EndpointGetActionsDetailsProps {
-  params: EndpointGetActionsDetailsRequestParamsInput;
-}
 export interface EndpointGetActionsListProps {
   query: EndpointGetActionsListRequestQueryInput;
 }
@@ -3275,6 +3270,9 @@ export interface EndpointUnisolateActionProps {
 }
 export interface EndpointUploadActionProps {
   attachment: FormData;
+}
+export interface EntityDetailsHighlightsProps {
+  body: EntityDetailsHighlightsRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;

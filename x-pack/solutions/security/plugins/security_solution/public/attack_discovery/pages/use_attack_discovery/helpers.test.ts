@@ -11,8 +11,9 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { omit } from 'lodash/fp';
 
 import { getGenAiConfig, getRequestBody } from './helpers';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
-const connector: ActionConnector = {
+const connector = createMockActionConnector({
   actionTypeId: '.gen-ai',
   config: {
     apiProvider: 'Azure OpenAI',
@@ -20,13 +21,10 @@ const connector: ActionConnector = {
       'https://example.com/openai/deployments/example/chat/completions?api-version=2024-02-15-preview',
   },
   id: '15b4f8df-e2ca-4060-81a1-3bd2a2bffc7e',
-  isDeprecated: false,
   isMissingSecrets: false,
-  isPreconfigured: false,
-  isSystemAction: false,
   name: 'Azure OpenAI GPT-4o',
   secrets: { secretTextField: 'a secret' },
-};
+});
 
 describe('getGenAiConfig', () => {
   it('returns undefined when the connector is preconfigured', () => {
@@ -101,7 +99,7 @@ describe('getGenAiConfig', () => {
   });
 
   it('returns the expected GenAiConfig when the connector config is undefined', () => {
-    const connectorWithoutConfig = omit('config', connector) as ActionConnector<
+    const connectorWithoutConfig = omit('config', connector) as unknown as ActionConnector<
       Record<string, unknown>,
       Record<string, unknown>
     >;
