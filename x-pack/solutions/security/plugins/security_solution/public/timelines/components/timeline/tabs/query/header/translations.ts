@@ -24,9 +24,37 @@ export const CALL_OUT_IMMUTABLE = i18n.translate(
 );
 
 export const CALL_OUT_ALERTS_ONLY_MIGRATION_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.callOut.alertsOnlyMigration.message.title',
+  {
+    defaultMessage: 'Show detection alerts option has been removed.',
+  }
+);
+
+export const CALL_OUT_ALERTS_ONLY_MIGRATION_CONTENT = i18n.translate(
   'xpack.securitySolution.timeline.callOut.alertsOnlyMigration.message.description',
   {
     defaultMessage:
-      'Show detection alerts option has been removed. Duplicate your current data view to maintain runtime fields or use the security alerts data view.',
+      'Show only alerts by adding a filter or switching to the security alerts data view.',
+  }
+);
+
+export const CALL_OUT_ALERTS_ONLY_MIGRATION_SWITCH_BUTTON = i18n.translate(
+  'xpack.securitySolution.timeline.callOut.alertsOnlyMigration.switchButton.label',
+  {
+    defaultMessage: 'Switch to alerts data view.',
+  }
+);
+
+export const CALL_OUT_FILTER_FOR_ALERTS_BUTTON = i18n.translate(
+  'xpack.securitySolution.timeline.callOut.alertsOnlyMigration.message.filterForAlerts',
+  {
+    defaultMessage: 'Filter for alerts.',
+  }
+);
+
+export const ALERTS_ONLY_FILTER_ALIAS = i18n.translate(
+  'xpack.securitySolution.timeline.filters.alertsOnlyFilterAlias',
+  {
+    defaultMessage: 'Alerts only',
   }
 );
