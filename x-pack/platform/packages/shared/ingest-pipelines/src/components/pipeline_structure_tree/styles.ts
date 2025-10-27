@@ -22,7 +22,7 @@ export const getStyles = (euiTheme: EuiThemeComputed) => css`
     background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
   }
 
-  [class*='cssTreeNode-level'] {
+  [class*='cssTreeNode-children'] {
     margin-left: ${euiTheme.size.xl};
     width: calc(100% - ${euiTheme.size.xl});
   }

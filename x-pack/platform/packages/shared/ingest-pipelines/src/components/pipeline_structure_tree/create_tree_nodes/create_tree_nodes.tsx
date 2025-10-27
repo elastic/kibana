@@ -35,7 +35,7 @@ export const createTreeNodesFromPipelines = (
     ),
     'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,
     className:
-      (level === 1 ? 'cssTreeNode-root' : `cssTreeNode-level-${level}`) +
+      (level === 1 ? 'cssTreeNode-root' : 'cssTreeNode-children') +
       (treeNode.pipelineName === selectedPipeline ? '--active' : ''),
     children: treeNode.children.length ? [] : undefined,
     isExpanded: level === 1,
