@@ -15,7 +15,7 @@ import type {
   ReadonlyToolProvider,
   ToolProviderFn,
 } from '../tool_provider';
-import { convertMcpToolToOnechatTool } from './converter';
+import { convertMcpToolToAgentBuilderTool } from './converter';
 import type {
   CreateMcpProviderParams,
   CreateMcpProviderFnDeps,
@@ -29,16 +29,22 @@ import type {
  * This function returns a provider factory that creates request-scoped MCP tool providers.
  * The provider discovers tools from MCP connectors and makes them available to agents.
  *
- * @param deps Dependencies (logger)
+ * @param deps Dependencies (logger, actions)
  * @returns Provider factory function
  */
-export const createMcpProviderFn = ({ logger }: CreateMcpProviderFnDeps): ToolProviderFn<true> => {
-  return ({ request, space }) => {
-    // Note: actionsClient will be injected when integrating with ToolsService
-    // For now, we'll receive it through the createMcpToolProvider function
-    // This matches the pattern used by other providers
+export const createMcpProviderFn = ({
+  logger,
+  actions,
+}: CreateMcpProviderFnDeps): ToolProviderFn<true> => {
+  return async ({ request, space }) => {
     logger.debug(`Creating MCP tool provider for space: ${space}`);
-    throw new Error('MCP provider requires actionsClient - use createMcpToolProvider directly');
+
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+
+    return createMcpToolProvider({
+      actionsClient,
+      logger,
+    });
   };
 };
 
@@ -58,8 +64,6 @@ export const createMcpProviderFn = ({ logger }: CreateMcpProviderFnDeps): ToolPr
 export const createMcpToolProvider = ({
   actionsClient,
   logger,
-  request,
-  space,
 }: CreateMcpProviderParams): ReadonlyToolProvider => {
   const loggerWithTags = logger.get('mcp-provider');
 
@@ -151,10 +155,8 @@ async function listAllMcpTools({
   const startTime = Date.now();
 
   try {
-    // 1. Get all connectors
     const allConnectors = await actionsClient.getAll();
 
-    // 2. Filter to MCP connectors only
     const mcpConnectors = allConnectors.filter(
       (connector: MCPConnector) => connector.actionTypeId === MCP_CONNECTOR_TYPE_ID
     );
@@ -165,7 +167,6 @@ async function listAllMcpTools({
       return [];
     }
 
-    // 3. Discover tools from each connector (in parallel)
     const toolsPerConnector = await Promise.all(
       mcpConnectors.map(async (connector: MCPConnector) => {
         try {
@@ -179,7 +180,6 @@ async function listAllMcpTools({
       })
     );
 
-    // 4. Flatten and return
     const allTools = toolsPerConnector.flat();
     const duration = Date.now() - startTime;
 
@@ -210,7 +210,6 @@ async function discoverToolsFromConnector({
   logger: any;
 }): Promise<InternalToolDefinition[]> {
   try {
-    // Call the connector's listTools action
     const result = await actionsClient.execute({
       actionId: connector.id,
       params: {
@@ -232,23 +231,18 @@ async function discoverToolsFromConnector({
       return [];
     }
 
-    // Extract uniqueId and description from connector config
-    // If uniqueId is not provided in config, default to connector.id
     const uniqueId = ((connector.config as any)?.uniqueId as string | undefined) || connector.id;
     const description = (connector.config as any)?.description as string | undefined;
 
-    // Transform each MCP tool to OneChat format
     const tools = response.tools.map((mcpTool) => {
-      // Add provider metadata to the tool
       const toolWithMetadata: MCPToolWithMetadata = {
         ...mcpTool,
         provider: createProviderMetadata(uniqueId, connector.name, description),
       };
 
-      // Override the provider ID to include the full tool ID
       toolWithMetadata.provider.id = createMcpToolId(uniqueId, mcpTool.name);
 
-      return convertMcpToolToOnechatTool(toolWithMetadata, connector.id, actionsClient);
+      return convertMcpToolToAgentBuilderTool(toolWithMetadata, connector.id, actionsClient);
     });
 
     logger.debug(`Discovered ${tools.length} tools from connector "${connector.name}"`);

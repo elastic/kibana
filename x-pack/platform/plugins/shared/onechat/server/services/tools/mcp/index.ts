@@ -12,4 +12,4 @@ export type {
   MCPConnector,
   MCPToolWithMetadata,
 } from './types';
-export { convertMcpToolToOnechatTool, convertJsonSchemaToZod } from './converter';
+export { convertMcpToolToAgentBuilderTool } from './converter';

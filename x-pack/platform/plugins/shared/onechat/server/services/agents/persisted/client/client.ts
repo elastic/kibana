@@ -173,13 +173,11 @@ class AgentClientImpl implements AgentClient {
       throw createAgentNotFoundError({ agentId });
     }
 
-    // Validate and auto-filter unavailable tools
     if (profileUpdate.configuration?.tools) {
       const filteredTools = await this.validateAgentToolSelection(
         profileUpdate.configuration.tools,
         { autoFilter: true }
       );
-      // Update the profile with filtered tools
       profileUpdate.configuration.tools = filteredTools;
     }
 
@@ -214,7 +212,6 @@ class AgentClientImpl implements AgentClient {
     return deleteResponse.result === 'deleted';
   }
 
-  // Agent tool selection validation helper
   private async validateAgentToolSelection(
     toolSelection: ToolSelection[],
     options: { autoFilter?: boolean } = {}
@@ -232,10 +229,11 @@ class AgentClientImpl implements AgentClient {
       );
     }
 
-    // Log warning if tools were filtered out
     if (result.filteredTools.length > 0) {
       this.logger.warn(
-        `Agent tools auto-filtered: removed ${result.filteredTools.length} unavailable tools: ${result.filteredTools.join(', ')}`
+        `Agent tools auto-filtered: removed ${
+          result.filteredTools.length
+        } unavailable tools: ${result.filteredTools.join(', ')}`
       );
     }
 

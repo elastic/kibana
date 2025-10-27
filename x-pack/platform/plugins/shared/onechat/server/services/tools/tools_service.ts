@@ -21,7 +21,7 @@ import {
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
 import { createPersistedProviderFn } from './persisted';
-import { createMcpToolProvider } from './mcp';
+import { createMcpProviderFn } from './mcp';
 import { createToolRegistry } from './tool_registry';
 import { getToolTypeInfo } from './utils';
 
@@ -76,19 +76,16 @@ export class ToolsService {
       esClient: elasticsearch.client.asInternalUser,
       toolTypes,
     });
+    const mcpProviderFn = createMcpProviderFn({
+      logger: logger.get('mcp-provider'),
+      actions,
+    });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
       const space = getCurrentSpaceId({ request, spaces });
       const builtinProvider = await builtinProviderFn({ request, space });
       const persistedProvider = await persistedProviderFn({ request, space });
-
-      const actionsClient = await actions.getActionsClientWithRequest(request);
-      const mcpProvider = createMcpToolProvider({
-        actionsClient,
-        logger: logger.get('mcp-provider'),
-        request,
-        space,
-      });
+      const mcpProvider = await mcpProviderFn({ request, space });
 
       return createToolRegistry({
         getRunner,
@@ -96,7 +93,7 @@ export class ToolsService {
         request,
         builtinProvider,
         persistedProvider,
-        mcpProvider, // Add MCP provider to registry
+        mcpProvider,
       });
     };
 

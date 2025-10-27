@@ -7,6 +7,7 @@
 
 import { SubActionConnector, type ServiceParams } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
 import type {
   MCPConnectorConfig,
   MCPConnectorSecrets,
@@ -29,6 +30,10 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
   private connected: boolean = false;
 
+  private cachedTools: ListToolsResponse | null = null; // Instance cache
+  private readonly CACHE_TOKEN_TYPE = 'mcp_tools_list'; // Unique cache identifier
+  private readonly CACHE_TTL_SECONDS = 300; // 5 minutes
+
   constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
     super(params);
 
@@ -43,6 +48,20 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     );
 
     this.registerSubActions();
+  }
+
+  /**
+   * Check if a cached token has expired.
+   * Includes a 5-second safety margin to prevent edge-case race conditions.
+   *
+   * @param token - The connector token to check
+   * @returns true if the token is expired, false otherwise
+   */
+  private isExpired(token: ConnectorToken): boolean {
+    const now = new Date();
+    const expiresAt = new Date(token.expiresAt);
+    now.setSeconds(now.getSeconds() + 5);
+    return expiresAt < now;
   }
 
   private async connectHttp(service: MCPConnectorHTTPServiceConfig) {
@@ -123,7 +142,44 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     });
   }
 
+  /**
+   * List all tools from the MCP server with caching.
+   *
+   * Caching strategy:
+   * 1. Check instance cache (fast path, same request)
+   * 2. Check persistent cache via ConnectorTokenClient (survives restarts)
+   * 3. On cache miss, fetch from MCP server and cache the result
+   *
+   * Cache TTL: 5 minutes
+   * Cache invalidation: Automatic on connector config/secret changes (new instance created)
+   *
+   * @returns List of tools with their schemas
+   */
   public async listTools(): Promise<ListToolsResponse> {
+    const { connectorTokenClient } = this.services;
+    const connectorId = this.connector.id;
+
+    if (this.cachedTools) {
+      this.logger.debug('Using instance-cached MCP tools');
+      return this.cachedTools;
+    }
+
+    try {
+      const cached = await connectorTokenClient.get({
+        connectorId,
+        tokenType: this.CACHE_TOKEN_TYPE,
+      });
+
+      if (cached.connectorToken && !this.isExpired(cached.connectorToken)) {
+        this.logger.debug('Using persistent-cached MCP tools');
+        this.cachedTools = JSON.parse(cached.connectorToken.token);
+        return this.cachedTools!;
+      }
+    } catch (error) {
+      this.logger.debug(`Cache lookup failed: ${error.message}`);
+    }
+
+    this.logger.debug('Cache miss - fetching tools from MCP server');
     await this.connect();
 
     const getNextPage = async (cursor?: string): Promise<Tool[]> => {
@@ -143,9 +199,27 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       ];
     };
 
-    return {
+    const tools: ListToolsResponse = {
       tools: await getNextPage(),
     };
+
+    try {
+      await connectorTokenClient.updateOrReplace({
+        connectorId,
+        tokenRequestDate: Date.now(),
+        deleteExisting: true,
+        token: null,
+        newToken: JSON.stringify(tools),
+        expiresInSec: this.CACHE_TTL_SECONDS,
+      });
+      this.logger.debug(`Cached ${tools.tools.length} tools for 5 minutes`);
+    } catch (error) {
+      this.logger.error(`Failed to cache tools: ${error.message}`);
+    }
+
+    this.cachedTools = tools;
+
+    return tools;
   }
 
   public async callTool({

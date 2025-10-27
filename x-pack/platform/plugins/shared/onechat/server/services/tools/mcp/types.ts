@@ -6,12 +6,9 @@
  */
 
 import type { Tool as MCPTool, ToolProviderMetadata } from '@kbn/mcp-connector-common';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionsClient, PluginStartContract } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
 
-/**
- * MCP connector information from Actions plugin
- */
 export interface MCPConnector {
   id: string;
   name: string;
@@ -22,26 +19,16 @@ export interface MCPConnector {
   isDeprecated: boolean;
 }
 
-/**
- * MCP tool with provider metadata attached
- */
 export interface MCPToolWithMetadata extends MCPTool {
   provider: ToolProviderMetadata;
 }
 
-/**
- * Parameters for creating MCP provider
- */
 export interface CreateMcpProviderParams {
   actionsClient: ActionsClient;
   logger: Logger;
-  request: unknown; // KibanaRequest (avoiding circular dependency)
-  space: string;
 }
 
-/**
- * Dependencies for creating MCP provider function
- */
 export interface CreateMcpProviderFnDeps {
   logger: Logger;
+  actions: PluginStartContract;
 }
