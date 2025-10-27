@@ -18,9 +18,9 @@ export const getTemperatureIfValid = (
     return { temperature: connector.config.temperature };
   }
 
-  // Else, use the temperature from the request
-  if (temperature === undefined) return {};
+  if (temperature === undefined || temperature < 0 || temperature > 1) return {};
 
+  // Else, use the temperature from the request
   const model =
     modelName ?? connector?.config?.providerConfig?.model_id ?? connector?.config?.defaultModel;
 

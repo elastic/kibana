@@ -219,7 +219,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                     }
                   }
                 },
-                isBlocking: true,
+                isBlocking: false,
               },
             ],
           }}
