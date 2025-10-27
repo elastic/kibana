@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
