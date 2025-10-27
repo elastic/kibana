@@ -30,6 +30,18 @@ type PrivmonUser = ListPrivMonUsersResponse[number];
 const DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP = new Date(
   Date.now() - 3.5 * 7 * 24 * 60 * 60 * 1000
 ).toISOString();
+const OKTA_INDEX = 'logs-entityanalytics_okta.user-default';
+const OKTA_EVENTS_INDEX = 'logs-entityanalytics_okta.entity-default';
+const OKTA_USER_IDS = {
+  devon: 'AZmLBcGV9XhZAwOqZV5t', // Devan.Nienow
+  elinor: 'AZmLBcGV9XhZAwOqZV5u', // Elinor.Johnston-Shanahan
+  kaelyn: 'AZmLBcGV9XhZAwOqZV5s', // Kaelyn.Shanahan
+  bennett: 'AZmLBcGV9XhZAwOqZV5y', // Bennett.Becker
+  mable: 'AZlHQD20hY07UD0HNBs-', // Mable.Mann
+};
+interface TimestampSource {
+  '@timestamp'?: string;
+}
 
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
@@ -47,9 +59,7 @@ export const PrivMonUtils = (
   const config = getService('config');
   const isServerless = config.get('serverless');
   const roleScopedSupertest = isServerless ? getService('roleScopedSupertest') : null;
-
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
-
   const _callInitAsAdmin = async () => {
     // we have to use cookie auth to call this API because the init route creates an API key
     // and Kibana does not allow this with API key auth (which is the default in @serverless tests)
@@ -207,8 +217,9 @@ export const PrivMonUtils = (
 
   const _waitForPrivMonUsersToBeSynced = async (expectedLength = 1) => {
     let lastSeenLength = -1;
+    let stableCount = 0;
 
-    return retry.waitForWithTimeout('users to be synced', 90000, async () => {
+    return retry.waitForWithTimeout('users to be synced', 120000, async () => {
       const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} });
       const currentLength = res.body.length;
 
@@ -219,6 +230,16 @@ export const PrivMonUtils = (
         lastSeenLength = currentLength;
       }
 
+      if (currentLength === expectedLength) {
+        stableCount++;
+        if (stableCount >= 3) {
+          log.info(`PrivMon users sync check: synced, found ${currentLength} users`);
+          return true;
+        }
+      } else {
+        stableCount = 0;
+      }
+
       return currentLength >= expectedLength;
     });
   };
@@ -226,8 +247,7 @@ export const PrivMonUtils = (
   const scheduleEngineAndWaitForUserCount = async (expectedCount: number) => {
     log.info(`Scheduling engine and waiting for user count: ${expectedCount}`);
 
-    await scheduleMonitoringEngineNow({ ignoreConflict: true });
-    await waitForSyncTaskRun();
+    await runSync();
     await _waitForPrivMonUsersToBeSynced(expectedCount);
     const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} });
 
@@ -247,6 +267,50 @@ export const PrivMonUtils = (
     });
   }
 
+  const getTimestampByOrder = async (
+    indexPattern: string,
+    order: 'asc' | 'desc' = 'desc'
+  ): Promise<string | undefined> => {
+    const res = await es.search<TimestampSource>({
+      index: indexPattern,
+      size: 1,
+      sort: [{ '@timestamp': { order } }],
+      _source: ['@timestamp'],
+      query: { match_all: {} },
+      track_total_hits: false,
+    });
+
+    return res.hits.hits[0]?._source?.['@timestamp'];
+  };
+
+  const createSyncEvent = async ({
+    indexPattern,
+    timestamp,
+    eventType,
+  }: {
+    indexPattern: string;
+    timestamp: string;
+    eventType?: 'started' | 'completed';
+  }) => {
+    await es.index({
+      index: indexPattern,
+      refresh: true,
+      document: {
+        '@timestamp': timestamp,
+        event: {
+          action: eventType,
+          agent_id_status: 'verified',
+          dataset: 'entityanalytics_okta.entity',
+          kind: 'asset',
+          ...(eventType && {
+            [eventType === 'completed' ? 'end' : 'start']: timestamp,
+          }),
+          ingested: timestamp,
+        },
+      },
+    });
+  };
+
   const expectUserCount = async (n: number) => {
     const users = (await api.listPrivMonUsers({ query: {} })).body;
     expect(users.length).toBe(n);
@@ -260,6 +324,14 @@ export const PrivMonUtils = (
     );
     return integration?.integrations?.syncData?.lastUpdateProcessed as string | undefined;
   }
+
+  const getSyncData = async (indexPattern: string) => {
+    const res = await api.listEntitySources({ query: {} });
+    const integration = res.body.find(
+      (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
+    );
+    return integration?.integrations?.syncData;
+  };
 
   const setIntegrationUserPrivilege = async ({
     id,
@@ -330,6 +402,21 @@ export const PrivMonUtils = (
     });
   };
 
+  const deleteIntegrationUser = async ({
+    id,
+    indexPattern,
+  }: {
+    id: string;
+    indexPattern: string;
+  }) => {
+    await es.deleteByQuery({
+      index: indexPattern,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { ids: { values: [id] } },
+    });
+  };
+
   const updateIntegrationsUserTimeStamp = async ({
     id,
     timestamp,
@@ -352,26 +439,111 @@ export const PrivMonUtils = (
     });
   };
 
-  const dateOffsetFromNow = async ({ days, months }: { days?: number; months?: number }) => {
-    const d = new Date();
-    if (months) {
-      d.setMonth(d.getMonth() - months);
-    }
-    if (days) {
-      d.setDate(d.getDate() - days);
-    }
+  /**
+   * Creates a full sync window by generating `started` and `completed` sync events.
+   *
+   * Offsets are calculated **relative to the latest timestamp** in the index.
+   * Because `dateOffsetFrom()` subtracts positive values and adds negative ones:
+   * - A **positive offset** moves the timestamp *earlier* (in the past)
+   * - A **negative offset** moves the timestamp *later* (in the future)
+   *
+   * Example:
+   *   createFullSyncWindowFromOffsets({
+   *     startOffsetMinutes: 10,
+   *     completeOffsetMinutes: 5,
+   *   })
+   *   → creates:
+   *     - 'started' event at (latest - 10 minutes)
+   *     - 'completed' event at (latest - 5 minutes)
+   *   → resulting in a 5-minute window that ended 5 minutes ago.
+   *
+   * Example 2:
+   *   createFullSyncWindowFromOffsets({
+   *     startOffsetMinutes: -40,
+   *     completeOffsetMinutes: -45,
+   *   })
+   *   → creates a window entirely *after* the latest timestamp (future window)
+   *
+   * @param startOffsetMinutes Minutes offset from the latest timestamp for the sync 'started' event.
+   * @param completeOffsetMinutes Minutes offset from the latest timestamp for the sync 'completed' event.
+   */
+  const createFullSyncWindowFromOffsets = async ({
+    startOffsetMinutes = 1,
+    completeOffsetMinutes = -1,
+  }: {
+    startOffsetMinutes?: number;
+    completeOffsetMinutes?: number;
+  } = {}) => {
+    const latest = await integrationsSync.getTimestampByOrder(OKTA_INDEX, 'desc');
+
+    const startedAt = await integrationsSync.dateOffsetFrom({
+      from: latest,
+      minutes: startOffsetMinutes,
+    });
+
+    const completedAt = await integrationsSync.dateOffsetFrom({
+      from: latest,
+      minutes: completeOffsetMinutes,
+    });
+
+    await integrationsSync.createSyncEvent({
+      timestamp: startedAt,
+      indexPattern: OKTA_EVENTS_INDEX,
+      eventType: 'started',
+    });
+
+    await integrationsSync.createSyncEvent({
+      timestamp: completedAt,
+      indexPattern: OKTA_EVENTS_INDEX,
+      eventType: 'completed',
+    });
+  };
+
+  const dateOffsetFrom = async ({
+    from = new Date(),
+    days,
+    months,
+    minutes,
+  }: {
+    from?: Date | string;
+    days?: number;
+    months?: number;
+    minutes?: number;
+  }): Promise<string> => {
+    const d = new Date(from);
+    if (months) d.setMonth(d.getMonth() - months);
+    if (days) d.setDate(d.getDate() - days);
+    if (minutes) d.setMinutes(d.getMinutes() - minutes);
     return d.toISOString();
+  };
+
+  const cleanupEventsIndex = async () => {
+    await es.deleteByQuery({
+      index: OKTA_EVENTS_INDEX,
+      refresh: true,
+      conflicts: 'proceed',
+      query: { match_all: {} },
+    });
   };
 
   const integrationsSync = {
     setTimestamp,
+    getSyncData,
     getLastProcessedMarker,
     setIntegrationUserPrivilege,
     updateIntegrationsUsersWithRelativeTimestamps,
     updateIntegrationsUserTimeStamp,
     DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP,
-    dateOffsetFromNow,
+    OKTA_INDEX,
+    OKTA_EVENTS_INDEX,
+    OKTA_USER_IDS,
+    dateOffsetFrom,
+    createFullSyncWindowFromOffsets,
+    deleteIntegrationUser,
+    getTimestampByOrder,
+    createSyncEvent,
     expectUserCount,
+    cleanupEventsIndex,
   };
 
   return {

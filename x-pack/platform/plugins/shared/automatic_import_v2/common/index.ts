@@ -16,3 +16,5 @@ export type {
   UpdateAutoImportDataStreamRequestBody,
   CreateAutoImportDataStreamResponse,
 } from './model/api/data_streams/data_stream.gen';
+
+export type { DataStreamSamples } from './model/index_samples.gen';
