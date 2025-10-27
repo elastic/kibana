@@ -367,7 +367,6 @@ version: "1"
 name: "test"
 triggers:
   - type: scheduled
-    enabled: true
     with:
       |<-
 steps: []
@@ -390,7 +389,6 @@ version: "1"
 name: "test"
 triggers:
   - type: scheduled
-    enabled: true
     with:
       |<-
 steps: []
@@ -413,7 +411,6 @@ version: "1"
 name: "test"
 triggers:
   - type: scheduled
-    enabled: true
     with:
       |<-
 steps: []
@@ -436,7 +433,6 @@ version: "1"
 name: "test"
 triggers:
   - type: scheduled
-    enabled: true
     with:
       |<-
 steps: []
@@ -459,7 +455,6 @@ version: "1"
 name: "test"
 triggers:
   - type: scheduled
-    enabled: true
     with:
       rrule:
         freq: DAILY
@@ -488,7 +483,6 @@ version: "1"
 name: "test"
 triggers:
   - type: scheduled
-    enabled: true
     with:
       every: "5m"
       |<-
