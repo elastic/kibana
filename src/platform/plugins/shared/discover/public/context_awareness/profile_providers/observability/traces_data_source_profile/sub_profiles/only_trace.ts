@@ -35,7 +35,6 @@ export const createTracesOnlyTraceDataSourceProfileProvider = (
     if (!baseResult.isMatch) {
       return baseResult;
     }
-
     if (
       params.rootContext.solutionType !== SolutionType.Observability ||
       !tracesService.isTracesIndexPattern(extractIndexPatternFrom(params)) ||
@@ -45,7 +44,7 @@ export const createTracesOnlyTraceDataSourceProfileProvider = (
     }
 
     // Only enabled on ESQL for POC purposes
-    if ('language' in params.query) {
+    if (!('esql' in params.query)) {
       return { isMatch: false };
     }
 
