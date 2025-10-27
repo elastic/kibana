@@ -7,7 +7,7 @@ This directory contains **Workplace AI-specific** serverless test scenarios. For
 ## Test Structure
 
 ```
-x-pack/solutions/workplace_ai/test/serverless/
+x-pack/solutions/workplaceai/test/serverless/
 ├─ api_integration/
 │  ├─ configs/
 │  ├─ services/             # Workplace AI serverless API services
@@ -26,12 +26,12 @@ x-pack/solutions/workplace_ai/test/serverless/
 
 ```bash
 # API integration tests
-node scripts/functional_tests_server.js --config x-pack/solutions/workplace_ai/test/serverless/api_integration/configs/config.ts
-node scripts/functional_test_runner.js --config x-pack/solutions/workplace_ai/test/serverless/api_integration/configs/config.ts
+node scripts/functional_tests_server.js --config x-pack/solutions/workplaceai/test/serverless/api_integration/configs/config.ts
+node scripts/functional_test_runner.js --config x-pack/solutions/workplaceai/test/serverless/api_integration/configs/config.ts
 
 # Functional tests
-node scripts/functional_tests_server.js --config x-pack/solutions/workplace_ai/test/serverless/functional/configs/config.ts
-node scripts/functional_test_runner.js --config x-pack/solutions/workplace_ai/test/serverless/functional/configs/config.ts
+node scripts/functional_tests_server.js --config x-pack/solutions/workplaceai/test/serverless/functional/configs/config.ts
+node scripts/functional_test_runner.js --config x-pack/solutions/workplaceai/test/serverless/functional/configs/config.ts
 ```
 
 **Note**: The config paths shown above are examples. Replace it with the actual path to the config file for the test suite you want to run.
@@ -43,5 +43,5 @@ node scripts/functional_test_runner.js --config x-pack/solutions/workplace_ai/te
 TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="YOUR_CLOUD_HOST" \
 TEST_ES_URL="https://USERNAME:PASSWORD@ES_HOSTNAME:443" \
 TEST_KIBANA_URL="https://USERNAME:PASSWORD@KIBANA_HOSTNAME" \
-node scripts/functional_test_runner.js --config x-pack/solutions/workplace_ai/test/serverless/api_integration/configs/config.ts --exclude-tag=skipMKI
+node scripts/functional_test_runner.js --config x-pack/solutions/workplaceai/test/serverless/api_integration/configs/config.ts --exclude-tag=skipMKI
 ```
