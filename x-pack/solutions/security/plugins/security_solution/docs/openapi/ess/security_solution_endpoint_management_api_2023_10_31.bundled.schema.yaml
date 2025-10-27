@@ -397,6 +397,26 @@ paths:
       summary: Terminate a process
       tags:
         - Security Endpoint Management API
+  /api/endpoint/action/memory_dump:
+    post:
+      description: Generates memory dumps on the targeted host.
+      operationId: EndpointGetActionsDetails
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoryDumpRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+          description: Action request was successfully created
+      summary: Generate a memory dump from the host machine
+      tags:
+        - Security Endpoint Management API
   /api/endpoint/action/running_procs:
     post:
       description: Get a list of all processes running on an endpoint.
@@ -1677,6 +1697,74 @@ components:
         - scriptName
       title: Microsoft Defender Endpoint Run Script Parameters
       type: object
+    MemoryDumpRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            case_ids:
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - description: Dump the entire kernel memory.
+                  type: object
+                  properties:
+                    type:
+                      enum:
+                        - kernel
+                      type: string
+                - description: Dump the entire memory of a process using the PID.
+                  type: object
+                  properties:
+                    pid:
+                      type: number
+                    type:
+                      enum:
+                        - process
+                      type: string
+                - description: Dump the entire memory of a process using the entity ID.
+                  type: object
+                  properties:
+                    entity_id:
+                      type: string
+                    type:
+                      enum:
+                        - process
+                      type: string
+          required:
+            - parameters
     MetadataListResponse:
       example:
         data:
