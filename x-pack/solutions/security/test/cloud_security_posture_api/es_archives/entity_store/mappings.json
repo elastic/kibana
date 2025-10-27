@@ -1,6 +1,9 @@
 {
   "type": "index",
   "value": {
+    "aliases": {
+      "entities-generic-latest": {}
+    },
     "index": ".entities.v1.latest.security_generic_default",
     "mappings": {
       "_meta": {
@@ -636,6 +639,9 @@
 {
   "type": "index",
   "value": {
+    "aliases": {
+      "entities-generic-latest": {}
+    },
     "index": ".entities.v1.latest.security_generic_test",
     "mappings": {
       "_meta": {
