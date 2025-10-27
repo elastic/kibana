@@ -13,13 +13,17 @@ const Path = require('path');
 const { readPackageJson } = require('./parse_package_json');
 const { PLUGIN_CATEGORY } = require('./plugin_category_info');
 const { readPackageManifest } = require('./parse_package_manifest');
-const { KIBANA_SOLUTIONS } = require('@kbn/projects-solutions-groups');
 
 /**
  * Normalize a path for operating systems which use backslashes
  * @param {string} path
  */
 const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : path);
+
+/**
+ * @type {import('@kbn/projects-solutions-groups').KibanaSolution[]}
+ */
+const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'workplace_ai'];
 
 /**
  * Representation of a Package in the Kibana repository
@@ -237,7 +241,8 @@ class Package {
       // this conditional branch is the only one that applies in production
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
-      visibility = KIBANA_SOLUTIONS.find((solution) => solution === group)
+      // KIBANA_SOLUTIONS - List of Kibana solutions
+      visibility = Boolean(KIBANA_SOLUTIONS.find((solution) => solution === group))
         ? 'private'
         : this.manifest.visibility ?? 'shared';
     }
