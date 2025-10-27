@@ -274,7 +274,7 @@ describe('getCloudFleetServersHosts', () => {
       serverless: {
         projectId: undefined,
       },
-      getInTrial: () => false,
+      isInTrial: () => false,
     });
 
     expect(getCloudFleetServersHosts()).toBeUndefined();
@@ -293,7 +293,7 @@ describe('getCloudFleetServersHosts', () => {
       serverless: {
         projectId: undefined,
       },
-      getInTrial: () => false,
+      isInTrial: () => false,
     });
 
     expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
@@ -317,7 +317,7 @@ describe('getCloudFleetServersHosts', () => {
       serverless: {
         projectId: undefined,
       },
-      getInTrial: () => false,
+      isInTrial: () => false,
     });
 
     expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
@@ -359,7 +359,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       serverless: {
         projectId: undefined,
       },
-      getInTrial: () => false,
+      isInTrial: () => false,
     });
     mockedAppContextService.getConfig.mockReturnValue({
       agentless: { enabled: true },
@@ -406,7 +406,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       serverless: {
         projectId: undefined,
       },
-      getInTrial: () => false,
+      isInTrial: () => false,
     });
     mockedAppContextService.getConfig.mockReturnValue({
       agentless: { enabled: false },
@@ -455,7 +455,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       serverless: {
         projectId: undefined,
       },
-      getInTrial: () => false,
+      isInTrial: () => false,
     });
     mockedAppContextService.getConfig.mockReturnValue({
       agentless: { enabled: true },
@@ -488,7 +488,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       serverless: {
         projectId: undefined,
       },
-      getInTrial: () => false,
+      isInTrial: () => false,
     });
     mockedAppContextService.getConfig.mockReturnValue({
       agentless: { enabled: true },
@@ -520,7 +520,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       serverless: {
         projectId: undefined,
       },
-      getInTrial: () => false,
+      isInTrial: () => false,
     });
     mockedAppContextService.getConfig.mockReturnValue({
       agentless: { enabled: false },
@@ -552,7 +552,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       serverless: {
         projectId: 'project-123',
       },
-      getInTrial: () => false,
+      isInTrial: () => false,
     });
     mockedAppContextService.getConfig.mockReturnValue({
       agentless: { enabled: true },

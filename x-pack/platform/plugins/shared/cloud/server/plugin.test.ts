@@ -160,7 +160,7 @@ describe('Cloud Plugin', () => {
         });
         expect(setup.serverless.projectType).toBe('security');
       });
-      describe('exposes getInTrial', () => {
+      describe('exposes isInTrial', () => {
         it('is `true` when `serverless.in_trial` is set', () => {
           const { setup } = setupPlugin({
             serverless: {
@@ -169,7 +169,7 @@ describe('Cloud Plugin', () => {
             },
           });
 
-          expect(setup.getInTrial()).toBe(true);
+          expect(setup.isInTrial()).toBe(true);
         });
         it('is `false` when `serverless.in_trial` is set to false', () => {
           const { setup } = setupPlugin({
@@ -178,25 +178,25 @@ describe('Cloud Plugin', () => {
               in_trial: false,
             },
           });
-          expect(setup.getInTrial()).toBe(false);
+          expect(setup.isInTrial()).toBe(false);
         });
         it('is `true` when `trial_end_date` is set and is in the future', () => {
           const { setup } = setupPlugin({
             trial_end_date: new Date(Date.now() + 10000).toISOString(),
           });
 
-          expect(setup.getInTrial()).toBe(true);
+          expect(setup.isInTrial()).toBe(true);
         });
         it('is `false` when `trial_end_date` is set and is in the past', () => {
           const { setup } = setupPlugin({
             trial_end_date: new Date(Date.now() - 10000).toISOString(),
           });
 
-          expect(setup.getInTrial()).toBe(false);
+          expect(setup.isInTrial()).toBe(false);
         });
         it('is `false` when `serverless.in_trial` & `trial_end_date` are not set', () => {
           const { setup } = setupPlugin({});
-          expect(setup.getInTrial()).toBe(false);
+          expect(setup.isInTrial()).toBe(false);
         });
       });
     });
@@ -213,7 +213,7 @@ describe('Cloud Plugin', () => {
         expect(start.isCloudEnabled).toBe(true);
       });
 
-      describe('exposes getInTrial', () => {
+      describe('exposes isInTrial', () => {
         it('is `true` when `serverless.in_trial` is set', () => {
           const { start } = setupPlugin({
             serverless: {
@@ -222,7 +222,7 @@ describe('Cloud Plugin', () => {
             },
           });
 
-          expect(start.getInTrial()).toBe(true);
+          expect(start.isInTrial()).toBe(true);
         });
         it('is `false` when `serverless.in_trial` is set to false', () => {
           const { start } = setupPlugin({
@@ -231,25 +231,25 @@ describe('Cloud Plugin', () => {
               in_trial: false,
             },
           });
-          expect(start.getInTrial()).toBe(false);
+          expect(start.isInTrial()).toBe(false);
         });
         it('is `true` when `trial_end_date` is set and is in the future', () => {
           const { start } = setupPlugin({
             trial_end_date: new Date(Date.now() + 10000).toISOString(),
           });
 
-          expect(start.getInTrial()).toBe(true);
+          expect(start.isInTrial()).toBe(true);
         });
         it('is `false` when `trial_end_date` is set and is in the past', () => {
           const { start } = setupPlugin({
             trial_end_date: new Date(Date.now() - 10000).toISOString(),
           });
 
-          expect(start.getInTrial()).toBe(false);
+          expect(start.isInTrial()).toBe(false);
         });
         it('is `false` when `serverless.in_trial` & `trial_end_date` are not set', () => {
           const { start } = setupPlugin({});
-          expect(start.getInTrial()).toBe(false);
+          expect(start.isInTrial()).toBe(false);
         });
       });
     });

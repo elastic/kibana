@@ -169,7 +169,7 @@ export interface CloudSetup {
   /**
    * Method to retrieve if the organization is in trial.
    */
-  getInTrial: () => boolean;
+  isInTrial: () => boolean;
 }
 
 /**
@@ -195,7 +195,7 @@ export interface CloudStart {
   /**
    * Method to retrieve if the organization is in trial.
    */
-  getInTrial: () => boolean;
+  isInTrial: () => boolean;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
@@ -397,7 +397,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         productTier,
         organizationInTrial: this.config.serverless?.in_trial,
       },
-      getInTrial: this.isInTrial.bind(this),
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -405,7 +405,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     return {
       ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),
-      getInTrial: this.isInTrial.bind(this),
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 

@@ -197,7 +197,7 @@ describe('Navigation Plugin', () => {
       const { plugin, coreStart, unifiedSearch, cloud: cloudStart, spaces } = setup();
       const coreSetup = coreMock.createSetup();
       const cloudSetup = cloudMock.createSetup();
-      cloudSetup.getInTrial.mockReturnValue(true);
+      cloudSetup.isInTrial.mockReturnValue(true);
       plugin.setup(coreSetup, { cloud: cloudSetup });
 
       for (const solution of ['es', 'oblt', 'security']) {
@@ -214,7 +214,7 @@ describe('Navigation Plugin', () => {
       const { plugin, coreStart, unifiedSearch, cloud: cloudStart, spaces } = setup();
       const coreSetup = coreMock.createSetup();
       const cloudSetup = cloudMock.createSetup();
-      cloudSetup.getInTrial.mockReturnValue(true);
+      cloudSetup.isInTrial.mockReturnValue(true);
       plugin.setup(coreSetup, { cloud: cloudSetup });
 
       for (const solution of ['es', 'oblt', 'security']) {

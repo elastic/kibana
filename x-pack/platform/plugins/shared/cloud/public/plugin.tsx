@@ -119,7 +119,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
-      getInTrial: this.isInTrial.bind(this),
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -169,7 +169,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
-      getInTrial: this.isInTrial.bind(this),
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 

@@ -55,7 +55,7 @@ export class NavigationPublicPlugin
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
     registerNavigationEventTypes(core);
 
-    this.isCloudTrialUser = deps.cloud?.getInTrial() ?? false;
+    this.isCloudTrialUser = deps.cloud?.isInTrial() ?? false;
 
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(

@@ -67,7 +67,7 @@ export class ProductInterceptServerPlugin
       );
 
       // Register trial intercept only if the trial end date is set and not passed
-      if (cloud?.getInTrial()) {
+      if (cloud?.isInTrial()) {
         void intercepts.registerTriggerDefinition?.(
           `${TRIAL_TRIGGER_DEF_ID}:${this.buildVersion}`,
           () => {

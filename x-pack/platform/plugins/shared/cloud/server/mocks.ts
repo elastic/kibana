@@ -35,7 +35,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       productTier: undefined,
       orchestratorTarget: undefined,
     },
-    getInTrial: jest.fn().mockReturnValue(false),
+    isInTrial: jest.fn().mockReturnValue(false),
   };
 }
 
@@ -44,7 +44,7 @@ function createStartMock(): jest.Mocked<CloudStart> {
     isCloudEnabled: true,
     projectsUrl: 'projects-url',
     baseUrl: 'base-url',
-    getInTrial: jest.fn().mockReturnValue(false),
+    isInTrial: jest.fn().mockReturnValue(false),
   };
 }
 
