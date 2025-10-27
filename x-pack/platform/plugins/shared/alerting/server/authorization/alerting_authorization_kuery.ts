@@ -8,6 +8,7 @@
 import type { EsQueryConfig, KueryNode } from '@kbn/es-query';
 import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import { remove } from 'lodash';
 import type { AuthorizedRuleTypes } from './alerting_authorization';
 
 export enum AlertingAuthorizationFilterType {
@@ -101,31 +102,23 @@ export function asFiltersBySpaceId(
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {
   const MAX_LENGTH = 1000;
-  const errors = [];
-  const whitespaceRegex = /\s/;
-  const invalidCharsRegex = /[>=<*:()]/;
 
   if (value.length > MAX_LENGTH) {
     throw new Error(`Input exceeds maximum allowed length of ${MAX_LENGTH} characters`);
   }
 
-  if (whitespaceRegex.test(value)) {
-    errors.push('whitespace');
-  }
-
-  const foundInvalidChars = [
-    ...new Set(value.split('').filter((char) => invalidCharsRegex.test(char))),
-  ];
-  if (foundInvalidChars.length > 0) {
-    const charsDescription = `invalid character${
-      foundInvalidChars.length > 1 ? 's' : ''
-    }: ${foundInvalidChars.join(', ')}`;
-    errors.push(charsDescription);
-  }
-
-  if (errors.length > 0) {
+  const matches = value.match(/([>=<\*:()]|\s)/g);
+  if (matches) {
+    const invalid = Array.from(matches);
+    const whitespace = remove(invalid, (chars) => chars.trim().length === 0);
+    const errors = [];
+    if (whitespace.length) {
+      errors.push(`whitespace`);
+    }
+    if (invalid.length) {
+      errors.push(`invalid character${invalid.length > 1 ? `s` : ``}: ${invalid?.join(`, `)}`);
+    }
     throw new Error(`expected ${field} not to include ${errors.join(' and ')}`);
   }
-
   return true;
 }
