@@ -107,9 +107,9 @@ Use --verbose to see detailed logs for every operation.`,
                           Default: uses the same version as the stack (kibana). Version
                           can also be from 'SNAPSHOT'.
                           Examples: 8.6.0, 8.7.0-SNAPSHOT
-      --staging           Optional. Use production/released builds instead of snapshot builds (Default: false)
-                          When enabled, removes -SNAPSHOT suffix from version and queries artifacts API
-                          which returns production build URLs (artifacts.elastic.co) instead of snapshot URLs.
+      --staging           Optional. Use staging builds for testing upcoming releases (Default: false)
+                          IMPORTANT: Staging builds are currently hardcoded to version 9.2.0 build 65fce82d
+                          Downloads from staging.elastic.co for pre-release testing
                           Example: --staging --version 9.2.0
       --vmName            Optional. Custom prefix for VM names
                           Default: [username]-osquery-[index]-[random]
@@ -398,6 +398,10 @@ const runCli: RunFn = async ({ log, flags }) => {
           try {
             // Check if agent is already enrolled by looking for the vm-name tag
             const vmNameTag = `vm-name:${vm.name}`;
+            if (verbose) {
+              log.info(`${EMOJIS.CLOCK} Checking for existing agent with tag: ${vmNameTag}`);
+            }
+
             const existingAgents = await fetchFleetAgents(kbnClient, {
               perPage: 1,
               kuery: `tags : "${vmNameTag}"`,
@@ -412,6 +416,10 @@ const runCli: RunFn = async ({ log, flags }) => {
                 );
               }
               return { success: true as const, vm, policy, vmIndex, alreadyEnrolled: true };
+            }
+
+            if (verbose) {
+              log.info(`  No existing agent found with tag ${vmNameTag}`);
             }
 
             // Agent not enrolled, proceed with enrollment

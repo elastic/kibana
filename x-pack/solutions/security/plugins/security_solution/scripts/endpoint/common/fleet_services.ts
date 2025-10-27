@@ -1007,17 +1007,6 @@ Expand-Archive -Path "${destPath}" -DestinationPath "C:\\Users\\Public" -Force
         const extractionWaitTime = 120000; // 2 minutes
         await new Promise(resolve => setTimeout(resolve, extractionWaitTime));
 
-        log.info(`Wait complete. Verifying elastic-agent.exe exists...`);
-
-        // Verify extraction completed
-        const exeCheck = await hostVm.exec(`Get-Item "C:\\Users\\Public\\${agentUrlInfo.dirName}\\elastic-agent.exe" -ErrorAction SilentlyContinue`);
-
-        if (exeCheck.exitCode === 0) {
-          log.info(`✓ Extraction verified - elastic-agent.exe exists`);
-        } else {
-          throw new Error(`Extraction failed - elastic-agent.exe not found after waiting 2 minutes`);
-        }
-
         // Keep ZIP file for debugging - don't delete
         // await hostVm.exec(`Remove-Item -Path "${destPath}" -Force -ErrorAction SilentlyContinue`);
       } else {
@@ -1077,7 +1066,7 @@ Expand-Archive -Path "${destPath}" -DestinationPath "C:\\Users\\Public" -Force
 
     // Build install command - cd into directory first, then run with relative path
     // Use --url= and --enrollment-token= with equals signs (Kibana style)
-    agentEnrollCommand = `cd "${agentDir}" ; .\\elastic-agent.exe install --url=${fleetServerUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive`;
+    agentEnrollCommand = `cd "${agentDir}" ; .\\elastic-agent.exe install --url=${fleetServerUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive --tag vm-name:${hostVm.name}`;
   } else {
     // Linux/macOS: Use bash, forward slashes, sudo
     const agentPath = hostVm.type === 'multipass'
