@@ -1407,10 +1407,11 @@ describe('execute()', () => {
   });
 
   const LongString = ''.padEnd(1000, 'x');
+  const MaxEmailBodyLength = 100;
 
   test('message parameter is trimmed to the maximum allowed length', async () => {
     const mockedActionsConfig = actionsConfigMock.create();
-    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(100);
+    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(MaxEmailBodyLength);
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
       params: {
@@ -1424,15 +1425,19 @@ describe('execute()', () => {
 
     sendEmailMock.mockReset();
     await connectorType.executor(customExecutorOptions);
-    expect(sendEmailMock.mock.calls[0][1].content.message.length).toBeLessThan(LongString.length);
 
-    const expectedMessage = `connector some-id email parameter message length ${LongString.length} exceeds 100 bytes and has been trimmed`;
+    const additionalTextWeAdded = 223;
+    expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(
+      MaxEmailBodyLength + additionalTextWeAdded
+    );
+
+    const expectedMessage = `The connector some-id email parameter message length 1000 exceeds 100 bytes and has been trimmed. Use the xpack.actions.email.maximum_body_length setting to change the maximum size.`;
     expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
   });
 
   test('messageHTML parameter is trimmed to the maximum allowed length', async () => {
     const mockedActionsConfig = actionsConfigMock.create();
-    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(100);
+    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(MaxEmailBodyLength);
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
       source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
@@ -1448,11 +1453,13 @@ describe('execute()', () => {
 
     sendEmailMock.mockReset();
     await connectorType.executor(customExecutorOptions);
-    expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBeLessThan(
-      LongString.length
+
+    const additionalTextWeAdded = 187;
+    expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(
+      MaxEmailBodyLength + additionalTextWeAdded
     );
 
-    const expectedMessage = `connector some-id email parameter messageHTML length ${LongString.length} exceeds 100 bytes and has been trimmed`;
+    const expectedMessage = `The connector some-id email parameter messageHTML length 1000 exceeds 100 bytes and has been trimmed. Use the xpack.actions.email.maximum_body_length setting to change the maximum size.`;
     expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
   });
 });

@@ -503,8 +503,9 @@ function trimMessageIfRequired(
     return message;
   }
 
-  const warningMessage = `connector ${connectorId} email parameter ${paramName} length ${message.length} exceeds ${maxLength} bytes and has been trimmed`;
+  const warningMessage = `The connector ${connectorId} email parameter ${paramName} length ${message.length} exceeds ${maxLength} bytes and has been trimmed. Use the xpack.actions.email.maximum_body_length setting to change the maximum size.`;
   logger.warn(warningMessage);
+
   const trimmedMessage = message.slice(0, maxLength);
   return `${warningMessage}\n\n${trimmedMessage}`;
 }
