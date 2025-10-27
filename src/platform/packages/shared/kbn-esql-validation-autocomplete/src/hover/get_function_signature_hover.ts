@@ -23,8 +23,8 @@ export async function getFunctionSignatureHover(
   root: ESQLAstQueryExpression,
   callbacks?: ESQLCallbacks
 ): Promise<Array<{ value: string }>> {
-  // Use function name as cache key
-  const cacheKey = fnNode.name;
+  // Use function text as cache key
+  const cacheKey = fnNode.text;
   const cached = fromCache(cacheKey);
   if (cached) {
     return cached;
