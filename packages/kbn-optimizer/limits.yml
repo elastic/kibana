@@ -11,7 +11,7 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 153204
   charts: 40269
-  cloud: 9012
+  cloud: 9300
   cloudDataMigration: 5687
   cloudExperiments: 103984
   cloudFullStory: 4752
@@ -46,7 +46,7 @@ pageLoadAssetSize:
   embeddable: 18810
   embeddableAlertsTable: 6524
   embeddableEnhanced: 10332
-  enterpriseSearch: 37475
+  enterpriseSearch: 37956
   esql: 16289
   esqlDataGrid: 10209
   esUiShared: 101220
