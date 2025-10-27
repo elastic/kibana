@@ -18,7 +18,7 @@ import {
 } from '../../../mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Visualization } from '@kbn/lens-common';
-import { LayerPanels } from './config_panel';
+import { ConfigPanel } from './config_panel';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -80,7 +80,7 @@ describe('ConfigPanel', () => {
     const { visualizationMap, datasourceMap, ...rest } = props;
     return mountWithReduxStore(
       <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
-        <LayerPanels {...rest} />
+        <ConfigPanel {...rest} />
       </EditorFrameServiceProvider>,
       {
         preloadedState: {
