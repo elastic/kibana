@@ -11,7 +11,7 @@ import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { z } from '@kbn/zod';
 
-export type WorkflowJsonSchema = JsonSchema7Type & {
+type WorkflowJsonSchema = JsonSchema7Type & {
   $ref: '#/definitions/WorkflowSchema';
   $schema: 'http://json-schema.org/draft-07/schema#';
   definitions: {
