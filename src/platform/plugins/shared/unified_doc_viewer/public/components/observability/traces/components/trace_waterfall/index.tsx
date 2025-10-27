@@ -71,7 +71,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
 
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({
     indexPattern: 'traces*,remote_cluster:traces*', // TODO put the proper indexes, not hardcoded
-    tabId: 'unifiedDocViewerExploreTraceTab',
+    tabLabel: `Trace: ${traceId}`,
   });
   const link = generateDiscoverLink(createTraceContextWhereClause({ traceId }));
 

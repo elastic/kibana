@@ -19,8 +19,10 @@ export interface GenerateDiscoverLink {
 
 export function useGetGenerateDiscoverLink({
   indexPattern,
+  tabLabel,
 }: {
   indexPattern?: string | (string | undefined)[];
+  tabLabel?: string;
 }) {
   const {
     data,
@@ -74,6 +76,7 @@ export function useGetGenerateDiscoverLink({
       timeRange,
       filters: [],
       query: { language: 'kuery', esql },
+      ...(tabLabel && { tab: { id: 'new', label: tabLabel } }), // TODO update tests
     });
 
     return url;
