@@ -24,11 +24,7 @@ const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/st
 const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 const inferenceId = defaultInferenceEndpoints.ELSER;
-/**
- * NOTE: This scenario has been migrated from the legacy evaluation framework.
- * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/kb/index.spec.ts
- * Any changes should be made in both places until the legacy evaluation framework is removed.
- */
+const RETRIEVE_ELASTIC_DOC_FUNCTION_NAME = 'retrieve_elastic_doc';
 
 evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
   evaluate.beforeAll(async ({ knowledgeBaseClient }) => {
@@ -182,6 +178,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       }
     );
   });
+
   evaluate.describe('kb source isolation (Lens)', () => {
     evaluate.beforeEach(async ({ knowledgeBaseClient, kbnClient, log }) => {
       await knowledgeBaseClient.importEntries({
@@ -284,7 +281,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
                 output: {
                   criteria: [
                     'Uses context function response to retrieve information ONLY from the internal policy',
-                    'Does not use function retrieve_elastic_doc before answering the question about internal Lens policies.',
+                    `Does not use function ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME}  before answering the question about internal Lens policies.`,
                     'Mentions masking PII fields (e.g., *_email, *_user_id), use of company color palette, red for SLA/SLO breaches, and Data Health embeddable.',
                   ],
                 },
@@ -296,35 +293,30 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       }
     );
 
-    evaluate(
-      'context learnings exclude product docs for questions about internal Lens policies',
-      async ({ chatClient }) => {
-        const conversation = await chatClient.complete({
-          messages:
-            'What are our internal Lens rules for production dashboards (naming, required tags, allowed data views, and minimum refresh)?',
-        });
-
-        const contextResponseMessage = conversation.messages.find((m) => m.name === 'context');
-        if (!contextResponseMessage) {
-          throw new Error('Could not find the context function response');
-        }
-
-        const { learnings } = JSON.parse(contextResponseMessage.content!);
-
-        if (!Array.isArray(learnings) || learnings.length < 1) {
-          throw new Error('Expected at least 1 learning from context');
-        }
-
-        const topLearning = learnings[0];
-        if (!(topLearning.llmScore > 4)) {
-          throw new Error(`Expected top learning LLM score > 4, got ${topLearning.llmScore}`);
-        }
-        if (topLearning.id !== 'lens_internal_policy') {
-          throw new Error(
-            `Expected top learning id "lens_internal_policy", got "${topLearning.id}"`
-          );
-        }
-      }
-    );
+    evaluate('retrieves Kibana documentation', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'documentation: kibana lens',
+          description: 'Validates retrieve_elastic_doc usage for Kibana Lens guidance.',
+          examples: [
+            {
+              input: {
+                question:
+                  'What is Kibana Lens and how do I create a bar chart visualization with it?',
+              },
+              output: {
+                criteria: [
+                  'Does not use context function response to retrieve information about Kibana Lens',
+                  `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Kibana`,
+                  'Accurately explains what Kibana Lens is and provides steps for creating a visualization',
+                  `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
+                ],
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
   });
 });
