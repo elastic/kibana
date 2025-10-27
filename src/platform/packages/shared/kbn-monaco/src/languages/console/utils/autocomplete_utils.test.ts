@@ -114,6 +114,17 @@ describe('autocomplete_utils', () => {
     });
   });
 
+    it('detects query with /_query endpoint', () => {
+    const request = `POST /_query\n{\n  "query": "FROM logs | STATS `;
+    const result = checkForTripleQuotesAndEsqlQuery(request);
+    expect(result).toEqual({
+      insideTripleQuotes: false,
+      insideSingleQuotesEsqlQuery: true,
+      insideTripleQuotesEsqlQuery: false,
+      esqlQueryIndex: request.indexOf('"FROM logs ') + 1,
+    });
+  });
+
   it('detects triple quoted query after POST   _query?foo=bar with extra spaces', () => {
     const request = `POST   _query?foo=bar\n{\n  "query": """FROM metrics `;
     const result = checkForTripleQuotesAndEsqlQuery(request);
