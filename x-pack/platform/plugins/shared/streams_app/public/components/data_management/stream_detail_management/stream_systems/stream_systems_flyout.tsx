@@ -19,7 +19,6 @@ import {
   EuiText,
   EuiTitle,
   EuiLoadingElastic,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,7 +39,6 @@ export const StreamSystemsFlyout = ({
   closeFlyout: () => void;
   definition: Streams.all.Definition;
 }) => {
-  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamSystemsFlyoutTitle' });
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const { addSystemsToStream } = useStreamSystemsApi(definition);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -50,12 +48,11 @@ export const StreamSystemsFlyout = ({
       ownFocus
       onClose={closeFlyout}
       hideCloseButton
-      aria-labelledby={flyoutTitleId}
       size="l"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>
+          <h2>
             <FormattedMessage
               id="xpack.streams.streamSystemsFlyout.title"
               defaultMessage="Feature identification"

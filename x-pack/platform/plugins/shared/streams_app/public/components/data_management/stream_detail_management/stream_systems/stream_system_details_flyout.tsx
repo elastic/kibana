@@ -19,7 +19,6 @@ import {
   EuiMarkdownEditor,
   EuiSpacer,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,7 +39,7 @@ export const StreamSystemDetailsFlyout = ({
   closeFlyout: () => void;
   definition: Streams.all.Definition;
 }) => {
-  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamSystemDetailsFlyoutTitle' });
+
   const [system, setSystem] = React.useState<System | undefined>(initialSystem);
   const [value, setValue] = React.useState(initialSystem?.description ?? '');
   const { upsertQuery } = useStreamSystemsApi(definition);
@@ -67,12 +66,11 @@ export const StreamSystemDetailsFlyout = ({
       ownFocus
       onClose={closeFlyout}
       hideCloseButton
-      aria-labelledby={flyoutTitleId}
       size="m"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{system?.name ?? 'System details'}</h2>
+          <h2>{system?.name ?? 'System details'}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
