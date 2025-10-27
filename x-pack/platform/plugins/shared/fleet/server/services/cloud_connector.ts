@@ -20,6 +20,11 @@ import type {
   UpdateCloudConnectorRequest,
 } from '../../common/types/rest_spec/cloud_connector';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  TENANT_ID_VAR_NAME,
+  CLIENT_ID_VAR_NAME,
+  AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
+} from '../../common/constants/cloud_connector';
 
 import {
   CloudConnectorCreateError,
@@ -358,7 +363,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (!isAzureCloudConnectorVars(vars)) {
         logger.error('Package policy must contain valid Azure cloud connector variables');
         throw new CloudConnectorInvalidVarsError(
-          'Package policy must contain tenant_id, client_id, and azure_credentials_cloud_connector_id'
+          `Package policy must contain ${TENANT_ID_VAR_NAME}, ${CLIENT_ID_VAR_NAME}, and ${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID}`
         );
       }
 
@@ -368,21 +373,25 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const azureCredentials = vars.azure_credentials_cloud_connector_id;
 
       if (!tenantId?.value?.id || !tenantId?.value?.isSecretRef) {
-        logger.error('Package policy must contain valid tenant_id secret reference');
-        throw new CloudConnectorInvalidVarsError('tenant_id must be a valid secret reference');
+        logger.error(`Package policy must contain valid ${TENANT_ID_VAR_NAME} secret reference`);
+        throw new CloudConnectorInvalidVarsError(
+          `${TENANT_ID_VAR_NAME} must be a valid secret reference`
+        );
       }
 
       if (!clientId?.value?.id || !clientId?.value?.isSecretRef) {
-        logger.error('Package policy must contain valid client_id secret reference');
-        throw new CloudConnectorInvalidVarsError('client_id must be a valid secret reference');
+        logger.error(`Package policy must contain valid ${CLIENT_ID_VAR_NAME} secret reference`);
+        throw new CloudConnectorInvalidVarsError(
+          `${CLIENT_ID_VAR_NAME} must be a valid secret reference`
+        );
       }
 
       if (!azureCredentials?.value?.id || !azureCredentials?.value?.isSecretRef) {
         logger.error(
-          'Package policy must contain valid azure_credentials_cloud_connector_id secret reference'
+          `Package policy must contain valid ${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} secret reference`
         );
         throw new CloudConnectorInvalidVarsError(
-          'azure_credentials_cloud_connector_id must be a valid secret reference'
+          `${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} must be a valid secret reference`
         );
       }
     } else {

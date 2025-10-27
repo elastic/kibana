@@ -132,6 +132,12 @@ import {
 import {
   AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
   AWS_ROLE_ARN_VAR_NAME,
+  AZURE_TENANT_ID_VAR_NAME,
+  AZURE_CLIENT_ID_VAR_NAME,
+  AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
+  TENANT_ID_VAR_NAME,
+  CLIENT_ID_VAR_NAME,
+  AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
 } from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -314,11 +320,11 @@ const extractPackagePolicyVars = (
       throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
     }
 
-    const tenantId = vars.tenant_id || vars['azure.credentials.tenant_id'];
-    const clientId = vars.client_id || vars['azure.credentials.client_id'];
+    const tenantId = vars[TENANT_ID_VAR_NAME] || vars[AZURE_TENANT_ID_VAR_NAME];
+    const clientId = vars[CLIENT_ID_VAR_NAME] || vars[AZURE_CLIENT_ID_VAR_NAME];
     const azureCredentials =
-      vars.azure_credentials_cloud_connector_id ||
-      vars['azure.credentials.azure_credentials_cloud_connector_id'];
+      vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID] ||
+      vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME];
 
     if (tenantId && clientId && azureCredentials) {
       const azureCloudConnectorVars: AzureCloudConnectorVars = {
