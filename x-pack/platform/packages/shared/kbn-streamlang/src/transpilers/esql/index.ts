@@ -48,5 +48,3 @@ export const transpile = (
     commands: commandsArray,
   };
 };
-
-export * as reverse from './reverse';

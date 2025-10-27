@@ -233,7 +233,6 @@ export const useTopNavLinks = ({
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
 
   return useMemo(() => {
-    // Compute ES|QL materialization eligibility and navigation
     const getEsqlFromState = (): string | undefined => {
       const q = state.appState.getState()?.query;
       return q && typeof (q as any).esql === 'string' ? (q as { esql: string }).esql : undefined;
@@ -243,7 +242,6 @@ export const useTopNavLinks = ({
     const isSingleTarget = Boolean(indexPattern) && !indexPattern.includes(',') && !indexPattern.includes('*') && !indexPattern.includes(' ');
     const processors = esqlQuery ? esqlToStreamlangProcessors(esqlQuery) : [];
     const stepsV3 = esqlQuery ? esqlToStreamlangSteps(esqlQuery) : [];
-    // Temporary debug removed
     const hasMaterializable = stepsV3.length > 0 || processors.length > 0;
     const isEligible = Boolean(isEsqlMode && isSingleTarget && hasMaterializable);
 
@@ -254,7 +252,6 @@ export const useTopNavLinks = ({
       })
     );
 
-    // Add Streams materialize button in ES|QL mode
     if (isEsqlMode) {
       entries.push({
         id: 'materialize-streams',
@@ -268,8 +265,10 @@ export const useTopNavLinks = ({
         iconType: 'indexEdit',
         run: async () => {
           if (!isEligible) return;
+
           const locator = services.share?.url.locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
           if (!locator) return;
+
           const pageState: EnrichmentUrlState =
             stepsV3.length > 0
               ? { v: 3, dataSources: [], stepsToAppend: stepsV3 }
@@ -289,7 +288,7 @@ export const useTopNavLinks = ({
             name: indexPattern,
             managementTab: 'processing',
             pageState,
-          } as unknown as StreamsAppLocatorParams;
+          } as StreamsAppLocatorParams;
           const url = await locator.getRedirectUrl(params);
           services.application.navigateToUrl(url);
         },

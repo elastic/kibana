@@ -58,13 +58,8 @@ function unwrapAst(arg: ESQLAstItem | ESQLAstItem[] | undefined): ESQLAstItem | 
   return arg;
 }
 
-export interface ReverseTranslationOptions {
-  // reserved for future use
-}
-
 export function esqlToStreamlangProcessors(
-  query: string,
-  _opts: ReverseTranslationOptions = {}
+  query: string
 ): StreamlangProcessorDefinition[] {
   const { root } = Parser.parse(query);
   const processors: StreamlangProcessorDefinition[] = [];
@@ -150,7 +145,6 @@ export function esqlToStreamlangProcessors(
     }
 
     if (isName(command, 'rename')) {
-      // RENAME old AS new → rename
       for (const arg of command.args ?? []) {
         const asCall = asBinaryFunc(arg, 'as');
         if (!asCall) continue;
@@ -195,8 +189,7 @@ function asFunction(item: ESQLAstItem, name?: string): ESQLFunction | undefined 
  * Build Streamlang steps (preferable for URL schema v3) preserving WHERE gating semantics.
  */
 export function esqlToStreamlangSteps(
-  query: string,
-  _opts: ReverseTranslationOptions = {}
+  query: string
 ): StreamlangStep[] {
   const { root } = Parser.parse(query);
   const steps: StreamlangStep[] = [];

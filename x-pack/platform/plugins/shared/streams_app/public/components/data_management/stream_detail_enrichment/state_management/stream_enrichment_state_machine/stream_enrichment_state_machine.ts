@@ -22,6 +22,7 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { StreamlangStep } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -379,7 +380,7 @@ export const streamEnrichmentMachine = setup({
       entry: [
         { type: 'setupSteps' },
         { type: 'setupDataSources' },
-        // v3 first (steps), then v2 (processors), then strip and sync
+        // consume steps first (v3), then processors (v2 fallback), then strip and sync
         { type: 'consumeStepsFromUrl', params: () => ({}) },
         { type: 'stripStepsFromUrl', params: () => ({}) },
         { type: 'consumeProcessorsFromUrl', params: () => ({}) },
@@ -572,7 +573,6 @@ export const streamEnrichmentMachine = setup({
                       target: 'creating',
                       actions: [{ type: 'addCondition', params: ({ event }) => event }],
                     },
-                    // When URL-prepopulated steps change while we're idle, trigger simulation
                     'step.change': {
                       guard: 'hasSimulatePrivileges',
                       actions: [{ type: 'sendStepsEventToSimulator', params: ({ event }) => event }],
@@ -673,12 +673,12 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
     consumeProcessorsFromUrl: assign(({ context, spawn, self }) => {
       const urlState: EnrichmentUrlState = context.urlState;
-      if (urlState.v !== 2 || !urlState.processorsToAppend?.length) {
+      if (!('processorsToAppend' in urlState) || !urlState.processorsToAppend?.length) {
         return {};
       }
 
       const isWired = getStreamTypeFromDefinition(context.definition.stream) === 'wired';
-      const appendedRefs = urlState.processorsToAppend.map((processor) => {
+      const appendedRefs = urlState.processorsToAppend.map((processor: StreamlangProcessorDefinition) => {
         const converted = stepConverter.toUIDefinition(processor, { parentId: null });
         if (isActionBlock(converted) && converted.where) {
           converted.where = rewriteConditionFieldsToOtel(converted.where, isWired);
@@ -692,7 +692,7 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
     stripProcessorsFromUrl: assign(({ context }) => {
       const urlState: EnrichmentUrlState = context.urlState;
-      if (urlState.v !== 2 || !urlState.processorsToAppend) {
+      if (!('processorsToAppend' in urlState) || !urlState.processorsToAppend) {
         return {};
       }
       const { processorsToAppend: _drop, ...rest } = urlState;
@@ -703,11 +703,11 @@ export const createStreamEnrichmentMachineImplementations = ({
     // v3 steps consumption (where blocks + processors)
     consumeStepsFromUrl: assign(({ context, spawn, self }) => {
       const urlState: EnrichmentUrlState = context.urlState;
-      if (urlState.v !== 3 || !urlState.stepsToAppend?.length) {
+      if (!('stepsToAppend' in urlState) || !urlState.stepsToAppend?.length) {
         return {};
       }
       const isWired = getStreamTypeFromDefinition(context.definition.stream) === 'wired';
-      const appendRefs = urlState.stepsToAppend.map((step) => {
+      const appendRefs = urlState.stepsToAppend.map((step: StreamlangStep) => {
         const converted = stepConverter.toUIDefinition(step, { parentId: null });
         if (isActionBlock(converted) && converted.where) {
           converted.where = rewriteConditionFieldsToOtel(converted.where, isWired);
@@ -720,7 +720,7 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
     stripStepsFromUrl: assign(({ context }) => {
       const urlState: EnrichmentUrlState = context.urlState;
-      if (urlState.v !== 3 || !urlState.stepsToAppend) {
+      if (!('stepsToAppend' in urlState) || !urlState.stepsToAppend) {
         return {};
       }
       const { stepsToAppend: _drop, ...rest } = urlState;

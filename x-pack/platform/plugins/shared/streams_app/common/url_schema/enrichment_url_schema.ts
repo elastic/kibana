@@ -122,6 +122,7 @@ export interface EnrichmentUrlStateV3 {
   v: 3;
   dataSources: EnrichmentDataSource[];
   stepsToAppend?: StreamlangStep[];
+  processorsToAppend?: StreamlangProcessorDefinition[];
 }
 
 export type EnrichmentUrlState = EnrichmentUrlStateV1 | EnrichmentUrlStateV2 | EnrichmentUrlStateV3;
@@ -144,6 +145,7 @@ const enrichmentUrlSchemaV3 = z.object({
   v: z.literal(3),
   dataSources: z.array(enrichmentDataSourceSchema),
   stepsToAppend: streamlangStepsSchema.optional(),
+  processorsToAppend: z.array(streamlangProcessorSchema).optional(),
 }) satisfies z.Schema<EnrichmentUrlStateV3>;
 
 export const enrichmentUrlSchema = z.union([
