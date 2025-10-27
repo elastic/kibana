@@ -62,7 +62,7 @@ const CONTENT_TOO_LONG_ERROR_MESSAGE = i18n.translate(
   'responseOpsRuleForm.investigationGuide.editor.errorMessage',
   {
     defaultMessage:
-      'The Investigation Guide is too long. Please shorten it.\nCurrent length: {length}.\nMax length: {maxLength}.',
+      'The investigation guide is too long. Please shorten it.\nCurrent length: {length}.\nMax length: {maxLength}.',
     values: { length, maxLength: MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH },
   }
 );
