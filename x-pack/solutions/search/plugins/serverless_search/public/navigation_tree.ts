@@ -5,12 +5,21 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
-import agentsIcon from './assets/robot.svg';
-import playgroundIcon from './assets/playground.svg';
+
+const LazyIconAgents = lazy(() =>
+  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
+);
+
+const LazyIconPlayground = lazy(() =>
+  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
+    default: m.iconPlayground,
+  }))
+);
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
   defaultMessage: 'Elasticsearch',
@@ -90,7 +99,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             },
           },
           {
-            iconV2: agentsIcon, // Temp svg until we have icon in EUI
+            iconV2: LazyIconAgents, // Temp svg until we have icon in EUI
             link: 'agent_builder',
             withBadge: true,
             badgeTypeV2: 'techPreview',
@@ -137,7 +146,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 }),
                 link: 'searchPlayground' as AppDeepLinkId,
                 breadcrumbStatus: 'hidden' as 'hidden',
-                iconV2: playgroundIcon, // Temp svg until we have icon in EUI
+                iconV2: LazyIconPlayground, // Temp svg until we have icon in EUI
               }),
             ],
           },
