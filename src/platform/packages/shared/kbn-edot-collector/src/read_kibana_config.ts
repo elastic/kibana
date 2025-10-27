@@ -9,47 +9,46 @@
 
 import fs from 'fs';
 import yaml from 'js-yaml';
-import { getConfigurationFilePaths } from '@kbn/apm-config-loader/src/utils';
 import { pickBy, identity } from 'lodash';
+import { resolve } from 'path';
 
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
 
 /**
- * Reads Kibana configuration from kibana.yml and kibana.dev.yml files.
- * Prioritizes CLI arguments, then environment variables, then config files.
+ * Reads Kibana configuration from a single config file.
+ * Uses provided configPath or defaults to kibana.dev.yml.
+ * Environment variables override config file values.
  */
-export const readKibanaConfig = () => {
-  const configPaths = getConfigurationFilePaths(process.argv);
+export const readKibanaConfig = (
+  configPath?: string
+): { elasticsearch: { hosts: string; username: string; password: string } } => {
+  const configPathToUse = resolve(process.cwd(), configPath || 'config/kibana.dev.yml');
 
-  let loadedKibanaConfig = {};
-
-  // Load all config files in order
-  for (const configPath of configPaths) {
-    if (fs.existsSync(configPath)) {
-      const config = (yaml.load(fs.readFileSync(configPath, 'utf8')) || {}) as Record<string, any>;
-      loadedKibanaConfig = { ...loadedKibanaConfig, ...config };
-    }
+  let configValues = {};
+  if (fs.existsSync(configPathToUse)) {
+    const config = (yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {}) as Record<
+      string,
+      any
+    >;
+    configValues = config.elasticsearch || {};
   }
 
-  // Environment variables override config files
-  const cliEsCredentials = pickBy(
+  const envOverrides = pickBy(
     {
-      'elasticsearch.username': process.env.ELASTICSEARCH_USERNAME,
-      'elasticsearch.password': process.env.ELASTICSEARCH_PASSWORD,
-      'elasticsearch.hosts': process.env.ELASTICSEARCH_HOST,
+      hosts: process.env.ELASTICSEARCH_HOST,
+      username: process.env.ELASTICSEARCH_USERNAME,
+      password: process.env.ELASTICSEARCH_PASSWORD,
     },
     identity
-  ) as {
-    'elasticsearch.username'?: string;
-    'elasticsearch.password'?: string;
-    'elasticsearch.hosts'?: string;
+  );
+
+  const elasticsearchConfig = {
+    hosts: 'http://localhost:9200',
+    username: 'elastic',
+    password: 'changeme',
+    ...configValues,
+    ...envOverrides,
   };
 
-  return {
-    'elasticsearch.hosts': 'http://localhost:9200',
-    'elasticsearch.username': 'elastic',
-    'elasticsearch.password': 'changeme',
-    ...loadedKibanaConfig,
-    ...cliEsCredentials,
-  };
+  return { elasticsearch: elasticsearchConfig };
 };
