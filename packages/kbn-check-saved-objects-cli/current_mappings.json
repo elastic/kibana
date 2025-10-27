@@ -639,13 +639,13 @@
       },
       "observables": {
         "properties": {
+          "description": {
+            "type": "keyword"
+          },
           "typeKey": {
             "type": "keyword"
           },
           "value": {
-            "type": "keyword"
-          },
-          "description": {
             "type": "keyword"
           }
         },
@@ -1070,6 +1070,62 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "data_stream-config": {
+    "dynamic": false,
+    "properties": {
+      "created_by": {
+        "type": "keyword"
+      },
+      "data_stream_id": {
+        "type": "keyword"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "job_info": {
+        "properties": {
+          "job_id": {
+            "type": "keyword"
+          },
+          "job_type": {
+            "type": "keyword"
+          },
+          "status": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
+      "metadata": {
+        "properties": {
+          "created_at": {
+            "index": false,
+            "type": "date"
+          },
+          "sample_count": {
+            "index": false,
+            "type": "integer"
+          },
+          "version": {
+            "index": false,
+            "type": "keyword"
+          }
+        }
+      },
+      "result": {
+        "properties": {
+          "field_mapping": {
+            "index": false,
+            "type": "flattened"
+          },
+          "ingest_pipeline": {
+            "index": false,
+            "type": "text"
+          }
+        }
       }
     }
   },
@@ -2614,6 +2670,44 @@
       },
       "use_space_awareness_migration_status": {
         "index": false,
+        "type": "keyword"
+      }
+    }
+  },
+  "integration-config": {
+    "dynamic": false,
+    "properties": {
+      "created_by": {
+        "type": "keyword"
+      },
+      "data_stream_count": {
+        "type": "integer"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "properties": {
+          "created_at": {
+            "index": false,
+            "type": "date"
+          },
+          "description": {
+            "index": false,
+            "type": "text"
+          },
+          "title": {
+            "index": false,
+            "type": "keyword"
+          },
+          "version": {
+            "index": false,
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "status": {
         "type": "keyword"
       }
     }
