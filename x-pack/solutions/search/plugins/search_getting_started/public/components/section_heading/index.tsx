@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiIcon, EuiText } from 
 interface Props {
   title: string;
   icon: string;
-  description: string;
+  description?: string;
 }
 
 export const SearchGettingStartedSectionHeading = ({ title, icon, description }: Props) => {
@@ -30,11 +30,13 @@ export const SearchGettingStartedSectionHeading = ({ title, icon, description }:
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued" grow={false}>
-          <p>{description}</p>
-        </EuiText>
-      </EuiFlexItem>
+      {description && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" grow={false}>
+            <p>{description}</p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
