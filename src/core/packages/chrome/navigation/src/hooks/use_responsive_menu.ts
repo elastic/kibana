@@ -35,7 +35,7 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
 
   const visibleMenuItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
   const overflowMenuItems = useMemo(() => items.slice(visibleCount), [items, visibleCount]);
-  const stableHeightItems = useStableItemsReference(items);
+  const stableItemsReference = useStableItemsReference(items);
 
   const recalculateMenuLayout = useCallback(() => {
     if (!primaryMenuRef.current) return;
@@ -45,7 +45,7 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     const menuHeight = menu.clientHeight;
 
     // 1. Cache the heights of all children
-    cacheHeights(heightsCacheRef, menu, stableHeightItems);
+    cacheHeights(heightsCacheRef, menu, stableItemsReference);
 
     if (heightsCacheRef.current.length === 0) return;
 
@@ -58,13 +58,13 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
 
     // 3. Update the visible count if needed
     setVisibleCount(nextVisibleCount);
-  }, [stableHeightItems]);
+  }, [stableItemsReference]);
 
   const [scheduleRecalc, cancelRecalc] = useRafDebouncedCallback(recalculateMenuLayout);
 
   useLayoutEffect(() => {
     // Invalidate the cache when items change
-    setVisibleCount(stableHeightItems.length);
+    setVisibleCount(stableItemsReference.length);
     heightsCacheRef.current = [];
 
     const observer = new ResizeObserver(() => {
@@ -82,7 +82,7 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
       observer.disconnect();
       cancelRecalc();
     };
-  }, [isCollapsed, stableHeightItems, scheduleRecalc, cancelRecalc]);
+  }, [isCollapsed, stableItemsReference, scheduleRecalc, cancelRecalc]);
 
   return {
     primaryMenuRef,
