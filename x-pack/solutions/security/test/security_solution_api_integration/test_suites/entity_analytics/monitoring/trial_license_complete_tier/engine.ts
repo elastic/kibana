@@ -9,11 +9,7 @@ import expect from 'expect';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
-import {
-  disablePrivmonSetting,
-  enablePrivmonSetting,
-  toggleIntegrationsSyncFlag,
-} from '../../utils';
+import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
 import {
   PrivMonUtils,
   PlainIndexSyncUtils,
@@ -446,7 +442,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
         await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
-        await toggleIntegrationsSyncFlag(kibanaServer, true);
       });
 
       afterEach(async () => {
@@ -456,7 +451,6 @@ export default ({ getService }: FtrProviderContext) => {
         // delete the okta index
         await api.deleteMonitoringEngine({ query: { data: true } });
         await disablePrivmonSetting(kibanaServer);
-        await toggleIntegrationsSyncFlag(kibanaServer, false);
       });
 
       it('should sync integrations during update detection ', async () => {
