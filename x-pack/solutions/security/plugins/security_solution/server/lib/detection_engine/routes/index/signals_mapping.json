@@ -434,9 +434,6 @@
           },
           "reason": {
             "type": "keyword"
-          },
-          "attack_ids": {
-            "type": "keyword"
           }
         }
       }

@@ -24,6 +24,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Document } from '@langchain/core/documents';
 
+import { ALERT_ATTACK_IDS } from '@kbn/rule-data-utils';
 import { deduplicateAttackDiscoveries } from '../../../lib/attack_discovery/persistence/deduplication';
 import { reportAttackDiscoverySuccessTelemetry } from './report_attack_discovery_success_telemetry';
 import { handleGraphError } from '../public/post/helpers/handle_graph_error';
@@ -149,10 +150,10 @@ export const generateAndUpdateAttackDiscoveries = async ({
         },
         script: {
           source: `
-            if (ctx._source.attack_ids == null) {
-              ctx._source.attack_ids = [params.attack_id];
-            } else if (!ctx._source.attack_ids.contains(params.attack_id)) {
-              ctx._source.attack_ids.add(params.attack_id);
+            if (ctx._source['${ALERT_ATTACK_IDS}'] == null) {
+              ctx._source['${ALERT_ATTACK_IDS}'] = [params.attack_id];
+            } else if (!ctx._source['${ALERT_ATTACK_IDS}'].contains(params.attack_id)) {
+              ctx._source['${ALERT_ATTACK_IDS}'].add(params.attack_id);
             }
           `,
           lang: 'painless',

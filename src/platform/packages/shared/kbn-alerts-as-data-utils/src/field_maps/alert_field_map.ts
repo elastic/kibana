@@ -54,7 +54,6 @@ import {
   TAGS,
   ALERT_INTENDED_TIMESTAMP,
   ALERT_INDEX_PATTERN,
-  ALERT_ATTACK_IDS,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
@@ -301,11 +300,6 @@ export const alertFieldMap = {
   [ALERT_INDEX_PATTERN]: {
     type: 'keyword',
     array: false,
-    required: false,
-  },
-  [ALERT_ATTACK_IDS]: {
-    type: 'keyword',
-    array: true,
     required: false,
   },
 } as const;
