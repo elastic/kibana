@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
-import { ProcessorEvent } from '@kbn/apm-types-shared';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { ServicesResponse } from '../../../common/service_map/types';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
