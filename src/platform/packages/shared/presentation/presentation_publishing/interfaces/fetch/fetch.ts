@@ -63,13 +63,24 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     observables.query = api.parentApi.query$;
   }
 
-  if (apiPublishesTimeRange(api)) {
-    observables.timeRange = api.timeRange$;
-  } else if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
-    observables.timeRange = api.parentApi.timeRange$.pipe(filter(() => !hasLocalTimeRange(api)));
-    if (api.parentApi.timeslice$) {
-      observables.timeslice = api.parentApi.timeslice$.pipe(filter(() => !hasLocalTimeRange(api)));
-    }
+  observables.timeRange = combineLatest({
+    local: apiPublishesTimeRange(api) ? api.timeRange$ : of(undefined),
+    parent:
+      apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
+        ? api.parentApi.timeRange$
+        : of(undefined),
+  }).pipe(
+    map(({ local, parent }) => {
+      return local ?? parent;
+    })
+  );
+
+  if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi) && api.parentApi.timeslice$) {
+    observables.timeslice = api.parentApi.timeslice$.pipe(
+      map((timeslice) => {
+        return hasLocalTimeRange(api) ? undefined : timeslice;
+      })
+    );
   }
 
   return combineLatest(observables);
@@ -120,7 +131,6 @@ export function fetch$(api: unknown): Observable<FetchContext> {
         isReload: Boolean(reloadTimestamp),
       };
     })
-    // debounceTime(0)
   );
 }
 
