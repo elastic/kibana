@@ -12,7 +12,7 @@ import { EuiMarkdownEditor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types';
 
 interface Props {
   setRuleParams: (v: { investigation_guide: { blob: string } }) => void;
