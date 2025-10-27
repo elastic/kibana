@@ -30,7 +30,8 @@
     "@kbn/search-shared-ui",
     "@kbn/search-code-examples",
     "@kbn/search-api-keys-components",
-    "@kbn/doc-links",
+    "@kbn/react-query",
+    "@kbn/doc-links"
   ],
   "exclude": [
     "target/**/*"
