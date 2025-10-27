@@ -30,7 +30,9 @@ export function transformControlGroupOut(
     ignoreParentSettingsJSON ? JSON.parse(ignoreParentSettingsJSON) : undefined;
   if (legacyControlGroupOptions) {
     const ignoreFilters =
-      legacyControlGroupOptions.ignoreFilters || legacyControlGroupOptions.ignoreQuery;
+      controlGroupInput.chainingSystem === 'NONE' ||
+      legacyControlGroupOptions.ignoreFilters ||
+      legacyControlGroupOptions.ignoreQuery;
     controls = controls.reduce((prev, control) => {
       return [
         ...prev,
@@ -44,3 +46,4 @@ export function transformControlGroupOut(
   }
   return { controls };
 }
+``;
