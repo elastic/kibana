@@ -124,7 +124,11 @@ export function convertRemoveProcessorToESQL(processor: RemoveProcessor): ESQLAs
     // TODO: Once ESQL supports access to unmapped fields, we can make sure that "from" itself exists as well as column,
     // so we can drop <field>,<field>.* . Right now however, that would always almost fail if "from" doesn't exist, only subobject fields.
     const dropArgs = by_prefix
-      ? [Builder.expression.column(`${from}.*`)]
+      ? [
+          Builder.expression.column({
+            args: [Builder.identifier(`${from}.`), Builder.identifier('*')],
+          }),
+        ]
       : [Builder.expression.column(from)];
 
     const dropCommand = Builder.command({
