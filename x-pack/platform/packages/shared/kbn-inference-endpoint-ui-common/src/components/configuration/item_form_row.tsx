@@ -30,6 +30,7 @@ interface ItemFormRowProps {
   isInternalProvider?: boolean;
   isEdit?: boolean;
   isLoading: boolean;
+  reenterSecretsOnEdit?: boolean;
   setConfigEntry: (key: string, value: string | number | boolean | null) => void;
 }
 
@@ -40,6 +41,7 @@ export const ItemFormRow: React.FC<ItemFormRowProps> = ({
   isInternalProvider,
   isEdit,
   isLoading,
+  reenterSecretsOnEdit,
   setConfigEntry,
 }) => {
   const { description, isValid, key, label, required, sensitive, validationErrors } = configEntry;
@@ -107,10 +109,15 @@ export const ItemFormRow: React.FC<ItemFormRowProps> = ({
           isPreconfigured={isPreconfigured}
         />
       </EuiFormRow>
-      {sensitive ? (
+      {sensitive && reenterSecretsOnEdit ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut size="s" color="warning" title={LABELS.RE_ENTER_SECRETS(label)} />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            title={LABELS.RE_ENTER_SECRETS(label)}
+          />
         </>
       ) : null}
     </EuiFlexItem>
