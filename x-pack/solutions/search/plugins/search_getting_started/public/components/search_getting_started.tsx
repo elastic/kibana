@@ -34,7 +34,7 @@ export const SearchGettingStartedPage: React.FC = () => {
       <EuiPageTemplate.Section paddingSize="xl">
         <ConsoleTutorialsGroup />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section data-test-subj="search-getting-code-example">
+      <EuiPageTemplate.Section data-test-subj="gettingStartedCodeExamples">
         <SearchGettingStartedConnectCode />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section>
