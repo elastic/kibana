@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import { AxisSettingsPopover } from './axis_settings_popover';
+import { AxisSettingsPopover } from './axis_settings';
 import type {
   FramePublicAPI,
   DatasourcePublicAPI,

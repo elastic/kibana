@@ -5,4 +5,9 @@
  * 2.0.
  */
 
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
+
 export { Toolbar } from './toolbar';

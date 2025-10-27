@@ -24,6 +24,11 @@ import { PartitionAppearanceSettings } from './appearance_settings';
 import { PartitionTitlesAndTextSettings } from './titles_and_text_setttings';
 import { legendOptions, partitionLegendValues } from './legend_settings';
 
+/**
+ * TODO: Remove this file after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
+
 const PANEL_STYLE = {
   width: '500px',
 };

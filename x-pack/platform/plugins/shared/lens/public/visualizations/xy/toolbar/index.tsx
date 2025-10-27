@@ -17,7 +17,7 @@ import { LegendSize } from '@kbn/chart-expressions-common';
 import type { LegendSettingsProps } from '../../../shared_components/legend/legend_settings';
 import { hasBarSeries, isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
-import { AxisSettingsPopover } from './axis_settings_popover';
+import { AxisSettingsPopover } from './axis_settings';
 import { getAxesConfiguration, getXDomain } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { TextPopover } from './titles_and_text_popover';
@@ -41,6 +41,10 @@ export function updateLayer(
   };
 }
 
+/**
+ *  TODO: Delete this component after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
 export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<XYState>) {
   const { state, setState, frame } = props;
   const dataLayers = getDataLayers(state?.layers);

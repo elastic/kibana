@@ -188,6 +188,10 @@ export const popoverConfig = (
   }
 };
 
+/**
+ *  TODO: Delete this component after migration to flyout toolbar
+ * See: https://github.com/elastic/kibana/issues/240088
+ */
 export const AxisSettingsPopover: React.FC<AxisSettingsPopoverProps> = (props) => {
   const { layers, axis, isDisabled } = props;
 

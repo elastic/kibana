@@ -8,7 +8,7 @@
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import { AxisSettingsPopover } from './axis_settings_popover';
+import { AxisSettingsPopover, XyAxisSettings } from './axis_settings';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -54,39 +54,28 @@ describe('AxesSettingsPopover', () => {
     };
   });
 
-  const renderAxisSettingsPopover = async (props: Partial<Props> = {}) => {
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    const renderResult = render(<AxisSettingsPopover {...defaultProps} {...props} />);
-
-    await user.click(screen.getByRole('button'));
-
+  const renderAxisSettings = async (props: Partial<Props> = {}) => {
+    const renderResult = render(<XyAxisSettings {...defaultProps} {...props} />);
     return {
       renderer: renderResult,
       bounds: new EuiButtonGroupTestHarness('lnsXY_axisBounds_groups'),
     };
   };
 
-  it('should disable the popover if the isDisabled property is true', async () => {
-    await renderAxisSettingsPopover({ axis: 'x', isDisabled: true });
-    const toolbarBtn = screen.getByTestId('lnsBottomAxisButton');
-    expect(toolbarBtn).toBeDisabled();
-  });
-
   it('should have the gridlines switch on by default', async () => {
-    await renderAxisSettingsPopover();
+    await renderAxisSettings();
     const gridlinesSwitch = screen.getByTestId('lnsshowxAxisGridlines');
     expect(gridlinesSwitch).toBeChecked();
   });
 
   it('should have the gridlines switch off when gridlinesVisibilitySettings for this axes are false', async () => {
-    await renderAxisSettingsPopover({ areGridlinesVisible: false });
+    await renderAxisSettings({ areGridlinesVisible: false });
     const gridlinesSwitch = screen.getByTestId('lnsshowxAxisGridlines');
     expect(gridlinesSwitch).not.toBeChecked();
   });
 
   it('should have selected the horizontal option on the orientation group', async () => {
-    await renderAxisSettingsPopover({
+    await renderAxisSettings({
       useMultilayerTimeAxis: false,
       areTickLabelsVisible: true,
     });
@@ -96,7 +85,7 @@ describe('AxesSettingsPopover', () => {
   });
 
   it('should have called the setOrientation function on orientation button group change', async () => {
-    await renderAxisSettingsPopover({
+    await renderAxisSettings({
       useMultilayerTimeAxis: false,
       areTickLabelsVisible: true,
     });
@@ -107,7 +96,7 @@ describe('AxesSettingsPopover', () => {
   });
 
   it('should hide the orientation group if the tickLabels are set to not visible', async () => {
-    await renderAxisSettingsPopover({
+    await renderAxisSettings({
       useMultilayerTimeAxis: false,
       areTickLabelsVisible: false,
     });
@@ -116,7 +105,7 @@ describe('AxesSettingsPopover', () => {
   });
 
   it('hides the endzone visibility switch if no setter is passed in', async () => {
-    await renderAxisSettingsPopover({
+    await renderAxisSettings({
       endzonesVisible: true,
       setEndzoneVisibility: undefined,
     });
@@ -124,7 +113,7 @@ describe('AxesSettingsPopover', () => {
   });
 
   it('shows the endzone visibility switch if setter is passed in', async () => {
-    await renderAxisSettingsPopover({
+    await renderAxisSettings({
       endzonesVisible: true,
       setEndzoneVisibility: jest.fn(),
     });
@@ -132,7 +121,7 @@ describe('AxesSettingsPopover', () => {
   });
 
   it('hides the current time marker visibility flag if no setter is passed in', async () => {
-    await renderAxisSettingsPopover({
+    await renderAxisSettings({
       currentTimeMarkerVisible: true,
       setCurrentTimeMarkerVisibility: undefined,
     });
@@ -142,7 +131,7 @@ describe('AxesSettingsPopover', () => {
   it('shows the current time marker switch if setter is present', async () => {
     const setCurrentTimeMarkerVisibilityMock = jest.fn();
 
-    await renderAxisSettingsPopover({
+    await renderAxisSettings({
       currentTimeMarkerVisible: false,
       setCurrentTimeMarkerVisibility: setCurrentTimeMarkerVisibilityMock,
     });
@@ -156,14 +145,14 @@ describe('AxesSettingsPopover', () => {
 
   describe('axis extent', () => {
     it('hides the extent section if no extent is passed in', async () => {
-      const result = await renderAxisSettingsPopover({
+      const result = await renderAxisSettings({
         extent: undefined,
       });
       expect(result.bounds.self).not.toBeInTheDocument();
     });
 
     it('renders 3 options for metric bound inputs', async () => {
-      const result = await renderAxisSettingsPopover({
+      const result = await renderAxisSettings({
         axis: 'yLeft',
         extent: { mode: 'custom', lowerBound: 123, upperBound: 456 },
       });
@@ -171,7 +160,7 @@ describe('AxesSettingsPopover', () => {
     });
 
     it('renders nice values enabled by default if mode is full for metric', async () => {
-      await renderAxisSettingsPopover({
+      await renderAxisSettings({
         axis: 'yLeft',
         extent: { mode: 'full' },
       });
@@ -179,7 +168,7 @@ describe('AxesSettingsPopover', () => {
     });
 
     it('should render nice values if mode is custom for metric', async () => {
-      await renderAxisSettingsPopover({
+      await renderAxisSettings({
         axis: 'yLeft',
         extent: { mode: 'custom', lowerBound: 123, upperBound: 456 },
       });
@@ -187,7 +176,7 @@ describe('AxesSettingsPopover', () => {
     });
 
     it('renders metric (y) bound inputs if mode is custom', async () => {
-      await renderAxisSettingsPopover({
+      await renderAxisSettings({
         axis: 'yLeft',
         extent: { mode: 'custom', lowerBound: 123, upperBound: 456 },
       });
@@ -199,7 +188,7 @@ describe('AxesSettingsPopover', () => {
     });
 
     it('renders 2 options for bucket bound inputs', async () => {
-      const result = await renderAxisSettingsPopover({
+      const result = await renderAxisSettings({
         axis: 'x',
         extent: { mode: 'custom', lowerBound: 123, upperBound: 456 },
       });
@@ -207,7 +196,7 @@ describe('AxesSettingsPopover', () => {
     });
 
     it('should render nice values enabled by default if mode is dataBounds for bucket', async () => {
-      await renderAxisSettingsPopover({
+      await renderAxisSettings({
         axis: 'x',
         extent: { mode: 'dataBounds' },
       });
@@ -215,7 +204,7 @@ describe('AxesSettingsPopover', () => {
     });
 
     it('should renders nice values if mode is custom for bucket', async () => {
-      await renderAxisSettingsPopover({
+      await renderAxisSettings({
         axis: 'x',
         extent: { mode: 'custom', lowerBound: 123, upperBound: 456 },
       });
@@ -223,7 +212,7 @@ describe('AxesSettingsPopover', () => {
     });
 
     it('renders bucket (x) bound inputs if mode is custom', async () => {
-      await renderAxisSettingsPopover({
+      await renderAxisSettings({
         axis: 'x',
         extent: { mode: 'custom', lowerBound: 123, upperBound: 456 },
       });
@@ -237,7 +226,7 @@ describe('AxesSettingsPopover', () => {
     describe('Custom bounds', () => {
       describe('changing scales', () => {
         it('should update extents when scale changes from linear to log scale', async () => {
-          await renderAxisSettingsPopover({
+          await renderAxisSettings({
             axis: 'yLeft',
             scale: 'linear',
             dataBounds: { min: 0, max: 1000 },
@@ -258,7 +247,7 @@ describe('AxesSettingsPopover', () => {
         });
 
         it('should update extent and scale when scale changes from log to linear scale', async () => {
-          await renderAxisSettingsPopover({
+          await renderAxisSettings({
             axis: 'yLeft',
             scale: 'log',
             dataBounds: { min: 0, max: 1000 },
@@ -282,7 +271,7 @@ describe('AxesSettingsPopover', () => {
 
     describe('Changing bound type', () => {
       it('should reset y extent when mode changes from custom to full', async () => {
-        const result = await renderAxisSettingsPopover({
+        const result = await renderAxisSettings({
           axis: 'yLeft',
           scale: 'log',
           dataBounds: { min: 0, max: 1000 },
@@ -307,7 +296,7 @@ describe('AxesSettingsPopover', () => {
       });
 
       it('should reset y extent when mode changes from custom to data', async () => {
-        const result = await renderAxisSettingsPopover({
+        const result = await renderAxisSettings({
           layers: [
             {
               seriesType: 'line',
@@ -342,7 +331,7 @@ describe('AxesSettingsPopover', () => {
       });
 
       it('should reset x extent when mode changes from custom to data', async () => {
-        const result = await renderAxisSettingsPopover({
+        const result = await renderAxisSettings({
           axis: 'x',
           scale: 'linear',
           dataBounds: { min: 100, max: 1000 },

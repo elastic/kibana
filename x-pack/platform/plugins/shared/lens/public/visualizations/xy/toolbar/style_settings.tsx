@@ -25,7 +25,7 @@ import {
 } from '../../../shared_components';
 import { XyAppearanceSettings, getValueLabelDisableReason } from './visual_options_popover';
 import { XyTitlesAndTextSettings } from './titles_and_text_popover';
-import { XyAxisSettings, popoverConfig } from './axis_settings_popover';
+import { XyAxisSettings, popoverConfig } from './axis_settings';
 import type { AxisGroupConfiguration } from '../axes_configuration';
 import { getAxesConfiguration, getXDomain } from '../axes_configuration';
 import { getDataLayers } from '../visualization_helpers';
