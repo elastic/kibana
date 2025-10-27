@@ -21,7 +21,7 @@ import { IMAGE_CLICK_TRIGGER } from '../actions';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
 import type { FileImageMetadata } from '../imports';
 import { coreServices, filesService } from '../services/kibana_services';
-import { IMAGE_EMBEDDABLE_TYPE } from './constants';
+import { IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
 export const getImageEmbeddableFactory = ({
@@ -50,15 +50,13 @@ export const getImageEmbeddableFactory = ({
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       function serializeState() {
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-          dynamicActionsManager?.serializeState() ?? {};
         return {
           rawState: {
             ...titleManager.getLatestState(),
-            ...dynamicActionsState,
+            ...(dynamicActionsManager?.getLatestState() ?? {}),
             imageConfig: imageConfig$.getValue(),
           },
-          references: dynamicActionsReferences ?? [],
+          references: [],
         };
       }
 
@@ -68,7 +66,8 @@ export const getImageEmbeddableFactory = ({
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          imageConfig$.pipe(map(() => undefined))
+          imageConfig$.pipe(map(() => undefined)),
+          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : [])
         ),
         getComparators: () => {
           return {

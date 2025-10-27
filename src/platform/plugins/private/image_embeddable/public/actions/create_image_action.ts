@@ -17,7 +17,7 @@ import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
-} from '../image_embeddable/constants';
+} from '../../common/constants';
 import type { ImageConfig, ImageEmbeddableSerializedState } from '../image_embeddable/types';
 import { coreServices } from '../services/kibana_services';
 

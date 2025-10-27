@@ -23,7 +23,7 @@ import { setKibanaServices, untilPluginStartServicesReady } from './services/kib
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
-} from './image_embeddable/constants';
+} from '../common/constants';
 
 export interface ImageEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
