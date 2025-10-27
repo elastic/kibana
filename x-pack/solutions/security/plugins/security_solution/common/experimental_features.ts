@@ -92,6 +92,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoreAssistantToolDisabled: false,
 
   /**
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   */
+  entityDetailsHighlightsEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,

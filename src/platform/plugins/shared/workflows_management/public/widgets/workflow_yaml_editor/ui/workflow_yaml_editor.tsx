@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
+import type { z } from '@kbn/zod';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
@@ -27,10 +28,11 @@ import {
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
 } from './decorations';
+import { useCompletionProvider } from './hooks/use_completion_provider';
 import { StepActions } from './step_actions';
 import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { addDynamicConnectorsToCache, getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
@@ -41,7 +43,6 @@ import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
-import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
@@ -56,7 +57,9 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import type { StepInfo } from '../lib/store';
 import {
   selectFocusedStepInfo,
+  selectSchemaLoose,
   selectYamlDocument,
+  setConnectors,
   setCursorPosition,
   setStepExecutions,
   setYamlString,
@@ -173,6 +176,7 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
   const yamlDocument = useSelector(selectYamlDocument);
+  const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
   const yamlDocumentRef = useRef<YAML.Document | null>(null);
   yamlDocumentRef.current = yamlDocument || null;
 
@@ -181,6 +185,10 @@ export const WorkflowYAMLEditor = ({
 
   // Data
   const { data: connectorsData } = useAvailableConnectors();
+
+  useEffect(() => {
+    dispatch(setConnectors(connectorsData));
+  }, [connectorsData, dispatch]);
 
   useEffect(() => {
     if (connectorsData?.connectorTypes) {
@@ -217,14 +225,6 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchemaStrict, workflowSchemaUriStrict]);
 
-  // TODO: move the schema generation up to detail page or some wrapper component
-  const workflowYamlSchemaLoose = useMemo(() => {
-    if (!connectorsData?.connectorTypes) {
-      return getWorkflowZodSchemaLoose({});
-    }
-    return getWorkflowZodSchemaLoose(connectorsData.connectorTypes);
-  }, [connectorsData?.connectorTypes]);
-
   const { error: errorValidating, isLoading: isLoadingValidation } = useYamlValidation(
     editorRef.current
   );
@@ -232,7 +232,7 @@ export const WorkflowYAMLEditor = ({
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
     useMonacoMarkersChangedInterceptor({
       yamlDocumentRef,
-      workflowYamlSchema: workflowYamlSchemaLoose,
+      workflowYamlSchema: workflowYamlSchemaLoose as z.ZodSchema,
     });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -533,9 +533,7 @@ export const WorkflowYAMLEditor = ({
     closeActionsPopover();
   };
 
-  const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(workflowYamlSchemaLoose, connectorsData?.connectorTypes);
-  }, [workflowYamlSchemaLoose, connectorsData?.connectorTypes]);
+  const completionProvider = useCompletionProvider();
 
   useEffect(() => {
     // Monkey patching
