@@ -5,9 +5,25 @@
  * 2.0.
  */
 
-import { evaluate } from '../../src/evaluate';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type {
+  InstallationStatusResponse,
+  PerformInstallResponse,
+  UninstallResponse,
+} from '@kbn/product-doc-base-plugin/common/http_api/installation';
 import { testDocs } from '../../src/sample_data/knowledge_base';
+import { evaluate } from '../../src/evaluate';
 
+/**
+ * NOTE: This scenario has been migrated from the legacy evaluation framework.
+ * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/documentation/index.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
+const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
+const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
+const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
+const inferenceId = defaultInferenceEndpoints.ELSER;
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
  * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/kb/index.spec.ts
@@ -167,7 +183,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
     );
   });
   evaluate.describe('kb source isolation (Lens)', () => {
-    evaluate.beforeEach(async ({ knowledgeBaseClient }) => {
+    evaluate.beforeEach(async ({ knowledgeBaseClient, kbnClient, log }) => {
       await knowledgeBaseClient.importEntries({
         entries: [
           {
@@ -185,11 +201,54 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
           },
         ],
       });
+      const { data: status } = await kbnClient.request<InstallationStatusResponse>({
+        method: 'GET',
+        path: `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(
+          inferenceId
+        )}`,
+      });
+      if (status.overall === 'installed') {
+        log.success('Elastic documentation is already installed');
+      } else {
+        log.info('Installing Elastic documentation');
+        const { data: installResponse } = await kbnClient.request<PerformInstallResponse>({
+          method: 'POST',
+          path: ELASTIC_DOCS_INSTALL_ALL_API_PATH,
+          body: { inferenceId },
+        });
+
+        if (!installResponse.installed) {
+          log.error('Could not install Elastic documentation');
+          throw new Error('Documentation did not install successfully before running tests.');
+        }
+
+        const { data: installStatus } = await kbnClient.request<InstallationStatusResponse>({
+          method: 'GET',
+          path: `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(
+            inferenceId
+          )}`,
+        });
+        if (installStatus.overall !== 'installed') {
+          throw new Error('Documentation is not fully installed, cannot proceed with tests.');
+        }
+      }
     });
 
-    evaluate.afterEach(async ({ knowledgeBaseClient, conversationsClient }) => {
+    evaluate.afterEach(async ({ knowledgeBaseClient, conversationsClient, kbnClient, log }) => {
       await knowledgeBaseClient.clear();
       await conversationsClient.clear();
+      log.info('Uninstalling Elastic documentation');
+      const { data: uninstallResponse } = await kbnClient.request<UninstallResponse>({
+        method: 'POST',
+        path: ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,
+        body: { inferenceId },
+      });
+
+      if (uninstallResponse.success) {
+        log.success('Uninstalled Elastic documentation');
+      } else {
+        log.error('Could not uninstall Elastic documentation');
+      }
     });
 
     evaluate(
@@ -208,11 +267,10 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
                 },
                 output: {
                   criteria: [
-                    'Calls the "context" function to retrieve knowledge.',
                     'Retrieves the internal policy entry (id "lens_internal_policy").',
                     'Mentions naming format <team>::<service>::<purpose>, required tags (owner, env, data_domain, pii_level, retention_days).',
                     'Mentions allowed data views ("acme-*", "metrics-acme-*", "logs-acme-*"), default time 24h, and refresh ≥ 30s.',
-                    'Does NOT include product usage instructions.',
+                    'Does not use function retrieve_elastic_doc before answering the question about internal Lens policies.',
                     'Does not hallucinate details that are not present in the internal policy.',
                   ],
                 },
@@ -225,7 +283,8 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
                 },
                 output: {
                   criteria: [
-                    'Uses context function response to pull ONLY from the internal policy.',
+                    'Uses context function response to retrieve information ONLY from the internal policy',
+                    'Does not use function retrieve_elastic_doc before answering the question about internal Lens policies.',
                     'Mentions masking PII fields (e.g., *_email, *_user_id), use of company color palette, red for SLA/SLO breaches, and Data Health embeddable.',
                   ],
                 },
@@ -238,7 +297,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
     );
 
     evaluate(
-      'context learnings exclude product docs for internal question',
+      'context learnings exclude product docs for questions about internal Lens policies',
       async ({ chatClient }) => {
         const conversation = await chatClient.complete({
           messages:
@@ -256,12 +315,14 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
           throw new Error('Expected at least 1 learning from context');
         }
 
-        const top = learnings[0];
-        if (!(top.llmScore > 4)) {
-          throw new Error(`Expected top learning LLM score > 4, got ${top.llmScore}`);
+        const topLearning = learnings[0];
+        if (!(topLearning.llmScore > 4)) {
+          throw new Error(`Expected top learning LLM score > 4, got ${topLearning.llmScore}`);
         }
-        if (top.id !== 'lens_internal_policy') {
-          throw new Error(`Expected top learning id "lens_internal_policy", got "${top.id}"`);
+        if (topLearning.id !== 'lens_internal_policy') {
+          throw new Error(
+            `Expected top learning id "lens_internal_policy", got "${topLearning.id}"`
+          );
         }
       }
     );
