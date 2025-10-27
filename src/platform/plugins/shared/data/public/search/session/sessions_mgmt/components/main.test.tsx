@@ -14,7 +14,6 @@ import { act, render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SessionsClient } from '../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
-import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -63,7 +62,6 @@ const setup = async () => {
           api={api}
           http={mockCoreSetup.http}
           timezone="UTC"
-          documentation={new AsyncSearchIntroDocumentation(docLinks)}
           config={mockConfig}
           kibanaVersion={'8.0.0'}
           searchUsageCollector={mockSearchUsageCollector}
