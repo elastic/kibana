@@ -71,10 +71,12 @@ export async function createFailureIssue(
       '|-------|-------|',
       `| Test ID | ${scoutFailure.id} |`,
       `| Target | ${scoutFailure.target} |`,
+      `| Duration | ${(scoutFailure.duration / 1000).toFixed(2) + 's'} |`,
       `| Location | ${scoutFailure.location} |`,
       scoutFailure.kibanaModule
         ? `| Kibana Module | ${scoutFailure.kibanaModule.id} (${scoutFailure.kibanaModule.type}) |`
         : '| Kibana Module | N/A |',
+      `| Code Owners | ${scoutFailure.owners} |`,
     ];
 
     bodyContent.splice(2, 0, '', '**Scout Test Details:**', '', ...scoutDetailsTable, '');
@@ -86,7 +88,6 @@ export async function createFailureIssue(
       );
 
       if (hasScreenshots) {
-        bodyContent.push('**Screenshots:**', '');
         bodyContent.push(
           'Failure screenshots are available in the Buildkite HTML report and artifacts.'
         );

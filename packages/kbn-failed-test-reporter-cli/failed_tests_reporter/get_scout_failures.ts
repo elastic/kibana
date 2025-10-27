@@ -13,10 +13,11 @@ import type { TestFailure } from './get_failures';
 
 // Extended TestFailure type for Scout failures
 export interface ScoutTestFailureExtended extends TestFailure {
-  id?: string;
-  target?: string;
-  location?: string;
-  duration?: number;
+  id: string;
+  target: string;
+  location: string;
+  duration: number;
+  owners: string;
   file?: string;
   kibanaModule?: {
     id: string;
