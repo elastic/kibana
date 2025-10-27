@@ -384,18 +384,20 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           });
 
-          it('Can find special character matches on rule name', async () => {
+          it('returns special character matches on rule name', async () => {
+            await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({ rule_id: 'rule-1', name: 'Rule name without backslash' })
+            );
             const expectedRule = await createRule(
               supertest,
               log,
-              getCustomQueryRuleParams({
-                rule_id: 'rule-1',
-                name: 'Rule name with a semi:colon',
-              })
+              getCustomQueryRuleParams({ rule_id: 'rule-2', name: 'Rule name with backslash(\\)' })
             );
 
             const body = await getCoverageOverview(supertest, {
-              search_term: 'semi:colon',
+              search_term: 'backslash(\\)',
             });
 
             expect(body).to.eql({
@@ -404,7 +406,7 @@ export default ({ getService }: FtrProviderContext): void => {
               rules_data: {
                 [expectedRule.id]: {
                   activity: 'disabled',
-                  name: 'Rule name with a semi:colon',
+                  name: 'Rule name with backslash(\\)',
                 },
               },
             });

@@ -75,12 +75,16 @@ export function fullyEscapeKQLStringParam(value = ''): string {
 }
 
 const SPECIAL_KQL_CHARACTERS = '\\(){}:<>"*';
+const SPECIAL_KQL_CHARACTERS_REGEX = new RegExp(
+  `[${SPECIAL_KQL_CHARACTERS.split('').join('\\')}]`,
+  'g'
+);
 
-const escapeSpecialCharacters = (val: string) =>
-  val.replace(new RegExp(`[${SPECIAL_KQL_CHARACTERS.split('').join('\\')}]`, 'g'), '\\$&');
+const escapeSpecialKQLCharacters = (val: string) =>
+  val.replace(SPECIAL_KQL_CHARACTERS_REGEX, '\\$&');
 
 const simplifyWhitespace = (val: string) => val.replace(/\s+/g, ' ');
 
 const trim = (val: string) => val.trim();
 
-const fullyEscapeStringValue = flow(escapeSpecialCharacters, simplifyWhitespace, trim);
+const fullyEscapeStringValue = flow(escapeSpecialKQLCharacters, simplifyWhitespace, trim);
