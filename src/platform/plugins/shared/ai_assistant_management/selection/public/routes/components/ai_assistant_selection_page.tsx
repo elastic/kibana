@@ -94,7 +94,6 @@ export function AiAssistantSelectionPage() {
                     <EuiCallOut
                       announceOnMount
                       iconType="warning"
-                      announceOnMount
                       data-test-subj="pluginsAiAssistantSelectionPageObservabilityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledCallOutLabel',
@@ -183,7 +182,6 @@ export function AiAssistantSelectionPage() {
                     <EuiCallOut
                       announceOnMount
                       iconType="warning"
-                      announceOnMount
                       data-test-subj="pluginsAiAssistantSelectionPageSecurityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',
