@@ -7,8 +7,10 @@
 
 import { appendProcessorConfig } from './configs/append';
 import { renameProcessorConfig } from './configs/rename';
+import { removeByPrefixProcessorConfig } from './configs/remove_by_prefix';
 
 export const configDrivenProcessors = {
   rename: renameProcessorConfig,
   append: appendProcessorConfig,
+  remove_by_prefix: removeByPrefixProcessorConfig,
 };

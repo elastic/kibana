@@ -20,6 +20,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   set: { to: 'field', where: 'if' },
   append: { to: 'field', where: 'if' },
   convert: { from: 'field', to: 'target_field', where: 'if' },
+  remove_by_prefix: { field: 'fields' },
   manual_ingest_pipeline: { where: 'if' },
 };
 
@@ -41,8 +42,48 @@ export const applyPreProcessing = (
   action: StreamlangProcessorDefinition['action'],
   processorWithRenames: IngestPipelineProcessor
 ): IngestProcessorContainer[] => {
-  // Placeholder for future pre-processing logic
-  // Currently returns processor as-is without any template escaping
+  // Special handling for remove_by_prefix: convert to script processor
+  if (action === 'remove_by_prefix') {
+    const { fields, ignore_missing: ignoreMissing = false, ...rest } = processorWithRenames as any;
+    const fieldArray = Array.isArray(fields) ? fields : [fields];
+
+    // Build Painless script to remove field and all nested fields (field.*)
+    // This handles both subobjects and flattened fields
+    const removeStatements = fieldArray
+      .map((field: string) => {
+        const checkMissing = ignoreMissing ? `if (ctx.containsKey('${field}')) { ` : '';
+        const closeMissing = ignoreMissing ? ' }' : '';
+
+        // Remove the field itself
+        let script = `${checkMissing}ctx.remove('${field}');${closeMissing}`;
+
+        // For flattened fields, remove all keys that start with the prefix
+        script += `
+      List keysToRemove = new ArrayList();
+      for (key in ctx.keySet()) {
+        if (key.startsWith('${field}.')) {
+          keysToRemove.add(key);
+        }
+      }
+      for (key in keysToRemove) {
+        ctx.remove(key);
+      }`;
+
+        return script;
+      })
+      .join('\n');
+
+    return [
+      {
+        script: {
+          ...rest,
+          source: removeStatements,
+        },
+      },
+    ];
+  }
+
+  // Default: return processor as-is
   return [
     {
       [action]: { ...processorWithRenames },
