@@ -46,16 +46,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
-   * Space awareness for Elastic Defend management.
-   * Feature depends on Fleet's corresponding features also being enabled:
-   * - `subfeaturePrivileges`
-   * - `useSpaceAwareness`
-   * and Fleet must set it runtime mode to spaces by calling the following API:
-   * - `POST /internal/fleet/enable_space_awareness`
-   */
-  endpointManagementSpaceAwarenessEnabled: true,
-
-  /**
    * Disables new notes
    */
   securitySolutionNotesDisabled: false,
@@ -94,6 +84,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
+
+  /**
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   */
+  entityDetailsHighlightsEnabled: false,
 
   /**
    * disables ES|QL rules

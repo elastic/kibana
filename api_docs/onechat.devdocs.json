@@ -129,7 +129,13 @@
               "\nRegister a built-in tool to be available in onechat."
             ],
             "signature": [
-              "<RunInput extends Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>>(tool: ",
+              "<RunInput extends ",
+              "ZodObject",
+              "<any, ",
+              "UnknownKeysParam",
+              ", ",
+              "ZodTypeAny",
+              ", { [x: string]: any; }, { [x: string]: any; }>>(tool: ",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
