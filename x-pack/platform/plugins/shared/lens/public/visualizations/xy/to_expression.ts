@@ -40,6 +40,7 @@ import {
 } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
 import type {
   State as XYState,
   YConfig,
@@ -50,7 +51,6 @@ import type {
   ValidXYDataLayerConfig,
   XYLayerConfig,
 } from './types';
-import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';

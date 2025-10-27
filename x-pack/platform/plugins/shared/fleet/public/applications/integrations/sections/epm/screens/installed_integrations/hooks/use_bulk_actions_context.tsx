@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useQueries, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQueryClient } from '@kbn/react-query';
 
 import {
   sendGetBulkRollbackInfoPackagesForRq,
