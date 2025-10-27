@@ -91,7 +91,6 @@ export interface GroupingArgs<T> {
     event: string | string[],
     count?: number | undefined
   ) => void;
-  multiValueFields?: string[];
 }
 
 /**
@@ -122,7 +121,6 @@ export const useGrouping = <T,>({
   tracker,
   title,
   onOpenTracker,
-  multiValueFields,
 }: GroupingArgs<T>): UseGrouping<T> => {
   const [groupingState, dispatch] = useReducer(
     groupsReducerWithStorage,
@@ -174,10 +172,9 @@ export const useGrouping = <T,>({
           groupSelector={groupSelector}
           groupingId={groupingId}
           tracker={tracker}
-          multiValueFields={multiValueFields}
         />
       ),
-    [componentProps, groupSelector, groupingId, tracker, multiValueFields]
+    [componentProps, groupSelector, groupingId, tracker]
   );
 
   return useMemo(
