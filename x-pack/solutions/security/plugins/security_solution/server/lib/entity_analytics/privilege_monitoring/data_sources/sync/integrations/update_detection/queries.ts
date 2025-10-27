@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { memoize } from 'lodash';
+import hash from 'object-hash';
 import type {
   Matcher,
   MonitoringEntitySource,
@@ -75,7 +76,7 @@ export const buildPrivilegedSearchBody = (
   pageSize: number = 100
 ): Omit<estypes.SearchRequest, 'index'> => {
   // this will get called multiple times with the same matchers during pagination
-  const script = memoize(buildMatcherScript)(matchers);
+  const script = memoize(buildMatcherScript, (v) => hash(v))(matchers);
   return {
     size: 0,
     query: {
