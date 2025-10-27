@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider/use_metrics_experience_client';
+import { useQuery } from '@kbn/react-query';
+import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider';
 
 export const useDimensionsQuery = (params: {
   dimensions: string[];
