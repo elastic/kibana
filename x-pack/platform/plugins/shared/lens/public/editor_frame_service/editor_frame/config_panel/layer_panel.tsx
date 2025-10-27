@@ -91,8 +91,6 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
-  const isSaveable = useLensSelector((state) => state.lens.isSaveable);
-
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const dateRange = useLensSelector(selectResolvedDateRange);

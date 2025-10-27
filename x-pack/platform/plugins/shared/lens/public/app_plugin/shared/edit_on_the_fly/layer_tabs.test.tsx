@@ -331,4 +331,151 @@ describe('LayerTabs', () => {
       );
     });
   });
+
+  describe('layer reset and remove', () => {
+    it('should show layer actions menu when single layer', async () => {
+      const datasourceMap = mockDatasourceMap();
+      const visualizationMap = mockVisualizationMap();
+
+      // Set up visualization to return a single layer
+      visualizationMap.testVis.getLayerIds = jest.fn(() => ['layer1']);
+      visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+        groups: [
+          {
+            layerId: 'layer1',
+            groupId: 'a',
+            groupLabel: 'A',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'mockVisA',
+          },
+        ],
+      }));
+
+      const props = getDefaultProps({ visualizationMap, datasourceMap });
+
+      const { instance } = await prepareAndMountComponent(props);
+
+      // The tab action button should exist
+      expect(instance.find('[data-test-subj="lnsLayerActions"]').exists()).toBe(true);
+
+      // Click the tab action button to open the menu
+      act(() => {
+        instance.find('button[aria-label="Layer actions"]').simulate('click');
+      });
+      instance.update();
+
+      // The layer actions menu should exist (contains reset/remove buttons)
+      expect(instance.find('[data-test-subj="lnsLayerActionsMenu"]').exists()).toBe(true);
+
+      // The reset action should exist
+      expect(instance.find('button[title="Clear layer"]').exists()).toBe(true);
+    });
+
+    it('should show layer actions menu when multiple layers', async () => {
+      const datasourceMap = mockDatasourceMap();
+      const visualizationMap = mockVisualizationMap();
+
+      // Mock multiple layers
+      visualizationMap.testVis.getLayerIds = jest.fn(() => ['layer1', 'layer2']);
+      visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+        groups: [
+          {
+            layerId: 'layer1',
+            groupId: 'a',
+            groupLabel: 'A',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'mockVisA',
+          },
+        ],
+      }));
+
+      const props = getDefaultProps({ visualizationMap, datasourceMap });
+
+      const { instance } = await prepareAndMountComponent(props, {
+        preloadedState: {
+          datasourceStates: {
+            testDatasource: {
+              isLoading: false,
+              state: 'state',
+            },
+          },
+          activeDatasourceId: 'testDatasource',
+          visualization: {
+            activeId: 'testVis',
+            state: 'state',
+            selectedLayerId: 'layer1',
+          },
+          query: undefined,
+        },
+      });
+
+      // The tab action button should exist
+      expect(instance.find('[data-test-subj="lnsLayerActions"]').exists()).toBe(true);
+
+      // Click the tab action button to open the menu
+      act(() => {
+        instance.find('button[aria-label="Layer actions"]').first().simulate('click');
+      });
+      instance.update();
+
+      // The layer actions menu should exist (contains reset/remove buttons)
+      expect(instance.find('[data-test-subj="lnsLayerActionsMenu"]').exists()).toBe(true);
+
+      // The delete action should exist
+      expect(instance.find('button[title="Delete layer"]').exists()).toBe(true);
+    });
+
+    it('should call the clear callback when resetting layer', async () => {
+      const datasourceMap = mockDatasourceMap();
+      const visualizationMap = mockVisualizationMap();
+
+      // Set up visualization to return a single layer
+      visualizationMap.testVis.getLayerIds = jest.fn(() => ['layer1']);
+      visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+        groups: [
+          {
+            layerId: 'layer1',
+            groupId: 'a',
+            groupLabel: 'A',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'mockVisA',
+          },
+        ],
+      }));
+
+      const props = getDefaultProps({ visualizationMap, datasourceMap });
+
+      const { instance, lensStore } = await prepareAndMountComponent(props);
+
+      // Click the tab action button to open the menu
+      act(() => {
+        instance.find('button[aria-label="Layer actions"]').simulate('click');
+      });
+      instance.update();
+
+      // Click the clear layer button
+      act(() => {
+        instance.find('button[title="Clear layer"]').simulate('click');
+      });
+
+      // Wait for state updates
+      await waitMs(0);
+
+      // lens/removeOrClearLayer action should be dispatched
+      expect(lensStore.dispatch).toHaveBeenCalledWith({
+        payload: {
+          layerId: 'layer1',
+          layerIds: ['layer1'],
+          visualizationId: 'testVis',
+        },
+        type: 'lens/removeOrClearLayer',
+      });
+    });
+  });
 });

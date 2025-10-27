@@ -171,29 +171,6 @@ describe('LayerPanel', () => {
     jest.clearAllMocks();
   });
 
-  describe('layer reset and remove', () => {
-    it('should show the reset button when single layer', async () => {
-      renderLayerPanel();
-      expect(screen.getByRole('button', { name: /clear layer/i })).toBeInTheDocument();
-    });
-
-    it('should show the delete button when single layer', async () => {
-      renderLayerPanel({
-        propsOverrides: { isOnlyLayer: false },
-      });
-      expect(screen.getByRole('button', { name: /delete layer/i })).toBeInTheDocument();
-    });
-
-    it('should call the clear callback when resetting layer', async () => {
-      const cb = jest.fn();
-      renderLayerPanel({
-        propsOverrides: { onRemoveLayer: cb },
-      });
-      await userEvent.click(screen.getByRole('button', { name: /clear layer/i }));
-      expect(cb).toHaveBeenCalled();
-    });
-  });
-
   describe('single group', () => {
     it('should render the group with a way to add a new column', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
