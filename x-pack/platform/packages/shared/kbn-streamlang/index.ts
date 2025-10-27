@@ -16,3 +16,7 @@ export * from './src/conditions/helpers';
 export * from './src/conditions/condition_to_query_dsl';
 export * from './src/conditions/condition_to_painless';
 export * from './src/transpilers/shared/convert_for_ui';
+export * from './src/utilities';
+export * from './src/validation';
+export { ACTION_METADATA_MAP, type ActionMetadata } from './src/actions/action_metadata';
+export { getJsonSchemaFromStreamlangSchema } from './src/schema/get_json_schema_from_streamlang_schema';

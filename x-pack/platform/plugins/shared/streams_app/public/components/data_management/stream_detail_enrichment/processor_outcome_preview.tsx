@@ -43,7 +43,7 @@ import {
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { isStepUnderEdit } from './state_management/steps_state_machine';
-import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
+import { selectIsInteractiveMode } from './state_management/stream_enrichment_state_machine/selectors';
 import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
   NoPreviewDocumentsEmptyPrompt,
@@ -54,6 +54,7 @@ import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { RowSelectionContext } from '../shared/preview_table';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 import { useDataSourceSelector } from './state_management/data_source_state_machine';
+import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -199,10 +200,16 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   );
 
   const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
-    const currentProcessorRef = state.context.stepRefs.find(
-      (stepRef) =>
-        isActionBlock(stepRef.getSnapshot().context.step) && isStepUnderEdit(stepRef.getSnapshot())
-    );
+    const isInteractiveMode = selectIsInteractiveMode(state);
+    if (!isInteractiveMode || !state.context.interactiveModeRef) return undefined;
+
+    const currentProcessorRef = state.context.interactiveModeRef
+      .getSnapshot()
+      .context.stepRefs.find(
+        (stepRef) =>
+          isActionBlock(stepRef.getSnapshot().context.step) &&
+          isStepUnderEdit(stepRef.getSnapshot())
+      );
 
     if (!currentProcessorRef) return undefined;
 
@@ -224,9 +231,15 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     return getAllFieldsInOrder(previewDocuments, detectedFields);
   }, [detectedFields, previewDocuments]);
 
-  const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
-    selectDraftProcessor(snapshot.context)
-  );
+  const draftProcessor = useStreamEnrichmentSelector((snapshot) => {
+    const isInteractiveMode = selectIsInteractiveMode(snapshot);
+    return isInteractiveMode && snapshot.context.interactiveModeRef
+      ? selectDraftProcessor(snapshot.context.interactiveModeRef.getSnapshot().context)
+      : {
+          processor: undefined,
+          resources: undefined,
+        };
+  });
 
   const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection

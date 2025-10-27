@@ -4,30 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xstate5';
-import { htmlIdGenerator } from '@elastic/eui';
-import {
-  assign,
-  enqueueActions,
-  forwardTo,
-  setup,
-  sendTo,
-  stopChild,
-  and,
-  raise,
-  stateIn,
-  cancel,
-} from 'xstate5';
+import type { MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { assign, forwardTo, setup, sendTo, stopChild, raise, cancel } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import {
-  ALWAYS_CONDITION,
-  convertStepsForUI,
-  type StreamlangProcessorDefinition,
+  addDeterministicCustomIdentifiers,
+  checkAdditiveChanges,
+  validateStreamlang,
+  StreamlangValidationError,
+  validateStreamlangModeCompatibility,
 } from '@kbn/streamlang';
-import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import { isStreamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type {
@@ -36,7 +25,6 @@ import type {
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { getDefaultGrokProcessor, stepConverter } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -47,22 +35,14 @@ import {
   simulationMachine,
   createSimulationMachineImplementations,
 } from '../simulation_state_machine';
-import { stepMachine } from '../steps_state_machine';
 import {
-  collectDescendantIds,
   defaultEnrichmentUrlState,
-  findInsertIndex,
-  getConfiguredSteps,
   getActiveDataSourceSamples,
   getDataSourcesUrlState,
   getUpsertFields,
-  getStepsForSimulation,
-  insertAtIndex,
   spawnDataSource,
-  spawnStep,
-  reorderSteps,
-  getActiveSimulationMode,
   selectDataSource,
+  getActiveDataSourceRef,
 } from './utils';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
@@ -70,13 +50,8 @@ import {
   dataSourceMachine,
 } from '../data_source_state_machine';
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
-import { selectPreviewRecords } from '../simulation_state_machine/selectors';
-import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
-
-export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
-export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
-
-const createId = htmlIdGenerator();
+import { interactiveModeMachine } from '../interactive_mode_machine';
+import { yamlModeMachine } from '../yaml_mode_machine';
 
 export const streamEnrichmentMachine = setup({
   types: {
@@ -89,8 +64,9 @@ export const streamEnrichmentMachine = setup({
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
     dataSourceMachine: getPlaceholderFor(() => dataSourceMachine),
     setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
-    stepMachine: getPlaceholderFor(() => stepMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
+    interactiveModeMachine: getPlaceholderFor(() => interactiveModeMachine),
+    yamlModeMachine: getPlaceholderFor(() => yamlModeMachine),
   },
   actions: {
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
@@ -101,132 +77,85 @@ export const streamEnrichmentMachine = setup({
       urlState: params.urlState,
     })),
     syncUrlState: getPlaceholderFor(createUrlSyncAction),
+    // Definition updates are handled outside of the machine, and sent in via an event.
     storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
       definition: params.definition,
     })),
-    /* Steps actions */
-    setupSteps: assign((assignArgs) => {
-      // Clean-up pre-existing steps
-      assignArgs.context.stepRefs.forEach(stopChild);
-      // Setup processors from the stream definition
-      const uiSteps = convertStepsForUI(assignArgs.context.definition.stream.ingest.processing);
-      const stepRefs = uiSteps.map((step) => {
-        return spawnStep(step, assignArgs);
-      });
-
-      return {
-        initialStepRefs: stepRefs,
-        stepRefs,
-      };
-    }),
-    addProcessor: assign(
-      (
-        assignArgs,
-        {
-          processor,
-          options,
-        }: {
-          processor?: StreamlangProcessorDefinition;
-          options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
-        }
-      ) => {
-        if (!processor) {
-          processor = getDefaultGrokProcessor({
-            sampleDocs: selectPreviewRecords(assignArgs.context.simulatorRef.getSnapshot().context),
-          });
-        }
-
-        const conversionOptions = options ?? { parentId: null };
-        const convertedProcessor = stepConverter.toUIDefinition(processor, conversionOptions);
-
-        const newProcessorRef = spawnStep(convertedProcessor, assignArgs, { isNew: true });
-        const insertIndex = findInsertIndex(
-          assignArgs.context.stepRefs,
-          conversionOptions.parentId
-        );
-
-        return {
-          stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
-        };
-      }
-    ),
-    duplicateProcessor: assign((assignArgs, params: { processorStepId: string }) => {
-      const targetStepUIDefinition = assignArgs.context.stepRefs
-        .map((stepRef) => stepRef.getSnapshot().context.step)
-        .find((stepDefinition) => {
-          return stepDefinition.customIdentifier === params.processorStepId;
-        });
-
-      if (!targetStepUIDefinition) {
-        return {};
-      }
-
-      const parentId = targetStepUIDefinition.parentId;
-      const newProcessorRef = spawnStep(
-        {
-          ...targetStepUIDefinition,
-          customIdentifier: createId(),
-        },
-        assignArgs,
-        {
-          isNew: true,
-        }
+    // When the definition is refreshed (outside of the machine), this resets state back to match it.
+    resetStateFromDefinition: assign(({ context }) => {
+      const dslWithIdentifiers = addDeterministicCustomIdentifiers(
+        context.definition.stream.ingest.processing
       );
-      const insertIndex = findInsertIndex(assignArgs.context.stepRefs, parentId);
-
       return {
-        stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
+        previousStreamlangDSL: dslWithIdentifiers,
+        nextStreamlangDSL: dslWithIdentifiers,
+        isNextStreamlangDSLValid: true,
+        hasChanges: false,
       };
     }),
-    addCondition: assign(
-      (
-        assignArgs,
-        {
-          condition,
-          options,
-        }: {
-          condition?: StreamlangWhereBlock;
-          options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+    updateDSL: assign(({ context }, params: { dsl: StreamlangDSL }) => {
+      let isValid = true;
+      try {
+        validateStreamlang(params.dsl);
+      } catch (error) {
+        if (error instanceof StreamlangValidationError) {
+          isValid = false;
+        } else {
+          throw error;
         }
-      ) => {
-        if (!condition) {
-          condition = {
-            where: {
-              ...ALWAYS_CONDITION,
-              steps: [],
-            },
-          };
-        }
-
-        const conversionOptions = options ?? { parentId: null };
-        const convertedCondition = stepConverter.toUIDefinition(condition, conversionOptions);
-
-        const newProcessorRef = spawnStep(convertedCondition, assignArgs, { isNew: true });
-        const insertIndex = findInsertIndex(
-          assignArgs.context.stepRefs,
-          conversionOptions.parentId
-        );
-
-        return {
-          stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
-        };
       }
-    ),
-    deleteStep: assign(({ context }, params: { id: string }) => {
-      const idsToDelete = collectDescendantIds(params.id, context.stepRefs);
-      idsToDelete.add(params.id);
+
       return {
-        stepRefs: context.stepRefs.filter((proc) => !idsToDelete.has(proc.id)),
+        nextStreamlangDSL: params.dsl,
+        isNextStreamlangDSLValid: isValid,
+        hasChanges: JSON.stringify(params.dsl) !== JSON.stringify(context.previousStreamlangDSL),
       };
     }),
-    reorderSteps: assign(({ context }, params: { stepId: string; direction: 'up' | 'down' }) => {
+    /* Mode machine spawning */
+    spawnInteractiveMode: assign(({ context, spawn, self }) => {
+      const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+      const activeDataSourceSnapshot = activeDataSourceRef?.getSnapshot();
+      const simulationMode = activeDataSourceSnapshot?.context.simulationMode ?? 'partial';
+
+      const additiveChanges = checkAdditiveChanges(
+        context.previousStreamlangDSL,
+        context.nextStreamlangDSL
+      );
       return {
-        stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
+        interactiveModeRef: spawn('interactiveModeMachine', {
+          id: 'interactiveMode',
+          input: {
+            dsl: context.nextStreamlangDSL,
+            parentRef: self,
+            privileges: context.definition.privileges,
+            newStepIds: additiveChanges.newStepIds ?? [],
+            simulationMode,
+          },
+        }),
+        yamlModeRef: undefined, // Clear YAML mode ref when switching to interactive
       };
     }),
-    reassignSteps: assign(({ context }) => ({
-      stepRefs: [...context.stepRefs],
-    })),
+    spawnYamlMode: assign(({ context, spawn, self }) => {
+      const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+      const activeDataSourceSnapshot = activeDataSourceRef?.getSnapshot();
+      const simulationMode = activeDataSourceSnapshot?.context.simulationMode ?? 'partial';
+
+      return {
+        yamlModeRef: spawn('yamlModeMachine', {
+          id: 'yamlMode',
+          input: {
+            previousStreamlangDSL: context.previousStreamlangDSL,
+            nextStreamlangDSL: context.nextStreamlangDSL,
+            parentRef: self,
+            privileges: context.definition.privileges,
+            simulationMode,
+          },
+        }),
+        interactiveModeRef: undefined, // Clear interactive mode ref when switching to YAML
+      };
+    }),
+    stopInteractiveMode: stopChild('interactiveMode'),
+    stopYamlMode: stopChild('yamlMode'),
     /* Data sources actions */
     setupDataSources: assign((assignArgs) => ({
       dataSourcesRefs: assignArgs.context.urlState.dataSources.map((dataSource) =>
@@ -239,7 +168,9 @@ export const streamEnrichmentMachine = setup({
       const dataSourcesRefs = [newDataSourceRef, ...assignArgs.context.dataSourcesRefs];
       selectDataSource(dataSourcesRefs, newDataSourceRef.id);
 
-      return { dataSourcesRefs };
+      return {
+        dataSourcesRefs,
+      };
     }),
     deleteDataSource: assign(({ context }, params: { id: string }) => ({
       dataSourcesRefs: context.dataSourcesRefs.filter((proc) => proc.id !== params.id),
@@ -249,55 +180,46 @@ export const streamEnrichmentMachine = setup({
         dataSourceRef.send({ type: 'dataSource.refresh' })
       );
     },
-    /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
-    sendStepsEventToSimulator: enqueueActions(
-      ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
-        const simulationMode = getActiveSimulationMode(context);
-        const isPartialSimulation = simulationMode === 'partial';
-        /**
-         * When any processor is before persisted, we need to reset the simulator
-         * because the processors are not in a valid order.
-         * If the order allows it, notify the simulator to run the simulation based on the received event.
-         */
-        if (isPartialSimulation && selectWhetherAnyProcessorBeforePersisted(context)) {
-          enqueue('sendResetEventToSimulator');
-        } else {
-          enqueue.sendTo('simulator', {
-            type: params?.type ?? 'simulation.receive_steps',
-            steps: getStepsForSimulation({ stepRefs: context.stepRefs, isPartialSimulation }),
-          });
-        }
-      }
-    ),
+    notifyActiveDataSourceChange: ({ context }) => {
+      const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+      const activeDataSourceSnapshot = activeDataSourceRef?.getSnapshot();
+      const simulationMode = activeDataSourceSnapshot?.context.simulationMode ?? 'partial';
+
+      context.interactiveModeRef?.send({
+        type: 'dataSource.activeChanged',
+        simulationMode,
+      });
+      context.yamlModeRef?.send({
+        type: 'dataSource.activeChanged',
+        simulationMode,
+      });
+    },
     sendDataSourcesSamplesToSimulator: sendTo('simulator', ({ context }) => ({
       type: 'simulation.receive_samples',
       samples: getActiveDataSourceSamples(context),
     })),
+
+    sendResetToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
   },
   guards: {
-    hasStagedChanges: ({ context }) => {
-      const { initialStepRefs, stepRefs } = context;
-      return (
-        // Deleted steps
-        initialStepRefs.length !== stepRefs.length ||
-        // New/updated processors
-        stepRefs.some((processorRef) => {
-          const state = processorRef.getSnapshot();
-          return state.matches('configured') && state.context.isUpdated;
-        }) ||
-        // Step order changed
-        stepRefs.some((stepRef, pos) => initialStepRefs[pos]?.id !== stepRef.id)
-      );
-    },
+    /* Staged changes are determined by comparing previous and next DSL */
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
     hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
-    canUpdateStream: and(['hasStagedChanges', stateIn('#managingProcessors.idle')]),
-    isStagedStep: ({ context }, params: { id: string }) => {
-      const stepRef = context.stepRefs.find((p) => p.id === params.id);
-
-      if (!stepRef) return false;
-      return stepRef.getSnapshot().context.isNew;
+    canUpdateStream: ({ context }) => {
+      return (
+        isStreamlangDSLSchema(context.nextStreamlangDSL) &&
+        JSON.stringify(context.previousStreamlangDSL) !== JSON.stringify(context.nextStreamlangDSL)
+      );
+    },
+    canSwitchToInteractiveMode: ({ context }) => {
+      if (!context.isNextStreamlangDSLValid) {
+        return false;
+      } else {
+        // Valid but can it actually be represented in the UI
+        const modeCompatibility = validateStreamlangModeCompatibility(context.nextStreamlangDSL);
+        return modeCompatibility.canBeRepresentedInInteractiveMode;
+      }
     },
   },
 }).createMachine({
@@ -305,10 +227,17 @@ export const streamEnrichmentMachine = setup({
   id: 'enrichStream',
   context: ({ input, spawn }) => ({
     definition: input.definition,
+    previousStreamlangDSL: addDeterministicCustomIdentifiers(
+      input.definition.stream.ingest.processing
+    ),
+    nextStreamlangDSL: addDeterministicCustomIdentifiers(input.definition.stream.ingest.processing),
+    // Should always be valid initially as it's sourced from a persisted stream definition
+    isNextStreamlangDSLValid: true,
+    hasChanges: false,
     dataSourcesRefs: [],
     grokCollection: new GrokCollection(),
-    initialStepRefs: [],
-    stepRefs: [],
+    interactiveModeRef: undefined, // Will be spawned when in interactive mode
+    yamlModeRef: undefined, // Will be spawned when in YAML mode
     urlState: defaultEnrichmentUrlState,
     simulatorRef: spawn('simulationMachine', {
       id: 'simulator',
@@ -351,9 +280,9 @@ export const streamEnrichmentMachine = setup({
       id: 'ready',
       type: 'parallel',
       entry: [
-        { type: 'setupSteps' },
+        { type: 'resetStateFromDefinition' },
         { type: 'setupDataSources' },
-        { type: 'sendStepsEventToSimulator' },
+        { type: 'notifyActiveDataSourceChange' },
       ],
       on: {
         'stream.received': {
@@ -372,7 +301,7 @@ export const streamEnrichmentMachine = setup({
             idle: {
               on: {
                 'stream.reset': {
-                  guard: 'hasStagedChanges',
+                  guard: 'canUpdateStream',
                   target: '#ready',
                   actions: [{ type: 'sendResetEventToSimulator' }],
                   reenter: true,
@@ -390,7 +319,7 @@ export const streamEnrichmentMachine = setup({
                 src: 'upsertStream',
                 input: ({ context }) => ({
                   definition: context.definition,
-                  steps: getConfiguredSteps(context),
+                  streamlangDSL: context.nextStreamlangDSL,
                   fields: getUpsertFields(context),
                 }),
                 onDone: {
@@ -426,12 +355,13 @@ export const streamEnrichmentMachine = setup({
             'dataSources.select': {
               actions: [
                 ({ context, event }) => selectDataSource(context.dataSourcesRefs, event.id),
-                { type: 'sendStepsEventToSimulator' },
+                { type: 'notifyActiveDataSourceChange' },
               ],
             },
             'dataSource.change': {
               actions: [
                 cancel('sync-on-change'),
+                { type: 'notifyActiveDataSourceChange' },
                 raise({ type: 'url.sync' }, { id: 'sync-on-change', delay: 300 }),
               ],
             },
@@ -483,14 +413,15 @@ export const streamEnrichmentMachine = setup({
                     'dataSources.add': {
                       actions: [
                         { type: 'addDataSource', params: ({ event }) => event },
+                        { type: 'notifyActiveDataSourceChange' },
                         raise({ type: 'url.sync' }),
-                        { type: 'sendStepsEventToSimulator' },
                       ],
                     },
                     'dataSource.delete': {
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteDataSource', params: ({ event }) => event },
+                        { type: 'notifyActiveDataSourceChange' },
                         raise({ type: 'url.sync' }),
                       ],
                     },
@@ -500,98 +431,64 @@ export const streamEnrichmentMachine = setup({
             },
             managingProcessors: {
               id: 'managingProcessors',
-              initial: 'idle',
+              initial: 'evaluatingMode',
               states: {
-                idle: {
-                  entry: [{ type: 'sendStepsEventToSimulator' }],
+                evaluatingMode: {
+                  always: [
+                    {
+                      guard: ({ context }) =>
+                        context.yamlModeRef !== undefined ||
+                        !validateStreamlangModeCompatibility(context.nextStreamlangDSL)
+                          .canBeRepresentedInInteractiveMode,
+                      target: 'yaml',
+                    },
+                    {
+                      target: 'interactive',
+                    },
+                  ],
+                },
+                interactive: {
+                  entry: ['spawnInteractiveMode'],
+                  exit: 'stopInteractiveMode',
                   on: {
-                    'step.edit': {
-                      guard: 'hasSimulatePrivileges',
-                      target: 'editing',
+                    'mode.switchToYAML': {
+                      target: 'yaml',
                     },
-                    'step.reorder': {
-                      guard: 'hasSimulatePrivileges',
-                      actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
-                      target: 'idle',
-                      reenter: true,
+                    'mode.dslUpdated': {
+                      actions: [{ type: 'updateDSL', params: ({ event }) => ({ dsl: event.dsl }) }],
                     },
-                    'step.delete': {
-                      target: 'idle',
-                      guard: 'hasManagePrivileges',
-                      actions: [
-                        stopChild(({ event }) => event.id),
-                        { type: 'deleteStep', params: ({ event }) => event },
-                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
-                      ],
+                    'simulation.reset': {
+                      actions: 'sendResetToSimulator',
                     },
-                    'step.duplicateProcessor': {
-                      target: 'creating',
-                      guard: 'hasManagePrivileges',
-                      actions: [
-                        {
-                          type: 'duplicateProcessor',
-                          params: ({ event }) => event,
-                        },
-                        { type: 'sendStepsEventToSimulator' },
-                      ],
+                    'simulation.updateSteps': {
+                      actions: forwardTo('simulator'),
                     },
-                    'step.addProcessor': {
-                      guard: 'hasSimulatePrivileges',
-                      target: 'creating',
-                      actions: [{ type: 'addProcessor', params: ({ event }) => event }],
-                    },
-                    'step.addCondition': {
-                      guard: 'hasSimulatePrivileges',
-                      target: 'creating',
-                      actions: [{ type: 'addCondition', params: ({ event }) => event }],
+                    // Forward step events to interactive mode machine
+                    'step.*': {
+                      actions: forwardTo('interactiveMode'),
                     },
                   },
                 },
-                creating: {
-                  id: 'creatingStep',
-                  entry: [{ type: 'sendStepsEventToSimulator' }],
+                yaml: {
+                  entry: ['spawnYamlMode'],
+                  exit: 'stopYamlMode',
                   on: {
-                    'step.change': {
-                      actions: [
-                        { type: 'reassignSteps' },
-                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
-                      ],
+                    'mode.switchToInteractive': {
+                      guard: 'canSwitchToInteractiveMode',
+                      target: 'interactive',
                     },
-                    'step.delete': {
-                      target: 'idle',
-                      guard: 'hasManagePrivileges',
-                      actions: [
-                        stopChild(({ event }) => event.id),
-                        { type: 'deleteStep', params: ({ event }) => event },
-                      ],
+                    'mode.dslUpdated': {
+                      actions: [{ type: 'updateDSL', params: ({ event }) => ({ dsl: event.dsl }) }],
                     },
-                    'step.save': {
-                      target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
+                    'simulation.reset': {
+                      actions: 'sendResetToSimulator',
                     },
-                  },
-                },
-                editing: {
-                  id: 'editingStep',
-                  entry: [{ type: 'sendStepsEventToSimulator' }],
-                  on: {
-                    'step.change': {
-                      actions: [
-                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
-                      ],
+                    'simulation.updateSteps': {
+                      actions: forwardTo('simulator'),
                     },
-                    'step.cancel': 'idle',
-                    'step.delete': {
-                      target: 'idle',
-                      guard: 'hasManagePrivileges',
-                      actions: [
-                        stopChild(({ event }) => event.id),
-                        { type: 'deleteStep', params: ({ event }) => event },
-                      ],
-                    },
-                    'step.save': {
-                      target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
+                    // Forward yaml events to YAML mode machine
+                    'yaml.*': {
+                      actions: forwardTo('yamlMode'),
                     },
                   },
                 },
@@ -618,7 +515,8 @@ export const createStreamEnrichmentMachineImplementations = ({
     initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient, telemetryClient }),
     setupGrokCollection: setupGrokCollectionActor(),
-    stepMachine,
+    interactiveModeMachine,
+    yamlModeMachine,
     dataSourceMachine: dataSourceMachine.provide(
       createDataSourceMachineImplementations({ data, toasts: core.notifications.toasts })
     ),
@@ -641,3 +539,5 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
   },
 });
+
+export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;

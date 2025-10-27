@@ -10,13 +10,13 @@ import { useSelector } from '@xstate5/react';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { isWhereBlock } from '@kbn/streamlang';
 import { ActionBlock } from './blocks/action';
-import type { StreamEnrichmentContextType } from '../state_management/stream_enrichment_state_machine';
 import { WhereBlock } from './blocks/where';
 import type { RootLevelMap } from '../state_management/stream_enrichment_state_machine/utils';
 import type { StepsProcessingSummaryMap } from '../state_management/use_steps_processing_summary';
+import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';
 
 export interface StepConfigurationProps {
-  stepRef: StreamEnrichmentContextType['stepRefs'][number];
+  stepRef: InteractiveModeContext['stepRefs'][number];
   level: number;
   rootLevelMap: RootLevelMap;
   stepUnderEdit?: StreamlangStepWithUIAttributes;

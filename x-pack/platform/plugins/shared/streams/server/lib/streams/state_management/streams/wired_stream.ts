@@ -25,6 +25,7 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
+import { validateStreamlang, StreamlangValidationError } from '@kbn/streamlang';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
@@ -36,7 +37,6 @@ import {
   validateSystemFields,
 } from '../../helpers/validate_fields';
 import {
-  validateNoManualIngestPipelineUsage,
   validateRootStreamChanges,
   validateBracketsInFieldNames,
   validateSettings,
@@ -57,6 +57,7 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import { MalformedStreamError } from '../../errors/malformed_stream_error';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -315,8 +316,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const existsInStartingState = startingState.has(this._definition.name);
 
     if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
-      // recursively go through all steps to make sure it's not using manual_ingest_pipeline
-      validateNoManualIngestPipelineUsage(this._definition.ingest.processing.steps);
+      try {
+        validateStreamlang(this._definition.ingest.processing, 'wired');
+      } catch (error) {
+        if (error instanceof StreamlangValidationError) {
+          throw new MalformedStreamError(
+            `Invalid processing Streamlang DSL "${this._definition.name}": ${error.errors.join(
+              ', '
+            )}`
+          );
+        }
+        throw error;
+      }
     }
 
     if (!existsInStartingState) {

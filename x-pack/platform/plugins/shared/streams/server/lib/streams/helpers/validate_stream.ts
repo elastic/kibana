@@ -7,29 +7,8 @@
 
 import { Streams } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
-import { isEqual, noop } from 'lodash';
-import type {
-  AppendProcessor,
-  Condition,
-  ConvertProcessor,
-  DateProcessor,
-  DissectProcessor,
-  GrokProcessor,
-  ProcessorType,
-  RemoveByPrefixProcessor,
-  RemoveProcessor,
-  RenameProcessor,
-  SetProcessor,
-  StreamlangProcessorDefinition,
-} from '@kbn/streamlang';
-import {
-  isActionBlock,
-  isAndCondition,
-  isFilterCondition,
-  isNotCondition,
-  isOrCondition,
-} from '@kbn/streamlang';
-import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
+import { isEqual } from 'lodash';
+import { validateCondition } from '@kbn/streamlang';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
 import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_error';
 
@@ -65,17 +44,6 @@ export function validateRootStreamChanges(
   }
 }
 
-export function validateNoManualIngestPipelineUsage(steps: StreamlangStep[]) {
-  for (const step of steps) {
-    if ('action' in step && step.action === 'manual_ingest_pipeline') {
-      throw new MalformedStreamError('Manual ingest pipelines are not allowed');
-    }
-    if ('where' in step && step.where && 'steps' in step.where) {
-      validateNoManualIngestPipelineUsage(step.where.steps);
-    }
-  }
-}
-
 const INVALID_CHARS_REGEX = /[\[\]]/; // Checks for either '[' or ']'
 
 function checkFieldName(fieldName: string) {
@@ -86,79 +54,7 @@ function checkFieldName(fieldName: string) {
   }
 }
 
-function validateCondition(condition: Condition) {
-  if (isAndCondition(condition)) {
-    condition.and.forEach(validateCondition);
-  } else if (isOrCondition(condition)) {
-    condition.or.forEach(validateCondition);
-  } else if (isNotCondition(condition)) {
-    validateCondition(condition.not);
-  } else if (isFilterCondition(condition)) {
-    checkFieldName(condition.field);
-  }
-}
-
-const actionStepValidators: {
-  [K in ProcessorType]: (step: Extract<StreamlangProcessorDefinition, { action: K }>) => void;
-} = {
-  append: (step: AppendProcessor) => checkFieldName(step.to),
-  convert: (step: ConvertProcessor) => {
-    checkFieldName(step.from);
-    if ('to' in step && step.to) {
-      checkFieldName(step.to);
-    }
-  },
-  date: (step: DateProcessor) => {
-    checkFieldName(step.from);
-    if ('to' in step && step.to) {
-      checkFieldName(step.to);
-    }
-  },
-  dissect: (step: DissectProcessor) => checkFieldName(step.from),
-  grok: (step: GrokProcessor) => checkFieldName(step.from),
-  rename: (step: RenameProcessor) => {
-    checkFieldName(step.from);
-    checkFieldName(step.to);
-  },
-  set: (step: SetProcessor) => {
-    checkFieldName(step.to);
-    if (step.copy_from) {
-      checkFieldName(step.copy_from);
-    }
-  },
-  remove_by_prefix: (step: RemoveByPrefixProcessor) => checkFieldName(step.from),
-  remove: (step: RemoveProcessor) => checkFieldName(step.from),
-  drop_document: noop, // 'where' condition is already validated in validateSteps function
-  // fields referenced in manual ingest pipelines are not validated here because
-  // the interface is Elasticsearch directly here, which has its own validation
-  manual_ingest_pipeline: () => {},
-};
-
-function validateSteps(steps: StreamlangStep[], isWithinWhereBlock = false) {
-  for (const step of steps) {
-    if ('where' in step && step.where && 'steps' in step.where) {
-      validateCondition(step.where as Condition);
-      // Nested steps are within a where block
-      validateSteps(step.where.steps, true);
-    } else if (isActionBlock(step)) {
-      // Check if remove_by_prefix is being used within a where block
-      if (step.action === 'remove_by_prefix' && isWithinWhereBlock) {
-        throw new MalformedStreamError(
-          'remove_by_prefix processor cannot be used within a where block. Use it at the root level or use the remove processor with a condition instead.'
-        );
-      }
-
-      if ('where' in step && step.where) {
-        validateCondition(step.where);
-      }
-      const validateStep = actionStepValidators[step.action] as (
-        s: StreamlangProcessorDefinition
-      ) => void;
-      validateStep(step);
-    }
-  }
-}
-
+// NOTE: Processing checks happen as part of the Streamlang validation.
 export function validateBracketsInFieldNames(definition: Streams.ingest.all.Definition) {
   if (!definition.ingest) {
     return;
@@ -172,7 +68,13 @@ export function validateBracketsInFieldNames(definition: Streams.ingest.all.Defi
     }
     if (definition.ingest.wired.routing) {
       for (const rule of definition.ingest.wired.routing) {
-        validateCondition(rule.where);
+        const conditionErrors: string[] = [];
+        validateCondition(rule.where, conditionErrors);
+        if (conditionErrors.length > 0) {
+          throw new MalformedStreamError(
+            `Invalid routing rule: [${JSON.stringify(rule)}]. Errors: ${conditionErrors.join(', ')}`
+          );
+        }
       }
     }
   } else if (Streams.ClassicStream.Definition.is(definition)) {
@@ -181,10 +83,6 @@ export function validateBracketsInFieldNames(definition: Streams.ingest.all.Defi
         checkFieldName(fieldName);
       }
     }
-  }
-
-  if (definition.ingest.processing?.steps) {
-    validateSteps(definition.ingest.processing.steps);
   }
 }
 

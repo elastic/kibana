@@ -15,10 +15,9 @@ import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
 } from '@kbn/streamlang';
-import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import type { StreamlangDSL, StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
-import type { StepActorRef, StepToParentEvent } from '../steps_state_machine';
 import type {
   PreviewDocsFilterOption,
   SimulationActorRef,
@@ -26,6 +25,13 @@ import type {
 } from '../simulation_state_machine';
 import type { MappedSchemaField } from '../../../schema_editor/types';
 import type { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
+import type { InteractiveModeActorRef } from '../interactive_mode_machine';
+import type { YamlModeActorRef } from '../yaml_mode_machine';
+
+export interface StreamPrivileges {
+  manage: boolean;
+  simulate: boolean;
+}
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -41,18 +47,32 @@ export interface StreamEnrichmentInput {
 }
 
 export interface StreamEnrichmentContextType {
+  // The Stream definition. This is handled outside of the machine, but any changes will be sent to the machine via events.
   definition: Streams.ingest.all.GetResponse;
-  initialStepRefs: SimulationActorRef[];
+  // Refs for data source machines.
   dataSourcesRefs: DataSourceActorRef[];
-  stepRefs: StepActorRef[];
+  // Grok collection for Grok highlighting via the grok-ui package.
   grokCollection: GrokCollection;
+  // Ref for the simulator state machine.
   simulatorRef: SimulationActorRef;
+  // Overall URL state
   urlState: EnrichmentUrlState;
+  // Ref for the interactive mode machine (only set when in interactive mode)
+  interactiveModeRef: InteractiveModeActorRef | undefined;
+  // Ref for the YAML mode machine (only set when in YAML mode)
+  yamlModeRef: YamlModeActorRef | undefined;
+  // Regardless of mode (interactive or YAML), this holds the current blob of Streamlang DSL reflecting the current changes.
+  nextStreamlangDSL: StreamlangDSL;
+  // Whether the nextStreamlangDSL is valid
+  isNextStreamlangDSLValid: boolean;
+  // The last persisted Streamlang DSL blob, used to determine what has changed.
+  previousStreamlangDSL: StreamlangDSL;
+  // Whether there are unsaved changes (diff of nextStreamlangDSL vs previousStreamlangDSL)
+  hasChanges: boolean;
 }
 
 export type StreamEnrichmentEvent =
   | DataSourceToParentEvent
-  | StepToParentEvent
   | { type: 'stream.received'; definition: Streams.ingest.all.GetResponse }
   | { type: 'stream.reset' }
   | { type: 'stream.update' }
@@ -70,6 +90,16 @@ export type StreamEnrichmentEvent =
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
+  | { type: 'url.initialized'; urlState: EnrichmentUrlState }
+  | { type: 'url.sync' }
+  | { type: 'mode.switchToYAML' }
+  | { type: 'mode.switchToInteractive' }
+  // Events from mode machines to parent
+  | { type: 'mode.dslUpdated'; dsl: StreamlangDSL }
+  | { type: 'mode.resetSimulator' }
+  | { type: 'simulation.reset' }
+  | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
+  // Step events forwarded to interactive mode machine
   | {
       type: 'step.addProcessor';
       step?: StreamlangProcessorDefinition;
@@ -85,5 +115,6 @@ export type StreamEnrichmentEvent =
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
-  | { type: 'url.initialized'; urlState: EnrichmentUrlState }
-  | { type: 'url.sync' };
+  // YAML events forwarded to YAML mode machine
+  | { type: 'yaml.contentChanged'; streamlangDSL: StreamlangDSL; yaml: string }
+  | { type: 'yaml.runSimulation'; stepIdBreakpoint?: string };

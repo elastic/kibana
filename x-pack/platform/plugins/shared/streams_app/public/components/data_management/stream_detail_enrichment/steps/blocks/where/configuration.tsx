@@ -23,7 +23,7 @@ import { useForm, FormProvider, useController } from 'react-hook-form';
 import type { DeepPartial } from 'utility-types';
 import { useSelector } from '@xstate5/react';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
-import type { StreamEnrichmentContextType } from '../../../state_management/stream_enrichment_state_machine';
+import type { StepActorRef } from '../../../state_management/steps_state_machine';
 import type { WhereBlockFormState } from '../../../types';
 import {
   getFormStateFromWhereStep,
@@ -33,7 +33,7 @@ import { discardChangesPromptOptions, deleteConditionPromptOptions } from './pro
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
 
 interface WhereBlockConfigurationProps {
-  stepRef: StreamEnrichmentContextType['stepRefs'][number];
+  stepRef: StepActorRef;
 }
 
 export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConfigurationProps>(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ActorRefFrom, SnapshotFrom } from 'xstate5';
-import { assign, forwardTo, sendTo, setup } from 'xstate5';
+import { and, assign, forwardTo, sendTo, setup } from 'xstate5';
 import type {
   StreamlangProcessorDefinition,
   StreamlangWhereBlockWithUIAttributes,
@@ -80,6 +80,7 @@ export const stepMachine = setup({
   },
   guards: {
     isDraft: ({ context }) => context.isNew,
+    isUpdated: ({ context }) => context.isUpdated === true,
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QAcBOB7AxnW7UDoBXAO1TnQBsA3SAYgG0AGAXURXVgEsAXT9YtiAAeiAEwBmcfgBsATkkAOAIxKALEoDss2YwUAaEAE8xm-LInjVjaeIUalAVmmqAvi4NosOPEVLlqdPRKrEggyBw8fAKhIgiiEviqCjaqsgqymtq6BsYI4oxSCrpJ0oyO4g6y0m4eGNiwuAQQqACGAGbctJ71jfiwLTRMIexcvPyCsdJTZpKV4hoOOYgAtEoV+A41YXXeTa0dXTsNPpgtxNgUQ4Lho1ETiNIOqolVjPILSwhK5jJVGhrKWz2JyiLbdXb4ZrtTrg44ETAACzOMCuoRukXGMTElQ2og0lnmiyMiGSMniCjsAOcqjx1Xc2y8cPwmH4bU4UEIZAg+E4EAoYEOjN6kB4qJGGOioFiDlE0kSoiqdiJuXxCnw+NkDgUkh1szBR16LOIbI5XPwIt4xCggp6Pn6gxY1wiY0lwkQ81EZjU1lEysQmqUZg1Wt1evpsMNrPZnMg5ogkStNohp3OYEujrRzruWLyDgc+HSPr9CABsnwEk12tDFX1QpOUdNsYtnETEZ8EDTYG4YDFYSzmKliCcjAL9impVkGhpAM+IKDGlEjH+-1UTlc4YN9eN0bNzdbm-hSKtPYz4pd9wQk8+Chp5cr1bD9OI6A78DRB6dtwHbq+n2W8XEWtbQIEgyFwAIIE-CULwcDR8HEeRtEcaRFzeApi1ERwZHxSxrCBZD11qOs9mhKDzxzVR-gLUQaSUOxUm0bRVE+TD82kHCrBsOwCKA5MGxjSDMy-V1YlST5HkDCsQ2rTYN2I5l+LNXl+TI7NBxLAozHMOiPmJS9pnMDRdAfWSiOAhTt0bbk9ygVTv1iJQ5HLYtJxHIzFyrUNTIZcyO35btBLPNSfymKQ3nyJcATzGVpE+HVyzWKsF3EFC8TcNwgA */
@@ -89,11 +90,19 @@ export const stepMachine = setup({
     previousStep: input.step,
     step: input.step,
     isNew: input.isNew ?? false,
+    isUpdated: input.isUpdated,
   }),
   initial: 'unresolved',
   states: {
     unresolved: {
-      always: [{ target: 'draft', guard: 'isDraft' }, { target: 'configured' }],
+      always: [
+        // Steps that have been preconfigured in a different mode, but not persisted yet.
+        { target: 'configured', guard: and(['isDraft', 'isUpdated']) },
+        // Brand new in this mode
+        { target: 'draft', guard: 'isDraft' },
+        // Existing configured step
+        { target: 'configured' },
+      ],
     },
     draft: {
       on: {
