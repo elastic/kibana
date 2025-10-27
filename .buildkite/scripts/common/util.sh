@@ -50,6 +50,8 @@ check_for_changed_files() {
       git commit -m "$CUSTOM_FIX_MESSAGE"
       git push
 
+      # Wait to ensure all commits arrive before we terminate the build
+      sleep 300
       # Still exit with error to fail the current build, a new build should be started after the push
       exit 1
     else
