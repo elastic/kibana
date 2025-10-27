@@ -9,11 +9,9 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { WorkflowDetailHeader } from './workflow_detail_header';
+import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 import { createMockStore } from '../../../widgets/workflow_yaml_editor/lib/store/__mocks__/store.mock';
 import {
   _setComputedDataInternal,
@@ -74,9 +72,7 @@ describe('WorkflowDetailHeader', () => {
 
   const renderWithProviders = (
     component: React.ReactElement,
-    storeSetup?: (store: ReturnType<typeof createMockStore>) => void,
-    isValid = true,
-    hasChanges = false
+    { isValid = true, hasChanges = false }: { isValid?: boolean; hasChanges?: boolean } = {}
   ) => {
     const store = createMockStore();
 
@@ -99,18 +95,11 @@ describe('WorkflowDetailHeader', () => {
       );
     }
 
-    // Run custom store setup if provided
-    if (storeSetup) {
-      storeSetup(store);
-    }
+    const wrapper = ({ children }: { children: React.ReactNode }) => {
+      return <TestWrapper store={store}>{children}</TestWrapper>;
+    };
 
-    return render(
-      <MemoryRouter>
-        <I18nProvider>
-          <Provider store={store}>{component}</Provider>
-        </I18nProvider>
-      </MemoryRouter>
-    );
+    return render(component, { wrapper });
   };
 
   beforeEach(() => {
@@ -159,21 +148,17 @@ describe('WorkflowDetailHeader', () => {
   });
 
   it('shows unsaved changes when there are changes', () => {
-    const { container } = renderWithProviders(
-      <WorkflowDetailHeader {...defaultProps} />,
-      undefined,
-      true,
-      true
-    );
+    const { container } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isValid: true,
+      hasChanges: true,
+    });
     expect(container).toBeTruthy();
   });
 
   it('disables run workflow button when yaml is invalid', () => {
-    const result = renderWithProviders(
-      <WorkflowDetailHeader {...defaultProps} />,
-      undefined,
-      false
-    );
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isValid: false,
+    });
     expect(result.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
   });
 
