@@ -241,8 +241,8 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
 
   const handleHeaderChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    headerIndex,
-    elementIndex
+    headerIndex: number,
+    elementIndex: number
   ) => {
     setHeaders((prevHeaders) => {
       const newHeaders = [...Object.entries(prevHeaders)];
