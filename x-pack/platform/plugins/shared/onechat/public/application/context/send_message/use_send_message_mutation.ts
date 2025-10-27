@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useRef, useState } from 'react';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationActions } from '../../hooks/use_conversation_actions';

@@ -12,7 +12,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AuthType } from '../../../common/auth/constants';
 import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSecretHeaders } from '../../common/auth/use_secret_headers';
 
 jest.mock('../../common/auth/use_secret_headers');

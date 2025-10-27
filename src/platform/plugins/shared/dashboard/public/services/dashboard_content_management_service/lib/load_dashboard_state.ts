@@ -13,7 +13,7 @@ import { getDashboardContentManagementCache } from '..';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
+import { contentManagementService } from '../../kibana_services';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 
 export const loadDashboardState = async ({
@@ -95,6 +95,7 @@ export const loadDashboardState = async ({
     query,
     timeRange,
     title,
+    tags,
   } = attributes;
 
   return {
@@ -111,9 +112,7 @@ export const loadDashboardState = async ({
       panels,
       query,
       title,
-      tags:
-        savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
-
+      tags,
       controlGroupInput: attributes.controlGroupInput,
     },
     dashboardFound: true,

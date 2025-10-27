@@ -25,7 +25,9 @@ describe('fromEs', () => {
         space: 'space',
         description: 'description',
         labels: ['foo', 'bar'],
-        configuration: {
+        avatar_color: 'blue',
+        avatar_symbol: 'star',
+        config: {
           instructions: 'instructions',
           tools: [{ tool_ids: ['id_1', 'id_2'] }],
         },
@@ -35,7 +37,7 @@ describe('fromEs', () => {
     };
   };
 
-  it('converts an agent document to its definition', () => {
+  it('converts an agent document with new config field to its definition', () => {
     const document = getSampleDoc();
 
     const definition = fromEs(document);
@@ -54,10 +56,42 @@ describe('fromEs', () => {
       },
       description: 'description',
       labels: ['foo', 'bar'],
+      avatar_color: 'blue',
+      avatar_symbol: 'star',
     });
   });
 
-  it('handles legacy doc format', () => {
+  it('converts an agent document with legacy configuration field to its definition', () => {
+    const document = getSampleDoc();
+    // @ts-ignore simulating legacy document
+    delete document._source.config;
+    document._source!.configuration = {
+      instructions: 'legacy instructions',
+      tools: [{ tool_ids: ['legacy_id_1', 'legacy_id_2'] }],
+    };
+
+    const definition = fromEs(document);
+
+    expect(definition).toEqual({
+      type: AgentType.chat,
+      id: 'id',
+      name: 'name',
+      configuration: {
+        instructions: 'legacy instructions',
+        tools: [
+          {
+            tool_ids: ['legacy_id_1', 'legacy_id_2'],
+          },
+        ],
+      },
+      description: 'description',
+      labels: ['foo', 'bar'],
+      avatar_color: 'blue',
+      avatar_symbol: 'star',
+    });
+  });
+
+  it('handles legacy doc format without id field', () => {
     const document = getSampleDoc();
     document._id = '_id';
     // @ts-ignore testing edge case
@@ -70,7 +104,7 @@ describe('fromEs', () => {
 });
 
 describe('createRequestToEs', () => {
-  it('converts a request to the document format', () => {
+  it('converts a request to the document format using new config field', () => {
     const createRequest: AgentCreateRequest = {
       id: 'id',
       name: 'name',
@@ -84,6 +118,8 @@ describe('createRequestToEs', () => {
         ],
       },
       labels: ['foo', 'bar'],
+      avatar_color: 'green',
+      avatar_symbol: 'circle',
     };
 
     const date = new Date();
@@ -100,7 +136,7 @@ describe('createRequestToEs', () => {
       name: 'name',
       space: 'space-2',
       description: 'description',
-      configuration: {
+      config: {
         instructions: 'instructions',
         tools: [
           {
@@ -109,6 +145,8 @@ describe('createRequestToEs', () => {
         ],
       },
       labels: ['foo', 'bar'],
+      avatar_color: 'green',
+      avatar_symbol: 'circle',
       created_at: expect.any(String),
       updated_at: expect.any(String),
     });
@@ -116,7 +154,7 @@ describe('createRequestToEs', () => {
 });
 
 describe('updateRequestToEs', () => {
-  it('converts an update request to the document format', () => {
+  it('migrates legacy document with configuration field to new config field', () => {
     const newUpdateDate = new Date();
 
     const agentProps: AgentProperties = {
@@ -125,6 +163,14 @@ describe('updateRequestToEs', () => {
       name: 'name',
       description: 'description',
       space: 'space',
+      config: {
+        instructions: 'instructions',
+        tools: [
+          {
+            tool_ids: ['id_1', 'id_2'],
+          },
+        ],
+      },
       configuration: {
         instructions: 'instructions',
         tools: [
@@ -134,6 +180,8 @@ describe('updateRequestToEs', () => {
         ],
       },
       labels: ['foo', 'bar'],
+      avatar_color: 'red',
+      avatar_symbol: 'triangle',
       created_at: creationDate,
       updated_at: updateDate,
     };
@@ -152,13 +200,14 @@ describe('updateRequestToEs', () => {
       updateDate: newUpdateDate,
     });
 
+    // Should use config field and omit configuration
     expect(docProperties).toEqual({
       id: 'id',
       type: AgentType.chat,
       space: 'space',
       name: 'new name',
       description: 'description',
-      configuration: {
+      config: {
         instructions: 'instructions',
         tools: [
           {
@@ -167,8 +216,74 @@ describe('updateRequestToEs', () => {
         ],
       },
       labels: ['foo', 'bar'],
+      avatar_color: 'red',
+      avatar_symbol: 'triangle',
       created_at: creationDate,
       updated_at: newUpdateDate.toISOString(),
     });
+    // Verify configuration is not present
+    expect(docProperties.configuration).toBeUndefined();
+  });
+
+  it('updates document with new config field and keeps using config', () => {
+    const newUpdateDate = new Date();
+
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: {
+        instructions: 'instructions',
+        tools: [
+          {
+            tool_ids: ['id_1', 'id_2'],
+          },
+        ],
+      },
+      labels: ['foo', 'bar'],
+      avatar_color: 'yellow',
+      avatar_symbol: 'square',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const updateRequest: AgentUpdateRequest = {
+      name: 'new name',
+      description: 'new description',
+      configuration: {
+        instructions: 'new instructions',
+      },
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: updateRequest,
+      updateDate: newUpdateDate,
+    });
+
+    expect(docProperties).toEqual({
+      id: 'id',
+      type: AgentType.chat,
+      space: 'space',
+      name: 'new name',
+      description: 'new description',
+      config: {
+        instructions: 'new instructions',
+        tools: [
+          {
+            tool_ids: ['id_1', 'id_2'],
+          },
+        ],
+      },
+      labels: ['foo', 'bar'],
+      avatar_color: 'yellow',
+      avatar_symbol: 'square',
+      created_at: creationDate,
+      updated_at: newUpdateDate.toISOString(),
+    });
+    expect(docProperties.configuration).toBeUndefined();
   });
 });
