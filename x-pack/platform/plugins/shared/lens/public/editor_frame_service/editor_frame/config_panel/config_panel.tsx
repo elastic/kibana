@@ -266,18 +266,18 @@ export function LayerPanels(
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
 
   const layerConfig = useMemo(() => {
-    const layerConfigs = layerIds.map((layerId) => ({
-      layerId,
-      layerType: activeVisualization.getLayerType(layerId, visualization.state),
+    if (!selectedLayerId) return;
+
+    return {
+      layerId: selectedLayerId,
+      layerType: activeVisualization.getLayerType(selectedLayerId, visualization.state),
       config: activeVisualization.getConfiguration({
-        layerId,
+        layerId: selectedLayerId,
         frame: props.framePublicAPI,
         state: visualization.state,
       }),
-    }));
-
-    return layerConfigs.find((l) => l.layerId === selectedLayerId);
-  }, [activeVisualization, layerIds, props.framePublicAPI, selectedLayerId, visualization.state]);
+    };
+  }, [activeVisualization, props.framePublicAPI, selectedLayerId, visualization.state]);
 
   return (
     <EuiForm
