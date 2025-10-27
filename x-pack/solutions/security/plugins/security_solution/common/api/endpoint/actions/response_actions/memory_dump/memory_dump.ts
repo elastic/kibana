@@ -24,8 +24,14 @@ export const MemoryDumpActionRequestSchema = {
             return '"pid" and "entity_id" parameters only supported for type of "process"';
           }
 
-          if (parameters.type === 'process' && !parameters.pid && !parameters.entity_id) {
-            return 'Type of "process" requires either "pid" or "entity_id"';
+          if (parameters.type === 'process') {
+            if (!parameters.pid && !parameters.entity_id) {
+              return 'Type of "process" requires either "pid" or "entity_id"';
+            }
+
+            if (parameters.pid !== undefined && parameters.entity_id !== undefined) {
+              return 'Type of "process" cannot have both "pid" and "entity_id"';
+            }
           }
         },
       }
