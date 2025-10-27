@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DocLinksStart } from '@kbn/core/public';
 import moment from 'moment';
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
@@ -45,14 +44,6 @@ const setup = async () => {
     application: mockCoreStart.application,
     featureFlags: mockCoreStart.featureFlags,
   });
-
-  const docLinks: DocLinksStart = {
-    ELASTIC_WEBSITE_URL: `boo/`,
-    DOC_LINK_VERSION: `#foo`,
-    links: {
-      search: { sessions: `mock-url` } as any,
-    } as any,
-  };
 
   await act(async () => {
     render(
