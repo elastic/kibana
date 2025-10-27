@@ -14,9 +14,16 @@ import YAML from 'yaml';
 export interface StepInfo {
   stepId: string;
   stepType: string;
-  stepYamlNode: any;
+  stepYamlNode: YAML.YAMLMap<unknown, unknown>;
   lineStart: number;
   lineEnd: number;
+  propInfos: Record<string, StepPropInfo>;
+}
+
+export interface StepPropInfo {
+  path: string[];
+  keyNode: YAML.Scalar<unknown>;
+  valueNode: YAML.Scalar<unknown>;
 }
 
 /**
@@ -103,7 +110,15 @@ function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepIn
     });
   }
 
-  if (stepId && stepType) {
+  if (stepId && stepType && YAML.isMap(node)) {
+    const propNodes: Record<string, StepPropInfo> = {};
+    node.items.forEach((innerNode) => {
+      if (YAML.isPair(innerNode) && YAML.isScalar(innerNode.key)) {
+        if (!['steps', 'else', 'fallback'].includes(innerNode.key.value as string)) {
+          Object.assign(propNodes, visitStepProps(innerNode));
+        }
+      }
+    });
     const lineStart = lineCounter.linePos(node.range![0]).line;
     const lineEnd = lineCounter.linePos(node.range![2] - 1).line;
     result[stepId] = {
@@ -112,6 +127,28 @@ function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepIn
       stepYamlNode: node,
       lineStart,
       lineEnd,
+      propInfos: propNodes,
+    };
+  }
+
+  return result;
+}
+
+function visitStepProps(node: any, stack: string[] = []): Record<string, StepPropInfo> {
+  const result: Record<string, StepPropInfo> = {};
+  if (YAML.isMap(node.value)) {
+    stack.push(node.key.value);
+    node.value.items.forEach((childNode: any) => {
+      Object.assign(result, visitStepProps(childNode, stack));
+    });
+    stack.pop();
+  } else {
+    const path = [...stack, node.key.value];
+    const composedKey = path.join('.');
+    result[composedKey] = {
+      path,
+      keyNode: node.key,
+      valueNode: node.value,
     };
   }
 
