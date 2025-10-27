@@ -36,7 +36,7 @@ export async function getServiceStats({
         filter: [
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
-          ...termsQuery(SERVICE_NAME, ...servicesWithAggregatedTransactions, serviceName),
+          ...termsQuery(SERVICE_NAME, serviceName, ...servicesWithAggregatedTransactions),
           ...kqlQuery(serviceGroupKuery),
           ...kqlQuery(kuery),
         ],
