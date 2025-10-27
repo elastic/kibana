@@ -109,9 +109,9 @@ export const useConfigurableRiskEngineSettings = () => {
       const backendFilters = (riskEngineSettings as Record<string, unknown>)?.filters;
       const transformedSettings = riskEngineSettings
         ? {
-          ...riskEngineSettings,
-          filters: Array.isArray(backendFilters) ? backendFilters : [],
-        }
+            ...riskEngineSettings,
+            filters: Array.isArray(backendFilters) ? backendFilters : [],
+          }
         : undefined;
 
       setSelectedRiskEngineSettings((currentValue) => {

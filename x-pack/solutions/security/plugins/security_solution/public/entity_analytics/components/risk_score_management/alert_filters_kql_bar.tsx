@@ -37,10 +37,10 @@ const DEFAULT_OPTIONS: Array<{
   label: (typeof COMBOBOX_LABEL_MAPPING)[keyof typeof COMBOBOX_LABEL_MAPPING];
   value: keyof typeof COMBOBOX_LABEL_MAPPING;
 }> = [
-    { label: COMBOBOX_LABEL_MAPPING.user, value: 'user' },
-    { label: COMBOBOX_LABEL_MAPPING.host, value: 'host' },
-    { label: COMBOBOX_LABEL_MAPPING.service, value: 'service' },
-  ];
+  { label: COMBOBOX_LABEL_MAPPING.user, value: 'user' },
+  { label: COMBOBOX_LABEL_MAPPING.host, value: 'host' },
+  { label: COMBOBOX_LABEL_MAPPING.service, value: 'service' },
+];
 
 interface AlertFiltersKqlBarProps {
   onQueryChange?: (query: Query) => void;
