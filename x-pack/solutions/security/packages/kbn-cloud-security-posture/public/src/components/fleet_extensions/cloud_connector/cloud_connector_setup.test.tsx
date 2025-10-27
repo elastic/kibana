@@ -11,8 +11,8 @@ import { render, act } from '@testing-library/react';
 import { CloudConnectorSetup } from './cloud_connector_setup';
 import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
-import { TestProvider } from '../test/test_provider';
-import { getMockPolicyAWS, getMockPackageInfoAWS } from '../test/mock';
+import { TestProvider } from './test/test_provider';
+import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
 import { CloudConnectorTabs } from './cloud_connector_tabs';
 import { isCloudConnectorReusableEnabled } from './utils';
 
