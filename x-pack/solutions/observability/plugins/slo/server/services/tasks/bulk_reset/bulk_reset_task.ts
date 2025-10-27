@@ -16,8 +16,7 @@ import { DefaultSummaryTransformManager } from '../../summay_transform_manager';
 import { createTransformGenerators } from '../../transform_generators';
 import { DefaultTransformManager } from '../../transform_manager';
 import { runBulkReset } from './run_bulk_reset';
-
-export const TYPE = 'slo:bulk-reset-task';
+import { TYPE } from '../types/task_types';
 
 interface TaskSetupContract {
   core: CoreSetup<SLOPluginStartDependencies>;
@@ -40,13 +39,13 @@ export class BulkResetTask {
 
   constructor(setupContract: TaskSetupContract) {
     const { core, plugins, logFactory, isServerless } = setupContract;
-    this.logger = logFactory.get(TYPE);
+    this.logger = logFactory.get(TYPE.RESET);
     this.isServerless = isServerless;
 
     this.logger.debug('Registering task with [10m] timeout');
 
     plugins.taskManager.setup.registerTaskDefinitions({
-      [TYPE]: {
+      [TYPE.RESET]: {
         title: 'SLO bulk reset',
         timeout: '10m',
         maxAttempts: 1,

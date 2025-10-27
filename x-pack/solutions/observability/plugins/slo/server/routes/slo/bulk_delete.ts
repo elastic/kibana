@@ -7,9 +7,9 @@
 import type { BulkOperationStatusResponse } from '@kbn/slo-schema';
 import { bulkOperationParamsSchema, bulkOperationStatusParamsSchema } from '@kbn/slo-schema';
 import { v4 } from 'uuid';
-import { TYPE } from '../../services/tasks/bulk_delete/bulk_delete_task';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
+import { TYPE } from '../../services/tasks/types/task_types';
 
 export const bulkDeleteSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_bulk_delete 2023-10-31',
@@ -28,7 +28,7 @@ export const bulkDeleteSLORoute = createSloServerRoute({
     await taskManager.ensureScheduled(
       {
         id: taskId,
-        taskType: TYPE,
+        taskType: TYPE.DELETE,
         scope: ['observability', 'slo'],
         state: {},
         runAt: new Date(Date.now() + 3 * 1000),

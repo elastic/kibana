@@ -17,8 +17,7 @@ import { DefaultSummaryTransformManager } from '../../summay_transform_manager';
 import type { TransformGenerator } from '../../transform_generators';
 import { DefaultTransformManager } from '../../transform_manager';
 import { runBulkDelete } from './run_bulk_delete';
-
-export const TYPE = 'slo:bulk-delete-task';
+import { TYPE } from '../types/task_types';
 
 interface TaskSetupContract {
   core: CoreSetup<SLOPluginStartDependencies>;
@@ -39,12 +38,12 @@ export class BulkDeleteTask {
 
   constructor(setupContract: TaskSetupContract) {
     const { core, plugins, logFactory } = setupContract;
-    this.logger = logFactory.get(TYPE);
+    this.logger = logFactory.get(TYPE.DELETE);
 
     this.logger.debug('Registering task with [10m] timeout');
 
     plugins.taskManager.setup.registerTaskDefinitions({
-      [TYPE]: {
+      [TYPE.DELETE]: {
         title: 'SLO bulk delete',
         timeout: '10m',
         maxAttempts: 1,
