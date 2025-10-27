@@ -8,10 +8,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { FilterStateStore } from '@kbn/es-query';
 
 const filterStateStoreSchema = schema.oneOf(
-  [schema.literal(FilterStateStore.APP_STATE), schema.literal(FilterStateStore.GLOBAL_STATE)],
+  [schema.literal('appState'), schema.literal('globalState')],
   {
     meta: {
       description:
