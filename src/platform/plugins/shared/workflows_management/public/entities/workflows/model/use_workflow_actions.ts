@@ -88,9 +88,12 @@ export function useWorkflowActions() {
         });
 
       // Update workflow detail query (used in YAML editor view)
+      // But skip optimistic update when saving YAML, as the component manages its own state
       const previousWorkflowDetail = queryClient.getQueryData<WorkflowDetailDto>(['workflows', id]);
-      if (previousWorkflowDetail) {
-        // Immediately update the workflow detail with new data
+      if (previousWorkflowDetail && !workflow.yaml) {
+        // Only optimistically update for non-YAML changes (like enabled toggle)
+        // YAML updates are handled by component state and we don't want to show
+        // false "Saved just now" messages when save might fail
         const optimisticWorkflowDetail: WorkflowDetailDto = {
           ...previousWorkflowDetail,
           ...workflow,
@@ -110,10 +113,15 @@ export function useWorkflowActions() {
           queryClient.setQueryData(queryKey, data);
         });
       }
-      // Restore previous workflow detail data
-      if (context?.previousWorkflowDetail) {
+      // For workflow detail, only revert if we're updating non-YAML fields (like enabled toggle)
+      // If YAML was being saved, DON'T revert because the YAML editor manages its own state
+      // and the component will handle showing the error and keeping the unsaved changes
+      if (context?.previousWorkflowDetail && !variables.workflow.yaml) {
+        // Only revert for metadata changes (like enabled toggle)
         queryClient.setQueryData(['workflows', variables.id], context.previousWorkflowDetail);
       }
+      // If YAML was being saved, we intentionally don't revert the detail query
+      // The component's local state keeps the YAML, and the error toast will inform the user
     },
     onSuccess: () => {
       // Refetch to ensure data is in sync with server
