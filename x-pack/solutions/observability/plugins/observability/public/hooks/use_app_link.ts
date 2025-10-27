@@ -32,7 +32,7 @@ export function useAppLink({ rule }: Props) {
     },
   };
 
-  return rule?.ruleTypeId
+  return rule?.ruleTypeId && linkMap[rule.ruleTypeId]
     ? linkMap[rule.ruleTypeId]
     : {
         navigateToLinkedApp: undefined,
