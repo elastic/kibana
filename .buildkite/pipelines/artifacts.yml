@@ -6,7 +6,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c2-standard-16
-      diskSizeGb: 150
+      diskSizeGb: 160
     timeout_in_minutes: 120
     retry:
       automatic:
@@ -98,6 +98,32 @@ steps:
 
   - command: .buildkite/scripts/steps/artifacts/cloud.sh
     label: 'Cloud Deployment'
+    soft_fail:
+      - exit_status: 255
+      - exit_status: -1
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+    timeout_in_minutes: 60
+    if: "build.env('RELEASE_BUILD') == null || build.env('RELEASE_BUILD') == '' || build.env('RELEASE_BUILD') == 'false'"
+    retry:
+      automatic:
+        # Timeout and graceful shutdown | ecctl deployment create falure
+        - exit_status: 255
+          limit: 0
+
+        # Timeout and forced shutdown
+        - exit_status: '-1'
+          limit: 0
+
+        # Test failures
+        - exit_status: '*'
+          limit: 1
+
+  - command: KIBANA_MEMORY_SIZE=8192 .buildkite/scripts/steps/artifacts/cloud.sh
+    label: 'Cloud Deployment - 8GB Kibana Node'
     soft_fail:
       - exit_status: 255
       - exit_status: -1

@@ -59,6 +59,7 @@ export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
   switch (node.type) {
     case 'function':
     case 'command':
+    case 'header-command':
     case 'order':
     case 'option': {
       yield* singleItems(node.args);

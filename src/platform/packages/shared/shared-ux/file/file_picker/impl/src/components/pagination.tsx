@@ -14,6 +14,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { useFilePickerContext } from '../context';
 
+import { i18nTexts } from '../i18n_texts';
+
 export const Pagination: FunctionComponent = () => {
   const { state } = useFilePickerContext();
   const page = useBehaviorSubject(state.currentPage$);
@@ -29,6 +31,7 @@ export const Pagination: FunctionComponent = () => {
       onPageClick={isUploading ? () => {} : state.setPage}
       pageCount={pageCount}
       activePage={page}
+      aria-label={i18nTexts.filesPagination}
     />
   );
 };

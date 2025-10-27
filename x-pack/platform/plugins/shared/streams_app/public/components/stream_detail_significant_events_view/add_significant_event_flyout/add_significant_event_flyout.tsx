@@ -21,7 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -36,7 +36,7 @@ import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { SystemSelector } from '../system_selector';
+import { FeaturesSelector } from '../feature_selector';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from './generated_flow_form/use_ai_features';
 import { validateQuery } from './common/validate_query';
@@ -46,10 +46,10 @@ interface Props {
   onClose: () => void;
   definition: Streams.all.Definition;
   onSave: (data: SaveData) => Promise<void>;
-  systems: System[];
+  features: Feature[];
   query?: StreamQueryKql;
   initialFlow?: Flow;
-  initialSelectedSystems?: System[];
+  initialSelectedFeatures?: Feature[];
 }
 
 export function AddSignificantEventFlyout({
@@ -58,8 +58,8 @@ export function AddSignificantEventFlyout({
   definition,
   onSave,
   initialFlow = undefined,
-  initialSelectedSystems = [],
-  systems,
+  initialSelectedFeatures = [],
+  features,
 }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'addSignificantEventFlyoutTitle' });
   const { euiTheme } = useEuiTheme();
@@ -92,7 +92,7 @@ export function AddSignificantEventFlyout({
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>(initialSelectedFeatures);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
@@ -117,7 +117,7 @@ export function AddSignificantEventFlyout({
 
   const generateQueries = useCallback(() => {
     const connector = aiFeatures?.genAiConnectors.selectedConnector;
-    if (!connector || selectedSystems.length === 0) {
+    if (!connector || selectedFeatures.length === 0) {
       return;
     }
 
@@ -125,10 +125,10 @@ export function AddSignificantEventFlyout({
     setIsGenerating(true);
     setGeneratedQueries([]);
 
-    from(selectedSystems)
+    from(selectedFeatures)
       .pipe(
-        concatMap((system) =>
-          generate(connector, system).pipe(
+        concatMap((feature) =>
+          generate(connector, feature).pipe(
             concatMap((result) => {
               const validation = validateQuery({
                 title: result.query.title,
@@ -142,7 +142,7 @@ export function AddSignificantEventFlyout({
                     id: v4(),
                     kql: { query: result.query.kql },
                     title: result.query.title,
-                    system: result.query.system,
+                    feature: result.query.feature,
                   },
                 ]);
               }
@@ -181,10 +181,10 @@ export function AddSignificantEventFlyout({
           setIsGenerating(false);
         },
       });
-  }, [aiFeatures, definition, generate, notifications, telemetryClient, selectedSystems]);
+  }, [aiFeatures, definition, generate, notifications, telemetryClient, selectedFeatures]);
 
   useEffect(() => {
-    if (initialFlow === 'ai' && initialSelectedSystems.length > 0) {
+    if (initialFlow === 'ai' && initialSelectedFeatures.length > 0) {
       generateQueries();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -247,16 +247,16 @@ export function AddSignificantEventFlyout({
                   selected={selectedFlow}
                   updateSelected={(flow) => {
                     setSelectedFlow(flow);
-                    setSelectedSystems([]);
+                    setSelectedFeatures([]);
                   }}
                 />
                 <EuiSpacer size="m" />
                 {selectedFlow === 'ai' && (
                   <>
-                    <SystemSelector
-                      systems={systems}
-                      selectedSystems={selectedSystems}
-                      onSystemsChange={setSelectedSystems}
+                    <FeaturesSelector
+                      features={features}
+                      selectedFeatures={selectedFeatures}
+                      onFeaturesChange={setSelectedFeatures}
                     />
                     <EuiButton
                       iconType="sparkles"
@@ -264,7 +264,7 @@ export function AddSignificantEventFlyout({
                       isLoading={isGenerating}
                       disabled={
                         isSubmitting ||
-                        selectedSystems.length === 0 ||
+                        selectedFeatures.length === 0 ||
                         !aiFeatures?.genAiConnectors?.selectedConnector
                       }
                       onClick={generateQueries}
@@ -317,10 +317,10 @@ export function AddSignificantEventFlyout({
                         }}
                         definition={definition}
                         dataViews={dataViewsFetch.value ?? []}
-                        systems={
-                          systems.map((system) => ({
-                            name: system.name,
-                            filter: system.filter,
+                        features={
+                          features.map((feature) => ({
+                            name: feature.name,
+                            filter: feature.filter,
                           })) || []
                         }
                       />
@@ -345,7 +345,7 @@ export function AddSignificantEventFlyout({
                       setCanSave={(next: boolean) => {
                         setCanSave(next);
                       }}
-                      systems={systems}
+                      features={features}
                       dataViews={dataViewsFetch.value ?? []}
                     />
                   )}

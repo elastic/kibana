@@ -9,6 +9,7 @@ import { useFindPrompts } from '@kbn/elastic-assistant';
 import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { useMemo } from 'react';
+
 export interface UseFindPromptContextsParams {
   context: {
     isAssistantEnabled: boolean;
@@ -26,7 +27,7 @@ export const useFindCostSavingsPrompts = (
   } = useFindPrompts({
     ...payload,
     params: {
-      prompt_group_id: 'aiForSoc',
+      prompt_group_id: 'ease',
       prompt_ids: ['costSavingsInsightPart1', 'costSavingsInsightPart2'],
     },
   });

@@ -7,26 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { APACHE_ERROR_LOGS_PROFILE } from '@kbn/discover-utils';
 import type { LogsDataSourceProfileProvider } from '../profile';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { createGetDefaultAppState, createRecommendedFields } from '../accessors';
 import { CLIENT_IP_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
-
-export const APACHE_LOGS_RECOMMENDED_FIELD_NAMES: Array<DataViewField['name']> = [
-  'http.request.method',
-  'url.path',
-  'http.response.status_code',
-  'http.response.bytes',
-  'client.ip',
-  'user.agent',
-  'referrer',
-  'message',
-  'log.level',
-  'source.ip',
-  'destination.ip',
-];
 
 export const createApacheErrorLogsDataSourceProfileProvider = (
   logsDataSourceProfileProvider: LogsDataSourceProfileProvider
@@ -38,8 +24,8 @@ export const createApacheErrorLogsDataSourceProfileProvider = (
         defaultColumns: [LOG_LEVEL_COLUMN, CLIENT_IP_COLUMN, MESSAGE_COLUMN],
       }),
       getRecommendedFields: createRecommendedFields({
-        defaultFields: APACHE_LOGS_RECOMMENDED_FIELD_NAMES,
+        defaultFields: APACHE_ERROR_LOGS_PROFILE.recommendedFields,
       }),
     },
-    resolve: createResolve('logs-apache.error'),
+    resolve: createResolve(APACHE_ERROR_LOGS_PROFILE.pattern),
   });

@@ -9,7 +9,7 @@
 
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useStableCallback } from '@kbn/unified-histogram';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export const usePaginatedFields = ({
   fields,
@@ -24,31 +24,38 @@ export const usePaginatedFields = ({
   pageSize: number;
   currentPage: number;
 }) => {
+  const dimensionsSet = useMemo(() => new Set(dimensions), [dimensions]);
+  const searchTermLower = useMemo(() => searchTerm.toLowerCase(), [searchTerm]);
+
   const buildPaginatedFields = useCallback(() => {
-    const allFields = fields.filter(
-      (field) =>
-        !field.noData &&
-        (dimensions.length === 0 ||
-          dimensions.every((sel) => field.dimensions.some((d) => d.name === sel)))
-    );
+    const filteredFields = fields.filter((field) => {
+      if (
+        field.noData ||
+        (searchTermLower && !field.name.toLowerCase().includes(searchTermLower))
+      ) {
+        return false;
+      }
 
-    const filteredFieldsBySearch = allFields.filter((field) =>
-      field.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+      if (dimensionsSet.size > 0) {
+        const hasMatchingDimension = field.dimensions.some((d) => dimensionsSet.has(d.name));
+        if (!hasMatchingDimension) {
+          return false;
+        }
+      }
 
-    const totalPages = Math.ceil(filteredFieldsBySearch.length / pageSize);
+      return true;
+    });
 
-    const currentPageFields = filteredFieldsBySearch.slice(
-      currentPage * pageSize,
-      currentPage * pageSize + pageSize
-    );
+    const totalPages = Math.ceil(filteredFields.length / pageSize);
+    const start = currentPage * pageSize;
+    const end = start + pageSize;
 
     return {
-      currentPageFields,
-      filteredFieldsBySearch,
+      currentPageFields: filteredFields.slice(start, end),
+      filteredFieldsCount: filteredFields.length,
       totalPages,
     };
-  }, [currentPage, dimensions, fields, pageSize, searchTerm]);
+  }, [fields, dimensionsSet, searchTermLower, pageSize, currentPage]);
 
   const [paginatedFieldsContext, setPaginatedFieldsContext] =
     useState<ReturnType<typeof buildPaginatedFields>>();

@@ -38,7 +38,7 @@ import {
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import { DiscoverLink } from '../../../../lib/discover_link';
-import { getLifecycleValue } from '../../../../lib/data_streams';
+import { getLifecycleValue, getRetentionPeriod } from '../../../../lib/data_streams';
 import { SectionLoading } from '../../../../../shared_imports';
 import type { Error } from '../../../../components';
 import { SectionError, DataHealth } from '../../../../components';
@@ -452,7 +452,49 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         dataTestSubj: 'dataRetentionDetail',
       });
     }
-
+    if (
+      dataStream.failureStoreEnabled &&
+      (dataStream.failureStoreRetention?.customRetentionPeriod ||
+        dataStream.failureStoreRetention?.defaultRetentionPeriod)
+    ) {
+      defaultDetails.push({
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.failureStoreRetentionTitle', {
+          defaultMessage: 'Failure store retention',
+        }),
+        toolTip: i18n.translate(
+          'xpack.idxMgmt.dataStreamDetailPanel.failureStoreRetentionTooltip',
+          {
+            defaultMessage:
+              'How long failed documents are stored before being automatically deleted. {retentionType}',
+            values: {
+              retentionType: dataStream.failureStoreRetention?.customRetentionPeriod
+                ? i18n.translate(
+                    'xpack.idxMgmt.dataStreamDetailPanel.failureStoreRetentionCustomTooltipLabel',
+                    {
+                      defaultMessage: 'This is a custom retention period for this data stream.',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.idxMgmt.dataStreamDetailPanel.failureStoreRetentionDefaultTooltipLabel',
+                    {
+                      defaultMessage: 'This is using the cluster default retention period.',
+                    }
+                  ),
+            },
+          }
+        ),
+        content: (
+          <>
+            {getRetentionPeriod(
+              dataStream.failureStoreRetention?.customRetentionPeriod ||
+                dataStream.failureStoreRetention?.defaultRetentionPeriod ||
+                ''
+            )}
+          </>
+        ),
+        dataTestSubj: 'failureStoreRetentionDetail',
+      });
+    }
     const managementDetails = getManagementDetails();
     const details = [...defaultDetails, ...managementDetails];
 
@@ -461,6 +503,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         {isDataStreamFullyManagedByILM(dataStream) && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.fullyManagedByILMTitle',
                 { defaultMessage: 'This data stream and its associated indices are managed by ILM' }
@@ -649,6 +692,9 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                 flush="left"
                 onClick={() => onClose()}
                 data-test-subj="closeDetailsButton"
+                aria-label={i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel', {
+                  defaultMessage: 'Close',
+                })}
               >
                 {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel', {
                   defaultMessage: 'Close',

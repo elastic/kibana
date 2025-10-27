@@ -120,6 +120,7 @@ export function Wrapper({
                     defaultMessage: 'Back to Streams',
                   }
                 )}
+                data-test-subj="backToStreamsButton"
               >
                 {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
                   defaultMessage: 'Streams',
@@ -135,10 +136,11 @@ export function Wrapper({
           <EuiFlexGroup
             direction="row"
             gutterSize="s"
-            alignItems="center"
+            alignItems="baseline"
             justifyContent="spaceBetween"
+            wrap
           >
-            <EuiFlexGroup gutterSize="s" alignItems="baseline">
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap>
               {streamId}
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
                 <EuiFlexItem grow={true}>

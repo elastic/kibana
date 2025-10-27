@@ -11,13 +11,3 @@ export const EMPTY_DASHBOARDS_ERROR = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboardsService.create.emptyDashbaordsError',
   { defaultMessage: 'Can not create a migration without dashboards' }
 );
-
-export const UPDATE_DASHBOARD_MIGRATION_SUCCESS = i18n.translate(
-  'xpack.securitySolution.siemMigrations.dashboardsService.update.success',
-  { defaultMessage: 'Dashboard migration updated' }
-);
-
-export const UPDATE_DASHBOARD_MIGRATION_FAILURE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.dashboardsService.update.failure',
-  { defaultMessage: 'Error updating dashboard migration' }
-);
