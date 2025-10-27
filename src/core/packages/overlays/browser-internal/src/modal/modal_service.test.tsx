@@ -10,7 +10,8 @@
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
@@ -81,9 +82,13 @@ describe('ModalService', () => {
         modals.open(mountPoint);
         expect(mockReactDomRender.mock.calls[0][0].props.children.type.name).toEqual('EuiModal');
         expect(mockReactDomRender.mock.calls[1][0].props.children.type.name).toEqual('EuiModal');
+        expect(mockReactDomRender.mock.calls[1][0].props.children.props.children.props.mount).toEqual(mountPoint);
 
-        const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
-        expect((modalContent.find('MountWrapper').props() as any).mount).toEqual(mountPoint);
+        const { container } = render(mockReactDomRender.mock.calls[1][0]);
+        
+        // Verify the modal structure is correct since we can't test the mount point content
+        expect(container.querySelector('.kbnOverlayMountWrapper')).toBeInTheDocument();
+
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         expect(() => ref1.close()).not.toThrowError();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
