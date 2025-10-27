@@ -32,5 +32,10 @@ export function useAppLink({ rule }: Props) {
     },
   };
 
-  return rule?.ruleTypeId ? linkMap[rule.ruleTypeId] : undefined;
+  return rule?.ruleTypeId
+    ? linkMap[rule.ruleTypeId]
+    : {
+        navigateToLinkedApp: undefined,
+        buttonText: '',
+      };
 }
