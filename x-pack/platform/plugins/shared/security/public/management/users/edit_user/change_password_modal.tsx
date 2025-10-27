@@ -78,8 +78,8 @@ export const validateChangePasswordForm = (
     errors.password = i18n.translate(
       'xpack.security.management.users.changePasswordForm.passwordInvalidError',
       {
-        defaultMessage: 'Enter at least {min_length} characters.',
-        values: { min_length: MIN_PASSWORD_LENGTH },
+        defaultMessage: 'Enter at least {minLength} characters.',
+        values: { minLength: MIN_PASSWORD_LENGTH },
       }
     );
   } else if (values.password !== values.confirm_password) {
@@ -256,8 +256,8 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
               helpText={i18n.translate(
                 'xpack.security.management.users.changePasswordForm.passwordHelpText',
                 {
-                  defaultMessage: 'Password must be at least {min_length} characters.',
-                  values: { min_length: MIN_PASSWORD_LENGTH },
+                  defaultMessage: 'Password must be at least {minLength} characters.',
+                  values: { minLength: MIN_PASSWORD_LENGTH },
                 }
               )}
               error={form.errors.password}
