@@ -33,7 +33,11 @@ export class AutomaticImportService {
   private logger: LoggerFactory;
   private savedObjectsClientPromise: Promise<SavedObjectsClientContract>;
 
-  constructor(logger: LoggerFactory, esClientPromise: Promise<ElasticsearchClient>, savedObjectsClientPromise: Promise<SavedObjectsClientContract>) {
+  constructor(
+    logger: LoggerFactory,
+    esClientPromise: Promise<ElasticsearchClient>,
+    savedObjectsClientPromise: Promise<SavedObjectsClientContract>
+  ) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = logger;
     this.savedObjectsClientPromise = savedObjectsClientPromise;

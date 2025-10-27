@@ -35,8 +35,10 @@ export const dataStreamSchemaV1 = schema.object({
           },
         })
       ),
-      input_type: schema.maybe(schema.oneOf(
-        Object.values(INPUT_TYPES).map((status) => schema.literal(status)) as [Type<string>])
+      input_type: schema.maybe(
+        schema.oneOf(
+          Object.values(INPUT_TYPES).map((status) => schema.literal(status)) as [Type<string>]
+        )
       ),
     },
     { unknowns: 'allow' }

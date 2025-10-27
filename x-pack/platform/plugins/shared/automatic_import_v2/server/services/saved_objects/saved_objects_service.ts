@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { LoggerFactory, Logger } from '@kbn/core/server';
 import {
   type SavedObjectsClientContract,
   type SavedObjectsUpdateOptions,
@@ -16,8 +17,6 @@ import {
   type KibanaRequest,
   type SecurityServiceStart,
   SavedObjectsErrorHelpers,
-  LoggerFactory,
-  Logger,
 } from '@kbn/core/server';
 import type { IntegrationAttributes, DataStreamAttributes } from './schemas/types';
 import {
@@ -26,13 +25,16 @@ import {
   TASK_STATUSES,
 } from './constants';
 
-
 export class AutomaticImportSavedObjectService {
   private savedObjectsClient: SavedObjectsClientContract;
   private logger: Logger;
   private security: SecurityServiceStart | null = null;
 
-  constructor(logger: LoggerFactory, savedObjectsClient: Promise<SavedObjectsClientContract>, security: SecurityServiceStart) {
+  constructor(
+    logger: LoggerFactory,
+    savedObjectsClient: Promise<SavedObjectsClientContract>,
+    security: SecurityServiceStart
+  ) {
     this.security = security;
     this.logger = logger.get('savedObjectsService');
     void this.initialize(savedObjectsClient);
@@ -365,9 +367,9 @@ export class AutomaticImportSavedObjectService {
       if (!allDataStreamsDeleted && !options?.force) {
         throw new Error(
           `Cannot delete integration ${integrationId}: Failed to delete ${deletionErrors.length} data streams. ` +
-          `Use force option to delete the integration anyway. Errors: ${JSON.stringify(
-            deletionErrors
-          )}`
+            `Use force option to delete the integration anyway. Errors: ${JSON.stringify(
+              deletionErrors
+            )}`
         );
       }
 
