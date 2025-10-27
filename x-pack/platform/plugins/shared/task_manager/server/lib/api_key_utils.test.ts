@@ -194,6 +194,46 @@ describe('api_key_utils', () => {
       });
     });
 
+    test('should return the users scope with a non-default serverBasePath', async () => {
+      const request = httpServerMock.createKibanaRequest({ path: '/kibana' });
+      const coreStart = coreMock.createStart();
+
+      const mockUser = {
+        authentication_type: 'basic',
+        username: 'testUser',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
+
+      coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce({
+        id: 'apiKeyId',
+        name: 'TaskManager: testUser',
+        api_key: 'apiKey',
+      });
+
+      const basePathMock = {
+        get: jest.fn(() => '/kibana/s/test-space'),
+        serverBasePath: '/kibana',
+      } as unknown as IBasePath;
+
+      const result = await getApiKeyAndUserScope(
+        [mockTask],
+        request,
+        coreStart.security,
+        basePathMock
+      );
+
+      expect(result.get('task')).toEqual({
+        apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          spaceId: 'test-space',
+          apiKeyCreatedByUser: false,
+        },
+      });
+    });
+
     test('should default space to default if space is not found', async () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = coreMock.createStart();
