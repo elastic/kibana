@@ -48,6 +48,9 @@ export const StreamSystemsFlyout = ({
       ownFocus
       onClose={closeFlyout}
       hideCloseButton
+      aria-label={i18n.translate('xpack.streams.streamSystemsFlyout.flyoutAriaLabel', {
+        defaultMessage: 'Stream description',
+      })}
       size="l"
     >
       <EuiFlyoutHeader hasBorder>

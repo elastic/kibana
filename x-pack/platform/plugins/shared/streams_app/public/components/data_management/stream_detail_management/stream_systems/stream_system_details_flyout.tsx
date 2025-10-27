@@ -39,7 +39,6 @@ export const StreamSystemDetailsFlyout = ({
   closeFlyout: () => void;
   definition: Streams.all.Definition;
 }) => {
-
   const [system, setSystem] = React.useState<System | undefined>(initialSystem);
   const [value, setValue] = React.useState(initialSystem?.description ?? '');
   const { upsertQuery } = useStreamSystemsApi(definition);
@@ -66,6 +65,9 @@ export const StreamSystemDetailsFlyout = ({
       ownFocus
       onClose={closeFlyout}
       hideCloseButton
+      aria-label={i18n.translate('xpack.streams.systemDetails.flyoutAriaLabel', {
+        defaultMessage: 'System details',
+      })}
       size="m"
     >
       <EuiFlyoutHeader hasBorder>
