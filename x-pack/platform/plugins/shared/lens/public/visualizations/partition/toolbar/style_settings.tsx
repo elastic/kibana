@@ -14,24 +14,11 @@ import type {
   LensPartitionVisualizationState as PieVisualizationState,
 } from '@kbn/lens-common';
 import { PARTITION_EMPTY_SIZE_RADIUS as EmptySizeRatios } from '@kbn/lens-common';
-import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
-import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import { PartitionAppearanceSettings } from './appearance_settings';
 import { PartitionTitlesAndTextSettings } from './titles_and_text_setttings';
 import { PartitionChartsMeta } from '../partition_charts_meta';
-import { PartitionLegendSettings } from './legend_settings';
 
-export function PartitionFlyoutToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
-  const { isDisabled: hasDisabledSytleSettings } =
-    PartitionChartsMeta[props.state.shape].toolbarPopover;
-  const datatableToolbarContentMap: ToolbarContentMap<PieVisualizationState> = {
-    style: hasDisabledSytleSettings ? undefined : PartitionStyleSettings,
-    legend: PartitionLegendSettings,
-  };
-  return <FlyoutToolbar {...props} contentMap={datatableToolbarContentMap} />;
-}
-
-function PartitionStyleSettings(props: VisualizationToolbarProps<PieVisualizationState>) {
+export function PartitionStyleSettings(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { state } = props;
 
   const layer = state.layers[0];
