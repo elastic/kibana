@@ -96,6 +96,8 @@ export const buildOngoingAlert = <
 
   // Omit fields that are overwrite-able with undefined value
   const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
+  const alertState = legacyAlert.getState();
+  const hasAlertState = Object.keys(alertState).length > 0;
 
   const alertUpdates = {
     // Set latest rule configuration
@@ -121,15 +123,13 @@ export const buildOngoingAlert = <
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Set the time range
-    ...(legacyAlert.getState().start
+    ...(alertState.start
       ? {
-          [ALERT_TIME_RANGE]: { gte: legacyAlert.getState().start },
+          [ALERT_TIME_RANGE]: { gte: alertState.start },
         }
       : {}),
     // Set latest duration as ongoing alerts should have updated duration
-    ...(legacyAlert.getState().duration
-      ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
-      : {}),
+    ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),
     ...(isImproving != null ? { [ALERT_SEVERITY_IMPROVING]: isImproving } : {}),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
     [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
@@ -141,7 +141,7 @@ export const buildOngoingAlert = <
         ...(rule[ALERT_RULE_TAGS] ?? []),
       ])
     ),
-    [ALERT_STATE_NAMESPACE]: legacyAlert.getState(),
+    ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: alertState } : {}),
   };
 
   // Clean the existing alert document so any nested fields that will be updated

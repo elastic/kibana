@@ -33,6 +33,7 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import {
   alertRule,
@@ -90,6 +91,11 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        [ALERT_STATE_NAMESPACE]: {
+          duration: '36000000',
+          end: '2023-03-30T12:27:28.159Z',
+          start: '2023-03-28T12:27:28.159Z',
+        },
         ...(flattened
           ? {
               ...alertRule,
@@ -163,6 +169,11 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        [ALERT_STATE_NAMESPACE]: {
+          duration: '36000000',
+          end: '2023-03-30T12:27:28.159Z',
+          start: '2023-03-28T12:27:28.159Z',
+        },
         ...(flattened
           ? {
               ...alertRule,
@@ -230,6 +241,11 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['*'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        [ALERT_STATE_NAMESPACE]: {
+          duration: '36000000',
+          end: '2023-03-30T12:27:28.159Z',
+          start: '2023-03-28T12:27:28.159Z',
+        },
         ...(flattened
           ? {
               ...alertRule,
@@ -334,6 +350,11 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        [ALERT_STATE_NAMESPACE]: {
+          duration: '36000000',
+          end: '2023-03-30T12:27:28.159Z',
+          start: '2023-03-28T12:27:28.159Z',
+        },
         ...(flattened
           ? {
               ...alertRule,
@@ -401,6 +422,11 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        [ALERT_STATE_NAMESPACE]: {
+          duration: '36000000',
+          end: '2023-03-30T12:27:28.159Z',
+          start: '2023-03-28T12:27:28.159Z',
+        },
         ...(flattened
           ? {
               ...alertRule,
@@ -512,6 +538,11 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['-tags', 'reported-recovery-tag', 'active-alert-tag', 'rule-'],
+        [ALERT_STATE_NAMESPACE]: {
+          duration: '36000000',
+          end: '2023-03-30T12:27:28.159Z',
+          start: '2023-03-28T12:27:28.159Z',
+        },
         ...(flattened
           ? {
               ...alertRule,
@@ -621,6 +652,11 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        [ALERT_STATE_NAMESPACE]: {
+          duration: '36000000',
+          end: '2023-03-30T12:27:28.159Z',
+          start: '2023-03-28T12:27:28.159Z',
+        },
         ...(flattened
           ? {
               ...alertRule,
@@ -729,6 +765,11 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
+        [ALERT_STATE_NAMESPACE]: {
+          duration: '36000000',
+          end: '2023-03-30T12:27:28.159Z',
+          start: '2023-03-28T12:27:28.159Z',
+        },
         ...(flattened
           ? {
               ...alertRule,

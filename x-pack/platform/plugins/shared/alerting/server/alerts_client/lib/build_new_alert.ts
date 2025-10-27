@@ -83,6 +83,10 @@ export const buildNewAlert = <
   RecoveryActionGroupId
 >): Alert & AlertData => {
   const cleanedPayload = stripFrameworkFields(payload);
+
+  const alertState = legacyAlert.getState();
+  const hasAlertState = Object.keys(alertState).length > 0;
+
   return deepmerge.all(
     [
       cleanedPayload,
@@ -103,13 +107,11 @@ export const buildNewAlert = <
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
-        ...(legacyAlert.getState().duration
-          ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
-          : {}),
-        ...(legacyAlert.getState().start
+        ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),
+        ...(alertState.start
           ? {
-              [ALERT_START]: legacyAlert.getState().start,
-              [ALERT_TIME_RANGE]: { gte: legacyAlert.getState().start },
+              [ALERT_START]: alertState.start,
+              [ALERT_TIME_RANGE]: { gte: alertState.start },
             }
           : {}),
         [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
@@ -117,7 +119,7 @@ export const buildNewAlert = <
         [TAGS]: Array.from(
           new Set([...((cleanedPayload?.tags as string[]) ?? []), ...(rule[ALERT_RULE_TAGS] ?? [])])
         ),
-        [ALERT_STATE_NAMESPACE]: legacyAlert.getState(),
+        ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: alertState } : {}),
       },
     ],
     { arrayMerge: (_, sourceArray) => sourceArray }

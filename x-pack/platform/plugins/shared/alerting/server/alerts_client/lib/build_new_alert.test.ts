@@ -29,6 +29,7 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import { alertRule } from './test_fixtures';
 
@@ -102,6 +103,10 @@ describe('buildNewAlert', () => {
       [SPACE_IDS]: ['default'],
       [VERSION]: '8.9.0',
       [TAGS]: ['rule-', '-tags'],
+      [ALERT_STATE_NAMESPACE]: {
+        duration: '0',
+        start: now,
+      },
     });
   });
 
