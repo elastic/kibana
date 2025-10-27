@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, take } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
@@ -104,11 +104,14 @@ describe('initializeUnifiedSearchManager', () => {
           }
         );
         let emitCount = 0;
-        unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
-          emitCount++;
+        unifiedSearchManager.internalApi
+          .startComparing$(lastSavedState$)
+          .pipe(take(2))
+          .subscribe((changes) => {
+            emitCount++;
 
-          if (emitCount === 1) {
-            expect(changes).toMatchInlineSnapshot(`
+            if (emitCount === 1) {
+              expect(changes).toMatchInlineSnapshot(`
               Object {
                 "timeRange": Object {
                   "from": "now-30m",
@@ -116,15 +119,15 @@ describe('initializeUnifiedSearchManager', () => {
                 },
               }
             `);
-            // reset timeRestore to false
-            timeRestore$.next(false);
-          }
+              // reset timeRestore to false
+              timeRestore$.next(false);
+            }
 
-          if (emitCount === 2) {
-            expect(changes).toMatchInlineSnapshot(`Object {}`);
-            done();
-          }
-        });
+            if (emitCount === 2) {
+              expect(changes).toMatchInlineSnapshot(`Object {}`);
+              done();
+            }
+          });
 
         timeRestore$.next(true);
         unifiedSearchManager.api.setTimeRange({
