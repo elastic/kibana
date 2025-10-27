@@ -116,7 +116,7 @@ export function initializeUnsavedChangesManager({
           const dashboardBackupState: DashboardBackupState = {
             // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
             viewMode,
-            ...(viewMode === 'edit' ? restOfDashboardChanges : {}),
+            ...restOfDashboardChanges,
           };
 
           // Backup latest state from children that have unsaved changes
