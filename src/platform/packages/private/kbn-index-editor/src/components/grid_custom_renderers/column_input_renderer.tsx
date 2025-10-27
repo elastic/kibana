@@ -21,6 +21,7 @@ import {
 import type { HTMLAttributes, KeyboardEvent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { isPlaceholderColumn } from '../../utils';
 import type { IndexUpdateService } from '../../index_update_service';
 import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
@@ -32,7 +33,7 @@ export const getColumnInputRenderer = (
   columnName: string,
   columnIndex: number,
   editMode: boolean,
-  setEditMode: (columnIndex: number | null) => void,
+  setEditingColumnIndex: (columnIndex: number | null) => void,
   indexUpdateService: IndexUpdateService,
   telemetryService: IndexEditorTelemetryService
 ): ((props: CustomGridColumnProps) => EuiDataGridColumn) => {
@@ -41,7 +42,7 @@ export const getColumnInputRenderer = (
     display: (
       <AddColumnHeader
         editMode={editMode}
-        setEditMode={setEditMode}
+        setEditingColumnIndex={setEditingColumnIndex}
         initialColumnName={columnName}
         columnIndex={columnIndex}
         telemetryService={telemetryService}
@@ -66,7 +67,7 @@ export const getColumnInputRenderer = (
           size: 'xs',
           iconType: 'pencil',
           onClick: () => {
-            setEditMode(columnIndex);
+            setEditingColumnIndex(columnIndex);
           },
         },
         {
@@ -90,7 +91,7 @@ export const getColumnInputRenderer = (
 
 interface AddColumnHeaderProps {
   editMode: boolean;
-  setEditMode: (columnIndex: number | null) => void;
+  setEditingColumnIndex: (columnIndex: number | null) => void;
   initialColumnName: string;
   columnIndex: number;
   telemetryService: IndexEditorTelemetryService;
@@ -98,7 +99,7 @@ interface AddColumnHeaderProps {
 
 export const AddColumnHeader = ({
   editMode,
-  setEditMode,
+  setEditingColumnIndex,
   initialColumnName,
   columnIndex,
   telemetryService,
@@ -113,8 +114,8 @@ export const AddColumnHeader = ({
     } else {
       resetColumnName();
     }
-    setEditMode(null);
-  }, [columnName, validationError, setEditMode, saveColumn, resetColumnName]);
+    setEditingColumnIndex(null);
+  }, [columnName, validationError, setEditingColumnIndex, saveColumn, resetColumnName]);
 
   const onSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -122,7 +123,7 @@ export const AddColumnHeader = ({
       event.stopPropagation();
 
       if (columnName && !validationError) {
-        setEditMode(null);
+        setEditingColumnIndex(null);
         saveColumn();
       } else {
         telemetryService.trackEditInteraction({
@@ -131,7 +132,7 @@ export const AddColumnHeader = ({
         });
       }
     },
-    [columnName, validationError, setEditMode, saveColumn, telemetryService]
+    [columnName, validationError, setEditingColumnIndex, saveColumn, telemetryService]
   );
 
   const columnLabel = isPlaceholderColumn(initialColumnName) ? (
@@ -187,7 +188,7 @@ export const AddColumnHeader = ({
                 if (e.key === 'Escape') {
                   e.preventDefault();
                   resetColumnName();
-                  setEditMode(null);
+                  setEditingColumnIndex(null);
                 }
               }}
               css={{
@@ -205,7 +206,9 @@ export const AddColumnHeader = ({
   return (
     <EuiButtonEmpty
       data-test-subj="indexEditorindexEditorColumnNameButton"
-      aria-label="Edit column name"
+      aria-label={i18n.translate('indexEditor.columnHeaderEdit.aria', {
+        defaultMessage: 'Edit column name',
+      })}
       css={{
         color: euiTheme.colors.textSubdued,
         width: '100%',
@@ -218,7 +221,7 @@ export const AddColumnHeader = ({
           justifyContent: 'left',
         },
       }}
-      onClick={() => setEditMode(columnIndex)}
+      onClick={() => setEditingColumnIndex(columnIndex)}
     >
       {columnLabel}
     </EuiButtonEmpty>

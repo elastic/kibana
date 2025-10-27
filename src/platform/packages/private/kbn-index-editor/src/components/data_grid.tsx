@@ -68,7 +68,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     },
   } = useKibana<KibanaContextExtra>();
 
-  const [columnBeingEdited, setColumnBeingEdited] = useState<number | null>(null);
+  const [editingColumnIndex, setEditingColumnIndex] = useState<number | null>(null);
 
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
   const sortOrder = useObservable(indexUpdateService.sortOrder$, []);
@@ -170,13 +170,13 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return renderedColumns.reduce<CustomGridColumnsConfiguration>(
       (acc, columnName, columnIndex) => {
         if (!props.dataView.fields.getByName(columnName)) {
-          const editMode = columnBeingEdited === columnIndex;
+          const editMode = editingColumnIndex === columnIndex;
           acc[columnName] = memoize(
             getColumnInputRenderer(
               columnName,
               columnIndex,
               editMode,
-              setColumnBeingEdited,
+              setEditingColumnIndex,
               indexUpdateService,
               indexEditorTelemetryService
             )
@@ -194,7 +194,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [
     renderedColumns,
     props.dataView.fields,
-    columnBeingEdited,
+    editingColumnIndex,
     indexUpdateService,
     indexEditorTelemetryService,
   ]);
