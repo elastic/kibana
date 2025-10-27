@@ -15,20 +15,12 @@ import { SearchGettingStartedPageTemplate } from '../layout/page_template';
 import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
 import { SearchGettingStartedConnectCode } from './connect_code';
 import { GettingStartedFooter } from './footer';
-import { useSearchGettingStartedFeatureFlag } from '../hooks/use_search_getting_started_feature_flag';
-import { useKibana } from '../hooks/use_kibana';
 
 export const SearchGettingStartedPage: React.FC = () => {
   const usageTracker = useUsageTracker();
-  const isGettingStartedEnabled = useSearchGettingStartedFeatureFlag();
-  const { application } = useKibana().services;
   useEffect(() => {
-    if (!isGettingStartedEnabled) {
-      application.navigateToApp('searchHomepage');
-    } else {
-      usageTracker.load(AnalyticsEvents.gettingStartedLoaded);
-    }
-  }, [isGettingStartedEnabled, application, usageTracker]);
+    usageTracker.load(AnalyticsEvents.gettingStartedLoaded);
+  }, [usageTracker]);
 
   return (
     <SearchGettingStartedPageTemplate>
