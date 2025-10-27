@@ -62,7 +62,7 @@ export class WorkflowTemplatingEngine {
     try {
       return this.engine.evalValueSync(resolvedExpression, context);
     } catch (err) {
-      throw new Error(`The provided expression is invalid. Got: ${template}`);
+      throw new Error(`The provided expression is invalid. Got: ${template}.`);
     }
   }
 

@@ -221,7 +221,9 @@ describe('EnterForeachNodeImpl', () => {
     it('should throw an error if foreach configuration is not provided', async () => {
       node.configuration.foreach = undefined as any;
 
-      await expect(underTest.run()).rejects.toThrowError('Foreach configuration is required');
+      await expect(underTest.run()).rejects.toThrowError(
+        'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
+      );
       expect(workflowExecutionRuntimeManager.navigateToNextNode).not.toHaveBeenCalled();
     });
 

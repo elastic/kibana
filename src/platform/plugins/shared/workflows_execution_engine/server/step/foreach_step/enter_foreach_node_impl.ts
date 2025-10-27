@@ -100,7 +100,9 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     const expression = this.node.configuration.foreach;
 
     if (!expression) {
-      throw new Error('Foreach configuration is required');
+      throw new Error(
+        'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
+      );
     }
 
     // Try to resolve the expression as JSON first
