@@ -19,6 +19,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
@@ -44,6 +45,43 @@ import type {
 } from './workflow_task_manager/types';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
+
+/**
+ * Re-enables scheduled tasks for a workflow when the resume task completes.
+ * This ensures scheduled tasks are re-enabled even if the resume task fails.
+ */
+export async function reEnableScheduledTasksForWorkflow(
+  workflowRunId: string,
+  spaceId: string,
+  taskManager: TaskManagerStartContract,
+  logger: Logger,
+  esClient: Client
+): Promise<void> {
+  try {
+    // Get the workflow execution to find the workflowId
+    const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+
+    if (!workflowExecution) {
+      logger.warn(
+        `Workflow execution ${workflowRunId} not found, cannot re-enable scheduled tasks`
+      );
+      return;
+    }
+
+    const workflowId = workflowExecution.workflowId;
+
+    // Re-enable the scheduled task
+    await taskManager.bulkEnable([`task:workflow:${workflowId}:scheduled`], true);
+
+    logger.info(`Re-enabled scheduled task for workflow ${workflowId} after resume completion`);
+  } catch (error) {
+    logger.error(`Failed to re-enable scheduled tasks for workflow ${workflowRunId}: ${error}`);
+  }
+}
 
 export class WorkflowsExecutionEnginePlugin
   implements
@@ -142,22 +180,39 @@ export class WorkflowsExecutionEnginePlugin
               const stepExecutionRepository = new StepExecutionRepository(esClient);
               const logsRepository = new LogsRepository(esClient, logger);
 
-              await resumeWorkflow({
-                workflowRunId,
-                spaceId,
-                workflowExecutionRepository,
-                stepExecutionRepository,
-                logsRepository,
-                taskAbortController,
-                taskManager,
-                esClient,
-                actions,
-                coreStart,
-                config,
-                logger,
-                fakeRequest: fakeRequest!,
-                dependencies,
-              });
+              try {
+                await resumeWorkflow({
+                  workflowRunId,
+                  spaceId,
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
+                  logsRepository,
+                  taskAbortController,
+                  taskManager,
+                  esClient,
+                  actions,
+                  coreStart,
+                  config,
+                  logger,
+                  fakeRequest: fakeRequest!,
+                  dependencies,
+                });
+              } finally {
+                // Always re-enable scheduled tasks when resume task completes (success or failure)
+                try {
+                  await reEnableScheduledTasksForWorkflow(
+                    workflowRunId,
+                    spaceId,
+                    taskManager,
+                    logger,
+                    esClient
+                  );
+                } catch (error) {
+                  logger.error(
+                    `Failed to re-enable scheduled tasks after resume completion: ${error}`
+                  );
+                }
+              }
             },
             async cancel() {
               taskAbortController.abort();

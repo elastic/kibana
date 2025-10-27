@@ -11,6 +11,7 @@ import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import {
   getReadableFrequency,
@@ -29,6 +30,7 @@ export interface WorkflowTaskState {
   lastRunAt?: string;
   lastRunStatus?: 'success' | 'failed';
   lastRunError?: string;
+  isWaiting?: boolean;
 }
 
 // This function creates a task runner for scheduled workflow tasks
@@ -73,6 +75,42 @@ export function createWorkflowTaskRunner({
 
           if (!workflow.valid) {
             throw new Error(`Workflow is not valid: ${workflowId}`);
+          }
+
+          // Solution #4: Safety guard against duplicate execution
+          // Check if there's already an in-progress execution for this workflow
+          try {
+            const existingExecutions = await workflowsService.getWorkflowExecutions(
+              {
+                workflowId,
+                statuses: [
+                  ExecutionStatus.PENDING,
+                  ExecutionStatus.RUNNING,
+                  ExecutionStatus.WAITING,
+                  ExecutionStatus.WAITING_FOR_INPUT,
+                ],
+                perPage: 1,
+                page: 1,
+              },
+              spaceId
+            );
+
+            if (existingExecutions.results.length > 0) {
+              logger.warn(
+                `Skipping scheduled execution for workflow ${workflowId} - workflow is already in progress (status: ${existingExecutions.results[0].status})`
+              );
+              return {
+                state: {
+                  ...state,
+                  lastRunAt: new Date().toISOString(),
+                  lastRunStatus: 'success',
+                  lastRunError: undefined,
+                },
+              };
+            }
+          } catch (error) {
+            // If we can't check existing executions, log warning but continue
+            logger.warn(`Failed to check existing executions for workflow ${workflowId}: ${error}`);
           }
 
           // Check for RRule triggers and log details
@@ -126,7 +164,7 @@ export function createWorkflowTaskRunner({
             triggeredBy: 'scheduled', // <-- mark as scheduled
           };
 
-          const executionId = fakeRequest
+          const executionResponse = fakeRequest
             ? await workflowsExecutionEngine.executeWorkflow(
                 workflowExecutionModel,
                 executionContext,
@@ -138,10 +176,45 @@ export function createWorkflowTaskRunner({
                 {} as any // eslint-disable-line @typescript-eslint/no-explicit-any -- Fallback when no user context is available
               );
 
+          const executionId = executionResponse.workflowExecutionId;
+
+          // Check workflow execution status to control rescheduling
+          let workflowExecutionStatus: ExecutionStatus | null = null;
+          try {
+            const workflowExecution = await workflowsService.getWorkflowExecution(
+              executionId,
+              spaceId
+            );
+            workflowExecutionStatus = workflowExecution?.status || null;
+          } catch (error) {
+            logger.warn(`Failed to fetch workflow execution status for ${executionId}: ${error}`);
+          }
+
           const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
           logger.info(
             `Successfully executed ${scheduleType}-scheduled workflow ${workflowId}, execution ID: ${executionId}`
           );
+
+          // Solution #1: Control rescheduling based on workflow execution status
+          const isWaiting =
+            workflowExecutionStatus === ExecutionStatus.WAITING ||
+            workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT;
+
+          if (isWaiting) {
+            logger.info(
+              `Workflow ${workflowId} is in ${workflowExecutionStatus} state - disabling scheduled task to prevent rescheduling`
+            );
+            return {
+              state: {
+                ...state,
+                lastRunAt: new Date().toISOString(),
+                lastRunStatus: 'success',
+                lastRunError: undefined,
+                isWaiting: true,
+              },
+              shouldDisableTask: true, // This will disable the task, preventing rescheduling
+            };
+          }
 
           return {
             state: {
@@ -149,6 +222,7 @@ export function createWorkflowTaskRunner({
               lastRunAt: new Date().toISOString(),
               lastRunStatus: 'success',
               lastRunError: undefined,
+              isWaiting: false,
             },
           };
         } catch (error) {

@@ -91,6 +91,7 @@ export async function setupDependencies(
     workflowExecutionGraph,
     workflowLogger,
     workflowExecutionState,
+    taskManager: taskManagerPlugin,
   });
 
   // Use user-scoped ES client if fakeRequest is available, otherwise fallback to regular client
