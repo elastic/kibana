@@ -11,16 +11,29 @@ import { run } from '@kbn/dev-cli-runner';
 import { ensureEdotCollector } from '../src/ensure_edot_collector';
 
 run(
-  ({ log, addCleanupTask }) => {
+  ({ log, addCleanupTask, flags }) => {
     const controller = new AbortController();
 
     addCleanupTask(() => {
       controller.abort();
     });
 
+    const grpcPort = flags['grpc-port'] ? Number(flags['grpc-port']) : undefined;
+    const httpPort = flags['http-port'] ? Number(flags['http-port']) : undefined;
+
+    if (grpcPort !== undefined && (isNaN(grpcPort) || grpcPort < 1 || grpcPort > 65535)) {
+      throw new Error('Invalid --grpc-port value. Must be a number between 1 and 65535.');
+    }
+
+    if (httpPort !== undefined && (isNaN(httpPort) || httpPort < 1 || httpPort > 65535)) {
+      throw new Error('Invalid --http-port value. Must be a number between 1 and 65535.');
+    }
+
     return ensureEdotCollector({
       log,
       signal: controller.signal,
+      grpcPort,
+      httpPort,
     }).catch((error) => {
       throw new Error('Failed to start EDOT Collector', { cause: error });
     });
@@ -33,12 +46,14 @@ run(
       and starts a Docker container running the EDOT Collector.
     `,
     flags: {
-      string: ['config'],
+      string: ['config', 'grpc-port', 'http-port'],
       alias: {
         c: 'config',
       },
       help: `
         --config, -c       Path to Kibana config file (defaults to config/kibana.dev.yml)
+        --grpc-port        Host port for gRPC endpoint (defaults to 4317)
+        --http-port        Host port for HTTP endpoint (defaults to 4318)
       `,
     },
   }

@@ -52,9 +52,19 @@ function getLatestAgentReleaseTag(): string {
  * Generates a Docker Compose configuration for running the EDOT Collector (Elastic Distribution of OpenTelemetry Collector) in Gateway mode.
  *
  * @param collectorConfigPath - Path to the EDOT Collector configuration file
+ * @param grpcPort - Host port for gRPC endpoint (defaults to 4317)
+ * @param httpPort - Host port for HTTP endpoint (defaults to 4318)
  * @returns Docker Compose YAML configuration string
  */
-export function getDockerComposeYaml({ collectorConfigPath }: { collectorConfigPath: string }) {
+export function getDockerComposeYaml({
+  collectorConfigPath,
+  grpcPort = 4317,
+  httpPort = 4318,
+}: {
+  collectorConfigPath: string;
+  grpcPort: number;
+  httpPort: number;
+}) {
   const agentVersion = getLatestAgentReleaseTag();
   return dedent(`
     services:
@@ -66,7 +76,7 @@ export function getDockerComposeYaml({ collectorConfigPath }: { collectorConfigP
         volumes:
           - ${collectorConfigPath}:/etc/otelcol-config.yml:ro
         ports:
-          - "4317:4317"
-          - "4318:4318"
+          - "${grpcPort}:4317"
+          - "${httpPort}:4318"
   `);
 }

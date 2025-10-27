@@ -59,13 +59,19 @@ function normalizeElasticsearchHost(host: string): string {
  *
  * @param log - Tooling logger for output
  * @param signal - Abort signal for cleanup
+ * @param grpcPort - Host port for gRPC endpoint (defaults to 4317)
+ * @param httpPort - Host port for HTTP endpoint (defaults to 4318)
  */
 export async function ensureEdotCollector({
   log,
   signal,
+  grpcPort = 4317,
+  httpPort = 4318,
 }: {
   log: ToolingLog;
   signal: AbortSignal;
+  grpcPort?: number;
+  httpPort?: number;
 }) {
   log.info(`Ensuring EDOT Collector is available`);
 
@@ -97,6 +103,8 @@ export async function ensureEdotCollector({
 
   const dockerComposeYaml = getDockerComposeYaml({
     collectorConfigPath: COLLECTOR_CONFIG_FILE_PATH,
+    grpcPort,
+    httpPort,
   });
 
   log.debug(`Writing docker-compose file to ${DOCKER_COMPOSE_FILE_PATH}`);
@@ -128,8 +136,8 @@ export async function ensureEdotCollector({
       log.write('');
       log.write(`${chalk.green('🔌')} OTLP endpoints available for application instrumentation:`);
       log.write('');
-      log.write(`  ${chalk.dim('gRPC:')} http://localhost:4317`);
-      log.write(`  ${chalk.dim('HTTP:')} http://localhost:4318`);
+      log.write(`  ${chalk.dim('gRPC:')} http://localhost:${grpcPort}`);
+      log.write(`  ${chalk.dim('HTTP:')} http://localhost:${httpPort}`);
       log.write('');
       log.write(`${chalk.dim('Container name:')} kibana-edot-collector`);
       log.write(`${chalk.dim('To stop:')} docker stop kibana-edot-collector`);
