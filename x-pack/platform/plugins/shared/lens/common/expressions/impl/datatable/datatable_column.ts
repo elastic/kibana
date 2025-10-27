@@ -9,7 +9,7 @@ import type { Direction } from '@elastic/eui';
 import type { PaletteOutput, CustomPaletteParams, ColorMapping } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { ExpressionFunctionDefinition, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { SortingHint } from '../../../types';
+import type { SortingHint } from '@kbn/lens-common';
 import type { CollapseFunction } from '../../defs/collapse';
 
 const LENS_DATATABLE_COLUMN = 'lens_datatable_column';
