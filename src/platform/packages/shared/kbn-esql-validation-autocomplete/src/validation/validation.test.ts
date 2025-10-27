@@ -268,7 +268,7 @@ describe('validation logic', () => {
 
         await expectErrors('f', [expect.any(String)]);
         await expectErrors('from ', [
-          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
         ]);
       });
 
@@ -277,10 +277,10 @@ describe('validation logic', () => {
           const { expectErrors } = await setup();
 
           await expectErrors('from index,', [
-            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
           ]);
           await expectErrors(`FROM index\n, \tother_index\t,\n \t `, [
-            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
           ]);
 
           await expectErrors(`from assignment = 1`, [
@@ -305,8 +305,7 @@ describe('validation logic', () => {
           const { expectErrors } = await setup();
 
           await expectErrors(`from index (metadata _id)`, [
-            "SyntaxError: extraneous input ')' expecting <EOF>",
-            "SyntaxError: token recognition error at: '('",
+            "SyntaxError: mismatched input '(' expecting <EOF>",
           ]);
         });
 
