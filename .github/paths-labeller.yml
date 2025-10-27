@@ -18,15 +18,16 @@
 - 'Team:Fleet':
     - 'x-pack/platform/plugins/shared/fleet/**/*.*'
     - 'x-pack/platform/test/fleet_api_integration/**/*.*'
-- 'Team:obs-ux-management':
-    - 'x-pack/solutions/observability/plugins/observability/**/*.*'
+- 'Team:actionable-obs':
     - 'x-pack/solutions/observability/plugins/slo/**/*.*'
     - 'x-pack/solutions/observability/plugins/synthetics/**/*.*'
     - 'x-pack/solutions/observability/plugins/exploratory_view/**/*.*'
-- 'Team:Obs AI Assistant':
+- 'Team:obs-ai-foundations':
     - 'x-pack/platform/plugins/shared/observability_ai_assistant/**/*.*'
     - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'
     - 'x-pack/solutions/observability/test/observability_ai_assistant_functional/**/*.*'
+- 'Team:obs-presentation':
+    - 'x-pack/solutions/observability/plugins/observability/**/*.*'
 - 'ci:project-deploy-observability':
     - 'packages/kbn-apm-*/**/*.*'
     - 'src/platform/plugins/shared/ai_assistant_management/**/*.*'
