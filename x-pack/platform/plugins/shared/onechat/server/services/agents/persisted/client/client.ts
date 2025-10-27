@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchServiceStart, KibanaRequest, Logger, SecurityServiceStart, } from '@kbn/core/server';
+import type {
+  ElasticsearchServiceStart,
+  KibanaRequest,
+  Logger,
+  SecurityServiceStart,
+} from '@kbn/core/server';
 import { validateAgentId } from '@kbn/onechat-common/agents';
 import {
   createAgentNotFoundError,

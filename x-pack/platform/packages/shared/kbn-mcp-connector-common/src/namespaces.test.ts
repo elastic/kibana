@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  MCP_NAMESPACE_PREFIX,
-  isMcpToolId,
-  createMcpToolId,
-  parseMcpToolId,
-} from './namespaces';
+import { MCP_NAMESPACE_PREFIX, isMcpToolId, createMcpToolId, parseMcpToolId } from './namespaces';
 
 describe('MCP Namespaces', () => {
   describe('MCP_NAMESPACE_PREFIX', () => {
