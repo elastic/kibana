@@ -23,7 +23,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchPlayground',
     'embeddedConsole',
     'solutionNavigation',
-    'searchStart',
     'svlSearchCreateIndexPage',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
@@ -110,8 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'search_project_nav_footer.project_settings_project_nav'
           );
 
-          await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'management' });
-          await pageObjects.solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
+          await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
           await pageObjects.svlCommonNavigation.sidenav.clickPanelLink(
             'management:triggersActionsConnectors'
           );
@@ -196,10 +194,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
             await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
             await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
-            await pageObjects.searchStart.setIndexNameValue(indexName);
-            await pageObjects.searchStart.expectCreateIndexButtonToBeEnabled();
-            await pageObjects.searchStart.clickCreateIndexButton();
-            await pageObjects.searchStart.expectToBeOnIndexDetailsPage();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.setIndexNameValue(indexName);
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToBeEnabled();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndexButton();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToBeOnIndexDetailsPage();
 
             // add mapping
             await es.indices.putMapping({

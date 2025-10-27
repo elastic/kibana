@@ -27,7 +27,8 @@ import {
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
-import { CONVERT_LEGACY_MARKDOWN_ACTION_ID, MARKDOWN_ID } from './constants';
+import { CONVERT_LEGACY_MARKDOWN_ACTION_ID } from './constants';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 
 const displayName = i18n.translate('dashboardMarkdown.convertLegacyDisplayName', {
   defaultMessage: 'Convert to new markdown',
@@ -63,7 +64,7 @@ export const getConvertLegacyMarkdownAction = () => ({
     const legacyContent = embeddable.getVis().params.markdown;
 
     await embeddable.parentApi.replacePanel(embeddable.uuid, {
-      panelType: MARKDOWN_ID,
+      panelType: MARKDOWN_EMBEDDABLE_TYPE,
       serializedState: {
         rawState: {
           content: legacyContent,

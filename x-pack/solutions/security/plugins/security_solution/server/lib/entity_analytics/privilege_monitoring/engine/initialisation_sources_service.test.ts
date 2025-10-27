@@ -66,6 +66,7 @@ describe('createInitialisationSourcesService', () => {
     const existingSources = [
       { id: '1', name: '.entity_analytics.monitoring.users-default' },
       { id: '2', name: '.entity_analytics.monitoring.sources.entityanalytics_okta-default' },
+      { id: '2', name: '.entity_analytics.monitoring.sources.entityanalytics_ad-default' },
     ];
     mockFindAll.mockResolvedValue(existingSources);
     mockFindByQuery.mockResolvedValue(existingSources);

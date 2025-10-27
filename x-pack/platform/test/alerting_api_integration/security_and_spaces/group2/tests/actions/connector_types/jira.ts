@@ -88,6 +88,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             apiUrl: jiraSimulatorURL,
             projectKey: mockJira.config.projectKey,
           },
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -106,6 +107,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             apiUrl: jiraSimulatorURL,
             projectKey: mockJira.config.projectKey,
           },
+          is_connector_type_deprecated: false,
         });
       });
 

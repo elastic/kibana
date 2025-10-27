@@ -8,17 +8,18 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type YAML from 'yaml';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { WorkflowEditorState } from './types';
 import { findStepByLine } from './utils/step_finder';
+import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
 
 // Initial state
 const initialState: WorkflowEditorState = {
+  isInitialized: false,
   yamlString: undefined,
   computed: undefined,
+  connectors: undefined,
+  schemaLoose: getWorkflowZodSchemaLoose({}),
   focusedStepId: undefined,
   stepExecutions: undefined,
   highlightedStepId: undefined,
@@ -36,25 +37,24 @@ const workflowEditorSlice = createSlice({
     _setComputedDataInternal: (
       state,
       action: {
-        payload: {
-          yamlDocument?: YAML.Document;
-          workflowLookup?: WorkflowLookup;
-          workflowGraph?: WorkflowGraph;
-        };
+        payload: WorkflowEditorState['computed'];
       }
     ) => {
-      state.computed = {
-        yamlDocument: action.payload.yamlDocument,
-        workflowLookup: action.payload.workflowLookup,
-        workflowGraph: action.payload.workflowGraph,
-      };
+      state.isInitialized = true;
+      state.computed = action.payload;
     },
+    _setGeneratedSchemaInternal: (
+      state,
+      action: { payload: WorkflowEditorState['schemaLoose'] }
+    ) => {
+      state.schemaLoose = action.payload;
+    },
+    setConnectors: (state, action: { payload: WorkflowEditorState['connectors'] }) => {
+      state.connectors = action.payload;
+    },
+    // Clear computed data (used when YAML changes)
     clearComputedData: (state) => {
-      state.computed = {
-        yamlDocument: undefined,
-        workflowLookup: undefined,
-        workflowGraph: undefined,
-      };
+      state.computed = undefined;
     },
     setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {
       if (!state.computed?.workflowLookup) {
@@ -86,10 +86,12 @@ export const {
   setCursorPosition,
   setStepExecutions,
   setHighlightedStepId,
+  setConnectors,
 } = workflowEditorSlice.actions;
 
 // Internal action for middleware use only
-export const { _setComputedDataInternal } = workflowEditorSlice.actions;
+export const { _setComputedDataInternal, _setGeneratedSchemaInternal } =
+  workflowEditorSlice.actions;
 
 // Export the reducer
 export const workflowEditorReducer = workflowEditorSlice.reducer;

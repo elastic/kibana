@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { WaitGraphNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../node_implementation';
+import { parseDuration } from '../../utils';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
-import { parseDuration } from '../../utils';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { NodeImplementation } from '../node_implementation';
 
 export class WaitStepImpl implements NodeImplementation {
   private static readonly SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
@@ -20,7 +20,7 @@ export class WaitStepImpl implements NodeImplementation {
 
   constructor(
     private node: WaitGraphNode,
-    private stepContext: WorkflowContextManager,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger,
     private workflowTaskManager: WorkflowTaskManager
@@ -44,23 +44,23 @@ export class WaitStepImpl implements NodeImplementation {
   }
 
   public async handleShortDuration(): Promise<void> {
-    await this.workflowRuntime.startStep();
+    await this.stepExecutionRuntime.startStep();
     this.logStartWait();
     const durationInMs = this.getDurationInMs();
     await new Promise((resolve, reject) => {
       const timeoutId = setTimeout(resolve, durationInMs);
-      this.stepContext.abortController.signal.addEventListener('abort', () => {
+      this.stepExecutionRuntime.abortController.signal.addEventListener('abort', () => {
         clearTimeout(timeoutId);
         reject(new Error('Wait step was aborted'));
       });
     });
     this.logFinishWait();
-    await this.workflowRuntime.finishStep();
+    await this.stepExecutionRuntime.finishStep();
     this.workflowRuntime.navigateToNextNode();
   }
 
   public handleLongDuration(): Promise<void> {
-    const stepState = this.workflowRuntime.getCurrentStepState();
+    const stepState = this.stepExecutionRuntime.getCurrentStepState();
 
     if (stepState?.resumeExecutionTaskId) {
       return this.exitLongWait();
@@ -71,7 +71,7 @@ export class WaitStepImpl implements NodeImplementation {
 
   private async enterLongWait(): Promise<void> {
     const durationInMs = this.getDurationInMs();
-    await this.workflowRuntime.startStep();
+    await this.stepExecutionRuntime.startStep();
     const workflowExecution = this.workflowRuntime.getWorkflowExecution();
     const runAt = new Date(new Date().getTime() + durationInMs);
     const resumeExecutionTask = await this.workflowTaskManager.scheduleResumeTask({
@@ -84,20 +84,20 @@ export class WaitStepImpl implements NodeImplementation {
         resumeExecutionTask.taskId
       }.\nExecution will resume at ${runAt.toISOString()}`
     );
-    await this.workflowRuntime.setCurrentStepState({
+    await this.stepExecutionRuntime.setCurrentStepState({
       resumeExecutionTaskId: resumeExecutionTask.taskId,
     });
     this.logStartWait();
-    await this.workflowRuntime.setWaitStep();
+    await this.stepExecutionRuntime.setWaitStep();
   }
 
   private async exitLongWait(): Promise<void> {
-    await this.workflowRuntime.setCurrentStepState(undefined);
+    await this.stepExecutionRuntime.setCurrentStepState(undefined);
     this.workflowLogger.logDebug(
       `Resuming execution of wait step "${this.node.id}" after long wait.`
     );
     this.logFinishWait();
-    await this.workflowRuntime.finishStep();
+    await this.stepExecutionRuntime.finishStep();
     this.workflowRuntime.navigateToNextNode();
   }
 

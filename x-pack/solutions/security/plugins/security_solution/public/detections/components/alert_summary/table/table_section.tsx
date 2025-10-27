@@ -29,7 +29,7 @@ export interface TableSectionProps {
    */
   dataView: DataView;
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }

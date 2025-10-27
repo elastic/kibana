@@ -8,7 +8,7 @@
 import { faker } from '@faker-js/faker';
 import { createEmptyLensState } from '../helper';
 import { makeEmbeddableServices, getLensRuntimeStateMock } from '../mocks';
-import type { LensRuntimeState } from '../types';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import { initializeIntegrations } from './initialize_integrations';
 
 function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>) {

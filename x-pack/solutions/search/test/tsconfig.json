@@ -33,5 +33,6 @@
     "@kbn/dev-utils",
     "@kbn/cases-plugin",
     "@kbn/serverless-search-settings",
+    "@kbn/management-settings-ids",
   ]
 }
