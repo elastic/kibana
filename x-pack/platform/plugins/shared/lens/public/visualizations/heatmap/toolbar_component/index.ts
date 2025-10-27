@@ -6,4 +6,3 @@
  */
 
 export { HeatmapToolbar } from './toolbar_component';
-export { HeatmapFlyoutToolbar } from './flyout_toolbar';
