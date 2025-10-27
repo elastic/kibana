@@ -12,6 +12,7 @@
       "routing": "",
       "_source": "__flag__",
       "_source_excludes": [],
+      "_source_exclude_vectors": "__flag__",
       "_source_includes": [],
       "stored_fields": [],
       "version": "",
