@@ -127,10 +127,16 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         .getEndpointMetadataService(this.options.spaceId)
         .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
 
+      const memDumpType = actionRequest.parameters.type;
       const unsuportedAgents: string[] = [];
 
       for (const endpointMeta of endpointMetadata) {
-        if (!endpointMeta.Endpoint.capabilities?.includes('memory_dump')) {
+        if (
+          (memDumpType === 'kernel' &&
+            !endpointMeta.Endpoint.capabilities?.includes('memdump_kernel')) ||
+          (memDumpType === 'process' &&
+            !endpointMeta.Endpoint.capabilities?.includes('memdump_process'))
+        ) {
           unsuportedAgents.push(`${endpointMeta.agent.id} (agent v.${endpointMeta.agent.version})`);
         }
       }

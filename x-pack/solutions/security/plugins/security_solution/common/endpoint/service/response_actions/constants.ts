@@ -64,7 +64,8 @@ export const ENDPOINT_CAPABILITIES = [
   'scan',
   'runscript',
   'cancel',
-  'memory_dump',
+  'memdump_process',
+  'memdump_kernel',
 ] as const;
 
 export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
@@ -167,7 +168,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.fr
   scan: 'scan',
   runscript: 'runscript',
   cancel: 'cancel',
-  'memory-dump': 'memory_dump',
+  'memory-dump': 'memdump_kernel',
 });
 
 /**
