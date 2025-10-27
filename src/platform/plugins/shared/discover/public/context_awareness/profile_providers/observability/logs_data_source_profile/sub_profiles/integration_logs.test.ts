@@ -112,35 +112,31 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
     },
   };
 
-  providers.forEach((provider) => {
-    const { profileId } = provider;
-
-    describe(profileId, () => {
-      it('should match a valid index pattern', async () => {
-        const result = await provider.resolve({
-          rootContext: ROOT_CONTEXT,
-          dataSource: createEsqlDataSource(),
-          query: { esql: `FROM ${indexPatternMap[profileId].valid}` },
-        });
-        expect(result).toEqual(RESOLUTION_MATCH);
+  describe.each(providers)('$profileId', (provider) => {
+    it('should match a valid index pattern', async () => {
+      const result = await provider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: createEsqlDataSource(),
+        query: { esql: `FROM ${indexPatternMap[provider.profileId].valid}` },
       });
+      expect(result).toEqual(RESOLUTION_MATCH);
+    });
 
-      it('should not match an invalid index pattern', async () => {
-        const result = await provider.resolve({
-          rootContext: ROOT_CONTEXT,
-          dataSource: createEsqlDataSource(),
-          query: { esql: `FROM ${indexPatternMap[profileId].invalid}` },
-        });
-        expect(result).toEqual({ isMatch: false });
+    it('should not match an invalid index pattern', async () => {
+      const result = await provider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: createEsqlDataSource(),
+        query: { esql: `FROM ${indexPatternMap[provider.profileId].invalid}` },
       });
+      expect(result).toEqual({ isMatch: false });
+    });
 
-      it('should return default app state', () => {
-        const getDefaultAppState = provider.profile.getDefaultAppState?.(() => ({}), {
-          context: RESOLUTION_MATCH.context,
-        });
-        expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
-          columns: expectedColumnsMap[profileId],
-        });
+    it('should return default app state', () => {
+      const getDefaultAppState = provider.profile.getDefaultAppState?.(() => ({}), {
+        context: RESOLUTION_MATCH.context,
+      });
+      expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
+        columns: expectedColumnsMap[provider.profileId],
       });
     });
   });
