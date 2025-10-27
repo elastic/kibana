@@ -17,7 +17,7 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
-import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
 import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
@@ -828,6 +828,6 @@ async function _getSpaceAwarenessFilter(spaceId: string | undefined) {
   if (spaceId === DEFAULT_SPACE_ID) {
     return [DEFAULT_NAMESPACES_FILTER];
   } else {
-    return [`namespaces:"${spaceId}"`];
+    return [`namespaces:"${spaceId}" or namespaces:"${ALL_SPACES_ID}"`];
   }
 }
