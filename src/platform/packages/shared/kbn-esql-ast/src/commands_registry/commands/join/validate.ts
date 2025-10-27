@@ -16,14 +16,23 @@ import type {
   ESQLAst,
 } from '../../../types';
 import { isBinaryExpression, isIdentifier, isSource } from '../../../ast/is';
-import type { ICommandContext } from '../../types';
+import type { ESQLFieldWithMetadata, ICommandCallbacks, ICommandContext } from '../../types';
 import { errors } from '../../../definitions/utils/errors';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
+import { createEnrichedContext, getOnOption } from './utils';
+import type { ESQLSingleAstItem } from '../../../types';
 
-export const validate = (
+// Type for callbacks that include getColumnsFor (from ESQLCallbacks)
+type CallbacksWithGetColumnsFor = ICommandCallbacks & {
+  getColumnsFor?: (params: { query: string }) => Promise<ESQLFieldWithMetadata[]>;
+};
+
+export const validate = async (
   command: ESQLAstAllCommands,
   ast: ESQLAst,
-  context?: ICommandContext
-): ESQLMessage[] => {
+  context?: ICommandContext,
+  callbacks?: CallbacksWithGetColumnsFor
+): Promise<ESQLMessage[]> => {
   const messages: ESQLMessage[] = [];
   const { commandType, args } = command as ESQLAstJoinCommand;
   const joinSources = context?.joinSources || [];
@@ -75,6 +84,49 @@ export const validate = (
     messages.push(error);
 
     return messages;
+  }
+
+  // Enrich context with lookup index fields for proper validation
+  let contextForValidation = context;
+
+  if (callbacks?.getColumnsFor) {
+    const joinCommand = command as ESQLAstJoinCommand;
+
+    // Adapter: createEnrichedContext expects callback with (query: string) signature, but getColumnsFor uses ({ query: string })
+    const normalizedCallback = async (query: string): Promise<ESQLFieldWithMetadata[]> => {
+      const result = await callbacks.getColumnsFor!({ query });
+
+      return result || [];
+    };
+
+    contextForValidation = await createEnrichedContext(context, joinCommand, normalizedCallback);
+  }
+
+  // Validate JOIN ON expressions
+  const onOption = getOnOption(command as ESQLAstJoinCommand);
+
+  if (onOption) {
+    messages.push(...validateOnExpressions(command as ESQLAstJoinCommand));
+  }
+
+  messages.push(...validateCommandArguments(command, ast, contextForValidation, callbacks));
+
+  return messages;
+};
+
+const validateOnExpressions = (joinCommand: ESQLAstJoinCommand): ESQLMessage[] => {
+  const messages: ESQLMessage[] = [];
+  const onOption = getOnOption(joinCommand)!;
+  const expressions = onOption.args as ESQLSingleAstItem[];
+
+  // Find complete binary expressions
+  const binaryExpressions = expressions.filter(
+    (expr) => isBinaryExpression(expr) && !expr.incomplete
+  );
+
+  // Binary expressions cannot be mixed with comma-separated fields
+  if (binaryExpressions.length > 0 && expressions.length > 1) {
+    messages.push(errors.joinOnSingleExpression(onOption.location));
   }
 
   return messages;

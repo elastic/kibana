@@ -8,10 +8,21 @@
  */
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
-import { expectErrors } from '../../../__tests__/validation';
 
-const joinExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
-  return expectErrors(query, expectedErrors, context, 'join', validate);
+const joinExpectErrors = async (query: string, expectedErrors: string[], context = mockContext) => {
+  const { Parser } = await import('../../../parser');
+  const { root } = Parser.parse(query);
+  const command = root.commands.find((cmd) => cmd.name === 'join');
+  if (!command) {
+    throw new Error('JOIN command not found in the parsed query');
+  }
+  const result = await validate(command, root.commands, context);
+
+  const errors: string[] = [];
+  result.forEach((error) => {
+    errors.push(error.text);
+  });
+  expect(errors).toEqual(expectedErrors);
 };
 
 describe('JOIN Validation', () => {
@@ -20,31 +31,31 @@ describe('JOIN Validation', () => {
   });
   describe('<LEFT | RIGHT | LOOKUP> JOIN <index> [ AS <alias> ] ON <condition> [, <condition> [, ...]]', () => {
     describe('... <index> ...', () => {
-      test('validates the most basic query', () => {
-        joinExpectErrors('FROM index | LEFT JOIN join_index ON stringField', []);
+      test('validates the most basic query', async () => {
+        await joinExpectErrors('FROM index | LEFT JOIN join_index ON keywordField', []);
       });
 
-      test('raises error, when index is not suitable for JOIN command', () => {
-        joinExpectErrors('FROM index | LEFT JOIN index ON stringField', [
+      test('raises error, when index is not suitable for JOIN command', async () => {
+        await joinExpectErrors('FROM index | LEFT JOIN index ON keywordField', [
           '"index" is not a valid JOIN index. Please use a "lookup" mode index.',
         ]);
-        joinExpectErrors('FROM index | LEFT JOIN non_existing_index_123 ON stringField', [
+        await joinExpectErrors('FROM index | LEFT JOIN non_existing_index_123 ON keywordField', [
           '"non_existing_index_123" is not a valid JOIN index. Please use a "lookup" mode index.',
         ]);
       });
 
-      test('allows lookup index', () => {
-        joinExpectErrors('FROM index | LEFT JOIN join_index ON stringField', []);
-        joinExpectErrors('FROM index | LEFT JOIN join_index_with_alias ON stringField', []);
+      test('allows lookup index', async () => {
+        await joinExpectErrors('FROM index | LEFT JOIN join_index ON keywordField', []);
+        await joinExpectErrors('FROM index | LEFT JOIN join_index_with_alias ON keywordField', []);
       });
 
-      test('allows lookup index alias', () => {
-        joinExpectErrors('FROM index | LEFT JOIN join_index_alias_1 ON stringField', []);
-        joinExpectErrors('FROM index | LEFT JOIN join_index_alias_2 ON stringField', []);
+      test('allows lookup index alias', async () => {
+        await joinExpectErrors('FROM index | LEFT JOIN join_index_alias_1 ON keywordField', []);
+        await joinExpectErrors('FROM index | LEFT JOIN join_index_alias_2 ON keywordField', []);
       });
 
-      test('handles correctly conflicts', () => {
-        joinExpectErrors(
+      test('handles correctly conflicts', async () => {
+        await joinExpectErrors(
           'FROM index  | EVAL keywordField = to_IP(keywordField) | LEFT JOIN join_index ON keywordField',
           []
         );

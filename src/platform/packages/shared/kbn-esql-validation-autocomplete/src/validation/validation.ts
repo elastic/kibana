@@ -99,7 +99,7 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
     };
 
-    const commandMessages = validateCommand(command, references, rootCommands, {
+    const commandMessages = await validateCommand(command, references, rootCommands, {
       ...callbacks,
       hasMinimumLicenseRequired,
     });
@@ -127,7 +127,7 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
     };
 
-    const commandMessages = validateCommand(
+    const commandMessages = await validateCommand(
       subquery.commands[subquery.commands.length - 1],
       references,
       rootCommands,
@@ -158,12 +158,12 @@ async function validateAst(
   };
 }
 
-function validateCommand(
+async function validateCommand(
   command: ESQLAstAllCommands,
   references: ReferenceMaps,
   rootCommands: ESQLCommand[],
   callbacks?: ICommandCallbacks
-): ESQLMessage[] {
+): Promise<ESQLMessage[]> {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
     return messages;
@@ -201,7 +201,12 @@ function validateCommand(
   };
 
   if (commandDefinition.methods.validate) {
-    const allErrors = commandDefinition.methods.validate(command, rootCommands, context, callbacks);
+    const allErrors = await commandDefinition.methods.validate(
+      command,
+      rootCommands,
+      context,
+      callbacks
+    );
 
     const filteredErrors = allErrors.filter((error) => {
       if (error.errorType === 'semantic' && error.requiresCallback) {

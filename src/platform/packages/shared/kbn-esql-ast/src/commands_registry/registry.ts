@@ -34,7 +34,7 @@ export interface ICommandMethods<TContext = any> {
     ast: ESQLCommand[],
     context?: TContext,
     callbacks?: ICommandCallbacks
-  ) => ESQLMessage[];
+  ) => ESQLMessage[] | Promise<ESQLMessage[]>;
 
   /**
    * Provides suggestions for autocompletion based on the current query context

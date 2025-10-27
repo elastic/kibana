@@ -394,6 +394,10 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  joinOnSingleExpression: {
+    message: string;
+    type: {};
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;
