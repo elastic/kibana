@@ -84,7 +84,7 @@ export const ProjectPicker = () => {
           const response: {
             origin: { [key: string]: Project };
             linked_projects: { [key: string]: Project };
-          } = await services.http.get('/api/projects/_tags');
+          } = await services.http.get('/internal/projects/_tags');
           console.log({ response });
 
           setOriginProject(Object.values(response.origin)[0]);
