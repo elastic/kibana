@@ -9,7 +9,7 @@
 
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import type { RuleFormData } from '../types';
 import { parseDuration, formatDuration } from '../utils';
 import {

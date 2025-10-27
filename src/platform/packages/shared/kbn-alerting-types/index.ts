@@ -23,4 +23,3 @@ export type * from './search_strategy_types';
 export type * from './alert_delete_types';
 export type * from './browser_fields_response';
 export type * from './alert_fields_response';
-export * from './rule/v1';

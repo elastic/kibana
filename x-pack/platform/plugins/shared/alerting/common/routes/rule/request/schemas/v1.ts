@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import { rRuleRequestSchemaV1 } from '../../../r_rule';
 import { validateSnoozeScheduleV1 } from '../../validation';
 

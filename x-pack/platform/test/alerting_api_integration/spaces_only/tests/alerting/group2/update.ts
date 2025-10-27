@@ -11,7 +11,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { MAX_ARTIFACTS_DASHBOARDS_LENGTH } from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
-import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,

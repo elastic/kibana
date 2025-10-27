@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import {
   RULE_INVESTIGATION_GUIDE_LABEL,
   RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT,
