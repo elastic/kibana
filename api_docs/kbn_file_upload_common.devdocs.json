@@ -158,6 +158,163 @@
       },
       {
         "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FileUploadTelemetryService",
+        "type": "Class",
+        "tags": [],
+        "label": "FileUploadTelemetryService",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadTelemetryService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "analytics",
+                "description": [],
+                "signature": [
+                  "AnalyticsServiceStart"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadTelemetryService.trackAnalyzeFile",
+            "type": "Function",
+            "tags": [],
+            "label": "trackAnalyzeFile",
+            "description": [],
+            "signature": [
+              "(fileUploadEvent: FileAnalysisEvent) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.trackAnalyzeFile.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fileUploadEvent",
+                "description": [],
+                "signature": [
+                  "FileAnalysisEvent"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadTelemetryService.trackUploadFile",
+            "type": "Function",
+            "tags": [],
+            "label": "trackUploadFile",
+            "description": [],
+            "signature": [
+              "(fileUploadEvent: FileUploadEvent) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.trackUploadFile.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fileUploadEvent",
+                "description": [],
+                "signature": [
+                  "FileUploadEvent"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadTelemetryService.trackUploadSession",
+            "type": "Function",
+            "tags": [],
+            "label": "trackUploadSession",
+            "description": [],
+            "signature": [
+              "(uploadSessionEvent: UploadSessionEvent) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.FileUploadTelemetryService.trackUploadSession.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "uploadSessionEvent",
+                "description": [],
+                "signature": [
+                  "UploadSessionEvent"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
         "id": "def-common.MessageReader",
         "type": "Class",
         "tags": [],
@@ -492,6 +649,43 @@
       }
     ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.registerFileUploadAnalyticsEvents",
+        "type": "Function",
+        "tags": [],
+        "label": "registerFileUploadAnalyticsEvents",
+        "description": [
+          "\nRegisters the file upload analytics events."
+        ],
+        "signature": [
+          "(analytics: ",
+          "AnalyticsServiceSetup",
+          ") => void"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.registerFileUploadAnalyticsEvents.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "AnalyticsServiceSetup"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/file-upload-common",
         "id": "def-common.updatePipelineTimezone",
@@ -2157,6 +2351,17 @@
             "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.location",
+            "type": "string",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2497,6 +2702,55 @@
             "label": "TIKA",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FILE_UPLOAD_EVENT",
+        "type": "Object",
+        "tags": [],
+        "label": "FILE_UPLOAD_EVENT",
+        "description": [
+          "\nEvent types."
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_UPLOAD_EVENT.FILE_ANALYSIS",
+            "type": "string",
+            "tags": [],
+            "label": "FILE_ANALYSIS",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_UPLOAD_EVENT.FILE_UPLOAD",
+            "type": "string",
+            "tags": [],
+            "label": "FILE_UPLOAD",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_UPLOAD_EVENT.UPLOAD_SESSION",
+            "type": "string",
+            "tags": [],
+            "label": "UPLOAD_SESSION",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/telemetry/register_telemetry.ts",
             "deprecated": false,
             "trackAdoption": false
           }
