@@ -81,7 +81,6 @@ describe('PipelineTreeNodeLabel', () => {
     expect(handleClick).toHaveBeenCalled();
   });
 
-
   it('truncates long pipeline names', () => {
     const longName = 'a'.repeat(100);
     const { getByTestId } = render(

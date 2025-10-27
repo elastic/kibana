@@ -48,8 +48,8 @@ export const PipelineTreeNodeLabel = ({
           data-test-subj={`pipelineTreeNode-${pipelineName}-link`}
         >
           {pipelineName.length > MAX_PIPELINE_NAME_LENGTH
-          ? `${pipelineName.slice(0, MAX_PIPELINE_NAME_LENGTH)}...`
-          : pipelineName}
+            ? `${pipelineName.slice(0, MAX_PIPELINE_NAME_LENGTH)}...`
+            : pipelineName}
         </EuiLink>
       </EuiFlexItem>
       {isManaged && (
