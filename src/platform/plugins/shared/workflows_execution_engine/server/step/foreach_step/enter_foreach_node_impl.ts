@@ -98,8 +98,15 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
   private getItems(): unknown[] {
     const expression = this.node.configuration.foreach;
+
+    if (!expression) {
+      throw new Error('Foreach configuration is required');
+    }
+
+    // Try to resolve the expression as JSON first
     let resolvedValue = this.tryParseJSON(expression);
 
+    // If parsing as JSON failed, evaluate the expression in context
     if (!resolvedValue) {
       resolvedValue =
         this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);

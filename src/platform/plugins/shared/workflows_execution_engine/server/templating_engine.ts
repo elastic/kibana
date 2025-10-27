@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AssignTag, Liquid } from 'liquidjs';
+import { Liquid } from 'liquidjs';
 
 export class WorkflowTemplatingEngine {
   private readonly engine: Liquid;

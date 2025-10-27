@@ -44,8 +44,7 @@ describe('EnterForeachNodeImpl', () => {
     stepExecutionRuntime.setCurrentStepState = jest.fn();
     stepExecutionRuntime.setInput = jest.fn();
     stepExecutionRuntime.contextManager = {
-      readContextPath: jest.fn(),
-      renderValueAccordingToContext: jest.fn().mockImplementation((input) => input),
+      evaluateExpressionInContext: jest.fn().mockImplementation((input) => input),
     } as any;
 
     workflowLogger = {} as unknown as IWorkflowEventLogger;
@@ -72,20 +71,9 @@ describe('EnterForeachNodeImpl', () => {
     describe('when foreach configuration is an array with items', () => {
       beforeEach(() => {
         node.configuration.foreach = JSON.stringify(['item1', 'item2', 'item3']);
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext = jest
+        stepExecutionRuntime.contextManager.evaluateExpressionInContext = jest
           .fn()
           .mockImplementation((input) => input);
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext = jest
-          .fn()
-          .mockReturnValue(JSON.stringify(['renderedItem1', 'renderedItem2', 'renderedItem3']));
-      });
-
-      it('should render foreach expression', async () => {
-        await underTest.run();
-
-        expect(
-          stepExecutionRuntime.contextManager.renderValueAccordingToContext
-        ).toHaveBeenCalledWith(JSON.stringify(['item1', 'item2', 'item3']));
       });
 
       it('should start step with foreach input equal to provided rendered JSON', async () => {
@@ -96,7 +84,7 @@ describe('EnterForeachNodeImpl', () => {
       it('should set step input equal to provided rendered JSON', async () => {
         await underTest.run();
         expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
-          foreach: JSON.stringify(['renderedItem1', 'renderedItem2', 'renderedItem3']),
+          foreach: JSON.stringify(['item1', 'item2', 'item3']),
         });
       });
 
@@ -105,8 +93,8 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['renderedItem1', 'renderedItem2', 'renderedItem3'],
-          item: 'renderedItem1',
+          items: ['item1', 'item2', 'item3'],
+          item: 'item1',
           index: 0,
           total: 3,
         });
@@ -116,13 +104,9 @@ describe('EnterForeachNodeImpl', () => {
     describe('when foreach configuration refers to context', () => {
       beforeEach(() => {
         node.configuration.foreach = 'steps.testStep.array';
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext = jest
+        stepExecutionRuntime.contextManager.evaluateExpressionInContext = jest
           .fn()
-          .mockReturnValue('steps.testStep.arrayRendered');
-        (stepExecutionRuntime.contextManager.readContextPath as jest.Mock).mockReturnValue({
-          value: ['item1', 'item2', 'item3'],
-          pathExists: true,
-        });
+          .mockReturnValue(['item1', 'item2', 'item3']);
       });
 
       it('should start step with foreach input equal to rendered value', async () => {
@@ -135,24 +119,31 @@ describe('EnterForeachNodeImpl', () => {
         await underTest.run();
 
         expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
-          foreach: 'steps.testStep.arrayRendered',
+          foreach: 'steps.testStep.array',
         });
       });
 
-      it('should render foreach expression', async () => {
+      it('should evaluate foreach expression', async () => {
         await underTest.run();
 
         expect(
-          stepExecutionRuntime.contextManager.renderValueAccordingToContext
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext
         ).toHaveBeenCalledWith('steps.testStep.array');
       });
 
-      it('should read array from context', async () => {
+      it('should parse value returned by expression if it is a string', async () => {
+        (
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
+        ).mockReturnValue('["item1", "item2", "item3"]');
         await underTest.run();
 
-        expect(stepExecutionRuntime.contextManager.readContextPath).toHaveBeenCalledWith(
-          'steps.testStep.arrayRendered'
-        );
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+          items: ['item1', 'item2', 'item3'],
+          item: 'item1',
+          index: 0,
+          total: 3,
+        });
       });
 
       it('should initialize foreach state from the context', async () => {
@@ -168,24 +159,22 @@ describe('EnterForeachNodeImpl', () => {
       });
 
       it('should throw an error if context does not exist', async () => {
-        (stepExecutionRuntime.contextManager.readContextPath as jest.Mock).mockReturnValue({
-          value: null,
-          pathExists: false,
-        });
+        (
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
+        ).mockReturnValue(null);
         await expect(underTest.run()).rejects.toThrowError(
-          `Expression "steps.testStep.arrayRendered" could not be found in the context. ` +
-            `Please ensure the expression references an array variable or update the configuration.`
+          'Foreach expression must evaluate to an array. Expression "steps.testStep.array" resolved to object (null).'
         );
       });
 
       it('should throw an error if context is not an array', async () => {
-        (stepExecutionRuntime.contextManager.readContextPath as jest.Mock).mockReturnValue({
-          value: { key: 'value' },
-          pathExists: true,
+        (
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
+        ).mockReturnValue({
+          key: 'value',
         });
         await expect(underTest.run()).rejects.toThrowError(
-          `Foreach expression must evaluate to an array. ` +
-            `Expression "steps.testStep.arrayRendered" resolved to object: {"key":"value"}. `
+          'Foreach expression must evaluate to an array. Expression "steps.testStep.array" resolved to object: {"key":"value"}.'
         );
       });
     });
