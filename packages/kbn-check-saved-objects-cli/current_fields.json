@@ -613,6 +613,12 @@
     "policy_id",
     "token_plain"
   ],
+  "gap_auto_fill_scheduler": [
+    "createdAt",
+    "enabled",
+    "name",
+    "updatedAt"
+  ],
   "graph-workspace": [
     "description",
     "kibanaSavedObjectMeta",

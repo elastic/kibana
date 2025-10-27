@@ -639,13 +639,13 @@
       },
       "observables": {
         "properties": {
+          "description": {
+            "type": "keyword"
+          },
           "typeKey": {
             "type": "keyword"
           },
           "value": {
-            "type": "keyword"
-          },
-          "description": {
             "type": "keyword"
           }
         },
@@ -2043,6 +2043,23 @@
       },
       "token_plain": {
         "type": "keyword"
+      }
+    }
+  },
+  "gap_auto_fill_scheduler": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },
