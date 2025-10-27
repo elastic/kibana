@@ -32411,7 +32411,7 @@ paths:
                 required:
                   - version
                   - success
-          description: OK        
+          description: OK
         '400':
           content:
             application/json:
