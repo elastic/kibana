@@ -96,7 +96,7 @@ export const ConsoleTutorialsGroup = () => {
         title={i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
           defaultMessage: 'Explore the API',
         })}
-        icon={commandLineIllustration}
+        icon={`${assetBasePath}/command_line.svg`}
         description={i18n.translate('xpack.searchGettingStarted.consoleTutorials.description', {
           defaultMessage:
             'Choose a tutorial and use Console to quickly start interacting with the Elasticsearch API.',
