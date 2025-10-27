@@ -777,6 +777,7 @@ components:
           get-file: '#/components/schemas/GetFile'
           isolate: '#/components/schemas/Isolate'
           kill-process: '#/components/schemas/KillProcess'
+          memory-dump: '#/components/schemas/MemoryDump'
           running-processes: '#/components/schemas/RunningProcesses'
           runscript: '#/components/schemas/Runscript'
           scan: '#/components/schemas/Scan'
@@ -796,6 +797,7 @@ components:
         - $ref: '#/components/schemas/Unisolate'
         - $ref: '#/components/schemas/SuspendProcess'
         - $ref: '#/components/schemas/RunningProcesses'
+        - $ref: '#/components/schemas/MemoryDump'
     ActionStateSuccessResponse:
       type: object
       properties:
@@ -1697,6 +1699,75 @@ components:
         - scriptName
       title: Microsoft Defender Endpoint Run Script Parameters
       type: object
+    MemoryDump:
+      allOf:
+        - $ref: '#/components/schemas/ResponseActionDetails'
+        - type: object
+          properties:
+            outputs:
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    properties:
+                      code:
+                        type: string
+                      disk_free_space:
+                        description: >-
+                          The free space on the host machine in bytes after the
+                          memory dump is written to disk
+                        type: number
+                      file_size:
+                        description: The size of the memory dump compressed file in bytes
+                        type: string
+                      path:
+                        description: >-
+                          The path to the memory dump compressed file on the
+                          host machine
+                        type: string
+                    title: Memory dump output
+                    type: object
+              type: object
+            parameters:
+              oneOf:
+                - properties:
+                    type:
+                      description: Kernel level memory dump
+                      enum:
+                        - kernel
+                      type: string
+                  required: type
+                  title: Kernel memory dump
+                  type: object
+                - properties:
+                    pid:
+                      description: The process ID (PID)
+                      type: number
+                    type:
+                      description: Process level memory dump using a process ID
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - pid
+                  title: Process memory dump with PID
+                  type: object
+                - properties:
+                    entity_id:
+                      description: The process entity id
+                      type: string
+                    type:
+                      description: Process level memory dump using an entity id
+                      enum:
+                        - process
+                      type: string
+                  required:
+                    - type
+                    - entity_id
+                  title: Process memory dump with entity id
+                  type: object
+          required: parameters
     MemoryDumpRouteRequestBody:
       allOf:
         - type: object
