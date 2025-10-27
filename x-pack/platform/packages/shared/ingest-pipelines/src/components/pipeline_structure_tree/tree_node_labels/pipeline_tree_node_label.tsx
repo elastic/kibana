@@ -18,6 +18,8 @@ interface PipelineTreeNodeLabelProps {
   onClick: () => void;
 }
 
+const MAX_PIPELINE_NAME_LENGTH = 30;
+
 export const PipelineTreeNodeLabel = ({
   pipelineName,
   isManaged,
@@ -45,7 +47,9 @@ export const PipelineTreeNodeLabel = ({
           }}
           data-test-subj={`pipelineTreeNode-${pipelineName}-link`}
         >
-          {pipelineName}
+          {pipelineName.length > MAX_PIPELINE_NAME_LENGTH
+          ? `${pipelineName.slice(0, MAX_PIPELINE_NAME_LENGTH)}...`
+          : pipelineName}
         </EuiLink>
       </EuiFlexItem>
       {isManaged && (
