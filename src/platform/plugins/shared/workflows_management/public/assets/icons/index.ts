@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { checkForTripleQuotesAndEsqlQuery, unescapeInvalidChars } from './autocomplete_utils';
+export { IconDisabledWorkflow } from './icon_disabled_workflow';
