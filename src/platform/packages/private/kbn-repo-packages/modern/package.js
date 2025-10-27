@@ -229,7 +229,7 @@ class Package {
     } else if (dir.startsWith('x-pack/solutions/observability/')) {
       group = 'observability';
       visibility = 'private';
-    } else if (dir.startsWith('x-pack/solutions/workplace_ai/')) {
+    } else if (dir.startsWith('x-pack/solutions/workplaceai/')) {
       group = 'workplaceai';
       visibility = 'private';
     } else {

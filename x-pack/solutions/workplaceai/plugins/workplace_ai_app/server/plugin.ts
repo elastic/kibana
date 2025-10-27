@@ -41,7 +41,7 @@ export class WorkplaceAIAppPlugin
 
   constructor(context: PluginInitializerContext) {
     this.loggerFactory = context.logger;
-    AppLogger.setInstance(this.loggerFactory.get('workplace_ai.app'));
+    AppLogger.setInstance(this.loggerFactory.get('workplaceai.app'));
     this.config = context.config.get<WorkplaceAIAppConfig>();
   }
 
