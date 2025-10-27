@@ -626,12 +626,7 @@ export class ActionsPlugin
       getUnsecuredActionsClient,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
-        renderActionParameterTemplates(
-          this.logger,
-          actionTypeRegistry,
-          actionsConfigUtils,
-          ...args
-        ),
+        renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),
       isSystemActionConnector: (connectorId: string): boolean => {
         return this.inMemoryConnectors.some(
           (inMemoryConnector) =>
@@ -825,26 +820,15 @@ export class ActionsPlugin
 export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
   logger: Logger,
   actionTypeRegistry: ActionTypeRegistry | undefined,
-  actionsConfigUtils: ActionsConfigurationUtilities,
   actionTypeId: string,
   actionId: string,
   params: Params,
   variables: Record<string, unknown>
 ): Params {
   const actionType = actionTypeRegistry?.get(actionTypeId);
-
-  let renderedParams: ActionTypeParams;
   if (actionType?.renderParameterTemplates) {
-    renderedParams = actionType.renderParameterTemplates(logger, params, variables, actionId);
+    return actionType.renderParameterTemplates(logger, params, variables, actionId) as Params;
   } else {
-    renderedParams = renderMustacheObject(logger, params, variables);
+    return renderMustacheObject(logger, params, variables);
   }
-
-  if (!actionType?.applyParamConstraints) {
-    return renderedParams as Params;
-  }
-
-  return actionType?.applyParamConstraints(logger, renderedParams, {
-    configurationUtilities: actionsConfigUtils,
-  }) as Params;
 }

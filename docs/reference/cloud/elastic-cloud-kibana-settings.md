@@ -89,7 +89,7 @@ stack: ga 9.1
 
 `xpack.actions.email.maximum_body_length`
 :    The maximum length of an email body.  Values longer than this length will
-be truncated.  The default is 1MB, the maximum is 10MB.
+be truncated.  The default is 25MB, the maximum is 25MB.
 
 ### Version 9.3+ [ec_version_9_3]
 ```{applies_to}

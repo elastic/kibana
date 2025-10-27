@@ -154,7 +154,7 @@ $$$action-config-email-domain-allowlist$$$
 
 `xpack.actions.email.maximum_body_length` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3`
 :    The maximum length of an email body.  Values longer than this length will
-be truncated.  The default is 1MB, the maximum is 10MB.
+be truncated.  The default is 25MB, the maximum is 25MB.
 
 ### Version 9.3+ [ec_version_9_3]
 ```{applies_to}
