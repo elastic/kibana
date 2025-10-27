@@ -18,13 +18,18 @@ import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScorePreviewRoute } from './preview';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../detection_engine/routes/__mocks__/request_context';
 
 jest.mock('../risk_score_service');
 jest.mock('../get_risk_inputs_index');
 
 describe('POST risk_engine/preview route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
   let logger: ReturnType<typeof loggerMock.create>;
   let mockRiskScoreService: ReturnType<typeof riskScoreServiceMock.create>;
 
@@ -44,6 +49,11 @@ describe('POST risk_engine/preview route', () => {
     (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
     riskScorePreviewRoute(server.router, logger);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   const buildRequest = (body: object = {}) =>
