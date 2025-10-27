@@ -101,6 +101,22 @@ export const withCompleteItem: ISuggestionItem = withAutoSuggest({
   sortText: '1',
 });
 
+export const minMaxValueCompleteItem: ISuggestionItem = {
+  label: 'minmax',
+  text: 'minmax',
+  kind: 'Value',
+  detail: 'minmax',
+  sortText: '1',
+};
+
+export const noneValueCompleteItem: ISuggestionItem = {
+  label: 'none',
+  text: 'none',
+  kind: 'Value',
+  detail: 'none',
+  sortText: '1',
+};
+
 export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionItem => {
   return withAutoSuggest({
     label,

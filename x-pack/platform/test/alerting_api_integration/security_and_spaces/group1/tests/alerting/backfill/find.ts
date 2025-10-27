@@ -442,6 +442,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
                 findWithSortAndPageResponse1,
                 findWithSortAndPageResponse2,
                 findWithSortResponse,
+                findInitiatorUserResponse,
+                findInitiatorSystemResponse,
               ].forEach((response) => {
                 expect(response.statusCode).to.eql(403);
                 expect(response.body).to.eql({
@@ -479,6 +481,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
                 findWithSortAndPageResponse1,
                 findWithSortAndPageResponse2,
                 findWithSortResponse,
+                findInitiatorUserResponse,
+                findInitiatorSystemResponse,
               ].forEach((response) => {
                 expect(response.statusCode).to.eql(200);
               });
@@ -697,6 +701,15 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
               const sortedStart1 = new Date(resultFindWithSort.data[0].start).valueOf();
               const sortedStart2 = new Date(resultFindWithSort.data[1].start).valueOf();
               expect(sortedStart1).to.be.greaterThan(sortedStart2);
+
+              const resultFindInitatorUser = findInitiatorUserResponse.body;
+              expect(resultFindInitatorUser.total).to.be.greaterThan(0);
+              expect(resultFindInitatorUser.data.every((b: any) => b.initiator === 'user')).to.be(
+                true
+              );
+
+              const resultFindInitatorSystem = findInitiatorSystemResponse.body;
+              expect(resultFindInitatorSystem.total).to.eql(0);
 
               break;
             default:

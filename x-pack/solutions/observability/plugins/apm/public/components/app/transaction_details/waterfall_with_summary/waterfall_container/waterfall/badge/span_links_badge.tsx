@@ -44,6 +44,7 @@ export function SpanLinksBadge({ linkedParents, linkedChildren, id, onClick }: P
       }
     >
       <EuiBadge
+        tabIndex={0}
         data-test-subj={`spanLinksBadge_${id}`}
         {...(onClick
           ? {

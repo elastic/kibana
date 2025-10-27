@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { DataViewListItem, DataView as DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataView as DataViewType, DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ensurePatternFormat } from '../../../common/utils/sourcerer';
 import type { KibanaDataView } from '../store/model';
 import { DEFAULT_TIME_FIELD } from '../../../common/constants';
 import {
-  DEFAULT_SECURITY_DATA_VIEW,
   DEFAULT_SECURITY_ALERT_DATA_VIEW,
+  DEFAULT_SECURITY_DATA_VIEW,
 } from '../../data_view_manager/components/data_view_picker/translations';
 
 export interface GetSourcererDataView {
@@ -46,8 +46,7 @@ export const createSourcererDataView = async ({
   }
   let allDataViews: DataViewListItem[] = await dataViewService.getIdsWithTitle();
   const siemDataViewExist = allDataViews.find((dv) => dv.id === dataViewId);
-  const alertDataViewExist =
-    alertDataViewId && allDataViews.find((dv) => dv.id === alertDataViewId);
+  const alertDataViewExist = allDataViews.find((dv) => dv.id === alertDataViewId);
 
   const { patternList } = body;
   const patternListFormatted = ensurePatternFormat(patternList);
@@ -84,12 +83,25 @@ export const createSourcererDataView = async ({
   } else {
     let patterns = ensurePatternFormat(siemDataViewExist.title.split(','));
     const siemDataViewTitle = siemDataViewExist ? patterns.join() : '';
-    if (patternListAsTitle !== siemDataViewTitle) {
-      patterns = patternListFormatted;
+    const arePatternsDifferent = patternListAsTitle !== siemDataViewTitle;
+    const isDefaultDataViewName = siemDataViewExist.name === DEFAULT_SECURITY_DATA_VIEW;
+
+    // Update the saved object if the pattern list is different or the name is incorrect
+    if (arePatternsDifferent || !isDefaultDataViewName) {
       siemDataView = await dataViewService.get(dataViewId);
-      siemDataView.title = patternListAsTitle;
+
+      if (arePatternsDifferent) {
+        patterns = patternListFormatted;
+        siemDataView.title = patternListAsTitle;
+      }
+
+      if (!isDefaultDataViewName) {
+        siemDataView.name = DEFAULT_SECURITY_DATA_VIEW;
+      }
+
       await dataViewService.updateSavedObject(siemDataView);
     }
+
     defaultDataView = {
       id: dataViewId,
       patternList: patterns,
@@ -128,6 +140,13 @@ export const createSourcererDataView = async ({
       title: alertOnlyDataView.title,
     };
   } else {
+    // Update the saved object if the name is incorrect
+    if (alertDataViewId && alertDataViewExist?.name !== DEFAULT_SECURITY_ALERT_DATA_VIEW) {
+      siemDataView = await dataViewService.get(alertDataViewId);
+      siemDataView.name = DEFAULT_SECURITY_ALERT_DATA_VIEW;
+      await dataViewService.updateSavedObject(siemDataView);
+    }
+
     alertDataView = {
       id: alertDataViewId ?? '',
       patternList: signalIndexName ? [signalIndexName] : [],
@@ -148,6 +167,7 @@ export const createSourcererDataView = async ({
     ...defaultDataView,
     patternList: existingPatternList,
   };
+
   return {
     defaultDataView,
     kibanaDataViews: allDataViews.map((dv) =>

@@ -10,13 +10,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@e
 import React, { useCallback, useMemo, useState } from 'react';
 import { SubSteps } from '../../../../../common/components/migration_steps';
 import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { DashboardMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { OnResourcesCreated, OnMissingResourcesFetched } from '../../types';
 import * as i18n from './translations';
 import { DashboardUploadSteps } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
-import { useCheckResourcesStep } from './sub_steps/check_resources';
+import { useCheckResourcesStep } from '../common/check_resources';
 
 interface MacrosDataInputSubStepsProps {
   migrationStats: DashboardMigrationTaskStats;
@@ -43,13 +44,14 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
             <EuiFlexGroup direction="row" justifyContent="center" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiStepNumber
+                  data-test-subj="macrosUploadStepNumber"
                   titleSize="xs"
                   number={DashboardUploadSteps.MacrosUpload}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
+                <EuiTitle size="xs" data-test-subj="macrosUploadTitle">
                   <b>{i18n.MACROS_DATA_INPUT_TITLE}</b>
                 </EuiTitle>
               </EuiFlexItem>
@@ -76,11 +78,13 @@ type SubStep = 1 | 2 | 3 | typeof END;
 export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
   ({ migrationStats, missingMacros, onMissingResourcesFetched }) => {
     const [subStep, setSubStep] = useState<SubStep>(missingMacros.length ? 1 : 3);
+    const { telemetry } = useKibana().services.siemMigrations.dashboards;
 
     // Copy query step
     const onCopied = useCallback(() => {
       setSubStep(2);
-    }, []);
+      telemetry.reportSetupMacrosQueryCopied({ migrationId: migrationStats.id });
+    }, [telemetry, migrationStats.id]);
     const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(1, subStep), onCopied });
 
     // Upload macros step

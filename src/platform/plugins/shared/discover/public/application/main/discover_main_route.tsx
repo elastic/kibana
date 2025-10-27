@@ -252,7 +252,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     <rootProfileState.AppWrapper>
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
         <DiscoverTopNavMenuProvider>
-          {tabsEnabled ? <TabsView {...props} /> : <SingleTabView {...props} />}
+          {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
+            <TabsView {...props} />
+          ) : (
+            <SingleTabView {...props} />
+          )}
         </DiscoverTopNavMenuProvider>
       </ChartPortalsRenderer>
     </rootProfileState.AppWrapper>

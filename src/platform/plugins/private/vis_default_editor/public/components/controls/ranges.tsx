@@ -195,7 +195,9 @@ function RangesParamEditor({
                     isInvalid={!isFromValid}
                     prepend={
                       <EuiToolTip content={gteTooltipContent}>
-                        <EuiText size="s">{gtePrependLabel}</EuiText>
+                        <EuiText size="s" tabIndex={0}>
+                          {gtePrependLabel}
+                        </EuiText>
                       </EuiToolTip>
                     }
                   />
@@ -217,7 +219,9 @@ function RangesParamEditor({
                     isInvalid={!isToValid}
                     prepend={
                       <EuiToolTip content={ltTooltipContent}>
-                        <EuiText size="s">{ltPrependLabel}</EuiText>
+                        <EuiText size="s" tabIndex={0}>
+                          {ltPrependLabel}
+                        </EuiText>
                       </EuiToolTip>
                     }
                   />

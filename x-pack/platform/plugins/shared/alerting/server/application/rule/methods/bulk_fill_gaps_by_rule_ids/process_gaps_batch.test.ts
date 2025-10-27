@@ -22,7 +22,7 @@ const scheduleBackfillMock = scheduleBackfill as jest.Mock;
 
 describe('processGapsBatch', () => {
   const context = rulesClientContextMock.create();
-
+  const rule = { id: 'some-rule-id', name: 'some-rule-name' };
   const backfillingDateRange = {
     start: '2025-05-09T09:15:09.457Z',
     end: '2025-05-20T09:24:09.457Z',
@@ -87,7 +87,7 @@ describe('processGapsBatch', () => {
         context,
         [
           {
-            ruleId: 'some-rule-id',
+            ruleId: rule.id,
             initiator: backfillInitiator.USER,
             ranges: testBatch.flatMap(getGapScheduleRange),
           },
@@ -183,7 +183,7 @@ describe('processGapsBatch', () => {
         context,
         [
           {
-            ruleId: 'some-rule-id',
+            ruleId: rule.id,
             initiator: backfillInitiator.USER,
             ranges: clampedGapsBatch.flatMap(getGapScheduleRange),
           },
@@ -255,7 +255,7 @@ describe('processGapsBatch', () => {
         context,
         [
           {
-            ruleId: 'some-rule-id',
+            ruleId: rule.id,
             initiator: backfillInitiator.USER,
             ranges: processedGaps.flatMap(getGapScheduleRange),
           },

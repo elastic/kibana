@@ -255,6 +255,7 @@ describe('on_failure graph', () => {
           stepType: 'fallback',
           type: 'enter-try-block',
           enterNormalPathNodeId: 'enterNormalPath_testRetryConnectorStep',
+          enterFallbackPathNodeId: 'enterFallbackPath_testRetryConnectorStep',
         });
       });
 
