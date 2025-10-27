@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { RemoveProcessor } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, type RemoveProcessor } from '@kbn/streamlang';
 import type {
   ConfigDrivenProcessorConfiguration,
   FieldConfiguration,
@@ -24,6 +24,7 @@ const defaultFormState: RemoveProcessorFormState = {
   action: 'remove' as const,
   from: '',
   ignore_missing: false,
+  where: ALWAYS_CONDITION,
   ignore_failure: false,
 };
 
@@ -78,10 +79,10 @@ export const removeProcessorConfig: ConfigDrivenProcessorConfiguration<
   defaultFormState,
   fieldConfigurations,
   fieldOptions,
-  convertFormStateToConfig: getConvertFormStateToConfig<
-    RemoveProcessorFormState,
-    RemoveProcessor
-  >(fieldConfigurations, fieldOptions),
+  convertFormStateToConfig: getConvertFormStateToConfig<RemoveProcessorFormState, RemoveProcessor>(
+    fieldConfigurations,
+    fieldOptions
+  ),
   convertProcessorToFormState: getConvertProcessorToFormState<
     RemoveProcessor,
     RemoveProcessorFormState
