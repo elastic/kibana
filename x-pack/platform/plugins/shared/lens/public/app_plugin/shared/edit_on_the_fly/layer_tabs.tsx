@@ -59,24 +59,25 @@ export const LayerTabsWrapper = memo(function LayerTabsWrapper(props: LayerConfi
   ) : null;
 });
 
-export function LayerTabs(
-  props: LayerConfigurationProps & {
-    activeVisualization: Visualization;
-  }
-) {
-  const { activeVisualization, coreStart, startDependencies } = props;
-
+export function LayerTabs({
+  activeVisualization,
+  attributes,
+  coreStart,
+  framePublicAPI,
+  setIsInlineFlyoutVisible,
+  startDependencies,
+}: LayerConfigurationProps & {
+  activeVisualization: Visualization;
+}) {
   const { datasourceMap } = useEditorFrameService();
   const { isSaveable, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
   );
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
 
-  const [datasource] = Object.values(props.framePublicAPI.datasourceLayers);
+  const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() ||
-    isOfAggregateQueryType(props.attributes?.state.query) ||
-    false;
+    datasource?.isTextBasedLanguage() || isOfAggregateQueryType(attributes?.state.query) || false;
 
   const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
 
@@ -132,11 +133,11 @@ export function LayerTabs(
       layerType: activeVisualization.getLayerType(layerId, visualization.state),
       config: activeVisualization.getConfiguration({
         layerId,
-        frame: props.framePublicAPI,
+        frame: framePublicAPI,
         state: visualization.state,
       }),
     }));
-  }, [activeVisualization, layerIds, props.framePublicAPI, visualization.state]);
+  }, [activeVisualization, layerIds, framePublicAPI, visualization.state]);
 
   // Create layer labels for the tabs
   const layerLabels = useMemo(() => {
@@ -172,7 +173,7 @@ export function LayerTabs(
 
   const onRemoveLayer = useCallback(
     async (layerToRemoveId: string) => {
-      const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerToRemoveId];
+      const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerToRemoveId];
       const datasourceId = datasourcePublicAPI?.datasourceId;
 
       if (datasourceId) {
@@ -207,7 +208,7 @@ export function LayerTabs(
       datasourceStates,
       dispatchLens,
       layerIds,
-      props.framePublicAPI.datasourceLayers,
+      framePublicAPI.datasourceLayers,
       startDependencies.uiActions,
       removeLayerRef,
     ]
@@ -310,10 +311,7 @@ export function LayerTabs(
 
     return activeVisualization?.getAddLayerButtonComponent?.({
       state: visualization.state,
-      supportedLayers: activeVisualization.getSupportedLayers(
-        visualization.state,
-        props.framePublicAPI
-      ),
+      supportedLayers: activeVisualization.getSupportedLayers(visualization.state, framePublicAPI),
       addLayer,
       ensureIndexPattern: async (specOrId) => {
         let indexPatternId;
@@ -321,7 +319,7 @@ export function LayerTabs(
         if (typeof specOrId === 'string') {
           indexPatternId = specOrId;
         } else {
-          const dataView = await props.startDependencies.dataViews.create(specOrId);
+          const dataView = await startDependencies.dataViews.create(specOrId);
 
           if (!dataView.id) {
             return;
@@ -332,7 +330,7 @@ export function LayerTabs(
 
         const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
           id: indexPatternId,
-          cache: props.framePublicAPI.dataViews.indexPatterns,
+          cache: framePublicAPI.dataViews.indexPatterns,
         });
 
         if (newIndexPatterns) {
@@ -347,7 +345,7 @@ export function LayerTabs(
         }
       },
       registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
-      isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
+      isInlineEditing: Boolean(setIsInlineFlyoutVisible),
     });
   }, [
     activeVisualization,
@@ -356,9 +354,9 @@ export function LayerTabs(
     dispatchLens,
     hideAddLayerButton,
     indexPatternService,
-    props.startDependencies.dataViews,
-    props.framePublicAPI,
-    props?.setIsInlineFlyoutVisible,
+    startDependencies.dataViews,
+    framePublicAPI,
+    setIsInlineFlyoutVisible,
     registerLibraryAnnotationGroupFunction,
     visualization.activeId,
     visualization.state,
