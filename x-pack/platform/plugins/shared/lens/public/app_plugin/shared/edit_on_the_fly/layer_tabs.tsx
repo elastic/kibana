@@ -16,7 +16,7 @@ import {
 } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
-import { TabStatus, UnifiedTabs, useNewTabProps } from '@kbn/unified-tabs';
+import { UnifiedTabs, useNewTabProps } from '@kbn/unified-tabs';
 
 import {
   addLayer as addLayerAction,
@@ -367,7 +367,7 @@ export function LayerTabs({
         items={managedItems}
         selectedItemId={selectedLayerId ?? undefined}
         recentlyClosedItems={[]}
-        onClearRecentlyClosed={() => {}} // not implemented in this example
+        onClearRecentlyClosed={() => {}}
         maxItemsCount={25}
         services={{
           core: { chrome: coreStart.chrome },
@@ -387,14 +387,7 @@ export function LayerTabs({
           dispatchLens(setSelectedLayerId({ layerId: updatedState.selectedItem?.id ?? null }));
         }}
         createItem={getNewTabDefaultProps}
-        getPreviewData={() => ({
-          query: { esql: 'FROM CAN HAZ' },
-          status: TabStatus.SUCCESS,
-        })}
         onEBTEvent={() => {}}
-        renderContent={({ label }) => {
-          return null;
-        }}
         customNewTabButton={addLayerButton || undefined}
         disableInlineLabelEditing
         disablePreview
