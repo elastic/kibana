@@ -24,6 +24,15 @@ export interface CloudConnectorSecretVar {
   frozen?: boolean;
 }
 
+// Azure credentials can be either a secret reference (new connector) or a cloud connector ID (reuse)
+export interface AzureCredentialsVar {
+  type?: 'password';
+  // TODO: refactor this to remove the string type when the connector name is implemented https://github.com/elastic/security-team/issues/14283
+  // this interface may not be needed
+  value: CloudConnectorSecretReference | string;
+  frozen?: boolean;
+}
+
 export interface AwsCloudConnectorVars {
   role_arn: CloudConnectorVar;
   external_id: CloudConnectorSecretVar;
@@ -32,7 +41,7 @@ export interface AwsCloudConnectorVars {
 export interface AzureCloudConnectorVars {
   tenant_id: CloudConnectorSecretVar;
   client_id: CloudConnectorSecretVar;
-  azure_credentials_cloud_connector_id: CloudConnectorSecretVar;
+  azure_credentials_cloud_connector_id: AzureCredentialsVar;
 }
 
 export type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
@@ -51,10 +60,4 @@ export interface CloudConnector {
 export interface CloudConnectorListOptions {
   page?: number;
   perPage?: number;
-}
-
-export interface CreateCloudConnectorRequest {
-  name: string;
-  vars: CloudConnectorVars;
-  cloudProvider: CloudProvider;
 }

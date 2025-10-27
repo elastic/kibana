@@ -148,7 +148,10 @@ describe('CloudConnectorService', () => {
       const emptyVarsRequest: CreateCloudConnectorRequest = {
         name: 'test-connector',
         cloudProvider: 'aws',
-        vars: {},
+        vars: {
+          role_arn: { value: '', type: 'text' },
+          external_id: { value: { id: '', isSecretRef: true }, type: 'password' },
+        },
       };
 
       await expect(service.create(mockSoClient, emptyVarsRequest)).rejects.toThrow(
@@ -182,7 +185,7 @@ describe('CloudConnectorService', () => {
             },
             type: 'password',
           },
-        },
+        } as any, // Intentionally invalid for testing validation
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
@@ -199,7 +202,7 @@ describe('CloudConnectorService', () => {
             value: 'arn:aws:iam::123456789012:role/TestRole',
             type: 'text',
           },
-        },
+        } as any, // Intentionally invalid for testing validation
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
@@ -606,7 +609,7 @@ describe('CloudConnectorService', () => {
           type: 'text' as const,
         },
         // Missing external_id
-      };
+      } as any; // Intentionally invalid for testing validation
 
       await expect(
         service.update(mockSoClient, 'cloud-connector-123', {
@@ -864,7 +867,7 @@ describe('CloudConnectorService', () => {
               },
               type: 'password',
             },
-          },
+          } as any, // Intentionally invalid for testing validation
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
@@ -905,7 +908,7 @@ describe('CloudConnectorService', () => {
               value: 'arn:aws:iam::123456789012:role/TestRole',
               type: 'text',
             },
-          },
+          } as any, // Intentionally invalid for testing validation
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
