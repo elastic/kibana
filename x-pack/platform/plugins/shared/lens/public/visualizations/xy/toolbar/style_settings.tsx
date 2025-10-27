@@ -13,16 +13,20 @@ import { ScaleType } from '@elastic/charts';
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { AxesSettingsConfig, VisualizationToolbarProps, XYState } from '@kbn/lens-common';
+import type {
+  AxesSettingsConfig,
+  FramePublicAPI,
+  VisualizationToolbarProps,
+  XYState,
+} from '@kbn/lens-common';
 import {
   hasNumericHistogramDimension,
   type AxesSettingsConfigKeys,
 } from '../../../shared_components';
-import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
-import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import { XyAppearanceSettings, getValueLabelDisableReason } from './visual_options_popover';
 import { XyTitlesAndTextSettings } from './titles_and_text_popover';
 import { XyAxisSettings, popoverConfig } from './axis_settings_popover';
+import type { AxisGroupConfiguration } from '../axes_configuration';
 import { getAxesConfiguration, getXDomain } from '../axes_configuration';
 import { getDataLayers } from '../visualization_helpers';
 import {
@@ -31,21 +35,69 @@ import {
   hasNonBarSeries,
   isHorizontalChart,
 } from '../state_helpers';
-import { axisKeyToTitleMapping, getDataBounds, hasPercentageAxis } from '.';
 import { getScaleType } from '../to_expression';
-import { XyLegendSettings } from './legend_settings';
+
+export const getDataBounds = function (
+  activeData: FramePublicAPI['activeData'],
+  axes: AxisGroupConfiguration[]
+) {
+  const groups: Partial<Record<string, { min: number; max: number }>> = {};
+  axes.forEach((axis) => {
+    let min = Number.MAX_SAFE_INTEGER;
+    let max = -Number.MAX_SAFE_INTEGER;
+    axis.series.forEach((series) => {
+      activeData?.[series.layer]?.rows.forEach((row) => {
+        const value = row[series.accessor];
+        // TODO: add tests for null value
+        if (value !== null && Number.isFinite(value)) {
+          if (value < min) {
+            min = value;
+          }
+          if (value > max) {
+            max = value;
+          }
+        }
+      });
+    });
+    if (min !== Number.MAX_SAFE_INTEGER && max !== -Number.MAX_SAFE_INTEGER) {
+      groups[axis.groupId] = {
+        min: Math.round((min + Number.EPSILON) * 100) / 100,
+        max: Math.round((max + Number.EPSILON) * 100) / 100,
+      };
+    }
+  });
+
+  return groups;
+};
+
+export function hasPercentageAxis(
+  axisGroups: AxisGroupConfiguration[],
+  groupId: string,
+  state: XYState
+) {
+  return Boolean(
+    axisGroups
+      .find((group) => group.groupId === groupId)
+      ?.series.some(({ layer: layerId }) =>
+        getDataLayers(state?.layers).find(
+          (layer) => layer.layerId === layerId && layer.seriesType.includes('percentage')
+        )
+      )
+  );
+}
+
+export const axisKeyToTitleMapping: Record<
+  keyof AxesSettingsConfig,
+  'xTitle' | 'yTitle' | 'yRightTitle'
+> = {
+  x: 'xTitle',
+  yLeft: 'yTitle',
+  yRight: 'yRightTitle',
+};
 
 type Props = VisualizationToolbarProps<XYState>;
 
-export const XyFlyoutToolbar: React.FC<Props> = (props) => {
-  const xyToolbarContentMap: ToolbarContentMap<XYState> = {
-    style: XyStyleSettings,
-    legend: XyLegendSettings,
-  };
-  return <FlyoutToolbar {...props} contentMap={xyToolbarContentMap} />;
-};
-
-const XyStyleSettings: React.FC<Props> = (props) => {
+export const XyStyleSettings: React.FC<Props> = (props) => {
   const { state, setState, frame } = props;
   const dataLayers = getDataLayers(state?.layers);
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
@@ -296,9 +348,9 @@ const XyStyleSettings: React.FC<Props> = (props) => {
           <EuiHorizontalRule margin="m" />
         </>
       )}
-      {/* Axis yLeft */}
       <EuiAccordion
-        id={''}
+        id="yLeft-axis"
+        data-test-subj="yLeft-axis"
         buttonContent={
           <TooltipWrapper
             tooltipContent={
@@ -348,9 +400,9 @@ const XyStyleSettings: React.FC<Props> = (props) => {
         />
       </EuiAccordion>
       <EuiHorizontalRule margin="m" />
-      {/* Axis x */}
       <EuiAccordion
-        id={''}
+        id="x-axis"
+        data-test-subj="x-axis"
         buttonContent={popoverConfig('x', isHorizontal).popoverTitle}
         paddingSize="s"
         initialIsOpen
@@ -380,9 +432,9 @@ const XyStyleSettings: React.FC<Props> = (props) => {
         />
       </EuiAccordion>
       <EuiHorizontalRule margin="m" />
-      {/* Axis yRight */}
       <EuiAccordion
-        id={''}
+        id="yRight-axis"
+        data-test-subj="yRight-axis"
         buttonContent={
           <TooltipWrapper
             tooltipContent={
