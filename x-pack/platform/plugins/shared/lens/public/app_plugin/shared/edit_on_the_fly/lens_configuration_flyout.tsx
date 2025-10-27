@@ -350,21 +350,11 @@ export function LensEditConfigurationFlyout({
           >
             <LayerTabsWrapper
               attributes={attributes}
-              dataLoading$={dataLoading$}
-              lensAdapters={lensAdapters}
-              getUserMessages={getUserMessages}
               coreStart={coreStart}
-              startDependencies={startDependencies}
-              datasourceId={datasourceId}
+              dataViews={startDependencies.dataViews}
+              uiActions={startDependencies.uiActions}
               framePublicAPI={framePublicAPI}
               setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-              updateSuggestion={updateSuggestion}
-              setCurrentAttributes={setCurrentAttributes}
-              closeFlyout={closeFlyout}
-              parentApi={parentApi}
-              panelId={panelId}
-              canEditTextBasedQuery={canEditTextBasedQuery}
-              editorContainer={editorContainer.current || undefined}
             />
           </div>
           <EuiFlexGroup

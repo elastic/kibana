@@ -53,7 +53,7 @@ export function LayerConfiguration({
     [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
   );
 
-  const layerPanelsProps: ConfigPanelWrapperProps = {
+  const configPanelWrapperProps: ConfigPanelWrapperProps = {
     attributes,
     lensAdapters,
     dataLoading$,
@@ -82,7 +82,7 @@ export function LayerConfiguration({
         padding: ${hasPadding ? euiTheme.size.s : 0};
       `}
     >
-      <ConfigPanelWrapper {...layerPanelsProps} />
+      <ConfigPanelWrapper {...configPanelWrapperProps} />
     </div>
   );
 }

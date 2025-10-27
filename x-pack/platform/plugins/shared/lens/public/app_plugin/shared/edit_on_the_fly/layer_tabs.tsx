@@ -44,9 +44,9 @@ import { getSharedActions } from '../../../editor_frame_service/editor_frame/con
 import { getRemoveOperation } from '../../../utils';
 import { useFocusUpdate } from '../../../editor_frame_service/editor_frame/config_panel/use_focus_update';
 
-import type { LayerConfigurationProps } from './types';
+import type { LayerTabsProps } from './types';
 
-export const LayerTabsWrapper = memo(function LayerTabsWrapper(props: LayerConfigurationProps) {
+export const LayerTabsWrapper = memo(function LayerTabsWrapper(props: LayerTabsProps) {
   const { visualizationMap } = useEditorFrameService();
   const visualization = useLensSelector(selectVisualization);
 
@@ -65,8 +65,9 @@ export function LayerTabs({
   coreStart,
   framePublicAPI,
   setIsInlineFlyoutVisible,
-  startDependencies,
-}: LayerConfigurationProps & {
+  dataViews,
+  uiActions,
+}: LayerTabsProps & {
   activeVisualization: Visualization;
 }) {
   const { datasourceMap } = useEditorFrameService();
@@ -86,8 +87,8 @@ export function LayerTabs({
   const indexPatternService = useMemo(
     () =>
       createIndexPatternService({
-        dataViews: startDependencies.dataViews,
-        uiActions: startDependencies.uiActions,
+        dataViews,
+        uiActions,
         core: coreStart,
         updateIndexPatterns: (newIndexPatternsState, options) => {
           dispatchLens(updateIndexPatterns(newIndexPatternsState));
@@ -96,7 +97,7 @@ export function LayerTabs({
           dispatchLens(replaceIndexpattern({ newIndexPattern, oldId }));
         },
       }),
-    [coreStart, dispatchLens, startDependencies.dataViews, startDependencies.uiActions]
+    [coreStart, dispatchLens, dataViews, uiActions]
   );
 
   const layerIds = activeVisualization.getLayerIds(visualization.state);
@@ -179,8 +180,8 @@ export function LayerTabs({
       if (datasourceId) {
         const layerDatasource = datasourceMap[datasourceId];
         const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
-        const trigger = startDependencies.uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-        const action = await startDependencies.uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
+        const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
+        const action = await uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
         action?.execute({
           trigger,
@@ -209,7 +210,7 @@ export function LayerTabs({
       dispatchLens,
       layerIds,
       framePublicAPI.datasourceLayers,
-      startDependencies.uiActions,
+      uiActions,
       removeLayerRef,
     ]
   );
@@ -319,7 +320,7 @@ export function LayerTabs({
         if (typeof specOrId === 'string') {
           indexPatternId = specOrId;
         } else {
-          const dataView = await startDependencies.dataViews.create(specOrId);
+          const dataView = await dataViews.create(specOrId);
 
           if (!dataView.id) {
             return;
@@ -354,7 +355,7 @@ export function LayerTabs({
     dispatchLens,
     hideAddLayerButton,
     indexPatternService,
-    startDependencies.dataViews,
+    dataViews,
     framePublicAPI,
     setIsInlineFlyoutVisible,
     registerLibraryAnnotationGroupFunction,
