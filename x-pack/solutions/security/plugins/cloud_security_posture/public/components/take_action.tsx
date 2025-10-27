@@ -13,7 +13,6 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLiveAnnouncer,
   EuiPopover,
   EuiText,
   useGeneratedHtmlId,
@@ -45,36 +44,18 @@ interface TakeActionProps {
   isDataGridControlColumn?: boolean;
 }
 
-const ErrorAnnouncement = ({ error }: { error: Error }) => {
-  const announcement = kbnI18n.translate('xpack.csp.takeAction.createRuleErrorAnnouncement', {
-    defaultMessage: 'Error: Unable to create detection rule. {errorMessage}',
-    values: { errorMessage: error.message },
-  });
-
-  return <EuiLiveAnnouncer>{announcement}</EuiLiveAnnouncer>;
-};
-
 export const showCreateDetectionRuleErrorToast = (
   cloudSecurityStartServices: CloudSecurityPostureStartServices,
   error: Error
 ) => {
-  const { analytics, i18n, theme } = cloudSecurityStartServices;
-  const startServices = { analytics, i18n, theme };
-
   return cloudSecurityStartServices.notifications.toasts.addDanger({
     title: kbnI18n.translate('xpack.csp.takeAction.createRuleErrorTitle', {
       defaultMessage: 'Unable to create detection rule',
     }),
-    text: toMountPoint(
-      <>
-        <ErrorAnnouncement error={error} />
-        {kbnI18n.translate('xpack.csp.takeAction.createRuleErrorDescription', {
-          defaultMessage: 'An error occurred while creating the detection rule: {errorMessage}.',
-          values: { errorMessage: error.message },
-        })}
-      </>,
-      startServices
-    ),
+    text: kbnI18n.translate('xpack.csp.takeAction.createRuleErrorDescription', {
+      defaultMessage: 'An error occurred while creating the detection rule: {errorMessage}.',
+      values: { errorMessage: error.message },
+    }),
     'data-test-subj': 'csp:toast-error',
   });
 };
