@@ -46,4 +46,3 @@ export function transformControlGroupOut(
   }
   return { controls };
 }
-``;
