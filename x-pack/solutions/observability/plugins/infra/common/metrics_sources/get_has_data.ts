@@ -11,7 +11,12 @@ import { SupportedEntityTypesRT } from '../http_api/shared/entity_type';
 import { DataSchemaFormatRT } from '../http_api/shared';
 
 export const getHasDataQueryParamsRT = rt.partial({
-  entityType: SupportedEntityTypesRT,
+  source: rt.union([
+    SupportedEntityTypesRT,
+    rt.keyof({
+      all: null,
+    }),
+  ]),
 });
 
 export const getHasDataResponseRT = rt.partial({

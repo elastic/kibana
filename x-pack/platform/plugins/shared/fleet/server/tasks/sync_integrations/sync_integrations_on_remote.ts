@@ -82,10 +82,9 @@ const getSyncedIntegrationsCCRDoc = async (
 };
 
 async function getSyncIntegrationsEnabled(
-  soClient: SavedObjectsClient,
   remoteEsHosts: SyncIntegrationsData['remote_es_hosts'] | undefined
 ): Promise<boolean> {
-  const outputs = await outputService.list(soClient);
+  const outputs = await outputService.list();
   const esHosts = outputs.items
     .filter((output) => output.type === 'elasticsearch')
     .flatMap((output) => output.hosts);
@@ -262,7 +261,6 @@ export const syncIntegrationsOnRemote = async (
   const syncIntegrationsDoc = await getSyncedIntegrationsCCRDoc(esClient, abortController, logger);
 
   const isSyncIntegrationsEnabled = await getSyncIntegrationsEnabled(
-    soClient,
     syncIntegrationsDoc?.remote_es_hosts
   );
 

@@ -12,9 +12,8 @@ import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
-import type { ValueFormatConfig } from '../../../../../common/types';
+import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
-import type { FieldBasedIndexPatternColumn } from './column_types';
 
 import {
   getFormatFromPreviousColumn,
@@ -58,14 +57,6 @@ function ofName(name: string, timeShift: string | undefined, reducedTimeRange: s
     undefined,
     reducedTimeRange
   );
-}
-
-export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof CARDINALITY_ID;
-  params?: {
-    emptyAsNull?: boolean;
-    format?: ValueFormatConfig;
-  };
 }
 
 export const cardinalityOperation: OperationDefinition<

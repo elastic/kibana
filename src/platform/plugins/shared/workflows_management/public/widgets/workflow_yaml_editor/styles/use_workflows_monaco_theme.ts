@@ -8,8 +8,9 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
 import { useEffect } from 'react';
+
+import { monaco } from '@kbn/monaco';
 
 export function useWorkflowsMonacoTheme() {
   const { euiTheme } = useEuiTheme();
@@ -19,10 +20,18 @@ export function useWorkflowsMonacoTheme() {
       inherit: true,
       rules: [],
       colors: {
+        'list.hoverForeground': euiTheme.colors.textPrimary,
+        'list.hoverBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
         'editor.background': euiTheme.colors.backgroundBaseSubdued,
+        'editorSuggestWidget.foreground': euiTheme.colors.textParagraph,
+        'editorSuggestWidget.background': euiTheme.colors.backgroundBasePlain,
+        'editorSuggestWidget.selectedForeground': euiTheme.colors.textPrimary,
+        'editorSuggestWidget.selectedBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
+        'editorSuggestWidget.focusHighlightForeground': euiTheme.colors.primary,
+        'editorSuggestWidget.border': euiTheme.colors.borderBaseSubdued,
         'editorHoverWidget.foreground': euiTheme.colors.textParagraph,
         'editorHoverWidget.background': euiTheme.colors.backgroundBasePlain,
-        'editorHoverWidget.border': euiTheme.colors.borderBasePlain,
+        'editorHoverWidget.border': euiTheme.colors.borderBaseSubdued,
       },
     });
   }, [euiTheme]);
