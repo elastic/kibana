@@ -279,6 +279,10 @@ export function LayerPanels(
     };
   }, [activeVisualization, props.framePublicAPI, selectedLayerId, visualization.state]);
 
+  const euiOverflowScroll = useEuiOverflowScroll('y');
+
+  if (!selectedLayerId || !layerConfig) return null;
+
   return (
     <EuiForm
       css={css`
@@ -286,7 +290,7 @@ export function LayerPanels(
           padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
             calc(400px + ${euiTheme.size.base});
           margin-left: -400px;
-          ${useEuiOverflowScroll('y')}
+          ${euiOverflowScroll}
           ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
             padding-left: ${euiTheme.size.base};
             margin-left: 0;
@@ -294,72 +298,68 @@ export function LayerPanels(
         }
       `}
     >
-      {/* Render the current layer panel */}
-      {selectedLayerId && layerConfig && (
-        <LayerPanel
-          {...props}
-          onDropToDimension={handleDimensionDrop}
-          registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
-          dimensionGroups={layerConfig.config.groups}
-          activeVisualization={activeVisualization}
-          registerNewLayerRef={registerNewLayerRef}
-          key={selectedLayerId}
-          layerId={selectedLayerId}
-          layerIndex={layerIds.indexOf(selectedLayerId)}
-          visualizationState={visualization.state}
-          updateVisualization={setVisualizationState}
-          updateDatasource={updateDatasource}
-          updateDatasourceAsync={updateDatasourceAsync}
-          displayLayerSettings={!props.hideLayerHeader}
-          onChangeIndexPattern={(args) => {
-            onChangeIndexPattern(args);
-            const layersToRemove =
-              activeVisualization.getLayersToRemoveOnIndexPatternChange?.(visualization.state) ??
-              [];
-            layersToRemove.forEach((id) => onRemoveLayer(id));
-          }}
-          updateAll={updateAll}
-          addLayer={addLayer}
-          isOnlyLayer={
-            getRemoveOperation(
-              activeVisualization,
-              visualization.state,
-              selectedLayerId,
-              layerIds.length
-            ) === 'clear'
-          }
-          onEmptyDimensionAdd={(columnId, { groupId }) => {
-            // avoid state update if the datasource does not support initializeDimension
-            if (
-              activeDatasourceId != null &&
-              datasourceMap[activeDatasourceId]?.initializeDimension
-            ) {
-              dispatchLens(
-                setLayerDefaultDimension({
-                  layerId: selectedLayerId,
-                  columnId,
-                  groupId,
-                })
-              );
-            }
-          }}
-          onCloneLayer={() => {
+      <LayerPanel
+        {...props}
+        onDropToDimension={handleDimensionDrop}
+        registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
+        dimensionGroups={layerConfig.config.groups}
+        activeVisualization={activeVisualization}
+        registerNewLayerRef={registerNewLayerRef}
+        key={selectedLayerId}
+        layerId={selectedLayerId}
+        layerIndex={layerIds.indexOf(selectedLayerId)}
+        visualizationState={visualization.state}
+        updateVisualization={setVisualizationState}
+        updateDatasource={updateDatasource}
+        updateDatasourceAsync={updateDatasourceAsync}
+        displayLayerSettings={!props.hideLayerHeader}
+        onChangeIndexPattern={(args) => {
+          onChangeIndexPattern(args);
+          const layersToRemove =
+            activeVisualization.getLayersToRemoveOnIndexPatternChange?.(visualization.state) ?? [];
+          layersToRemove.forEach((id) => onRemoveLayer(id));
+        }}
+        updateAll={updateAll}
+        addLayer={addLayer}
+        isOnlyLayer={
+          getRemoveOperation(
+            activeVisualization,
+            visualization.state,
+            selectedLayerId,
+            layerIds.length
+          ) === 'clear'
+        }
+        onEmptyDimensionAdd={(columnId, { groupId }) => {
+          // avoid state update if the datasource does not support initializeDimension
+          if (
+            activeDatasourceId != null &&
+            datasourceMap[activeDatasourceId]?.initializeDimension
+          ) {
             dispatchLens(
-              cloneLayer({
+              setLayerDefaultDimension({
                 layerId: selectedLayerId,
+                columnId,
+                groupId,
               })
             );
-          }}
-          onRemoveLayer={onRemoveLayer}
-          onRemoveDimension={(dimensionProps) => {
-            const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[selectedLayerId];
-            const datasourceId = datasourcePublicAPI?.datasourceId;
-            dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
-          }}
-          toggleFullscreen={toggleFullscreen}
-          indexPatternService={indexPatternService}
-        />
-      )}
+          }
+        }}
+        onCloneLayer={() => {
+          dispatchLens(
+            cloneLayer({
+              layerId: selectedLayerId,
+            })
+          );
+        }}
+        onRemoveLayer={onRemoveLayer}
+        onRemoveDimension={(dimensionProps) => {
+          const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[selectedLayerId];
+          const datasourceId = datasourcePublicAPI?.datasourceId;
+          dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
+        }}
+        toggleFullscreen={toggleFullscreen}
+        indexPatternService={indexPatternService}
+      />
     </EuiForm>
   );
 }
