@@ -97,7 +97,6 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
           </EuiForm>
         </FormProvider>
         <EuiSpacer size="m" />
-        {/* TODO - this wrapping is awkward */}
         <EuiFlexGroup justifyContent="spaceBetween" wrap>
           <EuiFlexItem>
             {canDelete && (
@@ -117,7 +116,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexGroup>
               <div>
                 <EuiButtonEmpty
                   data-test-subj="streamsAppWhereBlockConfigurationCancelButton"

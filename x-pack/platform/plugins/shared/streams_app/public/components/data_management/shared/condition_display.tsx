@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { useEuiTheme, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiBadge,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { Condition, FilterCondition } from '@kbn/streamlang';
 import {
   getFilterOperator,
@@ -89,12 +97,7 @@ const FilterBadges = ({ condition }: { condition: FilterCondition }) => {
 };
 
 const BadgeItem = ({ text }: { text: string }) => (
-  <EuiFlexItem
-    grow={false}
-    className={css`
-      max-width: 100%;
-    `}
-  >
+  <EuiFlexItem grow={false}>
     <EuiBadge color="hollow">{text}</EuiBadge>
   </EuiFlexItem>
 );
@@ -157,10 +160,18 @@ const RecursiveConditionDisplay = ({
       return <FilterBadges condition={condition} />;
     }
 
-    // TODO - what if the fallback is a code block and not a badge? badges do not wrap
     // Fallback for any unknown condition types
-    return <BadgeItem text={JSON.stringify(condition)} />;
-    // return <EuiCode className="eui-textBreakWord">{JSON.stringify(condition)}</EuiCode>;
+    const jsonStringifiedCondition = JSON.stringify(condition);
+    return (
+      <EuiToolTip
+        content={jsonStringifiedCondition}
+        anchorClassName={css`
+          max-width: 100%;
+        `}
+      >
+        <BadgeItem text={jsonStringifiedCondition} />
+      </EuiToolTip>
+    );
   };
 
   return (
