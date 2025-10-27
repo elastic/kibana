@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstAllCommands } from '../../../types';
-import { pipeCompleteItem } from '../../complete_items';
+import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
 import type { ISuggestionItem, ICommandContext } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
@@ -36,8 +36,22 @@ export async function autocomplete(
     return [];
   }
 
-  // GROK field /
-  if (commandArgs.length === 1 && /\s$/.test(innerText)) {
+  const hasField = commandArgs.length >= 1;
+  const hasPatterns = commandArgs.length >= 2;
+  const endsWithSpace = /\s$/.test(innerText);
+  const endsWithComma = /,\s*$/.test(innerText);
+
+  // No field yet OR still typing field name (no patterns and no trailing space) - suggest field names
+  if (!hasField || (hasField && !hasPatterns && !endsWithSpace)) {
+    const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) || [];
+
+    return fieldSuggestions.map((suggestion) => ({
+      ...withAutoSuggest(suggestion),
+      text: `${suggestion.text} `,
+    }));
+  }
+
+  if (hasField && !hasPatterns && endsWithSpace) {
     return buildConstantsDefinitions(
       ['"%{WORD:firstWord}"'],
       i18n.translate('kbn-esql-ast.esql.autocomplete.aPatternString', {
@@ -49,19 +63,27 @@ export async function autocomplete(
       }
     );
   }
-  // GROK field pattern /
-  else if (commandArgs.length === 2) {
-    return [withAutoSuggest(pipeCompleteItem)];
+
+  if (endsWithComma) {
+    return buildConstantsDefinitions(
+      ['"%{WORD:nextWord}"'],
+      i18n.translate('kbn-esql-ast.esql.autocomplete.aPatternString', {
+        defaultMessage: 'A pattern string',
+      }),
+      undefined,
+      {
+        advanceCursorAndOpenSuggestions: true,
+      }
+    );
   }
 
-  // GROK /
-  const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) || [];
-  return fieldSuggestions.map((sug) => {
-    const withSpace = {
-      ...sug,
-      text: `${sug.text} `,
-    };
+  // Has at least one pattern - suggest pipe or comma for more patterns
+  if (hasPatterns) {
+    return [
+      withAutoSuggest(pipeCompleteItem),
+      withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
+    ];
+  }
 
-    return withAutoSuggest(withSpace);
-  });
+  return [];
 }

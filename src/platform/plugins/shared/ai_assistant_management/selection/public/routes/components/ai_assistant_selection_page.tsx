@@ -35,14 +35,12 @@ export function AiAssistantSelectionPage() {
     kibanaBranch,
     securityAIAssistantEnabled,
   } = useAppContext();
-  const aiAssistantManagementSelection = capabilities.management.ai.aiAssistantManagementSelection;
 
   const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
   const securityAIAssistantVisibility = Boolean(
     capabilities.securitySolutionAssistant['ai-assistant']
   );
-  const isSecurityAIAssistantEnabled =
-    securityAIAssistantEnabled && aiAssistantManagementSelection && securityAIAssistantVisibility;
+  const isSecurityAIAssistantEnabled = securityAIAssistantEnabled && securityAIAssistantVisibility;
 
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
   const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant.home;
@@ -96,6 +94,7 @@ export function AiAssistantSelectionPage() {
                     <EuiCallOut
                       announceOnMount
                       iconType="warning"
+                      announceOnMount
                       data-test-subj="pluginsAiAssistantSelectionPageObservabilityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledCallOutLabel',
@@ -184,6 +183,7 @@ export function AiAssistantSelectionPage() {
                     <EuiCallOut
                       announceOnMount
                       iconType="warning"
+                      announceOnMount
                       data-test-subj="pluginsAiAssistantSelectionPageSecurityDocumentationCallout"
                       title={i18n.translate(
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',

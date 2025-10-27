@@ -159,7 +159,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             service: { name: prev.service.name, environment },
           }));
         }}
-        dataTestSubj="serviceEnviromentComboBox"
+        dataTestSubj="serviceEnvironmentComboBox"
       />
       <EuiSpacer />
       <EuiFlexGroup justifyContent="flexEnd">
