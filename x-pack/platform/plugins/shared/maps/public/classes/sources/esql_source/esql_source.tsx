@@ -137,7 +137,7 @@ export class ESQLSource
     );
 
     return asyncMap(keys, async (key) => {
-      return await this.getFieldByName(key).createTooltipProperty(key);
+      return await this.getFieldByName(key).createTooltipProperty(mbProperties[key]);
     });
   };
 
