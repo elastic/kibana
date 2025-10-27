@@ -23,7 +23,7 @@ export interface IEnvOptions {
   apmEventClient: APMEventClient;
   serviceName?: string;
   environment: string;
-  servicesWithAggregatedTransactions: string[];
+  searchAggregatedTransactions: boolean;
   logger: Logger;
   start: number;
   end: number;

@@ -8,8 +8,6 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { RollupInterval } from '@kbn/apm-data-access-plugin/common';
-import { environmentQuery } from '../../../../common/utils/environment_query';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import {
   TRANSACTION_DURATION,
@@ -17,7 +15,6 @@ import {
   TRANSACTION_ROOT,
   PARENT_ID,
   TRANSACTION_DURATION_SUMMARY,
-  SERVICE_NAME,
 } from '../../../../common/es_fields/apm';
 import type { APMConfig } from '../../..';
 import type { APMEventClient } from '../create_es_client/create_apm_event_client';
@@ -55,57 +52,6 @@ export async function getHasTransactionsEvents({
   });
 
   return response.hits.total.value > 0;
-}
-
-export async function getServiceNamesFromAggregatedTransactions({
-  start,
-  end,
-  apmEventClient,
-  kuery,
-  environment,
-}: {
-  start?: number;
-  end?: number;
-  apmEventClient: APMEventClient;
-  kuery?: string;
-  environment?: string;
-}) {
-  const response = await apmEventClient.search('get_service_names_from_aggregated_transactions', {
-    apm: {
-      sources: [
-        {
-          documentType: ApmDocumentType.ServiceTransactionMetric,
-          rollupInterval: RollupInterval.OneMinute,
-        },
-      ],
-    },
-    track_total_hits: false,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          ...(start && end ? rangeQuery(start, end) : []),
-          ...kqlQuery(kuery),
-          ...environmentQuery(environment),
-        ],
-      },
-    },
-    aggs: {
-      services: {
-        terms: {
-          field: SERVICE_NAME,
-          size: 1000,
-        },
-      },
-    },
-  });
-
-  const serviceNames =
-    response.aggregations?.services.buckets.map((bucket): string => {
-      return bucket.key as string;
-    }) || [];
-
-  return serviceNames;
 }
 
 export async function getSearchTransactionsEvents({

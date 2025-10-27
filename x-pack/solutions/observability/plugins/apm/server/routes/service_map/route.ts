@@ -12,11 +12,7 @@ import type { ServiceMapResponse } from '../../../common/service_map';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map/utils';
 import { notifyFeatureUsage } from '../../feature';
-import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
-import {
-  getSearchTransactionsEvents,
-  getServiceNamesFromAggregatedTransactions,
-} from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceMap } from './get_service_map';
 import type { ServiceMapServiceDependencyInfoResponse } from './get_service_map_dependency_node_info';
@@ -80,16 +76,13 @@ const serviceMapRoute = createApmServerRoute({
       uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
     ]);
 
-    const servicesWithAggregatedTransactions =
-      config.searchAggregatedTransactions === SearchAggregatedTransactionSetting.never
-        ? []
-        : await getServiceNamesFromAggregatedTransactions({
-            apmEventClient,
-            start,
-            end,
-            kuery,
-            environment,
-          });
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
+      config,
+      start,
+      end,
+      kuery,
+    });
 
     return getServiceMap({
       mlClient,
@@ -97,7 +90,7 @@ const serviceMapRoute = createApmServerRoute({
       apmEventClient,
       serviceName,
       environment,
-      servicesWithAggregatedTransactions,
+      searchAggregatedTransactions,
       logger: logger.get('serviceMap'),
       start,
       end,

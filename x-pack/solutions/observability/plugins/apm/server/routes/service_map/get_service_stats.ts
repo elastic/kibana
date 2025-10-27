@@ -6,6 +6,8 @@
  */
 
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { ServicesResponse } from '../../../common/service_map/types';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -16,7 +18,7 @@ import type { IEnvOptions } from './get_service_map';
 export async function getServiceStats({
   environment,
   apmEventClient,
-  servicesWithAggregatedTransactions,
+  searchAggregatedTransactions,
   start,
   end,
   maxNumberOfServices,
@@ -24,11 +26,19 @@ export async function getServiceStats({
   serviceName,
   kuery,
 }: IEnvOptions & { maxNumberOfServices: number }): Promise<ServicesResponse[]> {
-  const searchAggregatedTransactions = servicesWithAggregatedTransactions.length > 0;
+  const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
+  const shouldQueryMetrics = processorEvent === ProcessorEvent.metric;
   const params = {
-    apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
-    },
+    apm: shouldQueryMetrics
+      ? {
+          sources: [
+            {
+              documentType: ApmDocumentType.ServiceTransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+            },
+          ],
+        }
+      : { events: [processorEvent] },
     track_total_hits: false,
     size: 0,
     query: {
@@ -36,7 +46,7 @@ export async function getServiceStats({
         filter: [
           ...rangeQuery(start, end),
           ...environmentQuery(environment),
-          ...termsQuery(SERVICE_NAME, serviceName, ...servicesWithAggregatedTransactions),
+          ...termsQuery(SERVICE_NAME, serviceName),
           ...kqlQuery(serviceGroupKuery),
           ...kqlQuery(kuery),
         ],
