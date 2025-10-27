@@ -286,7 +286,7 @@ export class UnifiedTabsPageObject extends FtrService {
 
     const content = {
       title: await getVisibleText('unifiedTabs_tabPreview_title_'),
-      query: await getVisibleText('unifiedTabs_tabPreview_query_'),
+      query: await getVisibleText('unifiedTabs_tabPreviewCodeBlock_'),
       label: await getVisibleText('unifiedTabs_tabPreview_label_'),
     };
 
