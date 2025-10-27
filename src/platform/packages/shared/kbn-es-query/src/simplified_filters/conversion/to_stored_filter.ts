@@ -18,6 +18,7 @@ import type {
   FilterGroup,
   RawDSLFilter,
   RangeValue,
+  StoredFilterState,
 } from '@kbn/es-query-server';
 import type { Serializable } from '@kbn/utility-types';
 import { FilterStateStore } from '../../..';
@@ -36,7 +37,9 @@ export function toStoredFilter(simplified: SimplifiedFilter): StoredFilter {
     // Build base stored filter structure
     const storedFilter: StoredFilter = {
       $state: {
-        store: simplified.pinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
+        store: simplified.pinned
+          ? FilterStateStore.GLOBAL_STATE
+          : (FilterStateStore.APP_STATE as StoredFilterState),
       },
       meta: {
         alias: simplified.label || null,

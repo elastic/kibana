@@ -9,7 +9,7 @@
 
 export { timeRangeSchema } from './src/time_range';
 export { querySchema } from './src/query';
-export { filterSchema } from './src/filter/stored_filter';
+export { appStateSchema, globalStateSchema, filterSchema } from './src/filter/stored_filter';
 export { simplifiedFilterSchema } from './src/filter/simplified_filter';
 
 export type {
@@ -27,4 +27,5 @@ export type {
   FilterOperator,
   FilterValue,
   RangeValue,
+  StoredFilterState,
 } from './src/types';

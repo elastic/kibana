@@ -33,7 +33,6 @@ describe('Utils', () => {
         disabled: true,
         controlledBy: 'dashboard',
         indexPattern: 'test-index',
-        metadata: { custom: 'metadata' },
         negate: true,
         label: 'Test Filter',
       });
@@ -50,7 +49,6 @@ describe('Utils', () => {
         disabled: undefined,
         controlledBy: undefined,
         indexPattern: undefined,
-        metadata: undefined,
         negate: undefined,
         label: undefined,
       });
@@ -81,7 +79,6 @@ describe('Utils', () => {
         disabled: false, // disabled: false should be preserved as false, not undefined
         controlledBy: undefined,
         indexPattern: undefined,
-        metadata: undefined,
         negate: undefined,
         label: undefined,
       });

@@ -120,17 +120,10 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
     throw new FilterConversionError('Cannot determine field name from stored filter');
   }
 
-  // Build base condition
-  const baseCondition = {
-    field,
-    label: meta.alias || undefined,
-    disabled: meta.disabled || undefined,
-  };
-
   // Determine operator and value based on query structure
   if (query.exists) {
     return {
-      ...baseCondition,
+      field,
       operator: meta.negate ? 'not_exists' : 'exists',
     } as SimpleFilterCondition;
   }
@@ -145,7 +138,7 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
     if (rangeQuery?.lt !== undefined) rangeValue.lt = rangeQuery.lt;
 
     return {
-      ...baseCondition,
+      field,
       operator: 'range',
       value: rangeValue,
     };
@@ -154,7 +147,7 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
   if (query.terms) {
     const values = query.terms[field];
     return {
-      ...baseCondition,
+      field,
       operator: meta.negate ? 'is_not_one_of' : 'is_one_of',
       value: Array.isArray(values) ? values : [values],
     };
@@ -163,7 +156,7 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
   if (query.term) {
     const value = query.term[field];
     return {
-      ...baseCondition,
+      field,
       operator: meta.negate ? 'is_not' : 'is',
       value,
     };
@@ -175,7 +168,6 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
     const value = typeof matchValue === 'object' ? matchValue.query : matchValue;
 
     return {
-      ...baseCondition,
       field: matchField, // Use the field from the query, not meta
       operator: meta.negate ? 'is_not' : 'is',
       value,
@@ -186,7 +178,6 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
     const phraseField = Object.keys(query.match_phrase)[0];
     const value = query.match_phrase[phraseField];
     return {
-      ...baseCondition,
       field: phraseField, // Use the field from the query, not meta
       operator: meta.negate ? 'is_not' : 'is',
       value: typeof value === 'object' ? value.query : value,
@@ -196,7 +187,7 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
   // Fallback - try to extract from meta.params
   if (meta.params?.query) {
     return {
-      ...baseCondition,
+      field,
       operator: meta.negate ? 'is_not' : 'is',
       value: meta.params.query,
     };

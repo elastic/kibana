@@ -9,15 +9,15 @@
 
 import { schema } from '@kbn/config-schema';
 
-const filterStateStoreSchema = schema.oneOf(
-  [schema.literal('appState'), schema.literal('globalState')],
-  {
-    meta: {
-      description:
-        "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-    },
-  }
-);
+export const appStateSchema = schema.literal('appState');
+export const globalStateSchema = schema.literal('globalState');
+
+const filterStateStoreSchema = schema.oneOf([appStateSchema, globalStateSchema], {
+  meta: {
+    description:
+      "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
+  },
+});
 
 export const filterMetaSchema = schema.object(
   {

@@ -71,7 +71,6 @@ const baseFilterPropertiesSchema = {
   disabled: schema.maybe(schema.boolean()),
   controlledBy: schema.maybe(schema.string()),
   indexPattern: schema.maybe(schema.string()),
-  metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   negate: schema.maybe(schema.boolean()),
   label: schema.maybe(schema.string()),
 };

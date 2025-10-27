@@ -65,14 +65,6 @@ export class FilterBuilder {
   }
 
   /**
-   * Set metadata
-   */
-  metadata(metadata: Record<string, any>): this {
-    this.filter.metadata = metadata;
-    return this;
-  }
-
-  /**
    * Set a display label for the filter
    */
   label(label: string): this {

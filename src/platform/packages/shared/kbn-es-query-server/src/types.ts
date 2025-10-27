@@ -15,7 +15,12 @@ import type {
   relativeTimeRangeSchema,
 } from './time_range';
 import type { aggregateQuerySchema, querySchema } from './query';
-import type { filterSchema, filterMetaSchema } from './filter/stored_filter';
+import type {
+  filterSchema,
+  filterMetaSchema,
+  globalStateSchema,
+  appStateSchema,
+} from './filter/stored_filter';
 import type {
   simplifiedFilterSchema,
   simpleFilterConditionSchema,
@@ -48,3 +53,4 @@ export type RawDSLFilter = Writable<TypeOf<typeof rawDSLFilterSchema>>;
 export type FilterOperator = Writable<TypeOf<typeof filterOperatorSchema>>;
 export type FilterValue = Writable<TypeOf<typeof filterValueSchema>>;
 export type RangeValue = Writable<TypeOf<typeof rangeValueSchema>>;
+export type StoredFilterState = TypeOf<typeof appStateSchema> | TypeOf<typeof globalStateSchema>;
