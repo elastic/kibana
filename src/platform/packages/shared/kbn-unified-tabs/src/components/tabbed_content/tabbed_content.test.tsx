@@ -21,8 +21,6 @@ const NEW_TAB = {
 };
 
 describe('TabbedContent', () => {
-  const user = userEvent.setup();
-
   const TabsWrapper = ({
     initialItems,
     initialSelectedItemId,
@@ -203,6 +201,12 @@ describe('TabbedContent', () => {
   });
 
   it('correctly numbers duplicate tabs when multiple copies exist', async () => {
+    const user = userEvent.setup({
+      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
+
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 1 (copy)' },
@@ -242,6 +246,8 @@ describe('TabbedContent', () => {
   });
 
   it('correctly duplicates tabs with regex special characters in the label', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+
     const tabWithSpecialChars = { id: 'tab1', label: 'Tab (1+2)*.?' };
     const initialItems = [tabWithSpecialChars, { id: 'tab2', label: 'Regular Tab' }];
     const onChanged = jest.fn();
@@ -275,6 +281,8 @@ describe('TabbedContent', () => {
   });
 
   it('can switch to a different tab and sends tabSwitched event', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -292,7 +300,7 @@ describe('TabbedContent', () => {
       />
     );
 
-    await userEvent.click(screen.getByTestId(`unifiedTabs_selectTabBtn_${secondTab.id}`));
+    await user.click(screen.getByTestId(`unifiedTabs_selectTabBtn_${secondTab.id}`));
     await waitFor(() => {
       expect(onEBTEvent).toHaveBeenCalledWith({
         eventName: 'tabSwitched',
@@ -308,6 +316,8 @@ describe('TabbedContent', () => {
   });
 
   it('can close other tabs and sends tabClosedOthers event', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -352,6 +362,8 @@ describe('TabbedContent', () => {
   });
 
   it('can close tabs to the right and sends tabClosedToTheRight event', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
