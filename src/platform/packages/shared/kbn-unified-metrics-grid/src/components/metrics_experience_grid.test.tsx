@@ -260,7 +260,6 @@ describe('MetricsExperienceGrid', () => {
   });
 
   it('shows and updates the search input when the search button is clicked', () => {
-    // Use fake timers only for this test that needs debounce testing
     jest.useFakeTimers();
 
     const onSearchTermChange = jest.fn();

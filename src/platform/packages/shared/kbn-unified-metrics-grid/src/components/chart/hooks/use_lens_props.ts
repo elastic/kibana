@@ -13,10 +13,8 @@ import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unifi
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useStableCallback } from '@kbn/unified-histogram';
 import {
-  debounceTime,
   filter,
   startWith,
   Observable,
@@ -27,7 +25,6 @@ import {
   shareReplay,
   BehaviorSubject,
   switchMap,
-  defer,
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
@@ -86,25 +83,21 @@ export const useLensProps = ({
     return result;
   });
 
-  // loads the Lens attributes
-  const [attributesState, loadAttributes] = useAsyncFn(
-    () => buildAttributesFn.current(),
-    [buildAttributesFn]
+  const buildLensProps = useCallback(
+    (attributes: LensAttributes) => {
+      return getLensProps({
+        searchSessionId,
+        getTimeRange,
+        attributes,
+      });
+    },
+    [searchSessionId, getTimeRange]
   );
 
-  const buildLensProps = useCallback(() => {
-    if (!attributesState.value) {
-      return;
-    }
-    return getLensProps({
-      searchSessionId,
-      getTimeRange,
-      attributes: attributesState.value,
-    });
-  }, [searchSessionId, attributesState, getTimeRange]);
-
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
-  const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
+  const updateLensPropsContext = useStableCallback((attributes: LensAttributes) =>
+    setLensPropsContext(buildLensProps(attributes))
+  );
 
   useEffect(() => {
     const chartRefCurrent = chartRef?.current;
@@ -130,34 +123,28 @@ export const useLensProps = ({
     // load lens props when any trigger emits;
     const triggers$ = merge(
       // dependencies that change the chart configuration
-      configUpdates$.pipe(debounceTime(100)),
+      configUpdates$,
       // discover state update
       discoverFetch$
     ).pipe(
       // any new emission cancels previous load to avoid race conditions
-      switchMap(() => from(loadAttributes()))
+      switchMap(() => from(buildAttributesFn.current()))
     );
+
     // Update Lens props only when chart is visible
-    const subscription = merge(
-      // initial load on mount
-      defer(() => from(loadAttributes())),
-      triggers$,
-      intersecting$
-    )
+    const subscription = triggers$
       .pipe(
-        // debounce to avoid multiple updates in quick succession
-        debounceTime(100),
         withLatestFrom(intersecting$),
         filter(([, isIntersecting]) => isIntersecting)
       )
-      .subscribe(() => {
-        updateLensPropsContext();
+      .subscribe(([attributes]) => {
+        updateLensPropsContext(attributes);
       });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [discoverFetch$, loadAttributes, updateLensPropsContext, chartRef, euiTheme.size.base]);
+  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef, euiTheme.size.base]);
 
   return lensPropsContext;
 };
