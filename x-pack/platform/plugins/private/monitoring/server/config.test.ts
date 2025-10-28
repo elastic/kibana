@@ -72,7 +72,6 @@ describe('config schema', () => {
             "maxIdleSockets": 256,
             "maxResponseSize": false,
             "maxSockets": 800,
-            "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [
               "authorization",
               "es-client-authentication",
