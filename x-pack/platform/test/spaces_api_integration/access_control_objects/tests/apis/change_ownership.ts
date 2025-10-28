@@ -61,31 +61,24 @@ export default function ({ getService }: FtrProviderContext) {
     };
   };
 
-  const unownedObjectId = 'unowned_object_id';
-
   const createUnownedAccessControlObject = async () => {
     // Note: Using deprecated SO API to create an unowned object
-    const res = await supertest
-      .post(`/api/saved_objects/${ACCESS_CONTROL_TYPE}/${unownedObjectId}`)
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+    const res = await supertestWithoutAuth
+      .post(`/access_control_objects/create`)
+      .set(
+        'Authorization',
+        `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+          'base64'
+        )}`
+      )
       .set('kbn-xsrf', 'xxx')
-      .send({ attributes: {} })
+      .send({ type: ACCESS_CONTROL_TYPE })
       .expect(200);
+
     return res.body.id;
   };
 
-  const deleteUnownedAccessControlObject = async () => {
-    await supertest
-      .delete(`/api/saved_objects/${ACCESS_CONTROL_TYPE}/${unownedObjectId}`)
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .set('kbn-xsrf', 'xxx')
-      .expect(200);
-  };
-
   describe('#change_ownership', () => {
-    after(async () => {
-      await deleteUnownedAccessControlObject();
-    });
     it('should transfer ownership of write-restricted objects by owner', async () => {
       const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
 
@@ -258,7 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
     });
 
-    it.skip('should not allow non-admins to assign ownership of an unowned object', async () => {
+    it.only('should not allow non-admins to assign ownership of an unowned object', async () => {
       const { cookie: notAdminCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
       const objectId = await createUnownedAccessControlObject();
       const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();

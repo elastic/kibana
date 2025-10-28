@@ -4,45 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parse as parseCookie } from 'tough-cookie';
 
 import { ACCESS_CONTROL_TYPE } from '@kbn/access-control-test-plugin/server';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
+import { utils } from './utils';
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  const login = async (username: string, password: string | undefined) => {
-    const response = await supertestWithoutAuth
-      .post('/internal/security/login')
-      .set('kbn-xsrf', 'xxx')
-      .send({
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: '/',
-        params: { username, password },
-      })
-      .expect(200);
-    const cookie = parseCookie(response.headers['set-cookie'][0])!;
-    const profileUidResponse = await supertestWithoutAuth
-      .get('/internal/security/me')
-      .set('Cookie', cookie.cookieString())
-      .expect(200);
-    return {
-      cookie,
-      profileUid: profileUidResponse.body.profile_uid,
-    };
-  };
-
-  const loginAsKibanaAdmin = () => login(adminTestUser.username, adminTestUser.password);
-
-  const loginAsObjectOwner = (username: string, password: string) => login(username, password);
-
-  const loginAsNotObjectOwner = (username: string, password: string) => login(username, password);
+  const { loginAsKibanaAdmin, loginAsObjectOwner, loginAsNotObjectOwner } = utils(getService);
 
   describe('#create', () => {
     it('should create a write-restricted object', async () => {
