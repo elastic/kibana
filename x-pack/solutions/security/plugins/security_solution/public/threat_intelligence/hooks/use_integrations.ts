@@ -26,7 +26,7 @@ export interface Integration {
   status: IntegrationInstallStatus;
 }
 
-const queryKey = ['integrations'];
+const queryKey = ['integrations-threat-intel'];
 
 /**
  * Retrieves integrations from the Fleet plugin endpoint /api/fleet/epm/packages.
