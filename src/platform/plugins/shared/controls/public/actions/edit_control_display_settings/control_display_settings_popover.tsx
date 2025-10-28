@@ -43,15 +43,10 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
 
   const layoutState = api.parentApi.layout$.value;
   const layoutEntry = useMemo(() => layoutState.controls[api.uuid], [layoutState, api.uuid]);
-  const isToRightOfGrowControl = useMemo(() => {
-    if (layoutEntry.order === 0) return false;
-    const nextLowestOrder = layoutEntry.order - 1;
-    const nextLowestOrderControl = Object.values(layoutState.controls).reduce((a, b) =>
-      b.order - nextLowestOrder < a.order - nextLowestOrder ? b : a
-    );
-    if (nextLowestOrderControl.order === layoutEntry.order) return false;
-    return nextLowestOrderControl.grow;
-  }, [layoutEntry.order, layoutState.controls]);
+  const isToRightOfGrowControl = useMemo(
+    () => layoutEntry.order > 0 && Object.values(layoutState.controls)[layoutEntry.order - 1].grow,
+    [layoutEntry.order, layoutState.controls]
+  );
 
   const grow = useMemo(() => layoutEntry.grow ?? DEFAULT_CONTROL_GROW, [layoutEntry]);
   const width = useMemo(() => layoutEntry.width ?? DEFAULT_CONTROL_WIDTH, [layoutEntry]);
