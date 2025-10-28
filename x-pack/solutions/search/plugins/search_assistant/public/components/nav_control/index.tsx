@@ -140,7 +140,11 @@ export function NavControl() {
   );
 }
 
+const isMac = navigator.userAgent.toLocaleLowerCase().includes('mac');
 const buttonLabel = i18n.translate(
   'xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel',
-  { defaultMessage: 'Open the AI Assistant' }
+  {
+    defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
+    values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
+  }
 );
