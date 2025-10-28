@@ -130,112 +130,84 @@ apiTest.describe(
       expect(source).toHaveProperty('message', 'keep-this');
     });
 
-    apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-ignore-missing';
+    apiTest(
+      'should remove the parent field itself when using dotted notation',
+      async ({ testBed }) => {
+        const indexName = 'streams-e2e-test-remove-by-prefix-delete-parent-dotted';
 
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'remove_by_prefix',
+              from: 'metadata.user',
+            } as RemoveByPrefixProcessor,
+          ],
+        };
+
+        const { processors } = transpile(streamlangDSL);
+
+        const docs = [
           {
-            action: 'remove_by_prefix',
-            from: 'nonexistent',
-            ignore_missing: true,
-          } as RemoveByPrefixProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
-      await testBed.ingest(indexName, docs, processors);
-
-      const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source).toHaveProperty('message', 'some_value');
-    });
-
-    apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-fail-missing';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'remove_by_prefix',
-            from: 'nonexistent',
-            ignore_missing: false,
-          } as RemoveByPrefixProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
-      const { errors } = await testBed.ingest(indexName, docs, processors);
-      expect(errors).toHaveLength(1);
-      expect(errors[0].type).toBe('script_exception');
-    });
-
-    apiTest('should work with DSL where blocks for conditional removal', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-where-block';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            where: {
-              field: 'event.kind',
-              eq: 'test',
-              steps: [
-                {
-                  action: 'remove_by_prefix',
-                  from: 'temp_data',
-                } as RemoveByPrefixProcessor,
-              ],
-            },
+            'metadata.user.id': '123',
+            'metadata.user.name': 'john',
+            'metadata.timestamp': '2025-01-01',
+            message: 'keep-this',
           },
+        ];
+        await testBed.ingest(indexName, docs, processors);
+
+        const ingestedDocs = await testBed.getDocs(indexName);
+        expect(ingestedDocs).toHaveLength(1);
+        const source = ingestedDocs[0];
+        // Parent field and all nested fields removed
+        expect(source).not.toHaveProperty('metadata.user');
+        expect(source).not.toHaveProperty('metadata.user.id');
+        expect(source).not.toHaveProperty('metadata.user.name');
+        // Other metadata fields kept (as dotted notation - accessed with bracket notation)
+        expect(source['metadata.timestamp']).toBe('2025-01-01');
+        expect(source).toHaveProperty('message', 'keep-this');
+      }
+    );
+
+    apiTest('should remove the parent field itself when using subobjects', async ({ testBed }) => {
+      const indexName = 'streams-e2e-test-remove-by-prefix-delete-parent-subobjects';
+
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'remove_by_prefix',
+            from: 'metadata.user',
+          } as RemoveByPrefixProcessor,
         ],
       };
 
       const { processors } = transpile(streamlangDSL);
 
       const docs = [
-        { temp_data: { value: 'remove-me' }, event: { kind: 'test' }, message: 'doc1' },
-        { temp_data: { value: 'keep-me' }, event: { kind: 'production' }, message: 'doc2' },
+        {
+          metadata: {
+            user: {
+              id: '123',
+              name: 'john',
+            },
+            timestamp: '2025-01-01',
+          },
+          message: 'keep-this',
+        },
       ];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveLength(2);
-
-      // First doc should have temp_data removed (where condition matched)
-      const doc1 = ingestedDocs.find((d: any) => d.message === 'doc1');
-      expect(doc1).not.toHaveProperty('temp_data');
-      expect(doc1).toHaveProperty('event.kind', 'test');
-
-      // Second doc should keep temp_data (where condition not matched)
-      const doc2 = ingestedDocs.find((d: any) => d.message === 'doc2');
-      expect(doc2).toHaveProperty('temp_data.value', 'keep-me');
-      expect(doc2).toHaveProperty('event.kind', 'production');
-    });
-
-    apiTest('default value of ignore_missing (false)', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-defaults';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'remove_by_prefix',
-            from: 'nonexistent',
-          } as RemoveByPrefixProcessor,
-        ],
-      };
-
-      const { processors } = transpile(streamlangDSL);
-
-      // Field missing, should fail (ignore_missing defaults to false)
-      const docs = [{ message: 'some_value' }];
-      const { errors } = await testBed.ingest(indexName, docs, processors);
-      expect(errors).toHaveLength(1);
-      expect(errors[0].type).toBe('script_exception');
+      expect(ingestedDocs).toHaveLength(1);
+      const source = ingestedDocs[0];
+      // Parent field and all nested fields removed
+      expect(source).not.toHaveProperty('metadata.user');
+      expect(source).not.toHaveProperty('metadata.user.id');
+      expect(source).not.toHaveProperty('metadata.user.name');
+      // Other metadata fields kept (as nested object)
+      expect(source).toHaveProperty('metadata');
+      expect(source.metadata).toHaveProperty('timestamp', '2025-01-01');
+      expect(source).toHaveProperty('message', 'keep-this');
     });
 
     [

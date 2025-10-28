@@ -239,13 +239,11 @@ export const convertProcessorSchema = processorBaseWithWhereSchema
 export interface RemoveByPrefixProcessor extends ProcessorBase {
   action: 'remove_by_prefix';
   from: string;
-  ignore_missing?: boolean;
 }
 
 export const removeByPrefixProcessorSchema = processorBaseSchema.extend({
   action: z.literal('remove_by_prefix'),
   from: StreamlangSourceField,
-  ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<RemoveByPrefixProcessor>;
 
 /**

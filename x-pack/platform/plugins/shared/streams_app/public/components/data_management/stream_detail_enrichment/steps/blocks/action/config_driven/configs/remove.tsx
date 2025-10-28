@@ -23,9 +23,9 @@ export type RemoveProcessorFormState = RemoveProcessor;
 const defaultFormState: RemoveProcessorFormState = {
   action: 'remove' as const,
   from: '',
-  ignore_missing: false,
+  ignore_missing: true,
   where: ALWAYS_CONDITION,
-  ignore_failure: false,
+  ignore_failure: true,
 };
 
 const fieldOptions: FieldOptions = {

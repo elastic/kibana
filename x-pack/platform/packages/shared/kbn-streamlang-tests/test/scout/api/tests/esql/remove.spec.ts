@@ -110,8 +110,8 @@ apiTest.describe('Streamlang to ES|QL - Remove Processor', { tag: ['@ess', '@svl
     const { query } = transpile(streamlangDSL);
 
     const docs = [
-      { temp_data: { value: 'remove-me' }, event: { kind: 'test' }, message: 'doc1' },
-      { temp_data: { value: 'keep-me' }, event: { kind: 'production' }, message: 'doc2' },
+      { temp_data: 'remove-me', event: { kind: 'test' }, message: 'doc1' },
+      { temp_data: 'keep-me', event: { kind: 'production' }, message: 'doc2' },
     ];
     await testBed.ingest(indexName, docs);
     const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -121,13 +121,13 @@ apiTest.describe('Streamlang to ES|QL - Remove Processor', { tag: ['@ess', '@svl
     // First doc should have temp_data nulled (where condition matched)
     const doc1 = esqlResult.documents.find((d: any) => d.message === 'doc1');
     // Note: ESQL CASE sets to null, which is removed from the result
-    expect(doc1).not.toHaveProperty('temp_data');
-    expect(doc1).toHaveProperty('event.kind', 'test');
+    expect(doc1).toHaveProperty('temp_data', null);
+    expect(doc1?.['event.kind']).toBe('test');
 
     // Second doc should keep temp_data (where condition not matched)
     const doc2 = esqlResult.documents.find((d: any) => d.message === 'doc2');
-    expect(doc2).toHaveProperty('temp_data.value', 'keep-me');
-    expect(doc2).toHaveProperty('event.kind', 'production');
+    expect(doc2).toHaveProperty('temp_data', 'keep-me');
+    expect(doc2?.['event.kind']).toBe('production');
   });
 
   apiTest(

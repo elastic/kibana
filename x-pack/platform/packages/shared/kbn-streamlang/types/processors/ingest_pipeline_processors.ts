@@ -15,11 +15,8 @@ import type {
   ManualIngestPipelineProcessor,
   AppendProcessor,
   ConvertProcessor,
-<<<<<<< HEAD
   RemoveByPrefixProcessor,
   RemoveProcessor,
-=======
->>>>>>> upstream/main
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -69,7 +66,6 @@ export type IngestPipelineConvertProcessor = RenameFieldsAndRemoveAction<
     : { from: 'field'; to: 'target_field' }
 >;
 
-<<<<<<< HEAD
 // RemoveByPrefix
 export type IngestPipelineRemoveByPrefixProcessor = RenameFieldsAndRemoveAction<
   RemoveByPrefixProcessor,
@@ -82,8 +78,6 @@ export type IngestPipelineRemoveProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; where: 'if' }
 >;
 
-=======
->>>>>>> upstream/main
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -98,9 +92,6 @@ export type IngestPipelineProcessor =
   | IngestPipelineSetProcessor
   | IngestPipelineAppendProcessor
   | IngestPipelineConvertProcessor
-<<<<<<< HEAD
   | IngestPipelineRemoveByPrefixProcessor
   | IngestPipelineRemoveProcessor
-=======
->>>>>>> upstream/main
   | IngestPipelineManualIngestPipelineProcessor;

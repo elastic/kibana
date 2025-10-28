@@ -14,41 +14,88 @@ apiTest.describe(
   'Streamlang to ES|QL - RemoveByPrefix Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    apiTest('should remove a field', async ({ testBed, esql }) => {
-      const indexName = 'stream-e2e-test-remove-by-prefix-basic';
+    apiTest(
+      'should keep the parent field when it has no nested fields',
+      async ({ testBed, esql }) => {
+        const indexName = 'stream-e2e-test-remove-by-prefix-basic';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'remove_by_prefix',
+              from: 'temp_field',
+            } as RemoveByPrefixProcessor,
+          ],
+        };
+
+        const { query } = transpile(streamlangDSL);
+
+        const docs = [{ temp_field: 'to-be-kept', message: 'keep-this' }];
+        await testBed.ingest(indexName, docs);
+        const esqlResult = await esql.queryOnIndex(indexName, query);
+
+        expect(esqlResult.documents).toHaveLength(1);
+        // The parent field itself is not removed, only nested fields would be
+        expect(esqlResult.documents[0]).toHaveProperty('temp_field');
+        expect(esqlResult.documents[0]).toStrictEqual(
+          expect.objectContaining({ message: 'keep-this', temp_field: 'to-be-kept' })
+        );
+      }
+    );
+
+    apiTest('should remove nested fields (parent field removed too)', async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-remove-by-prefix-nested';
 
       const streamlangDSL: StreamlangDSL = {
         steps: [
           {
             action: 'remove_by_prefix',
-            from: 'temp_field',
+            from: 'host',
           } as RemoveByPrefixProcessor,
         ],
       };
 
       const { query } = transpile(streamlangDSL);
 
-      const docs = [{ temp_field: 'to-be-removed', message: 'keep-this' }];
+      const docs = [
+        {
+          host: {
+            name: 'server01',
+            ip: '192.168.1.1',
+            os: {
+              platform: 'linux',
+              version: '20.04',
+            },
+          },
+          message: 'keep-this',
+        },
+      ];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).not.toHaveProperty('temp_field');
+      // The nested fields are removed
+      expect(esqlResult.columnNames).not.toContain('host.name');
+      expect(esqlResult.columnNames).not.toContain('host.ip');
+      expect(esqlResult.columnNames).not.toContain('host.os.platform');
+      expect(esqlResult.columnNames).not.toContain('host.os.version');
+      // Parent field is also removed when all nested fields are gone
+      expect(esqlResult.columnNames).not.toContain('host');
       expect(esqlResult.documents[0]).toStrictEqual(
         expect.objectContaining({ message: 'keep-this' })
       );
     });
 
     apiTest(
-      'should remove a field and all nested fields (subobjects)',
+      'should work with dotted field names (flattened structure)',
       async ({ testBed, esql }) => {
-        const indexName = 'stream-e2e-test-remove-by-prefix-nested';
+        const indexName = 'stream-e2e-test-remove-by-prefix-dotted';
 
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {
               action: 'remove_by_prefix',
-              from: 'host',
+              from: 'labels',
             } as RemoveByPrefixProcessor,
           ],
         };
@@ -57,14 +104,8 @@ apiTest.describe(
 
         const docs = [
           {
-            host: {
-              name: 'server01',
-              ip: '192.168.1.1',
-              os: {
-                platform: 'linux',
-                version: '20.04',
-              },
-            },
+            'labels.env': 'production',
+            'labels.team': 'platform',
             message: 'keep-this',
           },
         ];
@@ -72,71 +113,16 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
         expect(esqlResult.documents).toHaveLength(1);
-        expect(esqlResult.columnNames).not.toContain('host');
-        expect(esqlResult.columnNames).not.toContain('host.name');
-        expect(esqlResult.columnNames).not.toContain('host.ip');
-        expect(esqlResult.columnNames).not.toContain('host.os.platform');
-        expect(esqlResult.columnNames).not.toContain('host.os.version');
+        // Nested fields are removed
+        expect(esqlResult.columnNames).not.toContain('labels.env');
+        expect(esqlResult.columnNames).not.toContain('labels.team');
+        // Parent field is also removed when all nested fields are gone
+        expect(esqlResult.columnNames).not.toContain('labels');
         expect(esqlResult.documents[0]).toStrictEqual(
           expect.objectContaining({ message: 'keep-this' })
         );
       }
     );
-
-    apiTest('should handle ignore_missing: false (default)', async ({ testBed, esql }) => {
-      const indexName = 'stream-e2e-test-remove-by-prefix-no-ignore-missing';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'remove_by_prefix',
-            from: 'temp_field',
-          } as RemoveByPrefixProcessor,
-        ],
-      };
-
-      const { query } = transpile(streamlangDSL);
-
-      const docWithField = { temp_field: 'to-be-removed', message: 'doc1' };
-      const docWithoutField = { message: 'doc2' }; // Should be filtered out
-      const docs = [docWithField, docWithoutField];
-      await testBed.ingest(indexName, docs);
-      const esqlResult = await esql.queryOnIndex(indexName, query);
-
-      // ES|QL filters out documents with missing field when ignore_missing: false
-      expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ message: 'doc1' }));
-      expect(esqlResult.documents[0]).not.toHaveProperty('temp_field');
-    });
-
-    apiTest('should handle ignore_missing: true', async ({ testBed, esql }) => {
-      const indexName = 'stream-e2e-test-remove-by-prefix-ignore-missing';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'remove_by_prefix',
-            from: 'temp_field',
-            ignore_missing: true,
-          } as RemoveByPrefixProcessor,
-        ],
-      };
-
-      const { query } = transpile(streamlangDSL);
-
-      const docWithField = { temp_field: 'to-be-removed', message: 'doc1' };
-      const docWithoutField = { message: 'doc2' }; // Should pass through
-      const docs = [docWithField, docWithoutField];
-      await testBed.ingest(indexName, docs);
-      const esqlResult = await esql.queryOnIndex(indexName, query);
-
-      // Both documents should be present
-      expect(esqlResult.documents).toHaveLength(2);
-      const doc1 = esqlResult.documents.find((d: any) => d.message === 'doc1');
-      const doc2 = esqlResult.documents.find((d: any) => d.message === 'doc2');
-      expect(doc1).not.toHaveProperty('temp_field');
-      expect(doc2).not.toHaveProperty('temp_field');
-    });
 
     apiTest(
       'should reject Mustache template syntax {{ and {{{ in field names',

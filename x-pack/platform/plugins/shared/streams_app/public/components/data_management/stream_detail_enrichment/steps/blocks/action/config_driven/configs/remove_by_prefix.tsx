@@ -23,8 +23,7 @@ export type RemoveByPrefixProcessorFormState = RemoveByPrefixProcessor;
 const defaultFormState: RemoveByPrefixProcessorFormState = {
   action: 'remove_by_prefix' as const,
   from: '',
-  ignore_missing: false,
-  ignore_failure: false,
+  ignore_failure: true,
 };
 
 const fieldOptions: FieldOptions = {
@@ -37,7 +36,7 @@ const fieldOptions: FieldOptions = {
   ),
   includeCondition: false,
   includeIgnoreFailures: true,
-  includeIgnoreMissing: true,
+  includeIgnoreMissing: false,
 };
 
 const fieldConfigurations: FieldConfiguration[] = [];

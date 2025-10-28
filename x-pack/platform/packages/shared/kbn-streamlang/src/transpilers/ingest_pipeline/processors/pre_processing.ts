@@ -45,21 +45,33 @@ export const applyPreProcessing = (
 ): IngestProcessorContainer[] => {
   // Special handling for remove_by_prefix: convert to script processor
   if (action === 'remove_by_prefix') {
-    const { fields, ignore_missing: ignoreMissing = false, ...rest } = processorWithRenames as any;
+    const {
+      fields,
+      tag,
+      description,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      ignore_failure,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      on_failure,
+    } = processorWithRenames as any;
     const fieldArray = Array.isArray(fields) ? fields : [fields];
 
     // Build Painless script to remove field and all nested fields (field.*)
     // This handles both subobjects and flattened fields
     const removeStatements = fieldArray
       .map((field: string) => {
-        const checkMissing = ignoreMissing ? `if (ctx.containsKey('${field}')) { ` : '';
-        const closeMissing = ignoreMissing ? ' }' : '';
+        const parts = field.split('.');
 
-        // Remove the field itself
-        let script = `${checkMissing}ctx.remove('${field}');${closeMissing}`;
+        // For nested fields (e.g., 'metadata.user'), navigate to parent and remove child
+        if (parts.length > 1) {
+          const parentPath = parts.slice(0, -1).join('.');
+          const childKey = parts[parts.length - 1];
 
-        // For flattened fields, remove all keys that start with the prefix
-        script += `
+          // Build script to navigate and remove nested field
+          let script = `if (ctx?.${parentPath} instanceof Map) { ctx.${parentPath}.remove('${childKey}'); }`;
+
+          // Also remove any flattened keys that start with this prefix
+          script += `
       List keysToRemove = new ArrayList();
       for (key in ctx.keySet()) {
         if (key.startsWith('${field}.')) {
@@ -70,18 +82,47 @@ export const applyPreProcessing = (
         ctx.remove(key);
       }`;
 
-        return script;
+          return script;
+        } else {
+          // For top-level fields, remove directly
+          let script = `ctx.remove('${field}');`;
+
+          // For flattened fields, remove all keys that start with the prefix
+          script += `
+      List keysToRemove = new ArrayList();
+      for (key in ctx.keySet()) {
+        if (key.startsWith('${field}.')) {
+          keysToRemove.add(key);
+        }
+      }
+      for (key in keysToRemove) {
+        ctx.remove(key);
+      }`;
+
+          return script;
+        }
       })
       .join('\n');
 
-    return [
-      {
-        script: {
-          ...rest,
-          source: removeStatements,
-        },
-      },
-    ];
+    const scriptProcessor: any = {
+      source: removeStatements,
+    };
+
+    // Only add valid script processor fields if they exist
+    if (tag !== undefined) scriptProcessor.tag = tag;
+    if (description !== undefined) scriptProcessor.description = description;
+    if (ignore_failure !== undefined) scriptProcessor.ignore_failure = ignore_failure;
+
+    const result: IngestProcessorContainer = {
+      script: scriptProcessor,
+    };
+
+    // on_failure goes at the processor container level, not inside script
+    if (on_failure !== undefined) {
+      (result as any).on_failure = on_failure;
+    }
+
+    return [result];
   }
 
   // Default: return processor as-is
