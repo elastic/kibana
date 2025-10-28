@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import type {
   InlineEditLensEmbeddableContext,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { css } from '@emotion/react';
 import { EditVisualizationButton, saveButtonLabel } from './edit_visualization_button';
 import { actionsContainer } from './styles';
 
@@ -37,10 +37,12 @@ export function VisualizationActions({
     return null;
   }
 
+  const containerCss = css(actionsContainer(euiTheme));
+  const iconCss = css({ marginLeft: '-1px' });
+
   return (
     <div
-      className="visualization-button-actions"
-      css={actionsContainer(euiTheme)}
+      className={`visualization-button-actions ${containerCss}`}
       data-test-subj="visualizationButtonActions"
     >
       <EditVisualizationButton
@@ -56,7 +58,7 @@ export function VisualizationActions({
         size="s"
         iconType="save"
         aria-label={saveButtonLabel}
-        css={css({ marginLeft: '-1px' })} // avoid double border
+        className={iconCss}
         onClick={onSave}
       />
     </div>

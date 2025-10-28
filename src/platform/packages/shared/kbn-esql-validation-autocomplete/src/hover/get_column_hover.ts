@@ -7,8 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  getRedirectAppLinksServicesMock,
-  getRedirectAppLinksKibanaDependenciesMock,
-} from './src/jest';
-export { StorybookMock as RedirectAppLinksStorybookMock } from './src/storybook';
+import type { ESQLColumn } from '@kbn/esql-ast';
+import type { GetColumnMapFn } from '../shared/columns';
+
+export async function getColumnHover(
+  node: ESQLColumn,
+  getColumnMap: GetColumnMapFn
+): Promise<Array<{ value: string }>> {
+  const columnsMap = await getColumnMap();
+  const columnData = columnsMap.get(node.name);
+  if (columnData) {
+    return [
+      {
+        value: `**${node.name}**: ${columnData.type}`,
+      },
+    ];
+  }
+  return [];
+}

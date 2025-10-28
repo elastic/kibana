@@ -138,9 +138,6 @@ export class ProjectNavigationService {
         return this.projectHome$.asObservable();
       },
       setCloudUrls: (cloudUrls: CloudURLs) => {
-        // Cloud links never change, so we only need to parse them once
-        if (Object.keys(this.cloudLinks$.getValue()).length > 0) return;
-
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
       setFeedbackUrlParams: (feedbackUrlParams: URLSearchParams) => {
