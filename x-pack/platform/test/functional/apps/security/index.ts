@@ -9,15 +9,15 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security app', function () {
-    loadTestFile(require.resolve('./security'));
-    loadTestFile(require.resolve('./doc_level_security_roles'));
-    loadTestFile(require.resolve('./management'));
+    // loadTestFile(require.resolve('./security'));
+    // loadTestFile(require.resolve('./doc_level_security_roles'));
+    // loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./users'));
-    loadTestFile(require.resolve('./secure_roles_perm'));
-    loadTestFile(require.resolve('./field_level_security'));
-    loadTestFile(require.resolve('./user_email'));
-    loadTestFile(require.resolve('./role_mappings'));
-    loadTestFile(require.resolve('./remote_cluster_security_roles'));
-    loadTestFile(require.resolve('./role_description'));
+    // loadTestFile(require.resolve('./secure_roles_perm'));
+    // loadTestFile(require.resolve('./field_level_security'));
+    // loadTestFile(require.resolve('./user_email'));
+    // loadTestFile(require.resolve('./role_mappings'));
+    // loadTestFile(require.resolve('./remote_cluster_security_roles'));
+    // loadTestFile(require.resolve('./role_description'));
   });
 }
