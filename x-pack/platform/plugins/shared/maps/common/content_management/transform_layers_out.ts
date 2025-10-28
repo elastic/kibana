@@ -11,7 +11,7 @@ import type { ESQLSourceDescriptor, LayerDescriptor } from '../descriptor_types'
 
 export function transformLayersOut(layers: Writable<Partial<LayerDescriptor>>[]) {
   return layers.map((layer) => {
-    if ('sourceDescriptor' in layer) {
+    if ('sourceDescriptor' in layer && layer.sourceDescriptor) {
       const source = layer.sourceDescriptor as { type?: string };
       if (source.type === SOURCE_TYPES.ESQL) {
         const { columns, ...restOfSource } = source as ESQLSourceDescriptor & { columns?: unknown };
