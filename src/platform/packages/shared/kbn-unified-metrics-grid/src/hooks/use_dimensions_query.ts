@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import { useMetricsExperience } from './use_metrics_experience';
+import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider';
 
 export const useDimensionsQuery = (params: {
   dimensions: string[];
@@ -18,7 +18,7 @@ export const useDimensionsQuery = (params: {
   from?: string;
   to?: string;
 }) => {
-  const { client } = useMetricsExperience();
+  const { client } = useMetricsExperienceClient();
 
   return useQuery({
     queryKey: ['dimensionValues', params],

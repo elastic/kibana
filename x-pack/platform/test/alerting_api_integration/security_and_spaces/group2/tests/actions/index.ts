@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
 export default function connectorsTests({ loadTestFile, getService }: FtrProviderContext) {
-  describe('Connectors', () => {
+  describe('testtest Connectors', () => {
     before(async () => {
       await setupSpacesAndUsers(getService);
     });

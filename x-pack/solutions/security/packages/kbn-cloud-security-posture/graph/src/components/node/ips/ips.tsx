@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiText, EuiButtonEmpty, useEuiFontSize } from '@elastic/eui';
+import { EuiFlexGroup, EuiText, EuiButtonEmpty, useEuiFontSize, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,6 +20,8 @@ import {
   GRAPH_IPS_POPOVER_IP_ID,
   GRAPH_IPS_POPOVER_ID,
   GRAPH_IPS_PLUS_COUNT_BUTTON_ID,
+  GRAPH_IPS_BUTTON_ID,
+  GRAPH_IPS_VALUE_ID,
 } from '../../test_ids';
 import { createPreviewItems } from '../utils';
 
@@ -74,18 +76,52 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
   if (ips.length === 0) return null;
 
   const visibleIps = (
-    <EuiText
-      data-test-subj={GRAPH_IPS_TEXT_ID}
-      size="s"
-      color="subdued"
-      css={css`
-        font-weight: medium;
-        ${sFontSize};
-      `}
-    >
-      {'IP: '}
-      {ips.slice(0, VISIBLE_IPS_LIMIT).join(', ')}
-    </EuiText>
+    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText
+          data-test-subj={GRAPH_IPS_TEXT_ID}
+          size="s"
+          color="subdued"
+          css={css`
+            font-weight: medium;
+            ${sFontSize};
+          `}
+        >
+          {'IP: '}
+        </EuiText>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        {ips.length === 1 && onIpClick ? (
+          <EuiButtonEmpty
+            size="s"
+            color="text"
+            data-test-subj={GRAPH_IPS_BUTTON_ID}
+            onClick={onIpClick}
+            aria-label={popoverTipAriaLabel}
+            flush="both"
+            css={css`
+              font-weight: medium;
+              ${sFontSize};
+            `}
+          >
+            {ips[0]}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiText
+            data-test-subj={GRAPH_IPS_VALUE_ID}
+            size="s"
+            color="subdued"
+            css={css`
+              font-weight: medium;
+              ${sFontSize};
+            `}
+          >
+            {ips.slice(0, VISIBLE_IPS_LIMIT).join(', ')}
+          </EuiText>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const counter =
@@ -121,9 +157,9 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
     ) : null;
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" justifyContent="center">
-      {visibleIps}
-      {counter}
+    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
+      <EuiFlexItem grow={false}>{visibleIps}</EuiFlexItem>
+      {counter && <EuiFlexItem grow={false}>{counter}</EuiFlexItem>}
     </EuiFlexGroup>
   );
 };
