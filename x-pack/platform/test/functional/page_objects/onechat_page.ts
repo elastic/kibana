@@ -7,7 +7,6 @@
 
 import type { ToolType } from '@kbn/onechat-common';
 import { subj } from '@kbn/test-subj-selector';
-import { last } from 'lodash';
 import { AGENT_BUILDER_APP_ID } from '../../onechat/common/constants';
 import type { LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
 import {
