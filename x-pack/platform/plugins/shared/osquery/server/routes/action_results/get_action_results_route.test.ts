@@ -216,6 +216,32 @@ describe('getActionResultsRoute', () => {
       });
     });
 
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify action details was NOT fetched (fallback path used)
+      expect(mockSearchFn).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          factoryQueryType: OsqueryQueries.actionDetails,
+        }),
+        expect.anything()
+      );
+
+      // Verify response - server doesn't know total, client handles pagination
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          currentPage: 0,
+          pageSize: 20,
+          // Should have 2 real results + 18 placeholders = 20 total (full page)
+          edges: expect.arrayContaining([expect.objectContaining({ _id: expect.any(String) })]),
+          total: 20, // Current page size
+        }),
+      });
+    });
+
+    it('should create placeholders for pending agents in fallback path', async () => {
+      // Scenario: Page with 5 agents, 2 responded, should create 3 placeholders
     it('should create placeholders for agents that have not responded', async () => {
       const mockActionResults = createMockActionResultsResponse(2, {
         totalResponded: 2,
