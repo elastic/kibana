@@ -207,3 +207,46 @@ docker_with_retry () {
     fi
   done
 }
+
+restore_target_folders() {
+  echo "--- Restoring target folders from cache if available"
+
+  .buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
+  set +e
+  gcloud storage ls "gs://ci-artifacts.kibana.dev/target_folders/${BUILDKITE_BRANCH:-default}/target_folders.tar.gz" > /dev/null
+  exit_code=$?
+  set -e
+
+  if [[ $exit_code -eq 0 ]]; then
+    echo "Downloading cached target folders from GCS"
+    gcloud storage cp "gs://ci-artifacts.kibana.dev/target_folders/${BUILDKITE_BRANCH:-default}/target_folders.tar.gz" .
+    echo "Extracting target folders ($PWD/)target_folders.tar.gz to current directory ($PWD)"
+    tar -xzf target_folders.tar.gz -C .
+    rm -rf target_folders.tar.gz
+  else
+    echo "No cached target folders found in GCS"
+  fi
+
+  .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
+}
+
+archive_target_folders() {
+  echo "--- Archiving target folders for caching"
+  mkdir -p target_archive
+  find . -type d -name target -exec rsync -avR {}/ ./target_archive/ \;
+
+  rm -rf target_archive/target
+  rm -rf target_archive/node_modules
+  tar -czf target_folders.tar.gz -C target_archive .
+
+  rm -rf target_archive
+
+  .buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
+  set +e
+  gcloud storage cp target_folders.tar.gz "gs://ci-artifacts.kibana.dev/target_folders/${BUILDKITE_BRANCH:-default}/target_folders.tar.gz" || echo "Failed to upload target folders to GCS"
+  exit_code=$?
+  set -e
+
+  .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
+  rm -rf target_folders.tar.gz target_archive
+}
