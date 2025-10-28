@@ -1160,5 +1160,167 @@ describe('parseRecords', () => {
         expect(targetNode.shape).toBe('rectangle');
       });
     });
+
+    describe('complex grouping scenarios', () => {
+      it('should create separate nodes for actors with different enrichment levels', () => {
+        // This test verifies that actors are correctly grouped:
+        // - Group 1: Multiple enriched actors with same type AND sub_type
+        // - Group 2: Single enriched actor with type only (no sub_type)
+        // - Group 3: Single non-enriched actor
+        const records: GraphEdge[] = [
+          // Event 1: Actor from Group 1 (enriched with type:sub_type)
+          {
+            action: 'complex.action',
+            actorIds: ['user-1'],
+            targetIds: ['target-1'],
+            actorEntityGroup: 'user:service account',
+            targetEntityGroup: 'host',
+            actorEntityType: 'user',
+            targetEntityType: 'host',
+            actorLabel: 'service account',
+            targetLabel: 'Server',
+            actorIdsCount: 1,
+            targetIdsCount: 1,
+            badge: 1,
+            uniqueEventsCount: 1,
+            uniqueAlertsCount: 0,
+            docs: ['{"id":"event1","type":"event"}'],
+            isOrigin: false,
+            isOriginAlert: false,
+            isAlert: false,
+            actorHostIps: [],
+            targetHostIps: [],
+            sourceIps: [],
+            sourceCountryCodes: [],
+          },
+          // Event 2: Another actor from Group 1 (same type:sub_type)
+          {
+            action: 'complex.action',
+            actorIds: ['user-2'],
+            targetIds: ['target-1'],
+            actorEntityGroup: 'user:service account',
+            targetEntityGroup: 'host',
+            actorEntityType: 'user',
+            targetEntityType: 'host',
+            actorLabel: 'service account',
+            targetLabel: 'Server',
+            actorIdsCount: 1,
+            targetIdsCount: 1,
+            badge: 1,
+            uniqueEventsCount: 1,
+            uniqueAlertsCount: 0,
+            docs: ['{"id":"event2","type":"event"}'],
+            isOrigin: false,
+            isOriginAlert: false,
+            isAlert: false,
+            actorHostIps: [],
+            targetHostIps: [],
+            sourceIps: [],
+            sourceCountryCodes: [],
+          },
+          // Event 3: Actor from Group 2 (enriched with type only, no sub_type)
+          {
+            action: 'complex.action',
+            actorIds: ['host-1'],
+            targetIds: ['target-1'],
+            actorEntityGroup: 'host',
+            targetEntityGroup: 'host',
+            actorEntityType: 'host',
+            targetEntityType: 'host',
+            actorLabel: 'host-1',
+            targetLabel: 'Server',
+            actorIdsCount: 1,
+            targetIdsCount: 1,
+            badge: 1,
+            uniqueEventsCount: 1,
+            uniqueAlertsCount: 0,
+            docs: ['{"id":"event3","type":"event"}'],
+            isOrigin: false,
+            isOriginAlert: false,
+            isAlert: false,
+            actorHostIps: [],
+            targetHostIps: [],
+            sourceIps: [],
+            sourceCountryCodes: [],
+          },
+          // Event 4: Actor from Group 3 (non-enriched)
+          {
+            action: 'complex.action',
+            actorIds: ['non-enriched-1'],
+            targetIds: ['target-1'],
+            actorEntityGroup: 'Entities',
+            targetEntityGroup: 'host',
+            actorEntityType: 'Entities',
+            targetEntityType: 'host',
+            actorLabel: 'non-enriched-1',
+            targetLabel: 'Server',
+            actorIdsCount: 1,
+            targetIdsCount: 1,
+            badge: 1,
+            uniqueEventsCount: 1,
+            uniqueAlertsCount: 0,
+            docs: ['{"id":"event4","type":"event"}'],
+            isOrigin: false,
+            isOriginAlert: false,
+            isAlert: false,
+            actorHostIps: [],
+            targetHostIps: [],
+            sourceIps: [],
+            sourceCountryCodes: [],
+          },
+        ];
+
+        const result = parseRecords(mockLogger, records);
+
+        // We have 4 events, all with same action going to same target
+        // Each event creates its own label node (4 labels)
+        // Entity nodes: user-1, user-2, host-1, non-enriched-1, target-1 = 5 entity nodes
+        const entityNodes = result.nodes.filter((n) => n.shape !== 'label');
+        const labelNodes = result.nodes.filter((n) => n.shape === 'label');
+
+        expect(entityNodes.length).toBe(5); // 4 actors + 1 target
+        expect(labelNodes.length).toBe(4); // 4 label nodes (one per event)
+
+        // Group 1: Enriched actors with type:sub_type (user:service account)
+        const group1Node = result.nodes.find((n) => n.id === 'user-1') as EntityNodeDataModel;
+        expect(group1Node).toBeDefined();
+        expect(group1Node.label).toBe('service account');
+        expect(group1Node.tag).toBe('user');
+        expect(group1Node.icon).toBe('user');
+        expect(group1Node.shape).toBe('ellipse');
+        expect(group1Node.count).toBeUndefined(); // Single entity in this group
+
+        // Verify user-2 is in the same group (should use same node)
+        const group1NodeAlt = result.nodes.find((n) => n.id === 'user-2') as EntityNodeDataModel;
+        expect(group1NodeAlt).toBeDefined();
+        expect(group1NodeAlt.label).toBe('service account');
+        expect(group1NodeAlt.tag).toBe('user');
+
+        // Group 2: Enriched actor with type only (host)
+        const group2Node = result.nodes.find((n) => n.id === 'host-1') as EntityNodeDataModel;
+        expect(group2Node).toBeDefined();
+        expect(group2Node.label).toBe('host-1');
+        expect(group2Node.tag).toBe('host');
+        expect(group2Node.icon).toBe('storage');
+        expect(group2Node.shape).toBe('hexagon');
+        expect(group2Node.count).toBeUndefined(); // Single entity
+
+        // Group 3: Non-enriched actor (Entities)
+        const group3Node = result.nodes.find(
+          (n) => n.id === 'non-enriched-1'
+        ) as EntityNodeDataModel;
+        expect(group3Node).toBeDefined();
+        expect(group3Node.label).toBe('non-enriched-1');
+        expect(group3Node.tag).toBe('Entities');
+        expect(group3Node.icon).toBe('database');
+        expect(group3Node.shape).toBe('rectangle');
+        expect(group3Node.count).toBeUndefined(); // Single entity
+
+        // Verify all 3 groups are distinct
+        const actorNodes = [group1Node, group2Node, group3Node];
+        const uniqueTags = new Set(actorNodes.map((n) => n.tag));
+        expect(uniqueTags.size).toBe(3); // user, host, Entities
+      });
+    });
   });
 });
