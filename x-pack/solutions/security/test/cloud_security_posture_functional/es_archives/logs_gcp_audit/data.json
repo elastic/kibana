@@ -795,3 +795,96 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "7",
+    "index": ".ds-logs-gcp.audit-default-2024.10.01-000001",
+    "source": {
+      "@timestamp": "2024-10-01T10:15:00.000Z",
+      "actor": {
+        "entity": {
+          "id": "test-user@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "test-user@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "test-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.DeleteRole",
+        "agent_id_status": "missing",
+        "category": [
+          "iam"
+        ],
+        "id": "test-event-id-time-range",
+        "ingested": "2024-10-01T10:20:00.000Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "deletion"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.delete",
+              "resource": "projects/test-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-time-range-test"
+          },
+          "resource_name": "projects/test-project-id/roles/testRole",
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/test-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "192.168.1.100"
+        ],
+        "user": [
+          "test-user@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "192.168.1.100"
+      },
+      "tags": [],
+      "target": {
+        "entity": {
+          "id": "projects/test-project-id/roles/testRole"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/400.0.0"
+      }
+    }
+  }
+}

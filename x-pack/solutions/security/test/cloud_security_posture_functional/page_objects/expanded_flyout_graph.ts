@@ -222,4 +222,8 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
       expect(ipText).to.contain(expectedIp);
     }
   }
+
+  async assertElementVisible(testSubjectId: string): Promise<void> {
+    await this.testSubjects.existOrFail(testSubjectId);
+  }
 }
