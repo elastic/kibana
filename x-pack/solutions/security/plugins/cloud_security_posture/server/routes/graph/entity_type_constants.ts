@@ -187,6 +187,11 @@ const buildEntityTypeMappings = (): EntityTypeMappings => {
       shape: 'rectangle',
       values: ['Secrets', 'Keys', 'API Keys', 'Encryption Keys', 'Access Keys'],
     },
+    {
+      icon: 'database',
+      shape: 'rectangle',
+      values: ['Entities'],
+    },
   ];
 
   const icons = rawMappings.reduce<EntityTypeIconMapping>((acc, mapping) => {

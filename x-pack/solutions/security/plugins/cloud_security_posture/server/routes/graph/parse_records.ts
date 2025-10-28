@@ -114,7 +114,6 @@ const createGroupedActorAndTargetNodes = (
     actorIds,
     actorIdsCount,
     actorsDocData,
-    actorEntityGroup,
     actorEntityType,
     actorLabel,
     actorHostIps,
@@ -148,7 +147,7 @@ const createGroupedActorAndTargetNodes = (
   const targetIdsArray = castArray(targetIds);
 
   const actorGroup = {
-    id: actorIdsCount > 0 ? actorIdsArray[0] : `${actorEntityGroup} ${uuidv4()}`,
+    id: actorIdsArray[0],
     type: actorEntityType,
     label: actorLabel,
     count: actorIdsCount,
@@ -159,7 +158,7 @@ const createGroupedActorAndTargetNodes = (
   const targetGroup =
     targetIdsCount > 0
       ? {
-          id: targetIdsArray[0]!, // by definition, it can't be null
+          id: targetIdsArray[0]!,
           type: targetEntityType,
           label: targetLabel,
           count: targetIdsCount,
