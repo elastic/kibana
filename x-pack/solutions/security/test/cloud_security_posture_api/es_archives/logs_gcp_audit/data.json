@@ -742,3 +742,85 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "7",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:40:00.000Z",
+      "actor": {
+        "entity": {
+          "id": "admin-no-event-id@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "admin-no-event-id@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.GetRole",
+        "agent_id_status": "missing",
+        "category": [
+          "configuration"
+        ],
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.get",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "resource_name": "projects/your-project-id/roles/customRole",
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.2"
+        ],
+        "user": [
+          "admin-no-event-id@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.2"
+      },
+      "target": {
+        "entity": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      }
+    }
+  }
+}

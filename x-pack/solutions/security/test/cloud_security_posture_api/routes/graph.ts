@@ -578,6 +578,296 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      xit('should return isOrigin as false when having no originEventIds', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [], // Empty array should result in isOrigin = false for all nodes
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [
+                  {
+                    match_phrase: {
+                      'actor.entity.id': 'admin@example.com',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }).expect(result(200));
+
+        // Based on test data, this should return some nodes and edges
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+
+        // All edges should be subdued since no originEventIds provided
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge.color).equal(
+            'subdued',
+            'All edges should be subdued when no origin events provided'
+          );
+        });
+      });
+
+      it('should return isOrigin as false when having originEventIds but event.id is not available', async () => {
+        // This tests COALESCE handling of null/missing event.id fields
+        // We query documents from actor admin-no-event-id@example.com which has no event.id field
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [{ id: 'any-non-matching-id', isAlert: false }],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [
+                  {
+                    match_phrase: {
+                      'actor.entity.id': 'admin-no-event-id@example.com',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+
+        // All edges should be subdued since the document has no event.id (COALESCE returns false)
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge.color).equal(
+            'subdued',
+            'All edges should be subdued when event.id is missing (COALESCE handles null)'
+          );
+        });
+      });
+
+      it('should return isOrigin as false when having originEventIds but event.id is not in them', async () => {
+        // Test case where event.id exists but doesn't match any origin IDs
+        // COALESCE ensures the IN operation returns false instead of null
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [{ id: 'different-unrelated-event-id', isAlert: false }],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [
+                  {
+                    match_phrase: {
+                      'actor.entity.id': 'admin@example.com',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+
+        // All edges should be subdued since event.id exists but doesn't match origin ID
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge.color).equal(
+            'subdued',
+            'All edges should be subdued when event.id is not in origin IDs'
+          );
+        });
+      });
+
+      it('should return isOrigin as true when event.id is in originEventIds', async () => {
+        // Test case where event.id matches one of the origin IDs
+        // COALESCE ensures the IN operation returns true (not null) when there's a match
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [
+              { id: 'kabcd1234efgh5678', isAlert: false }, // This event exists in test data
+            ],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+
+        // Since the event is an origin event but not an alert, edges should be subdued
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge.color).equal(
+            'subdued',
+            'Origin event edges should be subdued when not alerts'
+          );
+        });
+
+        // Verify nodes have primary color (not danger since it's not an alert)
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+          expect(node.color).equal(
+            'primary',
+            'Origin event nodes should be primary when not alerts'
+          );
+        });
+      });
+
+      it('should return isOriginAlert as false when having no originAlertIds', async () => {
+        // Test with origin events but none are alerts
+        // COALESCE ensures isOriginAlert evaluates to false (not null)
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: false }], // Event exists but not an alert
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+
+        // Edges should be subdued since no alerts in origin events
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge.color).equal('subdued', 'Edges should be subdued when no origin alerts');
+        });
+      });
+
+      it('should return isOriginAlert as false when having originAlertIds but isOrigin is false', async () => {
+        // Test with alert IDs but events don't match (isOrigin would be false)
+        // COALESCE in isOriginAlert: COALESCE(isOrigin AND event.id in (...))
+        // When isOrigin is false, the AND returns false regardless of event.id
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [{ id: 'non-matching-alert-id', isAlert: true }],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [
+                  {
+                    match_phrase: {
+                      'actor.entity.id': 'admin@example.com',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+
+        // Edges should be subdued since isOrigin is false (no matching events)
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge.color).equal(
+            'subdued',
+            'Edges should be subdued when isOrigin is false even with alert IDs'
+          );
+        });
+      });
+
+      it('should return isOriginAlert as false when having originAlertIds and isOrigin is true but event.id is not available', async () => {
+        // Test COALESCE with null event.id in alert context using the document without event.id
+        // COALESCE(isOrigin AND event.id in (...)) where event.id is null
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [{ id: 'any-id', isAlert: true }],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [
+                  {
+                    match_phrase: {
+                      'actor.entity.id': 'admin-no-event-id@example.com',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+
+        // Edges should be subdued since event.id is null (COALESCE handles it)
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge.color).equal(
+            'subdued',
+            'Edges should be subdued when event.id is null (COALESCE returns false)'
+          );
+        });
+      });
+
+      it('should return isOriginAlert as false when having originAlertIds and isOrigin is true but event.id is not in originAlertIds', async () => {
+        // Test mixed scenario: some events are origin, but not all are alerts
+        // COALESCE ensures proper boolean evaluation when event.id doesn't match alert IDs
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [
+              { id: 'kabcd1234efgh5678', isAlert: false }, // Origin event but not alert
+              { id: 'non-matching-alert', isAlert: true }, // Alert but doesn't match any events
+            ],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+
+        // Edges should be subdued since the matching event is origin but not alert
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge.color).equal(
+            'subdued',
+            'Edges should be subdued when origin event is not an alert'
+          );
+        });
+      });
+
+      it('should return isOriginAlert as true when event.id is in originAlertIds and isOrigin is true', async () => {
+        // Test case where event matches both origin and alert criteria
+        // COALESCE ensures both isOrigin and isOriginAlert evaluate to true (not null)
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: true }], // Event exists and marked as alert
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+
+        // Edges should be danger colored since this is an origin alert
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge.color).equal('danger', 'Origin alert edges should be colored as danger');
+        });
+
+        // Verify label nodes are colored as danger for alerts
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+          if (node.shape === 'label') {
+            expect(node.color).equal(
+              'danger',
+              'Alert origin label nodes should be colored as danger'
+            );
+          } else {
+            expect(node.color).equal('primary', 'Entity nodes should remain primary colored');
+          }
+        });
+      });
+
       it('should return a graph with nodes and edges by alert and actor', async () => {
         const response = await postGraph(supertest, {
           query: {
