@@ -63,6 +63,24 @@ export function assertValidUpdates({
           );
         }
 
+        // check that the new modelVersion has schemas and that schemas have both create and forwardCompatibility defined
+        if (infoAfter.modelVersions.length > infoBefore.modelVersions.length) {
+          const newModelVersion = infoAfter.modelVersions[infoAfter.modelVersions.length - 1];
+          if (!newModelVersion.schemas) {
+            throw new Error(
+              `❌ The new model version '${newModelVersion.version}' for SO type '${name}' is missing the 'schemas' definition.`
+            );
+          }
+          if (newModelVersion.schemas.forwardCompatibility === false)
+            throw new Error(
+              `❌ The new model version '${newModelVersion.version}' for SO type '${name}' is missing the 'forwardCompatibility' schema definition.`
+            );
+          if (newModelVersion.schemas.create === false)
+            throw new Error(
+              `❌ The new model version '${newModelVersion.version}' for SO type '${name}' is missing the 'create' schema definition.`
+            );
+        }
+
         // check that existing model versions have not been mutated
         const mutatedModelVersions = getMutatedModelVersions(infoBefore, infoAfter);
         if (mutatedModelVersions.length > 0) {
