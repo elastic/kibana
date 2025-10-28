@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './metrics_grid_slice';
+export {
+  MetricsExperienceStateProvider,
+  MetricsExperienceStateContext,
+} from './metrics_experience_state_context';
+
+export { useMetricsExperienceState } from './use_metrics_experience_state';
