@@ -24,7 +24,6 @@ describe('dashboard saved object model version transformations', () => {
     migrator = createModelVersionTestMigrator({
       type: createDashboardSavedObjectType({
         migrationDeps: { embeddable: embeddableSetupMock },
-        isAccessControlEnabled: true,
       }),
     });
   });
