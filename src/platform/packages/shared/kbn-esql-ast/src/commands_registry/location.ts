@@ -23,14 +23,14 @@ const commandOptionNameToLocation: Record<string, Location> = {
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
-  // Rerank is a special case, because it is the only command that requrire a boolen validation inside the ON Clause
-  on: Location.RERANK,
   dissect: Location.DISSECT,
   rename: Location.RENAME,
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
   rerank: Location.RERANK,
+  'join:on': Location.JOIN,
+  'rerank:on': Location.RERANK,
 };
 
 /**
@@ -77,17 +77,26 @@ export function getLocationInfo(
 
   if (option) {
     const displayName = option.name;
-    const id = getLocationFromCommandOrOptionName(displayName);
+    const parentCommandName = parentCommand.name;
+    const contextualKey = `${parentCommandName}:${displayName}`;
+    const id =
+      commandOptionNameToLocation[contextualKey] ?? getLocationFromCommandOrOptionName(displayName);
     return { id, displayName };
   }
 
   // If not in an option node, try to find a function that defines a location
-  const func = Walker.find(
+  // We need to find ALL functions containing the position, then check if any have a location config
+  const funcs = Walker.findAll(
     parentCommand,
     (node) => isFunctionExpression(node) && within(position, node)
   );
 
-  if (func && isFunctionExpression(func)) {
+  // Iterate through all matching functions to find one with a location config
+  for (const func of funcs) {
+    if (!isFunctionExpression(func)) {
+      continue;
+    }
+
     const locationConfig = functionBasedLocations[parentCommand.name]?.[func.name];
 
     if (locationConfig) {
