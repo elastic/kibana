@@ -37,6 +37,7 @@ import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
 import { getQueryForFields } from './get_query_for_fields';
+import type { GetColumnMapFn } from '../shared/columns';
 import { getColumnsByTypeRetriever } from '../shared/columns';
 
 export async function suggest(
