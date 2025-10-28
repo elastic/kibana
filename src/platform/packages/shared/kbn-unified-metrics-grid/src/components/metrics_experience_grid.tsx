@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import { useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
+import { keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   EuiBetaBadge,
@@ -23,17 +24,19 @@ import {
   type EuiFlexGridProps,
 } from '@elastic/eui';
 import { Subject } from 'rxjs';
-import { PAGE_SIZE } from '../common/constants';
+import {
+  METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
+  METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
+  PAGE_SIZE,
+} from '../common/constants';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
-import {
-  usePaginatedFields,
-  useMetricFieldsQuery,
-  useMetricsGridState,
-  useValueFilters,
-} from '../hooks';
+import { usePaginatedFields, useMetricFieldsQuery, useValueFilters } from '../hooks';
+import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { MetricsGridLoadingProgress, EmptyState } from './empty_state/empty_state';
+import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
+import { SearchButton } from './toolbar/right_side_actions/search_button';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -54,7 +57,17 @@ export const MetricsExperienceGrid = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const { currentPage, dimensions, valueFilters, onPageChange, searchTerm } = useMetricsGridState();
+  const {
+    searchTerm,
+    currentPage,
+    dimensions,
+    isFullscreen,
+    valueFilters,
+    onPageChange,
+    onSearchTermChange,
+    onToggleFullscreen,
+  } = useMetricsExperienceState();
+
   const { updateTimeRange } = requestParams;
 
   const input$ = useMemo(
@@ -73,6 +86,23 @@ export const MetricsExperienceGrid = ({
     timeRange,
   });
 
+  const { leftSideActions, rightSideActions } = useToolbarActions({
+    fields,
+    indexPattern,
+    renderToggleActions,
+    requestParams,
+  });
+
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.key === keys.ESCAPE && isFullscreen && !areSelectorPortalsOpen()) {
+        e.preventDefault();
+        onToggleFullscreen?.();
+      }
+    },
+    [isFullscreen, onToggleFullscreen]
+  );
+
   const {
     currentPageFields = [],
     totalPages = 0,
@@ -85,8 +115,8 @@ export const MetricsExperienceGrid = ({
     searchTerm,
   }) ?? {};
 
-  const columns = useMemo<EuiFlexGridProps['columns']>(
-    () => Math.min(filteredFieldsCount, 4) as EuiFlexGridProps['columns'],
+  const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
+    () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
     [filteredFieldsCount]
   );
 
@@ -98,12 +128,26 @@ export const MetricsExperienceGrid = ({
 
   return (
     <MetricsGridWrapper
-      indexPattern={indexPattern}
-      renderToggleActions={renderToggleActions}
-      chartToolbarCss={chartToolbarCss}
-      requestParams={requestParams}
-      fields={fields}
+      id="metricsExperienceGrid"
+      toolbarCss={chartToolbarCss}
+      toolbar={{
+        leftSide: leftSideActions,
+        rightSide: rightSideActions,
+        additionalControls: {
+          prependRight: (
+            <SearchButton
+              isFullscreen={isFullscreen}
+              value={searchTerm}
+              onSearchTermChange={onSearchTermChange}
+              onKeyDown={onKeyDown}
+              data-test-subj="metricsExperienceGridToolbarSearch"
+            />
+          ),
+        },
+      }}
       isComponentVisible={isComponentVisible}
+      isFullscreen={isFullscreen}
+      onKeyDown={onKeyDown}
     >
       <EuiFlexGroup
         direction="column"
@@ -187,4 +231,26 @@ export const MetricsExperienceGrid = ({
       </EuiFlexGroup>
     </MetricsGridWrapper>
   );
+};
+
+const areSelectorPortalsOpen = () => {
+  const portals = document.querySelectorAll('[data-euiportal]');
+
+  for (const portal of portals) {
+    const hasBreakdownSelector = portal.querySelector(
+      `[data-test-subj*=${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}]`
+    );
+    const hasValuesSelector = portal.querySelector(
+      `[data-test-subj*=${METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ}]`
+    );
+    const hasSelectableList = portal.querySelector('[data-test-subj*="Selectable"]');
+
+    if (hasBreakdownSelector || hasValuesSelector || hasSelectableList) {
+      // Check if the portal is visible and has focusable content
+      const style = window.getComputedStyle(portal);
+      if (style.display !== 'none' && style.visibility !== 'hidden') {
+        return true;
+      }
+    }
+  }
 };

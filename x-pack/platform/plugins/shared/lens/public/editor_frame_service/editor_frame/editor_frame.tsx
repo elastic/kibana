@@ -10,16 +10,15 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { type DragDropAction, RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { getAbsoluteDateRange } from '../../utils';
-import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import type {
-  DatasourceMap,
   FramePublicAPI,
-  VisualizationMap,
   Suggestion,
   UserMessagesGetter,
   AddUserMessages,
-} from '../../types';
+  LensInspector,
+} from '@kbn/lens-common';
+import { getAbsoluteDateRange } from '../../utils';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { BannerWrapper } from './banner_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -37,14 +36,12 @@ import {
   selectDatasourceStates,
   selectVisualization,
 } from '../../state_management';
-import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { getLongMessage } from '../../user_messages_utils';
+import { useEditorFrameService } from '../editor_frame_service_context';
 
 export interface EditorFrameProps {
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
@@ -56,7 +53,7 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
-  const { datasourceMap, visualizationMap } = props;
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
@@ -64,7 +61,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const areDatasourcesLoaded = useLensSelector(selectAreDatasourcesLoaded);
   const isVisualizationLoaded = !!visualization.state;
   const visualizationTypeIsKnown = Boolean(
-    visualization.activeId && props.visualizationMap[visualization.activeId]
+    visualization.activeId && visualizationMap[visualization.activeId]
   );
 
   const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
@@ -139,8 +136,6 @@ export function EditorFrame(props: EditorFrameProps) {
             <DataPanelWrapper
               core={props.core}
               plugins={props.plugins}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
               showNoDataPopover={props.showNoDataPopover}
               dropOntoWorkspace={dropOntoWorkspace}
               hasSuggestionForField={hasSuggestionForField}
@@ -154,8 +149,6 @@ export function EditorFrame(props: EditorFrameProps) {
             <ErrorBoundary onError={onError}>
               <ConfigPanelWrapper
                 core={props.core}
-                datasourceMap={datasourceMap}
-                visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 uiActions={props.plugins.uiActions}
                 dataViews={props.plugins.dataViews}
@@ -175,8 +168,6 @@ export function EditorFrame(props: EditorFrameProps) {
                 plugins={props.plugins}
                 ExpressionRenderer={props.ExpressionRenderer}
                 lensInspector={props.lensInspector}
-                datasourceMap={datasourceMap}
-                visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 getSuggestionForField={getSuggestionForField.current}
                 getUserMessages={props.getUserMessages}
@@ -191,8 +182,6 @@ export function EditorFrame(props: EditorFrameProps) {
             <ErrorBoundary onError={onError}>
               <SuggestionPanelWrapper
                 ExpressionRenderer={props.ExpressionRenderer}
-                datasourceMap={datasourceMap}
-                visualizationMap={visualizationMap}
                 frame={framePublicAPI}
                 getUserMessages={props.getUserMessages}
                 nowProvider={props.plugins.data.nowProvider}

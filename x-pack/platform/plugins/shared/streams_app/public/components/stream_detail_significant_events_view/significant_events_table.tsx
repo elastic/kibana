@@ -13,6 +13,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
 import type { Feature, StreamQuery, Streams } from '@kbn/streams-schema';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics/constants';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { StreamFeatureDetailsFlyout } from '../data_management/stream_detail_management/stream_features/stream_feature_details_flyout';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -37,11 +39,7 @@ export function SignificantEventsTable({
   onEditClick?: (query: SignificantEventItem) => void;
   xFormatter: TickFormatter;
 }) {
-  const {
-    dependencies: {
-      start: { discover },
-    },
-  } = useKibana();
+  const { share } = useKibana().dependencies.start;
   const { timeState } = useTimefilter();
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -51,29 +49,34 @@ export function SignificantEventsTable({
   const [selectedFeature, setSelectedFeature] = useState<Feature>();
   const { featuresByName, refreshFeatures } = useStreamFeatures(definition);
 
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
       field: 'title',
       name: i18n.translate('xpack.streams.significantEventsTable.titleColumnTitle', {
         defaultMessage: 'Title',
       }),
-      render: (_, record) => (
-        <EuiLink
-          aria-label={i18n.translate('xpack.streams.columns.euiButtonEmpty.openInDiscoverLabel', {
-            defaultMessage: 'Open in discover',
-          })}
-          href={discover?.locator?.getRedirectUrl(
-            buildDiscoverParams(record.query, definition, timeState)
-          )}
-        >
-          {record.query.title}
-        </EuiLink>
-      ),
+      render: (_, record) =>
+        discoverLocator ? (
+          <EuiLink
+            aria-label={i18n.translate('xpack.streams.columns.euiButtonEmpty.openInDiscoverLabel', {
+              defaultMessage: 'Open in discover',
+            })}
+            href={discoverLocator.getRedirectUrl(
+              buildDiscoverParams(record.query, definition, timeState)
+            )}
+          >
+            {record.query.title}
+          </EuiLink>
+        ) : (
+          record.query.title
+        ),
     },
     {
       field: 'query',
       name: i18n.translate('xpack.streams.significantEventsTable.feature', {
-        defaultMessage: 'Feauture',
+        defaultMessage: 'Feature',
       }),
       render: (query: StreamQuery) => {
         return (
@@ -155,11 +158,9 @@ export function SignificantEventsTable({
               defaultMessage: 'Open query in Discover',
             }
           ),
+          enabled: () => discoverLocator !== undefined,
           onClick: (item) => {
-            const url = discover?.locator?.getRedirectUrl(
-              buildDiscoverParams(item.query, definition, timeState)
-            );
-            window.open(url, '_blank');
+            discoverLocator?.navigate(buildDiscoverParams(item.query, definition, timeState));
           },
           isPrimary: true,
         },

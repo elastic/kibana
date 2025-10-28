@@ -20,6 +20,7 @@ export function getAlertHistoryEsIndex(): Readonly<InMemoryConnector> {
     isPreconfigured: true,
     isDeprecated: false,
     isSystemAction: false,
+    isConnectorTypeDeprecated: false,
     config: {
       index: AlertHistoryDefaultIndexName,
     },
