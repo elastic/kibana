@@ -11,10 +11,10 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { Parser } from '@kbn/esql-ast';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../common/constants';
-import type { DataSourceProfileProvider } from '../../profiles';
-import { DataSourceCategory, SolutionType } from '../../profiles';
-import type { ProfileProviderServices } from '../profile_provider_services';
+import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
+import type { DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createChartSection } from './accessor/chart_section';
 
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;

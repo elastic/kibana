@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ProfileProviderServices } from '../profile_provider_services';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createMetricsDataSourceProfileProvider } from './profile';
 
-export const createObservabilityMetricsDataSourceProfileProviders = (
+export const createMetricsDataSourceProfileProviders = (
   providerServices: ProfileProviderServices
 ) => {
   const metricsDataSourceProfileProvider = createMetricsDataSourceProfileProvider(providerServices);

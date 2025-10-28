@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createPatternDataSourceProfileProvider } from './profile';
+export { createMetricsDataSourceProfileProviders } from './create_profile_providers';
