@@ -13,23 +13,18 @@ import { createPromptRestApi } from './prompt';
 import { createOutputApi } from '../output';
 import { bindClient } from '../inference_client/bind_client';
 
-/**
- * REST inference client - excludes server-only MCP functionality (listMCPTools, callMCPTool)
- */
-export type RestInferenceClient = Omit<InferenceClient, 'listMCPTools' | 'callMCPTool'>;
-
 export function createInferenceRestClient({
   fetch,
   signal,
 }: {
   fetch: HttpHandler;
   signal?: AbortSignal;
-}): RestInferenceClient {
+}): InferenceClient {
   const chatComplete = createChatCompleteRestApi({ fetch, signal });
 
-  const client: RestInferenceClient = {
+  const client: InferenceClient = {
     bindTo: (options: BoundOptions) => {
-      return bindClient(client as InferenceClient, options);
+      return bindClient(client, options);
     },
     chatComplete,
     prompt: createPromptRestApi({ fetch, signal }),

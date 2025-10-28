@@ -45,7 +45,6 @@
     "@kbn/sse-utils-client",
     "@kbn/zod",
     "@kbn/inference-tracing",
-    "@kbn/core-ui-settings-common",
-    "@kbn/mcp-connector-common"
+    "@kbn/core-ui-settings-common"
   ]
 }

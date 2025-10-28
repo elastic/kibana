@@ -10,11 +10,6 @@ import type { InferenceConnector } from '../connectors';
 import type { BoundOutputAPI, OutputAPI } from '../output';
 import type { BoundPromptAPI, PromptAPI } from '../prompt';
 import type { BoundOptions } from '../bind';
-import type {
-  InferenceCallToolRequest,
-  InferenceCallToolResponse,
-  InferenceListToolsResponse,
-} from '../mcp';
 
 /**
  * An inference client, scoped to a request, that can be used to interact with LLMs.
@@ -46,17 +41,6 @@ export interface InferenceClient {
    * Create a {@link BoundInferenceClient}.
    */
   bindTo: (options: BoundOptions) => BoundInferenceClient;
-  /**
-   * `listMCPTools` returns the available tools from MCP connectors.
-   */
-  listMCPTools: () => Promise<InferenceListToolsResponse>;
-  /**
-   * `callMCPTool` executes a MCP tool by sending a request to the
-   * specified MCP Server.
-   * @param request
-   * @returns
-   */
-  callMCPTool: (request: InferenceCallToolRequest) => Promise<InferenceCallToolResponse>;
 }
 
 /**
