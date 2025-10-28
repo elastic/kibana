@@ -534,11 +534,16 @@ export class CstToAstConverter {
     ctx: antlr.ParserRuleContext & Pick<cst.FromCommandContext, 'indexPatternAndMetadataFields'>
   ): ast.ESQLCommand<Name> {
     const command = this.createCommand(commandName, ctx);
-    const indexPatternCtx = ctx.indexPatternAndMetadataFields();
-    const metadataCtx = indexPatternCtx.metadata();
-    const sources = indexPatternCtx
-      .getTypedRuleContexts(cst.IndexPatternContext as any)
-      .map((sourceCtx) => this.toSource(sourceCtx));
+    const indexPatternAndMetadataCtx = ctx.indexPatternAndMetadataFields();
+    const metadataCtx = indexPatternAndMetadataCtx.metadata();
+    const indexPatternOrSubqueryCtxs = indexPatternAndMetadataCtx.indexPatternOrSubquery_list();
+    const sources = indexPatternOrSubqueryCtxs
+      .map((indexPatternOrSubqueryCtx) => {
+        // ToDo: handle subqueries when implemented
+        const indexPatternCtx = indexPatternOrSubqueryCtx.indexPattern();
+        return indexPatternCtx ? this.toSource(indexPatternCtx) : null;
+      })
+      .filter((source): source is ast.ESQLSource => source !== null);
 
     command.args.push(...sources);
 
