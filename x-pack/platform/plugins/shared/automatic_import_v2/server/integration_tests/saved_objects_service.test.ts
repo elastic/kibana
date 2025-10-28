@@ -32,6 +32,10 @@ import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { integrationSavedObjectType } from '../services/saved_objects/integration';
 import { dataStreamSavedObjectType } from '../services/saved_objects/data_stream';
 import { createMockSecurity } from './__mocks__/security';
+import {
+  mockIntegrationData,
+  mockDataStreamData,
+} from '../__mocks__/saved_objects';
 
 describe('AutomaticImportSavedObjectService', () => {
   let mockSecurity: jest.Mocked<SecurityServiceStart>;
@@ -54,10 +58,10 @@ describe('AutomaticImportSavedObjectService', () => {
       coreStart = await kbnRoot.start();
     } catch (error) {
       if (kbnRoot) {
-        await kbnRoot.shutdown().catch(() => {});
+        await kbnRoot.shutdown().catch(() => { });
       }
       if (manageES) {
-        await manageES.stop().catch(() => {});
+        await manageES.stop().catch(() => { });
       }
       throw error;
     }
@@ -65,10 +69,10 @@ describe('AutomaticImportSavedObjectService', () => {
 
   afterAll(async () => {
     if (kbnRoot) {
-      await kbnRoot.shutdown().catch(() => {});
+      await kbnRoot.shutdown().catch(() => { });
     }
     if (manageES) {
-      await manageES.stop().catch(() => {});
+      await manageES.stop().catch(() => { });
     }
   });
 
@@ -83,7 +87,7 @@ describe('AutomaticImportSavedObjectService', () => {
       const mockLoggerFactory = loggerMock.create();
       const newService = new AutomaticImportSavedObjectService(
         mockLoggerFactory,
-        Promise.resolve(mockSavedObjectsClient),
+        mockSavedObjectsClient,
         mockSecurity
       );
 
@@ -103,7 +107,7 @@ describe('AutomaticImportSavedObjectService', () => {
       const mockLoggerFactory = loggerMock.create();
       savedObjectService = new AutomaticImportSavedObjectService(
         mockLoggerFactory,
-        Promise.resolve(savedObjectsClient),
+        savedObjectsClient,
         mockSecurity
       );
     });
@@ -111,10 +115,8 @@ describe('AutomaticImportSavedObjectService', () => {
     describe('insertIntegration', () => {
       it('should create integration with service-managed defaults', async () => {
         const result = await savedObjectService.insertIntegration(mockRequest, {
+          ...mockIntegrationData,
           integration_id: 'test-integration-1',
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: { title: 'Test Integration' },
         });
 
         expect(result.id).toBe('test-integration-1');
@@ -127,10 +129,8 @@ describe('AutomaticImportSavedObjectService', () => {
 
       it('should throw error when integration_id is missing', async () => {
         const invalidData = {
+          ...mockIntegrationData,
           integration_id: '',
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
         };
 
         await expect(
@@ -140,10 +140,8 @@ describe('AutomaticImportSavedObjectService', () => {
 
       it('should throw error when integration already exists', async () => {
         const integrationData: IntegrationAttributes = {
+          ...mockIntegrationData,
           integration_id: 'duplicate-integration',
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
         };
 
         await savedObjectService.insertIntegration(mockRequest, integrationData);
@@ -161,11 +159,10 @@ describe('AutomaticImportSavedObjectService', () => {
     describe('getIntegration', () => {
       it('should retrieve an existing integration', async () => {
         await savedObjectService.insertIntegration(mockRequest, {
+          ...mockIntegrationData,
           integration_id: 'test-get-integration',
           data_stream_count: 5,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: { title: 'Get Test Integration' },
+          metadata: { ...mockIntegrationData.metadata, title: 'Get Test Integration' },
         });
 
         const result = await savedObjectService.getIntegration('test-get-integration');
@@ -186,20 +183,19 @@ describe('AutomaticImportSavedObjectService', () => {
     describe('updateIntegration', () => {
       it('should update an existing integration', async () => {
         await savedObjectService.insertIntegration(mockRequest, {
+          ...mockIntegrationData,
           integration_id: 'test-update-integration',
           data_stream_count: 1,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: { title: 'Original Title' },
+          metadata: { ...mockIntegrationData.metadata, title: 'Original Title' },
         });
 
         const result = await savedObjectService.updateIntegration(
           {
+            ...mockIntegrationData,
             integration_id: 'test-update-integration',
             data_stream_count: 3,
-            created_by: 'test-user',
             status: TASK_STATUSES.completed,
-            metadata: { title: 'Updated Title' },
+            metadata: { ...mockIntegrationData.metadata, title: 'Updated Title' },
           },
           '0.0.0'
         );
@@ -213,11 +209,9 @@ describe('AutomaticImportSavedObjectService', () => {
 
       it('should increment version on update', async () => {
         const integrationData: IntegrationAttributes = {
+          ...mockIntegrationData,
           integration_id: 'test-version-integration',
           data_stream_count: 1,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
         };
 
         // Create integration
@@ -426,10 +420,10 @@ describe('AutomaticImportSavedObjectService', () => {
         } finally {
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-getall-1')
-            .catch(() => {});
+            .catch(() => { });
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-getall-2')
-            .catch(() => {});
+            .catch(() => { });
         }
       });
 
@@ -438,7 +432,7 @@ describe('AutomaticImportSavedObjectService', () => {
         for (const integration of existing.saved_objects) {
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, integration.id)
-            .catch(() => {});
+            .catch(() => { });
         }
 
         const result = await savedObjectService.getAllIntegrations();
@@ -534,7 +528,7 @@ describe('AutomaticImportSavedObjectService', () => {
       const mockLoggerFactory = loggerMock.create();
       savedObjectService = new AutomaticImportSavedObjectService(
         mockLoggerFactory,
-        Promise.resolve(savedObjectsClient),
+        savedObjectsClient,
         mockSecurity
       );
     });
@@ -549,16 +543,10 @@ describe('AutomaticImportSavedObjectService', () => {
         });
 
         const result = await savedObjectService.insertDataStream(mockRequest, {
+          ...mockDataStreamData,
           integration_id: 'test-ds-integration-1',
           data_stream_id: 'test-data-stream-1',
-          created_by: 'test-user',
-          job_info: {
-            job_id: 'job-1',
-            job_type: 'import',
-            status: TASK_STATUSES.pending,
-          },
-          metadata: { sample_count: 100 },
-          result: {},
+          metadata: { ...mockDataStreamData.metadata, sample_count: 100 },
         });
 
         expect(result.id).toBe('test-data-stream-1');
@@ -575,16 +563,10 @@ describe('AutomaticImportSavedObjectService', () => {
 
       it('should create data stream and auto-create integration if it does not exist', async () => {
         const result = await savedObjectService.insertDataStream(mockRequest, {
+          ...mockDataStreamData,
           integration_id: 'auto-created-integration',
           data_stream_id: 'test-data-stream-auto',
-          created_by: 'test-user',
-          job_info: {
-            job_id: 'job-auto',
-            job_type: 'import',
-            status: TASK_STATUSES.pending,
-          },
-          metadata: { sample_count: 50 },
-          result: {},
+          metadata: { ...mockDataStreamData.metadata, sample_count: 50 },
         });
 
         expect(result.id).toBe('test-data-stream-auto');
@@ -598,15 +580,9 @@ describe('AutomaticImportSavedObjectService', () => {
 
       it('should throw error when integration_id is missing', async () => {
         const invalidData = {
+          ...mockDataStreamData,
           integration_id: '',
           data_stream_id: 'test-ds',
-          job_info: {
-            job_id: 'job-1',
-            job_type: 'import',
-            status: TASK_STATUSES.pending,
-          },
-          metadata: {},
-          result: {},
         } as DataStreamAttributes;
 
         await expect(savedObjectService.insertDataStream(mockRequest, invalidData)).rejects.toThrow(
@@ -616,15 +592,9 @@ describe('AutomaticImportSavedObjectService', () => {
 
       it('should throw error when data_stream_id is missing', async () => {
         const invalidData = {
+          ...mockDataStreamData,
           integration_id: 'test-integration',
           data_stream_id: '',
-          job_info: {
-            job_id: 'job-1',
-            job_type: 'import',
-            status: TASK_STATUSES.pending,
-          },
-          metadata: {},
-          result: {},
         } as DataStreamAttributes;
 
         await expect(savedObjectService.insertDataStream(mockRequest, invalidData)).rejects.toThrow(
@@ -1002,13 +972,13 @@ describe('AutomaticImportSavedObjectService', () => {
         } finally {
           await savedObjectsClient
             .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-1')
-            .catch(() => {});
+            .catch(() => { });
           await savedObjectsClient
             .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-2')
-            .catch(() => {});
+            .catch(() => { });
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'getall-ds-integration')
-            .catch(() => {});
+            .catch(() => { });
         }
       });
     });
@@ -1207,7 +1177,7 @@ describe('AutomaticImportSavedObjectService', () => {
       const mockLoggerFactory = loggerMock.create();
       savedObjectService = new AutomaticImportSavedObjectService(
         mockLoggerFactory,
-        Promise.resolve(savedObjectsClient),
+        savedObjectsClient,
         mockSecurity
       );
     });
