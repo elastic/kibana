@@ -2005,7 +2005,7 @@
     "tough-cookie": "^6.0.0",
     "trace": "^3.2.0",
     "tree-kill": "^1.2.2",
-    "ts-morph": "^15.1.0",
+    "ts-morph": "^27.0.2",
     "tsd": "^0.33.0",
     "typescript": "5.4.5",
     "val-loader": "^6.0.0",
