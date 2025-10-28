@@ -12,7 +12,7 @@ import { screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { FieldItemButton } from './field_item_button';
 

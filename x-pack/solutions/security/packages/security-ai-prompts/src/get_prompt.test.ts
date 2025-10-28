@@ -6,20 +6,18 @@
  */
 
 import { getPrompt, getPromptsByGroupId } from './get_prompt';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { localPrompts, promptDictionary, promptGroupId } from './mock_prompts';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('@kbn/core-saved-objects-api-server');
 jest.mock('@kbn/actions-plugin/server');
-const defaultConnector = {
+const defaultConnector = createMockConnector({
   id: 'mock',
   name: 'Mock',
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false,
   actionTypeId: '.inference',
-};
+});
 describe('get_prompt', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let actionsClient: jest.Mocked<ActionsClient>;
@@ -493,17 +491,14 @@ describe('get_prompt', () => {
         localPrompts,
         promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
         promptGroupId: promptGroupId.aiAssistant,
-        connector: {
+        connector: createMockConnector({
           actionTypeId: '.gemini',
           config: {
             defaultModel: 'gemini-1.5-pro-002',
           },
           id: 'connector-123',
           name: 'Gemini',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
+        }),
         actionsClient,
         connectorId: 'connector-123',
       });
@@ -525,7 +520,7 @@ describe('get_prompt', () => {
         localPrompts,
         promptIds: [promptDictionary.systemPrompt],
         promptGroupId: promptGroupId.aiAssistant,
-        connector: {
+        connector: createMockConnector({
           actionTypeId: '.inference',
           config: {
             provider: 'elastic',
@@ -533,10 +528,7 @@ describe('get_prompt', () => {
           },
           id: 'connector-123',
           name: 'Inference',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
+        }),
         actionsClient,
         connectorId: 'connector-123',
       });

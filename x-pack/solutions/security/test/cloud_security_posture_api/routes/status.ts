@@ -6,7 +6,7 @@
  */
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 import { waitForPluginInitialized } from '../utils';
 

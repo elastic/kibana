@@ -13,20 +13,20 @@ import type { IHttpFetchError } from '@kbn/core/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 
-import { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { TestProviders } from '../mock/test_providers/test_providers';
-import { FetchCurrentUserConversations, useFetchCurrentUserConversations } from './api';
+import type { FetchCurrentUserConversations } from './api';
+import { useFetchCurrentUserConversations } from './api';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
-import { AIConnector } from '../connectorland/connector_selector';
-import {
-  FetchAnonymizationFields,
-  useFetchAnonymizationFields,
-} from './api/anonymization_fields/use_fetch_anonymization_fields';
+import type { AIConnector } from '../connectorland/connector_selector';
+import type { FetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { welcomeConvo } from '../mock/conversation';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -40,15 +40,13 @@ jest.mock('./api/anonymization_fields/use_fetch_anonymization_fields');
 jest.mock('./use_conversation');
 const apiConfig = { connectorId: '123' };
 const fullWelcomeConversation = {
+  ...welcomeConvo,
   id: 'welcome_id',
-  title: 'Welcome',
-  category: 'assistant',
-  messages: [],
   apiConfig,
-  replacements: {},
-  updatedAt: '2024-09-10T22:07:44.915Z',
+  isConversationOwner: true,
 };
 const fullSheepConversation = {
+  ...welcomeConvo,
   id: 'electric_sheep_id',
   title: 'electric sheep',
   category: 'assistant',
@@ -56,21 +54,12 @@ const fullSheepConversation = {
   replacements: {},
   apiConfig,
   updatedAt: '2024-10-10T22:07:44.915Z',
+  isConversationOwner: true,
 };
 
 const mockData = {
-  welcome_id: {
-    id: fullWelcomeConversation.id,
-    title: fullWelcomeConversation.title,
-    apiConfig: fullWelcomeConversation.apiConfig,
-    updatedAt: fullWelcomeConversation.updatedAt,
-  },
-  electric_sheep_id: {
-    id: fullSheepConversation.id,
-    title: fullSheepConversation.title,
-    apiConfig: fullSheepConversation.apiConfig,
-    updatedAt: fullSheepConversation.updatedAt,
-  },
+  welcome_id: fullWelcomeConversation,
+  electric_sheep_id: fullSheepConversation,
 };
 
 const renderAssistant = async (extraProps = {}) => {
@@ -182,7 +171,11 @@ describe('Assistant', () => {
         fireEvent.click(openConversationMenu);
       });
       // selecting first conversation proves sort by updatedAt is working
-      const deleteButton = screen.getAllByTestId('delete-option')[0];
+      const contextMenuButton = screen.getAllByTestId('convo-context-menu-button')[0];
+      await act(async () => {
+        fireEvent.click(contextMenuButton);
+      });
+      const deleteButton = screen.getByTestId('convo-context-menu-item-delete');
       await act(async () => {
         fireEvent.click(deleteButton);
       });
@@ -196,8 +189,13 @@ describe('Assistant', () => {
       });
     });
     it('should refetchCurrentUserConversations after clear chat history button click', async () => {
+      const getConversation = jest.fn().mockResolvedValue(fullSheepConversation);
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation,
+      });
       await renderAssistant();
-      fireEvent.click(screen.getByTestId('chat-context-menu'));
+      fireEvent.click(screen.getByTestId('conversation-settings-menu'));
       fireEvent.click(screen.getByTestId('clear-chat'));
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(() => {

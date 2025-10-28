@@ -35,6 +35,7 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
@@ -148,15 +149,6 @@ const trackedAlert2Raw = {
     flappingHistory: [true, false, false],
     lastScheduledActions: { group: 'default', date: new Date().toISOString() },
     uuid: 'def',
-  },
-};
-
-const trackedAlert3Raw = {
-  state: { foo: false },
-  meta: {
-    flapping: false,
-    flappingHistory: [true, false, false],
-    uuid: 'xyz',
   },
 };
 
@@ -327,6 +319,12 @@ const fakeRequest = {
 const ruleInfo = `for test.rule-type:1 'rule-name'`;
 const logTags = { tags: ['test.rule-type', '1', 'alerts-client'] };
 
+type InnerHit = { count?: number; url?: string } & (
+  | typeof fetchedAlert1
+  | typeof fetchedAlert2
+  | typeof fetchedAlert3
+);
+
 describe('Alerts Client', () => {
   let alertsClientParams: AlertsClientParams;
   let determineDelayedAlertsOpts: DetermineDelayedAlertsOpts;
@@ -347,6 +345,7 @@ describe('Alerts Client', () => {
     describe(`using ${label} for alert indices`, () => {
       beforeEach(() => {
         jest.clearAllMocks();
+        jest.restoreAllMocks();
         logger = loggingSystemMock.createLogger();
         alertsClientParams = {
           alertingEventLogger,
@@ -457,47 +456,21 @@ describe('Alerts Client', () => {
         });
 
         test('should query for alerts', async () => {
-          const spy = jest
-            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
-            .mockImplementation(() => mockLegacyAlertsClient);
-
-          const alertsClient = new AlertsClient(alertsClientParams);
-
-          const executionOptionsWithAlerts = {
-            ...defaultExecutionOpts,
-            activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
-            recoveredAlertsFromState: { '3': trackedAlert3Raw },
-          };
-
-          await alertsClient.initializeExecution(executionOptionsWithAlerts);
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
-            executionOptionsWithAlerts
-          );
-
-          expect(clusterClient.search).toHaveBeenCalledWith({
-            query: {
-              bool: {
-                filter: [
-                  { term: { [ALERT_RULE_UUID]: '1' } },
-                  { terms: { [ALERT_UUID]: ['abc', 'def', 'xyz'] } },
-                ],
-              },
+          clusterClient.search.mockResolvedValueOnce({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 0 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  fields: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] },
+                },
+              ],
             },
-            seq_no_primary_term: true,
-            index: useDataStreamForAlerts
-              ? '.alerts-test.alerts-default'
-              : '.internal.alerts-test.alerts-default-*',
-            ignore_unavailable: true,
-            sort: {
-              'kibana.alert.start': 'desc',
-            },
-            size: 3,
           });
-
-          spy.mockRestore();
-        });
-
-        test('should query for alerts with execution uuid when provided', async () => {
           const spy = jest
             .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
             .mockImplementation(() => mockLegacyAlertsClient);
@@ -506,26 +479,43 @@ describe('Alerts Client', () => {
 
           await alertsClient.initializeExecution({
             ...defaultExecutionOpts,
-            trackedExecutions: ['1234'],
           });
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith({
             ...defaultExecutionOpts,
-            trackedExecutions: ['1234'],
           });
 
-          expect(clusterClient.search).toHaveBeenCalledWith({
+          expect(clusterClient.search).toHaveBeenNthCalledWith(1, {
+            size: 20,
+            ignore_unavailable: true,
+            index: useDataStreamForAlerts
+              ? '.alerts-test.alerts-default'
+              : '.internal.alerts-test.alerts-default-*',
             query: {
               bool: {
                 must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
-                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['1234'] } }],
               },
             },
+            collapse: {
+              field: ALERT_RULE_EXECUTION_UUID,
+            },
+            _source: false,
+            sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+          });
+
+          expect(clusterClient.search).toHaveBeenNthCalledWith(2, {
+            size: 2000,
+            ignore_unavailable: true,
             seq_no_primary_term: true,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
-            ignore_unavailable: true,
-            size: 2000,
+            query: {
+              bool: {
+                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
+                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-uuid-1'] } }],
+              },
+            },
           });
 
           spy.mockRestore();
@@ -554,20 +544,16 @@ describe('Alerts Client', () => {
             .mockImplementation(() => mockLegacyAlertsClient);
 
           const alertsClient = new AlertsClient(alertsClientParams);
-          const executionOptionsWithUuid = {
-            ...defaultExecutionOpts,
-            trackedExecutions: ['1234'],
-          };
 
           try {
-            await alertsClient.initializeExecution(executionOptionsWithUuid);
+            await alertsClient.initializeExecution(defaultExecutionOpts);
           } catch (e) {
             spy.mockRestore();
             expect(e.message).toBe(`search failed!`);
           }
 
           expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
-            executionOptionsWithUuid
+            defaultExecutionOpts
           );
 
           expect(logger.error).toHaveBeenCalledWith(
@@ -576,94 +562,6 @@ describe('Alerts Client', () => {
           );
 
           spy.mockRestore();
-        });
-
-        test('should generate tracked executions from the alerts when fetched by alert uuids', async () => {
-          clusterClient.search.mockResolvedValue({
-            took: 10,
-            timed_out: false,
-            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
-            hits: {
-              total: { relation: 'eq', value: 2 },
-              hits: [
-                {
-                  _id: 'abc',
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  _seq_no: 41,
-                  _primary_term: 665,
-                  _source: fetchedAlert1,
-                },
-                {
-                  _id: 'def',
-                  _index: '.internal.alerts-test.alerts-default-000002',
-                  _seq_no: 42,
-                  _primary_term: 666,
-                  _source: fetchedAlert2,
-                },
-                {
-                  _id: 'xyz',
-                  _index: '.internal.alerts-test.alerts-default-000002',
-                  _seq_no: 43,
-                  _primary_term: 667,
-                  _source: fetchedAlert3,
-                },
-              ],
-            },
-          });
-
-          const alertsClient = new AlertsClient(alertsClientParams);
-
-          await alertsClient.initializeExecution({
-            ...defaultExecutionOpts,
-            activeAlertsFromState: {
-              '1': trackedAlert1Raw,
-              '2': trackedAlert2Raw,
-              '3': trackedAlert3Raw,
-            },
-          });
-
-          expect(alertsClient.getTrackedExecutions()).toEqual(
-            new Set([
-              '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-              '34lrfhw-645g-as67-sdf5-2534fvf8vfnjks',
-            ])
-          );
-        });
-
-        test('should generate tracked executions from the state when fetched by execution uuids', async () => {
-          clusterClient.search.mockResolvedValue({
-            took: 10,
-            timed_out: false,
-            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
-            hits: {
-              total: { relation: 'eq', value: 2 },
-              hits: [
-                {
-                  _id: 'abc',
-                  _index: '.internal.alerts-test.alerts-default-000001',
-                  _seq_no: 41,
-                  _primary_term: 665,
-                  _source: fetchedAlert1,
-                },
-                {
-                  _id: 'def',
-                  _index: '.internal.alerts-test.alerts-default-000002',
-                  _seq_no: 42,
-                  _primary_term: 666,
-                  _source: fetchedAlert2,
-                },
-              ],
-            },
-          });
-
-          const alertsClient = new AlertsClient(alertsClientParams);
-
-          await alertsClient.initializeExecution({
-            ...defaultExecutionOpts,
-            trackedExecutions: ['111', '222', '333'],
-          });
-
-          expect(alertsClient.getTrackedExecutions()).toEqual(new Set(['111', '222', '333']));
         });
       });
 
@@ -714,41 +612,6 @@ describe('Alerts Client', () => {
             request: fakeRequest,
             ruleTypeCategory: 'test',
             spaceId: 'space1',
-          });
-        });
-
-        test('should index new alerts even if updatePersistedAlertsWithMaintenanceWindowIds fails', async () => {
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
-            ...alertsClientParams,
-            isServerless: true,
-          });
-
-          await alertsClient.initializeExecution(defaultExecutionOpts);
-
-          // Report 2 new alerts
-          const alertExecutorService = alertsClient.factory();
-          alertExecutorService.create('1').scheduleActions('default');
-          alertExecutorService.create('2').scheduleActions('default');
-
-          await alertsClient.processAlerts();
-          alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
-          alertsClient.logAlerts(logAlertsOpts);
-
-          maintenanceWindowsService.getMaintenanceWindows.mockRejectedValue(
-            'Failed to fetch maintenance windows'
-          );
-
-          const result = await alertsClient.persistAlerts();
-
-          expect(logger.error).toHaveBeenCalledWith(
-            'Error updating maintenance window IDs:',
-            'Failed to fetch maintenance windows'
-          );
-
-          expect(result).toEqual({
-            alertIds: [],
-            maintenanceWindowIds: [],
           });
         });
 
@@ -835,7 +698,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -847,6 +710,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -910,18 +774,19 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
-                  _source: expandFlattenedAlert(fetchedAlert1),
+                  _source: expandFlattenedAlert(fetchedAlert1) as InnerHit,
                 },
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1042,7 +907,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -1052,6 +917,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1075,10 +941,9 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(spy).toHaveBeenCalledTimes(5);
+          expect(spy).toHaveBeenCalledTimes(2);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
           expect(spy).toHaveBeenNthCalledWith(2, 'recovered');
-          expect(spy).toHaveBeenNthCalledWith(3, 'new');
 
           expect(logger.error).toHaveBeenCalledWith(
             `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts ${ruleInfo}.`,
@@ -1115,7 +980,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 2 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -1134,6 +999,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1216,25 +1082,26 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 2 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
                   _index: '.internal.alerts-test.alerts-default-000001',
                   _seq_no: 41,
                   _primary_term: 665,
-                  _source: expandFlattenedAlert(fetchedAlert1),
+                  _source: expandFlattenedAlert(fetchedAlert1) as InnerHit,
                 },
                 {
                   _id: 'def',
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
-                  _source: expandFlattenedAlert(fetchedAlert2),
+                  _source: expandFlattenedAlert(fetchedAlert2) as InnerHit,
                 },
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1376,7 +1243,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 2 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -1395,6 +1262,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1490,12 +1358,13 @@ describe('Alerts Client', () => {
 
         test('should use runTimestamp time if provided', async () => {
           const runTimestamp = '2023-10-01T00:00:00.000Z';
+
           clusterClient.search.mockResolvedValue({
             took: 10,
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 2 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -1514,6 +1383,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1710,7 +1580,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 2 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -1729,6 +1599,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1867,10 +1738,7 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          expect(await alertsClient.persistAlerts()).toStrictEqual({
-            alertIds: [],
-            maintenanceWindowIds: [],
-          });
+          await alertsClient.persistAlerts();
 
           expect(logger.debug).toHaveBeenCalledWith(
             `Resources registered and installed for test context but "shouldWrite" is set to false ${ruleInfo}.`,
@@ -1917,6 +1785,99 @@ describe('Alerts Client', () => {
           await expect(alertsClient.persistAlerts()).rejects.toThrowError(
             'index [.internal.alerts-default.alerts-default-000001] blocked by: [FORBIDDEN/8/index write (api)];'
           );
+        });
+      });
+
+      describe('updatePersistedAlerts', () => {
+        beforeEach(() => {
+          clusterClient.updateByQuery.mockResponseOnce({
+            failures: [],
+            updated: 0,
+            total: 1,
+          });
+        });
+        test('should update the persistent alerts successfully', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService
+            .create('1')
+            .scheduleActions('default')
+            .updateLastScheduledActions('default');
+          alertExecutorService
+            .create('2')
+            .scheduleActions('default')
+            .updateLastScheduledActions('default');
+
+          await alertsClient.processAlerts();
+          await alertsClient.persistAlerts();
+
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid1 = rawActiveAlerts['1'].meta!.uuid!;
+          const uuid2 = rawActiveAlerts['2'].meta!.uuid!;
+
+          await alertsClient.updatePersistedAlerts();
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            conflicts: 'proceed',
+            index: '.alerts-test.alerts-default',
+            query: {
+              terms: {
+                _id: [uuid1, uuid2],
+              },
+            },
+            script: {
+              lang: 'painless',
+              params: {
+                [uuid1]: {
+                  date: '2023-03-28T22:27:28.159Z',
+                  group: 'default',
+                },
+                [uuid2]: {
+                  date: '2023-03-28T22:27:28.159Z',
+                  group: 'default',
+                },
+              },
+              source: `
+            if (params.containsKey(ctx._source['kibana.alert.uuid'])) {
+              ctx._source['kibana.alert.scheduled_action.group'] = params[ctx._source['kibana.alert.uuid']].group;
+              ctx._source['kibana.alert.scheduled_action.date'] = params[ctx._source['kibana.alert.uuid']].date;
+              if (params[ctx._source['kibana.alert.uuid']].containsKey('actions')) {
+                ctx._source['kibana.alert.scheduled_action.throttling'] = params[ctx._source['kibana.alert.uuid']].actions;
+              }
+            }
+          `,
+            },
+          });
+        });
+
+        test('should not call updateByQuery if there is no alert with last scheduled actions', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: false,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          await alertsClient.persistAlerts();
+
+          await alertsClient.updatePersistedAlerts();
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
         });
       });
 
@@ -2522,7 +2483,63 @@ describe('Alerts Client', () => {
       });
 
       describe('updatePersistedAlertsWithMaintenanceWindowIds', () => {
-        test('should update alerts with MW ids when provided with maintenance windows', async () => {
+        test('skips loading maintenance windows when there are no alerts', async () => {
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({});
+
+          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
+
+          expect(maintenanceWindowsService.getMaintenanceWindows).not.toHaveBeenCalled();
+
+          expect(result).toEqual({ alertIds: [], maintenanceWindowIds: [] });
+        });
+
+        test('should not update alerts if none match the maintenenance window scoped query', async () => {
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
+            maintenanceWindows: [
+              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+              { id: 'mw3' } as unknown as MaintenanceWindow,
+            ],
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1');
+          const alert2 = new Alert('2');
+          const alert3 = new Alert('3');
+          const alert4 = new Alert('4');
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+            '2': alert2,
+            '3': alert3,
+            '4': alert4,
+          });
+
+          jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
+            // @ts-ignore
+            .mockResolvedValueOnce({});
+
+          const updateSpy = jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            // @ts-ignore
+            .mockResolvedValueOnce({});
+
+          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
+
+          expect(alert1.getMaintenanceWindowIds()).toEqual([]);
+          expect(alert2.getMaintenanceWindowIds()).toEqual([]);
+          expect(alert3.getMaintenanceWindowIds()).toEqual([]);
+
+          expect(result).toEqual({ alertIds: [], maintenanceWindowIds: [] });
+          expect(updateSpy).not.toHaveBeenCalled();
+        });
+
+        test('should update alerts based on alert uuid with MW ids when provided with maintenance windows', async () => {
           maintenanceWindowsService.getMaintenanceWindows.mockReturnValueOnce({
             maintenanceWindows: [
               ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
@@ -2559,7 +2576,6 @@ describe('Alerts Client', () => {
             // @ts-ignore
             .mockResolvedValueOnce({});
 
-          // @ts-ignore - accessing private function
           const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
 
           expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
@@ -2576,6 +2592,123 @@ describe('Alerts Client', () => {
             alert2.getUuid(),
             alert3.getUuid(),
           ]);
+        });
+
+        test('should update alerts based on alert id with MW ids when provided with maintenance windows', async () => {
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValueOnce({
+            maintenanceWindows: [
+              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+              { id: 'mw3' } as unknown as MaintenanceWindow,
+            ],
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1');
+          const alert2 = new Alert('2');
+          const alert3 = new Alert('3');
+          const alert4 = new Alert('4');
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+            '2': alert2,
+            '3': alert3,
+            '4': alert4,
+          });
+
+          jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
+            // @ts-ignore
+            .mockResolvedValueOnce({
+              mw1: [alert1.getId(), alert2.getId()],
+              mw2: [alert3.getId()],
+            });
+
+          const updateSpy = jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            // @ts-ignore
+            .mockResolvedValueOnce({});
+
+          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
+
+          expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
+          expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
+          expect(alert3.getMaintenanceWindowIds()).toEqual(['mw3', 'mw2']);
+
+          expect(result).toEqual({
+            alertIds: [alert1.getId(), alert2.getId(), alert3.getId()],
+            maintenanceWindowIds: ['mw3', 'mw1', 'mw2'],
+          });
+
+          expect(updateSpy).toHaveBeenLastCalledWith([
+            alert1.getId(),
+            alert2.getId(),
+            alert3.getId(),
+          ]);
+        });
+
+        test('should handle errors update alerts with MW ids', async () => {
+          maintenanceWindowsService.getMaintenanceWindows.mockReturnValueOnce({
+            maintenanceWindows: [
+              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+              { id: 'mw3' } as unknown as MaintenanceWindow,
+            ],
+            maintenanceWindowsWithoutScopedQueryIds: [],
+          });
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          const alert1 = new Alert('1');
+          const alert2 = new Alert('2');
+          const alert3 = new Alert('3');
+          const alert4 = new Alert('4');
+
+          jest.spyOn(LegacyAlertsClient.prototype, 'getProcessedAlerts').mockReturnValueOnce({
+            '1': alert1,
+            '2': alert2,
+            '3': alert3,
+            '4': alert4,
+          });
+
+          jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'getMaintenanceWindowScopedQueryAlerts')
+            // @ts-ignore
+            .mockResolvedValueOnce({
+              mw1: [alert1.getId(), alert2.getId()],
+              mw2: [alert3.getId()],
+            });
+
+          const updateSpy = jest
+            // @ts-ignore
+            .spyOn(AlertsClient.prototype, 'updateAlertMaintenanceWindowIds')
+            // @ts-ignore
+            .mockImplementationOnce(() => {
+              throw new Error('Failed to update alerts with maintenance window IDs');
+            });
+
+          const result = await alertsClient.updatePersistedAlertsWithMaintenanceWindowIds();
+
+          expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
+          expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
+          expect(alert3.getMaintenanceWindowIds()).toEqual(['mw3', 'mw2']);
+
+          expect(result).toEqual({
+            alertIds: [],
+            maintenanceWindowIds: [],
+          });
+
+          expect(updateSpy).toHaveBeenLastCalledWith([
+            alert1.getId(),
+            alert2.getId(),
+            alert3.getId(),
+          ]);
+
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error updating maintenance window IDs: Failed to update alerts with maintenance window IDs`,
+            logTags
+          );
         });
       });
 
@@ -2929,14 +3062,15 @@ describe('Alerts Client', () => {
             [ALERT_INSTANCE_ID]: alertInstanceId,
             [ALERT_STATUS]: 'active',
             [ALERT_UUID]: 'abc',
-          };
+          } as InnerHit;
           const newClusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
           newClusterClient.search.mockResolvedValue({
             took: 10,
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -3130,7 +3264,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -3144,6 +3278,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<
             { count: number; url: string },
             {},
@@ -3233,7 +3368,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -3249,6 +3384,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<
             { count: number; url: string },
             {},
@@ -3357,7 +3493,7 @@ describe('Alerts Client', () => {
             timed_out: false,
             _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
             hits: {
-              total: { relation: 'eq', value: 1 },
+              total: { relation: 'eq', value: 0 },
               hits: [
                 {
                   _id: 'abc',
@@ -3369,6 +3505,7 @@ describe('Alerts Client', () => {
               ],
             },
           });
+
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -3429,6 +3566,7 @@ describe('Alerts Client', () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
+
           clusterClient.search.mockResolvedValue({
             took: 10,
             timed_out: false,

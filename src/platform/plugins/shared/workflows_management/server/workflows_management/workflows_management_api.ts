@@ -6,32 +6,49 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// TODO: remove eslint exceptions once we have a better way to handle this
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {
+import type { JsonSchema7Type } from 'zod-to-json-schema';
+import type { KibanaRequest } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import type {
+  ConnectorTypeInfo,
   CreateWorkflowCommand,
-  WorkflowListDto,
-  WorkflowExecutionDto,
-  WorkflowExecutionListDto,
-  WorkflowDetailDto,
   EsWorkflow,
-  WorkflowExecutionEngineModel,
+  EsWorkflowStepExecution,
   UpdatedWorkflowResponseDto,
-  transformWorkflowYamlJsontoEsWorkflow,
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowExecutionEngineModel,
+  WorkflowExecutionListDto,
+  WorkflowListDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
-import { WorkflowsService } from './workflows_management_service';
-import { SchedulerService } from '../scheduler/scheduler_service';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
+import { getJsonSchemaFromYamlSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { LogSearchResult } from './lib/workflow_logger';
+import type {
+  SearchWorkflowExecutionsParams,
+  WorkflowsService,
+} from './workflows_management_service';
+import { WorkflowValidationError } from '../../common/lib/errors';
+import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 
 export interface GetWorkflowsParams {
-  triggerType?: 'schedule' | 'event';
+  triggerType?: 'schedule' | 'event' | 'manual';
   limit: number;
-  offset: number;
+  page: number;
+  createdBy?: string[];
+  enabled?: boolean[];
+  query?: string;
   _full?: boolean;
 }
 
 export interface GetWorkflowExecutionLogsParams {
   executionId: string;
+  stepExecutionId?: string;
   limit?: number;
   offset?: number;
   sortField?: string;
@@ -57,54 +74,144 @@ export interface WorkflowExecutionLogsDto {
   offset: number;
 }
 
+export interface GetStepExecutionParams {
+  executionId: string;
+  id: string;
+}
+
+export interface GetExecutionLogsParams {
+  executionId: string;
+  limit?: number;
+  offset?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetStepLogsParams {
+  executionId: string;
+  limit?: number;
+  offset?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  stepExecutionId: string;
+}
+export interface GetAvailableConnectorsParams {
+  spaceId: string;
+  request: KibanaRequest;
+}
+
+export interface GetAvailableConnectorsResponse {
+  connectorsByType: Record<string, ConnectorTypeInfo>;
+  totalConnectors: number;
+}
+
 export class WorkflowsManagementApi {
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private schedulerService: SchedulerService | null = null
+    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
   ) {}
 
-  public setSchedulerService(schedulerService: SchedulerService) {
-    this.schedulerService = schedulerService;
+  public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
+    return this.workflowsService.getWorkflows(params, spaceId);
   }
 
-  public async getWorkflows(params: GetWorkflowsParams): Promise<WorkflowListDto> {
-    return await this.workflowsService.searchWorkflows(params);
+  public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
+    return this.workflowsService.getWorkflow(id, spaceId);
   }
 
-  public async getWorkflow(id: string): Promise<WorkflowDetailDto | null> {
-    return await this.workflowsService.getWorkflow(id);
+  public async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
+    return this.workflowsService.createWorkflow(workflow, spaceId, request);
   }
 
-  public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
-    return await this.workflowsService.createWorkflow(workflow);
+  public async cloneWorkflow(
+    workflow: WorkflowDetailDto,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
+    // Parse and update the YAML to change the name
+    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
+      { loose: true },
+      spaceId,
+      request
+    );
+    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema);
+    if (parsedYaml.error) {
+      throw parsedYaml.error;
+    }
+
+    const updatedYaml = {
+      ...parsedYaml.data,
+      name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+        defaultMessage: 'Copy',
+      })}`,
+    };
+
+    // Convert back to YAML string
+    const clonedYaml = `name: ${updatedYaml.name}\n${workflow.yaml
+      .split('\n')
+      .slice(1)
+      .join('\n')}`;
+    return this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
   }
 
   public async updateWorkflow(
     id: string,
-    workflow: Partial<EsWorkflow>
-  ): Promise<UpdatedWorkflowResponseDto> {
-    return await this.workflowsService.updateWorkflow(id, workflow);
+    workflow: Partial<EsWorkflow>,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto | null> {
+    const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
+    if (!originalWorkflow) {
+      throw new Error(`Workflow with id ${id} not found`);
+    }
+    return this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
   }
 
-  public async deleteWorkflows(workflowIds: string[]): Promise<void> {
-    return await this.workflowsService.deleteWorkflows(workflowIds);
+  public async deleteWorkflows(
+    workflowIds: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    return this.workflowsService.deleteWorkflows(workflowIds, spaceId);
   }
 
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
-    inputs: Record<string, any>
+    spaceId: string,
+    inputs: Record<string, any>,
+    request: KibanaRequest
   ): Promise<string> {
-    if (!this.schedulerService) {
-      throw new Error('Scheduler service not set');
-    }
-    return await this.schedulerService.runWorkflow(workflow, inputs);
+    const { event, ...manualInputs } = inputs;
+    const context = {
+      event,
+      spaceId,
+      inputs: manualInputs,
+    };
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
+      workflow,
+      context,
+      request
+    );
+    return executeResponse.workflowExecutionId;
   }
 
-  public async testWorkflow(workflowYaml: string, inputs: Record<string, any>): Promise<string> {
-    if (!this.schedulerService) {
-      throw new Error('Scheduler service not set');
-    }
-    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+  public async testWorkflow(
+    workflowYaml: string,
+    inputs: Record<string, any>,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<string> {
+    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
+      { loose: true },
+      spaceId,
+      request
+    );
+    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, zodSchema);
 
     if (parsedYaml.error) {
       // TODO: handle error properly
@@ -112,36 +219,107 @@ export class WorkflowsManagementApi {
       throw parsedYaml.error;
     }
 
-    // @ts-expect-error - TODO: fix this
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
+    // Validate step name uniqueness
+    const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+    if (!stepValidation.isValid) {
+      const errorMessages = stepValidation.errors.map((error) => error.message);
+      throw new WorkflowValidationError(
+        'Workflow validation failed: Step names must be unique throughout the workflow.',
+        errorMessages
+      );
+    }
 
-    return await this.schedulerService.runWorkflow(
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+    const { event, ...manualInputs } = inputs;
+    const context = {
+      event,
+      spaceId,
+      inputs: manualInputs,
+    };
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
         id: 'test-workflow',
         name: workflowToCreate.name,
-        status: workflowToCreate.status,
+        enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
+        yaml: workflowYaml,
+        isTestRun: true,
       },
-      inputs
+      context,
+      request
     );
+    return executeResponse.workflowExecutionId;
   }
 
-  public async getWorkflowExecutions(workflowId: string): Promise<WorkflowExecutionListDto> {
-    return await this.workflowsService.searchWorkflowExecutions({
-      workflowId,
-    });
+  public async testStep(
+    workflowYaml: string,
+    stepId: string,
+    contextOverride: Record<string, any>,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<string> {
+    const parsedYaml = parseWorkflowYamlToJSON(
+      workflowYaml,
+      await this.workflowsService.getWorkflowZodSchema({ loose: true }, spaceId, request)
+    );
+
+    if (parsedYaml.error) {
+      throw parsedYaml.error;
+    }
+
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflowStep(
+      {
+        id: 'test-workflow',
+        name: workflowToCreate.name,
+        enabled: workflowToCreate.enabled,
+        definition: workflowToCreate.definition,
+        yaml: workflowYaml,
+        isTestRun: true,
+        spaceId,
+      },
+      stepId,
+      contextOverride
+    );
+    return executeResponse.workflowExecutionId;
+  }
+
+  public async getWorkflowExecutions(
+    params: SearchWorkflowExecutionsParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionListDto> {
+    return this.workflowsService.getWorkflowExecutions(params, spaceId);
   }
 
   public async getWorkflowExecution(
-    workflowExecutionId: string
+    workflowExecutionId: string,
+    spaceId: string
   ): Promise<WorkflowExecutionDto | null> {
-    return await this.workflowsService.getWorkflowExecution(workflowExecutionId);
+    return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId);
   }
 
   public async getWorkflowExecutionLogs(
-    params: GetWorkflowExecutionLogsParams
+    params: GetWorkflowExecutionLogsParams,
+    spaceId: string
   ): Promise<WorkflowExecutionLogsDto> {
-    const result = await this.workflowsService.getExecutionLogs(params.executionId);
+    let result: LogSearchResult;
+    if (params.stepExecutionId) {
+      result = await this.workflowsService.getStepLogs(
+        {
+          executionId: params.executionId,
+          stepExecutionId: params.stepExecutionId,
+          limit: params.limit,
+          offset: params.offset,
+          sortField: params.sortField,
+          sortOrder: params.sortOrder,
+        },
+        spaceId
+      );
+    } else {
+      result = await this.workflowsService.getExecutionLogs(params, spaceId);
+    }
 
     // Transform the logs to match our API format
     return {
@@ -173,5 +351,44 @@ export class WorkflowsManagementApi {
       limit: params.limit || 100,
       offset: params.offset || 0,
     };
+  }
+
+  public async getStepExecution(
+    params: GetStepExecutionParams,
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution | null> {
+    return this.workflowsService.getStepExecution(params, spaceId);
+  }
+
+  public async cancelWorkflowExecution(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<void> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
+  }
+
+  public async getWorkflowStats(spaceId: string) {
+    return this.workflowsService.getWorkflowStats(spaceId);
+  }
+
+  public async getWorkflowAggs(fields: string[] = [], spaceId: string) {
+    return this.workflowsService.getWorkflowAggs(fields, spaceId);
+  }
+
+  public async getAvailableConnectors(
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<GetAvailableConnectorsResponse> {
+    return this.workflowsService.getAvailableConnectors(spaceId, request);
+  }
+
+  public async getWorkflowJsonSchema(
+    { loose }: { loose: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<JsonSchema7Type> {
+    const zodSchema = await this.workflowsService.getWorkflowZodSchema({ loose }, spaceId, request);
+    return getJsonSchemaFromYamlSchema(zodSchema);
   }
 }

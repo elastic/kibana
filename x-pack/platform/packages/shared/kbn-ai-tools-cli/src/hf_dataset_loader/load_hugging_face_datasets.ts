@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createLocalDirDiskCacheStore, fromCache } from '@kbn/cache-cli';
 import { createCache } from 'cache-manager';
 import { errors } from '@elastic/elasticsearch';
-import { ALL_HUGGING_FACE_DATASETS } from './config';
-import { HuggingFaceDatasetSpec } from './types';
-import { ensureDatasetIndexExists } from './ensure_dataset_index_exists';
-import { fetchRowsFromDataset } from './fetch_rows_from_dataset';
-import { indexDocuments } from './index_documents';
-import { getEmbeddings } from './get_embeddings';
+import { PREDEFINED_HUGGING_FACE_DATASETS } from './datasets/config';
+import type { HuggingFaceDatasetSpec } from './types';
+import { ensureDatasetIndexExists } from './indexing/ensure_dataset_index_exists';
+import { fetchRowsFromDataset } from './processing/fetch_rows_from_dataset';
+import { indexDocuments } from './indexing/index_documents';
+import { getEmbeddings } from './indexing/get_embeddings';
 
 const DATASET_ROWS_CACHE = createCache({
   stores: [
@@ -36,8 +36,8 @@ export async function loadHuggingFaceDatasets({
   esClient,
   logger,
   accessToken,
-  datasets = ALL_HUGGING_FACE_DATASETS,
-  limit = 1000,
+  datasets = PREDEFINED_HUGGING_FACE_DATASETS,
+  limit,
   clear = false,
 }: {
   esClient: ElasticsearchClient;
@@ -78,7 +78,9 @@ export async function loadHuggingFaceDatasets({
       })
     );
 
-    logger.debug('Generating embeddings');
+    logger.debug(
+      `Generating embeddings for ${documents.length} documents in dataset ${dataset.name}`
+    );
 
     const docsWithEmbeddings = await fromCache(dataset.name, DATASET_EMBEDDINGS_CACHE, () =>
       getEmbeddings({
@@ -88,16 +90,19 @@ export async function loadHuggingFaceDatasets({
         logger,
       })
     );
-
-    logger.debug(`Indexing documents with embeddings`);
+    logger.debug(`Indexing ${docsWithEmbeddings.length} documents with embeddings`);
 
     await indexDocuments({
       esClient,
       documents: docsWithEmbeddings,
       dataset,
       logger,
+      bulkHelperOverrides: {
+        // With embeddings already generated, larger flush size will not overload ELSER inference and improves performance
+        flushBytes: 1024 * 1024 * 5,
+      },
     });
 
-    logger.debug(`Indexed dataset`);
+    logger.info(`Indexed dataset`);
   }
 }

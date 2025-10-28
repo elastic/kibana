@@ -12,19 +12,20 @@ import {
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import {
   fleetPackageRegistryDockerImage,
   esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
-  FtrConfigProviderContext,
   defineDockerServersConfig,
 } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
-import { DeploymentAgnosticCommonServices, services } from '../services';
+import type { DeploymentAgnosticCommonServices } from '../services';
+import { services } from '../services';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
 interface CreateTestConfigOptions<T> {
@@ -34,6 +35,7 @@ interface CreateTestConfigOptions<T> {
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
+  indexRefreshInterval?: string | false;
 }
 
 export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
@@ -98,7 +100,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
         },
       }),
       testFiles: options.testFiles,
@@ -138,7 +140,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
           // if the config is run locally, explicitly enable mock-idp-plugin for UI role selector
-          ...(isRunOnCI ? [] : ['--mock_idp_plugin.enabled=true']),
+          ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
           // This ensures that we register the Security SAML API endpoints.
           // In the real world the SAML config is injected by control plane.
           `--plugin-path=${samlIdPPlugin}`,
@@ -167,6 +169,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           ...(options?.kbnTestServer?.serverArgs ?? []),
         ],
       },
+      indexRefreshInterval: options.indexRefreshInterval,
     };
   };
 }

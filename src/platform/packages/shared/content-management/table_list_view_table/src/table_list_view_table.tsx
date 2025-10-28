@@ -10,19 +10,14 @@
 import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useAsync from 'react-use/lib/useAsync';
-import {
+import type {
   EuiBasicTableColumn,
-  EuiButton,
-  EuiCallOut,
-  EuiEmptyPrompt,
   Pagination,
   Direction,
-  EuiSpacer,
   EuiTableActionsColumnType,
   CriteriaWithPagination,
-  Query,
-  Ast,
 } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, Query, Ast } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -60,7 +55,8 @@ import { type SortColumnField, getInitialSorting, saveSorting } from './componen
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import type { RowActions, SearchQueryError, TableItemsRowActions } from './types';
-import { CustomSortingOptions, sortByRecentlyAccessed } from './components/table_sort_select';
+import type { CustomSortingOptions } from './components/table_sort_select';
+import { sortByRecentlyAccessed } from './components/table_sort_select';
 import { ContentEditorActivityRow } from './components/content_editor_activity_row';
 
 const disabledEditAction = {
@@ -717,7 +713,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'controlsVertical',
+          icon: 'info',
           type: 'icon',
           onClick: inspectItem,
           'data-test-subj': `inspect-action`,

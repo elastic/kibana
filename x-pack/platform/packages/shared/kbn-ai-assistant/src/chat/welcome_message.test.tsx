@@ -7,27 +7,27 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { WelcomeMessage } from './welcome_message';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const mockConnectors: UseGenAIConnectorsResult = {
   connectors: [
-    {
+    createMockConnectorFindResult({
       id: 'test-connector',
       name: 'Test Connector',
       actionTypeId: '.gen-ai',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
       referencedByCount: 0,
-    },
+    }),
   ],
   loading: false,
   selectedConnector: 'test-connector',
   selectConnector: jest.fn(),
   reloadConnectors: jest.fn(),
+  getConnector: jest.fn(),
+  isConnectorSelectionRestricted: false,
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -54,14 +54,19 @@ const createMockKnowledgeBase = (
   install: jest.fn(),
   warmupModel: jest.fn(),
   isWarmingUpModel: false,
+  isProductDocInstalling: false,
+  isProductDocUninstalling: false,
+  installProductDoc: jest.fn(),
+  uninstallProductDoc: jest.fn(),
   status: {
     value: {
       enabled: true,
       errorMessage: undefined,
-      kbState: KnowledgeBaseState.NOT_INSTALLED,
+      inferenceModelState: InferenceModelState.NOT_INSTALLED,
       concreteWriteIndex: undefined,
       currentInferenceId: undefined,
       isReIndexing: false,
+      productDocStatus: 'uninstalled',
     },
     loading: false,
     error: undefined,
@@ -79,11 +84,12 @@ describe('WelcomeMessage', () => {
     const knowledgeBase = createMockKnowledgeBase({
       status: {
         value: {
-          kbState: KnowledgeBaseState.READY,
+          inferenceModelState: InferenceModelState.READY,
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: true,
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         error: undefined,
@@ -111,11 +117,12 @@ describe('WelcomeMessage', () => {
     const updatedKnowledgeBase = createMockKnowledgeBase({
       status: {
         value: {
-          kbState: KnowledgeBaseState.READY,
+          inferenceModelState: InferenceModelState.READY,
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         error: undefined,

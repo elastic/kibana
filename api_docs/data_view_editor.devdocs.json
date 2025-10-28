@@ -486,6 +486,88 @@
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.onDuplicate",
+            "type": "Function",
+            "tags": [],
+            "label": "onDuplicate",
+            "description": [
+              "\nIf editing a data view and onDuplicate is defined, a duplicate button is shown"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.isDuplicating",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDuplicating",
+            "description": [
+              "\nOptional boolean to indicate if the data view is being duplicated"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.getDataViewHelpText",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewHelpText",
+            "description": [
+              "\nOptional callback to get help text based on the active data view"
+            ],
+            "signature": [
+              "((dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => React.ReactNode) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViewEditor",
+                "id": "def-public.DataViewEditorProps.getDataViewHelpText.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

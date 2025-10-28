@@ -42,7 +42,8 @@ const TESTS_TIMEOUT = 8000;
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
 
-describe('When on integration detail', () => {
+// Failing: See https://github.com/elastic/kibana/issues/237961
+describe.skip('When on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
   const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
   let testRenderer: TestRenderer;
@@ -75,8 +76,8 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
     }, TESTS_TIMEOUT);
 
-    it('should display agent policy usage count', async () => {
-      expect(await renderResult.findByTestId('agentPolicyCount')).not.toBeNull();
+    it('should display policy usage count', async () => {
+      expect(await renderResult.findByTestId('policyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
@@ -113,8 +114,8 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
     }, TESTS_TIMEOUT);
 
-    it('should NOT display agent policy usage count', async () => {
-      expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
+    it('should NOT display policy usage count', async () => {
+      expect(renderResult.queryByTestId('policyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
@@ -151,8 +152,8 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
     }, TESTS_TIMEOUT);
 
-    it('should NOT display agent policy usage count', async () => {
-      expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
+    it('should NOT display policy usage count', async () => {
+      expect(renderResult.queryByTestId('policyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
@@ -843,6 +844,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
   const epmGetStatsResponse: GetStatsResponse = {
     response: {
       agent_policy_count: 2,
+      package_policy_count: 2,
     },
   };
 

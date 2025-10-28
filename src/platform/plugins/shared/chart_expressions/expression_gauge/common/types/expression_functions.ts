@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { $Values } from '@kbn/utility-types';
+import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import {
+import type {
   Datatable,
   DefaultInspectorAdapters,
   ExecutionContext,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
-import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type {
+  MakeOverridesSerializable,
+  Simplify,
+  ExpressionValueVisDimension,
+} from '@kbn/chart-expressions-common';
 import type { GoalProps } from '@elastic/charts';
-import {
+import type {
   EXPRESSION_GAUGE_NAME,
   GAUGE_FUNCTION_RENDERER_NAME,
   GaugeShapes,

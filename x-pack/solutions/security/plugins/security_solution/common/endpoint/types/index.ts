@@ -12,6 +12,7 @@ import type { ManifestSchema } from '../schema/manifest';
 export * from './actions';
 export * from './os';
 export * from './trusted_apps';
+export type * from './trusted_devices';
 export type * from './utility_types';
 export type * from './agents';
 export type * from './sentinel_one';
@@ -999,6 +1000,7 @@ export interface PolicyConfig {
     memory_protection: ProtectionFields & SupportedFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     ransomware: ProtectionFields & SupportedFields;
+    device_control?: DeviceControlFields;
     logging: {
       file: string;
     };
@@ -1016,6 +1018,10 @@ export interface PolicyConfig {
         enabled: boolean;
       };
       behavior_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      device_control?: {
         message: string;
         enabled: boolean;
       };
@@ -1042,6 +1048,7 @@ export interface PolicyConfig {
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
+    device_control?: DeviceControlFields;
     popup: {
       malware: {
         message: string;
@@ -1052,6 +1059,10 @@ export interface PolicyConfig {
         enabled: boolean;
       };
       memory_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      device_control?: {
         message: string;
         enabled: boolean;
       };
@@ -1110,13 +1121,20 @@ export interface UIPolicyConfig {
     | 'memory_protection'
     | 'behavior_protection'
     | 'attack_surface_reduction'
+    | 'device_control'
   >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
   mac: Pick<
     PolicyConfig['mac'],
-    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
+    | 'malware'
+    | 'events'
+    | 'popup'
+    | 'advanced'
+    | 'behavior_protection'
+    | 'memory_protection'
+    | 'device_control'
   >;
   /**
    * Linux-specific policy configuration that is supported via the UI
@@ -1160,6 +1178,21 @@ export enum AntivirusRegistrationModes {
   enabled = 'enabled',
   disabled = 'disabled',
   sync = 'sync_with_malware_prevent',
+}
+
+export const DeviceControlAccessLevel = {
+  audit: 'audit', // read and write
+  read_only: 'read_only',
+  no_execute: 'no_execute',
+  deny_all: 'deny_all',
+} as const;
+
+export type DeviceControlAccessLevel =
+  (typeof DeviceControlAccessLevel)[keyof typeof DeviceControlAccessLevel];
+
+export interface DeviceControlFields {
+  enabled: boolean;
+  usb_storage: DeviceControlAccessLevel;
 }
 
 /**
@@ -1314,13 +1347,21 @@ export interface HostPolicyResponse {
           };
         };
         artifacts: {
+          /**
+           * The Global artifacts applied to the host. Object could be empty if download of
+           * artifacts failed on the host.
+           */
           global: {
-            version: string;
-            identifiers: HostPolicyResponseAppliedArtifact[];
+            version?: string;
+            identifiers?: HostPolicyResponseAppliedArtifact[];
           };
+          /**
+           * The user defined artifacts (Kibana) applied to the host. Object could be empty if download of
+           * artifacts failed on the host.
+           */
           user: {
-            version: string;
-            identifiers: HostPolicyResponseAppliedArtifact[];
+            version?: string;
+            identifiers?: HostPolicyResponseAppliedArtifact[];
           };
         };
       };

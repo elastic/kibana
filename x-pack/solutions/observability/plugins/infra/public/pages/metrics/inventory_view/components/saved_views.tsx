@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { useInventoryViews } from '../../../../hooks/use_inventory_views';
+import { useInventoryViewsContext } from '../hooks/use_inventory_views';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
-import { useWaffleViewState } from '../hooks/use_waffle_view_state';
+import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
+import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 
 export const SavedViews = () => {
-  const { viewState } = useWaffleViewState();
   const {
     currentView,
     views,
@@ -25,7 +26,26 @@ export const SavedViews = () => {
     updateViewById,
     switchViewById,
     setDefaultViewById,
-  } = useInventoryViews();
+  } = useInventoryViewsContext();
+
+  const {
+    metric,
+    groupBy,
+    nodeType,
+    view,
+    customOptions,
+    customMetrics,
+    boundsOverride,
+    autoBounds,
+    accountId,
+    region,
+    legend,
+    sort,
+    timelineOpen,
+    preferredSchema,
+  } = useWaffleOptionsContext();
+  const { currentTime, isAutoReloading } = useWaffleTimeContext();
+  const { filterQuery } = useWaffleFiltersContext();
 
   return (
     <SavedViewsToolbarControls
@@ -41,7 +61,29 @@ export const SavedViews = () => {
       onLoadViews={fetchViews}
       onSetDefaultView={setDefaultViewById}
       onSwitchView={switchViewById}
-      viewState={viewState}
+      viewState={{
+        metric,
+        groupBy,
+        nodeType,
+        view,
+        customOptions,
+        customMetrics,
+        boundsOverride,
+        autoBounds,
+        accountId,
+        region,
+        legend,
+        sort,
+        timelineOpen,
+        time: currentTime,
+        autoReload: isAutoReloading,
+        // retrocompatibility with saved views
+        filterQuery: {
+          expression: filterQuery.query,
+          kind: filterQuery.language,
+        },
+        preferredSchema,
+      }}
     />
   );
 };

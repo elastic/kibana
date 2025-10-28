@@ -7,8 +7,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import { appContextService } from '../../services';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+
+import { appContextService, licenseService, packagePolicyService } from '../../services';
 import type {
+  BulkRollbackPackagesRequestSchema,
   BulkUninstallPackagesRequestSchema,
   BulkUpgradePackagesRequestSchema,
   FleetRequestHandler,
@@ -21,13 +24,13 @@ import type {
   GetOneBulkOperationPackagesResponse,
 } from '../../../common/types';
 import { getInstallationsByName } from '../../services/epm/packages/get';
-import { FleetError } from '../../errors';
+import { FleetError, FleetUnauthorizedError } from '../../errors';
 import {
   scheduleBulkUninstall,
   scheduleBulkUpgrade,
   getBulkOperationTaskResults,
+  scheduleBulkRollback,
 } from '../../tasks/packages_bulk_operations';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 async function validateInstalledPackages(
   savedObjectsClient: SavedObjectsClientContract,
@@ -116,6 +119,56 @@ export const getOneBulkOperationPackagesHandler: FleetRequestHandler<
     status: results.status,
     error: results.error,
     results: results.results,
+  };
+  return response.ok({ body });
+};
+
+export const getPackagePolicyIdsForCurrentUser = async (
+  request: KibanaRequest,
+  packages: { name: string }[]
+): Promise<{ [packageName: string]: string[] }> => {
+  const soClient = appContextService.getInternalUserSOClient(request);
+
+  const packagePolicyIdsByPackageName: { [packageName: string]: string[] } = {};
+  for (const pkg of packages) {
+    const packagePolicySORes = await packagePolicyService.getPackagePolicySavedObjects(soClient, {
+      searchFields: ['package.name'],
+      search: pkg.name,
+      spaceIds: ['*'],
+      fields: ['id', 'name'],
+    });
+    packagePolicyIdsByPackageName[pkg.name] = packagePolicySORes.saved_objects.map((so) => so.id);
+  }
+  return packagePolicyIdsByPackageName;
+};
+
+export const postBulkRollbackPackagesHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkRollbackPackagesRequestSchema.body>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
+  const spaceId = fleetContext.spaceId;
+
+  if (!licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError('Rollback integration requires an enterprise license.');
+  }
+
+  const taskManagerStart = getTaskManagerStart();
+  await validateInstalledPackages(savedObjectsClient, request.body.packages, 'rollback');
+
+  const taskId = await scheduleBulkRollback(taskManagerStart, {
+    packages: request.body.packages,
+    spaceId,
+    packagePolicyIdsForCurrentUser: await getPackagePolicyIdsForCurrentUser(
+      request,
+      request.body.packages
+    ),
+  });
+
+  const body: BulkOperationPackagesResponse = {
+    taskId,
   };
   return response.ok({ body });
 };

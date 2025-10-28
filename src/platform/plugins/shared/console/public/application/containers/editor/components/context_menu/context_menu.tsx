@@ -19,7 +19,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LanguageSelectorModal } from './language_selector_modal';
@@ -52,7 +52,9 @@ const styles = {
   button: css`
     &:hover {
       text-decoration: none !important;
-      .languageSelector {
+
+      /* Target the language selector when the button is hovered */
+      .consoleEditorContextMenu__languageSelector {
         text-decoration: underline;
       }
     }
@@ -251,7 +253,12 @@ export const ContextMenu = ({
     >
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" className="languageSelector">
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            className="consoleEditorContextMenu__languageSelector"
+            data-test-subj="language-selector"
+          >
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 tagName="span"

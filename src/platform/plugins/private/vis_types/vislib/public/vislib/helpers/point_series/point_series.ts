@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Duration } from 'moment';
+import type { Duration } from 'moment';
 
 import type { Dimension, Dimensions } from '@kbn/vis-type-xy-plugin/public';
-import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
+import type { DateHistogramParams, HistogramParams } from '@kbn/chart-expressions-common';
 
 import { getSeries } from './_get_series';
 import { getAspects } from './_get_aspects';
 import { initYAxis } from './_init_y_axis';
 import { initXAxis } from './_init_x_axis';
 import { orderedDateAxis } from './_ordered_date_axis';
-import { Serie } from './_add_to_siri';
-import { Column, Table } from '../../types';
+import type { Serie } from './_add_to_siri';
+import type { Column, Table } from '../../types';
 
 export interface Aspect {
   accessor: Column['id'];

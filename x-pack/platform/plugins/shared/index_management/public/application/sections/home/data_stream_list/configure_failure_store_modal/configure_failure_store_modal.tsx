@@ -6,28 +6,10 @@
  */
 
 import React from 'react';
-import {
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiSpacer,
-} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { configureFailureStoreFormSchema } from './schema';
-import {
-  useForm,
-  useFormIsModified,
-  Form,
-  UseField,
-  ToggleField,
-} from '../../../../../shared_imports';
+import { FailureStoreModal } from '@kbn/failure-store-modal';
 
-import { DataStream } from '../../../../../../common';
+import type { DataStream } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { updateDSFailureStore } from '../../../../services/api';
 
@@ -49,26 +31,14 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
     services: { notificationService },
   } = useAppContext();
 
-  const { form } = useForm({
-    defaultValue: {
-      dsFailureStore: dataStream?.failureStoreEnabled ?? false,
-    },
-    schema: configureFailureStoreFormSchema,
-    id: 'configureFailureStoreForm',
-  });
-  const isDirty = useFormIsModified({ form });
-
-  const formHasErrors = form.getErrors().length > 0;
-  const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
-
-  const onSubmitForm = async () => {
-    const { isValid, data } = await form.submit();
-
-    if (!isValid) {
-      return;
-    }
-
-    return updateDSFailureStore([dataStream.name], data).then(({ data: responseData, error }) => {
+  const handleSaveModal = async (data: {
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  }) => {
+    return updateDSFailureStore([dataStream.name], {
+      dsFailureStore: data.failureStoreEnabled,
+      customRetentionPeriod: data.customRetentionPeriod,
+    }).then(({ data: responseData, error }) => {
       if (responseData) {
         if (responseData.warning) {
           notificationService.showWarningToast(responseData.warning);
@@ -80,7 +50,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
           {
             defaultMessage:
               'Failure store {disabledFailureStore, plural, one { disabled } other { enabled } }',
-            values: { disabledFailureStore: !data.dsFailureStore ? 1 : 0 },
+            values: { disabledFailureStore: !data.failureStoreEnabled ? 1 : 0 },
           }
         );
 
@@ -105,68 +75,14 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <EuiModal
-      onClose={() => onClose()}
-      data-test-subj="configureFailureStoreModal"
-      css={{ width: 650 }}
-    >
-      <Form form={form} data-test-subj="configureFailureStoreForm">
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="xpack.idxMgmt.dataStreams.configureFailureStoreModal.modalTitleText"
-              defaultMessage="Configure failure store"
-            />
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-
-        <EuiModalBody>
-          <FormattedMessage
-            id="xpack.idxMgmt.dataStreams.configureFailureStoreModal.modalDescriptionText"
-            defaultMessage="A failure store is a secondary index within a data stream, used to store failed documents."
-          />
-          <EuiSpacer />
-
-          <UseField
-            path="dsFailureStore"
-            component={ToggleField}
-            data-test-subj="enableDataStreamFailureStoreToggle"
-            euiFieldProps={{
-              label: i18n.translate(
-                'xpack.idxMgmt.dataStreams.configureFailureStoreModal.infiniteRetentionPeriodField',
-                {
-                  defaultMessage: 'Enable data stream failure store',
-                }
-              ),
-            }}
-          />
-
-          <EuiSpacer />
-        </EuiModalBody>
-
-        <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cancelButton" onClick={() => onClose()}>
-            <FormattedMessage
-              id="xpack.idxMgmt.dataStreams.configureFailureStoreModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-
-          <EuiButton
-            fill
-            type="submit"
-            isLoading={false}
-            disabled={disableSubmit}
-            data-test-subj="saveButton"
-            onClick={onSubmitForm}
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.dataStreams.configureFailureStoreModal.saveButtonLabel"
-              defaultMessage="Save"
-            />
-          </EuiButton>
-        </EuiModalFooter>
-      </Form>
-    </EuiModal>
+    <FailureStoreModal
+      onCloseModal={onClose}
+      onSaveModal={handleSaveModal}
+      failureStoreProps={{
+        failureStoreEnabled: dataStream?.failureStoreEnabled ?? false,
+        customRetentionPeriod: dataStream?.failureStoreRetention?.customRetentionPeriod,
+        defaultRetentionPeriod: dataStream?.failureStoreRetention?.defaultRetentionPeriod,
+      }}
+    />
   );
 };

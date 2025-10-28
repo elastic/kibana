@@ -13,10 +13,14 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
+  GraphGroupedNodePreviewPanelKey,
+  GROUP_PREVIEW_BANNER,
   getNodeDocumentMode,
-  hasNodeDocumentsData,
+  getSingleDocumentData,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
+import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -27,8 +31,13 @@ import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../../preview/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import {
+  ALERT_PREVIEW_BANNER,
+  EVENT_PREVIEW_BANNER,
+  GENERIC_ENTITY_PREVIEW_BANNER,
+} from '../../preview/constants';
+import { useToasts } from '../../../../common/lib/kibana';
+import { GenericEntityPanelKey } from '../../../entity_details/shared/constants';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -38,13 +47,13 @@ const GraphInvestigationLazy = React.lazy(() =>
 
 export const GRAPH_ID = 'graph-visualization' as const;
 
+const MAX_DOCUMENTS_TO_LOAD = 50;
+
 /**
  * Graph visualization view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const GraphVisualization: React.FC = memo(() => {
-  const {
-    services: { notifications },
-  } = useKibana();
+  const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
@@ -53,6 +62,7 @@ export const GraphVisualization: React.FC = memo(() => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
   const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
     useDocumentDetailsContext();
@@ -69,27 +79,67 @@ export const GraphVisualization: React.FC = memo(() => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
-      if (
-        hasNodeDocumentsData(node) &&
-        node.documentsData[0].index &&
-        (getNodeDocumentMode(node) === 'single-event' ||
-          getNodeDocumentMode(node) === 'single-alert')
-      ) {
+      const singleDocumentData = getSingleDocumentData(node);
+      const docMode = getNodeDocumentMode(node);
+
+      if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
-            id: node.documentsData[0].id,
-            indexName: node.documentsData[0].index,
+            id: singleDocumentData.id,
+            indexName: singleDocumentData.index,
             scopeId,
-            banner:
-              getNodeDocumentMode(node) === 'single-alert'
-                ? ALERT_PREVIEW_BANNER
-                : EVENT_PREVIEW_BANNER,
+            banner: docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
             isPreviewMode: true,
           },
         });
+      } else if (docMode === 'single-entity' && singleDocumentData) {
+        openPreviewPanel({
+          id: GenericEntityPanelKey,
+          params: {
+            entityId: singleDocumentData.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GENERIC_ENTITY_PREVIEW_BANNER,
+          },
+        });
+      } else if (docMode === 'grouped-entities' && node.documentsData) {
+        openPreviewPanel({
+          id: GraphGroupedNodePreviewPanelKey,
+          params: {
+            id: node.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GROUP_PREVIEW_BANNER,
+            docMode,
+            entityItems: (node.documentsData as NodeDocumentDataModel[])
+              .slice(0, MAX_DOCUMENTS_TO_LOAD)
+              .map((doc) => ({
+                itemType: DOCUMENT_TYPE_ENTITY,
+                id: doc.id,
+                type: doc.entity?.type,
+                subType: doc.entity?.sub_type,
+                icon: node.icon,
+              })),
+          },
+        });
+      } else if (docMode === 'grouped-events' && node.documentsData) {
+        openPreviewPanel({
+          id: GraphGroupedNodePreviewPanelKey,
+          params: {
+            id: node.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GROUP_PREVIEW_BANNER,
+            docMode,
+            dataViewId: dataViewIndexPattern,
+            documentIds: (node.documentsData as NodeDocumentDataModel[])
+              .slice(0, MAX_DOCUMENTS_TO_LOAD)
+              .map((doc) => doc.event?.id),
+          },
+        });
       } else {
-        notifications?.toasts.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorOpenNodePreview',
             {
@@ -99,7 +149,7 @@ export const GraphVisualization: React.FC = memo(() => {
         });
       }
     },
-    [notifications?.toasts, openPreviewPanel, scopeId]
+    [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
   );
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
@@ -110,7 +160,20 @@ export const GraphVisualization: React.FC = memo(() => {
       const to = dateMath.parse(timeRange.to);
 
       if (!from || !to) {
-        // TODO: show error message
+        toasts.addDanger({
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorInvalidTimeRange',
+            {
+              defaultMessage: 'Invalid time range',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorInvalidTimeRangeDescription',
+            {
+              defaultMessage: 'Please select a valid time range.',
+            }
+          ),
+        });
         return;
       }
 
@@ -131,7 +194,7 @@ export const GraphVisualization: React.FC = memo(() => {
         },
       });
     },
-    [investigateInTimeline]
+    [investigateInTimeline, toasts]
   );
 
   return (

@@ -10,7 +10,7 @@
 import { unzip } from 'lodash';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const getTestSpec = (expression: string) => `
 {
@@ -57,8 +57,8 @@ const getLinkTestSpec = (url: string, usermeta?: string) => `
   mark: bar
   encoding: {
     x: {
-      field: key 
-      type: nominal 
+      field: key
+      type: nominal
       axis: {labelAngle: 0}
     }
     y: {
@@ -84,6 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('vega chart in visualize app', () => {
     before(async () => {
@@ -313,6 +314,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should remove filter by calling "kibanaRemoveFilter" expression', async () => {
+        // click on the breadcrumbs to dismiss the tooltip (prevents flakiness)
+        await testSubjects.click('breadcrumb last');
         await filterBar.addFilter({ field: 'response', operation: 'is', value: '200' });
 
         expect(await filterBar.getFilterCount()).to.be(1);

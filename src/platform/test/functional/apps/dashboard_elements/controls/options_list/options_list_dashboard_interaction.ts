@@ -13,7 +13,7 @@ import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
 
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_DASHBOARD_NAME } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -43,9 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await header.waitUntilLoadingHasFinished();
       await elasticChart.setNewChartUiDebugFlag();
-      await dashboard.loadSavedDashboard(OPTIONS_LIST_DASHBOARD_NAME);
-      await dashboard.ensureDashboardIsInEditMode();
-      await header.waitUntilLoadingHasFinished();
+      await dashboard.loadDashboardInEditMode(OPTIONS_LIST_DASHBOARD_NAME);
     };
 
     before(async () => {
@@ -168,7 +166,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Selections made in control apply to dashboard', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/239769
+    describe.skip('Selections made in control apply to dashboard', () => {
       it('Shows available options in options list', async () => {
         await queryBar.setQuery('');
         await queryBar.submitQuery();

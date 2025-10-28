@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DynamicStyleProperty } from '../../properties/dynamic_style_property';
+import type { DynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 interface Props {
   error: Error;
@@ -48,7 +48,12 @@ export const StyleError = ({ error, style }: Props) => {
       <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" title={styleName} content={label}>
-            <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+            <EuiText
+              className="eui-textTruncate"
+              size="xs"
+              style={{ maxWidth: '180px' }}
+              tabIndex={0}
+            >
               <small>
                 <strong>{label}</strong>
               </small>

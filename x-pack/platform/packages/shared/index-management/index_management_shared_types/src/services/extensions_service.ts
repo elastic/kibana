@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FunctionComponent, ReactNode } from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { EuiBadgeProps } from '@elastic/eui';
-import { IndexDetailsTab } from '../home_sections';
-import { Index } from '../types';
+import type { EuiBadgeProps } from '@elastic/eui';
+import type { IndexDetailsTab } from '../home_sections';
+import type { Index } from '../types';
 
 export interface IndexContent {
   renderContent: (args: {
@@ -69,8 +69,6 @@ export interface ExtensionsSetup {
   addIndexDetailsTab(tab: IndexDetailsTab): void;
   // sets content to render instead of the code block on the overview tab of the index page
   setIndexOverviewContent(content: IndexContent): void;
-  // sets content to render below the docs link on the mappings tab of the index page
-  setIndexMappingsContent(content: IndexContent): void;
   // sets index details page route
   setIndexDetailsPageRoute(route: IndexDetailsPageRoute, detailsTabId?: string): void;
 }

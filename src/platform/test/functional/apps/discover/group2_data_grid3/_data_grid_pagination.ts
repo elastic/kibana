@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultAbsoluteRange();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch(savedSearchTitle);
       await header.waitUntilLoadingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultAbsoluteRange();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch(savedSearchESQL);
       await header.waitUntilLoadingHasFinished();
 

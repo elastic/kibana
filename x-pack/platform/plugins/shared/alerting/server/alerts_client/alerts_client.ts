@@ -16,7 +16,11 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_RULE_EXECUTION_UUID,
-  ALERT_START,
+  ALERT_STATUS_UNTRACKED,
+  TIMESTAMP,
+  ALERT_SCHEDULED_ACTION_GROUP,
+  ALERT_SCHEDULED_ACTION_DATE,
+  ALERT_SCHEDULED_ACTION_THROTTLING,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import type {
@@ -43,7 +47,13 @@ import { LegacyAlertsClient } from './legacy_alerts_client';
 import type { IIndexPatternString } from '../alerts_service/resource_installer_utils';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, LogAlertsOpts, SearchResult, DetermineDelayedAlertsOpts } from './types';
+import type {
+  AlertRule,
+  LogAlertsOpts,
+  SearchResult,
+  DetermineDelayedAlertsOpts,
+  UpdatePersistedAlertsQueryParams,
+} from './types';
 import type {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -75,6 +85,7 @@ import {
 import { ErrorWithType } from '../lib/error_with_type';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
+import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -117,7 +128,6 @@ export class AlertsClient<
     getById: (id: string) => (Alert & AlertData) | undefined;
   };
 
-  private trackedExecutions: Set<string>;
   private startedAtString: string | null = null;
   private runTimestampString: string | undefined;
   private rule: AlertRule;
@@ -167,7 +177,6 @@ export class AlertsClient<
         );
       },
     };
-    this.trackedExecutions = new Set([]);
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
     this.ruleType = options.ruleType;
     this._isUsingDataStreams = this.options.dataStreamAdapter.isUsingDataStreams();
@@ -179,67 +188,60 @@ export class AlertsClient<
   public async initializeExecution(opts: InitializeExecutionOpts) {
     this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
 
-    const { runTimestamp, trackedExecutions } = opts;
+    const { runTimestamp } = opts;
 
     if (runTimestamp) {
       this.runTimestampString = runTimestamp.toISOString();
     }
     await this.legacyAlertsClient.initializeExecution(opts);
 
-    this.trackedExecutions = new Set(trackedExecutions ?? []);
-
     // No need to fetch the tracked alerts for the non-lifecycle rules
     if (this.ruleType.autoRecoverAlerts) {
-      const getTrackedAlertsByExecutionUuids = async (executionUuids: string[]) => {
-        const result = await this.search({
-          size: (opts.maxAlerts || DEFAULT_MAX_ALERTS) * 2,
+      const maxAlertLimit = this.legacyAlertsClient.getMaxAlertLimit();
+      const getTrackedAlerts = async () => {
+        // We can use inner_hits to get the alerts for the most recent executions
+        // but this may return too many alerts, therefore we make two queries:
+        // 1. Get the most recent execution UUIDs
+        // 2. Get the alerts for those execution UUIDs
+        // We can optimize this in the future once https://github.com/elastic/kibana/issues/235846 is
+        // implemented to allow filtering the ongoing recovered alerts. Then we can just query for
+        // the alerts of the latest execution by setting the size to 1 and adding inner_hits.
+        const executions = await this.search({
+          size: opts.flappingSettings.lookBackWindow,
+          query: {
+            bool: {
+              must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
+            },
+          },
+          collapse: {
+            field: ALERT_RULE_EXECUTION_UUID,
+          },
+          _source: false,
+          sort: [{ [TIMESTAMP]: { order: 'desc' } }],
+        });
+
+        const executionUuids = (executions.hits || [])
+          .map((hit) => get(hit.fields, ALERT_RULE_EXECUTION_UUID))
+          .flat();
+
+        const alerts = await this.search({
+          size: (maxAlertLimit || DEFAULT_MAX_ALERTS) * 2,
           seq_no_primary_term: true,
           query: {
             bool: {
               must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
+              must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
               filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: executionUuids } }],
             },
           },
         });
-        return result.hits;
-      };
-
-      const getTrackedAlertsByAlertUuids = async () => {
-        const { activeAlertsFromState = {}, recoveredAlertsFromState = {} } = opts;
-        const uuidsToFetch: string[] = [];
-        Object.values(activeAlertsFromState).forEach((activeAlert) =>
-          uuidsToFetch.push(activeAlert.meta?.uuid!)
-        );
-        Object.values(recoveredAlertsFromState).forEach((recoveredAlert) =>
-          uuidsToFetch.push(recoveredAlert.meta?.uuid!)
-        );
-
-        if (uuidsToFetch.length <= 0) {
-          return [];
-        }
-
-        const result = await this.search({
-          size: uuidsToFetch.length,
-          seq_no_primary_term: true,
-          sort: { [ALERT_START]: 'desc' },
-          query: {
-            bool: {
-              filter: [
-                { term: { [ALERT_RULE_UUID]: this.options.rule.id } },
-                { terms: { [ALERT_UUID]: uuidsToFetch } },
-              ],
-            },
-          },
-        });
-        return result.hits;
+        return alerts.hits;
       };
 
       try {
-        const results = trackedExecutions
-          ? await getTrackedAlertsByExecutionUuids(Array.from(this.trackedExecutions))
-          : await getTrackedAlertsByAlertUuids();
+        const results = await getTrackedAlerts();
 
-        for (const hit of results.flat()) {
+        for (const hit of results) {
           const alertHit = hit._source as Alert & AlertData;
           const alertUuid = get(alertHit, ALERT_UUID);
 
@@ -252,14 +254,6 @@ export class AlertsClient<
           this.trackedAlerts.indices[alertUuid] = hit._index;
           this.trackedAlerts.seqNo[alertUuid] = hit._seq_no;
           this.trackedAlerts.primaryTerm[alertUuid] = hit._primary_term;
-
-          // only when the alerts are fetched by alert uuids
-          if (!trackedExecutions) {
-            const executionUuid = get(alertHit, ALERT_RULE_EXECUTION_UUID);
-            if (executionUuid) {
-              this.trackedExecutions.add(executionUuid);
-            }
-          }
         }
       } catch (err) {
         this.options.logger.error(
@@ -375,6 +369,10 @@ export class AlertsClient<
     return this.legacyAlertsClient.hasReachedAlertLimit();
   }
 
+  public getMaxAlertLimit(): number {
+    return this.legacyAlertsClient.getMaxAlertLimit();
+  }
+
   public checkLimitUsage() {
     return this.legacyAlertsClient.checkLimitUsage();
   }
@@ -399,17 +397,6 @@ export class AlertsClient<
     type: 'new' | 'active' | 'trackedActiveAlerts' | 'recovered' | 'trackedRecoveredAlerts'
   ) {
     return this.legacyAlertsClient.getProcessedAlerts(type);
-  }
-
-  public async persistAlerts(): Promise<AlertsAffectedByMaintenanceWindows> {
-    // Persist alerts first
-    await this.persistAlertsHelper();
-    try {
-      return await this.updatePersistedAlertsWithMaintenanceWindowIds();
-    } catch (err) {
-      this.options.logger.error('Error updating maintenance window IDs:', err);
-      return { alertIds: [], maintenanceWindowIds: [] };
-    }
   }
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
@@ -478,7 +465,7 @@ export class AlertsClient<
     };
   }
 
-  private async persistAlertsHelper() {
+  public async persistAlerts() {
     if (!this.ruleType.alerts?.shouldWrite) {
       this.options.logger.debug(
         `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false ${this.ruleInfoMessage}.`,
@@ -702,6 +689,68 @@ export class AlertsClient<
     }
   }
 
+  public async updatePersistedAlerts() {
+    const { rawActiveAlerts } = this.getRawAlertInstancesForState(true);
+
+    const updateByQueryParams = Object.values(rawActiveAlerts).reduce(
+      (acc: UpdatePersistedAlertsQueryParams, rawAlert) => {
+        const { meta } = rawAlert;
+        if (!!meta?.uuid && meta.lastScheduledActions) {
+          const { group, date, actions } = meta.lastScheduledActions;
+          acc[meta.uuid] = {
+            group,
+            date,
+            ...(actions ? { actions } : {}),
+          };
+        }
+
+        return acc;
+      },
+      {}
+    );
+
+    const idsToUpdate = Object.keys(updateByQueryParams);
+
+    if (idsToUpdate.length === 0) {
+      return;
+    }
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      await retryTransientEsErrors(
+        () =>
+          esClient.updateByQuery({
+            query: {
+              terms: {
+                _id: idsToUpdate,
+              },
+            },
+            conflicts: 'proceed',
+            index: this.indexTemplateAndPattern.alias,
+            script: {
+              source: `
+            if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
+              ctx._source['${ALERT_SCHEDULED_ACTION_GROUP}'] = params[ctx._source['${ALERT_UUID}']].group;
+              ctx._source['${ALERT_SCHEDULED_ACTION_DATE}'] = params[ctx._source['${ALERT_UUID}']].date;
+              if (params[ctx._source['${ALERT_UUID}']].containsKey('actions')) {
+                ctx._source['${ALERT_SCHEDULED_ACTION_THROTTLING}'] = params[ctx._source['${ALERT_UUID}']].actions;
+              }
+            }
+          `,
+              lang: 'painless',
+              params: updateByQueryParams,
+            },
+          }),
+        { logger: this.options.logger }
+      );
+    } catch (err) {
+      this.options.logger.error(
+        `Error updating alert last scheduled actions ${this.ruleInfoMessage}: ${err}`,
+        this.logTags
+      );
+      throw err;
+    }
+  }
+
   private async getMaintenanceWindowScopedQueryAlerts({
     ruleId,
     spaceId,
@@ -759,7 +808,7 @@ export class AlertsClient<
     const params: Record<string, string[]> = {};
 
     idsToUpdate.forEach((id) => {
-      const newAlert = newAlerts.find((alert) => alert.getUuid() === id);
+      const newAlert = newAlerts.find((alert) => alert.matchesUuid(id));
       if (newAlert) {
         params[id] = newAlert.getMaintenanceWindowIds();
       }
@@ -772,6 +821,7 @@ export class AlertsClient<
             _id: idsToUpdate,
           },
         },
+        refresh: true,
         conflicts: 'proceed',
         index: this.indexTemplateAndPattern.alias,
         script: {
@@ -794,102 +844,106 @@ export class AlertsClient<
     }
   }
 
-  private async updatePersistedAlertsWithMaintenanceWindowIds(): Promise<AlertsAffectedByMaintenanceWindows> {
-    // check if there are any alerts
-    const newAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('new'));
-    const activeAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('active'));
-    const recoveredAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('recovered'));
+  public async updatePersistedAlertsWithMaintenanceWindowIds(): Promise<AlertsAffectedByMaintenanceWindows> {
+    try {
+      // check if there are any alerts
+      const newAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('new'));
+      const activeAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('active'));
+      const recoveredAlerts = Object.values(
+        this.legacyAlertsClient.getProcessedAlerts('recovered')
+      );
 
-    // return if there are no alerts written
-    if (
-      (!newAlerts.length && !activeAlerts.length && !recoveredAlerts.length) ||
-      !this.options.maintenanceWindowsService
-    ) {
+      // return if there are no alerts written
+      if (
+        (!newAlerts.length && !activeAlerts.length && !recoveredAlerts.length) ||
+        !this.options.maintenanceWindowsService
+      ) {
+        return {
+          alertIds: [],
+          maintenanceWindowIds: [],
+        };
+      }
+
+      const { maintenanceWindows } =
+        await this.options.maintenanceWindowsService.getMaintenanceWindows({
+          eventLogger: this.options.alertingEventLogger,
+          request: this.options.request,
+          ruleTypeCategory: this.ruleType.category,
+          spaceId: this.options.spaceId,
+        });
+
+      const maintenanceWindowsWithScopedQuery = filterMaintenanceWindows({
+        maintenanceWindows: maintenanceWindows ?? [],
+        withScopedQuery: true,
+      });
+      const maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
+        maintenanceWindows: maintenanceWindows ?? [],
+        withScopedQuery: false,
+      });
+      if (maintenanceWindowsWithScopedQuery.length === 0) {
+        return {
+          alertIds: [],
+          maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
+        };
+      }
+
+      // Run aggs to get all scoped query alert IDs, returns a record<maintenanceWindowId, alertIds>,
+      // indicating the maintenance window has matches a number of alerts with the scoped query.
+      const alertsByMaintenanceWindowIds = await this.getMaintenanceWindowScopedQueryAlerts({
+        ruleId: this.options.rule.id,
+        spaceId: this.options.rule.spaceId,
+        executionUuid: this.options.rule.executionId,
+        maintenanceWindows: maintenanceWindowsWithScopedQuery,
+      });
+
+      const alertsAffectedByScopedQuery: string[] = [];
+      const appliedMaintenanceWindowIds: string[] = [];
+
+      for (const [scopedQueryMaintenanceWindowId, alertIds] of Object.entries(
+        alertsByMaintenanceWindowIds
+      )) {
+        // Go through matched alerts, find the in memory object
+        alertIds.forEach((alertId) => {
+          const newAlert = newAlerts.find((alert) => alert.matchesUuid(alertId));
+          if (!newAlert) {
+            return;
+          }
+
+          const newMaintenanceWindowIds = [
+            // Keep existing Ids
+            ...newAlert.getMaintenanceWindowIds(),
+            // Add the ids that don't have scoped queries
+            ...maintenanceWindowsWithoutScopedQueryIds,
+            // Add the scoped query id
+            scopedQueryMaintenanceWindowId,
+          ];
+
+          // Update in memory alert with new maintenance window IDs
+          newAlert.setMaintenanceWindowIds([...new Set(newMaintenanceWindowIds)]);
+
+          alertsAffectedByScopedQuery.push(alertId);
+          appliedMaintenanceWindowIds.push(...newMaintenanceWindowIds);
+        });
+      }
+
+      const uniqueAlertsId = [...new Set(alertsAffectedByScopedQuery)];
+      const uniqueMaintenanceWindowIds = [...new Set(appliedMaintenanceWindowIds)];
+
+      if (uniqueAlertsId.length) {
+        await this.updateAlertMaintenanceWindowIds(uniqueAlertsId);
+      }
+
       return {
-        alertIds: [],
-        maintenanceWindowIds: [],
+        alertIds: uniqueAlertsId,
+        maintenanceWindowIds: uniqueMaintenanceWindowIds,
       };
+    } catch (err) {
+      this.options.logger.error(
+        `Error updating maintenance window IDs: ${err.message}`,
+        this.logTags
+      );
+      return { alertIds: [], maintenanceWindowIds: [] };
     }
-
-    const { maintenanceWindows } =
-      await this.options.maintenanceWindowsService.getMaintenanceWindows({
-        eventLogger: this.options.alertingEventLogger,
-        request: this.options.request,
-        ruleTypeCategory: this.ruleType.category,
-        spaceId: this.options.spaceId,
-      });
-
-    const maintenanceWindowsWithScopedQuery = filterMaintenanceWindows({
-      maintenanceWindows: maintenanceWindows ?? [],
-      withScopedQuery: true,
-    });
-    const maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
-      maintenanceWindows: maintenanceWindows ?? [],
-      withScopedQuery: false,
-    });
-    if (maintenanceWindowsWithScopedQuery.length === 0) {
-      return {
-        alertIds: [],
-        maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
-      };
-    }
-
-    // Run aggs to get all scoped query alert IDs, returns a record<maintenanceWindowId, alertIds>,
-    // indicating the maintenance window has matches a number of alerts with the scoped query.
-    const alertsByMaintenanceWindowIds = await this.getMaintenanceWindowScopedQueryAlerts({
-      ruleId: this.options.rule.id,
-      spaceId: this.options.rule.spaceId,
-      executionUuid: this.options.rule.executionId,
-      maintenanceWindows: maintenanceWindowsWithScopedQuery,
-    });
-
-    const alertsAffectedByScopedQuery: string[] = [];
-    const appliedMaintenanceWindowIds: string[] = [];
-
-    for (const [scopedQueryMaintenanceWindowId, alertIds] of Object.entries(
-      alertsByMaintenanceWindowIds
-    )) {
-      // Go through matched alerts, find the in memory object
-      alertIds.forEach((alertId) => {
-        const newAlert = newAlerts.find((alert) => alert.getUuid() === alertId);
-        if (!newAlert) {
-          return;
-        }
-
-        const newMaintenanceWindowIds = [
-          // Keep existing Ids
-          ...newAlert.getMaintenanceWindowIds(),
-          // Add the ids that don't have scoped queries
-          ...maintenanceWindowsWithoutScopedQueryIds,
-          // Add the scoped query id
-          scopedQueryMaintenanceWindowId,
-        ];
-
-        // Update in memory alert with new maintenance window IDs
-        newAlert.setMaintenanceWindowIds([...new Set(newMaintenanceWindowIds)]);
-
-        alertsAffectedByScopedQuery.push(newAlert.getUuid());
-        appliedMaintenanceWindowIds.push(...newMaintenanceWindowIds);
-      });
-    }
-
-    const uniqueAlertsId = [...new Set(alertsAffectedByScopedQuery)];
-    const uniqueMaintenanceWindowIds = [...new Set(appliedMaintenanceWindowIds)];
-
-    if (uniqueAlertsId.length) {
-      // Update alerts with new maintenance window IDs, await not needed
-      this.updateAlertMaintenanceWindowIds(uniqueAlertsId).catch(() => {
-        this.options.logger.debug(
-          `Failed to update new alerts with scoped query maintenance window Ids by updateByQuery ${this.ruleInfoMessage}.`,
-          this.logTags
-        );
-      });
-    }
-
-    return {
-      alertIds: uniqueAlertsId,
-      maintenanceWindowIds: uniqueMaintenanceWindowIds,
-    };
   }
 
   public client() {
@@ -922,10 +976,6 @@ export class AlertsClient<
 
   public isUsingDataStreams(): boolean {
     return this._isUsingDataStreams;
-  }
-
-  public getTrackedExecutions() {
-    return this.trackedExecutions;
   }
 
   private throwIfHasClusterBlockException(response: BulkResponse) {

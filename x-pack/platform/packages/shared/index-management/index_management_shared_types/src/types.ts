@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IlmExplainLifecycleLifecycleExplain,
   HealthStatus,
   IndicesStatsIndexMetadataState,
@@ -15,8 +15,8 @@ import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { ExtensionsSetup } from './services/extensions_service';
-import { PublicApiServiceSetup } from './services/public_api_service';
+import type { ExtensionsSetup } from './services/extensions_service';
+import type { PublicApiServiceSetup } from './services/public_api_service';
 
 export type IndexManagementLocatorParams = SerializableRecord &
   (
@@ -108,6 +108,7 @@ export interface Index {
   hidden: boolean;
   aliases: string | string[];
   data_stream?: string;
+  mode?: string;
 
   // The types below are added by extension services if corresponding plugins are enabled (ILM, Rollup, CCR)
   isRollupIndex?: boolean;

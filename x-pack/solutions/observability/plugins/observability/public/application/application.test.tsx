@@ -8,14 +8,15 @@
 import { renderHook } from '@testing-library/react';
 import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
 import { noop } from 'lodash';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { Observable } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
+import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from './application';
 import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
@@ -89,6 +90,7 @@ describe('renderApp', () => {
         uptime: { enabled: false },
       },
     },
+    managedOtlpServiceUrl: '',
   };
 
   beforeEach(() => {

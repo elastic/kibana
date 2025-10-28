@@ -10,17 +10,32 @@ import * as rt from 'io-ts';
 const userPrivilegesRt = rt.type({
   canMonitor: rt.boolean,
   canReadFailureStore: rt.boolean,
+  canManageFailureStore: rt.boolean,
 });
 
-const datasetUserPrivilegesRt = rt.intersection([
-  userPrivilegesRt,
-  rt.type({
-    canRead: rt.boolean,
-    canViewIntegrations: rt.boolean,
-  }),
-]);
+const datasetPrivilegeRt = rt.record(
+  rt.string,
+  rt.intersection([
+    userPrivilegesRt,
+    rt.type({
+      canRead: rt.boolean,
+    }),
+  ])
+);
+
+const datasetUserPrivilegesRt = rt.type({
+  datasetsPrivilages: datasetPrivilegeRt,
+  canViewIntegrations: rt.boolean,
+});
 
 export type DatasetUserPrivileges = rt.TypeOf<typeof datasetUserPrivilegesRt>;
+export type DatasetTypesPrivileges = rt.TypeOf<typeof datasetPrivilegeRt>;
+
+export const getDataStreamsTypesPrivilegesResponseRt = rt.exact(
+  rt.type({
+    datasetTypesPrivileges: datasetPrivilegeRt,
+  })
+);
 
 export const dataStreamStatRt = rt.intersection([
   rt.type({
@@ -246,6 +261,8 @@ export const dataStreamDetailsRt = rt.partial({
   services: rt.record(rt.string, rt.array(rt.string)),
   hosts: rt.record(rt.string, rt.array(rt.string)),
   userPrivileges: userPrivilegesRt,
+  defaultRetentionPeriod: rt.string,
+  customRetentionPeriod: rt.string,
 });
 
 export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;
@@ -294,3 +311,9 @@ export const getPreviewChartResponseRt = rt.type({
 });
 
 export type PreviewChartResponse = rt.TypeOf<typeof getPreviewChartResponseRt>;
+
+export const updateFailureStoreResponseRt = rt.type({
+  headers: rt.record(rt.string, rt.unknown),
+});
+
+export type UpdateFailureStoreResponse = rt.TypeOf<typeof updateFailureStoreResponseRt>;

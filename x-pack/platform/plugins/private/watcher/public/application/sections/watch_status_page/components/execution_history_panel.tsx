@@ -8,7 +8,7 @@
 import React, { Fragment, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
 import {
   EuiCodeBlock,
@@ -28,7 +28,8 @@ import {
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../../common/constants';
-import { ActionStateBadge, WatchStateBadge, SectionError, Error } from '../../../components';
+import type { Error } from '../../../components';
+import { ActionStateBadge, WatchStateBadge, SectionError } from '../../../components';
 import { useLoadWatchHistory, useLoadWatchHistoryDetail } from '../../../lib/api';
 import { WatchDetailsContext } from '../watch_details_context';
 
@@ -151,7 +152,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
@@ -174,7 +175,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.metConditionHeader', {
               defaultMessage: 'Condition met',
             })}{' '}
@@ -207,7 +208,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
               defaultMessage: 'Comment',
             })}{' '}
@@ -283,7 +284,7 @@ export const ExecutionHistoryPanel = () => {
                 }
               )}
             >
-              <span>
+              <span tabIndex={0}>
                 {i18n.translate(
                   'xpack.watcher.sections.watchHistory.watchActionStatusTable.state',
                   {

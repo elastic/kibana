@@ -54,20 +54,12 @@ const createErrorMessage = (errorResponse?: ServiceNowError): string => {
     : 'unknown: no error in error response';
 };
 
-export const createServiceError = (error: ResponseError, message: string): AxiosError => {
-  const serviceError = new AxiosError(
-    getErrorMessage(
-      i18n.SERVICENOW,
-      `${message}. Error: ${error.message} Reason: ${createErrorMessage(error.response?.data)}`
-    )
+export const addServiceMessageToError = (error: ResponseError, message: string): AxiosError => {
+  error.message = getErrorMessage(
+    i18n.SERVICENOW,
+    `${message}. Error: ${error.message} Reason: ${createErrorMessage(error.response?.data)}`
   );
-
-  serviceError.code = error.code;
-  serviceError.config = error.config;
-  serviceError.request = error.request;
-  serviceError.response = error.response;
-
-  return serviceError;
+  return error;
 };
 
 export const getPushedDate = (timestamp?: string) => {

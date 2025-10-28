@@ -8,7 +8,8 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { Entity, Fields } from '../entity';
+import type { Fields } from '../entity';
+import { Entity } from '../entity';
 import { Serializable } from '../serializable';
 
 interface K8sNodeDocument extends Fields {

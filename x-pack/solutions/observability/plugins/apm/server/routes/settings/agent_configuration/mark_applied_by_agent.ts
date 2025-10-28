@@ -24,6 +24,7 @@ export async function markAppliedByAgent({
     id, // by specifying the `id` elasticsearch will do an "upsert"
     body: {
       ...body,
+      error: undefined,
       applied_by_agent: true,
     },
   };

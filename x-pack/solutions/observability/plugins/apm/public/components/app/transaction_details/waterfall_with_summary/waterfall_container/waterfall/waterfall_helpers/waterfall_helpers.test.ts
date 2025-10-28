@@ -28,10 +28,10 @@ import {
   reparentOrphanItems,
   generateLegendsAndAssignColorsToWaterfall,
 } from './waterfall_helpers';
-import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import type {
   WaterfallSpan,
   WaterfallTransaction,
+  WaterfallError,
 } from '../../../../../../../../common/waterfall/typings';
 import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
 
@@ -122,6 +122,7 @@ describe('waterfall_helpers', () => {
   ];
   const errorDocs = [
     {
+      id: 'error1',
       processor: { event: 'error' },
       parent: { id: 'myTransactionId1' },
       timestamp: { us: 1549324795810000 },
@@ -139,7 +140,7 @@ describe('waterfall_helpers', () => {
         name: 'ruby',
         version: '2',
       },
-    } as unknown as APMError,
+    } as WaterfallError,
   ];
 
   describe('getWaterfall', () => {
@@ -451,7 +452,7 @@ describe('waterfall_helpers', () => {
     it('should order items correctly', () => {
       const legendValues = {
         serviceName: 'opbeans-java',
-        spanType: '',
+        type: '',
       };
 
       const items: IWaterfallSpanOrTransaction[] = [
@@ -966,7 +967,7 @@ describe('waterfall_helpers', () => {
         duration: 49660,
         offset: 0,
         skew: 0,
-        legendValues: { serviceName: 'opbeans-node', spanType: '' },
+        legendValues: { serviceName: 'opbeans-node', type: '' },
         color: '',
         spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
       },
@@ -995,7 +996,7 @@ describe('waterfall_helpers', () => {
             duration: 47557,
             offset: 1754,
             skew: 0,
-            legendValues: { serviceName: 'opbeans-node', spanType: '' },
+            legendValues: { serviceName: 'opbeans-node', type: '' },
             color: '',
             spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
           },
@@ -1097,7 +1098,7 @@ describe('waterfall_helpers', () => {
             duration: 47557,
             offset: 1754,
             skew: 0,
-            legendValues: { serviceName: 'opbeans-node', spanType: '' },
+            legendValues: { serviceName: 'opbeans-node', type: '' },
             color: '',
             spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
           },
@@ -1154,7 +1155,7 @@ describe('waterfall_helpers', () => {
         doc: { service: { name: 'default-service' } },
         legendValues: {
           [WaterfallLegendType.ServiceName]: 'default-service',
-          [WaterfallLegendType.SpanType]: 'http',
+          [WaterfallLegendType.Type]: 'http',
         },
         color: '',
         ...overrides,
@@ -1185,16 +1186,16 @@ describe('waterfall_helpers', () => {
       it('should generate legends for span types when only one service exists', () => {
         const waterfallItems: IWaterfallItem[] = [
           createWaterfallItem({
-            legendValues: { [WaterfallLegendType.SpanType]: 'db' },
+            legendValues: { [WaterfallLegendType.Type]: 'db' },
           } as Partial<IWaterfallSpan>),
           createWaterfallItem({
-            legendValues: { [WaterfallLegendType.SpanType]: 'cache' },
+            legendValues: { [WaterfallLegendType.Type]: 'cache' },
           } as Partial<IWaterfallSpan>),
         ];
 
         const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(waterfallItems);
         expect(legends.length).toBeGreaterThanOrEqual(2);
-        expect(colorBy).toBe(WaterfallLegendType.SpanType);
+        expect(colorBy).toBe(WaterfallLegendType.Type);
       });
 
       it('should correctly assign colors to items based on legend type', () => {

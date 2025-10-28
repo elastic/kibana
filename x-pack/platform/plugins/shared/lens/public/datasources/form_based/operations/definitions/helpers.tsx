@@ -9,22 +9,24 @@ import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
-import { Query } from '@kbn/es-query';
-import { TextBasedLayerColumn } from '../../esql_layer/types';
-import type { IndexPattern, IndexPatternField } from '../../../../types';
-import {
-  type FieldBasedOperationErrorMessage,
-  type GenericIndexPatternColumn,
-  operationDefinitionMap,
-} from '.';
-import {
+import type { Query } from '@kbn/es-query';
+import type {
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
+  GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
-} from './column_types';
-import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
+  TextBasedLayerColumn,
+  FormulaIndexPatternColumn,
+  LastValueIndexPatternColumn,
+  FormBasedLayer,
+  FormBasedPersistedState,
+  IndexPattern,
+  IndexPatternField,
+} from '@kbn/lens-common';
+import { type FieldBasedOperationErrorMessage, operationDefinitionMap } from '.';
 import { hasField } from '../../pure_utils';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../../../../user_messages_ids';
+import { getReferencedColumnIds } from '../layer_helpers';
 
 export function getInvalidFieldMessage(
   layer: FormBasedLayer,
@@ -235,4 +237,46 @@ export function getFilter(
 
 export function isMetricCounterField(field?: IndexPatternField) {
   return field?.timeSeriesMetric === 'counter';
+}
+
+export function hasStateFormulaColumn(state: FormBasedPersistedState): boolean {
+  return Object.values(state.layers).some((layer) =>
+    Object.values(layer.columns).some((column) =>
+      isColumnOfType<FormulaIndexPatternColumn>('formula', column)
+    )
+  );
+}
+
+export function getFormulaColumnsFromLayer(layer: Omit<FormBasedLayer, 'indexPatternId'>) {
+  return Object.entries(layer.columns).filter(
+    (entry): entry is [string, FormulaIndexPatternColumn] =>
+      isColumnOfType<FormulaIndexPatternColumn>('formula', entry[1])
+  );
+}
+
+export function cleanupFormulaColumns(state: FormBasedPersistedState): FormBasedPersistedState {
+  // check whether it makes sense to perform all the work for formula
+  if (hasStateFormulaColumn(state)) {
+    return state;
+  }
+  const newState = structuredClone(state);
+  for (const layerId of Object.keys(newState.layers)) {
+    const layer = newState.layers[layerId];
+    const columnsToFilter = new Set();
+    const formulaColumns = getFormulaColumnsFromLayer(layer);
+    for (const [columnId, column] of formulaColumns) {
+      const referencedColumns = getReferencedColumnIds(layer, columnId);
+      // Remove references to hidden formula columns
+      for (const id of referencedColumns) {
+        if (layer.columns[id]) {
+          delete layer.columns[id];
+          columnsToFilter.add(id);
+        }
+        delete column.params.isFormulaBroken;
+        column.references = [];
+      }
+    }
+    layer.columnOrder = layer.columnOrder.filter((colId) => !columnsToFilter.has(colId));
+  }
+  return newState;
 }

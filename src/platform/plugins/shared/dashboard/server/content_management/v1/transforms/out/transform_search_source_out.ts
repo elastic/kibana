@@ -9,24 +9,46 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
+import type { DashboardState } from '../../types';
 import { migrateLegacyQuery, cleanFiltersForSerialize } from '../../../../../common';
+import { logger } from '../../../../kibana_services';
 
 export function transformSearchSourceOut(
-  kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta'],
+  kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta'] = {},
   references: SavedObjectReference[] = []
-): DashboardAttributes['kibanaSavedObjectMeta'] {
+): Pick<DashboardState, 'filters' | 'query'> {
   const { searchSourceJSON } = kibanaSavedObjectMeta;
   if (!searchSourceJSON) {
     return {};
   }
-  const parsedSearchSource = parseSearchSourceJSON(searchSourceJSON);
-  const searchSource = injectReferences(parsedSearchSource, references);
-  const filters = cleanFiltersForSerialize(searchSource.filter);
-  const query = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
+  let parsedSearchSource;
+  try {
+    parsedSearchSource = parseSearchSourceJSON(searchSourceJSON);
+  } catch (parseError) {
+    logger.warn(`Unable to parse searchSourceJSON. Error: ${parseError.message}`);
+    return {};
+  }
 
-  return {
-    searchSource: { filters, query },
-  };
+  let searchSource;
+  try {
+    searchSource = injectReferences(parsedSearchSource, references);
+  } catch (injectError) {
+    logger.warn(
+      `Unable to transform filter and query state on read. Error: ${injectError.message}`
+    );
+    // fallback to parsed if injection fails
+    searchSource = parsedSearchSource;
+  }
+
+  try {
+    const filters = cleanFiltersForSerialize(searchSource.filter);
+    const query = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
+    return { filters, query };
+  } catch (error) {
+    logger.warn(
+      `Unexpected error transforming filter and query state on read. Error: ${error.message}`
+    );
+    return {};
+  }
 }

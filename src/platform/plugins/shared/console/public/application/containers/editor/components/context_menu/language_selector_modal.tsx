@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiModal,
@@ -18,13 +19,19 @@ import {
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
   EuiSelectable,
-  EuiSelectableOption,
   EuiLink,
   EuiTextColor,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AVAILABLE_LANGUAGES } from '../../../../../../common/constants';
+
+const styles = {
+  constrainedSelectable: css`
+    max-width: 550px;
+  `,
+};
 
 interface Props {
   closeModal: () => void;
@@ -113,7 +120,7 @@ export const LanguageSelectorModal = ({
 
       <EuiModalBody>
         <EuiSelectable
-          css={{ maxWidth: 550 }}
+          css={styles.constrainedSelectable}
           options={optionsList as EuiSelectableOption[]}
           onChange={(changedOptions) => setOptions(changedOptions)}
           singleSelection="always"

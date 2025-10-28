@@ -5,77 +5,156 @@
  * 2.0.
  */
 
-import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type {
-  SerializableAttributes,
-  VisualizationClient,
-} from '@kbn/visualizations-plugin/public';
-import { DOC_TYPE } from '../../common/constants';
+import type { HttpStart } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+
+import { omit } from 'lodash';
+import type { LensSavedObjectAttributes } from '@kbn/lens-common';
+import { LENS_API_VERSION, LENS_VIS_API_PATH } from '../../common/constants';
+import type { LensAttributes, LensItem } from '../../server/content_management';
+import { ConfigBuilderStub } from '../../common/transforms';
 import {
-  LensCreateIn,
-  LensCreateOut,
-  LensDeleteIn,
-  LensDeleteOut,
-  LensGetIn,
-  LensGetOut,
-  LensSearchIn,
-  LensSearchOut,
-  LensSearchQuery,
-  LensUpdateIn,
-  LensUpdateOut,
-} from '../../common/content_management';
+  type LensGetResponseBody,
+  type LensCreateRequestBody,
+  type LensCreateResponseBody,
+  type LensUpdateRequestBody,
+  type LensUpdateResponseBody,
+  type LensSearchRequestQuery,
+  type LensSearchResponseBody,
+} from '../../server';
 
-export function getLensClient<Attr extends SerializableAttributes = SerializableAttributes>(
-  cm: ContentManagementPublicStart
-): VisualizationClient<'lens', Attr> {
-  const get = async (id: string) => {
-    return cm.client.get<LensGetIn, LensGetOut>({
-      contentTypeId: DOC_TYPE,
-      id,
+/**
+ * This type is to allow `visualizationType` to be `null` in the public context.
+ *
+ * The stored attributes must have a `visualizationType`.
+ */
+export type LooseLensAttributes = Omit<LensAttributes, 'visualizationType'> &
+  Pick<LensSavedObjectAttributes, 'visualizationType'>;
+
+export class LensClient {
+  constructor(private http: HttpStart) {}
+
+  async get(id: string) {
+    const { data, meta } = await this.http.get<LensGetResponseBody>(`${LENS_VIS_API_PATH}/${id}`, {
+      version: LENS_API_VERSION,
     });
-  };
 
-  const create = async ({ data, options }: Omit<LensCreateIn, 'contentTypeId'>) => {
-    const res = await cm.client.create<LensCreateIn, LensCreateOut>({
-      contentTypeId: DOC_TYPE,
-      data,
+    return {
+      item: ConfigBuilderStub.in(data),
+      meta, // TODO: see if we still need this meta data
+    };
+  }
+
+  async create(
+    { description, visualizationType, state, title, version }: LooseLensAttributes,
+    references: Reference[],
+    options: LensCreateRequestBody['options'] = {}
+  ) {
+    if (visualizationType === null) {
+      throw new Error('Missing visualization type');
+    }
+
+    const body: LensCreateRequestBody = {
+      // TODO: Find a better way to conditionally omit id
+      data: omit(
+        ConfigBuilderStub.out({
+          id: '',
+          description,
+          visualizationType,
+          state,
+          title,
+          version,
+          references,
+        }),
+        'id'
+      ),
       options,
-    });
-    return res;
-  };
+    };
 
-  const update = async ({ id, data, options }: Omit<LensUpdateIn, 'contentTypeId'>) => {
-    const res = await cm.client.update<LensUpdateIn, LensUpdateOut>({
-      contentTypeId: DOC_TYPE,
-      id,
-      data,
+    const { data, meta } = await this.http.post<LensCreateResponseBody>(LENS_VIS_API_PATH, {
+      body: JSON.stringify(body),
+      version: LENS_API_VERSION,
+    });
+
+    return {
+      item: ConfigBuilderStub.in(data),
+      meta,
+    };
+  }
+
+  async update(
+    id: string,
+    { description, visualizationType, state, title, version }: LooseLensAttributes,
+    references: Reference[],
+    options: LensUpdateRequestBody['options'] = {}
+  ) {
+    if (visualizationType === null) {
+      throw new Error('Missing visualization type');
+    }
+
+    const body: LensUpdateRequestBody = {
+      // TODO: Find a better way to conditionally omit id
+      data: omit(
+        ConfigBuilderStub.out({
+          id: '',
+          description,
+          visualizationType,
+          state,
+          title,
+          version,
+          references,
+        }),
+        'id'
+      ),
       options,
-    });
-    return res;
-  };
+    };
 
-  const deleteLens = async (id: string) => {
-    const res = await cm.client.delete<LensDeleteIn, LensDeleteOut>({
-      contentTypeId: DOC_TYPE,
-      id,
-    });
-    return res;
-  };
+    const { data, meta } = await this.http.put<LensUpdateResponseBody>(
+      `${LENS_VIS_API_PATH}/${id}`,
+      {
+        body: JSON.stringify(body),
+        version: LENS_API_VERSION,
+      }
+    );
 
-  const search = async (query: SearchQuery = {}, options?: LensSearchQuery) => {
-    return cm.client.search<LensSearchIn, LensSearchOut>({
-      contentTypeId: DOC_TYPE,
-      query,
-      options,
-    });
-  };
+    return {
+      item: ConfigBuilderStub.in(data),
+      meta,
+    };
+  }
 
-  return {
-    get,
-    create,
-    update,
-    delete: deleteLens,
-    search,
-  } as unknown as VisualizationClient<'lens', Attr>;
+  async delete(id: string): Promise<{ success: boolean }> {
+    const response = await this.http.delete(`${LENS_VIS_API_PATH}/${id}`, {
+      asResponse: true,
+      version: LENS_API_VERSION,
+    });
+    const success = response.response?.ok ?? false;
+
+    return { success }; // TODO remove if not used
+  }
+
+  async search({
+    query,
+    page,
+    perPage,
+    fields,
+    searchFields,
+  }: LensSearchRequestQuery): Promise<LensItem[]> {
+    // TODO add all CM search options to query
+    const result = await this.http.get<LensSearchResponseBody>(LENS_VIS_API_PATH, {
+      query: {
+        query,
+        page,
+        perPage,
+        fields,
+        searchFields,
+      } satisfies LensSearchRequestQuery,
+      version: LENS_API_VERSION,
+    });
+
+    return result.data.map(({ data }) => ({
+      ...data,
+      attributes: ConfigBuilderStub.in(data),
+    }));
+  }
 }

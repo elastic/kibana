@@ -9,21 +9,20 @@ import React, { useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiCallOut,
   EuiConfirmModal,
   EuiIcon,
   EuiInMemoryTable,
   EuiSpacer,
-  EuiTableActionsColumnType,
   EuiText,
   useEuiBackgroundColor,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
+import type { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
 import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
 import { indexHealthToHealthColor } from '../../../shared/constants/health_colors';
@@ -199,6 +198,7 @@ export const SearchApplicationIndices: React.FC = () => {
       {(hasAllUnreachableIndices || hasUnknownIndices) && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             title={

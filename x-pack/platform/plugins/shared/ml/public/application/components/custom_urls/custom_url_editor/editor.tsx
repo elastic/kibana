@@ -113,9 +113,9 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       } catch (e) {
         dataViewToUse = undefined;
       }
-      if (dataViewToUse && dataViewToUse.timeFieldName) {
-        setHasTimefield(true);
-      }
+
+      setHasTimefield(dataViewToUse?.timeFieldName !== undefined);
+
       const dropDownOptions = await getDropDownOptions(
         isFirst.current,
         job,
@@ -316,6 +316,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           display="rowCompressed"
         >
           <EuiRadioGroup
+            name="linkToType"
             options={getLinkToOptions()}
             idSelected={type}
             onChange={onTypeChange}

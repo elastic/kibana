@@ -8,22 +8,25 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { DeletePrivMonUserRequestParams } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
-import type { DeletePrivMonUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
+import {
+  DeletePrivMonUserRequestParams,
+  type DeletePrivMonUserResponse,
+} from '../../../../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_USERS_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
 
 export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
     .delete({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/users/{id}',
+      path: `${MONITORING_USERS_URL}/{id}`,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -48,8 +51,11 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
             ENABLE_PRIVILEGED_USER_MONITORING_SETTING
           );
           const secSol = await context.securitySolution;
-          await secSol.getPrivilegeMonitoringDataClient().deleteUser(request.params.id);
-          return response.ok({ body: { aknowledged: true } });
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const crudService = createPrivilegedUsersCrudService(dataClient);
+
+          await crudService.delete(request.params.id);
+          return response.ok({ body: { acknowledged: true } });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error deleting user: ${error.message}`);

@@ -9,10 +9,13 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Plugin, CoreSetup } from '@kbn/core/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
 
 export class RenderingPlugin implements Plugin {
   public setup(core: CoreSetup) {
+    if (window.location.search.includes('isAnonymousPage=true')) {
+      core.http.anonymousPaths.register(window.location.pathname);
+    }
     core.application.register({
       id: 'rendering',
       title: 'Rendering',

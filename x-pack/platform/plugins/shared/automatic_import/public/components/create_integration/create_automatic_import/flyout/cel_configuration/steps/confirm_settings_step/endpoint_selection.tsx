@@ -81,6 +81,7 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
             <EuiSpacer size="m" />
             <EuiFlexItem>
               <EuiRadioGroup
+                name="endpointPathSelection"
                 options={options}
                 idSelected={selectedPath}
                 disabled={isGenerating}

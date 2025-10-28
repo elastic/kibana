@@ -9,12 +9,13 @@
 
 import React, { useEffect } from 'react';
 import { screen, render } from '@testing-library/react';
-import { EuiDataGridCellPopoverElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { CellPopoverHost } from './cell_popover_host';
 import { createPartialObjectMock } from '../utils/test';
 import { mockRenderContext } from '../mocks/context.mock';
+import type { AdditionalContext, RenderContext } from '../types';
 
 const props = createPartialObjectMock<EuiDataGridCellPopoverElementProps>({
   rowIndex: 0,
@@ -25,10 +26,12 @@ describe('CellPopoverHost', () => {
   it('should render the renderCellPopover when provided', () => {
     render(
       <AlertsTableContextProvider
-        value={{
-          ...mockRenderContext,
-          renderCellPopover: jest.fn(() => <div data-test-subj="renderCellPopover" />),
-        }}
+        value={
+          {
+            ...mockRenderContext,
+            renderCellPopover: jest.fn(() => <div data-test-subj="renderCellPopover" />),
+          } as RenderContext<AdditionalContext>
+        }
       >
         <CellPopoverHost {...props} />
       </AlertsTableContextProvider>

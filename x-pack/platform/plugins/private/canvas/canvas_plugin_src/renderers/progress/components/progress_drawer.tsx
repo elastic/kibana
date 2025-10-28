@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { Ref } from 'react';
-import {
-  ShapeDrawer,
+import type { Ref } from 'react';
+import React from 'react';
+import type {
   ShapeRef,
   ShapeDrawerComponentProps,
-  getShape,
 } from '../../../../public/components/shape_drawer';
+import { ShapeDrawer, getProgressShape } from '../../../../public/components/shape_drawer';
 
 export const ProgressDrawerComponent = React.forwardRef(
   (props: React.PropsWithChildren<ShapeDrawerComponentProps>, ref: Ref<ShapeRef>) => (
-    <ShapeDrawer {...props} ref={ref} getShape={getShape} />
+    <ShapeDrawer {...props} ref={ref} getShape={getProgressShape} />
   )
 );

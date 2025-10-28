@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningSuppliedConfigurationsProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -27,7 +27,7 @@ export function MachineLearningSuppliedConfigurationsProvider({ getService }: Ft
       );
     },
     async assertAllConfigurationsAreLoaded() {
-      const expectedLength = 19;
+      const expectedLength = 21;
       await retry.tryForTime(10 * 1000, async () => {
         const cards = await testSubjects.findAll('mlSuppliedConfigurationsCard');
         expect(cards.length).to.eql(

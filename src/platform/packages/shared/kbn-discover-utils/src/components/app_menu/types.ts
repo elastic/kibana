@@ -7,19 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type React from 'react';
+import type { IconType } from '@elastic/eui';
 
 export interface AppMenuControlOnClickParams {
   anchorElement: HTMLElement;
   onFinishAction: () => void;
 }
 
-export type AppMenuControlProps = Pick<
-  TopNavMenuData,
-  'testId' | 'isLoading' | 'label' | 'description' | 'disableButton' | 'href' | 'tooltip'
-> & {
+export interface TopNavMenuData {
+  testId?: string;
+  isLoading?: boolean;
+  label: string;
+  description?: string;
+  href?: string;
+  tooltip?: string | (() => string | undefined);
+  disableButton?: boolean | (() => boolean);
+}
+
+export type AppMenuControlProps = TopNavMenuData & {
   onClick:
     | ((params: AppMenuControlOnClickParams) => Promise<React.ReactNode | void>)
     | ((params: AppMenuControlOnClickParams) => React.ReactNode | void)
@@ -27,11 +33,11 @@ export type AppMenuControlProps = Pick<
 };
 
 export type AppMenuControlWithIconProps = AppMenuControlProps & {
-  iconType: EuiIconType;
+  iconType: IconType;
 };
 
 interface ControlWithOptionalIcon {
-  iconType?: EuiIconType;
+  iconType?: IconType;
 }
 
 export enum AppMenuActionId {
@@ -42,6 +48,7 @@ export enum AppMenuActionId {
   alerts = 'alerts',
   inspect = 'inspect',
   createRule = 'createRule',
+  backgroundsearch = 'backgroundSearch',
   manageRulesAndConnectors = 'manageRulesAndConnectors',
 }
 

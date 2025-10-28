@@ -11,55 +11,55 @@ const operatorConditionAndResults = [
   {
     condition: { field: 'log.logger', eq: 'nginx_proxy' },
     result:
-      "(relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString() == \"nginx_proxy\") || relevant_fields['log.logger'] == \"nginx_proxy\"))",
+      "($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString() == \"nginx_proxy\") || $('log.logger', null) == \"nginx_proxy\"))",
   },
   {
     condition: { field: 'log.logger', neq: 'nginx_proxy' },
     result:
-      "(relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString() != \"nginx_proxy\") || relevant_fields['log.logger'] != \"nginx_proxy\"))",
+      "($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString() != \"nginx_proxy\") || $('log.logger', null) != \"nginx_proxy\"))",
   },
   {
     condition: { field: 'http.response.status_code', lt: 500 },
     result:
-      "(relevant_fields['http.response.status_code'] !== null && ((relevant_fields['http.response.status_code'] instanceof String && Float.parseFloat(relevant_fields['http.response.status_code']) < 500) || relevant_fields['http.response.status_code'] < 500))",
+      "($('http.response.status_code', null) !== null && (($('http.response.status_code', null) instanceof String && Float.parseFloat($('http.response.status_code', null)) < 500) || $('http.response.status_code', null) < 500))",
   },
   {
     condition: { field: 'http.response.status_code', lte: 500 },
     result:
-      "(relevant_fields['http.response.status_code'] !== null && ((relevant_fields['http.response.status_code'] instanceof String && Float.parseFloat(relevant_fields['http.response.status_code']) <= 500) || relevant_fields['http.response.status_code'] <= 500))",
+      "($('http.response.status_code', null) !== null && (($('http.response.status_code', null) instanceof String && Float.parseFloat($('http.response.status_code', null)) <= 500) || $('http.response.status_code', null) <= 500))",
   },
   {
     condition: { field: 'http.response.status_code', gt: 500 },
     result:
-      "(relevant_fields['http.response.status_code'] !== null && ((relevant_fields['http.response.status_code'] instanceof String && Float.parseFloat(relevant_fields['http.response.status_code']) > 500) || relevant_fields['http.response.status_code'] > 500))",
+      "($('http.response.status_code', null) !== null && (($('http.response.status_code', null) instanceof String && Float.parseFloat($('http.response.status_code', null)) > 500) || $('http.response.status_code', null) > 500))",
   },
   {
     condition: { field: 'http.response.status_code', gte: 500 },
     result:
-      "(relevant_fields['http.response.status_code'] !== null && ((relevant_fields['http.response.status_code'] instanceof String && Float.parseFloat(relevant_fields['http.response.status_code']) >= 500) || relevant_fields['http.response.status_code'] >= 500))",
+      "($('http.response.status_code', null) !== null && (($('http.response.status_code', null) instanceof String && Float.parseFloat($('http.response.status_code', null)) >= 500) || $('http.response.status_code', null) >= 500))",
   },
   {
     condition: { field: 'log.logger', startsWith: 'nginx' },
     result:
-      "(relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString().startsWith(\"nginx\")) || relevant_fields['log.logger'].startsWith(\"nginx\")))",
+      "($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString().startsWith(\"nginx\")) || $('log.logger', null).startsWith(\"nginx\")))",
   },
   {
     condition: { field: 'log.logger', endsWith: 'proxy' },
     result:
-      "(relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString().endsWith(\"proxy\")) || relevant_fields['log.logger'].endsWith(\"proxy\")))",
+      "($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString().endsWith(\"proxy\")) || $('log.logger', null).endsWith(\"proxy\")))",
   },
   {
     condition: { field: 'log.logger', contains: 'proxy' },
     result:
-      "(relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString().contains(\"proxy\")) || relevant_fields['log.logger'].contains(\"proxy\")))",
+      "($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString().toLowerCase().contains(\"proxy\")) || $('log.logger', null).toLowerCase().contains(\"proxy\")))",
   },
   {
     condition: { field: 'log.logger', exists: true },
-    result: "relevant_fields['log.logger'] !== null",
+    result: "$('log.logger', null) !== null",
   },
   {
     condition: { field: 'log.logger', exists: false },
-    result: "relevant_fields['log.logger'] == null",
+    result: "$('log.logger', null) == null",
   },
 
   {
@@ -68,7 +68,7 @@ const operatorConditionAndResults = [
       range: { gte: 200, lt: 300 },
     },
     result:
-      "(relevant_fields['http.response.status_code'] !== null && ((relevant_fields['http.response.status_code'] instanceof Number && relevant_fields['http.response.status_code'] >= 200 && relevant_fields['http.response.status_code'] < 300) || (relevant_fields['http.response.status_code'] instanceof String && Float.parseFloat(relevant_fields['http.response.status_code']) >= 200 && Float.parseFloat(relevant_fields['http.response.status_code']) < 300)))",
+      "($('http.response.status_code', null) !== null && (($('http.response.status_code', null) instanceof Number && $('http.response.status_code', null) >= 200 && $('http.response.status_code', null) < 300) || ($('http.response.status_code', null) instanceof String && Float.parseFloat($('http.response.status_code', null)) >= 200 && Float.parseFloat($('http.response.status_code', null)) < 300)))",
   },
 ];
 
@@ -87,7 +87,7 @@ describe('conditionToPainless', () => {
           gt: '500',
         };
         expect(conditionToStatement(condition)).toEqual(
-          "(relevant_fields['http.response.status_code'] !== null && ((relevant_fields['http.response.status_code'] instanceof String && Float.parseFloat(relevant_fields['http.response.status_code']) > 500) || relevant_fields['http.response.status_code'] > 500))"
+          "($('http.response.status_code', null) !== null && (($('http.response.status_code', null) instanceof String && Float.parseFloat($('http.response.status_code', null)) > 500) || $('http.response.status_code', null) > 500))"
         );
       });
       test('ensure string comparison works with number values', () => {
@@ -96,7 +96,54 @@ describe('conditionToPainless', () => {
           contains: 500,
         };
         expect(conditionToStatement(condition)).toEqual(
-          "(relevant_fields['message'] !== null && ((relevant_fields['message'] instanceof Number && relevant_fields['message'].toString().contains(\"500\")) || relevant_fields['message'].contains(\"500\")))"
+          "($('message', null) !== null && (($('message', null) instanceof Number && $('message', null).toString().toLowerCase().contains(\"500\")) || $('message', null).toLowerCase().contains(\"500\")))"
+        );
+      });
+
+      test('boolean eq operator should compare against boolean values directly', () => {
+        const condition = {
+          field: 'should_process',
+          eq: true,
+        };
+        // This test expects the field to be compared against boolean literal `true`
+        expect(conditionToStatement(condition)).toEqual(
+          "($('should_process', null) !== null && (($('should_process', null) instanceof Number && $('should_process', null).toString() == \"true\") || $('should_process', null) == true))"
+        );
+      });
+
+      test('boolean neq operator should compare against boolean values directly', () => {
+        const condition = {
+          field: 'is_active',
+          neq: false,
+        };
+
+        // This test expects the field to be compared against boolean literal `false`
+        expect(conditionToStatement(condition)).toEqual(
+          "($('is_active', null) !== null && (($('is_active', null) instanceof Number && $('is_active', null).toString() != \"false\") || $('is_active', null) != false))"
+        );
+      });
+
+      test('boolean eq with false should work correctly', () => {
+        const condition = {
+          field: 'is_disabled',
+          eq: false,
+        };
+
+        // This test expects the field to be compared against boolean literal `false`
+        expect(conditionToStatement(condition)).toEqual(
+          "($('is_disabled', null) !== null && (($('is_disabled', null) instanceof Number && $('is_disabled', null).toString() == \"false\") || $('is_disabled', null) == false))"
+        );
+      });
+
+      test('boolean neq with true should work correctly', () => {
+        const condition = {
+          field: 'should_skip',
+          neq: true,
+        };
+
+        // This test expects the field to be compared against boolean literal `true`
+        expect(conditionToStatement(condition)).toEqual(
+          "($('should_skip', null) !== null && (($('should_skip', null) instanceof Number && $('should_skip', null).toString() != \"true\") || $('should_skip', null) != true))"
         );
       });
     });
@@ -110,7 +157,7 @@ describe('conditionToPainless', () => {
           ],
         };
         expect(conditionToStatement(condition)).toEqual(
-          "(relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString() == \"nginx_proxy\") || relevant_fields['log.logger'] == \"nginx_proxy\")) && (relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \"error\") || relevant_fields['log.level'] == \"error\"))"
+          "($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString() == \"nginx_proxy\") || $('log.logger', null) == \"nginx_proxy\")) && ($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \"error\") || $('log.level', null) == \"error\"))"
         );
       });
     });
@@ -124,7 +171,7 @@ describe('conditionToPainless', () => {
           ],
         };
         expect(conditionToStatement(condition)).toEqual(
-          "(relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString() == \"nginx_proxy\") || relevant_fields['log.logger'] == \"nginx_proxy\")) || (relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \"error\") || relevant_fields['log.level'] == \"error\"))"
+          "($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString() == \"nginx_proxy\") || $('log.logger', null) == \"nginx_proxy\")) || ($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \"error\") || $('log.level', null) == \"error\"))"
         );
       });
     });
@@ -135,7 +182,7 @@ describe('conditionToPainless', () => {
           not: { field: 'log.level', eq: 'error' },
         };
         expect(conditionToStatement(condition)).toEqual(
-          "!((relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \"error\") || relevant_fields['log.level'] == \"error\")))"
+          "!(($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \"error\") || $('log.level', null) == \"error\")))"
         );
       });
 
@@ -149,7 +196,7 @@ describe('conditionToPainless', () => {
           },
         };
         expect(conditionToStatement(condition)).toEqual(
-          "!(((relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \"error\") || relevant_fields['log.level'] == \"error\")) || (relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \"warn\") || relevant_fields['log.level'] == \"warn\"))))"
+          "!((($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \"error\") || $('log.level', null) == \"error\")) || ($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \"warn\") || $('log.level', null) == \"warn\"))))"
         );
       });
     });
@@ -168,7 +215,7 @@ describe('conditionToPainless', () => {
           ],
         };
         expect(conditionToStatement(condition)).toEqual(
-          "(relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString() == \"nginx_proxy\") || relevant_fields['log.logger'] == \"nginx_proxy\")) && ((relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \"error\") || relevant_fields['log.level'] == \"error\")) || (relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \"ERROR\") || relevant_fields['log.level'] == \"ERROR\")))"
+          "($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString() == \"nginx_proxy\") || $('log.logger', null) == \"nginx_proxy\")) && (($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \"error\") || $('log.level', null) == \"error\")) || ($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \"ERROR\") || $('log.level', null) == \"ERROR\")))"
         );
       });
       test('and with 2 or with filters', () => {
@@ -189,7 +236,7 @@ describe('conditionToPainless', () => {
           ],
         };
         expect(conditionToStatement(condition)).toEqual(
-          "((relevant_fields['log.logger'] !== null && ((relevant_fields['log.logger'] instanceof Number && relevant_fields['log.logger'].toString() == \"nginx_proxy\") || relevant_fields['log.logger'] == \"nginx_proxy\")) || (relevant_fields['service.name'] !== null && ((relevant_fields['service.name'] instanceof Number && relevant_fields['service.name'].toString() == \"nginx\") || relevant_fields['service.name'] == \"nginx\"))) && ((relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \"error\") || relevant_fields['log.level'] == \"error\")) || (relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \"ERROR\") || relevant_fields['log.level'] == \"ERROR\")))"
+          "(($('log.logger', null) !== null && (($('log.logger', null) instanceof Number && $('log.logger', null).toString() == \"nginx_proxy\") || $('log.logger', null) == \"nginx_proxy\")) || ($('service.name', null) !== null && (($('service.name', null) instanceof Number && $('service.name', null).toString() == \"nginx\") || $('service.name', null) == \"nginx\"))) && (($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \"error\") || $('log.level', null) == \"error\")) || ($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \"ERROR\") || $('log.level', null) == \"ERROR\")))"
         );
       });
     });
@@ -199,13 +246,8 @@ describe('conditionToPainless', () => {
     const condition = { field: 'log', exists: true };
     expect(conditionToPainless(condition)).toMatchInlineSnapshot(`
       "
-        def relevant_fields = [:];
-        
-      relevant_fields['log'] = ctx['log'];
-
-        
         try {
-        if (relevant_fields['log'] !== null) {
+        if ($('log', null) !== null) {
           return true;
         }
         return false;
@@ -230,36 +272,8 @@ describe('conditionToPainless', () => {
     };
     expect(conditionToPainless(condition)).toMatchInlineSnapshot(`
       "
-        def relevant_fields = [:];
-        
-      relevant_fields['log.logger.name'] = ctx['log'];
-      if (relevant_fields['log.logger.name'] != null) {
-        if (relevant_fields['log.logger.name'] instanceof Map) {
-          relevant_fields['log.logger.name'] = relevant_fields['log.logger.name']['logger'];
-        } else {
-          relevant_fields['log.logger.name'] = null;
-        }
-      }
-      if (relevant_fields['log.logger.name'] != null) {
-        if (relevant_fields['log.logger.name'] instanceof Map) {
-          relevant_fields['log.logger.name'] = relevant_fields['log.logger.name']['name'];
-        } else {
-          relevant_fields['log.logger.name'] = null;
-        }
-      }
-
-      relevant_fields['log.level'] = ctx['log'];
-      if (relevant_fields['log.level'] != null) {
-        if (relevant_fields['log.level'] instanceof Map) {
-          relevant_fields['log.level'] = relevant_fields['log.level']['level'];
-        } else {
-          relevant_fields['log.level'] = null;
-        }
-      }
-
-        
         try {
-        if ((relevant_fields['log.logger.name'] !== null && ((relevant_fields['log.logger.name'] instanceof Number && relevant_fields['log.logger.name'].toString() == \\"nginx_proxy\\") || relevant_fields['log.logger.name'] == \\"nginx_proxy\\")) && ((relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \\"error\\") || relevant_fields['log.level'] == \\"error\\")) || (relevant_fields['log.level'] !== null && ((relevant_fields['log.level'] instanceof Number && relevant_fields['log.level'].toString() == \\"ERROR\\") || relevant_fields['log.level'] == \\"ERROR\\")))) {
+        if (($('log.logger.name', null) !== null && (($('log.logger.name', null) instanceof Number && $('log.logger.name', null).toString() == \\"nginx_proxy\\") || $('log.logger.name', null) == \\"nginx_proxy\\")) && (($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \\"error\\") || $('log.level', null) == \\"error\\")) || ($('log.level', null) !== null && (($('log.level', null) instanceof Number && $('log.level', null).toString() == \\"ERROR\\") || $('log.level', null) == \\"ERROR\\")))) {
           return true;
         }
         return false;

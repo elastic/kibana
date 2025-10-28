@@ -16,8 +16,8 @@ import {
   NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ,
   SAVE_CONFIG_BUTTON_SUBJ,
 } from '@kbn/embeddable-alerts-table-plugin/public/constants';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
 import { getEventLog } from '../../../alerting_api_integration/common/lib';
 
@@ -76,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Config editor', () => {
       it('should show the solution picker when multiple solutions are available', async () => {
         await toasts.dismissIfExists();
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
         await testSubjects.existOrFail(SOLUTION_SELECTOR_SUBJ);
       });
@@ -113,7 +113,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it(`should only be able to create panels with ${solution} rule types`, async () => {
           await pageObjects.dashboard.gotoDashboardURL();
           await toasts.dismissIfExists();
-          await dashboardAddPanel.clickEditorMenuButton();
+          await dashboardAddPanel.openAddPanelFlyout();
           await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
           await retry.try(() => testSubjects.exists(FILTERS_FORM_SUBJ));
           if (solution === 'stack' || solution === 'observability') {
@@ -147,7 +147,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it(`should only show alerts from the observability area (o11y+stack) when selecting it`, async () => {
       await toasts.dismissIfExists();
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
       await testSubjects.existOrFail(SOLUTION_SELECTOR_SUBJ);
       await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
@@ -168,7 +168,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it(`should only show alerts from the security area when selecting it`, async () => {
       await toasts.dismissIfExists();
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
       await find.clickByCssSelector(`button#security`);
       await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);

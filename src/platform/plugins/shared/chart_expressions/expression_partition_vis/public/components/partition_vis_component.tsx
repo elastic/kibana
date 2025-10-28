@@ -8,39 +8,35 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import {
-  Chart,
+import type {
   Datum,
   LayerValue,
-  Partition,
-  Position,
-  Settings,
   TooltipProps,
-  TooltipType,
   SeriesIdentifier,
   PartitionElementEvent,
   SettingsProps,
-  Tooltip,
   TooltipValue,
 } from '@elastic/charts';
+import { Chart, Partition, Position, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import {
-  DEFAULT_LEGEND_SIZE,
-  LegendSizeToPixels,
-} from '@kbn/visualizations-plugin/common/constants';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import {
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { LegendToggle } from '@kbn/charts-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-common';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
+import type {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import {
+  getOverridesFor,
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/chart-expressions-common';
 import { useKbnPalettes } from '@kbn/palettes';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -77,7 +73,7 @@ import {
   partitionVisContainerWithToggleStyleFactory,
 } from './partition_vis_component.styles';
 import { filterOutConfig } from '../utils/filter_out_config';
-import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
+import type { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
 import { getMultiFilterCells } from '../utils/filter_helpers';
 
 declare global {

@@ -6,7 +6,7 @@
  */
 
 import { AGG_TYPE } from '../../../../../common/constants';
-import { DataFilters } from '../../../../../common/descriptor_types';
+import type { DataFilters } from '../../../../../common/descriptor_types';
 import type { BucketProperties, PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
 

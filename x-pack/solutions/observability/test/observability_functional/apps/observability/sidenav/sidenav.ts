@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, solutionNavigation, header } = getPageObjects([
@@ -17,6 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spaces = getService('spaces');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('o11y sidenav', () => {
     let cleanUp: () => Promise<unknown>;
@@ -39,11 +40,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
-        await solutionNavigation.sidenav.clickLink({ navId: 'observabilityAIAssistant' }); // click on AI Assistant link
+        await solutionNavigation.sidenav.expandMore();
+        await retry.waitFor('redirect or status response', async () => {
+          await solutionNavigation.sidenav.clickLink({ navId: 'aiAssistantContainer' }); // click on AI Assistant link
+          return (await browser.getCurrentUrl()).includes('/app/observabilityAIAssistant');
+        });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
 
-        // check Other Tools section
-        await solutionNavigation.sidenav.openPanel('otherTools');
+        // Open other tools more popover
+        await solutionNavigation.sidenav.expandMore();
+        await solutionNavigation.sidenav.clickLink({ navId: 'otherTools' });
+        // open first other tools link in a popover to open the panel
+        await solutionNavigation.sidenav.clickLink({ navId: 'logs:anomalies' });
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('otherTools');
           expect(isOpen).to.be(true);
@@ -61,8 +69,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           text: 'Visualize library',
         });
 
-        // check Machine Learning section
-        await solutionNavigation.sidenav.openPanel('machine_learning-landing');
+        // Open machine learning popover
+        await solutionNavigation.sidenav.expandMore();
+        await solutionNavigation.sidenav.clickLink({ navId: 'machine_learning-landing' });
+        // click on Machine Learning link
+        await solutionNavigation.sidenav.clickLink({ navId: 'ml:overview' });
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('machine_learning-landing');
           expect(isOpen).to.be(true);
@@ -76,9 +87,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // Supplied configurations is under Management -> Anomaly Detection Jobs -> Click button mlSuppliedConfigurationsButton
-        await solutionNavigation.sidenav.openSection(
-          'observability_project_nav_footer.project_settings_project_nav'
-        );
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
         await solutionNavigation.sidenav.clickPanelLink('management:anomaly_detection');

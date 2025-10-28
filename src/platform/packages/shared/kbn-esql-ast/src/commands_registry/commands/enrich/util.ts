@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLCommand } from '../../../types';
-import { ESQLPolicy, ISuggestionItem } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import type { ESQLAstAllCommands } from '../../../types';
+import type { ESQLPolicy, ISuggestionItem } from '../../types';
 import { getSafeInsertText } from '../../../definitions/utils/autocomplete/helpers';
 
 export const ENRICH_MODES = [
@@ -36,20 +36,21 @@ export const ENRICH_MODES = [
 export const buildPoliciesDefinitions = (
   policies: Array<{ name: string; sourceIndices: string[] }>
 ): ISuggestionItem[] =>
-  policies.map(({ name: label, sourceIndices }) => ({
-    label,
-    text: getSafeInsertText(label, { dashSupported: true }) + ' ',
-    kind: 'Class',
-    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.policyDefinition', {
-      defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
-      values: {
-        count: sourceIndices.length,
-        indices: sourceIndices.join(', '),
-      },
-    }),
-    sortText: 'D',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  }));
+  policies.map(({ name: label, sourceIndices }) =>
+    withAutoSuggest({
+      label,
+      text: getSafeInsertText(label, { dashSupported: true }) + ' ',
+      kind: 'Class',
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.policyDefinition', {
+        defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
+        values: {
+          count: sourceIndices.length,
+          indices: sourceIndices.join(', '),
+        },
+      }),
+      sortText: 'D',
+    })
+  );
 
 export const getPolicyMetadata = (policies: Map<string, ESQLPolicy>, policyName: string) => {
   return policies.get(policyName);
@@ -67,7 +68,10 @@ export enum Position {
   WITH_AFTER_COMPLETE_CLAUSE = 'with_after_complete_clause',
 }
 
-export const getPosition = (innerText: string, command: ESQLCommand): Position | undefined => {
+export const getPosition = (
+  innerText: string,
+  command: ESQLAstAllCommands
+): Position | undefined => {
   if (command.args.length < 2) {
     if (innerText.match(/_[^:\s]*$/)) {
       return Position.MODE;
@@ -131,22 +135,23 @@ export const modeDescription = i18n.translate('kbn-esql-ast.esql.definitions.ccq
   defaultMessage: 'Cross-cluster query mode',
 });
 
-export const modeSuggestions: ISuggestionItem[] = ENRICH_MODES?.map(({ name, description }) => ({
-  label: `_${name}`,
-  text: `_${name}:$0`,
-  asSnippet: true,
-  kind: 'Reference',
-  detail: i18n.translate('kbn-esql-ast.esql.definitions.ccqModeDoc', {
-    defaultMessage: 'Cross-cluster query mode - ${description}',
-    values: {
-      description,
-    },
-  }),
-  sortText: 'D',
-  command: TRIGGER_SUGGESTION_COMMAND,
-}));
+export const modeSuggestions: ISuggestionItem[] = ENRICH_MODES?.map(({ name, description }) =>
+  withAutoSuggest({
+    label: `_${name}`,
+    text: `_${name}:$0`,
+    asSnippet: true,
+    kind: 'Reference',
+    detail: i18n.translate('kbn-esql-ast.esql.definitions.ccqModeDoc', {
+      defaultMessage: 'Cross-cluster query mode - ${description}',
+      values: {
+        description,
+      },
+    }),
+    sortText: 'D',
+  })
+);
 
-export const onSuggestion: ISuggestionItem = {
+export const onSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'ON',
   text: 'ON ',
   kind: 'Reference',
@@ -154,10 +159,9 @@ export const onSuggestion: ISuggestionItem = {
     defaultMessage: 'On',
   }),
   sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
+});
 
-export const withSuggestion: ISuggestionItem = {
+export const withSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'WITH',
   text: 'WITH ',
   kind: 'Reference',
@@ -165,23 +169,23 @@ export const withSuggestion: ISuggestionItem = {
     defaultMessage: 'With',
   }),
   sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
+});
 
 export const buildMatchingFieldsDefinition = (
   matchingField: string,
   fields: string[]
 ): ISuggestionItem[] =>
-  fields.map((label) => ({
-    label,
-    text: getSafeInsertText(label) + ' ',
-    kind: 'Variable',
-    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.matchingFieldDefinition', {
-      defaultMessage: `Use to match on {matchingField} on the policy`,
-      values: {
-        matchingField,
-      },
-    }),
-    sortText: 'D',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  }));
+  fields.map((label) =>
+    withAutoSuggest({
+      label,
+      text: getSafeInsertText(label) + ' ',
+      kind: 'Variable',
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.matchingFieldDefinition', {
+        defaultMessage: `Use to match on {matchingField} on the policy`,
+        values: {
+          matchingField,
+        },
+      }),
+      sortText: 'D',
+    })
+  );

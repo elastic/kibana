@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { IAggConfig } from '../../aggs';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
+import type { IAggConfig } from '../../aggs';
 
 const getOtherBucketFilterTerms = (table: Datatable, columnIndex: number, rowIndex: number) => {
   if (rowIndex === -1) {
@@ -28,7 +29,7 @@ const getOtherBucketFilterTerms = (table: Datatable, columnIndex: number, rowInd
     ...new Set(
       terms.filter((term) => {
         const notOther = term !== '__other__';
-        const notMissing = term !== '__missing__';
+        const notMissing = term !== MISSING_TOKEN;
         return notOther && notMissing;
       })
     ),

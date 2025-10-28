@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   Plugin,
   PluginInitializerContext,
   CoreSetup,
   Logger,
   SavedObjectsServiceStart,
-  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { i18n } from '@kbn/i18n';
 
 import {
   ENTERPRISE_SEARCH_HOME_PLUGIN,
   ENTERPRISE_SEARCH_DATA_PLUGIN,
   ANALYTICS_PLUGIN,
-  SEARCH_EXPERIENCES_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
@@ -29,8 +26,8 @@ import {
   SEARCH_PRODUCT_NAME,
   SEARCH_INDICES,
   SEARCH_HOMEPAGE,
-  SEARCH_INDICES_START,
   SEARCH_INDEX_MANAGEMENT,
+  SEARCH_APPS_TITLE,
 } from '../common/constants';
 
 import { AS_TELEMETRY_NAME } from './collectors/app_search/telemetry';
@@ -62,7 +59,7 @@ import { getConnectorsSearchResultProvider } from './utils/connectors_search_res
 import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
-import { ConfigType } from '.';
+import type { ConfigType } from '.';
 
 export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, PluginsStart> {
   private readonly config: ConfigType;
@@ -99,10 +96,8 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     const PLUGIN_IDS = [
       ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
       ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
-      SEARCH_EXPERIENCES_PLUGIN.ID,
       SEARCH_HOMEPAGE,
       SEARCH_INDICES,
-      SEARCH_INDICES_START,
       SEARCH_INDEX_MANAGEMENT,
     ];
 
@@ -122,7 +117,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       name: SEARCH_PRODUCT_NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', ...PLUGIN_IDS],
       catalogue: PLUGIN_IDS,
       privileges: {
@@ -150,12 +144,9 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     });
     features.registerKibanaFeature({
       id: APPLICATIONS_PLUGIN.ID,
-      name: i18n.translate('xpack.enterpriseSearch.applications.featureName', {
-        defaultMessage: 'Search Applications',
-      }),
+      name: SEARCH_APPS_TITLE,
       order: 3,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', APPLICATIONS_PLUGIN.ID],
       catalogue: [APPLICATIONS_PLUGIN.ID],
       privileges: {
@@ -184,7 +175,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       name: ANALYTICS_PLUGIN.NAME,
       order: 4,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', ANALYTICS_PLUGIN.ID],
       catalogue: [ANALYTICS_PLUGIN.ID],
 

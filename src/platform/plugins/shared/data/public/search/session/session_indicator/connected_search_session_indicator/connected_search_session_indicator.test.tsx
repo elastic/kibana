@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -16,12 +17,8 @@ import { dataPluginMock } from '../../../../mocks';
 import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
-import {
-  ISessionService,
-  SearchSessionState,
-  SearchUsageCollector,
-  TimefilterContract,
-} from '../../../..';
+import type { ISessionService, SearchUsageCollector, TimefilterContract } from '../../../..';
+import { SearchSessionState } from '../../../..';
 import { coreMock } from '@kbn/core/public/mocks';
 import { TOUR_RESTORE_STEP_KEY, TOUR_TAKING_TOO_LONG_STEP_KEY } from './search_session_tour';
 import userEvent from '@testing-library/user-event';
@@ -31,6 +28,7 @@ import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
 const coreStart = coreMock.createStart();
 const application = coreStart.application;
 const basePath = coreStart.http.basePath;
+const featureFlags = coreStart.featureFlags;
 const dataStart = dataPluginMock.createStartContract();
 const sessionService = dataStart.search.session as jest.Mocked<ISessionService>;
 let storage: Storage;
@@ -67,6 +65,7 @@ test("shouldn't show indicator in case no active search session", async () => {
     usageCollector,
     basePath,
     tourDisabled,
+    featureFlags,
   });
   const { getByTestId, container } = render(
     <Container>
@@ -96,6 +95,7 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
     usageCollector,
     basePath,
     tourDisabled,
+    featureFlags,
   });
   const { getByTestId, container } = render(
     <Container>
@@ -127,6 +127,7 @@ test('should show indicator in case there is an active search session', async ()
     usageCollector,
     basePath,
     tourDisabled,
+    featureFlags,
   });
   const { getByTestId } = render(
     <Container>
@@ -152,6 +153,7 @@ test('should be disabled in case uiConfig says so ', async () => {
     usageCollector,
     basePath,
     tourDisabled,
+    featureFlags,
   });
 
   render(
@@ -162,7 +164,7 @@ test('should be disabled in case uiConfig says so ', async () => {
 
   await waitFor(() => screen.getByTestId('searchSessionIndicator'));
 
-  await userEvent.click(screen.getByLabelText('Search session loading'));
+  await userEvent.click(screen.getByLabelText('Background search loading'));
 
   expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
 });
@@ -175,6 +177,7 @@ test('should be disabled in case not enough permissions', async () => {
     storage,
     basePath,
     tourDisabled,
+    featureFlags,
   });
 
   render(
@@ -185,7 +188,7 @@ test('should be disabled in case not enough permissions', async () => {
 
   await waitFor(() => screen.getByTestId('searchSessionIndicator'));
 
-  await userEvent.click(screen.getByLabelText('Search session complete'));
+  await userEvent.click(screen.getByLabelText('Background search complete'));
 
   expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
   expect(screen.getByRole('button', { name: 'Manage sessions' })).toBeDisabled();
@@ -204,6 +207,7 @@ describe('Completed inactivity', () => {
       usageCollector,
       basePath,
       tourDisabled,
+      featureFlags,
     });
 
     render(
@@ -214,7 +218,7 @@ describe('Completed inactivity', () => {
 
     await waitFor(() => screen.getByTestId('searchSessionIndicator'));
 
-    await userEvent.click(screen.getByLabelText('Search session loading'));
+    await userEvent.click(screen.getByLabelText('Background search loading'));
 
     expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
 
@@ -245,6 +249,7 @@ describe('tour steps', () => {
         usageCollector,
         basePath,
         tourDisabled,
+        featureFlags,
       });
       const rendered = render(
         <Container>
@@ -286,6 +291,7 @@ describe('tour steps', () => {
         usageCollector,
         basePath,
         tourDisabled,
+        featureFlags,
       });
       const rendered = render(
         <Container>
@@ -320,6 +326,7 @@ describe('tour steps', () => {
         usageCollector,
         basePath,
         tourDisabled: true,
+        featureFlags,
       });
       const rendered = render(
         <Container>
@@ -365,6 +372,7 @@ describe('tour steps', () => {
       usageCollector,
       basePath,
       tourDisabled,
+      featureFlags,
     });
     const rendered = render(
       <Container>
@@ -392,6 +400,7 @@ describe('tour steps', () => {
       usageCollector,
       basePath,
       tourDisabled,
+      featureFlags,
     });
     const rendered = render(
       <Container>

@@ -669,6 +669,68 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.isTrustedDeviceFieldAvailableForOs",
+        "type": "Function",
+        "tags": [],
+        "label": "isTrustedDeviceFieldAvailableForOs",
+        "description": [],
+        "signature": [
+          "(field: ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ", osTypes: readonly string[]) => boolean"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.isTrustedDeviceFieldAvailableForOs.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-utils",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+                "section": "def-common.TrustedDeviceConditionEntryField",
+                "text": "TrustedDeviceConditionEntryField"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.isTrustedDeviceFieldAvailableForOs.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "osTypes",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.parseEsqlQuery",
         "type": "Function",
         "tags": [],
@@ -1124,6 +1186,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.TrustedDeviceConditionEntryField",
+        "type": "Enum",
+        "tags": [],
+        "label": "TrustedDeviceConditionEntryField",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -1264,6 +1338,86 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.TRUSTED_DEVICE_OS_FIELD_AVAILABILITY",
+        "type": "Object",
+        "tags": [],
+        "label": "TRUSTED_DEVICE_OS_FIELD_AVAILABILITY",
+        "description": [],
+        "signature": [
+          "{ readonly ALL_OS: readonly [",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".DEVICE_ID, ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".DEVICE_TYPE, ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".HOST, ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".MANUFACTURER, ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".MANUFACTURER_ID, ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".PRODUCT_ID, ",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".PRODUCT_NAME]; readonly WINDOWS_ONLY: readonly [",
+          {
+            "pluginId": "@kbn/securitysolution-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+            "section": "def-common.TrustedDeviceConditionEntryField",
+            "text": "TrustedDeviceConditionEntryField"
+          },
+          ".USERNAME]; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

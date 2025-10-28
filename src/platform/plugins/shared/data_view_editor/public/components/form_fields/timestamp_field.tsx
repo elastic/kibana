@@ -10,24 +10,22 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
-import { EuiFormRow, EuiComboBox, EuiFormHelpText, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { Observable } from 'rxjs';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiFormHelpText } from '@elastic/eui';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
-import {
-  UseField,
-  FieldConfig,
-  ValidationConfig,
-  getFieldValidityAndErrorMessage,
-} from '../../shared_imports';
+import type { FieldConfig, ValidationConfig } from '../../shared_imports';
+import { UseField, getFieldValidityAndErrorMessage } from '../../shared_imports';
 
-import { TimestampOption, MatchedIndicesSet } from '../../types';
+import type { TimestampOption, MatchedIndicesSet } from '../../types';
 import { schema } from '../form_schema';
 
 interface Props {
   options$: Observable<TimestampOption[]>;
   isLoadingOptions$: Observable<boolean>;
   matchedIndices$: Observable<MatchedIndicesSet>;
+  disabled?: boolean;
 }
 
 export const requireTimestampOptionValidator = (
@@ -74,7 +72,12 @@ const timestampFieldHelp = i18n.translate('indexPatternEditor.editor.form.timeFi
   defaultMessage: 'Select a timestamp field for use with the global time filter.',
 });
 
-export const TimestampField = ({ options$, isLoadingOptions$, matchedIndices$ }: Props) => {
+export const TimestampField = ({
+  options$,
+  isLoadingOptions$,
+  matchedIndices$,
+  disabled,
+}: Props) => {
   const options = useObservable<TimestampOption[]>(options$, []);
   const isLoadingOptions = useObservable<boolean>(isLoadingOptions$, false);
   const hasMatchedIndices = !!useObservable(matchedIndices$, matchedIndiciesDefault)
@@ -101,7 +104,7 @@ export const TimestampField = ({ options$, isLoadingOptions$, matchedIndices$ }:
         }
 
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-        const isDisabled = !optionsAsComboBoxOptions.length || isLoadingOptions;
+        const isDisabled = !optionsAsComboBoxOptions.length || isLoadingOptions || disabled;
         // if the value isn't in the list then don't use it.
         const valueInList = !!optionsAsComboBoxOptions.find(
           (option) => option.value === value.value

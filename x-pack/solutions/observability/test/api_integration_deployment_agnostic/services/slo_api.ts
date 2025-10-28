@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
-import {
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
+import type {
   BulkDeleteInput,
   CreateSLOInput,
   FindSLODefinitionsResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 interface SavedObject<Attributes extends Record<string, any>> {
   attributes: Attributes;

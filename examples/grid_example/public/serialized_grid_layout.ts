@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MockSerializedDashboardState } from './types';
+import type { MockSerializedDashboardState } from './types';
 
 import logsPanels from './logs_dashboard_panels.json';
 

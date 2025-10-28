@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutData, OrderedLayout } from '../types';
+import type { GridLayoutData, OrderedLayout } from '../types';
 
 export const getSampleLayout = (): GridLayoutData => ({
   panel1: {

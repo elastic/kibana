@@ -18,27 +18,35 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { isEDOTAgentName, type AgentName } from '@kbn/elastic-agent-utils';
+import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
-import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import type {
+  AgentConfiguration,
+  AgentConfigurationIntake,
+} from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   filterByAgent,
   settingDefinitions,
   validateSetting,
 } from '../../../../../../../common/agent_configuration/setting_definitions';
-import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
+import type { FetcherResult } from '../../../../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { saveConfig } from './save_config';
 import { SettingFormRow } from './setting_form_row';
+import { AdvancedConfiguration } from './advanced_configuration';
 
 function removeEmpty(obj: { [key: string]: any }) {
-  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null && v !== ''));
+  return Object.fromEntries(
+    Object.entries(obj).filter(([k, v]) => k !== '' && k != null && v !== '' && v != null)
+  );
 }
 
 export function SettingsPage({
-  status,
+  initialConfig,
   unsavedChanges,
   newConfig,
   setNewConfig,
@@ -46,7 +54,7 @@ export function SettingsPage({
   isEditMode,
   onClickEdit,
 }: {
-  status?: FETCH_STATUS;
+  initialConfig?: FetcherResult<AgentConfiguration>;
   unsavedChanges: Record<string, string>;
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -59,8 +67,37 @@ export function SettingsPage({
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
+  const [removedConfigCount, setRemovedConfigCount] = useState<number>(0);
+  const [validationErrors, setValidationErrors] = useState<Map<string, boolean>>(
+    new Map<string, boolean>()
+  );
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
+  const status = initialConfig?.status;
   const isLoading = status === FETCH_STATUS.LOADING;
+  const isAdvancedConfigSupported =
+    newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
+  const hasActiveValidationErrors = [...validationErrors.values()].includes(true);
+  const hasInactiveValidationErrors = [...validationErrors.values()].includes(false);
+  const [revalidate, setRevalidate] = useState(false);
+
+  const addValidationError = useCallback((key: string, active: boolean) => {
+    setValidationErrors((prev) => {
+      prev.set(key, active);
+      return new Map(prev);
+    });
+  }, []);
+
+  const removeValidationError = useCallback((key: string) => {
+    setValidationErrors((prev) => {
+      prev.delete(key);
+      return new Map(prev);
+    });
+  }, []);
+
+  const settingsDefinitionsByAgent = useMemo(
+    () => settingDefinitions.filter(filterByAgent(newConfig.agent_name as AgentName)),
+    [newConfig.agent_name]
+  );
 
   const isFormValid = useMemo(() => {
     return (
@@ -80,6 +117,11 @@ export function SettingsPage({
   }, [newConfig.settings]);
 
   const handleSubmitEvent = async () => {
+    if (hasInactiveValidationErrors) {
+      setRevalidate(true);
+      return;
+    }
+
     trackApmEvent({ metric: 'save_agent_configuration' });
     const config = { ...newConfig, settings: removeEmpty(newConfig.settings) };
 
@@ -94,9 +136,57 @@ export function SettingsPage({
     });
   };
 
+  const handleChange = useCallback(
+    ({ key, value, oldKey }: { key: string; value?: string; oldKey?: string }) => {
+      setNewConfig((prev) => {
+        let updatedSettings: Record<string, string>;
+
+        if (oldKey !== undefined) {
+          // Handle key change
+
+          // Maintain the order by recreating the config object while preserving key positions
+          updatedSettings = Object.fromEntries(
+            Object.entries(prev.settings).map(([currentKey, currentValue]) =>
+              currentKey === oldKey ? [key, currentValue] : [currentKey, currentValue]
+            )
+          );
+        } else if (key === '' && value === '' && prev.settings[''] === undefined) {
+          // Handle new row at the top of the list
+          updatedSettings = { ['']: '', ...prev.settings };
+        } else {
+          // Handle value change
+          updatedSettings = { ...prev.settings, [key]: value };
+        }
+
+        return {
+          ...prev,
+          settings: updatedSettings,
+        };
+      });
+    },
+    [setNewConfig]
+  );
+
+  const handleDelete = (key: string, id: number) => {
+    // Detect removed config only when the key-value already existed before
+    if (key in (initialConfig?.data?.settings ?? {})) {
+      setRemovedConfigCount((prev) => prev + 1);
+    }
+    removeValidationError(`key${id}`);
+    removeValidationError(`value${id}`);
+    setNewConfig((prev) => {
+      const { [key]: deleted, ...rest } = prev.settings;
+      return {
+        ...prev,
+        settings: rest,
+      };
+    });
+  };
+
   if (status === FETCH_STATUS.FAILURE) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.apm.agentConfig.settingsPage.notFound.title', {
           defaultMessage: 'Sorry, there was an error',
         })}
@@ -111,6 +201,18 @@ export function SettingsPage({
       </EuiCallOut>
     );
   }
+
+  const handleNewRow = () => {
+    handleChange({ key: '', value: '' });
+    setRevalidate(false);
+  };
+
+  const handleDiscardChanges = () => {
+    setRemovedConfigCount(0);
+    setRevalidate(false);
+    setValidationErrors(new Map());
+    resetSettings();
+  };
 
   return (
     <>
@@ -189,23 +291,46 @@ export function SettingsPage({
               <EuiLoadingSpinner size="m" />
             </div>
           ) : (
-            renderSettings({ unsavedChanges, newConfig, setNewConfig })
+            <>
+              {renderSettings({
+                unsavedChanges,
+                newConfig,
+                settingsDefinitionsByAgent,
+                onChange: handleChange,
+              })}
+              {isAdvancedConfigSupported && (
+                <>
+                  <EuiHorizontalRule />
+                  <AdvancedConfiguration
+                    newConfig={newConfig}
+                    settingsDefinitions={settingsDefinitionsByAgent}
+                    revalidate={revalidate}
+                    onChange={handleChange}
+                    onDelete={handleDelete}
+                    addNewRow={handleNewRow}
+                    addValidationError={addValidationError}
+                    removeValidationError={removeValidationError}
+                  />
+                </>
+              )}
+            </>
           )}
         </form>
       </EuiForm>
       <EuiSpacer size="xxl" />
 
       {/* Bottom bar with save button */}
-      {unsavedChangesCount > 0 && (
+      {(unsavedChangesCount > 0 || removedConfigCount > 0) && (
         <BottomBarActions
           isLoading={isSaving}
-          onDiscardChanges={resetSettings}
+          onDiscardChanges={handleDiscardChanges}
           onSave={handleSubmitEvent}
           saveLabel={i18n.translate('xpack.apm.agentConfig.settingsPage.saveButton', {
             defaultMessage: 'Save configuration',
           })}
-          unsavedChangesCount={unsavedChangesCount}
+          unsavedChangesCount={unsavedChangesCount + removedConfigCount}
           appTestSubj="apm"
+          areChangesInvalid={hasActiveValidationErrors || !isFormValid}
         />
       )}
     </>
@@ -215,34 +340,21 @@ export function SettingsPage({
 function renderSettings({
   newConfig,
   unsavedChanges,
-  setNewConfig,
+  settingsDefinitionsByAgent,
+  onChange,
 }: {
   newConfig: AgentConfigurationIntake;
   unsavedChanges: Record<string, string>;
-  setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
+  settingsDefinitionsByAgent: SettingDefinition[];
+  onChange: ({ key, value }: { key: string; value: string }) => void;
 }) {
-  return (
-    settingDefinitions
-
-      // filter out agent specific items that are not applicable
-      // to the selected service
-      .filter(filterByAgent(newConfig.agent_name as AgentName))
-      .map((setting) => (
-        <SettingFormRow
-          isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
-          key={setting.key}
-          setting={setting}
-          value={newConfig.settings[setting.key]}
-          onChange={(key, value) => {
-            setNewConfig((prev) => ({
-              ...prev,
-              settings: {
-                ...prev.settings,
-                [key]: value,
-              },
-            }));
-          }}
-        />
-      ))
-  );
+  return settingsDefinitionsByAgent.map((setting) => (
+    <SettingFormRow
+      isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
+      key={setting.key}
+      setting={setting}
+      value={newConfig.settings[setting.key]}
+      onChange={onChange}
+    />
+  ));
 }

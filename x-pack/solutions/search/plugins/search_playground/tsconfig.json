@@ -58,7 +58,10 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-saved-objects-server",
     "@kbn/search-queries",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/search-shared-ui",
+    "@kbn/license-management-plugin",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*",

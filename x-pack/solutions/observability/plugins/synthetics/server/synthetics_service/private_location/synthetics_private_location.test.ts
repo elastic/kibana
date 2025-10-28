@@ -4,21 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  MonitorTypeEnum,
-  MonitorFields,
-  ScheduleUnit,
-  SourceType,
-  HeartbeatConfig,
-} from '../../../common/runtime_types';
+import type { MonitorFields, HeartbeatConfig } from '../../../common/runtime_types';
+import { MonitorTypeEnum, ScheduleUnit, SourceType } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { SyntheticsServerSetup } from '../../types';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import type { SyntheticsServerSetup } from '../../types';
+import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 describe('SyntheticsPrivateLocation', () => {
@@ -72,6 +67,7 @@ describe('SyntheticsPrivateLocation', () => {
         bulkCreate: jest.fn(),
         getByIDs: jest.fn(),
       },
+      runWithCache: async (cb: any) => await cb(),
     },
     spaces: {
       spacesService: {
@@ -189,7 +185,7 @@ describe('SyntheticsPrivateLocation', () => {
       []
     );
 
-    expect(test.formattedPolicy.inputs[0].streams[1]).toStrictEqual({
+    expect(test.formattedPolicy.inputs[3].streams[1]).toStrictEqual({
       data_stream: {
         dataset: 'browser',
         type: 'synthetics',

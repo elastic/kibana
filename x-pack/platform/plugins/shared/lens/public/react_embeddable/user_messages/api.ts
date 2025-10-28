@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { Adapters } from '@kbn/inspector-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import type {
+  UserMessagesGetter,
+  UserMessage,
+  FramePublicAPI,
+  SharingSavedObjectProps,
+  LensPublicCallbacks,
+  VisualizationContextHelper,
+  LensApi,
+  LensInternalApi,
+} from '@kbn/lens-common';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
@@ -13,26 +23,14 @@ import {
 } from '../../app_plugin/get_application_user_messages';
 import { getDatasourceLayers } from '../../state_management/utils';
 import {
-  UserMessagesGetter,
-  UserMessage,
-  FramePublicAPI,
-  SharingSavedObjectProps,
-} from '../../types';
-import {
   getActiveDatasourceIdFromDoc,
   getActiveVisualizationIdFromDoc,
   getInitialDataViewsObject,
 } from '../../utils';
-import {
-  LensPublicCallbacks,
-  LensEmbeddableStartServices,
-  VisualizationContextHelper,
-  LensApi,
-  LensInternalApi,
-} from '../types';
 import { getLegacyURLConflictsMessage, hasLegacyURLConflict } from './checks';
 import { getSearchWarningMessages } from '../../utils';
 import { addLog } from '../logger';
+import type { LensEmbeddableStartServices } from '../types';
 
 function getUpdatedState(
   getVisualizationContext: VisualizationContextHelper['getVisualizationContext'],

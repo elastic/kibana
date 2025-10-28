@@ -11,7 +11,7 @@ import {
   ADD_PANEL_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { FILTER_BY_MAP_EXTENT } from './filter_by_map_extent/constants';
 import { SYNCHRONIZE_MOVEMENT_ACTION } from './synchronize_movement/constants';
 import type { MapsPluginStartDependencies } from '../plugin';

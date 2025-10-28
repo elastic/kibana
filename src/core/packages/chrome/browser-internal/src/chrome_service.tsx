@@ -55,8 +55,9 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { Router } from '@kbn/shared-ux-router';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { isPrinting$ } from './utils/printing_observable';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -72,6 +73,7 @@ import { ProjectSideNavV1 } from './ui/project/sidenav_v1/sidenav';
 import { GridLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/grid_layout_sidenav';
 import { FixedLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/fixed_layout_sidenav';
 import { SideNavV2CollapseButton } from './ui/project/sidenav_v2/collapse_button';
+import type { NavigationProps as SideNavV2NavigationProps } from './ui/project/sidenav_v2/types';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -98,6 +100,7 @@ export interface StartDeps {
   userProfile: UserProfileService;
   uiSettings: IUiSettingsClient;
   analytics: AnalyticsServiceStart;
+  featureFlags: FeatureFlagsStart;
 }
 
 /** @internal */
@@ -265,6 +268,7 @@ export class ChromeService {
     userProfile,
     uiSettings,
     analytics,
+    featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
@@ -340,6 +344,7 @@ export class ChromeService {
       http,
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
+      featureFlags,
     });
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
@@ -400,9 +405,8 @@ export class ChromeService {
       projectNavigation.setProjectHome(homeHref);
     };
 
-    const setProjectName = (projectName: string) => {
-      validateChromeStyle();
-      projectNavigation.setProjectName(projectName);
+    const setKibanaName = (kibanaName: string) => {
+      projectNavigation.setKibanaName(kibanaName);
     };
 
     const setIsSideNavCollapsed = (isCollapsed: boolean) => {
@@ -482,6 +486,24 @@ export class ChromeService {
     const loadingCount$ = http.getLoadingCount$();
     const recentlyAccessed$ = recentlyAccessed.get$();
     const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
+    const feedbackUrlParams$ = projectNavigation.getFeedbackUrlParams$();
+
+    const navProps: SideNavV2NavigationProps = {
+      basePath: http.basePath,
+      application,
+      reportEvent: analytics.reportEvent,
+
+      navigationTree$: navigationTreeUi$,
+      activeNodes$,
+      navLinks$,
+
+      recentlyAccessed$,
+      loadingCount$,
+      dataTestSubj$: activeDataTestSubj$,
+      isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
+      navigationTourManager: projectNavigation.tourManager,
+      feedbackUrlParams$,
+    };
 
     const getProjectHeader = ({
       includeSideNav,
@@ -501,7 +523,7 @@ export class ChromeService {
       /**
        * Whether the header should include a side navigation and which version of it.
        */
-      includeSideNav: false | 'v1' | 'v2';
+      includeSideNav: false | 'v1' | 'v2' | 'both';
 
       /**
        * Whether the header should include the application subheader
@@ -532,7 +554,7 @@ export class ChromeService {
       >
         <Router history={application.history}>
           <>
-            {includeSideNav === 'v1' && (
+            {(includeSideNav === 'v1' || includeSideNav === 'both') && (
               <ProjectSideNavV1
                 isCollapsed$={this.isSideNavCollapsed$}
                 toggle={setIsSideNavCollapsed}
@@ -551,10 +573,12 @@ export class ChromeService {
               />
             )}
 
-            {includeSideNav === 'v2' && (
+            {(includeSideNav === 'v2' || includeSideNav === 'both') && (
               <FixedLayoutProjectSideNavV2
                 isCollapsed$={this.isSideNavCollapsed$}
                 toggle={setIsSideNavCollapsed}
+                navProps={navProps}
+                side={includeSideNav === 'both' ? 'right' : 'left'}
               />
             )}
           </>
@@ -632,7 +656,9 @@ export class ChromeService {
     };
 
     const getProjectSideNavV2ComponentForGridLayout = () => {
-      return <GridLayoutProjectSideNavV2 isCollapsed$={this.isSideNavCollapsed$} />;
+      return (
+        <GridLayoutProjectSideNavV2 isCollapsed$={this.isSideNavCollapsed$} navProps={navProps} />
+      );
     };
 
     return {
@@ -761,7 +787,8 @@ export class ChromeService {
       project: {
         setHome: setProjectHome,
         setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
-        setProjectName,
+        setFeedbackUrlParams: projectNavigation.setFeedbackUrlParams.bind(projectNavigation),
+        setKibanaName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setBreadcrumbs: setProjectBreadcrumbs,
@@ -769,6 +796,7 @@ export class ChromeService {
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
+        navigationTourManager: projectNavigation.tourManager,
       },
     };
   }

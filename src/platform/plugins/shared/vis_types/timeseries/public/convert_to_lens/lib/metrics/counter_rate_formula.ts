@@ -8,7 +8,7 @@
  */
 
 import { addAdditionalArgs } from '.';
-import { AdditionalArgs } from '../../types';
+import type { AdditionalArgs } from '../../types';
 
 const buildMaxFormula = (selector: string, additionalArgs: AdditionalArgs) => {
   return `max(${selector}${addAdditionalArgs(additionalArgs)})`;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
 
 import { contextMiddleware } from '.';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { applyChanges, initialState } from '../lens_slice';
-import { LensAppState } from '../types';
+import type { LensAppState } from '@kbn/lens-common';
 import { mockDataPlugin, mockStoreDeps } from '../../mocks';
 
 const storeDeps = mockStoreDeps();

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 
 type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
 
@@ -49,12 +49,14 @@ export interface ESQLControlState {
   grow?: boolean;
   width?: ControlWidthOptions;
   title: string;
-  availableOptions: string[];
   selectedOptions: string[];
   variableName: string;
   variableType: ESQLVariableType;
   esqlQuery: string;
   controlType: EsqlControlType;
+  // If the controlType is STATIC_VALUES, store the list of availableOptions in the control state
+  // VALUES_FROM_QUERY controls will instead fetch available options at runtime
+  availableOptions?: string[];
 }
 
 export const apiPublishesESQLVariable = (
@@ -72,5 +74,22 @@ export const apiPublishesESQLVariables = (
 ): unknownApi is PublishesESQLVariables => {
   return Boolean(
     unknownApi && (unknownApi as PublishesESQLVariables)?.esqlVariables$ !== undefined
+  );
+};
+
+interface HasVariableName {
+  variableName: string;
+}
+
+/**
+ * Type guard to check if a control state object has a variable name property.
+ * @param controlState - The control state object to check
+ * @returns True if the control state has a defined variableName property
+ */
+export const controlHasVariableName = (controlState: unknown): controlState is HasVariableName => {
+  return Boolean(
+    controlState &&
+      (controlState as HasVariableName)?.variableName !== undefined &&
+      typeof (controlState as HasVariableName).variableName === 'string'
   );
 };

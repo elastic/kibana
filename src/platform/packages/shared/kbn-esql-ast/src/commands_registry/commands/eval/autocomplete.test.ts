@@ -14,7 +14,7 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
 import { timeUnitsToSuggest } from '../../../definitions/constants';
 
@@ -451,7 +451,7 @@ describe('EVAL Autocomplete', () => {
     );
 
     await evalExpectSuggestions(
-      'from a | eval col0 = abs(b ) | eval abs(col0) ',
+      'from a | eval col0 = abs(doubleField ) | eval abs(col0) ',
       [
         ...getFieldNamesByType(['double', 'integer', 'long', 'unsigned_long']),
         ...getFunctionSignaturesByReturnType(
@@ -499,22 +499,38 @@ describe('EVAL Autocomplete', () => {
       ]),
     ];
 
-    const comparisonOperators = ['==', '!=', '>', '<', '>=', '<='];
-
     test('first position', async () => {
       await evalExpectSuggestions('from a | eval case(', allSuggestions);
       await evalExpectSuggestions('from a | eval case(', allSuggestions);
     });
 
-    test('suggests comparison operators after initial column', async () => {
-      // case( field /) suggest comparison operators at this point to converge to a boolean
-      await evalExpectSuggestions('from a | eval case( textField ', [...comparisonOperators, ',']);
-      await evalExpectSuggestions('from a | eval case( doubleField ', [
-        ...comparisonOperators,
-        ',',
+    test('suggests operators after initial column based on type', async () => {
+      // case( field ) suggests all appropriate operators for that field type
+      await evalExpectSuggestions('from a | eval case( textField ', [
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true, agg: false, scalar: false },
+          ['text']
+        ),
       ]);
+
+      await evalExpectSuggestions('from a | eval case( doubleField ', [
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true, agg: false, scalar: false },
+          ['double']
+        ),
+      ]);
+
       await evalExpectSuggestions('from a | eval case( booleanField ', [
-        ...comparisonOperators,
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true, agg: false, scalar: false },
+          ['boolean']
+        ),
         ',',
       ]);
     });

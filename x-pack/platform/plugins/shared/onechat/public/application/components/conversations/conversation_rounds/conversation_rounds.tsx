@@ -7,51 +7,62 @@
 
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConversationRound } from '@kbn/onechat-common';
 import React from 'react';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useConversationRounds } from '../../../hooks/use_conversation';
 import { ConversationContent } from '../conversation_grid';
 import { RoundError } from './round_error';
 import { RoundIcon } from './round_icon';
 import { RoundLayout } from './round_layout';
 import { RoundResponse } from './round_response';
+import { conversationRoundsId } from './conversation_rounds.styles';
 
 interface ConversationRoundsProps {
-  rounds: ConversationRound[];
-  isResponseLoading: boolean;
-  error: unknown;
-  onRetry: () => void;
+  scrollContainerHeight: number;
 }
 
 export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
-  rounds,
-  isResponseLoading,
-  error,
-  onRetry,
+  scrollContainerHeight,
 }) => {
+  const { isResponseLoading, retry, error } = useSendMessage();
+
+  const conversationRounds = useConversationRounds();
+
   return (
     <ConversationContent>
       <EuiFlexGroup
+        id={conversationRoundsId}
         direction="column"
         gutterSize="l"
         aria-label={i18n.translate('xpack.onechat.conversationRounds', {
           defaultMessage: 'Conversation messages',
         })}
       >
-        {rounds.map(({ input, response, steps }, index) => {
-          const isCurrentRound = index === rounds.length - 1;
+        {conversationRounds.map((round, index) => {
+          const { input, response, steps } = round;
+          const isCurrentRound = index === conversationRounds.length - 1;
           const isLoading = isResponseLoading && isCurrentRound;
           const isError = Boolean(error) && isCurrentRound;
+
           return (
             <RoundLayout
               key={index}
+              scrollContainerHeight={scrollContainerHeight}
               // TODO: eventually we will use a RoundInput component when we have more complicated inputs like file attachments
               input={<EuiText size="s">{input.message}</EuiText>}
+              isResponseLoading={isResponseLoading}
+              isCurrentRound={isCurrentRound}
               outputIcon={<RoundIcon isLoading={isLoading} isError={isError} />}
               output={
                 isError ? (
-                  <RoundError error={error} onRetry={onRetry} />
+                  <RoundError error={error} onRetry={retry} />
                 ) : (
-                  <RoundResponse response={response} steps={steps} isLoading={isLoading} />
+                  <RoundResponse
+                    rawRound={round}
+                    response={response}
+                    steps={steps}
+                    isLoading={isLoading}
+                  />
                 )
               }
             />

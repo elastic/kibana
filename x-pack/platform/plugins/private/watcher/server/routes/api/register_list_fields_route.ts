@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 // @ts-ignore
 import { Fields } from '../../models/fields';
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
   indexes: schema.arrayOf(schema.string()),

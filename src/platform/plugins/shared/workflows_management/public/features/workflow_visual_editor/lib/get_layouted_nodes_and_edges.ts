@@ -7,30 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import dagre, { graphlib } from '@dagrejs/dagre';
-import { WorkflowYaml } from '@kbn/workflows';
 import { Position } from '@xyflow/react';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { getTriggerLabel } from '../../../shared/lib/graph_utils';
 
-export type NodeType = 'if' | 'merge' | 'parallel' | 'action' | 'foreach' | 'atomic' | 'trigger';
+export type NodeType =
+  | 'if'
+  | 'merge'
+  | 'parallel'
+  | 'action'
+  | 'foreach'
+  | 'atomic'
+  | 'http'
+  | 'trigger';
 
-export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'merge', 'trigger'];
-
-function getTriggerLabel(triggerType: string) {
-  switch (triggerType) {
-    case 'triggers.elastic.manual':
-      return 'Manual';
-    case 'triggers.elastic.detectionRule':
-      return 'Detection Rule';
-    case 'triggers.elastic.scheduled':
-      return 'Scheduled';
-    default:
-      return triggerType;
-  }
-}
+export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
 
 export function transformYamlToNodesAndEdges(
-  triggers: WorkflowYaml['workflow']['triggers'],
-  steps: WorkflowYaml['workflow']['steps']
+  triggers: WorkflowYaml['triggers'],
+  steps: WorkflowYaml['steps']
 ) {
   const nodes: any[] = [];
   const edges: any[] = [];
@@ -219,8 +218,8 @@ export function transformYamlToNodesAndEdges(
 
 export function getLayoutedNodesAndEdges(workflowDefinition: WorkflowYaml) {
   const { nodes, edges } = transformYamlToNodesAndEdges(
-    workflowDefinition.workflow?.triggers ?? [],
-    workflowDefinition.workflow?.steps ?? []
+    workflowDefinition?.triggers ?? [],
+    workflowDefinition?.steps ?? []
   );
 
   const dagreGraph = new graphlib.Graph();

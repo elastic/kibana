@@ -419,6 +419,7 @@ Object {
     "sourceFields": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The sourceFields param is ignored.",
         "error": [Function],
         "presence": "optional",
       },
@@ -2945,6 +2946,33 @@ Object {
         "error": [Function],
       },
       "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "schema": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
         Object {
           "args": Object {
             "method": [Function],
@@ -5754,6 +5782,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -6097,6 +6126,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -6425,6 +6472,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -6768,6 +6816,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -7067,6 +7133,9 @@ Object {
                     "field": Object {
                       "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
                     },
+                    "negate": Object {
+                      "type": "boolean",
+                    },
                     "type": Object {
                       "const": "mapping",
                       "type": "string",
@@ -7159,6 +7228,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -7502,6 +7572,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -7811,6 +7899,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -8154,6 +8243,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -8519,6 +8626,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -8862,6 +8970,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -9228,6 +9354,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -9571,6 +9698,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -9937,6 +10082,7 @@ Object {
                   "rule_default",
                   "endpoint",
                   "endpoint_trusted_apps",
+                  "endpoint_trusted_devices",
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
@@ -10280,6 +10426,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },

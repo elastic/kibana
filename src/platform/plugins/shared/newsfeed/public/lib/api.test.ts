@@ -12,7 +12,7 @@ import { driverInstanceMock, storageInstanceMock } from './api.test.mocks';
 import moment from 'moment';
 import { getApi } from './api';
 import { TestScheduler } from 'rxjs/testing';
-import { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
+import type { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
 import { take } from 'rxjs';
 
 import { NewsfeedApiDriver as MockNewsfeedApiDriver } from './driver';

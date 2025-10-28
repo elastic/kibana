@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiFlexItemProps } from '@elastic/eui';
+import type { EuiFlexItemProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -14,6 +15,8 @@ interface PipelineTreeNodeLabelProps {
   isManaged: boolean;
   isDeprecated: boolean;
 }
+
+const MAX_PIPELINE_NAME_LENGTH = 30;
 
 export const PipelineTreeNodeLabel = ({
   pipelineName,
@@ -33,7 +36,9 @@ export const PipelineTreeNodeLabel = ({
         grow={(10 - Number(isDeprecated) - Number(isManaged)) as EuiFlexItemProps['grow']}
         css={{ textAlign: 'left' }}
       >
-        {pipelineName}
+        {pipelineName.length > MAX_PIPELINE_NAME_LENGTH
+          ? `${pipelineName.slice(0, MAX_PIPELINE_NAME_LENGTH)}...`
+          : pipelineName}
       </EuiFlexItem>
       {isManaged && (
         <EuiFlexItem grow={1} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>

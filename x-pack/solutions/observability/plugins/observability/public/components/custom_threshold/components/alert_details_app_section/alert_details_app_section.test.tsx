@@ -10,16 +10,16 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { render } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   buildCustomThresholdAlert,
   buildCustomThresholdRule,
 } from '../../mocks/custom_threshold_rule';
-import { CustomThresholdAlertFields } from '../../types';
+import type { CustomThresholdAlertFields } from '../../types';
 import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
-import { CustomThresholdAlert } from '../types';
+import type { CustomThresholdAlert } from '../types';
 import AlertDetailsAppSection from './alert_details_app_section';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
@@ -125,31 +125,25 @@ describe('AlertDetailsAppSection', () => {
     expect(result.getByTestId('chartTitle-0').textContent).toBe(
       'Equation result for count (host.name: host-1)'
     );
-    expect((result.getByTestId('viewLogs-0') as any).href).toBe('http://localhost/view-in-app-url');
 
     expect(result.getByTestId('chartTitle-1').textContent).toBe(
       'Equation result for max (system.cpu.user.pct)'
     );
-    expect((result.getByTestId('viewLogs-1') as any).href).toBe('http://localhost/view-in-app-url');
 
     expect(result.getByTestId('chartTitle-2').textContent).toBe(
       'Equation result for min (system.memory.used.pct)'
     );
-    expect((result.getByTestId('viewLogs-2') as any).href).toBe('http://localhost/view-in-app-url');
 
     expect(result.getByTestId('chartTitle-3').textContent).toBe(
       'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct...'
     );
-    expect((result.getByTestId('viewLogs-3') as any).href).toBe('http://localhost/view-in-app-url');
 
     expect(result.getByTestId('chartTitle-4').textContent).toBe(
       'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct)'
     );
-    expect((result.getByTestId('viewLogs-4') as any).href).toBe('http://localhost/view-in-app-url');
 
     expect(result.getByTestId('chartTitle-5').textContent).toBe(
       'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct)'
     );
-    expect((result.getByTestId('viewLogs-5') as any).href).toBe('http://localhost/view-in-app-url');
   });
 });

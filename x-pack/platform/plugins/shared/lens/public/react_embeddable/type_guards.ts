@@ -11,12 +11,13 @@ import {
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
-import {
-  LensApiCallbacks,
+import type {
   LensApi,
-  LensComponentForwardedProps,
+  LensApiCallbacks,
+  ESQLVariablesCompatibleDashboardApi,
   LensPublicCallbacks,
-} from './types';
+  LensComponentForwardedProps,
+} from '@kbn/lens-common';
 
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
   const fns = [
@@ -72,3 +73,14 @@ export function apiPublishesInlineEditingCapabilities(
 ): api is { canEditInline: boolean } {
   return isObject(api) && Object.hasOwn(api, 'canEditInline');
 }
+
+export const isApiESQLVariablesCompatible = (
+  api: unknown | null
+): api is ESQLVariablesCompatibleDashboardApi => {
+  return Boolean(
+    api &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.esqlVariables$ !== undefined &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.controlGroupApi$ !== undefined &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.children$ !== undefined
+  );
+};

@@ -21,10 +21,12 @@ import type { Action } from '@elastic/eui/src/components/basic_table/action_type
 
 import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
-import { type UrlPagination, useLink, useAuthz } from '../../../../../../../hooks';
+import { type UrlPagination, useLink, useAuthz, useLicense } from '../../../../../../../hooks';
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
+
+import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
@@ -56,9 +58,14 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   const { selectedItems, setSelectedItems } = selection;
   const { addViewPolicies } = useViewPolicies();
   const {
-    actions: { bulkUninstallIntegrationsWithConfirmModal, bulkUpgradeIntegrationsWithConfirmModal },
+    actions: {
+      bulkUninstallIntegrationsWithConfirmModal,
+      bulkUpgradeIntegrationsWithConfirmModal,
+      bulkRollbackIntegrationsWithConfirmModal,
+    },
   } = useInstalledIntegrationsActions();
-
+  const { enablePackageRollback } = ExperimentalFeaturesService.get();
+  const licenseService = useLicense();
   const { setPagination } = pagination;
   const handleTablePagination = React.useCallback(
     ({ page }: CriteriaWithPagination<InstalledPackageUIPackageListItem>) => {
@@ -75,6 +82,12 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     }
     const count = item.packagePoliciesInfo.count;
     return count > 0;
+  };
+  const hasPreviousVersion = (item: InstalledPackageUIPackageListItem) => {
+    return !!item.installationInfo?.previous_version;
+  };
+  const isRollbackTTLExpired = (item: InstalledPackageUIPackageListItem) => {
+    return !!item.installationInfo?.is_rollback_ttl_expired;
   };
 
   return (
@@ -201,7 +214,6 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               );
             },
           },
-          // TODO Actions are not yet implemented to be done in https://github.com/elastic/kibana/issues/209867
           {
             actions: [
               wrapActionWithDisabledTooltip(
@@ -308,6 +320,67 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   }
                 )
               ),
+              ...(enablePackageRollback
+                ? [
+                    wrapActionWithDisabledTooltip(
+                      {
+                        name: i18n.translate(
+                          'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
+                          {
+                            defaultMessage: 'Rollback integration',
+                          }
+                        ),
+                        icon: 'returnKey',
+                        type: 'icon',
+
+                        onClick: (item) => bulkRollbackIntegrationsWithConfirmModal([item]),
+                        enabled: (item) =>
+                          hasPreviousVersion(item) &&
+                          !!licenseService.isEnterprise() &&
+                          !isRollbackTTLExpired(item),
+                        description: (item) =>
+                          !hasPreviousVersion(item)
+                            ? i18n.translate(
+                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsNoPreviousVersionLabel',
+                                {
+                                  defaultMessage:
+                                    "You can't rollback this integration because it does not have a previous version saved.",
+                                }
+                              )
+                            : !licenseService.isEnterprise()
+                            ? i18n.translate(
+                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsNoEnterpriseLabel',
+                                {
+                                  defaultMessage:
+                                    'Rollback integrations requires an enterprise license.',
+                                }
+                              )
+                            : isRollbackTTLExpired(item)
+                            ? i18n.translate(
+                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsTTLExpiredLabel',
+                                {
+                                  defaultMessage:
+                                    'Rollback is no longer allowed for this integration.',
+                                }
+                              )
+                            : i18n.translate(
+                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
+                                {
+                                  defaultMessage: 'Rollback integration',
+                                }
+                              ),
+                      },
+                      !authz.integrations.installPackages,
+                      i18n.translate(
+                        'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsRequiredPermissionTooltip',
+                        {
+                          defaultMessage:
+                            "You don't have permissions to rollback integrations. Contact your administrator.",
+                        }
+                      )
+                    ),
+                  ]
+                : []),
             ],
           },
         ]}

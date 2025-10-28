@@ -10,8 +10,9 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { EuiProvider } from '@elastic/eui';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import MetricVisComponent, { MetricVisComponentProps } from './metric_component';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { MetricVisComponentProps } from './metric_component';
+import MetricVisComponent from './metric_component';
 import { LabelPosition } from '../../common/constants';
 
 jest.mock('../services', () => ({

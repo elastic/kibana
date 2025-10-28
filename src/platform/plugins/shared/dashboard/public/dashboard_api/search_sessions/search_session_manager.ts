@@ -8,14 +8,14 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
 import { dataService } from '../../services/kibana_services';
 import { startDashboardSearchSessionIntegration } from './start_dashboard_search_session_integration';
 
 export function initializeSearchSessionManager(
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
-  incomingEmbeddable: EmbeddablePackageState | undefined,
+  incomingEmbeddables: EmbeddablePackageState[] | undefined,
   dashboardApi: Omit<DashboardApi, 'searchSessionId$'>,
   dashboardInternalApi: DashboardInternalApi
 ) {
@@ -26,9 +26,11 @@ export function initializeSearchSessionManager(
     const { sessionIdToRestore } = searchSessionSettings;
 
     // if this incoming embeddable has a session, continue it.
-    if (incomingEmbeddable?.searchSessionId) {
-      dataService.search.session.continue(incomingEmbeddable.searchSessionId);
-    }
+    incomingEmbeddables?.forEach((embeddablePackage) => {
+      if (embeddablePackage.searchSessionId) {
+        dataService.search.session.continue(embeddablePackage.searchSessionId);
+      }
+    });
     if (sessionIdToRestore) {
       dataService.search.session.restore(sessionIdToRestore);
     }
@@ -36,7 +38,7 @@ export function initializeSearchSessionManager(
 
     const initialSearchSessionId =
       sessionIdToRestore ??
-      (existingSession && incomingEmbeddable
+      (existingSession && incomingEmbeddables?.length
         ? existingSession
         : dataService.search.session.start());
     searchSessionId$.next(initialSearchSessionId);

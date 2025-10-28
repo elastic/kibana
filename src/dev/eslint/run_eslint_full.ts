@@ -9,7 +9,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 
 const batchSize = 250;
@@ -19,17 +19,15 @@ run(
   async ({ log, flags }) => {
     const bail = !!(flags.bail || false);
 
-    const { batches, files } = getLintableFileBatches();
+    const { batches, files } = getLintableFileBatches(flags._);
     log.info(`Found ${files.length} files in ${batches.length} batches to lint.`);
 
-    const eslintArgs =
-      // Unexpected will contain anything meant for ESLint directly, like `--fix`
-      flags.unexpected
-        // ESLint has no cache by default
-        .concat([flags.cache ? '--cache' : '--no-cache']);
+    const eslintArgs = [...(flags.fix ? ['--fix'] : []), flags.cache ? '--cache' : '--no-cache'];
+
+    // ESLint has no cache by default
     log.info(
       `Running ESLint with args: ${pretty({
-        args: eslintArgs,
+        args: eslintArgs.concat(flags._),
         batchSize,
         maxParallelism,
       })}`
@@ -52,23 +50,23 @@ run(
   {
     description: 'Run ESLint on all JavaScript/TypeScript files in the repository',
     flags: {
-      boolean: ['bail', 'cache'],
+      boolean: ['bail', 'cache', 'fix'],
       default: {
         bail: false,
         cache: true, // Enable caching by default
       },
-      allowUnexpected: true,
       help: `
         --bail            Stop on the first linting error
         --no-cache        Disable ESLint caching
+        --fix             Fix files
       `,
     },
   }
 );
 
-function getLintableFileBatches() {
+function getLintableFileBatches(filePatterns: string[]) {
   const files = execa
-    .sync('git', ['ls-files'], {
+    .sync('git', ['ls-files', ...filePatterns], {
       cwd: REPO_ROOT,
       encoding: 'utf8',
     })
@@ -79,6 +77,7 @@ function getLintableFileBatches() {
   for (let i = 0; i < files.length; i += batchSize) {
     batches.push(files.slice(i, i + batchSize));
   }
+
   return { batches, files };
 }
 

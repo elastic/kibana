@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useRef } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { useRovingIndex } from '../../utils/use_roving_index';
+import { getFocusableElements } from '../../utils/get_focusable_elements';
+import { updateTabIndices } from '../../utils/update_tab_indices';
+import { handleRovingIndex } from '../../utils/handle_roving_index';
 
 export interface SideNavFooterProps {
   children: ReactNode;
@@ -19,16 +23,15 @@ export interface SideNavFooterProps {
 }
 
 export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JSX.Element => {
-  const ref = useRef<HTMLElement>(null);
-
   const { euiTheme } = useEuiTheme();
 
-  useRovingIndex(ref);
-
   return (
+    // The footer itself is not interactive but the children are
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <footer
-      // TODO: translate
-      aria-label="Side navigation footer"
+      aria-label={i18n.translate('core.ui.chrome.sideNavigation.footerAriaLabel', {
+        defaultMessage: 'Side navigation',
+      })}
       css={css`
         align-items: center;
         border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
@@ -38,7 +41,13 @@ export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JS
         justify-content: center;
         padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
       `}
-      ref={ref}
+      onKeyDown={handleRovingIndex}
+      ref={(ref) => {
+        if (ref) {
+          const elements = getFocusableElements(ref);
+          updateTabIndices(elements);
+        }
+      }}
     >
       {children}
     </footer>

@@ -176,6 +176,20 @@
             "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grid-layout",
+            "id": "def-public.GridPanelData.resizeOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "resizeOptions",
+            "description": [],
+            "signature": [
+              "{ minWidth?: number | undefined; maxWidth?: number | undefined; minHeight?: number | undefined; maxHeight?: number | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_panel/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

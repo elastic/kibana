@@ -8,23 +8,17 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/types';
-import { ReactNode } from 'react';
-import { GeoJsonProperties } from 'geojson';
-import { Geometry } from 'geojson';
-import { DRAW_SHAPE } from '../constants';
-import { CustomIcon } from './style_property_descriptor_types';
-import { INITIAL_LOCATION } from '../constants';
+import type { ReactNode } from 'react';
+import type { GeoJsonProperties } from 'geojson';
+import type { Geometry } from 'geojson';
+import type { DRAW_SHAPE } from '../constants';
+import type { MapCenter } from '.';
 
 export type MapExtent = {
   minLon: number;
   minLat: number;
   maxLon: number;
   maxLat: number;
-};
-
-export type MapCenter = {
-  lat: number;
-  lon: number;
 };
 
 export type MapCenterAndZoom = MapCenter & {
@@ -82,34 +76,4 @@ export type DrawState = {
 export type EditState = {
   layerId: string;
   drawShape?: DRAW_SHAPE;
-};
-
-export type MapSettings = {
-  autoFitToDataBounds: boolean;
-  backgroundColor: string;
-  customIcons: CustomIcon[];
-  disableInteractive: boolean;
-  disableTooltipControl: boolean;
-  hideToolbarOverlay: boolean;
-  hideLayerControl: boolean;
-  hideViewControl: boolean;
-  initialLocation: INITIAL_LOCATION;
-  fixedLocation: {
-    lat: number;
-    lon: number;
-    zoom: number;
-  };
-  browserLocation: {
-    zoom: number;
-  };
-  keydownScrollZoom: boolean;
-  maxZoom: number;
-  minZoom: number;
-  projection: 'globeInterpolate' | 'mercator';
-  showScaleControl: boolean;
-  showSpatialFilters: boolean;
-  showTimesliderToggleButton: boolean;
-  spatialFiltersAlpa: number;
-  spatialFiltersFillColor: string;
-  spatialFiltersLineColor: string;
 };

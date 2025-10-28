@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
-  type SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
-  type SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
-  type SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  type SavedObjectsBulkCreateObject,
+  type SavedObjectsCreateOptions,
+  type SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { isEmpty, isEqual } from 'lodash';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 import {
   legacyMonitorAttributes,
@@ -27,13 +30,13 @@ import {
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
 import { formatSecrets, normalizeSecrets } from '../synthetics_service/utils';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
 import { combineAndSortSavedObjects } from './utils/combine_and_sort_saved_objects';
 
 const getSuccessfulResult = <T>(
@@ -63,7 +66,10 @@ export class MonitorConfigRepository {
     ]);
     const resolved = results.saved_objects.find((obj) => obj?.attributes);
     if (!resolved) {
-      throw new Error('Monitor not found');
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+        syntheticsMonitorSavedObjectType,
+        id
+      );
     }
     return resolved;
   }

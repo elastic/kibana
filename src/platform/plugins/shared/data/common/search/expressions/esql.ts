@@ -24,7 +24,8 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
 import { getIndexPatternFromESQLQuery, fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
-import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { catchError, defer, map, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import DateMath from '@kbn/datemath';
@@ -37,7 +38,7 @@ import {
   isRunningResponse,
   type KibanaContext,
 } from '..';
-import { UiSettingsCommon } from '../..';
+import type { UiSettingsCommon } from '../..';
 
 declare global {
   interface Window {
@@ -170,7 +171,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         descriptionForInspector,
         ignoreGlobalFilters,
       },
-      { abortSignal, inspectorAdapters, getKibanaRequest }
+      { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
     ) {
       return defer(() =>
         getStartDependencies(() => {
@@ -194,7 +195,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query: fixedQuery,
             // time_zone: timezone,
             locale,
-            include_ccs_metadata: true,
+            include_execution_metadata: true,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
@@ -271,7 +272,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
-            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY, sessionId: getSearchSessionId() }
           ).pipe(
             catchError((error) => {
               if (!error.attributes) {
@@ -350,16 +351,26 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               }
             : undefined;
 
+          // Normalize body.values: if all arrays are empty, convert to single empty array
+          const normalizedValues = body.values.every(
+            (row) => Array.isArray(row) && row.length === 0
+          )
+            ? []
+            : body.values;
+
           const allColumns =
             // eslint-disable-next-line @typescript-eslint/naming-convention
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
               const hasConflict = type === 'unsupported' && originalTypes.length > 1;
+              const kibanaFieldType = hasConflict
+                ? KBN_FIELD_TYPES.CONFLICT
+                : esFieldTypeToKibanaFieldType(type);
               return {
                 id: name,
                 name,
                 meta: {
-                  type: hasConflict ? KBN_FIELD_TYPES.CONFLICT : esFieldTypeToKibanaFieldType(type),
+                  type: kibanaFieldType,
                   esType: type,
                   sourceParams:
                     type === 'date'
@@ -373,6 +384,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                           indexPattern,
                           sourceField: name,
                         },
+                  params: {
+                    id: kibanaFieldType,
+                  },
                 },
                 isNull: hasEmptyColumns ? !lookup.has(name) : false,
               };
@@ -391,7 +405,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           }
           const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
 
-          const rows = body.values.map((row) => zipObject(columnNames, row));
+          const rows = normalizedValues.map((row) => zipObject(columnNames, row));
 
           return {
             type: 'datatable',
@@ -399,7 +413,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               type: ESQL_TABLE_TYPE,
               query,
               statistics: {
-                totalCount: body.values.length,
+                totalCount: normalizedValues.length,
               },
             },
             columns: updatedWithVariablesColumns,

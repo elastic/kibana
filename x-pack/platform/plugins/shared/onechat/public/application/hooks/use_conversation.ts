@@ -5,136 +5,30 @@
  * 2.0.
  */
 
-import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
-import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
-import produce from 'immer';
-import { useEffect, useMemo, useRef } from 'react';
-import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import { useQuery } from '@kbn/react-query';
+import { useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { queryKeys } from '../query_keys';
-import { appPaths } from '../utils/app_paths';
-import { createNewConversation, newConversationId } from '../utils/new_conversation';
+import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
-import { useNavigation } from './use_navigation';
 import { useOnechatServices } from './use_onechat_service';
-
-const createActions = ({
-  queryClient,
-  queryKey,
-  navigateToConversation,
-}: {
-  queryClient: QueryClient;
-  queryKey: QueryKey;
-  navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => void;
-}) => {
-  const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
-    queryClient.setQueryData<Conversation>(queryKey, updater);
-  };
-  const setCurrentRound = (updater: (conversationRound: ConversationRound) => void) => {
-    setConversation(
-      produce((draft) => {
-        const round = draft?.rounds?.at(-1);
-        if (round) {
-          updater(round);
-        }
-      })
-    );
-  };
-  const removeNewConversationQuery = () => {
-    queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
-  };
-  const [_, conversationId] = queryKey;
-  const isNewConversation = conversationId === newConversationId;
-  return {
-    invalidateConversation: () => {
-      removeNewConversationQuery();
-      queryClient.invalidateQueries({ queryKey });
-    },
-    addConversation: () => {
-      setConversation(() => createNewConversation());
-    },
-    addConversationRound: ({ userMessage }: { userMessage: string }) => {
-      setConversation(
-        produce((draft) => {
-          const nextRound: ConversationRound = {
-            input: { message: userMessage },
-            response: { message: '' },
-            steps: [],
-          };
-          draft?.rounds?.push(nextRound);
-        })
-      );
-    },
-    setAgentId: (agentId: string) => {
-      // We allow to change agent only at the start of the conversation
-      if (!isNewConversation) {
-        return;
-      }
-      setConversation(
-        produce((draft) => {
-          if (draft) {
-            draft.agent_id = agentId;
-          }
-        })
-      );
-    },
-    addToolCall: ({ step }: { step: ToolCallStep }) => {
-      setCurrentRound((round) => {
-        round.steps.push(step);
-      });
-    },
-    setToolCallResult: ({ results, toolCallId }: { results: ToolResult[]; toolCallId: string }) => {
-      setCurrentRound((round) => {
-        const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
-        if (step) {
-          step.results = results;
-        }
-      });
-    },
-    setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => {
-      setCurrentRound((round) => {
-        round.response.message = assistantMessage;
-      });
-    },
-    addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => {
-      setCurrentRound((round) => {
-        round.response.message += messageChunk;
-      });
-    },
-    onConversationCreated: ({
-      conversationId: id,
-      title,
-    }: {
-      conversationId: string;
-      title: string;
-    }) => {
-      const current = queryClient.getQueryData<Conversation>(queryKey);
-      if (!current) {
-        throw new Error('Conversation not created');
-      }
-      queryClient.setQueryData<Conversation>(
-        queryKeys.conversations.byId(id),
-        produce(current, (draft) => {
-          draft.id = id;
-          draft.title = title;
-        })
-      );
-      removeNewConversationQuery();
-      // Invalidate all conversations to refresh conversation history
-      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
-      navigateToConversation({ nextConversationId: id });
-    },
-  };
-};
+import { storageKeys } from '../storage_keys';
+import { useSendMessage } from '../context/send_message/send_message_context';
+import { useValidateAgentId } from './agents/use_validate_agent_id';
 
 export const useConversation = () => {
-  const shouldAllowConversationRedirectRef = useRef(true);
   const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
-  const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
-  const { data: conversation, isLoading } = useQuery({
+  const {
+    data: conversation,
+    isLoading,
+    isFetching,
+    isFetched,
+  } = useQuery({
     queryKey,
     // Disable query if we are on a new conversation or if there is a message currently being sent
     // Otherwise a refetch will overwrite our optimistic updates
@@ -146,45 +40,84 @@ export const useConversation = () => {
       return conversationsService.get({ conversationId });
     },
   });
-  const { navigateToOnechatUrl } = useNavigation();
 
-  useEffect(() => {
-    return () => {
-      // On unmount disable conversation redirect
-      shouldAllowConversationRedirectRef.current = false;
-    };
-  }, []);
+  return { conversation, isLoading, isFetching, isFetched };
+};
 
-  const actions = useMemo(
-    () =>
-      createActions({
-        queryClient,
-        queryKey,
-        navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => {
-          // Navigate to the new conversation if user is still on the "new" conversation page
-          if (!conversationId && shouldAllowConversationRedirectRef.current) {
-            navigateToOnechatUrl(
-              appPaths.chat.conversation({ conversationId: nextConversationId })
-            );
-          }
-        },
-      }),
-    [queryClient, queryKey, conversationId, navigateToOnechatUrl]
-  );
+export const useConversationStatus = () => {
+  const { isLoading, isFetching, isFetched } = useConversation();
+  return { isLoading, isFetching, isFetched };
+};
 
-  useEffect(() => {
-    if (!conversationId && !conversation) {
-      actions.addConversation();
+const useGetNewConversationAgentId = () => {
+  const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const validateAgentId = useValidateAgentId();
+
+  // Ensure we always return a string
+  return (): string => {
+    const isAgentIdValid = validateAgentId(agentIdStorage);
+    if (isAgentIdValid) {
+      return agentIdStorage;
     }
-  }, [conversationId, actions, conversation]);
-
-  return {
-    conversation,
-    conversationId,
-    hasActiveConversation: Boolean(
-      conversationId || (conversation && conversation.rounds.length > 0)
-    ),
-    isLoading,
-    actions,
+    return oneChatDefaultAgentId;
   };
+};
+
+export const useAgentId = () => {
+  const { conversation } = useConversation();
+  const agentId = conversation?.agent_id;
+  const conversationId = useConversationId();
+  const isNewConversation = !conversationId;
+  const getNewConversationAgentId = useGetNewConversationAgentId();
+
+  if (agentId) {
+    return agentId;
+  }
+
+  // For new conversations, agent id must be defined
+  if (isNewConversation) {
+    return getNewConversationAgentId();
+  }
+
+  return undefined;
+};
+
+export const useConversationTitle = () => {
+  const { conversation, isLoading } = useConversation();
+  return { title: conversation?.title ?? '', isLoading };
+};
+
+export const useConversationRounds = () => {
+  const { conversation } = useConversation();
+  const { pendingMessage, error } = useSendMessage();
+
+  const conversationRounds = useMemo(() => {
+    const rounds = conversation?.rounds ?? [];
+    if (Boolean(error) && pendingMessage) {
+      return [
+        ...rounds,
+        { id: '', input: { message: pendingMessage }, response: { message: '' }, steps: [] },
+      ];
+    }
+    return rounds;
+  }, [conversation?.rounds, error, pendingMessage]);
+
+  return conversationRounds;
+};
+
+// Returns a flattened list of all steps across all rounds.
+// CAUTION: This uses `conversationRounds.length` as useMemo key to prevent re-renders during streaming. This will return stale data for the last round. It will only contain the complete set of steps up until the previous round.
+export const useStepsFromPrevRounds = () => {
+  const conversationRounds = useConversationRounds();
+
+  return useMemo(() => {
+    return conversationRounds.flatMap(({ steps }) => steps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationRounds.length]); // only depend on length to avoid re-renders during streaming
+};
+
+export const useHasActiveConversation = () => {
+  const conversationId = useConversationId();
+  const conversationRounds = useConversationRounds();
+  return Boolean(conversationId || conversationRounds.length > 0);
 };

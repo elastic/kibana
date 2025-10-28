@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css, cx } from '@emotion/css';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKubernetesCharts } from '../hooks/use_host_metrics_charts';
@@ -24,10 +25,14 @@ import type { KubernetesContainerMetrics, MetricsChartsFields } from './types';
 
 const FRAGMENT_BASE = 'key-metrics';
 
-export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChartsFields>(
+interface Props extends MetricsChartsFields {
+  schema?: DataSchemaFormat | null;
+}
+
+export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, Props>(
   ({ entityId, dataView, dateRange, onShowAll, overview }, ref) => {
     const { charts } = useKubernetesCharts({
-      dataViewId: dataView?.id,
+      indexPattern: dataView?.getIndexPattern(),
       overview,
     });
 
@@ -75,6 +80,7 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
               entityId={entityId}
               dateRange={dateRange}
               lensAttributes={chart}
+              dataView={dataView}
               queryField={findInventoryFields('host').id}
             />
           ))}

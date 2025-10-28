@@ -44,8 +44,6 @@ describe('Space awareness migration', () => {
 
   beforeEach(() => {
     endpointServiceMock = createMockEndpointAppContextService();
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
     migrationsState = {
       [ARTIFACTS_MIGRATION_REF_DATA_ID]: {
         id: ARTIFACTS_MIGRATION_REF_DATA_ID,
@@ -55,6 +53,7 @@ describe('Space awareness migration', () => {
           started: '',
           finished: '',
           status: 'not-started',
+          version: 2,
         },
       },
       [RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID]: {
@@ -79,15 +78,6 @@ describe('Space awareness migration', () => {
     refDataMock.update.mockImplementation(async (id, data) => {
       return data;
     });
-  });
-
-  it('should do nothing if feature flag is disabled', async () => {
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
-
-    await expect(migrateEndpointDataToSupportSpaces(endpointServiceMock)).resolves.toBeUndefined();
-    expect(endpointServiceMock.getInternalFleetServices).not.toHaveBeenCalled();
-    expect(endpointServiceMock.getInternalEsClient).not.toHaveBeenCalled();
   });
 
   describe('for Artifacts', () => {
@@ -146,19 +136,21 @@ describe('Space awareness migration', () => {
         expect.objectContaining({
           executeFunctionOnStream: expect.any(Function),
           listId: [
+            'endpoint_list',
             'endpoint_trusted_apps',
+            'endpoint_trusted_devices',
             'endpoint_event_filters',
             'endpoint_host_isolation_exceptions',
             'endpoint_blocklists',
-            'endpoint_list',
           ],
-          namespaceType: ['agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic'],
+          namespaceType: ['agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic'],
           filter: [
-            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
-            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
-            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
-            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
-            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
+            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
           ],
         })
       );
@@ -205,6 +197,21 @@ describe('Space awareness migration', () => {
       expect(endpointServiceMock.getReferenceDataClient().update).toHaveBeenCalledWith(
         ARTIFACTS_MIGRATION_REF_DATA_ID,
         expect.objectContaining({ metadata: expect.objectContaining({ status: 'complete' }) })
+      );
+    });
+
+    it('should re-run migration if version is less than 2', async () => {
+      artifactMigrationState.metadata.status = 'complete';
+      artifactMigrationState.metadata.version = 1;
+
+      await expect(
+        migrateEndpointDataToSupportSpaces(endpointServiceMock)
+      ).resolves.toBeUndefined();
+      expect(endpointServiceMock.getReferenceDataClient().update).toHaveBeenCalledWith(
+        ARTIFACTS_MIGRATION_REF_DATA_ID,
+        expect.objectContaining({
+          metadata: expect.objectContaining({ status: 'complete', version: 2 }),
+        })
       );
     });
   });
@@ -280,7 +287,7 @@ describe('Space awareness migration', () => {
         await expect(
           migrateEndpointDataToSupportSpaces(endpointServiceMock)
         ).resolves.toBeUndefined();
-        expect(endpointServiceMock.getExceptionListsClient).not.toHaveBeenCalled();
+        expect(endpointServiceMock.getInternalEsClient().indices.exists).not.toHaveBeenCalled();
       }
     );
 

@@ -18,7 +18,6 @@ import type {
   MutableRefObject,
   ReactNode,
   RefAttributes,
-  SetStateAction,
 } from 'react';
 import type {
   AlertConsumers,
@@ -41,7 +40,6 @@ import type {
 import type {
   MappingRuntimeFields,
   QueryDslQueryContainer,
-  SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { BrowserFields } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
@@ -56,11 +54,19 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Case } from './apis/bulk_get_cases';
 
 export interface Consumer {
   id: AlertConsumers;
   name: string;
+}
+
+interface Observable {
+  typeKey: string;
+  value: string;
+  description: string | null;
 }
 
 export type AlertsTableSupportedConsumers = Exclude<AlertConsumers, 'alerts' | 'streams'>;
@@ -78,7 +84,7 @@ export interface SystemCellComponentMap {
 export type SystemCellId = keyof SystemCellComponentMap;
 
 type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown> & { onSuccess: () => void }) => {
-  open: ({ attachments }: { attachments: any[] }) => void;
+  open: ({ attachments, observables }: { attachments: any[]; observables?: any[] }) => void;
   close: () => void;
 };
 
@@ -87,8 +93,10 @@ type UseCasesAddToExistingCaseModal = (
 ) => {
   open: ({
     getAttachments,
+    getObservables,
   }: {
     getAttachments: ({ theCase }: { theCase?: { id: string } }) => any[];
+    getObservables?: ({ theCase }: { theCase?: { id: string } }) => any[];
   }) => void;
   close: () => void;
 };
@@ -121,7 +129,31 @@ export interface CasesService {
     groupAlertsByRule: (items: any[]) => any[];
     canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
     getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
+    getObservablesFromEcs: (ecsArray: any[][]) => Observable[];
   };
+}
+
+interface AlertsTableEmptyState {
+  /**
+   * The message title for the empty state prompt
+   */
+  messageTitle?: string;
+  /**
+   * The message body for the empty state prompt
+   */
+  messageBody?: string;
+  /**
+   * The height variant for the empty state prompt
+   */
+  height?: 'tall' | 'short' | 'flex';
+  /**
+   * The style variant for the empty state prompt.
+   *
+   * `subdued` shows a subtle background color and with a distinct centered panel.
+   * `transparent` shows a transparent background and a less prominent center panel.
+   * @default `subdued`
+   */
+  variant?: 'subdued' | 'transparent';
 }
 
 type MergeProps<T, AP> = T extends (args: infer Props) => unknown
@@ -148,6 +180,12 @@ export interface AlertsTableOnLoadedProps {
   totalAlertsCount: number;
 }
 
+export interface AlertsTableSortCombinations {
+  [field: string]: {
+    order: 'asc' | 'desc';
+  };
+}
+
 export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
   extends PublicAlertsDataGridProps {
   /**
@@ -160,17 +198,60 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   columns?: EuiDataGridProps['columns'];
   /**
+   * Columns change callback
+   *
+   * This is a controllable state: provide a non-undefined value and this onChange
+   * callback to control it, otherwise the table will manage it internally.
+   */
+  onColumnsChange?: (newColumns: EuiDataGridProps['columns']) => void;
+  /**
+   * An array of column ids to show in the table
+   */
+  visibleColumns?: string[];
+  /**
+   * Visible columns change callback.
+   *
+   * This is a controllable state: provide a non-undefined value and this onChange
+   * callback to control it, otherwise the table will manage it internally.
+   */
+  onVisibleColumnsChange?: (newVisibleColumns: string[]) => void;
+  /**
    * A boolean expression or list of ids to refine the alerts search query
    */
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   /**
-   * The initial sort configuration
+   * The sort configuration.
+   *
+   * This is a controllable state: provide a non-undefined value to control it, otherwise
+   * the table will manage it internally.
    */
-  initialSort?: SortCombinations[];
+  sort?: AlertsTableSortCombinations[];
   /**
-   * The initial page size. Allowed values are 10, 20, 50, 100
+   * Sort change callback
    */
-  initialPageSize?: number;
+  onSortChange?: (newSort: AlertsTableSortCombinations[]) => void;
+  /**
+   * The page size. Allowed values are 10, 20, 50, 100.
+   *
+   * This is a controllable state: provide a non-undefined value to control it, otherwise
+   * the table will manage it internally.
+   */
+  pageSize?: number;
+  /**
+   * Page size change callback
+   */
+  onPageSizeChange?: (newPageSize: number) => void;
+  /**
+   * The page index, starting from 0.
+   *
+   * This is a controllable state: provide a non-undefined value to control it, otherwise
+   * the table will manage it internally.
+   */
+  pageIndex?: number;
+  /**
+   * Page index change callback
+   */
+  onPageIndexChange?: (newPageIndex: number) => void;
   /**
    * Alert document fields available to be displayed in the table as columns
    *
@@ -209,27 +290,10 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   dynamicRowHeight?: boolean;
 
-  emptyState?: {
-    /**
-     * The message title for the empty state prompt
-     */
-    messageTitle?: string;
-    /**
-     * The message body for the empty state prompt
-     */
-    messageBody?: string;
-    /**
-     * The height variant for the empty state prompt
-     */
-    height?: 'tall' | 'short' | 'flex';
-    /**
-     * The style variant for the empty state prompt.
-     *
-     * `subdued` shows a subtle background color and with a distinct centered panel.
-     * `transparent` shows a transparent background and a less prominent center panel.
-     * @default `subdued`
-     */
-    variant?: 'subdued' | 'transparent';
+  emptyState?: AlertsTableEmptyState;
+
+  errorState?: AlertsTableEmptyState & {
+    onResetToPreviousState?: () => void;
   };
   /**
    * If true, the links in default cells, flyout and row actions will open in a new tab
@@ -268,36 +332,79 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderAdditionalToolbarControls?: ComponentRenderer<AC>;
   /**
-   * Flyout header render function
+   * The index of the alert to be displayed in the expanded view (i.e. flyout).
+   *
+   * This pagination crosses the table page boundaries, so if you have a page size of 20,
+   * and you set this value to 21, the table will automatically switch to page 2.
+   *
+   * If `null` or `undefined`, the expanded view is closed.
+   *
+   * This is a controllable state: provide a non-undefined value to control it, otherwise
+   * the table will manage it internally.
+   *
+   * @example
+   * ```tsx
+   * export const AlertsTableWithExpandedView = () => {
+   *   const [expandedAlertIndex, setExpandedAlertIndex] = useState<number | null>(null);
+   *
+   *   return (
+   *     <AlertsTable
+   *       ...
+   *       expandedAlertIndex={expandedAlertIndex}
+   *       onExpandedAlertIndexChange={setExpandedAlertIndex}
+   *       ...
+   *     />
+   *   );
+   * };
+   * ```
    */
-  renderFlyoutHeader?: FlyoutSectionRenderer<AC>;
+  expandedAlertIndex?: number | null;
   /**
-   * Flyout body render function
+   * Callback for expanded alert index changes
+   *
+   * The expanded alert index can be set to `null` to close the expanded view.
+   * To open a row of the alerts table in the expanded view, set this value to the corresponding
+   * `rowIndex`.
    */
-  renderFlyoutBody?: FlyoutSectionRenderer<AC>;
+  onExpandedAlertIndexChange?: (expandedAlertIndex: number | null) => void;
   /**
-   * Flyout footer render function
+   * Renders the expanded alert. If undefined, a default flyout will be used. If null, no expanded
+   * view will be rendered.
+   *
+   * The expanded alert can be retrieved from the `alerts` array by converting `expandedAlertIndex`
+   * into a page-relative index (i.e. if expandedAlertIndex = 20 and pageSize = 20, the
+   * corresponding `alerts` array index is 0).
+   *
+   * @example
+   * ```tsx
+   * export const AlertDetailFlyout: GetAlertsTableProp<'renderExpandedAlertView'> = ({
+   *   pageSize,
+   *   pageIndex,
+   *   expandedAlertIndex,
+   *   isLoading,
+   *   alerts,
+   * }) => {
+   *   const alertIndexInPage = expandedAlertIndex - pageIndex * pageSize;
+   *   // This can be undefined when a new page of alerts is still loading
+   *   // Use this in combination with isLoading to show a loading indicator
+   *   const alert = alerts[alertIndexInPage] as Alert | undefined;
+   *
+   *   render (...);
+   * };
+   * ```
    */
-  renderFlyoutFooter?: FlyoutSectionRenderer<AC>;
-  /**
-   * Passed to the alerts preview flyout's `ownFocus` prop
-   * @default false
-   */
-  flyoutOwnsFocus?: boolean;
-  /**
-   * If false, hides the pagination in the alert details flyout
-   * @default true
-   */
-  flyoutPagination?: boolean;
+  renderExpandedAlertView?: ComponentType<
+    Omit<RenderContext<AC>, 'expandedAlertIndex'> & { expandedAlertIndex: number }
+  > | null;
   /**
    * Timestamp of the last data refetch request
    */
   lastReloadRequestTime?: number;
   /**
    * A storage provider where to persist the table configuration
-   * @default new Storage(window.localStorage)
+   * @default new LocalStorageWrapper(window.localStorage)
    */
-  configurationStorage?: IStorageWrapper;
+  configurationStorage?: IStorageWrapper | null;
   /**
    * Dependencies
    */
@@ -330,19 +437,6 @@ export interface AlertsTableImperativeApi {
 
 export type AlertsTablePropsWithRef<AC extends AdditionalContext> = AlertsTableProps<AC> &
   RefAttributes<AlertsTableImperativeApi>;
-
-export type FlyoutSectionProps<AC extends AdditionalContext = AdditionalContext> =
-  RenderContext<AC> & {
-    alert: Alert;
-    flyoutIndex: number;
-    isLoading: boolean;
-    onClose: () => void;
-    onPaginate: (pageIndex: number) => void;
-  };
-
-export type FlyoutSectionRenderer<AC extends AdditionalContext = AdditionalContext> = ComponentType<
-  FlyoutSectionProps<AC>
->;
 
 // Intentional empty interface since using `object` is too permissive
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -384,11 +478,6 @@ export type RenderContext<AC extends AdditionalContext> = {
   isLoadingMaintenanceWindows: boolean;
   maintenanceWindows?: Map<string, MaintenanceWindow>;
 
-  pageIndex: number;
-  pageSize: number;
-
-  openAlertInFlyout: (alertId: string) => void;
-
   showAlertStatusWithFlapping?: boolean;
 
   bulkActionsStore: [BulkActionsState, Dispatch<BulkActionsReducerAction>];
@@ -396,19 +485,28 @@ export type RenderContext<AC extends AdditionalContext> = {
   Pick<
     AlertsTableProps<AC>,
     | 'columns'
+    | 'pageIndex'
+    | 'onPageIndexChange'
+    | 'pageSize'
+    | 'onPageSizeChange'
     | 'renderCellValue'
     | 'renderCellPopover'
     | 'renderActionsCell'
-    | 'renderFlyoutHeader'
-    | 'renderFlyoutBody'
-    | 'renderFlyoutFooter'
+    | 'expandedAlertIndex'
+    | 'onExpandedAlertIndexChange'
+    | 'renderExpandedAlertView'
     | 'services'
     | 'casesConfiguration'
     | 'openLinksInNewTab'
-    | 'flyoutOwnsFocus'
-    | 'flyoutPagination'
   >,
-  'columns' | 'openLinksInNewTab'
+  | 'columns'
+  | 'pageIndex'
+  | 'onPageIndexChange'
+  | 'pageSize'
+  | 'onPageSizeChange'
+  | 'openLinksInNewTab'
+  | 'expandedAlertIndex'
+  | 'onExpandedAlertIndexChange'
 > &
   AC;
 
@@ -452,6 +550,7 @@ export interface PublicAlertsDataGridProps
     owner: Parameters<CasesService['helpers']['canUseCases']>[0];
     appId?: string;
     syncAlerts?: boolean;
+    extractObservables?: boolean;
   };
   /**
    * If true, hides the bulk actions controls
@@ -476,17 +575,16 @@ export interface PublicAlertsDataGridProps
 }
 
 export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalContext>
-  extends PublicAlertsDataGridProps {
+  extends PublicAlertsDataGridProps,
+    Pick<EuiDataGridProps, 'columnVisibility'> {
   renderContext: RenderContext<AC>;
   additionalToolbarControls?: ReactNode;
   pageSizeOptions?: number[];
   leadingControlColumns?: EuiDataGridControlColumn[];
   trailingControlColumns?: EuiDataGridControlColumn[];
-  visibleColumns: string[];
   'data-test-subj': string;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
-  onChangeVisibleColumns: (newColumns: string[]) => void;
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   showInspectButton?: boolean;
@@ -499,31 +597,27 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
-  sort: SortCombinations[];
-  alertsQuerySnapshot?: EsQuerySnapshot;
+  sort: AlertsTableSortCombinations[];
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
-  flyoutAlertIndex: number;
-  setFlyoutAlertIndex: Dispatch<SetStateAction<number>>;
-  onPaginateFlyout: (nextPageIndex: number) => void;
-  onChangePageSize: (size: number) => void;
-  onChangePageIndex: (index: number) => void;
+  alertsQuerySnapshot?: EsQuerySnapshot;
 }
 
 export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> =
-  RenderContext<AC> & {
-    key?: Key;
-    alert: Alert;
-    onActionExecuted?: () => void;
-    isAlertDetailsEnabled?: boolean;
-    /**
-     * Implement this to resolve your app's specific rule page path, return null to avoid showing the link
-     */
-    resolveRulePagePath?: (ruleId: string, currentPageId: string) => string | null;
-    /**
-     * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
-     */
-    resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
-  };
+  RenderContext<AC> &
+    EuiDataGridCellValueElementProps & {
+      key?: Key;
+      alert: Alert;
+      onActionExecuted?: () => void;
+      isAlertDetailsEnabled?: boolean;
+      /**
+       * Implement this to resolve your app's specific rule page path, return null to avoid showing the link
+       */
+      resolveRulePagePath?: (ruleId: string, currentPageId: string) => string | null;
+      /**
+       * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
+       */
+      resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
+    };
 
 export interface BulkActionsConfig {
   label: string;
@@ -538,11 +632,11 @@ export interface BulkActionsConfig {
     clearSelection: () => void,
     refresh: () => void
   ) => void;
-  panel?: number;
+  panel?: EuiContextMenuPanelId;
 }
 
 interface PanelConfig {
-  id: number;
+  id: EuiContextMenuPanelId;
   title?: JSX.Element | string;
   'data-test-subj'?: string;
 }
@@ -556,12 +650,12 @@ export interface RenderContentPanelProps {
   closePopoverMenu: () => void;
 }
 
-interface ContentPanelConfig extends PanelConfig {
+export interface ContentPanelConfig extends PanelConfig {
   renderContent: (args: RenderContentPanelProps) => JSX.Element;
   items?: never;
 }
 
-interface ItemsPanelConfig extends PanelConfig {
+export interface ItemsPanelConfig extends PanelConfig {
   content?: never;
   items: BulkActionsConfig[];
 }

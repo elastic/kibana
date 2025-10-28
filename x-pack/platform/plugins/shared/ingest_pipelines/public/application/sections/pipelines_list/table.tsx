@@ -5,33 +5,36 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import qs from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { parse } from 'query-string';
 
+import type {
+  EuiInMemoryTableProps,
+  EuiTableFieldDataColumnType,
+  EuiSelectableOption,
+} from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiLink,
   EuiButton,
   EuiButtonIcon,
-  EuiInMemoryTableProps,
-  EuiTableFieldDataColumnType,
   EuiPopover,
   EuiBetaBadge,
   EuiToolTip,
   EuiFilterGroup,
   EuiSelectable,
   EuiFilterButton,
-  EuiSelectableOption,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
-import { Pipeline } from '../../../../common/types';
+import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
 export interface Props {
@@ -120,6 +123,8 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+
   const { pageSize, sorting, onTableChange } = useEuiTablePersist<Pipeline>({
     tableId: 'ingestPipelines',
     initialPageSize: 10,
@@ -196,12 +201,17 @@ export const PipelineTable: FunctionComponent<Props> = ({
   };
   const closePopover = () => {
     setIsPopoverOpen(false);
+    // Return focus to the filter button when popover closes
+    if (filterButtonRef.current) {
+      filterButtonRef.current.focus?.();
+    }
   };
 
   const button = (
     <EuiFilterButton
       iconType="arrowDown"
       badgeColor="success"
+      buttonRef={filterButtonRef}
       data-test-subj="filtersDropdown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
@@ -348,6 +358,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
                       color="subdued"
                       size="s"
                       data-test-subj="isDeprecatedBadge"
+                      tabIndex={0}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>

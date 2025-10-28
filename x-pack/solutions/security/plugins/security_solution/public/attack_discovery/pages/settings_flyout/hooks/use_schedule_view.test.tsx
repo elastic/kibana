@@ -15,6 +15,8 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_discovery_schedules';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../common/constants';
+import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('react-router', () => ({
   matchPath: jest.fn(),
@@ -27,6 +29,13 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../schedule/logic/use_find_schedules');
 
+const mockUseKibanaFeatureFlags = jest
+  .fn()
+  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
+jest.mock('../../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
+}));
+
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
   typeof useSourcererDataView
@@ -34,35 +43,40 @@ const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
 const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as jest.MockedFunction<
   typeof useFindAttackDiscoverySchedules
 >;
-const getBooleanValueMock = jest.fn();
+
+const setupUseKibana = (updateAttackDiscoverySchedule = true) => {
+  mockUseKibana.mockReturnValue({
+    services: {
+      application: {
+        capabilities: {
+          [ATTACK_DISCOVERY_FEATURE_ID]: {
+            updateAttackDiscoverySchedule,
+          },
+        },
+      },
+      lens: {
+        EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
+      },
+      triggersActionsUi: {
+        ...triggersActionsUiMock.createStart(),
+      },
+      uiSettings: {
+        get: jest.fn(),
+      },
+      unifiedSearch: {
+        ui: {
+          SearchBar: () => <div data-test-subj="mockSearchBar" />,
+        },
+      },
+    },
+  } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+};
 
 describe('useScheduleView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    getBooleanValueMock.mockReturnValue(false);
-
-    mockUseKibana.mockReturnValue({
-      services: {
-        featureFlags: {
-          getBooleanValue: getBooleanValueMock,
-        },
-        lens: {
-          EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
-        },
-        triggersActionsUi: {
-          ...triggersActionsUiMock.createStart(),
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        unifiedSearch: {
-          ui: {
-            SearchBar: () => <div data-test-subj="mockSearchBar" />,
-          },
-        },
-      },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    setupUseKibana();
 
     mockUseSourcererDataView.mockReturnValue({
       sourcererDataView: {},
@@ -98,7 +112,7 @@ describe('useScheduleView', () => {
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
-    expect(screen.queryByTestId('createNewSchedule')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createSchedule')).not.toBeInTheDocument();
   });
 
   it('should return the `attack discovery schedules table` if there are existing schedules', () => {
@@ -114,7 +128,7 @@ describe('useScheduleView', () => {
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
-    expect(screen.getByTestId('createNewSchedule')).toBeInTheDocument();
+    expect(screen.getByTestId('createSchedule')).toBeInTheDocument();
   });
 
   it('should show create schedule flyout on `create new schedule` action button click', async () => {
@@ -122,16 +136,53 @@ describe('useScheduleView', () => {
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
-    expect(screen.getByTestId('createNewSchedule')).toBeInTheDocument();
+    expect(screen.getByTestId('createSchedule')).toBeInTheDocument();
 
-    const createNewSchedule = screen.getByTestId('createNewSchedule');
+    const createButton = screen.getByTestId('createSchedule');
     act(() => {
-      fireEvent.click(createNewSchedule);
+      fireEvent.click(createButton);
     });
 
     render(<TestProviders>{result.current.scheduleView}</TestProviders>);
     await waitFor(() => {
       expect(screen.getByTestId('scheduleCreateFlyout')).toBeInTheDocument();
+    });
+  });
+
+  describe('update schedule kibana privilege', () => {
+    it('should return enabled `create new schedule` action button if update schedule privilege is granted', () => {
+      setupUseKibana(true);
+
+      const { result } = renderHook(() => useScheduleView());
+
+      render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+
+      expect(screen.getByTestId('createSchedule')).toBeEnabled();
+    });
+
+    it('should return disabled `create new schedule` action button if update schedule privilege is missing', () => {
+      setupUseKibana(false);
+
+      const { result } = renderHook(() => useScheduleView());
+
+      render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+
+      expect(screen.getByTestId('createSchedule')).toBeDisabled();
+    });
+
+    it('should render missing privileges tooltip if update schedule privilege is missing', async () => {
+      setupUseKibana(false);
+
+      const { result } = renderHook(() => useScheduleView());
+
+      render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+
+      const createButton = screen.getByTestId('createSchedule');
+      fireEvent.mouseOver(createButton.parentElement as Node);
+      await waitForEuiToolTipVisible();
+
+      const tooltip = screen.getByRole('tooltip');
+      expect(tooltip).toHaveTextContent('Missing privileges');
     });
   });
 });

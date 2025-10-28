@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { DataStream } from '@kbn/index-management-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
+import type { DataStream } from '@kbn/index-management-plugin/common';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
 
 const API_BASE_PATH = '/api/index_management';
 
@@ -85,6 +85,9 @@ export default function ({ getService }: FtrProviderContext) {
           hidden: false,
           failureStoreEnabled: false,
           indexMode: 'standard',
+          failureStoreRetention: {
+            defaultRetentionPeriod: '30d',
+          },
         });
       });
 
@@ -129,6 +132,9 @@ export default function ({ getService }: FtrProviderContext) {
           meteringStorageSizeBytes: 0,
           failureStoreEnabled: false,
           indexMode: 'standard',
+          failureStoreRetention: {
+            defaultRetentionPeriod: '30d',
+          },
         });
       });
 

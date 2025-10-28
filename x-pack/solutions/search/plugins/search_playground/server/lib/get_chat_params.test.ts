@@ -13,9 +13,10 @@ import {
   INFERENCE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { elasticModelIds } from '@kbn/inference-common';
 
@@ -24,7 +25,6 @@ jest.mock('@kbn/langchain/server', () => {
   return {
     ...original,
     ActionsClientChatOpenAI: jest.fn(),
-    ActionsClientSimpleChatModel: jest.fn(),
   };
 });
 
@@ -93,7 +93,7 @@ describe('getChatParams', () => {
     const result = await getChatParams(
       {
         connectorId: '1',
-        model: 'gemini-1.5-pro',
+        model: 'gemini-2.5-pro',
         prompt: 'Hello, world!',
         citations: true,
       },
@@ -111,7 +111,7 @@ describe('getChatParams', () => {
       request,
       connectorId: '1',
       chatModelOptions: expect.objectContaining({
-        model: 'gemini-1.5-pro',
+        model: 'gemini-2.5-pro',
         temperature: 0,
         maxRetries: 0,
       }),

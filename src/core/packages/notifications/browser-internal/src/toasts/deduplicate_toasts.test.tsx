@@ -8,12 +8,13 @@
  */
 
 import React from 'react';
-import { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { render } from '@testing-library/react';
 
-import { deduplicateToasts, TitleWithBadge, ToastWithRichTitle } from './deduplicate_toasts';
-import { Toast } from '@kbn/core-notifications-browser';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { ToastWithRichTitle } from './deduplicate_toasts';
+import { deduplicateToasts, TitleWithBadge } from './deduplicate_toasts';
+import type { Toast } from '@kbn/core-notifications-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 function toast(title: string | MountPoint, text?: string | MountPoint, id = Math.random()): Toast {
   return {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { LockManagerService, isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { updateExistingIndexAssets } from '../index_assets/update_existing_index_assets';
@@ -105,7 +105,7 @@ async function isKnowledgeBaseSemanticTextCompatible({
 
 export function isSemanticTextUnsupportedError(error: Error) {
   const semanticTextUnsupportedError =
-    'The [sparse_vector] field type is not supported on indices created on versions 8.0 to 8.10';
+    '[semantic_text] is available on indices created with 8.11 or higher. Please create a new index to use [semantic_text]';
 
   const isSemanticTextUnspported =
     error instanceof errors.ResponseError &&

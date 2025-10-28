@@ -6,11 +6,12 @@
  */
 
 import _ from 'lodash';
-import React, { Component, ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React, { Component } from 'react';
 import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { TOCEntry } from './toc_entry';
 import { isLayerGroup } from '../../../../classes/layers/layer_group';
-import { ILayer } from '../../../../classes/layers/layer';
+import type { ILayer } from '../../../../classes/layers/layer';
 
 export interface Props {
   isReadOnly: boolean;

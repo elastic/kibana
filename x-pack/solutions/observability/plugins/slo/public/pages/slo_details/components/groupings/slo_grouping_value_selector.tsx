@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiCopy,
-  EuiFlexItem,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonIcon, EuiComboBox, EuiCopy, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -61,6 +56,10 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
     }
   }, [data]);
 
+  const selectGroupValueLabel = i18n.translate('xpack.slo.sLOGroupingValueSelector.placeholder', {
+    defaultMessage: 'Select a group value',
+  });
+
   const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
     const newValue = selected[0].value;
     if (!newValue) return;
@@ -73,6 +72,12 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
       search: urlSearchParams.toString(),
     });
   };
+  const copySLOGroupingValueAriaLabel = i18n.translate(
+    'xpack.slo.sLOGroupingValueSelector.copyButton.label',
+    {
+      defaultMessage: 'Copy SLO Grouping Value',
+    }
+  );
 
   return (
     <EuiFlexItem grow={false}>
@@ -92,12 +97,7 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
                   color="text"
                   iconType="copyClipboard"
                   onClick={copy}
-                  aria-label={i18n.translate(
-                    'xpack.slo.sLOGroupingValueSelector.copyButton.label',
-                    {
-                      defaultMessage: 'Copy value to clipboard',
-                    }
-                  )}
+                  aria-label={copySLOGroupingValueAriaLabel}
                 />
               )}
             </EuiCopy>
@@ -107,10 +107,7 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
               color="text"
               disabled={true}
               iconType="copyClipboard"
-              aria-label={i18n.translate(
-                'xpack.slo.sLOGroupingValueSelector.copyButton.noValueLabel',
-                { defaultMessage: 'Select a value before' }
-              )}
+              aria-label={copySLOGroupingValueAriaLabel}
             />
           )
         }
@@ -118,9 +115,8 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
         options={options}
         isLoading={isLoading}
         isDisabled={isError || !isAvailable}
-        placeholder={i18n.translate('xpack.slo.sLOGroupingValueSelector.placeholder', {
-          defaultMessage: 'Select a group value',
-        })}
+        aria-label={selectGroupValueLabel}
+        placeholder={selectGroupValueLabel}
         selectedOptions={currentValue ? [toField(currentValue)] : []}
         onChange={onChange}
         truncationProps={{

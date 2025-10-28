@@ -10,7 +10,8 @@
 import React, { PureComponent } from 'react';
 import _ from 'lodash';
 
-import { injectI18n, WrappedComponentProps } from '@kbn/i18n-react';
+import type { WrappedComponentProps } from '@kbn/i18n-react';
+import { injectI18n } from '@kbn/i18n-react';
 import { EuiFieldText, EuiComboBox, EuiThemeProvider } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormRow } from './form_row';
@@ -136,12 +137,15 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
       };
     });
 
+    const selectPlaceholderLabel = intl.formatMessage({
+      id: 'inputControl.vis.listControl.selectPlaceholder',
+      defaultMessage: 'Select...',
+    });
+
     return (
       <EuiComboBox
-        placeholder={intl.formatMessage({
-          id: 'inputControl.vis.listControl.selectPlaceholder',
-          defaultMessage: 'Select...',
-        })}
+        placeholder={selectPlaceholderLabel}
+        aria-label={selectPlaceholderLabel}
         options={options}
         isLoading={this.state.isLoading}
         async={this.props.dynamicOptions}

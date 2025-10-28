@@ -7,13 +7,15 @@
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
-import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../utils/create_llm_proxy';
+import type { LlmProxy, LlmResponseSimulator } from '../utils/create_llm_proxy';
+import { createLlmProxy } from '../utils/create_llm_proxy';
 import { setAdvancedSettings } from '../utils/advanced_settings';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { clearConversations } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
+  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
   const supertest = getService('supertest');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');

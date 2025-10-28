@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import { take } from 'rxjs';
+import type {
   App,
   AppMountParameters,
   CoreSetup,
@@ -16,8 +17,9 @@ import {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import {
   CCS_REMOTE_PATTERN,
   RULE_DETAILS,
@@ -34,7 +36,7 @@ import { createMissingMonitoringDataAlertType } from './alerts/missing_monitorin
 import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
 import { setConfig } from './external_config';
 import { Legacy } from './legacy_shims';
-import {
+import type {
   MonitoringConfig,
   MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,
@@ -43,9 +45,10 @@ import { getIndexPatterns } from '../common/get_index_patterns';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
-  cloud?: { isCloudEnabled: boolean };
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export class MonitoringPlugin
@@ -58,7 +61,7 @@ export class MonitoringPlugin
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
-    const { home } = plugins;
+    const { home, licensing } = plugins;
     const id = 'monitoring';
     const icon = 'monitoringApp';
     const title = i18n.translate('xpack.monitoring.stackMonitoringTitle', {
@@ -98,6 +101,10 @@ export class MonitoringPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const externalConfig = this.getExternalConfig();
+        // Check if user has enterprise license
+        const license = await licensing.license$.pipe(take(1)).toPromise();
+        const hasEnterpriseLicense = license?.hasAtLeast('enterprise') || false;
+
         const deps: LegacyMonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           element: params.element,
@@ -105,6 +112,8 @@ export class MonitoringPlugin
           data: pluginsStart.data,
           share: pluginsStart.share,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+          cloudBaseUrl: plugins.cloud?.baseUrl,
+          hasEnterpriseLicense,
           pluginInitializerContext: this.initializerContext,
           externalConfig,
           triggersActionsUi: pluginsStart.triggersActionsUi,
@@ -120,6 +129,8 @@ export class MonitoringPlugin
           data: deps.data,
           navigation: deps.navigation,
           isCloud: deps.isCloud,
+          cloudBaseUrl: deps.cloudBaseUrl,
+          hasEnterpriseLicense: deps.hasEnterpriseLicense,
           pluginInitializerContext: deps.pluginInitializerContext,
           externalConfig: deps.externalConfig,
           triggersActionsUi: deps.triggersActionsUi,

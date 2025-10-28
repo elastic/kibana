@@ -13,11 +13,17 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import { FramePublicAPI, DatasourcePublicAPI, OperationDescriptor, DataType } from '../../../types';
-import { DatatableVisualizationState } from '../visualization';
+import type {
+  FramePublicAPI,
+  DatasourcePublicAPI,
+  OperationDescriptor,
+  DataType,
+  DatatableVisualizationState,
+} from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
-import { TableDimensionEditor, TableDimensionEditorProps } from './dimension_editor';
-import { ColumnState } from '../../../../common/expressions';
+import type { TableDimensionEditorProps } from './dimension_editor';
+import { TableDimensionEditor } from './dimension_editor';
+import type { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
 import { getKbnPalettes } from '@kbn/palettes';
 import { renderWithProviders } from '../../../test_utils/test_utils';
@@ -222,10 +228,44 @@ describe('data table dimension editor', () => {
         {
           columnId: 'foo',
           colorMode: 'cell',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
           palette: expect.objectContaining({ type: 'palette' }),
         },
         {
           columnId: 'bar',
+        },
+      ],
+    });
+  });
+
+  it('should not set colorMapping or palette if color mode is changed to "text"', async () => {
+    const paletteId = 'non-default';
+    state.columns = [
+      {
+        columnId: 'foo',
+        colorMode: 'cell',
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId,
+        },
+        palette: {
+          type: 'palette',
+          name: paletteId,
+        },
+      },
+    ];
+    renderTableDimensionEditor();
+    await user.click(screen.getByRole('button', { name: 'Text' }));
+    jest.advanceTimersByTime(256);
+
+    expect(props.setState).toHaveBeenCalledWith({
+      ...state,
+      columns: [
+        {
+          columnId: 'foo',
+          colorMode: 'text',
+          colorMapping: expect.objectContaining({ paletteId }),
+          palette: expect.objectContaining({ type: 'palette', name: paletteId }),
         },
       ],
     });

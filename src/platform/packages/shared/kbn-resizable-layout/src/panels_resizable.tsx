@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiResizableContainer,
-  useGeneratedHtmlId,
-  mathWithUnits,
-  UseEuiTheme,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiResizableContainer, useGeneratedHtmlId, mathWithUnits } from '@elastic/eui';
 import type { ResizeTrigger } from '@elastic/eui/src/components/resizable_container/types';
 import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
@@ -20,7 +16,7 @@ import type { ReactNode } from 'react';
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import useLatest from 'react-use/lib/useLatest';
-import { ResizableLayoutDirection } from '../types';
+import { ResizableLayoutOrder, type ResizableLayoutDirection } from '../types';
 import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 
 export const PanelsResizable = ({
@@ -31,17 +27,19 @@ export const PanelsResizable = ({
   minFlexPanelSize,
   fixedPanel,
   flexPanel,
+  fixedPanelOrder = ResizableLayoutOrder.Start,
   resizeButtonClassName,
   ['data-test-subj']: dataTestSubj = 'resizableLayout',
   onFixedPanelSizeChange,
 }: {
   className?: string;
   direction: ResizableLayoutDirection;
-  fixedPanelSize: number;
+  fixedPanelSize: number | 'max-content';
   minFixedPanelSize: number;
   minFlexPanelSize: number;
   fixedPanel: ReactNode;
   flexPanel: ReactNode;
+  fixedPanelOrder?: ResizableLayoutOrder;
   resizeButtonClassName?: string;
   ['data-test-subj']?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
@@ -95,9 +93,12 @@ export const PanelsResizable = ({
     let fixedPanelSizePct: number;
     let flexPanelSizePct: number;
 
+    const resolvedFixedPanelSize =
+      fixedPanelSize === 'max-content' ? containerSize - minFlexPanelSize : fixedPanelSize;
+
     // If the container size is less than the minimum main content size
     // plus the current fixed panel size, then we need to make some adjustments.
-    if (containerSize < minFlexPanelSize + fixedPanelSize) {
+    if (containerSize < minFlexPanelSize + resolvedFixedPanelSize) {
       const newFixedPanelSize = containerSize - minFlexPanelSize;
 
       // Try to make the fixed panel size fit within the container, but if it
@@ -110,7 +111,7 @@ export const PanelsResizable = ({
         flexPanelSizePct = 100 - fixedPanelSizePct;
       }
     } else {
-      fixedPanelSizePct = pixelsToPercent(containerSize, fixedPanelSize);
+      fixedPanelSizePct = pixelsToPercent(containerSize, resolvedFixedPanelSize);
       flexPanelSizePct = 100 - fixedPanelSizePct;
     }
 
@@ -197,8 +198,8 @@ export const PanelsResizable = ({
         data-test-subj={`${dataTestSubj}ResizableContainer`}
         css={containerCss}
       >
-        {(EuiResizablePanel, EuiResizableButton) => (
-          <>
+        {(EuiResizablePanel, EuiResizableButton) => {
+          const fixedPanelElement = (
             <EuiResizablePanel
               id={fixedPanelId}
               minSize={`${minFixedPanelSize}px`}
@@ -208,6 +209,20 @@ export const PanelsResizable = ({
             >
               {fixedPanel}
             </EuiResizablePanel>
+          );
+
+          const flexPanelElement = (
+            <EuiResizablePanel
+              minSize={`${minFlexPanelSize}px`}
+              size={panelSizes.flexPanelSizePct}
+              paddingSize="none"
+              data-test-subj={`${dataTestSubj}ResizablePanelFlex`}
+            >
+              {flexPanel}
+            </EuiResizablePanel>
+          );
+
+          const resizeButtonElement = (
             <EuiResizableButton
               className={resizeButtonClassName}
               indicator="border"
@@ -217,17 +232,27 @@ export const PanelsResizable = ({
               ]}
               data-test-subj={`${dataTestSubj}ResizableButton`}
             />
-            <EuiResizablePanel
-              minSize={`${minFlexPanelSize}px`}
-              size={panelSizes.flexPanelSizePct}
-              paddingSize="none"
-              data-test-subj={`${dataTestSubj}ResizablePanelFlex`}
-            >
-              {flexPanel}
-            </EuiResizablePanel>
-            {isResizing ? <div css={resizingOverlayCss} /> : <></>}
-          </>
-        )}
+          );
+
+          return (
+            <>
+              {fixedPanelOrder === ResizableLayoutOrder.Start ? (
+                <>
+                  {fixedPanelElement}
+                  {resizeButtonElement}
+                  {flexPanelElement}
+                </>
+              ) : (
+                <>
+                  {flexPanelElement}
+                  {resizeButtonElement}
+                  {fixedPanelElement}
+                </>
+              )}
+              {isResizing ? <div css={resizingOverlayCss} /> : <></>}
+            </>
+          );
+        }}
       </EuiResizableContainer>
     </div>
   );

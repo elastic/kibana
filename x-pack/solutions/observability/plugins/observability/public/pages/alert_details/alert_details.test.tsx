@@ -11,17 +11,18 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { useBreadcrumbs, TagsList } from '@kbn/observability-shared-plugin/public';
-import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Chance } from 'chance';
 import React, { Fragment } from 'react';
+import moment from 'moment';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { from } from 'rxjs';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
-import { ConfigSchema } from '../../plugin';
-import { Subset } from '../../typings';
+import type { ConfigSchema } from '../../plugin';
+import type { Subset } from '../../typings';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
@@ -29,6 +30,7 @@ import { AlertDetails } from './alert_details';
 import { alertDetail, alertWithNoData } from './mock/alert';
 import { createTelemetryClientMock } from '../../services/telemetry/telemetry_client.mock';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -55,6 +57,12 @@ jest.mock('./hooks/use_add_suggested_dashboard', () => ({
   useAddSuggestedDashboards: () => ({
     onClickAddSuggestedDashboard: jest.fn(),
     addingDashboardId: undefined,
+  }),
+}));
+
+jest.mock('./hooks/use_discover_url', () => ({
+  useDiscoverUrl: () => ({
+    discoverUrl: null,
   }),
 }));
 
@@ -98,10 +106,24 @@ const mockConvertNameToReference = jest
   .fn()
   .mockImplementation((value: string) => ({ id: value, type: value }));
 
+const myLocator = {
+  ...sharePluginMock.createLocator(),
+  getLocation: jest.fn().mockResolvedValue({ path: '' }),
+};
+const kibanaStartMockServices = kibanaStartMock.startContract().services;
+
+const kibanaStartMockServicesWithLocator = {
+  ...kibanaStartMockServices,
+  share: {
+    ...kibanaStartMockServices.share,
+    url: { ...kibanaStartMockServices.share.url, locators: { get: jest.fn(() => myLocator) } },
+  },
+};
+
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
-      ...kibanaStartMock.startContract().services,
+      ...kibanaStartMockServicesWithLocator,
       cases: casesPluginMock.createStartContract(),
       application: { currentAppId$: from('mockedApp') },
       http: {
@@ -148,6 +170,15 @@ const MOCK_RULE = {
   name: 'ruleName',
   ruleTypeId: MOCK_RULE_TYPE_ID,
   consumer: 'logs',
+  params: {
+    searchConfiguration: {
+      index: 'index',
+      query: {
+        query: 'tags: tag1',
+      },
+    },
+    criteria: [],
+  },
   artifacts: {
     dashboards: [
       {
@@ -306,5 +337,23 @@ describe('Alert details', () => {
     expect(mockConvertNameToReference).toHaveBeenNthCalledWith(1, 'SuggestedTag');
     expect(mockConvertNameToReference).toHaveBeenNthCalledWith(2, 'SecondTag');
     expect(alertDetails.queryByTestId('tagList')).toBeTruthy();
+  });
+
+  it('should build dashboard link with the correct time range when clicking on a suggested dashboard', async () => {
+    useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
+
+    const alertDetails = renderComponent();
+
+    await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
+
+    // Navigate to Related Dashboards tab
+    await userEvent.click(alertDetails.getByText(/Related dashboards/));
+    expect(myLocator.getRedirectUrl).toHaveBeenCalledWith({
+      dashboardId: 'suggested-dashboard-1',
+      timeRange: {
+        from: moment(alertDetail.formatted.start).subtract(30, 'minutes').toISOString(),
+        to: moment(alertDetail.formatted.start).add(30, 'minutes').toISOString(),
+      },
+    });
   });
 });

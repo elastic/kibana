@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useGrouping } from '@kbn/grouping';
-import { ParsedGroupingAggregation } from '@kbn/grouping/src';
-import { Filter } from '@kbn/es-query';
+import type { useGrouping } from '@kbn/grouping';
+import type { ParsedGroupingAggregation } from '@kbn/grouping/src';
+import type { Filter } from '@kbn/es-query';
 import React from 'react';
 import { css } from '@emotion/react';
 import { CSP_GROUPING, CSP_GROUPING_LOADING } from '../test_subjects';
@@ -49,7 +49,7 @@ export const CloudSecurityGroupingLoading = ({
         renderChildComponent: () => <></>,
         onGroupClose: () => {},
         selectedGroup: '',
-        takeActionItems: () => [],
+        takeActionItems: () => ({ items: [], panels: [] }),
       })}
     </div>
   );
@@ -113,7 +113,7 @@ export const CloudSecurityGrouping = ({
           onChangeGroupsPage,
           renderChildComponent,
           onGroupClose: () => {},
-          takeActionItems: () => [],
+          takeActionItems: () => ({ items: [], panels: [] }),
         })}
       </div>
     </div>

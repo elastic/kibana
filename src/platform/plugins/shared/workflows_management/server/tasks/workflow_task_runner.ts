@@ -8,12 +8,16 @@
  */
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { convertToSerializableGraph, convertToWorkflowGraph } from '../../common';
-import { extractConnectorIds } from '../scheduler/lib/extract_connector_ids';
+import {
+  getReadableFrequency,
+  getReadableInterval,
+  RRULE_FREQUENCY_REVERSE_MAP,
+} from '../lib/rrule_logging_utils';
+import { getScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 export interface WorkflowTaskParams {
@@ -40,52 +44,103 @@ export function createWorkflowTaskRunner({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actionsClient: IUnsecuredActionsClient;
 }) {
-  return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-    const { workflowId } = taskInstance.params as WorkflowTaskParams;
+  return ({
+    taskInstance,
+    fakeRequest,
+  }: {
+    taskInstance: ConcreteTaskInstance;
+    fakeRequest?: KibanaRequest;
+  }) => {
+    const { workflowId, spaceId } = taskInstance.params as WorkflowTaskParams;
     const state = taskInstance.state as WorkflowTaskState;
 
     return {
       async run() {
         logger.info(`Running scheduled workflow task for workflow ${workflowId}`);
 
+        let rruleTriggers: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
+
         try {
           // Get the workflow
-          const workflow = await workflowsService.getWorkflow(workflowId);
+          const workflow = await workflowsService.getWorkflow(workflowId, spaceId);
           if (!workflow) {
             throw new Error(`Workflow ${workflowId} not found`);
           }
 
+          if (!workflow.definition) {
+            throw new Error(`Workflow definition not found: ${workflowId}`);
+          }
+
+          if (!workflow.valid) {
+            throw new Error(`Workflow is not valid: ${workflowId}`);
+          }
+
+          // Check for RRule triggers and log details
+          const scheduledTriggers = getScheduledTriggers(workflow.definition.triggers);
+          rruleTriggers = scheduledTriggers.filter((trigger) => trigger.with?.rrule);
+
+          if (rruleTriggers.length > 0) {
+            logger.info(
+              `Executing RRule-scheduled workflow ${workflowId} with ${rruleTriggers.length} RRule triggers`
+            );
+
+            // Log detailed RRule configuration for each trigger
+            rruleTriggers.forEach((trigger, index) => {
+              if (trigger.with?.rrule) {
+                const rrule = trigger.with.rrule;
+                const freq = RRULE_FREQUENCY_REVERSE_MAP[rrule.freq];
+
+                const freqText = getReadableFrequency(freq);
+                const intervalText = getReadableInterval(freq, rrule.interval);
+
+                logger.info(
+                  `RRule trigger ${index + 1}: ${freqText} every ${
+                    rrule.interval
+                  } ${intervalText} ${freqText.toLowerCase()} at ${rrule.tzid}${
+                    rrule.byhour ? ` (hours: ${rrule.byhour.join(', ')})` : ''
+                  }${rrule.byweekday ? ` (days: ${rrule.byweekday.join(', ')})` : ''}`
+                );
+              }
+            });
+          }
+
           // Convert to execution model
-          const executionGraph = convertToWorkflowGraph(workflow);
           const workflowExecutionModel: WorkflowExecutionEngineModel = {
             id: workflow.id,
             name: workflow.name,
-            status: workflow.status,
+            enabled: workflow.enabled,
             definition: workflow.definition,
-            executionGraph: convertToSerializableGraph(executionGraph),
+            yaml: workflow.yaml,
           };
 
-          // Extract connector credentials for the workflow
-          const connectorCredentials = await extractConnectorIds(actionsClient);
+          // Execute the workflow with user context from fakeRequest if available
+          const executionContext = {
+            workflowRunId: `scheduled-${Date.now()}`,
+            spaceId,
+            inputs: {},
+            event: {
+              type: 'scheduled',
+              timestamp: new Date().toISOString(),
+              source: 'task-manager',
+            },
+            triggeredBy: 'scheduled', // <-- mark as scheduled
+          };
 
-          // Execute the workflow
-          const executionId = await workflowsExecutionEngine.executeWorkflow(
-            workflowExecutionModel,
-            {
-              workflowRunId: `scheduled-${Date.now()}`,
-              inputs: {},
-              event: {
-                type: 'scheduled',
-                timestamp: new Date().toISOString(),
-                source: 'task-manager',
-              },
-              connectorCredentials,
-              triggeredBy: 'scheduled', // <-- mark as scheduled
-            }
-          );
+          const executionId = fakeRequest
+            ? await workflowsExecutionEngine.executeWorkflow(
+                workflowExecutionModel,
+                executionContext,
+                fakeRequest // Pass the fakeRequest for user context
+              )
+            : await workflowsExecutionEngine.executeWorkflow(
+                workflowExecutionModel,
+                executionContext,
+                {} as any // eslint-disable-line @typescript-eslint/no-explicit-any -- Fallback when no user context is available
+              );
 
+          const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
           logger.info(
-            `Successfully executed scheduled workflow ${workflowId}, execution ID: ${executionId}`
+            `Successfully executed ${scheduleType}-scheduled workflow ${workflowId}, execution ID: ${executionId}`
           );
 
           return {
@@ -98,7 +153,10 @@ export function createWorkflowTaskRunner({
           };
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
-          logger.error(`Failed to execute scheduled workflow ${workflowId}: ${errorMessage}`);
+          const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
+          logger.error(
+            `Failed to execute ${scheduleType}-scheduled workflow ${workflowId}: ${errorMessage}`
+          );
 
           return {
             state: {

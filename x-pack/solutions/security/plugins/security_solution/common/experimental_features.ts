@@ -12,10 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  // FIXME:PT delete?
-  excludePoliciesInFilterEnabled: false,
-
-  kubernetesEnabled: false,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -43,62 +39,11 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the `upload` endpoint response action (v8.9)
-   */
-  responseActionUploadEnabled: true,
-
-  /**
-   * Enables Automated Endpoint Process actions
-   */
-  automatedProcessActionsEnabled: true,
-
-  /**
-   * Enables the ability to send Response actions to SentinelOne and persist the results
-   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
-   * response actions in Response Console.
-   *
-   * Release: v8.13.0
-   */
-  responseActionsSentinelOneV1Enabled: true,
-
-  /**
-   * Enables use of SentinelOne response actions that complete asynchronously
-   *
-   * Release: v8.14.0
-   */
-  responseActionsSentinelOneV2Enabled: true,
-
-  /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: true,
-
-  /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: true,
-
-  /** Enable the `processes` response actions for SentinelOne */
-  responseActionsSentinelOneProcessesEnabled: true,
-
-  /**
-   * Enables the ability to send Response actions to Crowdstrike and persist the results
-   * in ES.
-   */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-
-  /**
    * `runscript` response actions for SentinelOne hosts.
    *
    * Release: 9.2.0 (earlier for serverless)
    */
-  responseActionsSentinelOneRunScriptEnabled: false,
-
-  /**
-   * Space awareness for Elastic Defend management.
-   * Feature depends on Fleet's corresponding features also being enabled:
-   * - `subfeaturePrivileges`
-   * - `useSpaceAwareness`
-   * and Fleet must set it runtime mode to spaces by calling the following API:
-   * - `POST /internal/fleet/enable_space_awareness`
-   */
-  endpointManagementSpaceAwarenessEnabled: true,
+  responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
    * Disables new notes
@@ -116,14 +61,24 @@ export const allowedExperimentalValues = Object.freeze({
   newUserDetailsFlyoutManagedUser: false,
 
   /**
-   * Enable risk engine client and initialisation of datastream, component templates and mappings
+   * Disables ESQL-based risk scoring
    */
-  riskScoringPersistence: true,
+  disableESQLRiskScoring: false,
 
   /**
-   * Enables experimental Entity Analytics HTTP endpoints
+   * Enable resetting risk scores to zero for outdated entities
    */
-  riskScoringRoutesEnabled: true,
+  enableRiskScoreResetToZero: true,
+
+  /**
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   */
+  riskScoreAssistantToolDisabled: false,
+
+  /**
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   */
+  entityDetailsHighlightsEnabled: false,
 
   /**
    * disables ES|QL rules
@@ -136,54 +91,9 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Disables the timeline save tour.
-   * This flag is used to disable the tour in cypress tests.
+   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
    */
-  disableTimelineSaveTour: false,
-
-  /**
-   * Enables the risk engine privileges route
-   * and associated callout in the UI
-   */
-  riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables experimental Experimental S1 integration data to be available in Analyzer
-   */
-  sentinelOneDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables SentinelOne manual host isolation response actions directly through the connector
-   * sub-actions framework.
-   * v8.12.0
-   */
-  sentinelOneManualHostActionsEnabled: true,
-
-  /**
-   * Enables experimental Crowdstrike integration data to be available in Analyzer
-   */
-  crowdstrikeDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables Response actions telemetry collection
-   * Should be enabled in 8.17.0
-   */
-  responseActionsTelemetryEnabled: true,
-
-  /**
-   * Enables experimental JAMF integration data to be available in Analyzer
-   */
-  jamfDataInAnalyzerEnabled: true,
-
-  /**
-   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
-   */
-  malwareOnWriteScanOptionAvailable: true,
-
-  /**
-   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
-   */
-  unifiedManifestEnabled: true,
+  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
    * Enables the new modal for the value list items
@@ -201,9 +111,9 @@ export const allowedExperimentalValues = Object.freeze({
   bulkFillRuleGapsEnabled: true,
 
   /**
-   * Adds a new option to filter descendants of a process for Management / Event Filters
+   * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  filterProcessDescendantsForEventFiltersEnabled: true,
+  filterProcessDescendantsForTrustedAppsEnabled: false,
 
   /**
    * Enables the rule's bulk action to manage alert suppression
@@ -211,9 +121,9 @@ export const allowedExperimentalValues = Object.freeze({
   bulkEditAlertSuppressionEnabled: true,
 
   /**
-   * Enables the new data ingestion hub
+   * Enables the ability to use does not match condition for indicator match rules
    */
-  dataIngestionHubEnabled: false,
+  doesNotMatchForIndicatorMatchRuleEnabled: true,
 
   /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
@@ -222,24 +132,19 @@ export const allowedExperimentalValues = Object.freeze({
   entityStoreDisabled: false,
 
   /**
-   * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
-   */
-  serviceEntityStoreEnabled: true,
-
-  /**
-   * Enables Privilege Monitoring
-   */
-  privilegedUserMonitoringDisabled: false,
-
-  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
 
   /**
-   * Enables the Defend Insights feature
+   * Enables the Defend Insights Policy Response Failure feature
    */
-  defendInsights: true,
+  defendInsightsPolicyResponseFailure: true,
+
+  /**
+   * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   */
+  endpointExceptionsMovedUnderManagement: false,
 
   /**
    * Disables flyout history and new preview navigation
@@ -247,32 +152,16 @@ export const allowedExperimentalValues = Object.freeze({
   newExpandableFlyoutNavigationDisabled: false,
 
   /**
-   * Enables the ability to edit highlighted fields in the alertflyout
-   */
-  editHighlightedFields: true,
-
-  /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
 
-  /**
-   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
-   * Release: 8.18/9.0
-   */
-  responseActionsMSDefenderEndpointEnabled: true,
-
-  /**
-   * Enables banner for informing users about changes in data collection.
-   */
-  eventCollectionDataReductionBannerEnabled: true,
-
   /** Enables new Data View Picker */
-  newDataViewPickerEnabled: false,
+  newDataViewPickerEnabled: true,
 
   /**
-   * Enables Microsoft Defender for  Endpoint's RunScript RTR command
+   * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1
    */
   microsoftDefenderEndpointRunScriptEnabled: true,
@@ -280,11 +169,32 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables advanced mode for Trusted Apps creation and update
    */
-  trustedAppsAdvancedMode: false,
+  trustedAppsAdvancedMode: true,
+
+  /**
+   * Enables Trusted Devices artifact management for device control protections.
+   * Allows users to manage trusted USB and external devices
+   */
+  trustedDevices: true,
+
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
    */
-  automaticDashboardsMigration: false,
+  automaticDashboardsMigration: true,
+
+  /**
+   * Enables the SIEM Readiness Dashboard feature
+   */
+  siemReadinessDashboard: false,
+  /**
+   * Enables Microsoft Defender for Endpoint's Cancel command
+   * Release: 9.2.0
+   */
+  microsoftDefenderEndpointCancelEnabled: true,
+  /**
+   * Protects all the work related to the attacks and alert alignment effort
+   */
+  attacksAlertAlignment: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

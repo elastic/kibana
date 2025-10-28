@@ -8,11 +8,13 @@
 import type { CompiledStateGraph } from '@langchain/langgraph';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
+import type { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../../ai_assistant_data_clients/knowledge_base';
 import type { DefendInsightsGraphState } from '../../../langchain/graphs';
+import type { DefendInsightsCombinedPrompts } from './prompts';
 import {
   getGenerateNode,
   getGenerateOrEndEdge,
@@ -22,7 +24,6 @@ import {
   getRetrieveAnonymizedDocsOrGenerateEdge,
 } from '../../../langchain/output_chunking';
 import { NodeType } from '../../../langchain/graphs/constants';
-import { DefendInsightsCombinedPrompts } from './prompts/incompatible_antivirus';
 import { getCombinedDefendInsightsPrompt } from './prompts/get_combined_prompt';
 import { responseIsHallucinated } from './helpers/response_is_hallucinated';
 import { getRetrieveAnonymizedEventsNode } from './nodes/retriever';
@@ -34,6 +35,7 @@ export interface GetDefaultDefendInsightsGraphParams {
   endpointIds: string[];
   anonymizationFields: AnonymizationFieldResponse[];
   esClient: ElasticsearchClient;
+  kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
   llm: ActionsClientLlm;
   logger?: Logger;
   onNewReplacements?: (replacements: Replacements) => void;
@@ -55,6 +57,7 @@ export const getDefaultDefendInsightsGraph = ({
   endpointIds,
   anonymizationFields,
   esClient,
+  kbDataClient,
   llm,
   logger,
   onNewReplacements,
@@ -77,6 +80,7 @@ export const getDefaultDefendInsightsGraph = ({
       endpointIds,
       anonymizationFields,
       esClient,
+      kbDataClient,
       logger,
       onNewReplacements,
       replacements,
@@ -129,7 +133,6 @@ export const getDefaultDefendInsightsGraph = ({
         refine: NodeType.REFINE_NODE,
       });
 
-    // compile the graph:
     return graph.compile();
   } catch (e) {
     throw new Error(`Unable to compile DefendInsightsGraph\n${e}`);

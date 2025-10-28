@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+
+import { dateRangeQuery } from '@kbn/es-query';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getSampleDocuments } from './get_sample_documents';
 import { mergeSampleDocumentsWithFieldCaps } from './merge_sample_documents_with_field_caps';
-import { rangeQuery } from './queries';
 
 export async function describeDataset({
   esClient,
@@ -15,12 +17,14 @@ export async function describeDataset({
   end,
   index,
   kql,
+  filter,
 }: {
   esClient: ElasticsearchClient;
   start: number;
   end: number;
-  index: string;
+  index: string | string[];
   kql?: string;
+  filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
 }) {
   const [fieldCaps, hits] = await Promise.all([
     esClient.fieldCaps({
@@ -28,7 +32,7 @@ export async function describeDataset({
       fields: '*',
       index_filter: {
         bool: {
-          filter: rangeQuery(start, end),
+          filter: dateRangeQuery(start, end),
         },
       },
     }),
@@ -38,6 +42,7 @@ export async function describeDataset({
       start,
       end,
       kql,
+      filter,
     }),
   ]);
 

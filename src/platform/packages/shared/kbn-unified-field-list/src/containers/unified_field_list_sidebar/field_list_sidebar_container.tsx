@@ -36,13 +36,14 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-
+import { prepareDataViewForEditing } from '@kbn/discover-utils';
 import {
   useExistingFieldsFetcher,
   type ExistingFieldsFetcher,
 } from '../../hooks/use_existing_fields';
 import { useQuerySubscriber } from '../../hooks/use_query_subscriber';
-import { getSidebarVisibility, SidebarVisibility } from './get_sidebar_visibility';
+import type { SidebarVisibility } from './get_sidebar_visibility';
+import { getSidebarVisibility } from './get_sidebar_visibility';
 import {
   UnifiedFieldListSidebar,
   type UnifiedFieldListSidebarCustomizableProps,
@@ -145,7 +146,8 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
   /**
    * Callback to execute after editing/deleting a runtime field
    */
-  onFieldEdited?: (options?: {
+  onFieldEdited?: (options: {
+    editedDataView: UnifiedFieldListSidebarContainerProps['dataView'];
     removedFieldName?: string;
     editedFieldName?: string;
   }) => Promise<void>;
@@ -179,6 +181,8 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
     createStateService({ options: getCreationOptions() })
   );
+  const shouldKeepAdHocDataViewImmutable =
+    stateService.creationOptions.shouldKeepAdHocDataViewImmutable ?? false;
   const { data, dataViewFieldEditor } = services;
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
   const [sidebarVisibility] = useState(() =>
@@ -232,14 +236,20 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     () =>
       dataView && dataViewFieldEditor && searchMode === 'documents' && canEditDataView
         ? async (fieldName?: string) => {
+            const editedDataView = shouldKeepAdHocDataViewImmutable
+              ? await prepareDataViewForEditing(dataView, data.dataViews)
+              : dataView;
             const ref = await dataViewFieldEditor.openEditor({
               ctx: {
-                dataView,
+                dataView: editedDataView,
               },
               fieldName,
               onSave: async () => {
                 if (onFieldEdited) {
-                  await onFieldEdited({ editedFieldName: fieldName });
+                  await onFieldEdited({
+                    editedDataView,
+                    editedFieldName: fieldName,
+                  });
                 }
               },
             });
@@ -248,10 +258,12 @@ const UnifiedFieldListSidebarContainer = forwardRef<
           }
         : undefined,
     [
+      dataView,
+      dataViewFieldEditor,
       searchMode,
       canEditDataView,
-      dataViewFieldEditor,
-      dataView,
+      shouldKeepAdHocDataViewImmutable,
+      data.dataViews,
       setFieldEditorRef,
       closeFieldListFlyout,
       onFieldEdited,
@@ -262,14 +274,20 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     () =>
       dataView && dataViewFieldEditor && editField
         ? async (fieldName: string) => {
+            const editedDataView = shouldKeepAdHocDataViewImmutable
+              ? await prepareDataViewForEditing(dataView, data.dataViews)
+              : dataView;
             const ref = await dataViewFieldEditor.openDeleteModal({
               ctx: {
-                dataView,
+                dataView: editedDataView,
               },
               fieldName,
               onDelete: async () => {
                 if (onFieldEdited) {
-                  await onFieldEdited({ removedFieldName: fieldName });
+                  await onFieldEdited({
+                    editedDataView,
+                    removedFieldName: fieldName,
+                  });
                 }
               },
             });
@@ -279,10 +297,12 @@ const UnifiedFieldListSidebarContainer = forwardRef<
         : undefined,
     [
       dataView,
-      setFieldEditorRef,
-      editField,
-      closeFieldListFlyout,
       dataViewFieldEditor,
+      editField,
+      shouldKeepAdHocDataViewImmutable,
+      data.dataViews,
+      setFieldEditorRef,
+      closeFieldListFlyout,
       onFieldEdited,
     ]
   );

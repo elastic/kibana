@@ -6,7 +6,7 @@
  */
 
 import { alertConvo, conversationWithContentReferences } from '../../../mock/conversation';
-import { Conversation } from '../../../..';
+import type { Conversation } from '../../../..';
 import { conversationContainsContentReferences, conversationContainsAnonymizedValues } from '.';
 
 describe('conversation utils', () => {

@@ -7,4 +7,18 @@
 
 export { describeDataset } from './src/tools/describe_dataset';
 export { sortAndTruncateAnalyzedFields } from './src/tools/describe_dataset/sort_and_truncate_analyzed_fields';
+export { mergeSampleDocumentsWithFieldCaps } from './src/tools/describe_dataset/merge_sample_documents_with_field_caps';
+export type {
+  DocumentAnalysis,
+  TruncatedDocumentAnalysis,
+} from './src/tools/describe_dataset/document_analysis';
+export {
+  getLogPatterns,
+  type FieldPatternResultWithChanges,
+} from './src/tools/log_patterns/get_log_patterns';
+export {
+  pValueToLabel,
+  P_VALUE_SIGNIFICANCE_HIGH,
+  P_VALUE_SIGNIFICANCE_MEDIUM,
+} from './src/utils/p_value_to_label';
 export { executeAsEsqlAgent } from './src/tools/esql';

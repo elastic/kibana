@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { infraSyncTaskRunner } from './task';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import {
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type {
   AgentlessConnectorsInfraService,
   ConnectorMetadata,
   PackagePolicyMetadata,
 } from './services';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createAgentPolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
+import type { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
 
 const DATE_1970 = '1970-01-01T00:00:00.000Z';
 
@@ -218,7 +220,7 @@ describe('infraSyncTaskRunner', () => {
         throw new Error('Cannot deploy these connectors');
       }
 
-      return createPackagePolicyMock();
+      return createAgentPolicyMock();
     });
 
     await infraSyncTaskRunner(

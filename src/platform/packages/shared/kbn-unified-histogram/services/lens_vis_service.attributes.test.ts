@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   dataViewWithTimefieldMock,
@@ -189,6 +190,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
+          "version": 1,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -362,6 +364,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
+          "version": 1,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -517,6 +520,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
+          "version": 1,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -678,7 +682,7 @@ describe('LensVisService attributes', () => {
             ],
             "query": Object {
               "esql": "from logstash-* | limit 10
-      | EVAL timestamp=DATE_TRUNC(10 minute, timestamp) | stats results = count(*) by timestamp",
+      | STATS results = COUNT(*) BY timestamp = BUCKET(timestamp, 10 minute)",
             },
             "visualization": Object {
               "gridConfig": Object {
@@ -702,6 +706,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Heat map",
+          "version": 1,
           "visualizationType": "lnsHeatmap",
         },
         "requestData": Object {
@@ -735,6 +740,7 @@ describe('LensVisService attributes', () => {
           'index-pattern-with-timefield-id': {},
         },
       }),
+      version: 1,
       references: [],
       title: 'Heat map',
       visualizationType: 'lnsHeatmap',
@@ -813,7 +819,7 @@ describe('LensVisService attributes', () => {
   it('should use the correct histogram query when no suggestion passed', async () => {
     const histogramQuery = {
       esql: `from logstash-* | limit 10
-| EVAL timestamp=DATE_TRUNC(10 minute, @timestamp) | stats results = count(*) by timestamp`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)`,
     };
     const lensVis = await getLensVisMock({
       filters,

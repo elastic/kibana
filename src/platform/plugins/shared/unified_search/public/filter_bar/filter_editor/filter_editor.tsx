@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiFormRowProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,7 +16,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiFormRowProps,
   EuiIcon,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -43,11 +43,12 @@ import { merge } from 'lodash';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewsContract, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import { cx } from '@emotion/css';
-import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
+import type { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -69,7 +70,7 @@ import {
   filterPreviewLabelStyle,
   filtersBuilderMaxHeightCss,
 } from './filter_editor.styles';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
 
@@ -276,6 +277,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                   onChange={this.onCustomLabelChange}
                   placeholder={strings.getAddCustomLabel()}
                   fullWidth
+                  compressed
                 />
               </EuiFormRow>
             </div>
@@ -294,6 +296,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                     onClick={this.onSubmit}
                     isDisabled={!this.isFilterValid()}
                     data-test-subj="saveFilter"
+                    size="s"
                   >
                     {this.props.mode === 'add'
                       ? strings.getAddButtonLabel()
@@ -305,6 +308,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                     flush="right"
                     onClick={this.props.onCancel}
                     data-test-subj="cancelSaveFilter"
+                    size="s"
                   >
                     <FormattedMessage
                       id="unifiedSearch.filter.filterEditor.cancelButtonLabel"

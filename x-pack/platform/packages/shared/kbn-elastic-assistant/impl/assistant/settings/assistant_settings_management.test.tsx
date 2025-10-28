@@ -12,11 +12,10 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AssistantSettingsManagement } from './assistant_settings_management';
 
 import {
-  CONNECTORS_TAB,
   ANONYMIZATION_TAB,
   CONVERSATIONS_TAB,
   EVALUATION_TAB,
@@ -24,7 +23,13 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+
+const mockSetSelectedSettingsTab = jest.fn();
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -35,7 +40,24 @@ const mockContext = {
   assistantAvailability: {
     isAssistantEnabled: true,
     isAssistantManagementEnabled: true,
+    hasConnectorsAllPrivilege: true,
   },
+  settings: {
+    client: {
+      get: jest.fn((key) => {
+        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
+          return 'c5f91dc0-2197-11ee-aded-897192c5d6f5';
+        }
+        if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
+          return false;
+        }
+        return undefined;
+      }),
+    },
+  },
+  selectedSettingsTab: null,
+  setSelectedSettingsTab: mockSetSelectedSettingsTab,
+  navigateToApp: jest.fn(),
 };
 
 const mockDataViews = {
@@ -47,13 +69,9 @@ const testProps = {
   selectedConversation: welcomeConvo,
   dataViews: mockDataViews,
   onTabChange,
-  currentTab: CONNECTORS_TAB,
+  currentTab: CONVERSATIONS_TAB,
 };
 jest.mock('../../assistant_context');
-
-jest.mock('../../connectorland/connector_settings_management', () => ({
-  ConnectorsSettingsManagement: () => <span data-test-subj="connectors-tab" />,
-}));
 
 jest.mock('../conversations/conversation_settings_management', () => ({
   ConversationSettingsManagement: () => <span data-test-subj="conversations-tab" />,
@@ -107,8 +125,35 @@ describe('AssistantSettingsManagement', () => {
     expect(queryByTestId(`bottom-bar`)).not.toBeInTheDocument();
   });
 
+  describe('useEffect behavior', () => {
+    it('calls onTabChange and clears contextSettingsTab when contextSettingsTab is set', () => {
+      const contextWithTab = {
+        ...mockContext,
+        selectedSettingsTab: SYSTEM_PROMPTS_TAB,
+      };
+      (useAssistantContext as jest.Mock).mockImplementation(() => contextWithTab);
+
+      render(<AssistantSettingsManagement {...testProps} />, { wrapper });
+
+      expect(onTabChange).toHaveBeenCalledWith(SYSTEM_PROMPTS_TAB);
+      expect(mockSetSelectedSettingsTab).toHaveBeenCalledWith(null);
+    });
+
+    it('does not call onTabChange when contextSettingsTab is null', () => {
+      const contextWithoutTab = {
+        ...mockContext,
+        selectedSettingsTab: null,
+      };
+      (useAssistantContext as jest.Mock).mockImplementation(() => contextWithoutTab);
+
+      render(<AssistantSettingsManagement {...testProps} />, { wrapper });
+
+      expect(onTabChange).not.toHaveBeenCalled();
+      expect(mockSetSelectedSettingsTab).not.toHaveBeenCalled();
+    });
+  });
+
   describe.each([
-    CONNECTORS_TAB,
     ANONYMIZATION_TAB,
     CONVERSATIONS_TAB,
     EVALUATION_TAB,

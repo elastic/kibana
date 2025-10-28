@@ -6,51 +6,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
+import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
-import {
-  ONECHAT_UI_SETTING_ID,
-  ONECHAT_MCP_SERVER_UI_SETTING_ID,
-  ONECHAT_API_SETTING_ID,
-} from '../common/constants';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
-    [ONECHAT_MCP_SERVER_UI_SETTING_ID]: {
-      description: i18n.translate('xpack.onechat.uiSettings.mcpServer.description', {
-        defaultMessage: 'Enables MCP server with access to tools.',
+    [AGENT_BUILDER_ENABLED_SETTING_ID]: {
+      description: i18n.translate('xpack.onechat.uiSettings.feature.description', {
+        defaultMessage: 'Enables Elastic Agent Builder.',
       }),
-      name: i18n.translate('xpack.onechat.uiSettings.mcpServer.name', {
-        defaultMessage: 'MCP Server',
-      }),
-      schema: schema.boolean(),
-      value: false,
-      readonly: true,
-      readonlyMode: 'ui',
-    },
-    [ONECHAT_UI_SETTING_ID]: {
-      description: i18n.translate('xpack.onechat.uiSettings.chatUI.description', {
-        defaultMessage: 'Enables the OneChat chat UI.',
-      }),
-      name: i18n.translate('xpack.onechat.uiSettings.chatUI.name', {
-        defaultMessage: 'OneChat Chat UI',
+      name: i18n.translate('xpack.onechat.uiSettings.feature.name', {
+        defaultMessage: 'Elastic Agent Builder',
       }),
       schema: schema.boolean(),
-      value: false,
-      readonly: true,
-      readonlyMode: 'ui',
-    },
-    [ONECHAT_API_SETTING_ID]: {
-      description: i18n.translate('xpack.onechat.uiSettings.api.description', {
-        defaultMessage: 'Enables the OneChat APIs.',
-      }),
-      name: i18n.translate('xpack.onechat.uiSettings.api.name', {
-        defaultMessage: 'OneChat APIs',
-      }),
-      schema: schema.boolean(),
-      value: false,
-      readonly: true,
-      readonlyMode: 'ui',
+      value: true,
+      technicalPreview: true,
+      requiresPageReload: true,
+      readonly: false,
     },
   });
 };

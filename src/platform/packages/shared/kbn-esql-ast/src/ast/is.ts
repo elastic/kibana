@@ -8,7 +8,7 @@
  */
 
 import type * as types from '../types';
-import { ESQLInlineCast, ESQLProperNode, ESQLTimeInterval } from '../types';
+import type { ESQLInlineCast, ESQLProperNode } from '../types';
 import { Walker } from '../walker';
 
 export const isProperNode = (node: unknown): node is types.ESQLProperNode =>
@@ -24,8 +24,14 @@ export const isQuery = (node: unknown): node is types.ESQLAstQueryExpression =>
 export const isCommand = (node: unknown): node is types.ESQLCommand =>
   isProperNode(node) && node.type === 'command';
 
+export const isHeaderCommand = (node: unknown): node is types.ESQLAstHeaderCommand =>
+  isProperNode(node) && node.type === 'header-command';
+
 export const isFunctionExpression = (node: unknown): node is types.ESQLFunction =>
   isProperNode(node) && node.type === 'function';
+
+export const isUnaryExpression = (node: unknown): node is types.ESQLUnaryExpression =>
+  isFunctionExpression(node) && node.subtype === 'unary-expression';
 
 /**
  * Returns true if the given node is a binary expression, i.e. an operator
@@ -69,8 +75,14 @@ export const isIntegerLiteral = (node: unknown): node is types.ESQLIntegerLitera
 export const isDoubleLiteral = (node: unknown): node is types.ESQLIntegerLiteral =>
   isLiteral(node) && node.literalType === 'double';
 
-export const isBooleanLiteral = (node: unknown): node is types.ESQLStringLiteral =>
+export const isBooleanLiteral = (node: unknown): node is types.ESQLBooleanLiteral =>
   isLiteral(node) && node.literalType === 'boolean';
+
+export const isTimeDurationLiteral = (node: unknown): node is types.ESQLTimeDurationLiteral =>
+  isLiteral(node) && node.literalType === 'time_duration';
+
+export const isDatePeriodLiteral = (node: unknown): node is types.ESQLDatePeriodLiteral =>
+  isLiteral(node) && node.literalType === 'date_period';
 
 export const isParamLiteral = (node: unknown): node is types.ESQLParamLiteral =>
   isLiteral(node) && node.literalType === 'param';
@@ -94,8 +106,8 @@ export const isOptionNode = (node: types.ESQLAstNode): node is types.ESQLCommand
   return !!node && typeof node === 'object' && !Array.isArray(node) && node.type === 'option';
 };
 
-export const isTimeInterval = (node: unknown): node is ESQLTimeInterval =>
-  isProperNode(node) && node.type === 'timeInterval';
+export const isUnknownNode = (node: unknown): node is types.ESQLUnknownItem =>
+  isProperNode(node) && node.type === 'unknown';
 
 export const isInlineCast = (node: unknown): node is ESQLInlineCast =>
   isProperNode(node) && node.type === 'inlineCast';

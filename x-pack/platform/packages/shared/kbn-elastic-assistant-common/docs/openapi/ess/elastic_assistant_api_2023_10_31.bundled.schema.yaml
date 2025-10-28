@@ -588,6 +588,16 @@ paths:
             example: 20
             minimum: 0
             type: integer
+        - description: >-
+            Whether to return conversations that the current user owns. If true,
+            only conversations owned by the user are returned.
+          in: query
+          name: is_owner
+          required: false
+          schema:
+            default: false
+            example: true
+            type: boolean
       responses:
         '200':
           content:
@@ -864,6 +874,12 @@ paths:
               schema:
                 type: object
                 properties:
+                  defend_insights_exists:
+                    description: >-
+                      Indicates if Defend Insights documentation exists in the
+                      KnowledgeBase.
+                    example: true
+                    type: boolean
                   elser_exists:
                     description: Indicates if the ELSER model exists for the KnowledgeBase.
                     example: true
@@ -1816,6 +1832,35 @@ components:
       required:
         - id
         - type
+    BaseInterruptResumeValue:
+      description: The basis of an interrupt resume value
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/InterruptType'
+          description: Type of the resume value
+          example: SELECT_OPTION
+      required:
+        - type
+    BaseInterruptValue:
+      description: The basis of an agent interrupt
+      type: object
+      properties:
+        expired:
+          description: Whether the interrupt has expired and can no longer be resumed.
+          example: false
+          type: boolean
+        threadId:
+          description: Thread ID of the graph execution that produced this message.
+          example: <UUID>
+          type: string
+        type:
+          $ref: '#/components/schemas/InterruptType'
+          description: Type of the interrupt
+          example: SELECT_OPTION
+      required:
+        - type
+        - threadId
     BulkCrudActionSummary:
       type: object
       properties:
@@ -1959,14 +2004,6 @@ components:
         - insights
       example: assistant
       type: string
-    ConversationConfidence:
-      description: The conversation confidence.
-      enum:
-        - low
-        - medium
-        - high
-      example: high
-      type: string
     ConversationCreateProps:
       type: object
       properties:
@@ -2011,6 +2048,9 @@ components:
           description: The time conversation was created.
           example: '2025-04-30T14:00:00Z'
           type: string
+        createdBy:
+          $ref: '#/components/schemas/User'
+          description: The user who created the conversation.
         excludeFromLastConversationStorage:
           description: Exclude from last conversation storage.
           type: boolean
@@ -2027,8 +2067,6 @@ components:
           type: string
         replacements:
           $ref: '#/components/schemas/Replacements'
-        summary:
-          $ref: '#/components/schemas/ConversationSummary'
         timestamp:
           $ref: '#/components/schemas/NonEmptyTimestamp'
         title:
@@ -2047,32 +2085,10 @@ components:
         - id
         - title
         - createdAt
+        - createdBy
         - users
         - namespace
         - category
-    ConversationSummary:
-      type: object
-      properties:
-        confidence:
-          $ref: '#/components/schemas/ConversationConfidence'
-          description: >-
-            How confident you are about this being a correct and useful
-            learning.
-          example: high
-        content:
-          description: Summary text of the conversation over time.
-          example: >-
-            This conversation covered how to configure the Security AI
-            Assistant.
-          type: string
-        public:
-          description: Define if summary is marked as publicly available.
-          example: true
-          type: boolean
-        timestamp:
-          $ref: '#/components/schemas/NonEmptyTimestamp'
-          description: The timestamp summary was updated.
-          example: '2025-04-30T16:00:00Z'
     ConversationUpdateProps:
       type: object
       properties:
@@ -2095,12 +2111,14 @@ components:
           type: array
         replacements:
           $ref: '#/components/schemas/Replacements'
-        summary:
-          $ref: '#/components/schemas/ConversationSummary'
         title:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
           type: string
+        users:
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
       required:
         - id
     DeleteResponseFields:
@@ -2486,6 +2504,65 @@ components:
           - fieldType
           - description
       type: array
+    InputTextInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+            value:
+              description: Text value used to resume the graph execution with.
+              example: .logs*
+              type: string
+          required:
+            - value
+            - type
+      description: A resume value for input text
+    InputTextInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: What is the index you would like to use for the query.
+              type: string
+            placeholder:
+              description: Placeholder text for the input field
+              example: Enter index pattern here...
+              type: string
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+          required:
+            - type
+      description: Interrupt that requests user to provide text input
+    InterruptResumeValue:
+      description: Union of the interrupt resume values
+      oneOf:
+        - $ref: '#/components/schemas/SelectOptionInterruptResumeValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/InputTextInterruptResumeValue'
+          additionalProperties: false
+    InterruptType:
+      description: The type of interrupt
+      enum:
+        - SELECT_OPTION
+        - INPUT_TEXT
+      type: string
+    InterruptValue:
+      description: Union of the interrupt values
+      oneOf:
+        - $ref: '#/components/schemas/SelectOptionInterruptValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/InputTextInterruptValue'
+          additionalProperties: false
     KnowledgeBaseEntryBulkActionSkipReason:
       description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
@@ -2710,6 +2787,7 @@ components:
         'user', etc.
       enum:
         - security_labs
+        - defend_insights
         - user
       example: security_labs
       type: string
@@ -2729,6 +2807,9 @@ components:
           description: Message content.
           example: Hello, how can I assist you today?
           type: string
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+          description: Message id
         isError:
           description: Is error message.
           example: false
@@ -2750,6 +2831,9 @@ components:
         traceData:
           $ref: '#/components/schemas/TraceData'
           description: Trace data
+        user:
+          $ref: '#/components/schemas/User'
+          description: The user who sent the message.
       required:
         - timestamp
         - content
@@ -2768,6 +2852,18 @@ components:
         contentReferences:
           $ref: '#/components/schemas/ContentReferences'
           description: Data referred to by the message content.
+        interruptResumeValue:
+          $ref: '#/components/schemas/InterruptResumeValue'
+          description: >-
+            When the agent is resumed after an interrupt, this field is
+            populated with the details of the resume value.
+        interruptValue:
+          $ref: '#/components/schemas/InterruptValue'
+          description: >-
+            When the agent is interrupted (for example, when user input is
+            required), this field is populated with the details of the
+            interrupt. Messages containing interruptValues in the metadata are
+            excluded from the LLM context.
     MessageRole:
       description: Message role.
       enum:
@@ -3194,6 +3290,79 @@ components:
           required:
             - type
       description: References the security alerts page
+    SelectOptionInterruptOption:
+      description: A request approval option
+      type: object
+      properties:
+        buttonColor:
+          enum:
+            - text
+            - accent
+            - accentSecondary
+            - primary
+            - success
+            - warning
+            - danger
+            - neutral
+            - risk
+          example: danger
+          type: string
+        label:
+          example: Option 1
+          type: string
+        value:
+          example: option_1
+          type: string
+      required:
+        - label
+        - value
+    SelectOptionInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+            value:
+              description: >-
+                The value of the selected option to resume the graph execution
+                with
+              example: option_1
+              type: string
+          required:
+            - value
+            - type
+      description: A request approval resume schema
+    SelectOptionInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: Select one of the options
+              type: string
+            options:
+              description: List of actions to choose from
+              example:
+                - label: Option 1
+                - label: Option 2
+              items:
+                $ref: '#/components/schemas/SelectOptionInterruptOption'
+              type: array
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+          required:
+            - type
+            - description
+            - options
+      description: Interrupt that requests user to select one of the provided options
     SortOrder:
       description: The order in which results are sorted.
       enum:

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { AgentMode, ConversationRound, RoundInput, ToolSelection } from '@kbn/onechat-common';
-import { AgentHandlerContext } from '@kbn/onechat-server';
-import { runChatAgent } from './chat';
-import { runReasoningAgent } from './reasoning';
-import { runPlannerAgent } from './planner';
-import { runResearcherAgent } from './researcher';
+import type {
+  AgentCapabilities,
+  ConversationRound,
+  RoundInput,
+  AgentConfiguration,
+} from '@kbn/onechat-common';
+import type { AgentHandlerContext } from '@kbn/onechat-server';
+import { runDefaultAgentMode } from './default';
 
 export interface RunAgentParams {
-  mode: AgentMode;
   /**
    * The next message in this conversation that the agent should respond to.
    */
@@ -21,16 +22,15 @@ export interface RunAgentParams {
   /**
    * Previous rounds of conversation.
    */
-  conversation?: ConversationRound[];
+  conversation: ConversationRound[];
   /**
-   * Optional custom instructions to add to the prompts.
+   * Configuration of the agent to run
    */
-  customInstructions?: string;
+  agentConfiguration: AgentConfiguration;
   /**
-   * Selection of tools which will be exposed to the agent.
-   * Defaults to exposing all available tools.
+   * Capabilities to enable. if not specified will use the default capabilities.
    */
-  toolSelection?: ToolSelection[];
+  capabilities?: AgentCapabilities;
   /**
    * In case of nested calls (e.g calling from a tool), allows to define the runId.
    */
@@ -53,15 +53,5 @@ export const runAgent = async (
   params: RunAgentParams,
   context: AgentHandlerContext
 ): Promise<RunAgentResponse> => {
-  const { mode, ...modeParams } = params;
-  switch (mode) {
-    case AgentMode.research:
-      return runResearcherAgent(modeParams, context);
-    case AgentMode.plan:
-      return runPlannerAgent(modeParams, context);
-    case AgentMode.reason:
-      return runReasoningAgent(modeParams, context);
-    case AgentMode.normal:
-      return runChatAgent(modeParams, context);
-  }
+  return runDefaultAgentMode(params, context);
 };

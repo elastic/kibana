@@ -24,6 +24,8 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-chrome-browser-mocks",
     "@kbn/ai-assistant-icon",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/react-query"
   ]
 }

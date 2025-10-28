@@ -150,6 +150,8 @@ export class PerAlertActionScheduler<
       }
 
       for (const alert of activeAlertsArray) {
+        const allActionUuids = this.actions.map((a) => a.uuid!);
+        alert.clearThrottlingLastScheduledActions(allActionUuids);
         if (
           this.isExecutableAlert({ alert, action, summarizedAlerts }) &&
           this.isExecutableActiveAlert({ alert, action })
@@ -183,7 +185,6 @@ export class PerAlertActionScheduler<
 
     for (const { action, alert } of executables) {
       const { actionTypeId } = action;
-
       if (
         !shouldScheduleAction({
           action,
@@ -196,7 +197,6 @@ export class PerAlertActionScheduler<
       ) {
         continue;
       }
-
       this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActions();
       this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(
         actionTypeId
@@ -394,7 +394,7 @@ export class PerAlertActionScheduler<
     const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
     if (alertMaintenanceWindowIds.length !== 0) {
       this.context.logger.debug(
-        `no scheduling of summary actions "${action.id}" for rule "${
+        `no scheduling of actions "${action.id}" for alert "${alert.getId()}" from rule "${
           this.context.rule.id
         }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
       );

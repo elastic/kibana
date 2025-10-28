@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { HasLibraryTransforms, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { HasLibraryTransforms, SerializedPanelState } from '@kbn/presentation-publishing';
 import { getCore, getCoreOverlays } from '../kibana_services';
-import type { MapAttributes } from '../../common/content_management';
+import type { MapAttributes } from '../../server';
 import { checkForDuplicateTitle, getMapClient } from '../content_management';
 import { MAP_EMBEDDABLE_NAME } from '../../common/constants';
-import { MapSerializedState } from './types';
+import type { MapByValueState, MapByReferenceState, MapEmbeddableState } from '../../common';
 
-export function getByReferenceState(state: MapSerializedState | undefined, savedObjectId: string) {
-  const { attributes, ...byRefState } = state ?? {};
+export function getByReferenceState(state: MapEmbeddableState | undefined, savedObjectId: string) {
+  const { attributes, ...byRefState } = (state as MapByValueState) ?? {};
   return {
     ...byRefState,
     savedObjectId,
   };
 }
 
-export function getByValueState(state: MapSerializedState | undefined, attributes: MapAttributes) {
-  const { savedObjectId, ...byValueState } = state ?? {};
+export function getByValueState(state: MapEmbeddableState | undefined, attributes: MapAttributes) {
+  const { savedObjectId, ...byValueState } = (state as MapByReferenceState) ?? {};
   return {
     ...byValueState,
     attributes,
@@ -30,9 +30,9 @@ export function getByValueState(state: MapSerializedState | undefined, attribute
 
 export function initializeLibraryTransforms(
   isByReference: boolean,
-  serializeByReference: (libraryId: string) => SerializedPanelState<MapSerializedState>,
-  serializeByValue: () => SerializedPanelState<MapSerializedState>
-): HasLibraryTransforms<MapSerializedState, MapSerializedState> {
+  serializeByReference: (libraryId: string) => SerializedPanelState<MapByReferenceState>,
+  serializeByValue: () => SerializedPanelState<MapByValueState>
+): HasLibraryTransforms<MapByReferenceState, MapByValueState> {
   return {
     canLinkToLibrary: async () => {
       const { maps_v2: maps } = getCore().application.capabilities;
@@ -47,10 +47,9 @@ export function initializeLibraryTransforms(
         item: { id: savedObjectId },
       } = await getMapClient().create({
         data: {
-          ...(state.rawState?.attributes ?? {}),
+          ...state.rawState.attributes,
           title,
         },
-        options: { references: state.references ?? [] },
       });
       return savedObjectId;
     },

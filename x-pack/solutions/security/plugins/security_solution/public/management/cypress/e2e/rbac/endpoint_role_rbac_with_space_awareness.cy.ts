@@ -36,9 +36,7 @@ describe(
           { product_line: 'endpoint', product_tier: 'complete' },
         ],
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'endpointManagementSpaceAwarenessEnabled',
-          ])}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
         ],
       },
     },
@@ -100,16 +98,16 @@ describe(
 
           return features;
         })
-        // Using `include.members` here because in serverless, an additional privilege shows
-        // up in this list - `Endpoint exceptions`.
-        .should('include.members', [
+        .should('deep.equal', [
           'Endpoint ListAll',
           'Automatic TroubleshootingNone',
           'Global Artifact ManagementNone',
           'Trusted ApplicationsNone',
+          'Trusted DevicesNone',
           'Host Isolation ExceptionsNone',
           'BlocklistNone',
           'Event FiltersNone',
+          'Endpoint ExceptionsNone',
           'Elastic Defend Policy ManagementNone',
           'Response Actions HistoryNone',
           'Host IsolationAll',

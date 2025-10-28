@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -24,8 +25,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { proxySettingsUrl } from '../../../../../services/documentation';
 
-import { ClusterErrors } from '../validators';
-import { FormFields } from '../remote_cluster_form';
+import type { ClusterErrors } from '../validators';
+import type { FormFields } from '../remote_cluster_form';
 
 export interface Props {
   fields: FormFields;
@@ -90,7 +91,7 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
         helpText={
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.fieldRemoteAddressHelpText"
-            defaultMessage="When no port is specified, the default {default_port} port is used."
+            defaultMessage="Must include a valid hostname, IPv4, or IPv6 address. When no port is specified, the default {default_port} port is used."
             values={{
               default_port: <EuiCode>{'9400'}</EuiCode>,
             }}

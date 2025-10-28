@@ -5,33 +5,28 @@
  * 2.0.
  */
 
-import {
-  CustomPaletteParams,
-  CUSTOM_PALETTE,
-  PaletteRegistry,
-  PaletteOutput,
-  getOverridePaletteStops,
-} from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteRegistry, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
 import type {
   TrendlineExpressionFunctionDefinition,
   MetricVisExpressionFunctionDefinition,
 } from '@kbn/expression-metric-vis-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
 import { hasIcon } from '@kbn/visualization-ui-components';
-import { ThemeServiceStart } from '@kbn/core/public';
-import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
-import { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
-import { DatasourceLayers } from '../../types';
+import type { ThemeServiceStart } from '@kbn/core/public';
+import type { DatasourceLayers } from '@kbn/lens-common';
+import type { CollapseArgs, CollapseFunction } from '../../../common/expressions';
+import type { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
 import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
-import { MetricVisualizationState } from './types';
-import { metricStateDefaults } from './constants';
+import type { MetricVisualizationState } from './types';
+import { legacyMetricStateDefaults, metricStateDefaults } from './constants';
 import {
   getColorMode,
   getDefaultConfigForMode,
-  getPrefixSelected,
+  getSecondaryLabelSelected,
   getTrendPalette,
   getSecondaryDynamicTrendBaselineValue,
 } from './helpers';
@@ -162,9 +157,9 @@ export const toExpression = (
 
   const secondaryDynamicColorMode = getColorMode(state.secondaryTrend, isNumericType);
 
-  // replace the secondary prefix if a dynamic coloring with primary metric baseline is picked
-  const secondaryPrefixConfig = getPrefixSelected(state, {
-    defaultPrefix: '',
+  // Replace the secondary prefix if a dynamic coloring with primary metric baseline is picked
+  const secondaryLabelConfig = getSecondaryLabelSelected(state, {
+    defaultSecondaryLabel: '',
     colorMode: secondaryDynamicColorMode,
     isPrimaryMetricNumeric: isMetricNumeric,
   });
@@ -174,11 +169,22 @@ export const toExpression = (
       ? state.secondaryTrend
       : getDefaultConfigForMode(secondaryDynamicColorMode);
 
+  const hasMetricIcon = hasIcon(state.icon);
+  // If an icon is present but no iconAlign is set (legacy state), default to 'left' alignment;
+  // otherwise, use the configured or default alignment
+  let iconAlign: 'right' | 'left';
+  if (hasMetricIcon) {
+    // Legacy: If iconAlign is missing, default to 'left'
+    iconAlign = state.iconAlign ?? legacyMetricStateDefaults.iconAlign;
+  } else {
+    iconAlign = metricStateDefaults.iconAlign;
+  }
+
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
-    secondaryPrefix:
-      secondaryPrefixConfig.mode === 'custom' ? secondaryPrefixConfig.label : state.secondaryPrefix,
+    secondaryLabel:
+      secondaryLabelConfig.mode === 'custom' ? secondaryLabelConfig.label : state.secondaryLabel,
     secondaryColor: secondaryTrendConfig.type === 'static' ? secondaryTrendConfig.color : undefined,
     secondaryTrendVisuals:
       secondaryTrendConfig.type === 'dynamic' ? secondaryTrendConfig.visuals : undefined,
@@ -200,11 +206,14 @@ export const toExpression = (
       ? state.progressDirection || LayoutDirection.Vertical
       : undefined,
     titlesTextAlign: state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign,
-    valuesTextAlign: state.valuesTextAlign ?? metricStateDefaults.valuesTextAlign,
-    iconAlign: state.iconAlign ?? metricStateDefaults.iconAlign,
+    primaryAlign: state.primaryAlign ?? metricStateDefaults.primaryAlign,
+    secondaryAlign: state.secondaryAlign ?? metricStateDefaults.secondaryAlign,
+    iconAlign,
     valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
+    primaryPosition: state.primaryPosition ?? metricStateDefaults.primaryPosition,
+    titleWeight: state.titleWeight ?? metricStateDefaults.titleWeight,
     color: state.color ?? getDefaultColor(state, isMetricNumeric),
-    icon: hasIcon(state.icon) ? state.icon : undefined,
+    icon: hasMetricIcon ? state.icon : undefined,
     palette:
       isMetricNumeric && state.palette?.params
         ? [
@@ -216,6 +225,9 @@ export const toExpression = (
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
+    secondaryLabelPosition:
+      state.secondaryLabelPosition ?? metricStateDefaults.secondaryLabelPosition,
+    applyColorTo: state.applyColorTo ?? metricStateDefaults.applyColorTo,
   });
 
   return {

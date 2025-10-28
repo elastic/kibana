@@ -11,12 +11,13 @@ import { access, link, unlink, chmod } from 'fs';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
+import { write, copyAll, mkdirp, exec } from '../../../lib';
+import type { Config, Build, Solution } from '../../../lib';
 import * as dockerTemplates from './templates';
-import { TemplateContext } from './template_context';
+import type { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
 
 const accessAsync = promisify(access);
@@ -38,6 +39,7 @@ export async function runDockerGenerator(
     serverless?: boolean;
     dockerBuildDate?: string;
     fips?: boolean;
+    solution?: Solution;
   }
 ) {
   let baseImageName = '';
@@ -50,17 +52,18 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:1c4caa90ee9cf26c9143e44074f50ba9bb17636823bde4397751a5e0d846bfd6';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:792313d45d114da11e169252586f76a79ff20248c7af4283f11b94bff7f1aed7';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
+  if (flags.solution) imageFlavor += `-${flags.solution}`;
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:69f3df4cc5fd08b194a1a44dda2ff9f6665ac2b59063a2b2aedb8948ebd87f97';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:cbdc968f357706186e2b83ea1fea92382f5d51842e867a662541b67c28f4e809';
   }
 
   // General docker var config
@@ -75,8 +78,10 @@ export async function runDockerGenerator(
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   let artifactVariant = '';
+  let artifactSolution = '';
   if (flags.serverless) artifactVariant = '-serverless';
-  const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
+  if (flags.solution) artifactSolution = `-${flags.solution}`;
+  const artifactPrefix = `kibana${artifactVariant}${artifactSolution}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
   const metricbeatTarball = `metricbeat${

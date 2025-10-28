@@ -6,7 +6,7 @@
  */
 
 import { castArray, sortBy, uniq } from 'lodash';
-import { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
 import type { DocumentAnalysis } from './document_analysis';
 
@@ -39,9 +39,7 @@ export function mergeSampleDocumentsWithFieldCaps({
 
   for (const document of samples) {
     Object.keys(document).forEach((field) => {
-      if (!nonEmptyFields.has(field)) {
-        nonEmptyFields.add(field);
-      }
+      nonEmptyFields.add(field);
 
       if (!typesByFields.has(field)) {
         typesByFields.set(field, []);

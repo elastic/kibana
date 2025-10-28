@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
@@ -15,15 +15,13 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { BurnRate } from './burn_rate';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './constants';
-import { BurnRateApi, BurnRateCustomInput, SloBurnRateEmbeddableState } from './types';
+import type { BurnRateApi, BurnRateCustomInput, SloBurnRateEmbeddableState } from './types';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
 
@@ -114,28 +112,26 @@ export const getBurnRateEmbeddableFactory = ({
           const queryClient = new QueryClient();
 
           return (
-            <Router history={createBrowserHistory()}>
-              <KibanaContextProvider services={deps}>
-                <PluginContext.Provider
-                  value={{
-                    observabilityRuleTypeRegistry:
-                      pluginsStart.observability.observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate:
-                      pluginsStart.observabilityShared.navigation.PageTemplate,
-                    sloClient,
-                  }}
-                >
-                  <QueryClientProvider client={queryClient}>
-                    <BurnRate
-                      sloId={sloId}
-                      sloInstanceId={sloInstanceId}
-                      duration={duration}
-                      reloadSubject={reload$}
-                    />
-                  </QueryClientProvider>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </Router>
+            <KibanaContextProvider services={deps}>
+              <PluginContext.Provider
+                value={{
+                  observabilityRuleTypeRegistry:
+                    pluginsStart.observability.observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate:
+                    pluginsStart.observabilityShared.navigation.PageTemplate,
+                  sloClient,
+                }}
+              >
+                <QueryClientProvider client={queryClient}>
+                  <BurnRate
+                    sloId={sloId}
+                    sloInstanceId={sloInstanceId}
+                    duration={duration}
+                    reloadSubject={reload$}
+                  />
+                </QueryClientProvider>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
           );
         },
       };

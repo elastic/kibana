@@ -6,16 +6,21 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import * as ReactQuery from '@tanstack/react-query';
+import '@kbn/react-query/mock';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useGetAttackDiscoveryGenerations, useInvalidateGetAttackDiscoveryGenerations } from '.';
+import {
+  ATTACK_DISCOVERY_GENERATIONS,
+  ATTACK_DISCOVERY_GENERATIONS_INTERNAL,
+} from '@kbn/elastic-assistant-common';
 import { ERROR_RETRIEVING_ATTACK_DISCOVERY_GENERATIONS } from './translations';
-import * as useKibanaFeatureFlagsModule from '../use_kibana_feature_flags';
 
 const mockAddError = jest.fn();
+const useQueryClientMock = useQueryClient as unknown as jest.MockedFn<typeof useQueryClient>;
+
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
     addError: mockAddError,
@@ -29,8 +34,12 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
   },
 }));
 
+// mock feature flags
+const mockUseKibanaFeatureFlags = jest.fn().mockReturnValue({
+  attackDiscoveryPublicApiEnabled: true,
+});
 jest.mock('../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: jest.fn(),
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
 }));
 
 const mockHttp: HttpSetup = {
@@ -54,9 +63,6 @@ describe('useGetAttackDiscoveryGenerations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useKibanaFeatureFlagsModule.useKibanaFeatureFlags as jest.Mock).mockReturnValue({
-      attackDiscoveryAlertsEnabled: true,
-    });
     queryClient = new QueryClient();
   });
 
@@ -104,18 +110,32 @@ describe('useGetAttackDiscoveryGenerations', () => {
 });
 
 describe('useInvalidateGetAttackDiscoveryGenerations', () => {
-  it('returns a function that calls invalidateQueries', () => {
+  it('calls invalidateQueries with internal generations route when feature flag is false', () => {
     const invalidateQueries = jest.fn();
-    jest
-      .spyOn(ReactQuery, 'useQueryClient')
-      .mockReturnValue({ invalidateQueries } as unknown as ReturnType<
-        typeof ReactQuery.useQueryClient
-      >);
+    useQueryClientMock.mockReturnValue({ invalidateQueries } as unknown as ReturnType<
+      typeof useQueryClient
+    >);
+    mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: false }); // <-- feature flag disabled
 
     const { result } = renderHook(() => useInvalidateGetAttackDiscoveryGenerations());
     result.current();
 
-    expect(invalidateQueries).toHaveBeenCalledWith(['GET', expect.anything()], {
+    expect(invalidateQueries).toHaveBeenCalledWith(['GET', ATTACK_DISCOVERY_GENERATIONS_INTERNAL], {
+      refetchType: 'all',
+    });
+  });
+
+  it('calls invalidateQueries with public generations route when feature flag is true', () => {
+    const invalidateQueries = jest.fn();
+    useQueryClientMock.mockReturnValue({ invalidateQueries } as unknown as ReturnType<
+      typeof useQueryClient
+    >);
+    mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: true }); // <-- feature flag enabled
+
+    const { result } = renderHook(() => useInvalidateGetAttackDiscoveryGenerations());
+    result.current();
+
+    expect(invalidateQueries).toHaveBeenCalledWith(['GET', ATTACK_DISCOVERY_GENERATIONS], {
       refetchType: 'all',
     });
   });

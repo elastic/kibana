@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLCommandOption } from '../../types';
+import type { ESQLCommandOption } from '../../types';
 import { Walker } from '../../walker';
 
 describe('CHANGE_POINT command', () => {

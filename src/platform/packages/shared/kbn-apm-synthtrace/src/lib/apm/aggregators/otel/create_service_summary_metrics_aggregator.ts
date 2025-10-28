@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmOtelFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
+import type { ApmOtelFields } from '@kbn/apm-synthtrace-client';
+import { hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { identity, noop, pick } from 'lodash';
 import { createOtelMetricAggregator } from '../create_apm_metric_aggregator';
 

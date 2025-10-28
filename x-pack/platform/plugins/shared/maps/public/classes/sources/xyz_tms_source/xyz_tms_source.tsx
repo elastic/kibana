@@ -6,20 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ReactElement } from 'react';
-import { RasterTileSource } from 'maplibre-gl';
+import type { ReactElement } from 'react';
+import type { RasterTileSource } from 'maplibre-gl';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import {
+import type {
   XYZTMSSourceDescriptor,
   DataRequestMeta,
   Timeslice,
 } from '../../../../common/descriptor_types';
-import { AbstractSource, ImmutableSourceProperty } from '../source';
-import { XYZTMSSourceConfig } from './xyz_tms_editor';
+import type { ImmutableSourceProperty } from '../source';
+import { AbstractSource } from '../source';
+import type { XYZTMSSourceConfig } from './xyz_tms_editor';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { DataRequest } from '../../util/data_request';
-import { IRasterSource, RasterTileSourceData } from '../raster_source';
+import type { DataRequest } from '../../util/data_request';
+import type { IRasterSource, RasterTileSourceData } from '../raster_source';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',
@@ -32,7 +33,7 @@ export class XYZTMSSource extends AbstractSource implements IRasterSource {
 
   static createDescriptor({ urlTemplate }: XYZTMSSourceConfig): XYZTMSSourceDescriptor {
     return {
-      type: XYZTMSSource.type,
+      type: SOURCE_TYPES.EMS_XYZ,
       urlTemplate,
     };
   }

@@ -9,14 +9,14 @@ import React from 'react';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { screen } from '@elastic/eui/lib/test/rtl';
 import { render, data as dataMock } from '../../../../../utils/test_helper';
-import { CoreStart } from '@kbn/core/public';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../../plugin';
+import type { CoreStart } from '@kbn/core/public';
+import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../../plugin';
 import { APMSection } from './apm_section';
 import { response } from './mock_data/apm.mock';
 import * as hasDataHook from '../../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../../hooks/use_plugin_context';
-import { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
-import { AppMountParameters } from '@kbn/core/public';
+import type { HasDataContextValue } from '../../../../../context/has_data_context/has_data_context';
+import type { AppMountParameters } from '@kbn/core/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../../rules/observability_rule_type_registry_mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
@@ -64,6 +64,7 @@ describe('APMSection', () => {
           uptime: { enabled: false },
         },
       },
+      managedOtlpServiceUrl: '',
     };
 
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({

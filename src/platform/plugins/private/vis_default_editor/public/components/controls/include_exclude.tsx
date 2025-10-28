@@ -9,7 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { search } from '@kbn/data-plugin/public';
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 import { StringParamEditor } from './string';
 import { SimpleNumberList } from './components/simple_number_list';
 const { isNumberType } = search.aggs;

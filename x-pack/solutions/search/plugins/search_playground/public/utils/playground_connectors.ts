@@ -16,12 +16,12 @@ import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { isSupportedConnector } from '@kbn/inference-common';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
+import type { InferenceActionConnector } from '../types';
 import {
   LLMs,
   type ActionConnector,
   type UserConfiguredActionConnector,
   type PlaygroundConnector,
-  InferenceActionConnector,
 } from '../types';
 
 type OpenAIConnector = UserConfiguredActionConnector<
@@ -143,4 +143,12 @@ export async function parsePlaygroundConnectors(
     }
   }
   return playgroundConnectors;
+}
+
+export function isElasticConnector(connector: PlaygroundConnector): boolean {
+  return (
+    isInferenceActionConnector(connector) &&
+    connector.isPreconfigured &&
+    connector.config.provider === 'elastic'
+  );
 }

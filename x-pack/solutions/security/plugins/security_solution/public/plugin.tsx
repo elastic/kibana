@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, Subject, combineLatestWith } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  PluginInitializerContext,
   Plugin as IPlugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -30,20 +30,20 @@ import type {
   PluginSetup,
   PluginStart,
   SetupPlugins,
+  StartedSubPlugins,
   StartPlugins,
+  StartPluginsDependencies,
   StartServices,
   SubPlugins,
-  StartedSubPlugins,
-  StartPluginsDependencies,
 } from './types';
-import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations';
+import { ASSISTANT_MANAGEMENT_TITLE, SOLUTION_NAME } from './common/translations';
 
-import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
+import { APP_ICON_SOLUTION, APP_ID, APP_PATH, APP_UI_ID } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
 import {
-  applicationLinksUpdater,
   type ApplicationLinksUpdateParams,
+  applicationLinksUpdater,
 } from './app/links/application_links_updater';
 import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from './common/types';
 
@@ -65,12 +65,14 @@ import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
+import { defaultDeepLinks } from './app/links/default_deep_links';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
   private experimentalFeatures: ExperimentalFeatures;
   private contract: PluginContract;
   private services: PluginServices;
+  private isServerless: boolean;
 
   private appUpdater$ = new Subject<AppUpdater>();
   private storage = new Storage(localStorage);
@@ -86,6 +88,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.config.enableExperimental || []
     ).features;
     this.contract = new PluginContract(this.experimentalFeatures);
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
     this.services = new PluginServices(
       this.config,
@@ -125,6 +128,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
+      deepLinks: defaultDeepLinks,
       updater$: this.appUpdater$,
       visibleIn: ['globalSearch', 'home', 'kibanaOverview'],
       euiIconType: APP_ICON_SOLUTION,
@@ -192,15 +196,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       ),
       icon: 'sparkles',
-      path: '/app/management/kibana/securityAiAssistantManagement',
+      path: '/app/management/ai/securityAiAssistantManagement',
       showOnHomePage: false,
       category: 'admin',
     });
 
-    management?.sections.section.kibana.registerApp({
+    management?.sections.section.ai.registerApp({
       id: 'securityAiAssistantManagement',
       title: ASSISTANT_MANAGEMENT_TITLE,
       hideFromSidebar: true,
+      hideFromGlobalSearch: !this.isServerless,
       order: 1,
       mount: async (params) => {
         const { renderApp, services, store } = await mountDependencies();
@@ -227,8 +232,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
           !productFeatureKeys?.has(ProductFeatureSecurityKey.configurations) &&
           license?.hasAtLeast('enterprise');
-
-        const assistantManagementApp = management?.sections.section.kibana.getApp(
+        const assistantManagementApp = management?.sections.section.ai.getApp(
           'securityAiAssistantManagement'
         );
 
@@ -310,6 +314,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
+        siemReadiness: new subPluginClasses.SiemReadiness(),
         configurations: new subPluginClasses.Configurations(),
         reports: new subPluginClasses.Reports(),
       };
@@ -339,12 +344,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       rules: subPlugins.rules.start(storage),
       threatIntelligence: subPlugins.threatIntelligence.start(),
       timelines: subPlugins.timelines.start(),
-      entityAnalytics: subPlugins.entityAnalytics.start(
-        this.experimentalFeatures.riskScoringRoutesEnabled
-      ),
-      siemMigrations: subPlugins.siemMigrations.start(
-        !this.experimentalFeatures.siemMigrationsDisabled
-      ),
+      entityAnalytics: subPlugins.entityAnalytics.start(),
+      siemMigrations: subPlugins.siemMigrations.start(this.experimentalFeatures),
+      siemReadiness: subPlugins.siemReadiness.start(),
       configurations: subPlugins.configurations.start(),
       reports: subPlugins.reports.start(),
     };

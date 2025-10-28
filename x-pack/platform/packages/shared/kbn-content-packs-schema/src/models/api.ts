@@ -7,28 +7,43 @@
 
 import { z } from '@kbn/zod';
 
-export interface ContentPackIncludeObjects {
-  objects: {
-    streams: string[];
-  };
-}
-
 export interface ContentPackIncludeAll {
-  all: {};
+  objects: { all: {} };
 }
 
-export type ContentPackIncludedObjects = ContentPackIncludeObjects | ContentPackIncludeAll;
+export type ContentPackIncludedObjects =
+  | ContentPackIncludeAll
+  | {
+      objects: {
+        mappings: boolean;
+        queries: Array<{ id: string }>;
+        routing: Array<{ destination: string } & ContentPackIncludedObjects>;
+      };
+    };
 
-const contentPackIncludeObjectsSchema = z.object({
-  objects: z.object({ streams: z.array(z.string()) }),
+const includeAllSchema = z.object({
+  objects: z.object({ all: z.strictObject({}) }),
 });
-export const contentPackIncludeAllSchema = z.object({ all: z.strictObject({}) });
 
-export const isIncludeAll = (value: unknown): value is ContentPackIncludeAll => {
-  return contentPackIncludeAllSchema.safeParse(value).success;
+export const isIncludeAll = (value: ContentPackIncludedObjects): value is ContentPackIncludeAll => {
+  return includeAllSchema.safeParse(value).success;
 };
 
-export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.union([
-  contentPackIncludeObjectsSchema,
-  contentPackIncludeAllSchema,
-]);
+export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.lazy(() =>
+  z.union([
+    includeAllSchema,
+    z.object({
+      objects: z.object({
+        mappings: z.boolean(),
+        queries: z.array(z.object({ id: z.string() })),
+        routing: z.array(
+          contentPackIncludedObjectsSchema.and(
+            z.object({
+              destination: z.string(),
+            })
+          )
+        ),
+      }),
+    }),
+  ])
+);

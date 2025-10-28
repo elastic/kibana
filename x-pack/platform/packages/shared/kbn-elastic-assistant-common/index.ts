@@ -6,6 +6,7 @@
  */
 
 // Schema constants
+
 export * from './impl/schemas';
 
 export { defaultAssistantFeatures } from './impl/capabilities';
@@ -33,6 +34,8 @@ export {
   contentReferenceBlock,
   removeContentReferences,
   pruneContentReferences,
+  enrichDocument,
+  sanitizeMessages,
 } from './impl/content_references';
 
 export type {
@@ -42,6 +45,13 @@ export type {
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';
+export {
+  getIsConversationOwner,
+  getCurrentConversationOwner,
+  getConversationSharedState,
+  ConversationSharedState,
+} from './impl/utils/sharing_helpers';
+
 export * from './constants';
 
 /** currently the same shape as "fields" property in the ES response */
@@ -84,3 +94,13 @@ export {
   replaceNewlineLiterals,
   transformInternalReplacements,
 } from './impl/utils/attack_discovery_helpers';
+
+export { transformAttackDiscoveryAlertFromApi } from './impl/utils/transform_attack_discovery_alert_from_api';
+export { transformAttackDiscoveryAlertToApi } from './impl/utils/transform_attack_discovery_alert_to_api';
+export { transformAttackDiscoveryScheduleFromApi } from './impl/utils/transform_attack_discovery_schedule_from_api';
+export { transformAttackDiscoveryScheduleToApi } from './impl/utils/transform_attack_discovery_schedule_to_api';
+export { transformAttackDiscoveryScheduleCreatePropsToApi } from './impl/utils/transform_attack_discovery_schedule_create_props_to_api';
+export { transformAttackDiscoveryScheduleUpdatePropsToApi } from './impl/utils/transform_attack_discovery_schedule_update_props_to_api';
+export { transformAttackDiscoveryScheduleCreatePropsFromApi } from './impl/utils/transform_attack_discovery_schedule_create_props_from_api';
+export { transformAttackDiscoveryScheduleUpdatePropsFromApi } from './impl/utils/transform_attack_discovery_schedule_update_props_from_api';
+export { FindAttackDiscoverySchedulesInternalRequestQuery } from './impl/schemas/attack_discovery/routes/internal/schedules/find_attack_discovery_schedules_route.gen';

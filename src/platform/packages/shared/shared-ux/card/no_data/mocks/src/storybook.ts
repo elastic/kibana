@@ -12,7 +12,17 @@ import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { RedirectAppLinksStorybookMock } from '@kbn/shared-ux-link-redirect-app-mocks';
 import type { NoDataCardServices, NoDataCardProps } from '@kbn/shared-ux-card-no-data-types';
 
-type PropArguments = Pick<NoDataCardProps, 'category' | 'title' | 'description' | 'button'>;
+type PropArguments = Pick<
+  NoDataCardProps,
+  | 'title'
+  | 'description'
+  | 'buttonText'
+  | 'href'
+  | 'docsLink'
+  | 'canAccessFleet'
+  | 'disabledButtonTooltipText'
+  | 'data-test-subj'
+>;
 type ServiceArguments = Pick<NoDataCardServices, 'canAccessFleet'>;
 type Arguments = PropArguments & ServiceArguments;
 
@@ -33,12 +43,6 @@ export class StorybookMock extends AbstractStorybookMock<
   ServiceArguments
 > {
   propArguments = {
-    category: {
-      control: {
-        control: 'text',
-      },
-      defaultValue: '',
-    },
     title: {
       control: {
         control: 'text',
@@ -51,7 +55,31 @@ export class StorybookMock extends AbstractStorybookMock<
       },
       defaultValue: '',
     },
-    button: {
+    buttonText: {
+      control: {
+        control: 'text',
+      },
+      defaultValue: '',
+    },
+    href: {
+      control: {
+        control: 'text',
+      },
+      defaultValue: '',
+    },
+    docsLink: {
+      control: {
+        control: 'text',
+      },
+      defaultValue: '',
+    },
+    canAccessFleet: {
+      control: {
+        control: 'boolean',
+      },
+      defaultValue: true,
+    },
+    disabledButtonTooltipText: {
       control: {
         control: 'text',
       },
@@ -70,15 +98,19 @@ export class StorybookMock extends AbstractStorybookMock<
 
   getProps(params?: Params): NoDataCardProps {
     return {
-      category: this.getArgumentValue('category', params),
       title: this.getArgumentValue('title', params),
       description: this.getArgumentValue('description', params),
-      button: this.getArgumentValue('button', params),
+      buttonText: this.getArgumentValue('buttonText', params),
+      canAccessFleet: this.getArgumentValue('canAccessFleet', params),
+      href: this.getArgumentValue('href', params),
+      docsLink: this.getArgumentValue('docsLink', params),
+      disabledButtonTooltipText: this.getArgumentValue('disabledButtonTooltipText', params),
     };
   }
 
   getServices(params: Params): NoDataCardServices {
-    const { canAccessFleet } = params;
+    // Use canAccessFleet from params, defaulting to true if not provided
+    const canAccessFleet = params?.canAccessFleet !== undefined ? params.canAccessFleet : true;
 
     return {
       canAccessFleet,

@@ -18,14 +18,14 @@ import {
   EuiRadio,
   EuiSpacer,
 } from '@elastic/eui';
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../utils/urls';
 import { embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
-import { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import type { CopyToDashboardAPI } from './copy_to_dashboard_action';
 
 interface CopyToDashboardModalProps {
   api: CopyToDashboardAPI;
@@ -56,8 +56,8 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
       type: panelToCopy.type,
       serializedState: panelToCopy.serializedState,
       size: {
-        width: panelToCopy.gridData.w,
-        height: panelToCopy.gridData.h,
+        width: panelToCopy.grid.w,
+        height: panelToCopy.grid.h,
       },
     };
 
@@ -67,8 +67,8 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
         : `#${CREATE_NEW_DASHBOARD_URL}`;
 
     closeModal();
-    stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-      state,
+    stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+      state: [state],
       path,
     });
   }, [api, dashboardOption, selectedDashboard, closeModal, stateTransfer]);

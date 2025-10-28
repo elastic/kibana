@@ -11,6 +11,7 @@ import { useLocation } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,7 +25,6 @@ import {
   EuiSteps,
   EuiText,
   EuiTitle,
-  EuiComboBoxOptionOption,
   EuiCallOut,
   EuiButton,
   EuiButtonEmpty,
@@ -35,7 +35,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import type { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
 import { CANCEL_BUTTON_LABEL, ESINDEX_QUERY_PARAMETER } from '../../../shared/constants';
 import { docLinks } from '../../../shared/doc_links';
@@ -88,7 +88,7 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
             {i18n.translate(
               'xpack.enterpriseSearch.searchApplications.createSearchApplication.headerTitle',
               {
-                defaultMessage: 'Create a Search Application',
+                defaultMessage: 'Create a search application',
               }
             )}
           </h3>
@@ -109,7 +109,7 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.searchApplications.createSearchApplication.header.docsLink',
-                      { defaultMessage: 'Search Applications documentation' }
+                      { defaultMessage: 'Search applications documentation' }
                     )}
                   </EuiLink>
                 ),
@@ -121,6 +121,7 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
           <>
             <EuiSpacer />
             <EuiCallOut
+              announceOnMount
               color="danger"
               title={i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.createSearchApplication.header.createError.title',

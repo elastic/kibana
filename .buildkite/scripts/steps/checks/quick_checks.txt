@@ -1,6 +1,5 @@
 .buildkite/scripts/steps/checks/ts_projects.sh
 .buildkite/scripts/steps/checks/packages.sh
-.buildkite/scripts/steps/checks/bazel_packages.sh
 .buildkite/scripts/steps/checks/verify_notice.sh
 .buildkite/scripts/steps/checks/plugin_list_docs.sh
 .buildkite/scripts/steps/checks/event_log.sh
@@ -23,3 +22,4 @@
 .buildkite/scripts/steps/checks/validate_pipelines.sh
 .buildkite/scripts/steps/checks/check_scout_config.sh
 .buildkite/scripts/steps/checks/dependencies_diff.sh
+.buildkite/scripts/steps/checks/verify_codeowners.sh

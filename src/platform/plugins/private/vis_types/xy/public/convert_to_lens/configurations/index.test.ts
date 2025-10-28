@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getConfiguration } from '.';
-import { Layer } from '..';
+import type { Layer } from '..';
 import { ChartType } from '../../../common';
 import { sampleAreaVis } from '../../sample_vis.test.mocks';
 import { ChartMode, InterpolationMode } from '../../types';
@@ -96,6 +96,7 @@ describe('getConfiguration', () => {
       fittingFunction: undefined,
       gridlinesVisibilitySettings: { x: false, yLeft: false, yRight: true },
       labelsOrientation: { x: -0, yLeft: -0, yRight: -90 },
+      preferredSeriesType: 'bar',
       layers: [
         {
           accessors: ['1'],

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { finished } from 'stream/promises';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
-import { Message } from '@aws-sdk/client-bedrock-runtime';
-import { StreamParser } from './types';
+import type { Message } from '@aws-sdk/client-bedrock-runtime';
+import type { StreamParser } from './types';
 
 export const parseBedrockStreamAsAsyncIterator = async function* (
   responseStream: Readable,
@@ -245,5 +245,5 @@ export const prepareMessages = (messages: Message[]) =>
     return acc;
   }, [] as Message[]);
 
-export const DEFAULT_BEDROCK_MODEL = 'us.anthropic.claude-3-7-sonnet-20250219-v1:0';
+export const DEFAULT_BEDROCK_MODEL = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
 export const DEFAULT_BEDROCK_REGION = 'us-east-1';

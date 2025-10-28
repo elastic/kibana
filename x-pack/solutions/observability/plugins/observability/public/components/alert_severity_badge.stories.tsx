@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { AlertSeverityBadge } from './alert_severity_badge';
 
 type Args = ComponentProps<typeof AlertSeverityBadge>;

@@ -14,7 +14,7 @@ import { setupEnvironment } from '../helpers';
 
 import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS } from './constants';
 import { setup } from './template_clone.helpers';
-import { TemplateFormTestBed } from './template_form.helpers';
+import type { TemplateFormTestBed } from './template_form.helpers';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -103,10 +103,10 @@ describe('<TemplateClone />', () => {
           body: JSON.stringify({
             name: `${templateToClone.name}-copy`,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
-            indexMode,
             priority,
             version,
             allowAutoCreate,
+            indexMode,
             _kbnMeta,
             template,
           }),

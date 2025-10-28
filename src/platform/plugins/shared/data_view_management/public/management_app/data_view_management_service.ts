@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
-import { BehaviorSubject, Observable, map, distinctUntilChanged } from 'rxjs';
+import type { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, map, distinctUntilChanged } from 'rxjs';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { FilterChecked } from '@elastic/eui';
+import type { FilterChecked } from '@elastic/eui';
 
-import {
+import type {
   SavedObjectsManagementPluginStart,
   SavedObjectManagementTypeInfo,
   SavedObjectRelation,
 } from '@kbn/saved-objects-management-plugin/public';
 
-import {
+import type {
   DataViewsPublicPluginStart,
   INDEX_PATTERN_TYPE,
   DataViewField,
@@ -243,6 +244,7 @@ export class DataViewMgmtService {
       indexedFieldTypes: Array.from(indexedFieldTypes),
       fieldConflictCount: fields.filter((field) => field.type === 'conflict').length,
       tags: await this.getTags(dataView),
+      defaultIndex: await this.services.uiSettings.get('defaultIndex'),
       isRefreshing: false,
       conflictFieldsUrl: this.getConflictFieldsKbnUrl(dataView.id!),
       scriptedFields: dataView.getScriptedFields(),

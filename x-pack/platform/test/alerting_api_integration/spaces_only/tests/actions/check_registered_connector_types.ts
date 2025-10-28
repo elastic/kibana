@@ -43,6 +43,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.servicenow-sir',
           '.servicenow-itom',
           '.jira',
+          '.jira-service-management',
           '.observability-ai-assistant',
           '.resilient',
           '.teams',
@@ -57,6 +58,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.cases',
           '.crowdstrike',
           '.microsoft_defender_endpoint',
+          '.workflows',
           '.xsoar',
         ].sort()
       );

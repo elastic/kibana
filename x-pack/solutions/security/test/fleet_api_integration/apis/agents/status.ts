@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -19,7 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const superTestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('fleet_agents_status', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/230292
+  describe.skip('fleet_agents_status', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await es.create({

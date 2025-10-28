@@ -11,11 +11,16 @@ import Path from 'path';
 
 import { v4 as uuidV4 } from 'uuid';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { FtrConfigProviderContext, FtrConfigProvider } from '@kbn/test';
+import {
+  type FtrConfigProviderContext,
+  type FtrConfigProvider,
+  defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
+} from '@kbn/test';
+import path from 'path';
 import { services } from '../services';
-
-import { AnyStep } from './journey';
-import { JourneyConfig } from './journey_config';
+import type { AnyStep } from './journey';
+import type { JourneyConfig } from './journey_config';
 import { JOURNEY_APM_CONFIG } from './journey_apm_config';
 
 export function makeFtrConfigProvider(
@@ -26,10 +31,10 @@ export function makeFtrConfigProvider(
     const isServerless = !!process.env.TEST_SERVERLESS;
     // Use the same serverless FTR config for all journeys
     const configPath = isServerless
-      ? 'x-pack/test_serverless/shared/config.base.ts'
+      ? 'x-pack/platform/test/serverless/shared/config.base.ts'
       : config.getFtrConfigPath();
     const defaultConfigPath = config.isXpack()
-      ? 'x-pack/test/functional/config.base.js'
+      ? 'x-pack/platform/test/functional/config.base.ts'
       : 'src/platform/test/functional/config.base.js';
     const ftrConfigPath = configPath ?? defaultConfigPath;
     const baseConfig = (await readConfigFile(Path.resolve(REPO_ROOT, ftrConfigPath))).getAll();
@@ -59,8 +64,31 @@ export function makeFtrConfigProvider(
       journeyName: config.getName(),
     };
 
+    /**
+     * This is used by CI to set the docker registry port
+     * you can also define this environment variable locally when running tests which
+     * will spin up a local docker package registry locally for you
+     * if this is defined it takes precedence over the `packageRegistryOverride` variable
+     */
+    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
+    const packageRegistryConfig = path.join(__dirname, '../fixtures/package_registry_config.yml');
+    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+
     return {
       ...baseConfig,
+
+      dockerServers: defineDockerServersConfig({
+        registry: {
+          enabled: !!dockerRegistryPort,
+          image: fleetPackageRegistryDockerImage,
+          portInContainer: 8080,
+          port: dockerRegistryPort,
+          args: dockerArgs,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
+        },
+      }),
 
       mochaOpts: {
         ...baseConfig.mochaOpts,

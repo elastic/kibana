@@ -6,11 +6,10 @@
  */
 
 import { convertToRawColorMappings, isDeprecatedColorMapping } from './converter';
-import { DeprecatedColorMappingConfig } from './types';
-import { DataType } from '../../../types';
-import { ColorMapping } from '@kbn/coloring';
-import { GenericIndexPatternColumn } from '../../../async_services';
-import { SerializedRangeKey } from '@kbn/data-plugin/common/search';
+import type { DeprecatedColorMappingConfig } from './types';
+import type { DataType, GenericIndexPatternColumn } from '@kbn/lens-common';
+import type { ColorMapping } from '@kbn/coloring';
+import type { SerializedRangeKey } from '@kbn/data-plugin/common/search';
 
 type OldAssignment = DeprecatedColorMappingConfig['assignments'][number];
 type OldRule = OldAssignment['rule'];

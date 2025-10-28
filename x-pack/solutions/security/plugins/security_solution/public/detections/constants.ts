@@ -9,3 +9,7 @@ export const SECURITY_ALERT_DATA_VIEW = {
   id: 'security_solution_alerts_dv',
   name: 'Security Solution Alerts DataView',
 };
+
+// Runtime field to extract the related_integration.package value from the kibana.alert.rule.parameters field
+// This is used in the EASE alert summary page
+export const RELATED_INTEGRATION = 'relatedIntegration';

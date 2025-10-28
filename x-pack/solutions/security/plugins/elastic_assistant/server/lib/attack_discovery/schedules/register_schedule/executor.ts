@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
 import { ALERT_URL } from '@kbn/rule-data-utils';
@@ -19,10 +19,10 @@ import {
 import { ANONYMIZATION_FIELDS_RESOURCE } from '../../../../ai_assistant_service/constants';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { getResourceName } from '../../../../ai_assistant_service';
-import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
+import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
-import { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
+import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
 import {
   generateAttackDiscoveryAlertHash,
@@ -116,7 +116,9 @@ export const attackDiscoveryScheduleExecutor = async ({
       anonymizedAlerts,
       apiConfig: params.apiConfig,
       connectorName: params.apiConfig.name,
+      enableFieldRendering: true, // Always enable field rendering for scheduled discoveries. It's still possible for clients who read the generated discoveries to specify false when retrieving them.
       replacements,
+      withReplacements: false, // Never apply replacements to the results. It's still possible for clients who read the generated discoveries to specify true when retrieving them.
     };
 
     // Deduplicate attackDiscoveries before creating alerts

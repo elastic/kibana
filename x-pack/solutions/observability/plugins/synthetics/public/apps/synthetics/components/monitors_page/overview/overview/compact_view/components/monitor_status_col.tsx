@@ -7,16 +7,14 @@
 
 import React from 'react';
 import { EuiHorizontalRule, EuiText, EuiToolTip, EuiSpacer } from '@elastic/eui';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import {
   getShortTimeStamp,
   parseTimestamp,
 } from '../../../../../../../../../common/utils/date_util';
-import {
-  MonitorTypeEnum,
-  OverviewStatusMetaData,
-} from '../../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import { MonitorTypeEnum } from '../../../../../../../../../common/runtime_types';
 import { BadgeStatus } from '../../../../../common/components/monitor_status';
 
 export const MonitorStatusCol = ({
@@ -50,7 +48,7 @@ export const MonitorStatusCol = ({
             </>
           }
         >
-          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+          <EuiText tabIndex={0} size="xs" color="subdued" className="eui-textNoWrap">
             {getCheckedLabel(timestamp)}
           </EuiText>
         </EuiToolTip>

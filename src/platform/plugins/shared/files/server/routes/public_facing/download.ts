@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import type { FilesClient } from '../../../common/files_client';
 import { NoDownloadAvailableError } from '../../file/errors';
 import { FileNotFoundError } from '../../file_service/errors';
@@ -17,10 +17,12 @@ import {
   FileShareTokenInvalidError,
 } from '../../file_share_service/errors';
 import type { FilesRouter } from '../types';
-import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
-import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
+import type { CreateRouteDefinition } from '../api_routes';
+import { FILES_API_ROUTES } from '../api_routes';
+import { getFileHttpResponseOptions, getDownloadedFileName } from '../common';
 import { fileNameWithExt } from '../common_schemas';
-import { CreateHandler } from '../types';
+import type { CreateHandler } from '../types';
+import { validateFileNameExtension } from '../file_kind/helpers';
 
 const method = 'get' as const;
 
@@ -44,11 +46,19 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
 
   try {
     const file = await fileService.asInternalUser().getByToken(token);
+
+    const invalidExtensionResponse = validateFileNameExtension(fileName, file);
+    if (invalidExtensionResponse) {
+      return invalidExtensionResponse;
+    }
+
     const body: Readable = await file.downloadContent();
+    const fileHttpResponseOptions = getFileHttpResponseOptions(file);
+
     return res.file({
       body,
       filename: fileName ?? getDownloadedFileName(file),
-      headers: getDownloadHeadersForFile({ file, fileName }),
+      ...fileHttpResponseOptions,
     });
   } catch (e) {
     if (

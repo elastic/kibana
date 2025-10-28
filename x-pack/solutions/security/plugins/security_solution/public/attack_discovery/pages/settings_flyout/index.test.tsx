@@ -17,18 +17,23 @@ import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from './constants';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../sourcerer/containers');
-jest.mock('../use_kibana_feature_flags');
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({
     search: '',
   }),
   withRouter: jest.fn(),
+}));
+
+const mockUseKibanaFeatureFlags = jest
+  .fn()
+  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
+jest.mock('../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
 }));
 
 const mockFilter = {
@@ -76,31 +81,10 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
   typeof useSourcererDataView
 >;
-const mockUseKibanaFeatureFlags = useKibanaFeatureFlags as jest.MockedFunction<
-  typeof useKibanaFeatureFlags
->;
-const getBooleanValueMock = jest.fn();
 
 const setupMocks = (overrides = {}) => {
-  const defaultMockSetup = {
-    getBooleanValue: false,
-    attackDiscoveryAlertsEnabled: false,
-    assistantAttackDiscoverySchedulingEnabled: false,
-  };
-
-  const config = { ...defaultMockSetup, ...overrides };
-
-  getBooleanValueMock.mockReturnValue(config.getBooleanValue);
-
-  mockUseKibanaFeatureFlags.mockReturnValue({
-    attackDiscoveryAlertsEnabled: config.attackDiscoveryAlertsEnabled,
-  });
-
   mockUseKibana.mockReturnValue({
     services: {
-      featureFlags: {
-        getBooleanValue: getBooleanValueMock,
-      },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
       },
@@ -202,18 +186,6 @@ describe('SettingsFlyout', () => {
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
-  it('should not render Settings tab', () => {
-    renderComponent();
-
-    expect(screen.queryByRole('tab', { name: 'Settings' })).not.toBeInTheDocument();
-  });
-
-  it('should not render Schedule tab', () => {
-    renderComponent();
-
-    expect(screen.queryByRole('tab', { name: 'Schedule' })).not.toBeInTheDocument();
-  });
-
   describe('when the save button is clicked', () => {
     beforeEach(() => {
       renderComponent();
@@ -255,14 +227,7 @@ describe('SettingsFlyout', () => {
     });
   });
 
-  describe('when `securitySolution.assistantAttackDiscoverySchedulingEnabled` feature flag is enabled', () => {
-    beforeEach(() => {
-      setupMocks({
-        getBooleanValue: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
-      });
-    });
-
+  describe('tabs', () => {
     it('renders the settings tab when defaultSelectedTabId is settings', () => {
       renderComponent(createMockProps({ defaultSelectedTabId: SETTINGS_TAB_ID }));
 
@@ -273,24 +238,6 @@ describe('SettingsFlyout', () => {
       renderComponent(createMockProps({ defaultSelectedTabId: SCHEDULE_TAB_ID }));
 
       expect(screen.getByRole('heading', { name: ATTACK_DISCOVERY_SCHEDULE })).toBeInTheDocument();
-    });
-  });
-
-  describe('when `attackDiscoveryAlertsEnabled` feature flag is disabled', () => {
-    beforeEach(() => {
-      setupMocks({
-        attackDiscoveryAlertsEnabled: false,
-        assistantAttackDiscoverySchedulingEnabled: false,
-      });
-    });
-
-    it('renders the flyout with smaller size and spacer', () => {
-      renderComponent();
-
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-      expect(
-        screen.getByRole('heading', { name: /attack discovery settings/i })
-      ).toBeInTheDocument();
     });
   });
 

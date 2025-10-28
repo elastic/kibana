@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { TestProvider } from '../../test/test_provider';
 import { RulesTable } from './rules_table';
 import * as TEST_SUBJECTS from './test_subjects';
 import { selectRulesMock } from './__mocks__/rules_table_headers.mock';
-import { CspBenchmarkRulesWithStates } from './rules_container';
+import type { CspBenchmarkRulesWithStates } from './rules_container';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   CHANGE_RULE_STATE,

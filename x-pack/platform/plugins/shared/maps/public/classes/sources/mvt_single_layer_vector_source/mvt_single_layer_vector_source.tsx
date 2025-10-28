@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
-import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import {
+import type { GeoJsonProperties, Geometry, Position } from 'geojson';
+import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { AbstractSource } from '../source';
+import type {
   BoundsRequestMeta,
   GetFeatureActionsArgs,
   GeoJsonWithMeta,
@@ -24,7 +24,7 @@ import {
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
-import {
+import type {
   MapExtent,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
@@ -32,7 +32,8 @@ import {
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { TooltipProperty } from '../../tooltips/tooltip_property';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -49,10 +50,9 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     maxSourceZoom,
     fields,
     tooltipProperties,
-  }: Partial<TiledSingleLayerVectorSourceDescriptor>) {
+  }: Partial<TiledSingleLayerVectorSourceDescriptor>): Required<TiledSingleLayerVectorSourceDescriptor> {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-      id: uuidv4(),
       urlTemplate: urlTemplate ? urlTemplate : '',
       layerName: layerName ? layerName : '',
       minSourceZoom:
@@ -64,7 +64,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     };
   }
 
-  readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
+  readonly _descriptor: Required<TiledSingleLayerVectorSourceDescriptor>;
   readonly _tooltipFields: MVTField[];
 
   constructor(sourceDescriptor: TiledSingleLayerVectorSourceDescriptor) {

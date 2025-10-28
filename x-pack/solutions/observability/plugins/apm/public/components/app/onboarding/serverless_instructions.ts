@@ -19,22 +19,11 @@ import {
   createGoAgentInstructions,
   createDotNetAgentInstructions,
   createPhpAgentInstructions,
-  createOpenTelemetryAgentInstructions,
 } from './instructions';
 
 const DEFAULT_INSTRUCTION_TITLE = i18n.translate('xpack.apm.onboarding.defaultTitle', {
   defaultMessage: 'APM Agents',
 });
-
-function convertApmServerUrlToOtlpServiceUrl(apmServerUrl: string) {
-  if (!apmServerUrl) {
-    return '';
-  }
-
-  const urlParts = apmServerUrl.split('.');
-
-  return `${urlParts[0]}.ingest.${urlParts.slice(2).join('.')}:443`;
-}
 
 export function serverlessInstructions(
   {
@@ -60,7 +49,6 @@ export function serverlessInstructions(
   const commonOptions: AgentInstructions = {
     baseUrl,
     apmServerUrl: `${config.managedServiceUrl}:443`,
-    otlpManagedServiceUrl: convertApmServerUrlToOtlpServiceUrl(config.managedServiceUrl),
     checkAgentStatus,
     agentStatus,
     agentStatusLoading,
@@ -118,10 +106,6 @@ export function serverlessInstructions(
       title: DEFAULT_INSTRUCTION_TITLE,
       id: INSTRUCTION_VARIANT.PHP,
       instructions: createPhpAgentInstructions(commonOptions),
-    },
-    {
-      id: INSTRUCTION_VARIANT.OPEN_TELEMETRY,
-      instructions: createOpenTelemetryAgentInstructions(commonOptions),
     },
   ];
 }

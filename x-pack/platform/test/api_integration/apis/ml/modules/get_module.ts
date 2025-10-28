@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -27,7 +27,9 @@ const moduleIds = [
   'sample_data_ecommerce',
   'sample_data_weblogs',
   'security_auth',
+  'security_azure_activitylogs',
   'security_cloudtrail',
+  'security_gcp_audit',
   'security_host',
   'security_linux_v3',
   'security_network',
@@ -41,7 +43,9 @@ const securityModuleIds = [
   'logs_ui_analysis',
   'logs_ui_categories',
   'security_auth',
+  'security_azure_activitylogs',
   'security_cloudtrail',
+  'security_gcp_audit',
   'security_host',
   'security_linux_v3',
   'security_network',

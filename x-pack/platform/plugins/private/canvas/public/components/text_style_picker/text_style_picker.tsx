@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FontValue } from '@kbn/expressions-plugin/common';
+import type { FontValue } from '@kbn/expressions-plugin/common';
 
 import { FontPicker } from '../font_picker';
 import { ColorPickerPopover } from '../color_picker_popover';
@@ -35,6 +36,10 @@ const strings = {
   getFontColorLabel: () =>
     i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
       defaultMessage: 'Font Color',
+    }),
+  getFontSizeLabel: () =>
+    i18n.translate('xpack.canvas.textStylePicker.fontSizeLabel', {
+      defaultMessage: 'Size',
     }),
   getStyleBoldOption: () =>
     i18n.translate('xpack.canvas.textStylePicker.styleBoldOption', {
@@ -176,7 +181,8 @@ export const TextStylePicker: FC<Props> = ({
             value={size}
             onChange={(e) => doChange('size', Number(e.target.value))}
             options={fontSizes.map((fontSize) => ({ text: String(fontSize), value: fontSize }))}
-            prepend="Size"
+            prepend={strings.getFontSizeLabel()}
+            aria-label={strings.getFontSizeLabel()}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

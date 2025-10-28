@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
 import {
   ONLY_IN_THEIR_SOLUTIONS,
@@ -53,4 +53,8 @@ export const classicSetting: Omit<UiSettingsParams<AIAssistantType>, 'value'> = 
     [AIAssistantType.Never]: HIDE_ALL_ASSISTANTS,
   },
   requiresPageReload: true,
+  solutionViews: ['classic'],
+  // Hide the setting in Kibana -> Advanced Settigns
+  readonly: true,
+  readonlyMode: 'ui',
 };

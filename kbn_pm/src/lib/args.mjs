@@ -148,10 +148,12 @@ export class Args {
    * Get the boolean value of a specific flag. If the flag wasn't defined then undefined will
    * be returned. If the flag was specified with a string value then an error will be thrown.
    * @param {string} name
+   * @return {boolean | undefined}
    */
   getBooleanValue(name) {
     const value = this.#flags.get(name) ?? this.#defaults.get(name);
     if (typeof value === 'boolean' || value === undefined) {
+      /* @ts-ignore */
       return value;
     }
 

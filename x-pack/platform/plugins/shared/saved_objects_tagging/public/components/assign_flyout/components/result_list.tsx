@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiIcon, EuiSelectable, EuiSelectableOption, EuiText } from '@elastic/eui';
+import type { FC } from 'react';
+import React from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiIcon, EuiSelectable, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AssignableObject } from '../../../../common/assignments';
-import { AssignmentAction, AssignmentOverrideMap, AssignmentStatusMap } from '../types';
+import type { AssignableObject } from '../../../../common/assignments';
+import type { AssignmentAction, AssignmentOverrideMap, AssignmentStatusMap } from '../types';
 import { getKey, getOverriddenStatus, getAssignmentAction } from '../utils';
 
 export interface AssignFlyoutResultListProps {

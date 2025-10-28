@@ -6,7 +6,7 @@
  */
 import globby from 'globby';
 import path from 'path';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 
 const cwd = path.join(__dirname);
 const envGrepFiles = process.env.OBSERVABILITY_ONBOARDING_TEST_GREP_FILES as string;

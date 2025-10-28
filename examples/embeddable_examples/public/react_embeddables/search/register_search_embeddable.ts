@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { Services } from './types';
+import type { Services } from './types';
 
 export function registerSearchEmbeddable(embeddable: EmbeddableSetup, services: Promise<Services>) {
   embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {

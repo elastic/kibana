@@ -22,16 +22,14 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
-import { AgentlessAgentCreateOverProvisionnedError } from '../errors';
-
-import { agentPolicyService, appContextService, packagePolicyService } from '.';
+import { type AgentPolicyServiceInterface, appContextService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
-import { agentlessAgentService } from './agents/agentless_agent';
 
 async function getFleetServerAgentPolicyId(
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  agentPolicyService: AgentPolicyServiceInterface
 ): Promise<string | undefined> {
   const logger = appContextService.getLogger().get('getFleetServerAgentPolicyId');
 
@@ -65,6 +63,7 @@ async function getFleetServerAgentPolicyId(
 async function createPackagePolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
+  agentPolicyService: AgentPolicyServiceInterface,
   agentPolicy: AgentPolicy,
   packageToInstall: string,
   options: {
@@ -106,6 +105,7 @@ async function createPackagePolicy(
 interface CreateAgentPolicyParams {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  agentPolicyService: AgentPolicyServiceInterface;
   newPolicy: NewAgentPolicy;
   hasFleetServer?: boolean;
   withSysMonitoring: boolean;
@@ -113,20 +113,25 @@ interface CreateAgentPolicyParams {
   spaceId: string;
   user?: AuthenticatedUser;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  /** Pass force to all following calls: package install, policy creation */
   force?: boolean;
+  /** Pass force only to package policy creation */
+  forcePackagePolicyCreation?: boolean;
 }
 
 export async function createAgentPolicyWithPackages({
   soClient,
   esClient,
+  agentPolicyService,
   newPolicy,
   hasFleetServer,
-  withSysMonitoring,
-  monitoringEnabled,
+  withSysMonitoring: withSysMonitoringParams,
+  monitoringEnabled: monitoringEnabledParams,
   spaceId,
   user,
   authorizationHeader,
   force,
+  forcePackagePolicyCreation,
 }: CreateAgentPolicyParams) {
   const logger = appContextService.getLogger().get('createAgentPolicyWithPackages');
 
@@ -141,13 +146,28 @@ export async function createAgentPolicyWithPackages({
   if (hasFleetServer) {
     packagesToInstall.push(FLEET_SERVER_PACKAGE);
 
-    agentPolicyId = agentPolicyId || (await getFleetServerAgentPolicyId(soClient));
+    agentPolicyId =
+      agentPolicyId || (await getFleetServerAgentPolicyId(soClient, agentPolicyService));
 
     if (agentPolicyId === getDefaultFleetServerpolicyId(spaceId)) {
       // setting first fleet server policy to default, so that fleet server can enroll without setting policy_id
       newPolicy.is_default_fleet_server = true;
     }
   }
+
+  const withSysMonitoring = withSysMonitoringParams && !newPolicy.supports_agentless;
+  if (!withSysMonitoring && withSysMonitoringParams) {
+    logger.info(`Disabling system monitoring for agentless policy [${newPolicy.name}]`);
+  }
+  const monitoringEnabled =
+    newPolicy.supports_agentless && monitoringEnabledParams?.length
+      ? []
+      : (monitoringEnabledParams as NewAgentPolicy['monitoring_enabled']);
+
+  if (monitoringEnabledParams?.length && !monitoringEnabled?.length) {
+    logger.info(`Disabling monitoring for agentless policy [${newPolicy.name}]`);
+  }
+
   if (withSysMonitoring) {
     packagesToInstall.push(FLEET_SYSTEM_PACKAGE);
   }
@@ -167,53 +187,71 @@ export async function createAgentPolicyWithPackages({
     });
   }
 
-  const { id, ...policy } = newPolicy; // omit id from create object
+  const { id, monitoring_enabled: _, ...policy } = newPolicy; // omit id from create object
 
-  const agentPolicy = await agentPolicyService.create(soClient, esClient, policy, {
-    user,
-    id: agentPolicyId,
-    authorizationHeader,
-    hasFleetServer,
-    skipDeploy: true, // skip deploying the policy until package policies are added
-  });
+  const agentPolicy = await agentPolicyService.create(
+    soClient,
+    esClient,
+    { ...policy, monitoring_enabled: monitoringEnabled },
+    {
+      user,
+      id: agentPolicyId,
+      authorizationHeader,
+      hasFleetServer,
+      skipDeploy: true, // skip deploying the policy until package policies are added
+    }
+  );
 
   // Create the fleet server package policy and add it to agent policy.
   if (hasFleetServer) {
-    await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SERVER_PACKAGE, {
-      spaceId,
-      user,
-      authorizationHeader,
-      force,
-    });
+    await createPackagePolicy(
+      soClient,
+      esClient,
+      agentPolicyService,
+      agentPolicy,
+      FLEET_SERVER_PACKAGE,
+      {
+        spaceId,
+        user,
+        authorizationHeader,
+        force: force || forcePackagePolicyCreation,
+      }
+    );
   }
 
   // Create the system monitoring package policy and add it to agent policy.
   if (withSysMonitoring) {
-    await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SYSTEM_PACKAGE, {
-      spaceId,
-      user,
-      authorizationHeader,
-      force,
-    });
+    await createPackagePolicy(
+      soClient,
+      esClient,
+      agentPolicyService,
+      agentPolicy,
+      FLEET_SYSTEM_PACKAGE,
+      {
+        spaceId,
+        user,
+        authorizationHeader,
+        force: force || forcePackagePolicyCreation,
+      }
+    );
   }
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
-  await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
 
-  // Create the agentless agent
-  if (agentPolicy.supports_agentless) {
-    try {
-      await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
-    } catch (err) {
-      if (err instanceof AgentlessAgentCreateOverProvisionnedError) {
-        await agentPolicyService.delete(soClient, esClient, agentPolicy.id).catch((deleteError) => {
-          appContextService
-            .getLogger()
-            .error(`Error deleting agentless policy`, { error: agentPolicy });
-        });
-      }
-      throw err;
+  try {
+    // Deploy policy will create the agentless agent if needed
+    await agentPolicyService.deployPolicy(soClient, agentPolicy.id, undefined, {
+      throwOnAgentlessError: true,
+    });
+  } catch (err) {
+    if (agentPolicy.supports_agentless) {
+      await agentPolicyService.delete(soClient, esClient, agentPolicy.id).catch(() => {
+        appContextService
+          .getLogger()
+          .error(`Error deleting agentless policy`, { error: agentPolicy });
+      });
     }
+    throw err;
   }
 
   return agentPolicy;

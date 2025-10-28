@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { parseRelativeDate } from '../../../../common/lib/get_histogram_interval';
 
 describe('Parsing a relative end date properly', () => {

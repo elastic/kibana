@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren, useState } from 'react';
-import { EuiFlexItem, EuiPopover, EuiPopoverProps, EuiPopoverTitle, IconType } from '@elastic/eui';
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
+import type { PropsWithChildren } from 'react';
+import React, { useState } from 'react';
+import type { EuiPopoverProps, IconType } from '@elastic/eui';
+import { EuiFlexItem, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import type { ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { EuiIconLegend } from '@kbn/chart-icons';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
@@ -40,7 +43,7 @@ export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {
   handleClose?: () => void;
 };
 
-const defaultPanelStyles = { width: '410px' };
+const defaultPanelStyles = { width: '420px' };
 
 export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = ({
   children,
@@ -75,6 +78,7 @@ export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = 
             isDisabled={isDisabled}
             groupPosition={groupPosition}
             data-test-subj={buttonDataTestSubj}
+            size="s"
           />
         }
         isOpen={isOpen}
@@ -83,7 +87,7 @@ export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = 
           handleClose?.();
         }}
         anchorPosition="downRight"
-        panelPaddingSize="s"
+        panelPaddingSize="m"
         {...euiPopoverProps}
       >
         <EuiPopoverTitle data-test-subj={`${euiPopoverProps['data-test-subj']}_title`}>

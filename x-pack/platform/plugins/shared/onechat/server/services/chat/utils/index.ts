@@ -6,8 +6,17 @@
  */
 
 export { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
-export { generateTitle$, generateConversationTitle } from './generate_title';
+export { generateTitle } from './generate_title';
 export { handleCancellation } from './handle_cancellation';
-export { getChatModel$ } from './get_chat_model';
 export { executeAgent$ } from './execute_agent';
-export { getConversation$, updateConversation$, createConversation$ } from './conversations';
+export {
+  getConversation,
+  conversationExists,
+  updateConversation$,
+  createConversation$,
+  placeholderConversation,
+  type ConversationOperation,
+  type ConversationWithOperation,
+} from './conversations';
+export { convertErrors } from './convert_errors';
+export { resolveServices } from './resolve_services';

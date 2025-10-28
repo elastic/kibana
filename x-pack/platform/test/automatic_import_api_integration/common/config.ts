@@ -7,7 +7,7 @@
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
 interface CreateTestConfigOptions {

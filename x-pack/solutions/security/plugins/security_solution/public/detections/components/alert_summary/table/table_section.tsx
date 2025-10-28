@@ -20,7 +20,6 @@ import { inputsSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import { groupStatsAggregations } from './group_stats_aggregations';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 export const GROUPED_TABLE_TEST_ID = 'alert-summary-grouped-table';
 
@@ -30,29 +29,16 @@ export interface TableSectionProps {
    */
   dataView: DataView;
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
-  /**
-   * Result from the useQuery to fetch all rules
-   */
-  ruleResponse: {
-    /**
-     * Result from fetching all rules
-     */
-    rules: RuleResponse[];
-    /**
-     * True while rules are being fetched
-     */
-    isLoading: boolean;
-  };
 }
 
 /**
  * Section rendering the table in the alert summary page.
  * This component leverages the GroupedAlertsTable and the ResponseOps AlertsTable also used in the alerts page.
  */
-export const TableSection = memo(({ dataView, packages, ruleResponse }: TableSectionProps) => {
+export const TableSection = memo(({ dataView, packages }: TableSectionProps) => {
   const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
   const { to, from } = useGlobalTime();
 
@@ -72,18 +58,13 @@ export const TableSection = memo(({ dataView, packages, ruleResponse }: TableSec
 
   const renderChildComponent = useCallback(
     (groupingFilters: Filter[]) => (
-      <Table
-        dataView={dataView}
-        groupingFilters={groupingFilters}
-        packages={packages}
-        ruleResponse={ruleResponse}
-      />
+      <Table dataView={dataView} groupingFilters={groupingFilters} packages={packages} />
     ),
-    [dataView, packages, ruleResponse]
+    [dataView, packages]
   );
 
   return (
-    <TableSectionContextProvider packages={packages} ruleResponse={ruleResponse}>
+    <TableSectionContextProvider packages={packages}>
       <div data-test-subj={GROUPED_TABLE_TEST_ID}>
         <GroupedAlertsTable
           accordionButtonContent={groupTitleRenderers}

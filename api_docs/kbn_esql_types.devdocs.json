@@ -98,6 +98,45 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.controlHasVariableName",
+        "type": "Function",
+        "tags": [],
+        "label": "controlHasVariableName",
+        "description": [
+          "\nType guard to check if a control state object has a variable name property."
+        ],
+        "signature": [
+          "(controlState: unknown) => controlState is HasVariableName"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.controlHasVariableName.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "controlState",
+            "description": [
+              "- The control state object to check"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if the control state has a defined variableName property"
+        ],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -154,20 +193,6 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-types",
-            "id": "def-common.ESQLControlState.availableOptions",
-            "type": "Array",
-            "tags": [],
-            "label": "availableOptions",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -247,6 +272,20 @@
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLControlState.availableOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "availableOptions",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -312,54 +351,150 @@
       },
       {
         "parentPluginId": "@kbn/esql-types",
-        "id": "def-common.ESQLLicenseResult",
+        "id": "def-common.ESQLSourceResult",
         "type": "Interface",
         "tags": [],
-        "label": "ESQLLicenseResult",
+        "label": "ESQLSourceResult",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-types/src/license.ts",
+        "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/esql-types",
-            "id": "def-common.ESQLLicenseResult.hasAtLeast",
-            "type": "Function",
+            "id": "def-common.ESQLSourceResult.name",
+            "type": "string",
             "tags": [],
-            "label": "hasAtLeast",
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLSourceResult.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLSourceResult.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
             "description": [],
             "signature": [
-              "(minimumLicenseRequired: ",
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLLicenseType",
-                "text": "ESQLLicenseType"
-              },
-              ") => boolean"
+              "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/license.ts",
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLSourceResult.dataStreams",
+            "type": "Array",
+            "tags": [],
+            "label": "dataStreams",
+            "description": [],
+            "signature": [
+              "{ name: string; title?: string | undefined; }[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLSourceResult.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.ESQLTelemetryCallbacks",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLTelemetryCallbacks",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLTelemetryCallbacks.onDecorationHoverShown",
+            "type": "Function",
+            "tags": [],
+            "label": "onDecorationHoverShown",
+            "description": [],
+            "signature": [
+              "((hoverMessage: string) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/esql-types",
-                "id": "def-common.ESQLLicenseResult.hasAtLeast.$1",
-                "type": "CompoundType",
+                "id": "def-common.ESQLTelemetryCallbacks.onDecorationHoverShown.$1",
+                "type": "string",
                 "tags": [],
-                "label": "minimumLicenseRequired",
+                "label": "hoverMessage",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/esql-types",
-                    "scope": "common",
-                    "docId": "kibKbnEsqlTypesPluginApi",
-                    "section": "def-common.ESQLLicenseType",
-                    "text": "ESQLLicenseType"
-                  }
+                  "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-esql-types/src/license.ts",
+                "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLTelemetryCallbacks.onSuggestionsWithCustomCommandShown",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuggestionsWithCustomCommandShown",
+            "description": [],
+            "signature": [
+              "((commandNames: string[]) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-types",
+                "id": "def-common.ESQLTelemetryCallbacks.onSuggestionsWithCustomCommandShown.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "commandNames",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1378,7 +1513,7 @@
         "tags": [],
         "label": "ResolveIndexResponse",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1392,7 +1527,7 @@
             "signature": [
               "ResolveIndexResponseItem[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1406,7 +1541,7 @@
             "signature": [
               "ResolveIndexResponseItem[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1420,7 +1555,7 @@
             "signature": [
               "ResolveIndexResponseItem[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1457,6 +1592,18 @@
       },
       {
         "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.SOURCES_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "SOURCES_TYPES",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
         "id": "def-common.VariableNamePrefix",
         "type": "Enum",
         "tags": [],
@@ -1480,36 +1627,6 @@
           "\"small\" | \"medium\" | \"large\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-types",
-        "id": "def-common.ESQLLicenseType",
-        "type": "Type",
-        "tags": [],
-        "label": "ESQLLicenseType",
-        "description": [],
-        "signature": [
-          "\"basic\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-types/src/license.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-types",
-        "id": "def-common.ESQLSignatureLicenseType",
-        "type": "Type",
-        "tags": [],
-        "label": "ESQLSignatureLicenseType",
-        "description": [],
-        "signature": [
-          "\"PLATINUM\""
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-types/src/license.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

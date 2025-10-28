@@ -49,6 +49,7 @@ export default ({ getService, getPageObjects }) => {
           'Searchable',
           'Aggregatable',
           'Excluded',
+          'Actions',
         ];
 
         expect(headers.length).to.be(expectedHeaders.length);

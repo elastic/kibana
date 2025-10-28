@@ -210,9 +210,16 @@ describe('column', () => {
 });
 
 describe('literal', () => {
-  describe('"time interval"', () => {
-    test('a basic time Interval node', () => {
-      const node = Builder.expression.literal.qualifiedInteger(42, 'days');
+  describe('"time intervals"', () => {
+    test('a basic time duration node', () => {
+      const node = Builder.expression.literal.timespan(42, 'second');
+      const text = BasicPrettyPrinter.expression(node);
+
+      expect(text).toBe('42 second');
+    });
+
+    test('a basic date period node', () => {
+      const node = Builder.expression.literal.timespan(42, 'days');
       const text = BasicPrettyPrinter.expression(node);
 
       expect(text).toBe('42 days');
@@ -515,6 +522,156 @@ describe('map', () => {
           },
         },
       ],
+    });
+  });
+});
+
+describe('header', () => {
+  describe('.command()', () => {
+    test('can create a generic header command', () => {
+      const node = Builder.header.command({
+        name: 'custom_header',
+        args: [Builder.expression.literal.integer(42)],
+      });
+
+      expect(node).toMatchObject({
+        type: 'header-command',
+        name: 'custom_header',
+        args: [
+          {
+            type: 'literal',
+            literalType: 'integer',
+            value: 42,
+          },
+        ],
+      });
+    });
+
+    test('can create a header command with no args', () => {
+      const node = Builder.header.command({
+        name: 'some_command',
+      });
+
+      expect(node).toMatchObject({
+        type: 'header-command',
+        name: 'some_command',
+        args: [],
+      });
+    });
+  });
+
+  describe('.command.set()', () => {
+    test('can create a SET command with single assignment', () => {
+      const node = Builder.header.command.set([
+        Builder.expression.func.binary('=', [
+          Builder.identifier('setting1'),
+          Builder.expression.literal.string('value1'),
+        ]),
+      ]);
+
+      expect(node).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        args: [
+          {
+            type: 'function',
+            name: '=',
+            subtype: 'binary-expression',
+            args: [
+              {
+                type: 'identifier',
+                name: 'setting1',
+              },
+              {
+                type: 'literal',
+                literalType: 'keyword',
+                valueUnquoted: 'value1',
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    test('can create a SET command with multiple assignments', () => {
+      const node = Builder.header.command.set([
+        Builder.expression.func.binary('=', [
+          Builder.identifier('setting1'),
+          Builder.expression.literal.string('value1'),
+        ]),
+        Builder.expression.func.binary('=', [
+          Builder.identifier('setting2'),
+          Builder.expression.literal.integer(42),
+        ]),
+      ]);
+
+      expect(node).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        args: [
+          {
+            type: 'function',
+            name: '=',
+            args: [
+              {
+                type: 'identifier',
+                name: 'setting1',
+              },
+              {
+                type: 'literal',
+                literalType: 'keyword',
+                valueUnquoted: 'value1',
+              },
+            ],
+          },
+          {
+            type: 'function',
+            name: '=',
+            args: [
+              {
+                type: 'identifier',
+                name: 'setting2',
+              },
+              {
+                type: 'literal',
+                literalType: 'integer',
+                value: 42,
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    test('can create a SET command with integer value', () => {
+      const node = Builder.header.command.set([
+        Builder.expression.func.binary('=', [
+          Builder.identifier('timeout'),
+          Builder.expression.literal.integer(30),
+        ]),
+      ]);
+
+      expect(node).toMatchObject({
+        type: 'header-command',
+        name: 'set',
+        args: [
+          {
+            type: 'function',
+            name: '=',
+            args: [
+              {
+                type: 'identifier',
+                name: 'timeout',
+              },
+              {
+                type: 'literal',
+                literalType: 'integer',
+                value: 30,
+              },
+            ],
+          },
+        ],
+      });
     });
   });
 });

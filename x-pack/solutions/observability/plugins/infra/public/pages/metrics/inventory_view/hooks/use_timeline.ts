@@ -7,10 +7,11 @@
 
 import { first } from 'lodash';
 import { useEffect, useMemo } from 'react';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import type { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
+import type { UseSnapshotRequest } from './use_snaphot';
 import { useSnapshot } from './use_snaphot';
+import { useWaffleOptionsContext } from './use_waffle_options';
 
 const ONE_MINUTE = 60;
 const ONE_HOUR = ONE_MINUTE * 60;
@@ -44,19 +45,22 @@ const getTimeLengthFromInterval = (interval: string | undefined) => {
   }
 };
 
-export function useTimeline(
-  filterQuery: string | null | undefined,
-  metrics: Array<{ type: SnapshotMetricType }>,
-  nodeType: InventoryItemType,
-  sourceId: string,
-  currentTime: number,
-  accountId: string,
-  region: string,
-  interval: string | undefined,
-  shouldReload: boolean
-) {
+export function useTimeline({
+  kuery,
+  metrics,
+  nodeType,
+  sourceId,
+  currentTime,
+  accountId,
+  region,
+  interval,
+  shouldReload,
+}: Omit<UseSnapshotRequest, 'groupBy'> & {
+  interval?: string;
+  shouldReload: boolean;
+}) {
+  const { preferredSchema } = useWaffleOptionsContext();
   const displayInterval = useMemo(() => getDisplayInterval(interval), [interval]);
-
   const timeLengthResult = useMemo(
     () => getTimeLengthFromInterval(displayInterval),
     [displayInterval]
@@ -79,11 +83,12 @@ export function useTimeline(
       currentTime,
       nodeType,
       timerange,
-      filterQuery,
+      kuery,
       sourceId,
       accountId,
       region,
       includeTimeseries: true,
+      schema: preferredSchema,
     },
     { sendRequestImmediately: false }
   );

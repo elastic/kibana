@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { UptimeSettingsContext } from '../contexts';
-import { ClientPluginsStart } from '../../plugin';
+import type { ClientPluginsStart } from '../../plugin';
 import { indexStatusSelector } from '../state/selectors';
 
 export function useNoDataConfig(): NoDataConfig | undefined {
@@ -26,9 +26,6 @@ export function useNoDataConfig(): NoDataConfig | undefined {
   // Returns no data config when there is no historical data
   if (data && !data.indexExists) {
     return {
-      solution: i18n.translate('xpack.uptime.noDataConfig.solutionName', {
-        defaultMessage: 'Observability',
-      }),
       action: {
         beats: {
           title: i18n.translate('xpack.uptime.noDataConfig.beatsCard.title', {
@@ -39,9 +36,9 @@ export function useNoDataConfig(): NoDataConfig | undefined {
               'Proactively monitor the availability of your sites and services. Receive alerts and resolve issues faster to optimize your users experience.',
           }),
           href: basePath + `/app/home#/tutorial/uptimeMonitors`,
+          docsLink: docLinks!.links.observability.guide,
         },
       },
-      docsLink: docLinks!.links.observability.guide,
     };
   }
 }

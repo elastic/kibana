@@ -8,14 +8,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import {
-  EuiButtonGroup,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFieldNumber,
-  EuiSelect,
-  EuiSwitch,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -25,20 +19,20 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
-import type { TermsIndexPatternColumn } from '.';
-import {
-  GenericOperationDefinition,
-  termsOperation,
+import type {
+  TermsIndexPatternColumn,
   LastValueIndexPatternColumn,
-  operationDefinitionMap,
-} from '..';
-import { FormBasedLayer, FormBasedPrivateState } from '../../../types';
-import { FramePublicAPI } from '../../../../../types';
-import { DateHistogramIndexPatternColumn } from '../date_histogram';
+  DateHistogramIndexPatternColumn,
+  FormBasedLayer,
+  FormBasedPrivateState,
+  IndexPattern,
+  FramePublicAPI,
+} from '@kbn/lens-common';
+import type { GenericOperationDefinition } from '..';
+import { termsOperation, operationDefinitionMap } from '..';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
-import { IndexPattern } from '../../../../../types';
 import { IncludeExcludeRow } from './include_exclude_options';
 import { TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS } from '../../../../../user_messages_ids';
 

@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
@@ -22,8 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard control group settings', () => {
     before(async () => {
-      await dashboard.loadSavedDashboard('control group settings test dashboard');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('control group settings test dashboard');
     });
 
     describe('filtering settings', () => {

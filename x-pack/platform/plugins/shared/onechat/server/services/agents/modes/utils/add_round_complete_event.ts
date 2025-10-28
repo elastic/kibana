@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { map, merge, OperatorFunction, share, toArray } from 'rxjs';
-import {
+import { v4 as uuidv4 } from 'uuid';
+import type { OperatorFunction } from 'rxjs';
+import { map, merge, share, toArray } from 'rxjs';
+import type {
   ChatAgentEvent,
-  ChatEventType,
-  ConversationRoundStepType,
-  isMessageCompleteEvent,
-  isToolCallEvent,
-  isToolResultEvent,
-  isReasoningEvent,
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
@@ -21,9 +17,18 @@ import {
   ReasoningEvent,
   ToolCallEvent,
 } from '@kbn/onechat-common';
+import {
+  ChatEventType,
+  ConversationRoundStepType,
+  isMessageCompleteEvent,
+  isToolCallEvent,
+  isToolResultEvent,
+  isToolProgressEvent,
+  isReasoningEvent,
+} from '@kbn/onechat-common';
 import { getCurrentTraceId } from '../../../../tracing';
 
-type SourceEvents = Exclude<ChatAgentEvent, RoundCompleteEvent>;
+type SourceEvents = ChatAgentEvent;
 
 type StepEvents = ReasoningEvent | ToolCallEvent;
 
@@ -67,36 +72,54 @@ const createRoundFromEvents = ({
   input: RoundInput;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent).map((event) => event.data);
+  const toolProgressions = events.filter(isToolProgressEvent).map((event) => event.data);
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
   const stepEvents = events.filter(isStepEvent);
 
-  const eventToStep = (event: StepEvents): ConversationRoundStep => {
+  const eventToStep = (event: StepEvents): ConversationRoundStep[] => {
     if (isToolCallEvent(event)) {
       const toolCall = event.data;
+
       const toolResult = toolResults.find(
         (result) => result.tool_call_id === toolCall.tool_call_id
       );
 
-      return {
-        type: ConversationRoundStepType.toolCall,
-        tool_call_id: toolCall.tool_call_id,
-        tool_id: toolCall.tool_id,
-        params: toolCall.params,
-        results: toolResult?.results ?? [],
-      };
+      const toolProgress = toolProgressions
+        .filter((progressEvent) => progressEvent.tool_call_id === toolCall.tool_call_id)
+        .map((progress) => ({
+          message: progress.message,
+        }));
+
+      return [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: toolCall.tool_call_id,
+          tool_id: toolCall.tool_id,
+          progression: toolProgress,
+          params: toolCall.params,
+          results: toolResult?.results ?? [],
+        },
+      ];
     }
     if (isReasoningEvent(event)) {
-      return {
-        type: ConversationRoundStepType.reasoning,
-        reasoning: event.data.reasoning,
-      };
+      if (event.data.transient !== true) {
+        return [
+          {
+            type: ConversationRoundStepType.reasoning,
+            reasoning: event.data.reasoning,
+          },
+        ];
+      } else {
+        return [];
+      }
     }
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
 
   const round: ConversationRound = {
+    id: uuidv4(),
     input,
-    steps: stepEvents.map(eventToStep),
+    steps: stepEvents.flatMap(eventToStep),
     trace_id: getCurrentTraceId(),
     response: { message: messages[messages.length - 1].message_content },
   };

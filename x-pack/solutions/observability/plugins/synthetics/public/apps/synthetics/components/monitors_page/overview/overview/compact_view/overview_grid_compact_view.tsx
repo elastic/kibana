@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import { useMonitorsSortedByStatus } from '../../../../../hooks/use_monitors_sorted_by_status';
 import { selectOverviewState } from '../../../../../state';
 import { GridItemsByGroup } from '../grid_by_group/grid_items_by_group';
-import { FlyoutParamProps } from '../types';
+import type { FlyoutParamProps } from '../types';
 import { MonitorsTable } from './components/monitors_table';
 
 export const OverviewGridCompactView = ({

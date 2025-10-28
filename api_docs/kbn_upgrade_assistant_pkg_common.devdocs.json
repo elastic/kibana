@@ -1,0 +1,209 @@
+{
+  "id": "@kbn/upgrade-assistant-pkg-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+        "id": "def-common.Version",
+        "type": "Class",
+        "tags": [],
+        "label": "Version",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/upgrade-assistant-pkg-common",
+            "scope": "common",
+            "docId": "kibKbnUpgradeAssistantPkgCommonPluginApi",
+            "section": "def-common.Version",
+            "text": "Version"
+          },
+          " implements ",
+          "IVersion"
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+            "id": "def-common.Version.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(version: string) => void"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+                "id": "def-common.Version.setup.$1",
+                "type": "string",
+                "tags": [],
+                "label": "version",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+            "id": "def-common.Version.getCurrentVersion",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentVersion",
+            "description": [],
+            "signature": [
+              "() => ",
+              "node_modules/@types/semver/classes/semver"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+            "id": "def-common.Version.getMajorVersion",
+            "type": "Function",
+            "tags": [],
+            "label": "getMajorVersion",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+            "id": "def-common.Version.getNextMajorVersion",
+            "type": "Function",
+            "tags": [],
+            "label": "getNextMajorVersion",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+            "id": "def-common.Version.getPrevMajorVersion",
+            "type": "Function",
+            "tags": [],
+            "label": "getPrevMajorVersion",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/version.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+        "id": "def-common.ReindexStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "ReindexStatus",
+        "description": [],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+        "id": "def-common.ML_UPGRADE_OP_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ML_UPGRADE_OP_TYPE",
+        "description": [],
+        "signature": [
+          "\"upgrade-assistant-ml-upgrade-operation\""
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+        "id": "def-common.REINDEX_OP_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "REINDEX_OP_TYPE",
+        "description": [],
+        "signature": [
+          "\"upgrade-assistant-reindex-operation\""
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+        "id": "def-common.UA_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "UA_BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/upgrade_assistant\""
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

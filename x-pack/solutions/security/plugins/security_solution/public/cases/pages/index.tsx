@@ -12,8 +12,8 @@ import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { IOCPanelKey } from '../../flyout/ai_for_soc/constants/panel_keys';
-import { DetectionEngineAlertsTable } from '../../detections/components/alerts_table';
+import { EasePanelKey } from '../../flyout/ease/constants/panel_keys';
+import { AlertsTable } from '../../detections/components/alerts_table';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { RulePanelKey } from '../../flyout/rule_details/right';
@@ -36,7 +36,9 @@ import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
-import { AiForSOCAlertsTable } from '../components/ai_for_soc/wrapper';
+import { EaseAlertsTable } from '../components/ease/wrapper';
+import { EventsTableForCases } from '../components/case_events/table';
+import { CASES_FEATURES } from '..';
 
 const CaseContainerComponent: React.FC = () => {
   const {
@@ -56,15 +58,15 @@ const CaseContainerComponent: React.FC = () => {
 
   // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
   //  https://github.com/elastic/kibana/issues/218741
-  const AIForSOC = capabilities[SECURITY_FEATURE_ID].configurations;
+  const EASE = capabilities[SECURITY_FEATURE_ID].configurations;
 
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
-      //  For the AI for SOC we need to show the AI alert flyout.
-      if (AIForSOC) {
+      //  For EASE we need to show the AI alert flyout.
+      if (EASE) {
         openFlyout({
           right: {
-            id: IOCPanelKey,
+            id: EasePanelKey,
             params: {
               id: alertId,
               indexName: index,
@@ -88,19 +90,19 @@ const CaseContainerComponent: React.FC = () => {
         });
       }
     },
-    [AIForSOC, openFlyout, telemetry]
+    [EASE, openFlyout, telemetry]
   );
 
   const renderAlertsTable = useCallback(
     (props: CaseViewAlertsTableProps) => {
-      //  For the AI for SOC we need to show the Alert summary page alerts table.
-      if (AIForSOC) {
-        return <AiForSOCAlertsTable id={props.id} onLoaded={props.onLoaded} query={props.query} />;
+      //  For EASE we need to show the Alert summary page alerts table.
+      if (EASE) {
+        return <EaseAlertsTable id={props.id} onLoaded={props.onLoaded} query={props.query} />;
       } else {
-        return <DetectionEngineAlertsTable tableType={TableId.alertsOnCasePage} {...props} />;
+        return <AlertsTable tableType={TableId.alertsOnCasePage} {...props} />;
       }
     },
-    [AIForSOC]
+    [EASE]
   );
 
   const onRuleDetailsClick = useCallback(
@@ -144,6 +146,7 @@ const CaseContainerComponent: React.FC = () => {
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
+            ...CASES_FEATURES,
             metrics: [
               CaseMetricsFeature.ALERTS_COUNT,
               CaseMetricsFeature.ALERTS_USERS,
@@ -152,6 +155,7 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.LIFESPAN,
             ],
             alerts: { isExperimental: false },
+            events: { enabled: true },
           },
           refreshRef,
           actionsNavigation: {
@@ -189,6 +193,7 @@ const CaseContainerComponent: React.FC = () => {
           onAlertsTableLoaded,
           permissions: userCasesPermissions,
           renderAlertsTable,
+          renderEventsTable: EventsTableForCases,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

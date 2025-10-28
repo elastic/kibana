@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogDocument, generateLongId, generateShortId, log } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+/**
+ * Generates log documents that are designed to fail ingest pipelines.
+ */
+
+import type { LogDocument } from '@kbn/apm-synthtrace-client';
+import { generateLongId, generateShortId, log } from '@kbn/apm-synthtrace-client';
+import type { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
 import {
@@ -70,23 +75,14 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     bootstrap: async ({ logsEsClient }) => {
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
 
+      await logsEsClient.createIndexTemplate(IndexTemplateName.NoFailureStore);
       await logsEsClient.createCustomPipeline(
         processors,
         `${IndexTemplateName.SomeFailureStore}@pipeline`
       );
-      await logsEsClient.createComponentTemplate({
-        name: `${IndexTemplateName.SomeFailureStore}@custom`,
-        dataStreamOptions: {
-          failure_store: {
-            enabled: true,
-          },
-        },
-      });
       await logsEsClient.createIndexTemplate(IndexTemplateName.SomeFailureStore);
     },
     teardown: async ({ logsEsClient }) => {
-      await logsEsClient.deleteIndexTemplate(IndexTemplateName.SomeFailureStore);
-      await logsEsClient.deleteComponentTemplate(`${IndexTemplateName.SomeFailureStore}@custom`);
       if (isLogsDb) await logsEsClient.deleteIndexTemplate(IndexTemplateName.LogsDb);
     },
     generate: ({ range, clients: { logsEsClient } }) => {

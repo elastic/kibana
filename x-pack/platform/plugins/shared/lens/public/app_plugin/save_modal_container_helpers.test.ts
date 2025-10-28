@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { makeDefaultServices } from '../mocks';
-import type { LensAppServices } from './types';
 import { redirectToDashboard } from './save_modal_container_helpers';
-import { LensSerializedState } from '..';
+import type { LensSerializedState } from '..';
+import type { LensAppServices } from '@kbn/lens-common';
 
 describe('redirectToDashboard', () => {
   const embeddableInput = {
@@ -15,11 +15,11 @@ describe('redirectToDashboard', () => {
   } as unknown as LensSerializedState;
   const mockServices = makeDefaultServices();
 
-  it('should call the navigateToWithEmbeddablePackage with the correct args if originatingApp is given', () => {
-    const navigateToWithEmbeddablePackageSpy = jest.fn();
+  it('should call the navigateToWithEmbeddablePackages with the correct args if originatingApp is given', () => {
+    const navigateToWithEmbeddablePackagesSpy = jest.fn();
     const transferService = {
       ...mockServices.stateTransfer,
-      navigateToWithEmbeddablePackage: navigateToWithEmbeddablePackageSpy,
+      navigateToWithEmbeddablePackages: navigateToWithEmbeddablePackagesSpy,
     } as unknown as LensAppServices['stateTransfer'];
     redirectToDashboard({
       embeddableInput,
@@ -28,17 +28,17 @@ describe('redirectToDashboard', () => {
       getOriginatingPath: jest.fn(),
       stateTransfer: transferService,
     });
-    expect(navigateToWithEmbeddablePackageSpy).toHaveBeenCalledWith('security', {
+    expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('security', {
       path: '#/view/id',
-      state: { serializedState: { rawState: { test: 'test' }, references: [] }, type: 'lens' },
+      state: [{ serializedState: { rawState: { test: 'test' }, references: [] }, type: 'lens' }],
     });
   });
 
-  it('should call the navigateToWithEmbeddablePackage with the correct args if originatingApp is an empty string', () => {
-    const navigateToWithEmbeddablePackageSpy = jest.fn();
+  it('should call the navigateToWithEmbeddablePackages with the correct args if originatingApp is an empty string', () => {
+    const navigateToWithEmbeddablePackagesSpy = jest.fn();
     const transferService = {
       ...mockServices.stateTransfer,
-      navigateToWithEmbeddablePackage: navigateToWithEmbeddablePackageSpy,
+      navigateToWithEmbeddablePackages: navigateToWithEmbeddablePackagesSpy,
     } as unknown as LensAppServices['stateTransfer'];
     redirectToDashboard({
       embeddableInput,
@@ -47,9 +47,9 @@ describe('redirectToDashboard', () => {
       getOriginatingPath: jest.fn(),
       stateTransfer: transferService,
     });
-    expect(navigateToWithEmbeddablePackageSpy).toHaveBeenCalledWith('dashboards', {
+    expect(navigateToWithEmbeddablePackagesSpy).toHaveBeenCalledWith('dashboards', {
       path: '#/view/id',
-      state: { serializedState: { rawState: { test: 'test' }, references: [] }, type: 'lens' },
+      state: [{ serializedState: { rawState: { test: 'test' }, references: [] }, type: 'lens' }],
     });
   });
 });

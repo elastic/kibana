@@ -47,8 +47,8 @@ describe('Error details', () => {
 
       cy.visitKibana(errorDetailsPageHref);
       cy.contains(`Error group ${errorGroupingKeyShort}`);
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
+      checkA11y();
     });
 
     describe('when error has no occurrences', () => {
@@ -107,10 +107,10 @@ describe('Error details', () => {
         });
       });
 
-      describe('when clicking on View x occurences in discover', () => {
+      describe('when clicking on Open in Discover', () => {
         it('should redirects the user to discover', () => {
           cy.visitKibana(errorDetailsPageHref);
-          cy.contains('View 1 occurrence in Discover').click();
+          cy.contains('Open in Discover').click();
           cy.url().should('include', 'app/discover');
         });
       });

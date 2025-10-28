@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { omit } from 'lodash';
+import type { FunctionComponent } from 'react';
 import React, {
   createContext,
-  FunctionComponent,
   useCallback,
   useContext,
   useEffect,
@@ -16,9 +16,9 @@ import React, {
   useRef,
 } from 'react';
 
-import { Processor } from '../../../../../common/types';
+import type { Processor } from '../../../../../common/types';
 
-import {
+import type {
   EditorMode,
   FormValidityState,
   OnFormUpdateArg,
@@ -34,14 +34,10 @@ import { deserialize } from '../deserialize';
 
 import { serialize } from '../serialize';
 
-import { OnActionHandler } from '../components/processors_tree';
+import type { OnActionHandler } from '../components/processors_tree';
 
-import {
-  ProcessorRemoveModal,
-  PipelineProcessorsItemTooltip,
-  ProcessorForm,
-  OnSubmitHandler,
-} from '../components';
+import type { OnSubmitHandler } from '../components';
+import { ProcessorRemoveModal, PipelineProcessorsItemTooltip, ProcessorForm } from '../components';
 
 import { getValue } from '../utils';
 
@@ -205,7 +201,10 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     (action) => {
       switch (action.type) {
         case 'addProcessor':
-          setMode({ id: 'creatingProcessor', arg: { selector: action.payload.target } });
+          setMode({
+            id: 'creatingProcessor',
+            arg: { selector: action.payload.target, buttonRef: action.payload.buttonRef },
+          });
           break;
         case 'move':
           setMode({ id: 'idle' });
@@ -265,6 +264,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
         <ProcessorForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
           processor={mode.id === 'managingProcessor' ? mode.arg.processor : undefined}
+          buttonRef={mode.arg.buttonRef}
           onOpen={onFlyoutOpen}
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}

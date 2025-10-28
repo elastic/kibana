@@ -10,15 +10,11 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  AlertsFilter,
-  AlertsFilterTimeframe,
-  RecoveredActionGroup,
-  RuleActionFrequency,
-} from '@kbn/alerting-types';
+import type { AlertsFilter, AlertsFilterTimeframe, RuleActionFrequency } from '@kbn/alerting-types';
+import { RecoveredActionGroup } from '@kbn/alerting-types';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { useRuleFormState } from '../hooks';
-import { RuleAction, RuleTypeWithDescription } from '../common';
+import type { RuleAction, RuleTypeWithDescription } from '../common';
 import {
   getActionGroups,
   getDurationNumberInItsUnit,
@@ -217,13 +213,17 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
             {showSelectActionGroup && (
               <EuiSuperSelect
                 prepend={
-                  <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${action.actionTypeId}`}>
+                  <EuiFormLabel
+                    id={`addNewActionConnectorActionGroupLabel-${action.actionTypeId}`}
+                    htmlFor={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
+                  >
                     {ACTION_GROUP_RUN_WHEN}
                   </EuiFormLabel>
                 }
                 data-test-subj="ruleActionsSettingsSelectActionGroup"
                 fullWidth
                 id={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
+                aria-labelledby={`addNewActionConnectorActionGroupLabel-${action.actionTypeId}`}
                 options={actionGroups.map(({ id: value, name }) => ({
                   value,
                   ['data-test-subj']: `addNewActionConnectorActionGroup-${value}`,

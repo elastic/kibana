@@ -6,6 +6,7 @@
  */
 
 import { validateThresholdBase } from '../../../../../utils/request_validation/threshold';
+import { validateThreatMapping } from '../../../../../utils/request_validation/indicator_match';
 import type { RuleCreateProps } from '../../../model';
 
 /**
@@ -15,8 +16,9 @@ export const validateCreateRuleProps = (props: RuleCreateProps): string[] => {
   return [
     ...validateTimelineId(props),
     ...validateTimelineTitle(props),
-    ...validateThreatMapping(props),
+    ...validateThreatMatchConcurrentSearches(props),
     ...validateThreshold(props),
+    ...validateThreatMapping(props),
   ];
 };
 
@@ -46,7 +48,7 @@ const validateTimelineTitle = (props: RuleCreateProps): string[] => {
   return [];
 };
 
-const validateThreatMapping = (props: RuleCreateProps): string[] => {
+const validateThreatMatchConcurrentSearches = (props: RuleCreateProps): string[] => {
   const errors: string[] = [];
   if (props.type === 'threat_match') {
     if (props.concurrent_searches != null && props.items_per_search == null) {

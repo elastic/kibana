@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
 import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
 import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
@@ -36,15 +37,19 @@ import * as i18n from '../../rule_management_ui/components/rules_table/upgrade_p
 import { UpgradeFlyoutSubHeader } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_flyout_subheader';
 import { CustomizationDisabledCallout } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/customization_disabled_callout';
 import { RuleUpgradeTab } from '../components/rule_details/three_way_diff';
-import { TabContentPadding } from '../../../siem_migrations/rules/components/rule_details_flyout';
 import { RuleTypeChangeCallout } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_type_change_callout';
 import { RuleDiffTab } from '../components/rule_details/rule_diff_tab';
+import type { RulePreviewFlyoutCloseReason } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
 import { useRulePreviewFlyout } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
 import type { UpgradePrebuiltRulesSortingOptions } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../../rule_management_ui/components/rules_table/constants';
 import type { RulesConflictStats } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal/conflicts_description';
+import { useKibana } from '../../../common/lib/kibana';
+import { TabContentPadding } from '../components/rule_details/rule_details_flyout';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
+const RULE_UPGRADE_FLYOUT_BUTTON_EVENT_VERSION = 2;
+const RULE_UPGRADE_FLYOUT_OPEN_EVENT_VERSION = 2;
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
@@ -67,6 +72,7 @@ export function usePrebuiltRulesUpgrade({
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
+  const { telemetry } = useKibana().services;
 
   const {
     data: upgradeReviewResponse,
@@ -358,7 +364,24 @@ export function usePrebuiltRulesUpgrade({
     },
     [rulesUpgradeState, isRulesCustomizationEnabled, setRuleFieldResolvedValue]
   );
-  const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
+  const closeRulePreviewAction = (rule: RuleResponse, reason: RulePreviewFlyoutCloseReason) => {
+    const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
+    const hasBaseVersion = ruleUpgradeState.has_base_version === true;
+    if (reason === 'dismiss') {
+      telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
+        type: 'dismiss',
+        hasBaseVersion,
+        eventVersion: RULE_UPGRADE_FLYOUT_BUTTON_EVENT_VERSION,
+      });
+    } else {
+      telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
+        type: 'update',
+        hasBaseVersion,
+        eventVersion: RULE_UPGRADE_FLYOUT_BUTTON_EVENT_VERSION,
+      });
+    }
+  };
+  const { rulePreviewFlyout, openRulePreview: openRulePreviewDefault } = useRulePreviewFlyout({
     rules: ruleUpgradeStates.map(({ target_rule: targetRule }) => targetRule),
     subHeaderFactory,
     ruleActionsFactory,
@@ -367,7 +390,22 @@ export function usePrebuiltRulesUpgrade({
       id: PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR,
       dataTestSubj: PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR,
     },
+    closeRulePreviewAction,
   });
+
+  const openRulePreview = useCallback(
+    (ruleId: string) => {
+      openRulePreviewDefault(ruleId);
+      const ruleUpgradeState = rulesUpgradeState[ruleId];
+      const hasBaseVersion = ruleUpgradeState.has_base_version === true;
+
+      telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutOpen, {
+        hasBaseVersion,
+        eventVersion: RULE_UPGRADE_FLYOUT_OPEN_EVENT_VERSION,
+      });
+    },
+    [openRulePreviewDefault, rulesUpgradeState, telemetry]
+  );
 
   return {
     ruleUpgradeStates,

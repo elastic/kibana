@@ -11,6 +11,7 @@ import { transformResponse } from './v1';
 describe('transformResponse v1', () => {
   it('transforms valid gaps data correctly', () => {
     const gap = new Gap({
+      ruleId: 'some-rule-id',
       timestamp: '2024-01-01T00:00:00.000Z',
       range: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' },
       internalFields: {
@@ -44,6 +45,7 @@ describe('transformResponse v1', () => {
 
   it('filters out gaps with missing _id', () => {
     const gap = new Gap({
+      ruleId: 'some-rule-id',
       timestamp: '2024-01-01T00:00:00.000Z',
       range: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' },
     });
@@ -60,6 +62,7 @@ describe('transformResponse v1', () => {
 
   it('filters out gaps with missing timestamp', () => {
     const gap = new Gap({
+      ruleId: 'some-rule-id',
       range: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' },
       internalFields: {
         _id: 'test-gap-id',
@@ -97,6 +100,7 @@ describe('transformResponse v1', () => {
 
   it('transforms multiple gaps correctly', () => {
     const gap1 = new Gap({
+      ruleId: 'some-rule-id',
       timestamp: '2024-01-01T00:00:00.000Z',
       range: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' },
       internalFields: {
@@ -108,6 +112,7 @@ describe('transformResponse v1', () => {
     });
 
     const gap2 = new Gap({
+      ruleId: 'some-rule-id',
       timestamp: '2024-01-01T00:00:00.000Z',
       range: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' },
       internalFields: {

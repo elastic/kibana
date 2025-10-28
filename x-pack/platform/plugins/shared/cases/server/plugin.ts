@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import type {
-  IContextProvider,
-  KibanaRequest,
-  Logger,
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
+import {
+  type IContextProvider,
+  type KibanaRequest,
+  type Logger,
+  type PluginInitializerContext,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  SavedObjectsClient,
 } from '@kbn/core/server';
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { APP_ID } from '../common/constants';
+import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
 
 import type { CasesClient } from './client';
 import type {
@@ -49,11 +50,9 @@ import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
 
-import {
-  createCasesAnalyticsIndexes,
-  registerCasesAnalyticsIndexesTasks,
-  scheduleCasesAnalyticsSyncTasks,
-} from './cases_analytics';
+import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
+import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
+import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 
 export class CasePlugin
   implements
@@ -73,6 +72,7 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private incrementalIdTaskManager?: IncrementalIdTaskManager;
   private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -135,14 +135,25 @@ export class CasePlugin
       })
     );
 
-    if (plugins.taskManager && plugins.usageCollection) {
-      createCasesTelemetry({
-        core,
-        taskManager: plugins.taskManager,
-        usageCollection: plugins.usageCollection,
-        logger: this.logger,
-        kibanaVersion: this.kibanaVersion,
-      });
+    if (plugins.taskManager) {
+      if (plugins.usageCollection) {
+        createCasesTelemetry({
+          core,
+          taskManager: plugins.taskManager,
+          usageCollection: plugins.usageCollection,
+          logger: this.logger,
+          kibanaVersion: this.kibanaVersion,
+        });
+      }
+
+      if (this.caseConfig.incrementalId.enabled) {
+        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
+          plugins.taskManager,
+          this.caseConfig.incrementalId,
+          this.logger,
+          plugins.usageCollection
+        );
+      }
     }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
@@ -208,13 +219,24 @@ export class CasePlugin
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
 
+      if (this.caseConfig.incrementalId.enabled) {
+        void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
+      }
       if (this.caseConfig.analytics.index?.enabled) {
-        scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
+        const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+          CASE_SAVED_OBJECT,
+        ]);
+        const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
+        scheduleCAISchedulerTask({
+          taskManager: plugins.taskManager,
+          logger: this.logger,
+        }).catch(() => {}); // it shouldn't reject, but just in case
         createCasesAnalyticsIndexes({
           esClient: core.elasticsearch.client.asInternalUser,
           logger: this.logger,
           isServerless: this.isServerless,
           taskManager: plugins.taskManager,
+          savedObjectsClient: internalSavedObjectsClient,
         }).catch(() => {}); // it shouldn't reject, but just in case
       }
     }

@@ -6,20 +6,30 @@
  */
 
 import { partition, mapValues, pickBy } from 'lodash';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { nonNullable } from '../../../utils';
-import type { DateRange } from '../../../../common/types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type {
-  DatasourceFixAction,
+  TimeScaleUnit,
+  ReferenceBasedIndexPatternColumn,
+  DateRange,
+  FormBasedLayer,
+  GenericIndexPatternColumn,
+  FormBasedPrivateState,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
+import type {
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
-  OperationMetadata,
   VisualizationDimensionGroupConfig,
-} from '../../../types';
+  FormulaIndexPatternColumn,
+  BaseIndexPatternColumn,
+  DatasourceFixAction,
+} from '@kbn/lens-common';
+import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -27,22 +37,15 @@ import {
   type RequiredReference,
   type OperationDefinition,
   type GenericOperationDefinition,
-  type TermsIndexPatternColumn,
   type FieldBasedOperationErrorMessage,
 } from './definitions';
-import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
+import type { DataViewDragDropOperation } from '../types';
 import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../../id_generator';
-import {
-  GenericIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-} from './definitions/column_types';
-import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
-import type { TimeScaleUnit } from '../../../../common/expressions';
+import { insertOrReplaceFormulaColumn } from './definitions/formula';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
-import type { DataType } from '../../..';
+import type { DataType, OperationMetadata } from '../../..';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -1648,7 +1651,10 @@ export function getReferenceRoot(layer: FormBasedLayer, columnId: string): strin
   return currentId;
 }
 
-export function getReferencedColumnIds(layer: FormBasedLayer, columnId: string): string[] {
+export function getReferencedColumnIds(
+  layer: Omit<FormBasedLayer, 'indexPatternId'>,
+  columnId: string
+): string[] {
   const referencedIds: string[] = [];
   function collect(id: string) {
     const column = layer.columns[id];

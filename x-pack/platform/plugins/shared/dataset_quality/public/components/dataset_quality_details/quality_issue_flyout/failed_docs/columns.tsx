@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTableColumn, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { FailedDocsError } from '../../../../../common/api_types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import type { FailedDocsError } from '../../../../../common/api_types';
 import { ErrorStacktraceLink } from './error_stacktrace_link';
 import { ErrorMessage } from './error_message';
 
@@ -44,7 +45,7 @@ export const getFailedDocsErrorsColumns = (): Array<EuiBasicTableColumn<FailedDo
   {
     name: (
       <EuiToolTip content={typeColumnTooltip}>
-        <span>
+        <span tabIndex={0}>
           {`${typeColumnName} `}
           <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
         </span>

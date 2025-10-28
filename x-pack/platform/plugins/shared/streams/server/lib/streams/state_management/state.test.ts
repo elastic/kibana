@@ -12,16 +12,16 @@ import { GroupStream } from './streams/group_stream';
 import { ClassicStream } from './streams/classic_stream';
 import { WiredStream } from './streams/wired_stream';
 import * as streamFromDefinition from './stream_active_record/stream_from_definition';
-import {
-  StreamActiveRecord,
+import type {
   StreamChangeStatus,
   ValidationResult,
 } from './stream_active_record/stream_active_record';
-import { StreamChange } from './types';
-import { ElasticsearchAction } from './execution_plan/types';
+import { StreamActiveRecord } from './stream_active_record/stream_active_record';
+import type { StreamChange } from './types';
+import type { ElasticsearchAction } from './execution_plan/types';
 import { ExecutionPlan } from './execution_plan/execution_plan';
-import { Streams } from '@kbn/streams-schema';
-import { LockManagerService } from '@kbn/lock-manager';
+import type { Streams } from '@kbn/streams-schema';
+import type { LockManagerService } from '@kbn/lock-manager';
 
 describe('State', () => {
   const searchMock = jest.fn();
@@ -42,7 +42,8 @@ describe('State', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
+        settings: {},
         wired: {
           fields: {},
           routing: [],
@@ -54,7 +55,8 @@ describe('State', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
+        settings: {},
         classic: {},
       },
     };
@@ -62,6 +64,8 @@ describe('State', () => {
       name: 'group_stream',
       description: '',
       group: {
+        metadata: {},
+        tags: [],
         members: [],
       },
     };
@@ -124,6 +128,8 @@ describe('State', () => {
                 description: '',
                 name: 'whatever',
                 group: {
+                  metadata: {},
+                  tags: [],
                   members: [],
                 },
               },
@@ -156,6 +162,8 @@ describe('State', () => {
                 description: '',
                 name: 'new_group_stream',
                 group: {
+                  metadata: {},
+                  tags: [],
                   members: [],
                 },
               },
@@ -188,6 +196,8 @@ describe('State', () => {
                 name: 'stream_that_fails',
                 description: 'Something went wrong',
                 group: {
+                  metadata: {},
+                  tags: [],
                   members: [],
                 },
               },
@@ -304,6 +314,8 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
               name: 'and_another',
               description: '',
               group: {
+                metadata: {},
+                tags: [],
                 members: [],
               },
             },

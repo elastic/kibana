@@ -10,7 +10,8 @@
 // eslint-disable-next-line max-classes-per-file
 import './jest.mocks';
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { merge } from 'lodash';
 
 import { defer, BehaviorSubject } from 'rxjs';
@@ -21,12 +22,15 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/data_views/data_view_lazy.stub';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import { PreviewController } from '../../../public/components/preview/preview_controller';
-import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
+import type { Context } from '../../../public/components/field_editor_context';
+import { FieldEditorProvider } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
-import { initApi, ApiService } from '../../../public/lib';
+import type { ApiService } from '../../../public/lib';
+import { initApi } from '../../../public/lib';
 import { init as initHttpRequests } from './http_requests';
-import { RuntimeFieldSubFields } from '../../../public/shared_imports';
+import type { RuntimeFieldSubFields } from '../../../public/shared_imports';
 
 const dataStart = dataPluginMock.createStartContract();
 const { search } = dataStart;
@@ -82,7 +86,10 @@ class MockCustomFieldFormat extends FieldFormat {
   static id = 'upper';
   static title = 'UpperCaseString';
 
-  htmlConvert = (value: string) => `<span>${value.toUpperCase()}</span>`;
+  // we need to catch possible null values and block them before running the transformation
+  // like in the real formatter.
+  htmlConvert = (value: unknown) =>
+    `<span>${value == null ? NULL_LABEL : String(value).toUpperCase()}</span>`;
 }
 
 // The format options available in the dropdown select for our tests.

@@ -37,5 +37,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/expandable-flyout",
     "@kbn/grouping",
+    "@kbn/std",
+    "@kbn/react-query"
   ]
 }

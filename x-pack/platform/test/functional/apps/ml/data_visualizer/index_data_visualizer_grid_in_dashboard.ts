@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { TestData, MetricFieldVisConfig } from './types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { TestData, MetricFieldVisConfig } from './types';
 import { farequoteLuceneFiltersSearchTestData } from './index_test_data';
 
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
@@ -96,8 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.testResources.setAdvancedSettingProperty(SHOW_FIELD_STATISTICS, false);
 
         await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardTitle);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.loadDashboardInEditMode(dashboardTitle);
 
         await dashboardAddPanel.addSavedSearch(savedSearchTitle);
         await PageObjects.header.waitUntilLoadingHasFinished();

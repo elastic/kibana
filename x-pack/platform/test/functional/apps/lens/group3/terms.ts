@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
@@ -296,7 +297,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.waitForVisualization('xyVisChart');
         const data = await lens.getCurrentChartDebugState('xyVisChart');
         const seriesBar = data!.bars![0].bars;
-        expect(seriesBar[0].x).to.eql('(empty)');
+        expect(seriesBar[0].x).to.eql(EMPTY_LABEL);
         expect(seriesBar[seriesBar.length - 1].x).to.eql('Other');
       });
 
@@ -317,7 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await lens.waitForVisualization('xyVisChart');
         const data = await lens.getCurrentChartDebugState('xyVisChart');
-        expect(data!.bars![0].name).to.eql('(empty)');
+        expect(data!.bars![0].name).to.eql(EMPTY_LABEL);
         expect(data!.bars![data!.bars!.length - 1].name).to.eql('Other');
       });
 
@@ -351,13 +352,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.waitForVisualization();
         await common.sleep(20000);
         // a empty value
-        expect(await lens.getDatatableCellText(1, 0)).to.eql('(empty)');
+        expect(await lens.getDatatableCellText(1, 0)).to.eql(EMPTY_LABEL);
         // b Other value
         expect(await lens.getDatatableCellText(1, 1)).to.eql('Other');
         // a Other value
         expect(await lens.getDatatableCellText(5, 0)).to.eql('Other');
         // b empty value
-        expect(await lens.getDatatableCellText(5, 1)).to.eql('(empty)');
+        expect(await lens.getDatatableCellText(5, 1)).to.eql(EMPTY_LABEL);
       });
     });
   });

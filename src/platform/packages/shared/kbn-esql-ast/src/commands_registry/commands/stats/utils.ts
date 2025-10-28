@@ -6,10 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../../..';
 import type {
+  ESQLAstAllCommands,
   ESQLAstItem,
-  ESQLCommand,
   ESQLFunction,
   ESQLProperNode,
   ESQLSingleAstItem,
@@ -26,8 +27,7 @@ import {
 } from '../../../ast/is';
 import { Walker } from '../../../walker';
 import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
-import { ISuggestionItem } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import type { ISuggestionItem } from '../../types';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';
 
@@ -50,7 +50,7 @@ export type CaretPosition =
   | 'grouping_expression_after_assignment'
   | 'after_where';
 
-export const getPosition = (command: ESQLCommand, innerText: string): CaretPosition => {
+export const getPosition = (command: ESQLAstAllCommands, innerText: string): CaretPosition => {
   const lastCommandArg = command.args[command.args.length - 1];
 
   if (isOptionNode(lastCommandArg) && lastCommandArg.name === 'by') {
@@ -79,23 +79,21 @@ export const getPosition = (command: ESQLCommand, innerText: string): CaretPosit
   return 'expression_without_assignment';
 };
 
-export const byCompleteItem: ISuggestionItem = {
+export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'BY',
   text: 'BY ',
   kind: 'Reference',
   detail: 'By',
   sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
+});
 
-export const whereCompleteItem: ISuggestionItem = {
+export const whereCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'WHERE',
   text: 'WHERE ',
   kind: 'Reference',
   detail: 'Where',
   sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
+});
 
 function isAggregation(arg: ESQLAstItem): arg is ESQLFunction {
   return (
@@ -191,11 +189,10 @@ export const getCommaAndPipe = (
   columnExists: (name: string) => boolean
 ): ISuggestionItem[] => {
   const pipeSuggestion = { ...pipeCompleteItem };
-  const commaSuggestion = {
+  const commaSuggestion = withAutoSuggest({
     ...commaCompleteItem,
     text: ', ',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  };
+  });
 
   // does the query end with whitespace?
   if (/\s$/.test(innerText)) {

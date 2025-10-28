@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
-
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -18,7 +16,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const aiops = getService('aiops');
-  const retry = getService('retry');
 
   // AIOps / Log Rate Analysis lives in the ML UI so we need some related services.
   const ml = getService('ml');
@@ -187,39 +184,39 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       // The group switch should be disabled by default
-      await aiops.logRateAnalysisPage.assertLogRateAnalysisResultsGroupSwitchExists(false);
+      // await aiops.logRateAnalysisPage.assertLogRateAnalysisResultsGroupSwitchExists(false);
 
-      await retry.tryForTime(30 * 1000, async () => {
-        if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
-          // Enabled grouping
-          await aiops.logRateAnalysisPage.clickLogRateAnalysisResultsGroupSwitchOn();
+      // await retry.tryForTime(30 * 1000, async () => {
+      //   if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
+      //     // Enabled grouping
+      //     await aiops.logRateAnalysisPage.clickLogRateAnalysisResultsGroupSwitchOn();
 
-          await aiops.logRateAnalysisResultsGroupsTable.assertLogRateAnalysisResultsTableExists();
-          await aiops.logRateAnalysisResultsGroupsTable.scrollAnalysisTableIntoView();
+      //     await aiops.logRateAnalysisResultsGroupsTable.assertLogRateAnalysisResultsTableExists();
+      //     await aiops.logRateAnalysisResultsGroupsTable.scrollAnalysisTableIntoView();
 
-          const analysisGroupsTable =
-            await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
+      //     const analysisGroupsTable =
+      //       await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
 
-          const actualAnalysisGroupsTable = orderBy(analysisGroupsTable, 'group');
-          const expectedAnalysisGroupsTable = orderBy(
-            testData.expected.analysisGroupsTable,
-            'group'
-          );
+      //     const actualAnalysisGroupsTable = orderBy(analysisGroupsTable, 'group');
+      //     const expectedAnalysisGroupsTable = orderBy(
+      //       testData.expected.analysisGroupsTable,
+      //       'group'
+      //     );
 
-          expect(actualAnalysisGroupsTable).to.be.eql(
-            expectedAnalysisGroupsTable,
-            `Expected analysis groups table to be ${JSON.stringify(
-              expectedAnalysisGroupsTable
-            )}, got ${JSON.stringify(actualAnalysisGroupsTable)}`
-          );
-        }
-      });
+      //     expect(actualAnalysisGroupsTable).to.be.eql(
+      //       expectedAnalysisGroupsTable,
+      //       `Expected analysis groups table to be ${JSON.stringify(
+      //         expectedAnalysisGroupsTable
+      //       )}, got ${JSON.stringify(actualAnalysisGroupsTable)}`
+      //     );
+      //   }
+      // });
 
       if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
-        await ml.testExecution.logTestStep('expand table row');
-        await aiops.logRateAnalysisResultsGroupsTable.assertExpandRowButtonExists();
-        await aiops.logRateAnalysisResultsGroupsTable.expandRow();
-        await aiops.logRateAnalysisResultsGroupsTable.scrollAnalysisTableIntoView();
+        // await ml.testExecution.logTestStep('expand table row');
+        // await aiops.logRateAnalysisResultsGroupsTable.assertExpandRowButtonExists();
+        // await aiops.logRateAnalysisResultsGroupsTable.expandRow();
+        // await aiops.logRateAnalysisResultsGroupsTable.scrollAnalysisTableIntoView();
 
         await ml.testExecution.logTestStep('open the column filter');
         await aiops.logRateAnalysisPage.assertFilterPopoverButtonExists(
@@ -227,35 +224,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           false
         );
         await aiops.logRateAnalysisPage.clickFilterPopoverButton('aiopsColumnFilterButton', true);
-        await aiops.logRateAnalysisPage.assertFieldSelectorFieldNameList(
-          testData.expected.columnSelectorPopover
-        );
+        // await aiops.logRateAnalysisPage.assertFieldSelectorFieldNameList(
+        //   testData.expected.columnSelectorPopover
+        // );
 
         await ml.testExecution.logTestStep('filter columns');
         await aiops.logRateAnalysisPage.setFieldSelectorSearch(testData.columnSelectorSearch);
-        await aiops.logRateAnalysisPage.assertFieldSelectorFieldNameList([
-          testData.columnSelectorSearch,
-        ]);
+        // await aiops.logRateAnalysisPage.assertFieldSelectorFieldNameList([
+        //   testData.columnSelectorSearch,
+        // ]);
         await aiops.logRateAnalysisPage.clickFieldSelectorListItem(
           'aiopsFieldSelectorFieldNameListItem'
         );
         await aiops.logRateAnalysisPage.assertFieldFilterApplyButtonExists(false);
         await aiops.logRateAnalysisPage.clickFieldFilterApplyButton('aiopsColumnFilterButton');
 
-        const analysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
+        // const analysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
 
-        const actualAnalysisTable = orderBy(analysisTable, ['fieldName', 'fieldValue']);
-        const expectedAnalysisTable = orderBy(testData.expected.analysisTable, [
-          'fieldName',
-          'fieldValue',
-        ]);
+        // const actualAnalysisTable = orderBy(analysisTable, ['fieldName', 'fieldValue']);
+        // const expectedAnalysisTable = orderBy(testData.expected.analysisTable, [
+        //   'fieldName',
+        //   'fieldValue',
+        // ]);
 
-        expect(actualAnalysisTable).to.be.eql(
-          expectedAnalysisTable,
-          `Expected analysis table results to be ${JSON.stringify(
-            expectedAnalysisTable
-          )}, got ${JSON.stringify(actualAnalysisTable)}`
-        );
+        // expect(actualAnalysisTable).to.be.eql(
+        //   expectedAnalysisTable,
+        //   `Expected analysis table results to be ${JSON.stringify(
+        //     expectedAnalysisTable
+        //   )}, got ${JSON.stringify(actualAnalysisTable)}`
+        // );
 
         await ml.testExecution.logTestStep('open the field filter');
         await aiops.logRateAnalysisPage.assertFilterPopoverButtonExists(
@@ -277,50 +274,49 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           !testData.fieldSelectorApplyAvailable
         );
 
-        if (testData.fieldSelectorApplyAvailable) {
-          await ml.testExecution.logTestStep('regroup results');
-          await aiops.logRateAnalysisPage.clickFieldFilterApplyButton('aiopsFieldFilterButton');
+        // if (testData.fieldSelectorApplyAvailable) {
+        //   await ml.testExecution.logTestStep('regroup results');
+        //   await aiops.logRateAnalysisPage.clickFieldFilterApplyButton('aiopsFieldFilterButton');
 
-          const filteredAnalysisGroupsTable =
-            await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
+        //   const filteredAnalysisGroupsTable =
+        //     await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
 
-          const actualFilteredAnalysisGroupsTable = orderBy(filteredAnalysisGroupsTable, 'group');
-          const expectedFilteredAnalysisGroupsTable = orderBy(
-            testData.expected.filteredAnalysisGroupsTable,
-            'group'
-          );
+        //   const actualFilteredAnalysisGroupsTable = orderBy(filteredAnalysisGroupsTable, 'group');
+        //   const expectedFilteredAnalysisGroupsTable = orderBy(
+        //     testData.expected.filteredAnalysisGroupsTable,
+        //     'group'
+        //   );
 
-          expect(actualFilteredAnalysisGroupsTable).to.be.eql(
-            expectedFilteredAnalysisGroupsTable,
-            `Expected filtered analysis groups table to be ${JSON.stringify(
-              expectedFilteredAnalysisGroupsTable
-            )}, got ${JSON.stringify(actualFilteredAnalysisGroupsTable)}`
-          );
-        }
+        //   expect(actualFilteredAnalysisGroupsTable).to.be.eql(
+        //     expectedFilteredAnalysisGroupsTable,
+        //     `Expected filtered analysis groups table to be ${JSON.stringify(
+        //       expectedFilteredAnalysisGroupsTable
+        //     )}, got ${JSON.stringify(actualFilteredAnalysisGroupsTable)}`
+        //   );
+        // }
 
-        if (testData.action !== undefined) {
-          await ml.testExecution.logTestStep('check all table row actions are present');
-          await aiops.logRateAnalysisResultsGroupsTable.assertRowActions(
-            testData.action.tableRowId
-          );
-
-          await ml.testExecution.logTestStep('click log pattern analysis action');
-          await aiops.logRateAnalysisResultsGroupsTable.clickRowAction(
-            testData.action.tableRowId,
-            testData.action.type
-          );
-
-          await ml.testExecution.logTestStep('check log pattern analysis page loaded correctly');
-          await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
-          await aiops.logPatternAnalysisPage.assertTotalDocumentCount(
-            testData.action.expected.totalDocCount
-          );
-          await aiops.logPatternAnalysisPage.assertQueryInput(testData.action.expected.queryBar);
-        }
+        // if (testData.action !== undefined) {
+        //   await ml.testExecution.logTestStep('check all table row actions are present');
+        //   await aiops.logRateAnalysisResultsGroupsTable.assertRowActions(
+        //     testData.action.tableRowId
+        //   );
+        //   await ml.testExecution.logTestStep('click log pattern analysis action');
+        //   await aiops.logRateAnalysisResultsGroupsTable.clickRowAction(
+        //     testData.action.tableRowId,
+        //     testData.action.type
+        //   );
+        //   await ml.testExecution.logTestStep('check log pattern analysis page loaded correctly');
+        //   await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
+        //   await aiops.logPatternAnalysisPage.assertTotalDocumentCount(
+        //     testData.action.expected.totalDocCount
+        //   );
+        //   await aiops.logPatternAnalysisPage.assertQueryInput(testData.action.expected.queryBar);
+        // }
       }
     });
   }
-
+  // Temporarily comment out tests referencing smart grouping controls/table
+  // as it is disabled until https://github.com/elastic/kibana/issues/232849 is resolved
   describe('log rate analysis', function () {
     for (const testData of logRateAnalysisTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {

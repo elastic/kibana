@@ -9,14 +9,15 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
-import {
+import type {
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
   UserMessage,
   VisualizationType,
-} from '../../types';
-import {
+} from '@kbn/lens-common';
+import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
+import type {
   State,
   XYState,
   XYAnnotationLayerConfig,
@@ -26,11 +27,9 @@ import {
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
-  visualizationTypes,
-  visualizationSubtypes,
 } from './types';
+import { visualizationTypes, visualizationSubtypes } from './types';
 import { isHorizontalChart } from './state_helpers';
-import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';
 import { XY_BREAKDOWN_MISSING_AXIS, XY_Y_MISSING_AXIS } from '../../user_messages_ids';
 

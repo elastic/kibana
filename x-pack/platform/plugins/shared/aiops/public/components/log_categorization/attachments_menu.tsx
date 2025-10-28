@@ -81,7 +81,7 @@ export const AttachmentsMenu = ({
   const canEditDashboards = capabilities.dashboard_v2.createNew;
 
   const onSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
       const embeddableInput: Partial<PatternAnalysisEmbeddableState> = {
@@ -105,8 +105,8 @@ export const AttachmentsMenu = ({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },

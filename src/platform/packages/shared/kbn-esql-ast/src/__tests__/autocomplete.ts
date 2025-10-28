@@ -13,32 +13,49 @@
  * on the generated definitions provided by Elasticsearch.
  */
 import { uniq } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import {
-  ESQLUserDefinedColumn,
-  ESQLFieldWithMetadata,
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
   ICommandCallbacks,
   ISuggestionItem,
-  getLocationFromCommandOrOptionName,
   Location,
+  ESQLColumnData,
 } from '../commands_registry/types';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '../definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { parse } from '../parser';
-import type { ESQLCommand } from '../types';
-import {
+import type { ESQLAstAllCommands } from '../types';
+import type {
   FieldType,
-  FunctionDefinitionTypes,
   FunctionParameterType,
   FunctionReturnType,
   SupportedDataType,
 } from '../definitions/types';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../definitions/utils/ast';
+
+export const DATE_DIFF_TIME_UNITS = (() => {
+  const dateDiffDefinition = scalarFunctionDefinitions.find(
+    ({ name }) => name.toLowerCase() === 'date_diff'
+  );
+  const suggestedValues = dateDiffDefinition?.signatures?.[0]?.params?.[0]?.suggestedValues ?? [];
+
+  return suggestedValues.map((unit) => `"${unit}", `);
+})();
+
+export const mockFieldsWithTypes = (
+  mockCallbacks: ICommandCallbacks,
+  fieldNames: string[]
+): void => {
+  (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    fieldNames.map((fieldName) => ({ label: fieldName, text: fieldName }))
+  );
+};
 
 export const suggest = (
   query: string,
@@ -47,11 +64,10 @@ export const suggest = (
   mockCallbacks = getMockCallbacks(),
   autocomplete: (
     arg0: string,
-    arg1: ESQLCommand,
+    arg1: ESQLAstAllCommands,
     arg2: ICommandCallbacks,
     arg3: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
@@ -77,11 +93,10 @@ export const expectSuggestions = async (
   mockCallbacks = getMockCallbacks(),
   autocomplete: (
     arg0: string,
-    arg1: ESQLCommand,
+    arg1: ESQLAstAllCommands,
     arg2: ICommandCallbacks,
     arg3: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
@@ -91,6 +106,11 @@ export const expectSuggestions = async (
 
   const suggestions: string[] = [];
   result.forEach((suggestion) => {
+    if (containsSnippet(suggestion.text) && !suggestion.asSnippet) {
+      throw new Error(
+        `Suggestion with snippet placeholder must be marked as a snippet. -> ${suggestion.text}`
+      );
+    }
     suggestions.push(suggestion.text);
   });
   expect(uniq(suggestions).sort()).toEqual(uniq(expectedSuggestions).sort());
@@ -100,12 +120,10 @@ export function getFieldNamesByType(
   _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>,
   excludeUserDefined: boolean = false
 ) {
-  const fieldsMap = mockContext.fields;
-  const userDefinedColumnsMap = mockContext.userDefinedColumns;
-  const fields = Array.from(fieldsMap.values());
-  const userDefinedColumns = Array.from(userDefinedColumnsMap.values()).flat();
+  const columnMap = mockContext.columns;
+  const columns = Array.from(columnMap.values());
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  const finalArray = excludeUserDefined ? fields : [...fields, ...userDefinedColumns];
+  const finalArray = excludeUserDefined ? columns.filter((col) => !col.userDefined) : columns;
   return finalArray
     .filter(
       ({ type }) =>
@@ -138,6 +156,7 @@ export function getFunctionSignaturesByReturnType(
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
+    timeseriesAgg,
     grouping,
     scalar,
     operators,
@@ -146,6 +165,7 @@ export function getFunctionSignaturesByReturnType(
     skipAssign,
   }: {
     agg?: boolean;
+    timeseriesAgg?: boolean;
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
@@ -154,8 +174,9 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
-    license === 'platinum'
+  hasMinimumLicenseRequired = (license?: LicenseType | undefined): boolean =>
+    license === 'platinum',
+  activeProduct = { type: 'observability', tier: 'complete' }
 ) {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -164,6 +185,9 @@ export function getFunctionSignaturesByReturnType(
   const list = [];
   if (agg) {
     list.push(...aggFunctionDefinitions);
+  }
+  if (timeseriesAgg) {
+    list.push(...timeSeriesAggFunctionDefinitions);
   }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);
@@ -181,53 +205,60 @@ export function getFunctionSignaturesByReturnType(
   const locations = Array.isArray(location) ? location : [location];
 
   return deduped
-    .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
-      const hasRestrictedSignature = signatures.some((signature) => signature.license);
-      if (hasRestrictedSignature) {
-        const availableSignatures = signatures.filter((signature) => {
-          if (!signature.license) return true;
-          return hasMinimumLicenseRequired(
-            signature.license.toLocaleLowerCase() as ESQLLicenseType
-          );
-        });
+    .filter(
+      ({ signatures, ignoreAsSuggestion, locationsAvailable, license, observabilityTier }) => {
+        const hasRestrictedSignature = signatures.some((signature) => signature.license);
+        if (hasRestrictedSignature) {
+          const availableSignatures = signatures.filter((signature) => {
+            if (!signature.license) return true;
+            return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
+          });
 
-        if (availableSignatures.length === 0) {
+          if (availableSignatures.length === 0) {
+            return false;
+          }
+        }
+
+        if (
+          license &&
+          observabilityTier &&
+          !(
+            activeProduct?.type === 'observability' &&
+            activeProduct.tier === observabilityTier.toLowerCase()
+          )
+        ) {
           return false;
         }
-      }
 
-      if (ignoreAsSuggestion) {
-        return false;
-      }
-      if (
-        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
-          (loc) => locationsAvailable.includes(loc)
-        )
-      ) {
-        return false;
-      }
-      const filteredByReturnType = signatures.filter(
-        ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
-      );
-      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
-        return false;
-      }
-      if (paramsTypes?.length) {
-        return filteredByReturnType.some(
-          ({ params }) =>
-            !params.length ||
-            (paramsTypes.length <= params.length &&
-              paramsTypes.every(
-                (expectedType, i) =>
-                  expectedType === 'any' ||
-                  params[i].type === 'any' ||
-                  expectedType === params[i].type
-              ))
+        if (ignoreAsSuggestion) {
+          return false;
+        }
+        if (!locations.some((loc) => locationsAvailable.includes(loc))) {
+          return false;
+        }
+        const filteredByReturnType = signatures.filter(
+          ({ returnType }) =>
+            expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
         );
+        if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
+          return false;
+        }
+        if (paramsTypes?.length) {
+          return filteredByReturnType.some(
+            ({ params }) =>
+              !params.length ||
+              (paramsTypes.length <= params.length &&
+                paramsTypes.every(
+                  (expectedType, i) =>
+                    expectedType === 'any' ||
+                    params[i].type === 'any' ||
+                    expectedType === params[i].type
+                ))
+          );
+        }
+        return true;
       }
-      return true;
-    })
+    )
     .filter(({ name }) => {
       if (ignored?.length) {
         return !ignored?.includes(name);
@@ -257,3 +288,10 @@ export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]
   }
   return [];
 }
+
+export const containsSnippet = (text: string): boolean => {
+  // Matches most common monaco snippets
+  // $0, $1, etc. and ${1:placeholder}, ${2:another}
+  const snippetRegex = /\$(\d+|\{\d+:[^}]*\})/;
+  return snippetRegex.test(text);
+};

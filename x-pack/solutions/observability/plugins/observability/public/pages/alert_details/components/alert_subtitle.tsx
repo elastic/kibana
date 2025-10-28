@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiLink, EuiText, EuiToolTip, useEuiTheme } from '@elasti
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { ALERT_RULE_UUID, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -37,6 +37,7 @@ export function AlertSubtitle({ alert }: AlertSubtitleProps) {
       </EuiText>
       <EuiToolTip position="top" content={alert.fields[ALERT_RULE_NAME]}>
         <EuiText
+          tabIndex={0}
           css={css`
             font-weight: ${euiTheme.font.weight.semiBold};
           `}

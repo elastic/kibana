@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -21,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { CreateConnectorFilter } from './create_connector_filter';
-import {
+import type {
   ActionConnector,
   ActionType,
   ActionTypeModel,
@@ -32,8 +33,9 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
-import { ConnectorForm, ConnectorFormState, ResetForm } from '../connector_form';
-import { ConnectorFormSchema } from '../types';
+import type { ConnectorFormState, ResetForm } from '../connector_form';
+import { ConnectorForm } from '../connector_form';
+import type { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
@@ -84,6 +86,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     config: {},
     secrets: {},
     isMissingSecrets: false,
+    isConnectorTypeDeprecated: false,
   };
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
@@ -97,17 +100,22 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
-      ? (actionTypeModel?.subtype ?? []).map((subtypeAction) => ({
-          ...actionTypeRegistry.get(subtypeAction.id),
-          name: subtypeAction.name,
-        }))
+      ? (actionTypeModel?.subtype ?? [])
+          .filter((item) => allActionTypes && allActionTypes[item.id].enabledInConfig)
+          .map((subtypeAction) => ({
+            ...actionTypeRegistry.get(subtypeAction.id),
+            name: subtypeAction.name,
+          }))
       : [];
 
-  const groupActionButtons = groupActionTypeModel.map((gAction) => ({
-    id: gAction.id,
-    label: gAction.name,
-    'data-test-subj': `${gAction.id}Button`,
-  }));
+  const groupActionButtons =
+    groupActionTypeModel?.length > 1
+      ? groupActionTypeModel.map((gAction) => ({
+          id: gAction.id,
+          label: gAction.name,
+          'data-test-subj': `${gAction.id}Button`,
+        }))
+      : [];
 
   const resetConnectorForm = useRef<ResetForm | undefined>();
 

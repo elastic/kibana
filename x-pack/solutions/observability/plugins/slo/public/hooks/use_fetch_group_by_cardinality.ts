@@ -6,8 +6,9 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
-import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import type { QuerySchema } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { useQuery } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import { getElasticsearchQueryOrThrow } from '../../common/parse_kuery';
 import { useKibana } from './use_kibana';

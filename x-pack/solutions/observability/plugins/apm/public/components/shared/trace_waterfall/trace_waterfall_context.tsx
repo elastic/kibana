@@ -12,11 +12,12 @@ import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
-import type { TraceWaterfallItem } from './use_trace_waterfall';
+import { TraceDataState, type TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
 
-interface TraceWaterfallContextProps {
+export interface TraceWaterfallContextProps {
   duration: number;
+  traceState: TraceDataState;
   traceWaterfall: TraceWaterfallItem[];
   rootItem?: TraceItem;
   margin: { left: number; right: number };
@@ -36,6 +37,7 @@ interface TraceWaterfallContextProps {
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   duration: 0,
+  traceState: TraceDataState.Empty,
   traceWaterfall: [],
   rootItem: undefined,
   margin: { left: 0, right: 0 },
@@ -49,7 +51,26 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
 });
 
 export type OnNodeClick = (id: string) => void;
-export type OnErrorClick = (params: { traceId: string; docId: string }) => void;
+export type OnErrorClick = (params: {
+  traceId: string;
+  docId: string;
+  errorCount: number;
+  errorDocId?: string;
+}) => void;
+
+interface Props {
+  children: React.ReactNode;
+  traceItems: TraceItem[];
+  showAccordion: boolean;
+  highlightedTraceId?: string;
+  onClick?: OnNodeClick;
+  onErrorClick?: OnErrorClick;
+  scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  isEmbeddable: boolean;
+  showLegend: boolean;
+  serviceName?: string;
+}
 
 export function TraceWaterfallContextProvider({
   children,
@@ -63,22 +84,11 @@ export function TraceWaterfallContextProvider({
   isEmbeddable,
   showLegend,
   serviceName,
-}: {
-  children: React.ReactNode;
-  traceItems: TraceItem[];
-  showAccordion: boolean;
-  highlightedTraceId?: string;
-  onClick?: OnNodeClick;
-  onErrorClick?: OnErrorClick;
-  scrollElement?: Element;
-  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
-  isEmbeddable: boolean;
-  showLegend: boolean;
-  serviceName?: string;
-}) {
-  const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy } = useTraceWaterfall({
-    traceItems,
-  });
+}: Props) {
+  const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState } =
+    useTraceWaterfall({
+      traceItems,
+    });
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
   const right = 40;
@@ -88,6 +98,7 @@ export function TraceWaterfallContextProvider({
   return (
     <TraceWaterfallContext.Provider
       value={{
+        traceState,
         duration,
         rootItem,
         traceWaterfall,

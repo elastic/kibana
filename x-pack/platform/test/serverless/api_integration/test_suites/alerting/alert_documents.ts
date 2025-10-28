@@ -42,9 +42,9 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from './object_remover';
-import { RoleCredentials } from '../../../shared/services';
+import type { RoleCredentials } from '../../../shared/services';
 
 const OPEN_OR_ACTIVE = new Set(['open', 'active']);
 

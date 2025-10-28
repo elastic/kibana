@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -23,7 +24,7 @@ import {
   EuiSplitPanel,
 } from '@elastic/eui';
 
-import { Pipeline } from '../../../../../common/types';
+import type { Pipeline } from '../../../../../common/types';
 
 import { deprecatedPipelineBadge } from '../table';
 import { PipelineDetailsJsonBlock } from '../details_json_block';
@@ -78,6 +79,7 @@ export const DetailsPanel: FunctionComponent<Props> = ({ pipeline }) => {
                 size="s"
                 color="subdued"
                 data-test-subj="isDeprecatedBadge"
+                tabIndex={0}
               />
             </EuiToolTip>
           </EuiFlexItem>

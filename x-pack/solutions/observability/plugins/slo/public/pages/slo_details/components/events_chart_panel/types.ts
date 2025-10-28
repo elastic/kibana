@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { GetPreviewDataResponse } from '@kbn/slo-schema';
+import type { GetPreviewDataResponse } from '@kbn/slo-schema';
 
 export type GetPreviewDataResponseResults = GetPreviewDataResponse['results'];

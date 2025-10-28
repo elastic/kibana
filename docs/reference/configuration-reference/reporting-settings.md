@@ -104,7 +104,7 @@ To generate PDF and PNG files, Reporting uses an internal "screenshotting" plugi
 The following settings control the capturing process.
 
 `xpack.screenshotting.capture.timeouts.openUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for the "Loading…​" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
+:   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for the "Loading…" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
 `xpack.screenshotting.capture.timeouts.waitForElements` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
@@ -195,6 +195,15 @@ xpack.screenshotting.networkPolicy:
 xpack.screenshotting.networkPolicy:
   rules: [ { allow: true, host: "elastic.co", protocol: "https:" } ]
 ```
+
+Example of a baseline configuration for disallowing all requests to external paths:
+```yaml
+xpack.screenshotting.networkPolicy:
+  rules: [ { allow: true, host: "localhost:5601", protocol: "http:" } ]
+```
+::::{note}
+Typically, Chromium will connect to {{kib}} on a local interface, but this may be different based on the environment and specific [headless browser connection settings](#reporting-kibana-server-settings).
+::::
 
 A final `allow` rule with no host or protocol allows all requests that are not explicitly denied:
 

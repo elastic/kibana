@@ -7,7 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,

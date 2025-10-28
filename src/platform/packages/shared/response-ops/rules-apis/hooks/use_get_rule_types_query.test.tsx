@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useGetRuleTypesQuery } from './use_get_rule_types_query';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import { getRuleTypes } from '../apis/get_rule_types';

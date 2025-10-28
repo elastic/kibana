@@ -13,7 +13,7 @@ import type { ConfigType } from './config';
 import { duration } from 'moment';
 
 export const createMockConfig = (): ConfigType => {
-  const enableExperimental: Array<keyof ExperimentalFeatures> = ['responseActionUploadEnabled'];
+  const enableExperimental: Array<keyof ExperimentalFeatures> = [];
 
   return {
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
@@ -55,6 +55,7 @@ export const createMockConfig = (): ConfigType => {
       monitoring: {
         privileges: {
           users: {
+            maxPrivilegedUsersAllowed: 10000,
             csvUpload: {
               errorRetries: 3,
               maxBulkRequestBodySizeBytes: 10_485_760,

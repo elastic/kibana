@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const SAVED_SEARCH_NON_TRANSFORMATIONAL_INITIAL_COLUMNS = 'nonTransformationalInitialColumns';
 const SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS = 'nonTransformationalCustomColumns';
@@ -36,7 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql columns', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/239575
+  describe.skip('discover esql columns', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -263,6 +264,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Summary']);
+    });
+
+    it('should correctly set fields when initial query returns no results', async () => {
+      await timePicker.setCommonlyUsedTime('Last_1 hour');
+      await monacoEditor.setCodeEditorValue('from logstash-* | keep ip, @timestamp | limit 500');
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+      expect(await dataGrid.getHeaderFields()).to.eql([]);
+      await browser.refresh();
+      await discover.waitUntilTabIsLoaded();
+      await timePicker.setDefaultAbsoluteRange();
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+      expect(await dataGrid.getHeaderFields()).to.eql(['ip', '@timestamp']);
     });
   });
 }

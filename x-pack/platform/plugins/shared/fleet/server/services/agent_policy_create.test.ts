@@ -71,6 +71,7 @@ describe('createAgentPolicyWithPackages', () => {
         id: options?.id || 'new_id',
       } as AgentPolicy)
     );
+    mockedAgentPolicyService.deployPolicy.mockReset();
     mockedAgentPolicyService.deployPolicy.mockResolvedValue();
 
     mockedPackagePolicyService.buildPackagePolicyFromPackage.mockImplementation(
@@ -84,6 +85,9 @@ describe('createAgentPolicyWithPackages', () => {
         ...newPolicy,
       } as PackagePolicy)
     );
+
+    jest.mocked(mockedBulkInstallPackages).mockReset();
+    jest.mocked(mockedPackagePolicyService.create).mockReset();
   });
 
   afterEach(() => {
@@ -99,6 +103,7 @@ describe('createAgentPolicyWithPackages', () => {
       await createAgentPolicyWithPackages({
         esClient: esClientMock,
         soClient: soClientMock,
+        agentPolicyService: mockedAgentPolicyService,
         newPolicy: { name: 'Agent policy 1', namespace: 'default' },
         withSysMonitoring: true,
         spaceId: 'default',
@@ -121,6 +126,7 @@ describe('createAgentPolicyWithPackages', () => {
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,
       soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
       newPolicy: { name: 'Fleet Server policy', namespace: 'default' },
       hasFleetServer: true,
       withSysMonitoring: true,
@@ -154,6 +160,7 @@ describe('createAgentPolicyWithPackages', () => {
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,
       soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
       newPolicy: { name: 'Fleet Server policy 2', namespace: 'default' },
       hasFleetServer: true,
       withSysMonitoring: false,
@@ -179,6 +186,7 @@ describe('createAgentPolicyWithPackages', () => {
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,
       soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
       newPolicy: { name: 'Agent policy 1', namespace: 'default' },
       withSysMonitoring: true,
       spaceId: 'default',
@@ -199,6 +207,53 @@ describe('createAgentPolicyWithPackages', () => {
     );
   });
 
+  it('should no create agentless policy with system package or monitoring', async () => {
+    const response = await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
+      newPolicy: {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
+      withSysMonitoring: true,
+      monitoringEnabled: ['logs', 'metrics'],
+      spaceId: 'default',
+    });
+
+    expect(response.id).toEqual('new_id');
+    expect(mockedBulkInstallPackages).not.toHaveBeenCalled();
+    expect(mockedPackagePolicyService.create).not.toHaveBeenCalled();
+
+    expect(agentPolicyService.create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
+      expect.objectContaining({ skipDeploy: true })
+    );
+
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+      'Disabling system monitoring for agentless policy [Agent policy 1]'
+    );
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+      'Disabling monitoring for agentless policy [Agent policy 1]'
+    );
+
+    expect(mockedAgentPolicyService.deployPolicy).toHaveBeenCalledWith(
+      expect.anything(),
+      'new_id',
+      undefined,
+      { throwOnAgentlessError: true }
+    );
+  });
+
   it('should call deploy policy once when create policy with system package', async () => {
     mockedAgentPolicyService.deployPolicy.mockClear();
     mockedAgentPolicyService.create.mockImplementation(
@@ -215,6 +270,7 @@ describe('createAgentPolicyWithPackages', () => {
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,
       soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
       newPolicy: { name: 'Agent policy 1', namespace: 'default' },
       withSysMonitoring: true,
       spaceId: 'default',
@@ -234,6 +290,7 @@ describe('createAgentPolicyWithPackages', () => {
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,
       soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
       newPolicy: { name: 'Agent policy 1', namespace: 'default' },
       withSysMonitoring: true,
       spaceId: 'default',
@@ -259,6 +316,7 @@ describe('createAgentPolicyWithPackages', () => {
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,
       soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
       newPolicy: { id: 'policy-1', name: 'Agent policy 1', namespace: 'default' },
       withSysMonitoring: false,
       spaceId: 'default',
@@ -272,6 +330,7 @@ describe('createAgentPolicyWithPackages', () => {
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,
       soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
       newPolicy: { id: 'policy-1', name: 'Agent policy 1', namespace: 'default' },
       withSysMonitoring: false,
       spaceId: 'default',
@@ -291,6 +350,7 @@ describe('createAgentPolicyWithPackages', () => {
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,
       soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
       newPolicy: {
         id: 'new_fleet_server_policy',
         name: 'Fleet Server policy',

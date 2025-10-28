@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  PackagePolicy,
   packagePolicyRouteService,
   SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '@kbn/cloud-security-posture-common';
 
 interface PackagePolicyListData {

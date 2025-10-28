@@ -36,6 +36,7 @@ import type {
   ElasticsearchClient,
   IUiSettingsClient,
 } from '@kbn/core/server';
+import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -89,7 +90,6 @@ import {
   SECURITY_QUERY_SPAN_S,
 } from './apm_field_names';
 import { buildTimeRangeFilter } from './build_events_query';
-
 export const MAX_RULE_GAP_RATIO = 4;
 
 export const hasReadIndexPrivileges = async (args: {
@@ -299,15 +299,26 @@ export const getNumCatchupIntervals = ({
 export const getExceptions = async ({
   client,
   lists,
+  shouldFilterOutEndpointExceptions,
 }: {
   client: ExceptionListClient;
   lists: ListArray;
+  shouldFilterOutEndpointExceptions: boolean;
 }): Promise<ExceptionListItemSchema[]> => {
   return withSecuritySpan('getExceptions', async () => {
-    if (lists.length > 0) {
+    const filteredLists = shouldFilterOutEndpointExceptions
+      ? lists.filter(
+          ({ list_id: listId }) =>
+            !(ENDPOINT_ARTIFACT_LIST_IDS as readonly string[]).includes(listId)
+        )
+      : lists;
+
+    if (filteredLists.length > 0) {
       try {
-        const listIds = lists.map(({ list_id: listId }) => listId);
-        const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
+        const listIds = filteredLists.map(({ list_id: listId }) => listId);
+        const namespaceTypes = filteredLists.map(
+          ({ namespace_type: namespaceType }) => namespaceType
+        );
 
         // Stream the results from the Point In Time (PIT) finder into this array
         let items: ExceptionListItemSchema[] = [];
@@ -427,7 +438,13 @@ export const getRuleRangeTuples = async ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0), warningStatusMessage };
+    return {
+      tuples,
+      remainingGap: moment.duration(0),
+      warningStatusMessage,
+      originalFrom,
+      originalTo,
+    };
   }
 
   const gap = getGapBetweenRuns({
@@ -469,6 +486,8 @@ export const getRuleRangeTuples = async ({
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
     gap: gapRange,
+    originalFrom,
+    originalTo,
   };
 };
 

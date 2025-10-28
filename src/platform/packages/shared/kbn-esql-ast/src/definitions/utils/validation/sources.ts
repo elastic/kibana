@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLMessage, ESQLSource } from '../../../types';
-import { ICommandContext } from '../../../commands_registry/types';
+import type { ESQLMessage, ESQLSource } from '../../../types';
+import type { ICommandContext } from '../../../commands_registry/types';
 import { sourceExists } from '../sources';
-import { getMessageFromId } from '../errors';
+import { errors } from '../errors';
 
 function hasWildcard(name: string) {
   return /\*/.test(name);
@@ -51,26 +51,12 @@ export function validateSources(sources: ESQLSource[], context?: ICommandContext
   }
 
   unknownIndexNames.forEach((source) => {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
+    messages.push(errors.unknownIndex(source));
   });
 
   if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
-    // only if there are no known index names, no known index patterns, and no unknown
-    // index names do we worry about creating errors for unknown index patterns
     unknownIndexPatterns.forEach((source) => {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownIndex',
-          values: { name: source.name },
-          locations: source.location,
-        })
-      );
+      messages.push(errors.unknownIndex(source));
     });
   }
 

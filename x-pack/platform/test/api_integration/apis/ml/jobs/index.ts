@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('jobs', function () {
@@ -30,5 +30,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./jobs_with_time_range'));
     loadTestFile(require.resolve('./bulk_create_jobs'));
     loadTestFile(require.resolve('./all_jobs_and_group_ids'));
+    loadTestFile(require.resolve('./force_stop_and_close_job'));
+    loadTestFile(require.resolve('./job_for_cloning'));
   });
 }

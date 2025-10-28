@@ -15,21 +15,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type {
-  RuleMigrationResourceData,
-  RuleMigrationTaskStats,
-} from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+  AddUploadedLookups,
+  UploadedLookups,
+} from '../../../../../common/components/migration_steps/types';
+import { SubSteps } from '../../../../../common/components';
+import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
+import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnResourcesCreated } from '../../types';
-import { getStatus } from '../common/get_status';
 import * as i18n from './translations';
 import { DataInputStep } from '../constants';
-import { SubSteps } from '../common/sub_step';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
-
-export type UploadedLookups = Record<string, string>;
-export type AddUploadedLookups = (lookups: RuleMigrationResourceData[]) => void;
 
 interface LookupsDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -45,7 +43,7 @@ interface LookupsDataInputProps
 export const LookupsDataInput = React.memo<LookupsDataInputProps>(
   ({ dataInputStep, migrationStats, missingLookups, onAllLookupsCreated }) => {
     const dataInputStatus = useMemo(
-      () => getStatus(DataInputStep.Lookups, dataInputStep),
+      () => getEuiStepStatus(DataInputStep.Lookups, dataInputStep),
       [dataInputStep]
     );
 
@@ -56,13 +54,14 @@ export const LookupsDataInput = React.memo<LookupsDataInputProps>(
             <EuiFlexGroup direction="row" justifyContent="center" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiStepNumber
+                  data-test-subj="lookupsUploadStepNumber"
                   titleSize="xs"
                   number={DataInputStep.Lookups}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
+                <EuiTitle size="xs" data-test-subj="lookupsUploadTitle">
                   <b>{i18n.LOOKUPS_DATA_INPUT_TITLE}</b>
                 </EuiTitle>
               </EuiFlexItem>
@@ -71,7 +70,7 @@ export const LookupsDataInput = React.memo<LookupsDataInputProps>(
           {dataInputStatus === 'current' && migrationStats && missingLookups && (
             <>
               <EuiFlexItem>
-                <EuiText size="s" color="subdued">
+                <EuiText size="s" color="subdued" data-test-subj="lookupsUploadDescription">
                   {i18n.LOOKUPS_DATA_INPUT_DESCRIPTION}
                 </EuiText>
               </EuiFlexItem>
@@ -120,7 +119,7 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
     }, [telemetry, migrationStats.id]);
 
     const copyStep = useMissingLookupsListStep({
-      status: getStatus(1, subStep),
+      status: getEuiStepStatus(1, subStep),
       migrationStats,
       missingLookups,
       uploadedLookups,
@@ -130,7 +129,7 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
 
     // Upload macros step
     const uploadStep = useLookupsFileUploadStep({
-      status: getStatus(2, subStep),
+      status: getEuiStepStatus(2, subStep),
       migrationStats,
       missingLookups,
       addUploadedLookups,

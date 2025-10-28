@@ -19,7 +19,7 @@ import {
   filter,
   concatAll,
 } from 'rxjs';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { PluginName } from '@kbn/core-base-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { createLogThrottledBuffer } from './log_throttled_buffer';

@@ -19,7 +19,7 @@ jest.mock('@kbn/react-kibana-mount', () => {
   };
 });
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -28,7 +28,7 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/m
 import { FieldEditorLoader } from './components/field_editor_loader';
 import { IndexPatternFieldEditorPlugin } from './plugin';
 import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
-import { DataView } from './shared_imports';
+import type { DataView } from './shared_imports';
 
 const noop = () => {};
 
@@ -109,7 +109,7 @@ describe('DataViewFieldEditorPlugin', () => {
       ...pluginStart,
       data: pluginStart.data,
       dataViews: {
-        ...pluginStart.data.indexPatterns,
+        ...pluginStart.dataViews,
         updateSavedObject: jest.fn(),
       },
     };

@@ -14,9 +14,8 @@ describe('serializeLayout', () => {
     const layout = {
       panels: {
         '1': {
-          gridData: {
+          grid: {
             h: 6,
-            i: '1',
             w: 6,
             x: 0,
             y: 0,
@@ -24,9 +23,8 @@ describe('serializeLayout', () => {
           type: 'testPanelType',
         },
         '3': {
-          gridData: {
+          grid: {
             h: 6,
-            i: '3',
             sectionId: 'section1',
             w: 6,
             x: 0,
@@ -38,10 +36,10 @@ describe('serializeLayout', () => {
       sections: {
         section1: {
           collapsed: true,
-          gridData: {
-            i: 'section1',
+          grid: {
             y: 6,
           },
+          uid: 'section1',
           title: 'Section One',
         },
       },
@@ -71,42 +69,40 @@ describe('serializeLayout', () => {
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
-          "gridData": Object {
+          "config": Object {
+            "title": "panel One",
+          },
+          "grid": Object {
             "h": 6,
-            "i": "1",
             "w": 6,
             "x": 0,
             "y": 0,
           },
-          "panelConfig": Object {
-            "title": "panel One",
-          },
-          "panelIndex": "1",
           "type": "testPanelType",
+          "uid": "1",
         },
         Object {
           "collapsed": true,
-          "gridData": Object {
-            "i": "section1",
+          "grid": Object {
             "y": 6,
           },
           "panels": Array [
             Object {
-              "gridData": Object {
+              "config": Object {
+                "title": "panel Three",
+              },
+              "grid": Object {
                 "h": 6,
-                "i": "3",
                 "w": 6,
                 "x": 0,
                 "y": 0,
               },
-              "panelConfig": Object {
-                "title": "panel Three",
-              },
-              "panelIndex": "3",
               "type": "testPanelType",
+              "uid": "3",
             },
           ],
           "title": "Section One",
+          "uid": "section1",
         },
       ]
     `);

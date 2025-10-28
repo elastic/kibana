@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { FilterField } from '../../types';
-
-// avoid import from shareable_runtime
-const SHAREABLE_RUNTIME_NAME = 'kbn_canvas';
+import type { FilterField } from '../../types';
 
 export const CANVAS_TYPE = 'canvas-workpad';
 export const CUSTOM_ELEMENT_TYPE = 'canvas-element';
@@ -43,10 +40,6 @@ export const CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR = `canvasLayout__stageContent`
 export const DATATABLE_COLUMN_TYPES = ['string', 'number', 'null', 'boolean', 'date'];
 export const LAUNCHED_FULLSCREEN = 'workpad-full-screen-launch';
 export const LAUNCHED_FULLSCREEN_AUTOPLAY = 'workpad-full-screen-launch-with-autoplay';
-export const API_ROUTE_SHAREABLE_BASE = '/public/canvas';
-export const API_ROUTE_SHAREABLE_ZIP = '/public/canvas/zip';
-export const API_ROUTE_SHAREABLE_RUNTIME = '/public/canvas/runtime';
-export const API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD = `/public/canvas/${SHAREABLE_RUNTIME_NAME}.js`;
 export const CANVAS_EMBEDDABLE_CLASSNAME = `canvasEmbeddable`;
 export const CONTEXT_MENU_TOP_BORDER_CLASSNAME = 'canvasContextMenu--topBorder';
 export const API_ROUTE_FUNCTIONS = `${INTERNAL_API_ROUTE}/fns`;

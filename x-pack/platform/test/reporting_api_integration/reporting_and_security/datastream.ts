@@ -6,7 +6,7 @@
  */
 
 import { expect } from 'expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         generation: 1,
         health: 'green',
         ilmPolicyName: 'kibana-reporting',
-        maxTimeStamp: 0,
+        maxTimeStamp: expect.any(Number),
         privileges: {
           delete_index: true,
           manage_data_stream_lifecycle: true,
@@ -66,6 +66,9 @@ export default function ({ getService }: FtrProviderContext) {
         storageSizeBytes: expect.any(Number),
         failureStoreEnabled: false,
         indexMode: 'standard',
+        failureStoreRetention: {
+          defaultRetentionPeriod: '30d',
+        },
       });
     });
   });

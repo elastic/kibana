@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiPopoverTitle } from '@elastic/eui';
-import { TimeWindow } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { TimeWindow } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { PopoverExpression } from './popover_expression';
 import { getConditionType } from '../../../../../../common/rules/status_rule';
-import { StatusRuleParamsProps } from '../status_rule_ui';
+import type { StatusRuleParamsProps } from '../status_rule_ui';
 
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];

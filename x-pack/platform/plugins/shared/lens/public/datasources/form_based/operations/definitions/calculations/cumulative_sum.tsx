@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CUMULATIVE_SUM_ID, CUMULATIVE_SUM_NAME } from '@kbn/lens-formula-docs';
-import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { FormBasedLayer } from '../../../types';
+import type { CumulativeSumIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
 import {
   checkForDateHistogram,
   getErrorsForDateReference,
@@ -17,7 +16,7 @@ import {
   buildLabelFunction,
   checkForDataLayerType,
 } from './utils';
-import { OperationDefinition } from '..';
+import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 
@@ -33,11 +32,6 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
-
-export type CumulativeSumIndexPatternColumn = FormattedIndexPatternColumn &
-  ReferenceBasedIndexPatternColumn & {
-    operationType: typeof CUMULATIVE_SUM_ID;
-  };
 
 export const cumulativeSumOperation: OperationDefinition<
   CumulativeSumIndexPatternColumn,

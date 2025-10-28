@@ -27,7 +27,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
+import type { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
 import {
   RuleSettingsFlappingForm,
   RuleSettingsFlappingTitleTooltip,
@@ -126,12 +126,15 @@ export const RuleDefinition = () => {
     if (consumer !== ALERTING_FEATURE_ID) {
       return [];
     }
+
     const selectedAvailableRuleType = availableRuleTypes.find((ruleType) => {
       return ruleType.id === selectedRuleType.id;
     });
+
     if (!selectedAvailableRuleType?.authorizedConsumers) {
       return [];
     }
+
     return getAuthorizedConsumers({
       ruleType: selectedAvailableRuleType,
       validConsumers,

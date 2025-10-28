@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { UiCounterMetricType } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export const APP_NAME = 'cloud-security';
+export const ASSET_INVENTORY_APP_NAME = 'asset-inventory';
 
 export const MISCONFIGURATION_INSIGHT = 'misconfiguration-insight-v2' as const;
 export const VULNERABILITIES_INSIGHT = 'vulnerabilities-insight-v2' as const;
@@ -55,6 +56,19 @@ export const GENERIC_ENTITY_FLYOUT_OPENED = 'generic-entity-flyout-opened' as co
 export const KSPM_NAMESPACE_SELECTOR = 'kspm-dashboard-namespace-selector-dropdown' as const;
 export const CSPM_NAMESPACE_SELECTOR = 'cspm-dashboard-namespace-selector-dropdown' as const;
 
+export const ASSET_INVENTORY_FILTER_CRITICALITY_APPLIED = 'filter_criticality_applied' as const;
+export const ASSET_INVENTORY_FILTER_TYPE_APPLIED = 'filter_type_applied' as const;
+export const ASSET_INVENTORY_FILTER_ID_APPLIED = 'filter_id_applied' as const;
+export const ASSET_INVENTORY_SEARCH_QUERY_PERFORMED = 'search_query_performed' as const;
+export const ASSET_INVENTORY_COLUMN_ADDED = 'column_added' as const;
+export const ASSET_INVENTORY_COLUMN_REMOVED = 'column_removed' as const;
+export const ASSET_INVENTORY_GROUP_BY_OPENED = 'group_by_opened' as const;
+export const ASSET_INVENTORY_GROUP_BY_SELECTED_FIELD = 'group_by_selected_field_' as const;
+export type ASSET_INVENTORY_COLUMN_ADDED_PREFIX = `group_by_selected_field_${string}`;
+export const ASSET_INVENTORY_CRITICALITY_ASSIGNED_MANUAL = 'criticality_assigned_manual' as const;
+export const ASSET_INVENTORY_CRITICALITY_ASSIGNED_BULK = 'criticality_assigned_bulk' as const;
+export const ASSET_INVENTORY_CRITICALITY_ASSIGNED_UPLOAD = 'criticality_assigned_upload' as const;
+
 export type CloudSecurityUiCounters =
   | typeof ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT
   | typeof ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW
@@ -80,7 +94,18 @@ export type CloudSecurityUiCounters =
   | typeof ASSET_INVENTORY_EXPAND_FLYOUT_ERROR
   | typeof GENERIC_ENTITY_FLYOUT_OPENED
   | typeof KSPM_NAMESPACE_SELECTOR
-  | typeof CSPM_NAMESPACE_SELECTOR;
+  | typeof CSPM_NAMESPACE_SELECTOR
+  | typeof ASSET_INVENTORY_FILTER_CRITICALITY_APPLIED
+  | typeof ASSET_INVENTORY_FILTER_TYPE_APPLIED
+  | typeof ASSET_INVENTORY_FILTER_ID_APPLIED
+  | typeof ASSET_INVENTORY_SEARCH_QUERY_PERFORMED
+  | typeof ASSET_INVENTORY_COLUMN_ADDED
+  | typeof ASSET_INVENTORY_COLUMN_REMOVED
+  | typeof ASSET_INVENTORY_GROUP_BY_OPENED
+  | ASSET_INVENTORY_COLUMN_ADDED_PREFIX
+  | typeof ASSET_INVENTORY_CRITICALITY_ASSIGNED_MANUAL
+  | typeof ASSET_INVENTORY_CRITICALITY_ASSIGNED_BULK
+  | typeof ASSET_INVENTORY_CRITICALITY_ASSIGNED_UPLOAD;
 
 export class UiMetricService {
   private usageCollection: UsageCollectionSetup | undefined;
@@ -89,16 +114,24 @@ export class UiMetricService {
     this.usageCollection = usageCollection;
   }
 
-  private track(metricType: UiCounterMetricType, eventName: CloudSecurityUiCounters) {
+  private track(
+    metricType: UiCounterMetricType,
+    eventName: CloudSecurityUiCounters,
+    appName: string = APP_NAME
+  ) {
     if (!this.usageCollection) {
       // Usage collection might be disabled in Kibana config.
       return;
     }
-    return this.usageCollection.reportUiCounter(APP_NAME, metricType, eventName);
+    return this.usageCollection.reportUiCounter(appName, metricType, eventName);
   }
 
-  public trackUiMetric(metricType: UiCounterMetricType, eventName: CloudSecurityUiCounters) {
-    return this.track(metricType, eventName);
+  public trackUiMetric(
+    metricType: UiCounterMetricType,
+    eventName: CloudSecurityUiCounters,
+    appName?: string
+  ) {
+    return this.track(metricType, eventName, appName);
   }
 }
 

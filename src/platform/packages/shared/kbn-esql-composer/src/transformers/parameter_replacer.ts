@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Builder,
+import type {
   ESQLAstBaseItem,
   ESQLColumn,
   ESQLFunction,
   ESQLLiteral,
   ESQLParamLiteral,
-  isColumn,
-  isFunctionExpression,
-  isParamLiteral,
 } from '@kbn/esql-ast';
-import { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-ast/src/types';
-import { FieldValue, Params } from '../types';
+import { Builder, isColumn, isFunctionExpression, isParamLiteral } from '@kbn/esql-ast';
+import type { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-ast/src/types';
+import type { FieldValue, Params } from '../types';
 
 type ReplaceableNodes = ESQLParamLiteral | ESQLLiteral | ESQLColumn | ESQLFunction;
 export class ParameterReplacer {
@@ -92,7 +89,7 @@ export class ParameterReplacer {
   private replaceColumnExpression(node: ESQLColumn, parent?: ESQLProperNode): ESQLColumn {
     return Builder.expression.column({
       ...node,
-      args: node.args.map((arg) =>
+      args: node.args.flatMap((arg) =>
         isParamLiteral(arg) ? (this.buildReplacementAstNode(arg, parent) as ESQLIdentifier) : arg
       ),
     });
@@ -111,24 +108,35 @@ export class ParameterReplacer {
   private buildReplacementAstNode(
     node: ESQLParamLiteral | ESQLLiteral,
     parent?: ESQLProperNode
-  ): ESQLAstBaseItem {
+  ): ESQLAstBaseItem | ESQLAstBaseItem[] {
     if (!isParamLiteral(node)) {
       return node;
     }
 
     const value = this.resolveParamValue(node);
 
-    if (!value) {
+    if (value === null || value === undefined) {
       return node;
     }
 
+    if (node.paramKind === '??') {
+      return String(value)
+        .split('.')
+        .map((name) => Builder.identifier({ name }));
+    }
+
     if (
-      node.paramKind === '??' ||
-      (parent &&
-        node.paramKind === '?' &&
-        isFunctionExpression(parent) &&
-        parent.subtype === 'variadic-call')
+      parent &&
+      node.paramKind === '?' &&
+      isFunctionExpression(parent) &&
+      parent.subtype === 'variadic-call'
     ) {
+      if (parent.name === 'bucket' && node.type === 'literal') {
+        return Builder.expression.literal.string(String(value), {
+          unquoted: String(value).match(/^now\(\)/i) !== null,
+        });
+      }
+
       return Builder.identifier(String(value));
     }
 

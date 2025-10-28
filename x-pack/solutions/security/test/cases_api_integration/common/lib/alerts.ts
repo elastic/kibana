@@ -18,7 +18,7 @@ import {
   waitForAlertsToBePresent,
   getAlertsByIds,
   getQueryAlertIds,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
+} from '../../../security_solution_api_integration/config/services/detections_response';
 
 export const createSecuritySolutionAlerts = async (
   supertest: SuperTest.Agent,

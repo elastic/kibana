@@ -12,6 +12,7 @@ import type { Literals } from './types';
 
 export const EDITOR_MARKER = 'marker_esql_editor';
 
+// List for suggestions (human-friendly)
 export const timeUnitsToSuggest: Literals[] = [
   {
     name: 'year',
@@ -129,18 +130,4 @@ export const timeUnitsToSuggest: Literals[] = [
   },
 ];
 
-export const timeUnits: string[] = [
-  ...timeUnitsToSuggest.map((literal) => literal.name),
-  'ms',
-  's',
-  'm',
-  'h',
-  'd',
-  'w',
-  'mo',
-  'q',
-  'y',
-  'yr',
-];
-
-export const FULL_TEXT_SEARCH_FUNCTIONS = ['match', 'match_operator', 'qstr', 'kql'];
+export const FULL_TEXT_SEARCH_FUNCTIONS = ['match', 'match_operator', 'multi_match', 'qstr', 'kql'];

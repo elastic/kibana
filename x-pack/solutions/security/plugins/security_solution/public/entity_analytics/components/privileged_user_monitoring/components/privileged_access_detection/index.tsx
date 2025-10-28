@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiEmptyPrompt, EuiFlexGroup, EuiPanel, EuiProgress } from '@elastic/eui';
 import React from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { PrivilegedAccessDetectionMLPopover } from './pad_ml_popover';
@@ -136,7 +136,7 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
                   <PrivilegedAccessInfoPopover />
                 </>
               }
-              titleSize="s"
+              titleSize="m"
               outerDirection="column"
               hideSubtitle
             >

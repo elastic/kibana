@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { getIndexMappings } from '@kbn/onechat-genai-utils';
-import { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const getIndexMappingsSchema = z.object({
@@ -17,7 +17,8 @@ const getIndexMappingsSchema = z.object({
 
 export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMappingsSchema> => {
   return {
-    id: builtinToolIds.getIndexMapping,
+    id: platformCoreTools.getIndexMapping,
+    type: ToolType.builtin,
     description: 'Retrieve mappings for the specified index or indices.',
     schema: getIndexMappingsSchema,
     handler: async ({ indices }, { esClient }) => {
@@ -35,6 +36,6 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
         ],
       };
     },
-    tags: [builtinTags.retrieval],
+    tags: [],
   };
 };

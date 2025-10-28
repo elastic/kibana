@@ -1,25 +1,26 @@
 # Onechat plugin
 
-Home of the workchat framework.
+Home of the **Agent Builder** framework.
 
 Note: as many other platform features, onechat isolates its public types and static utils, exposed from packages,
 from its APIs, exposed from the plugin.
 
-The onechat plugin has 3 main packages:
+The onechat plugin has 4 main packages:
 
 - `@kbn/onechat-common`: types and utilities which are shared between browser and server
 - `@kbn/onechat-server`: server-specific types and utilities
 - `@kbn/onechat-browser`: browser-specific types and utilities.
+- `@kbn/onechat-genai-utils`: server-side utilities for our built-in tools and agents.
 
 ## Enable all feature flags
 
-All features in the Onechat plugin are developed behind UI settings (feature flags). By default, in-progress or experimental features are disabled. To enable all features for development or testing, add the following to your `kibana.dev.yml`:
+All features in the Onechat plugin are developed behind UI settings (feature flags). 
+By default, in-progress or experimental features are disabled. 
+To enable all features for development or testing, add the following to your `kibana.dev.yml`:
 
 ```yml
 uiSettings.overrides:
-  onechat:mcp:enabled: true
-  onechat:api:enabled: true
-  onechat:ui:enabled: true
+  agentBuilder:enabled: true
 ```
 
 This will ensure all Onechat features are available in your Kibana instance.
@@ -30,11 +31,41 @@ If running in Serverless or Cloud dev environments, it may be more practical to 
 POST kbn://internal/kibana/settings
 {
    "changes": {
-      "onechat:mcp:enabled": true,
-      "onechat:api:enabled": true,
-      "onechat:ui:enabled": true
+      "agentBuilder:enabled": true
    }
 }
+```
+
+## Enabling tracing
+
+Onechat agents are compatible with the Kibana inference tracing.
+
+You can enable tracing on your local instance by adding the following config parameters:
+
+```yaml
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+
+telemetry.tracing.exporters.phoenix.base_url: {phoenix server url}
+telemetry.tracing.exporters.phoenix.public_url: {phoenix server url}
+telemetry.tracing.exporters.phoenix.project_name: {your project name}
+```
+
+To run phoenix locally and configuring Kibana inference tracing accordingly:
+
+```bash
+docker run -p 6006:6006 -p 4317:4317 -i -t arizephoenix/phoenix:latest
+```
+
+and then edit the Kibana config:
+
+```yaml
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+
+telemetry.tracing.exporters.phoenix.base_url: 'http://localhost:6006/'
+telemetry.tracing.exporters.phoenix.public_url: 'http://localhost:6006/'
+telemetry.tracing.exporters.phoenix.project_name: '1chat'
 ```
 
 ## Overview
@@ -45,87 +76,28 @@ The main primitives are:
 
 - [tools](#tools)
 
-Additionally, the plugin implements [MCP server](#mcp-server) that exposes onechat tools.
+Additionally, the plugin implements [MCP server](#mcp-server) that exposes onechat tools and [A2A server](#a2a-server) that exposes onechat agents for agent-to-agent communication.
 
 ## Tools
 
-A tool can be thought of as a LLM-friendly function, with the metadata required for the LLM to understand its purpose
-and how to call it attached to it.
+A tool can be thought of as an agent-friendly function, with the metadata required for the agent to understand its purpose
+and how to call it.
 
-Tool can come from multiple sources: built-in from Kibana, from MCP servers, and so on. At the moment,
-only built-in tools are implemented
+Tools can come from multiple sources:
+- built-in from Kibana
+- created by users
+- from MCP servers (not implemented yet)
 
-### Registering a built-in tool
+### Type of tools
 
-#### Basic example
+- builtin: "Code" tools, which expose a handler that executes an arbitrary function.
+- esql: ES|QL tools, which are defined by a templated ES|QL query and its corresponding parameters.
+- index_search: An agentic search tool that can be scoped to an index pattern.
+- workflow: A tool that executes a workflow.
 
-```ts
-class MyPlugin {
-  setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
-    onechat.tools.register({
-      id: 'my_tool',
-      name: 'My Tool',
-      description: 'My very first tool',
-      meta: {
-        tags: ['foo', 'bar'],
-      },
-      schema: z.object({
-        someNumber: z.number().describe('Some random number'),
-      }),
-      handler: ({ someNumber }, context) => {
-        return 42 + someNumber;
-      },
-    });
-  }
-}
-```
+### Registering a tool
 
-#### using the handler context to use scoped services
-
-```ts
-onechat.tools.register({
-  id: 'my_es_tool',
-  name: 'My Tool',
-  description: 'Some example',
-  schema: z.object({
-    indexPattern: z.string().describe('Index pattern to filter on'),
-  }),
-  handler: async ({ indexPattern }, { modelProvider, esClient }) => {
-    const indices = await esClient.asCurrentUser.cat.indices({ index: indexPattern });
-
-    const model = await modelProvider.getDefaultModel();
-    const response = await model.inferenceClient.chatComplete(somethingWith(indices));
-
-    return response;
-  },
-});
-```
-
-#### emitting events
-
-```ts
-onechat.tools.register({
-  id: 'my_es_tool',
-  name: 'My Tool',
-  description: 'Some example',
-  schema: z.object({}),
-  handler: async ({}, { events }) => {
-    events.emit({
-      type: 'my_custom_event',
-      data: { stage: 'before' },
-    });
-
-    const response = doSomething();
-
-    events.emit({
-      type: 'my_custom_event',
-      data: { stage: 'after' },
-    });
-
-    return response;
-  },
-});
-```
+Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
 
 ### Executing a tool
 
@@ -144,85 +116,6 @@ It can also be done directly from a tool definition:
 ```ts
 const tool = await onechat.tools.registry.get({ toolId: 'my_tool', request });
 const { result } = await tool.execute({ toolParams: { someNumber: 9000 } });
-```
-
-### Event handling
-
-Tool execution emits `toolCall` and `toolResponse` events:
-
-```ts
-import { isToolCallEvent, isToolResponseEvent } from '@kbn/onechat-server';
-
-const { result } = await onechat.tools.execute({
-  toolId: 'my_tool',
-  toolParams: { someNumber: 9000 },
-  request,
-  onEvent: (event) => {
-    if (isToolCallEvent(event)) {
-      const {
-        data: { toolId, toolParams },
-      } = event;
-    }
-    if (isToolResponseEvent(event)) {
-      const {
-        data: { toolResult },
-      } = event;
-    }
-  },
-});
-```
-
-### Tool identifiers
-
-Because tools are coming from multiple sources, and because we need to be able to identify
-which source a given tool is coming from (e.g. for execution), we're using the concept of tool identifier
-to represent more than a plain id.
-
-Tool identifier come into 3 shapes:
-
-- `PlainIdToolIdentifier`: plain tool identifiers
-- `StructuredToolIdentifier`: structured (object version)
-- `SerializedToolIdentifier`: serialized string version
-
-Using a `plain` id is always possible but discouraged, as in case of id conflict,
-the system will then just pick an arbitrary tool in any source available.
-
-E.g. avoid doing:
-
-```ts
-await onechat.tools.execute({
-  toolId: 'my_tool',
-  toolParams: { someNumber: 9000 },
-  request,
-});
-```
-
-And instead do:
-
-```ts
-import { ToolSourceType, builtinSourceId } from '@kbn/onechat-common';
-
-await onechat.tools.execute({
-  toolId: {
-    toolId: 'my_tool',
-    sourceType: ToolSourceType.builtIn,
-    sourceId: builtinSourceId,
-  },
-  toolParams: { someNumber: 9000 },
-  request,
-});
-```
-
-Or, with the corresponding utility:
-
-```ts
-import { createBuiltinToolId } from '@kbn/onechat-common';
-
-await onechat.tools.execute({
-  toolId: createBuiltinToolId('my_tool'),
-  toolParams: { someNumber: 9000 },
-  request,
-});
 ```
 
 ### Error handling
@@ -248,19 +141,20 @@ try {
 }
 ```
 
+## Agents
+
+Agents can be either built-in or user-defined.
+
+### Registering a built-in agent
+
+Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
+
 ## MCP Server
 
-The MCP server provides a standardized interface for external MCP clients to access onechat tools.
-
+The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/agent_builder/mcp` endpoint.
 
 ### Running with Claude Desktop
 
-To enable the MCP server, add the following to your Kibana config:
-
-```yaml
-uiSettings.overrides:
-  onechat:mcp:enabled: true
-```
 Configure Claude Desktop by adding this to its configuration:
 ```json
 {
@@ -269,24 +163,30 @@ Configure Claude Desktop by adding this to its configuration:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:5601/api/mcp",
+        "http://localhost:5601/api/agent_builder/mcp",
         "--header",
-        "Authorization: ApiKey ${API_KEY}"
+        "Authorization:${AUTH_HEADER}"
       ],
       "env": {
-        "API_KEY": "..."
+        "AUTH_HEADER": "ApiKey {...}"
       }
     }
   }
 }
 ```
 
+## A2A Server
+
+The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with onechat agents, enabling agent-to-agent collaboration following the A2A protocol specification.
+
+Agentcards for onechat agents are exposed on `GET /api/agent_builder/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/agent_builder/a2a/{agentId}`.
+
 ## ES|QL Based Tools
 
 The ES|QL Tool API enables users to build custom ES|QL-powered tools that the LLM can execute against any index. Here's how to create your first ES|QL tool using a POST request in Kibana DevTools:
 
 ```json
-POST kbn://api/chat/tools
+POST kbn://api/agent_builder/tools
 {
   "id": "case_by_id",
   "description": "Find a custom case by id.",
@@ -304,16 +204,19 @@ POST kbn://api/chat/tools
 }
 ```
 
-To enable the API, add the following to your Kibana config
+## Use custom LLM connector
 
-```yaml
-uiSettings.overrides:
-  onechat:api:enabled: true
-```
-## Chat UI
-To enable the Chat UI located at `/app/chat/`, add the following to your Kibana config:
+Create new LLM connector in UI (in search bar type “connectors” ), fill it in with creds. In dev console:
 
-```yaml
-uiSettings.overrides:
-  onechat:ui:enabled: true
 ```
+GET kbn://api/actions/connectors # find id of your connector
+
+POST kbn://internal/kibana/settings
+{
+   "changes": {
+      "genAiSettings:defaultAIConnector": "{connecotor id}"
+   }
+}
+```
+
+Or, set the default LLM in the UI under Management > GenAI Settings.

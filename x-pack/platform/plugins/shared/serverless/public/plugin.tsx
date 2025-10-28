@@ -6,13 +6,13 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { generateManageOrgMembersNavCard, manageOrgMembersNavCardName } from './navigation';
-import {
+import type {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
   ServerlessPluginStart,
@@ -50,9 +50,15 @@ export class ServerlessPlugin
     chrome.setChromeStyle('project');
 
     if (cloud.serverless.projectName) {
-      project.setProjectName(cloud.serverless.projectName);
+      project.setKibanaName(cloud.serverless.projectName);
     }
-    project.setCloudUrls(cloud);
+
+    project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
+    cloud.getPrivilegedUrls().then((privilegedUrls) => {
+      if (Object.keys(privilegedUrls).length === 0) return;
+
+      project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
+    });
 
     chrome.navControls.registerRight({
       order: 1,

@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
-import {
+import type {
   IngestDocument,
   IngestProcessorContainer,
   IngestSimulateRequest,
@@ -19,32 +19,38 @@ import {
   SimulateIngestResponse,
   SimulateIngestSimulateIngestDocumentResult,
   FieldCapsResponse,
+  IngestSimulateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
-import {
+import type {
   FlattenRecord,
-  ProcessorDefinitionWithId,
-  getProcessorType,
-  ProcessorDefinition,
-  getInheritedFieldsFromAncestors,
   NamedFieldDefinitionConfig,
   FieldDefinitionConfig,
   InheritedFieldDefinitionConfig,
-  isNamespacedEcsField,
   FieldDefinition,
+} from '@kbn/streams-schema';
+import {
+  getInheritedFieldsFromAncestors,
+  isNamespacedEcsField,
   Streams,
 } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
-import { StreamsClient } from '../../../../lib/streams/client';
-import { formatToIngestProcessors } from '../../../../lib/streams/helpers/processing';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import { transpileIngestPipeline } from '@kbn/streamlang';
+import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
+import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
+import type { StreamsClient } from '../../../../lib/streams/client';
 
 export interface ProcessingSimulationParams {
   path: {
     name: string;
   };
   body: {
-    processing: ProcessorDefinitionWithId[];
+    processing: StreamlangDSL;
     documents: FlattenRecord[];
     detected_fields?: NamedFieldDefinitionConfig[];
   };
@@ -54,6 +60,7 @@ export interface SimulateProcessingDeps {
   params: ProcessingSimulationParams;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export interface BaseSimulationError {
@@ -138,13 +145,18 @@ export type DetectedField =
   | WithNameAndEsType
   | WithNameAndEsType<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
 
-export type WithNameAndEsType<TObj = {}> = TObj & { name: string; esType?: string };
+export type WithNameAndEsType<TObj = {}> = TObj & {
+  name: string;
+  esType?: string;
+  suggestedType?: string;
+};
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 export const simulateProcessing = async ({
   params,
   scopedClusterClient,
   streamsClient,
+  fieldsMetadataClient,
 }: SimulateProcessingDeps) => {
   /* 0. Retrieve required data to prepare the simulation */
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
@@ -154,10 +166,11 @@ export const simulateProcessing = async ({
     ]);
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
-  const simulationData = prepareSimulationData(params);
+  const simulationData = prepareSimulationData(params, stream);
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
   const ingestSimulationBody = prepareIngestSimulationBody(
     simulationData,
+    stream,
     streamIndexState,
     params
   );
@@ -190,12 +203,13 @@ export const simulateProcessing = async ({
     streamFields
   );
 
-  /* 5. Extract valid detected fields asserting existing mapped fields from stream and ancestors */
+  /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
     processorsMetrics,
     params,
     streamFields,
-    streamIndexFieldCaps
+    streamIndexFieldCaps,
+    fieldsMetadataClient
   );
 
   /* 6. Derive general insights and process final response body */
@@ -213,77 +227,56 @@ const prepareSimulationDocs = (
   }));
 };
 
-const prepareSimulationProcessors = (
-  processing: ProcessorDefinitionWithId[]
-): IngestProcessorContainer[] => {
+const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessorContainer[] => {
   //
   /**
-   * We want to simulate processors logic and collect data indipendently from the user config for simulation purposes.
+   * We want to simulate processors logic and collect data independently from the user config for simulation purposes.
    * 1. Force each processor to not ignore failures to collect all errors
    * 2. Append the error message to the `_errors` field on failure
    */
-  const processors = processing.map((processor) => {
-    const { id, ...processorConfig } = processor;
+  const transpiledIngestPipelineProcessors = transpileIngestPipeline(processing, {
+    ignoreMalformed: true,
+    traceCustomIdentifiers: true,
+  }).processors;
 
-    const type = getProcessorType(processorConfig);
+  return transpiledIngestPipelineProcessors.map((processor) => {
+    const type = Object.keys(processor)[0];
+    const processorConfig = (processor as any)[type]; // Safe to use any here due to type structure
+
     return {
       [type]: {
-        ...(processorConfig as any)[type], // Safe to use any here due to type structure
+        ...processorConfig,
         ignore_failure: false,
-        tag: id,
         on_failure: [
           {
             append: {
               field: '_errors',
               value: {
                 message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: '{{{ _ingest.on_failure_processor_tag }}}',
+                processor_id: processorConfig.tag,
                 type: 'generic_processor_failure',
               },
             },
           },
         ],
       },
-    } as ProcessorDefinition;
+    };
   });
-
-  const dotExpanderProcessors: Array<Pick<IngestProcessorContainer, 'dot_expander'>> = [
-    {
-      dot_expander: {
-        field: '*',
-        ignore_failure: true,
-        override: true,
-      },
-    },
-    {
-      dot_expander: {
-        path: 'resource.attributes',
-        field: '*',
-        ignore_failure: true,
-      },
-    },
-    {
-      dot_expander: {
-        path: 'attributes',
-        field: '*',
-        ignore_failure: true,
-      },
-    },
-  ];
-
-  const formattedProcessors = formatToIngestProcessors(processors, {
-    ignoreMalformedManualIngestPipeline: true,
-  });
-
-  return [...dotExpanderProcessors, ...formattedProcessors];
 };
 
-const prepareSimulationData = (params: ProcessingSimulationParams) => {
-  const { path, body } = params;
+const prepareSimulationData = (
+  params: ProcessingSimulationParams,
+  stream: Streams.all.Definition
+) => {
+  const { body } = params;
   const { processing, documents } = body;
 
+  const targetStreamName = Streams.WiredStream.Definition.is(stream)
+    ? getRoot(stream.name)
+    : stream.name;
+
   return {
-    docs: prepareSimulationDocs(documents, path.name),
+    docs: prepareSimulationDocs(documents, targetStreamName),
     processors: prepareSimulationProcessors(processing),
   };
 };
@@ -295,13 +288,15 @@ const preparePipelineSimulationBody = (
 
   return {
     docs,
-    pipeline: { processors },
+    // @ts-expect-error field_access_pattern not supported by typing yet
+    pipeline: { processors, field_access_pattern: 'flexible' },
     verbose: true,
   };
 };
 
 const prepareIngestSimulationBody = (
   simulationData: ReturnType<typeof prepareSimulationData>,
+  stream: Streams.all.Definition,
   streamIndex: IndicesIndexState,
   params: ProcessingSimulationParams
 ): SimulateIngestRequest => {
@@ -311,28 +306,41 @@ const prepareIngestSimulationBody = (
   const { docs, processors } = simulationData;
 
   const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
-  const mappings = streamIndex.mappings;
+
+  const pipelineSubstitutions: SimulateIngestRequest['pipeline_substitutions'] = {};
+
+  if (defaultPipelineName) {
+    pipelineSubstitutions[defaultPipelineName] = {
+      processors,
+      // @ts-expect-error field_access_pattern not supported by typing yet
+      field_access_pattern: 'flexible',
+    };
+  }
+  if (Streams.WiredStream.Definition.is(stream)) {
+    // need to reroute from the root
+    pipelineSubstitutions[getProcessingPipelineName(getRoot(stream.name))] = {
+      processors: [
+        {
+          reroute: {
+            destination: stream.name,
+          },
+        },
+      ],
+    };
+  }
 
   const simulationBody: SimulateIngestRequest = {
     docs,
-    ...(defaultPipelineName && {
-      pipeline_substitutions: {
-        [defaultPipelineName]: {
-          processors,
-        },
-      },
-    }),
+    pipeline_substitutions: pipelineSubstitutions,
     // Ideally we should not need to retrieve and merge the mappings from the stream index.
     // But the ingest simulation API does not validate correctly the mappings unless they are specified in the simulation body.
     // So we need to merge the mappings from the stream index with the detected fields.
     // This is a workaround until the ingest simulation API works as expected.
-    mapping_addition: {
-      ...mappings,
-      properties: {
-        ...(mappings && mappings.properties),
-        ...(detected_fields && computeMappingProperties(detected_fields)),
+    ...(detected_fields && {
+      mapping_addition: {
+        properties: computeMappingProperties(detected_fields),
       },
-    },
+    }),
   };
 
   return simulationBody;
@@ -348,8 +356,10 @@ const executePipelineSimulation = async (
   simulationBody: IngestSimulateRequest
 ): Promise<PipelineSimulationResult> => {
   try {
-    const simulation = await scopedClusterClient.asCurrentUser.ingest.simulate(simulationBody);
-
+    const originalSimulation = await scopedClusterClient.asCurrentUser.ingest.simulate(
+      simulationBody
+    );
+    const simulation = sanitiseSimulationResult(originalSimulation);
     return {
       status: 'success',
       simulation: simulation as SuccessfulPipelineSimulateResponse,
@@ -377,6 +387,81 @@ const executePipelineSimulation = async (
     };
   }
 };
+
+// When dealing with a manual_ingest_pipeline action it is possible to have nested pipelines in the configuration,
+// as in, using the actual pipeline processor type. The problem is these results are a little bit different, e.g:
+// {
+//   "processor_type": "pipeline",
+//   "status": "success",
+//   "tag": "id5ded880-a555-11f0-94f6-45fc383ca38e",
+//   "if": {
+//     "condition": "ctx['data_stream.type'] == 'logs'",
+//     "result": true
+//   }
+// },
+// {
+//   "processor_type": "set",
+//   "status": "success",
+//   "doc": {
+//     "_index": "logs-synth-default",
+//     "_version": "-3",
+//     "_id": "99",
+//     "_source": {
+//       "host.name": test,
+//     },
+//   "_ingest": {
+//     "pipeline": "network_subpipeline",
+//     "timestamp": "2025-10-09T23:40:40.710774Z"
+//   }
+// }
+// We use sanitiseSimulationResult and propagateProcessorResultsPipelineTags to
+// propagate the pipeline processor tag (taken from the manual_ingest_pipeline action) to all nested
+// pipeline processor results.
+const sanitiseSimulationResult = (simulationResult: IngestSimulateResponse) => {
+  return {
+    docs: simulationResult.docs.map((doc) => {
+      return {
+        ...doc,
+        processor_results: propagateProcessorResultsPipelineTags(doc.processor_results)?.filter(
+          (result) => {
+            return result.processor_type !== 'pipeline';
+          }
+        ),
+      };
+    }),
+  };
+};
+
+function propagateProcessorResultsPipelineTags(
+  processorResults: IngestSimulateDocumentResult['processor_results']
+): IngestSimulateDocumentResult['processor_results'] {
+  if (!processorResults) return undefined;
+
+  let lastPipelineTag: string | undefined;
+  let applyTag = false;
+
+  return processorResults.map((result) => {
+    // If this is a pipeline processor, store its tag and start applying
+    if (result.processor_type === 'pipeline' && result.tag) {
+      lastPipelineTag = result.tag;
+      applyTag = true;
+      return result;
+    }
+
+    // If 1. we should apply the tag 2. this result is not from the root simulated pipeline 3. has no tag set
+    if (applyTag && !result.tag && result.doc?._ingest?.pipeline !== '_simulate_pipeline') {
+      // Apply the last pipeline tag
+      return { ...result, tag: lastPipelineTag };
+    }
+
+    // If this result has its own tag, stop applying the pipeline tag
+    if (result.tag) {
+      applyTag = false;
+    }
+
+    return result;
+  });
+}
 
 const executeIngestSimulation = async (
   scopedClusterClient: IScopedClusterClient,
@@ -426,14 +511,19 @@ const computePipelineSimulationResult = (
   pipelineSimulationResult: SuccessfulPipelineSimulateResponse,
   ingestSimulationResult: SimulateIngestResponse,
   sampleDocs: Array<{ _source: FlattenRecord }>,
-  processing: ProcessorDefinitionWithId[],
+  processing: StreamlangDSL,
   isWiredStream: boolean,
   streamFields: FieldDefinition
 ): {
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
 } => {
-  const processorsMap = initProcessorMetricsMap(processing);
+  const transpiledProcessors = transpileIngestPipeline(processing, {
+    ignoreMalformed: true,
+    traceCustomIdentifiers: true,
+  }).processors;
+
+  const processorsMap = initProcessorMetricsMap(transpiledProcessors);
 
   const forbiddenFields = Object.entries(streamFields)
     .filter(([, { type }]) => type === 'system')
@@ -449,7 +539,12 @@ const computePipelineSimulationResult = (
       ingestDocErrors
     );
 
-    const diff = computeSimulationDocDiff(pipelineDocResult, isWiredStream, forbiddenFields);
+    const diff = computeSimulationDocDiff(
+      sampleDocs[id]._source,
+      pipelineDocResult,
+      isWiredStream,
+      forbiddenFields
+    );
 
     pipelineDocResult.processor_results.forEach((processor) => {
       const procId = processor.tag;
@@ -491,10 +586,26 @@ const computePipelineSimulationResult = (
 };
 
 const initProcessorMetricsMap = (
-  processing: ProcessorDefinitionWithId[]
+  processors: IngestProcessorContainer[]
 ): Record<string, ProcessorMetrics> => {
-  const processorMetricsEntries = processing.map((processor) => [
-    processor.id,
+  // Gather unique IDs because the manual ingest pipeline proccessor (for example) will share the same
+  // ID across it's nested processors.
+  const ids = new Set<string>();
+
+  for (const processor of processors) {
+    const type = Object.keys(processor)[0] as keyof IngestProcessorContainer;
+    const config = processor[type] as Record<string, unknown>;
+    const tag = config.tag;
+
+    if (typeof tag === 'string') {
+      ids.add(tag);
+    }
+  }
+
+  const uniqueIds = Array.from(ids);
+
+  const processorMetricsEntries = uniqueIds.map((id) => [
+    id,
     {
       detected_fields: [],
       errors: [],
@@ -539,8 +650,7 @@ const getDocumentStatus = (
   if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
     return 'failed';
   }
-  // Remove the always present base processor for dot expanders
-  const processorResults = doc.processor_results.slice(3);
+  const processorResults = doc.processor_results;
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
@@ -564,10 +674,8 @@ const getLastDoc = (
 ) => {
   const status = getDocumentStatus(docResult, ingestDocErrors);
   const lastDocSource =
-    docResult.processor_results
-      .slice(3) // Remove the always present base processors for dot expander
-      .filter((proc) => !isSkippedProcessor(proc))
-      .at(-1)?.doc?._source ?? sample;
+    docResult.processor_results.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ??
+    sample;
 
   if (status === 'parsed') {
     return {
@@ -586,6 +694,7 @@ const getLastDoc = (
  * this function computes the detected fields and the errors for each processor.
  */
 const computeSimulationDocDiff = (
+  base: FlattenRecord,
   docResult: SuccessfulPipelineSimulateDocumentResult,
   isWiredStream: boolean,
   forbiddenFields: string[]
@@ -594,11 +703,13 @@ const computeSimulationDocDiff = (
   const successfulProcessors = docResult.processor_results.filter(isSuccessfulProcessor);
 
   const comparisonDocs = [
-    { processor_id: 'base', value: docResult.processor_results[0]!.doc!._source },
-    ...successfulProcessors.map((proc) => ({
-      processor_id: proc.tag,
-      value: omit(proc.doc._source, ['_errors']),
-    })),
+    { processor_id: 'base', value: base },
+    ...successfulProcessors.map((proc) => {
+      return {
+        processor_id: proc.tag,
+        value: omit(proc.doc._source, ['_errors']),
+      };
+    }),
   ];
 
   const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> = {
@@ -634,7 +745,7 @@ const computeSimulationDocDiff = (
         diffResult.errors.push({
           processor_id: nextDoc.processor_id,
           type: 'non_namespaced_fields_failure',
-          message: `The fields generated by the processor are not namespaced ECS fields: [${nonNamespacedFields.join()}]`,
+          message: `The fields generated by the processor do not match the streams recommended schema - put custom fields into attributes, body.structured or resource.attributes: [${nonNamespacedFields.join()}]`,
         });
       }
     }
@@ -687,6 +798,7 @@ const prepareSimulationResponse = async (
     detected_fields: detectedFields,
     documents: docReports,
     processors_metrics: processorsMetrics,
+    definition_error: undefined,
     documents_metrics: {
       failed_rate: parseFloat(failureRate.toFixed(3)),
       partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(3)),
@@ -697,6 +809,7 @@ const prepareSimulationResponse = async (
 };
 
 const prepareSimulationFailureResponse = (error: SimulationError) => {
+  const failedBecauseNoSampleDocs = error.message.includes('must specify at least one document');
   return {
     detected_fields: [],
     documents: [],
@@ -712,6 +825,9 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
           },
         }),
     },
+    // failure to simulate is considered a definition error, which will be displayed prominently in the UI
+    // The simulate API returns a generic error when no documents are provided, which is not useful in this context
+    definition_error: !failedBecauseNoSampleDocs ? error : undefined,
     documents_metrics: {
       failed_rate: 1,
       partially_parsed_rate: 0,
@@ -764,6 +880,10 @@ const getStreamFields = async (
     return { ...stream.ingest.wired.fields, ...getInheritedFieldsFromAncestors(ancestors) };
   }
 
+  if (Streams.ClassicStream.Definition.is(stream)) {
+    return { ...stream.ingest.classic.field_overrides };
+  }
+
   return {};
 };
 
@@ -774,7 +894,8 @@ const computeDetectedFields = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
-  streamFieldCaps: FieldCapsResponse['fields']
+  streamFieldCaps: FieldCapsResponse['fields'],
+  fieldsMetadataClient: IFieldsMetadataClient
 ): Promise<DetectedField[]> => {
   const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
 
@@ -787,6 +908,18 @@ const computeDetectedFields = async (
 
   const confirmedValidDetectedFields = computeMappingProperties(params.body.detected_fields ?? []);
 
+  let fieldMetadataMap: Record<string, FieldMetadataPlain>;
+  try {
+    fieldMetadataMap = (
+      await fieldsMetadataClient.find({
+        fieldNames: uniqueFields,
+      })
+    ).toPlain();
+  } catch (error) {
+    // Gracefully handle metadata service failures
+    fieldMetadataMap = {};
+  }
+
   return uniqueFields.map((name) => {
     const existingField = streamFields[name];
     if (existingField) {
@@ -794,10 +927,31 @@ const computeDetectedFields = async (
     }
 
     const existingFieldCaps = Object.keys(streamFieldCaps[name] || {});
-
     const esType = existingFieldCaps.length > 0 ? existingFieldCaps[0] : undefined;
 
-    return { name, type: confirmedValidDetectedFields[name]?.type, esType };
+    let suggestedType: string | undefined;
+    let source: string | undefined;
+    let description: string | undefined;
+
+    const fieldMetadata = fieldMetadataMap[name];
+    if (
+      fieldMetadata &&
+      fieldMetadata.type &&
+      FIELD_DEFINITION_TYPES.includes(fieldMetadata.type as (typeof FIELD_DEFINITION_TYPES)[number])
+    ) {
+      suggestedType = fieldMetadata.type;
+      source = fieldMetadata.source;
+      description = fieldMetadata.description;
+    }
+
+    return {
+      name,
+      type: confirmedValidDetectedFields[name]?.type,
+      esType,
+      suggestedType,
+      source,
+      description,
+    };
   });
 };
 

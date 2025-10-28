@@ -23,7 +23,7 @@ import {
 import { DATA_TEST_SUBJ_PREFIX_TAB } from './tab';
 import { DATA_TEST_SUBJ_SETTINGS_CATEGORY } from '@kbn/management-settings-components-field-category/category';
 import { wrap, createSettingsApplicationServicesMock } from './mocks';
-import { SettingsApplicationServices } from './services';
+import type { SettingsApplicationServices } from './services';
 
 const spaceCategories = ['general', 'dashboard', 'notifications'];
 const globalCategories = ['custom branding'];

@@ -10,8 +10,8 @@ import {
   postElasticsearchCcrShardRequestPayloadRT,
   postElasticsearchCcrShardResponsePayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
-import { TimeRange } from '../../../../../common/http_api/shared';
-import { ElasticsearchResponse } from '../../../../../common/types/es';
+import type { TimeRange } from '../../../../../common/http_api/shared';
+import type { ElasticsearchResponse } from '../../../../../common/types/es';
 import {
   getIndexPatterns,
   getElasticsearchDataset,
@@ -20,7 +20,7 @@ import { createValidationFunction } from '../../../../lib/create_route_validatio
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { Globals } from '../../../../static_globals';
-import { LegacyRequest, MonitoringCore } from '../../../../types';
+import type { LegacyRequest, MonitoringCore } from '../../../../types';
 
 function getFormattedLeaderIndex(leaderIndex: string) {
   let leader = leaderIndex;

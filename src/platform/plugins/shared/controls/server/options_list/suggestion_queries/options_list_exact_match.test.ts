@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { OptionsListRequestBody } from '../../../common/options_list/types';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { OptionsListRequestBody } from '../../../common/options_list/types';
 import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 
 describe('options list exact match search query', () => {

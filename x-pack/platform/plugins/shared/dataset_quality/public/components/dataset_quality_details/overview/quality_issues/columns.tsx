@@ -5,29 +5,33 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiButtonIcon, EuiText, formatNumber } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiText, formatNumber } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { QualityIssue } from '../../../../../common/api_types';
+import type { QualityIssue } from '../../../../../common/api_types';
 import { NUMBER_FORMAT } from '../../../../../common/constants';
 import {
-  countColumnName,
+  degradedField,
   documentIndexFailed,
+  documentsColumnName,
+  fieldColumnName,
   issueColumnName,
   lastOccurrenceColumnName,
+  overviewPanelDatasetQualityIndicatorFailedDocs,
 } from '../../../../../common/translations';
-import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
+import type { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
 import { SparkPlot } from '../../../common/spark_plot';
 
 const expandDatasetAriaLabel = i18n.translate(
-  'xpack.datasetQuality.details.qualityIssuesTable.expandLabel',
+  'xpack.datasetQuality.details.qualityIssuesTable.expand',
   {
     defaultMessage: 'Expand',
   }
 );
+
 const collapseDatasetAriaLabel = i18n.translate(
   'xpack.datasetQuality.details.qualityIssuesTable.collapseLabel',
   {
@@ -54,7 +58,6 @@ export const getQualityIssuesColumns = ({
     field: 'name',
     render: (_, { name, type }) => {
       const isExpanded = name === expandedQualityIssue?.name && type === expandedQualityIssue?.type;
-
       const onExpandClick = () => {
         openQualityIssueFlyout(name, type);
       };
@@ -79,32 +82,29 @@ export const getQualityIssuesColumns = ({
     `,
   },
   {
-    name: issueColumnName,
+    name: fieldColumnName,
     field: 'name',
     render: (_, { name, type }) => {
-      return type === 'degraded' ? (
+      return (
         <EuiText size="s">
-          <FormattedMessage
-            id="xpack.datasetQuality.details.qualityIssues.degradedField"
-            defaultMessage="{name} field ignored"
-            values={{
-              name: (
-                <>
-                  <strong>{name}</strong>{' '}
-                </>
-              ),
-            }}
-          />
+          {type === 'degraded' ? name : overviewPanelDatasetQualityIndicatorFailedDocs}
         </EuiText>
-      ) : (
-        <>{documentIndexFailed}</>
       );
     },
   },
   {
-    name: countColumnName,
-    sortable: true,
+    name: issueColumnName,
+    field: 'name',
+    render: (_, { type }) => {
+      return (
+        <EuiText size="s">{type === 'degraded' ? degradedField : documentIndexFailed}</EuiText>
+      );
+    },
+  },
+  {
+    name: documentsColumnName,
     field: 'count',
+    align: 'left',
     render: (_, { count, timeSeries }) => {
       const countValue = formatNumber(count, NUMBER_FORMAT);
       return <SparkPlot series={timeSeries} valueLabel={countValue} isLoading={isLoading} />;

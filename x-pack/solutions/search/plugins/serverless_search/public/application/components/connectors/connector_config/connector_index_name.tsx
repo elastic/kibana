@@ -17,9 +17,10 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
 import React, { useState } from 'react';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidIndexName } from '../../../../utils/validate_index_name';
 import { SAVE_LABEL } from '../../../../../common/i18n_string';

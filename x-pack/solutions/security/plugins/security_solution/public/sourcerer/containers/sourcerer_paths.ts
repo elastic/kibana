@@ -17,6 +17,7 @@ import {
   OVERVIEW_PATH,
   RULES_PATH,
   DATA_QUALITY_PATH,
+  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
 } from '../../../common/constants';
 import { SourcererScopeName } from '../store/model';
 
@@ -28,6 +29,7 @@ export const sourcererPaths = [
   USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
+  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
 ];
 
 const detectionsPaths = [
@@ -37,7 +39,12 @@ const detectionsPaths = [
   ATTACK_DISCOVERY_PATH,
 ];
 
-const explorePaths = [HOSTS_PATH, USERS_PATH, NETWORK_PATH, OVERVIEW_PATH];
+const explorePaths = [
+  HOSTS_PATH,
+  USERS_PATH,
+  NETWORK_PATH,
+  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+];
 
 export const getScopeFromPath = (
   pathname: string,

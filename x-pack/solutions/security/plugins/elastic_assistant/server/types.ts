@@ -9,7 +9,7 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import {
+import type {
   AuthenticatedUser,
   CoreRequestHandlerContext,
   CoreSetup,
@@ -21,51 +21,54 @@ import {
   Logger,
   AuditLogger,
   SavedObjectsClientContract,
+  UserProfileServiceStart,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
-import { StructuredToolInterface } from '@langchain/core/tools';
-import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import {
-  AttackDiscoveryPostRequestBody,
+import type { StructuredToolInterface } from '@langchain/core/tools';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type {
+  AttackDiscoveryPostInternalRequestBody,
   DefendInsightsPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
   Replacements,
   ContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import {
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import type {
   ActionsClientChatVertexAI,
   ActionsClientChatOpenAI,
-  ActionsClientGeminiChatModel,
   ActionsClientChatBedrockConverse,
   ActionsClientLlm,
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
-import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
-import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
-import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
-import {
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
+import type {
+  GetAIAssistantKnowledgeBaseDataClientParams,
+  AIAssistantKnowledgeBaseDataClient,
+} from './ai_assistant_data_clients/knowledge_base';
+import type { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
+import type {
   AIAssistantConversationsDataClient,
   GetAIAssistantConversationsDataClientParams,
 } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { CallbackIds } from './services/app_context';
-import { AIAssistantDataClient } from './ai_assistant_data_clients';
-import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
+import type { AIAssistantDataClient } from './ai_assistant_data_clients';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
-import { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
@@ -167,11 +170,17 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAlertSummaryDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
+  getCheckpointSaver: () => Promise<BaseCheckpointSaver | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
+  /**
+   * Test purpose only.
+   */
+  updateAnonymizationFields: () => Promise<void>;
+  userProfile: UserProfileServiceStart;
 }
 /**
  * @internal
@@ -197,8 +206,9 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   indexTemplate: {
     alertSummary: string;
@@ -206,8 +216,9 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   aliases: {
     alertSummary: string;
@@ -215,8 +226,9 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   indexPatterns: {
     alertSummary: string;
@@ -224,8 +236,9 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    attackDiscovery: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   pipelines: {
     knowledgeBase: string;
@@ -257,7 +270,6 @@ export interface AssistantTool {
 export type AssistantToolLlm =
   | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
-  | ActionsClientGeminiChatModel
   | ActionsClientChatVertexAI
   | InferenceChatModel;
 
@@ -282,7 +294,9 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+    | ExecuteConnectorRequestBody
+    | AttackDiscoveryPostInternalRequestBody
+    | DefendInsightsPostRequestBody
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;

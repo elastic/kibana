@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
 import type { CoreTheme } from '@kbn/core/public';
-import { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
-import { VisualizationDimensionEditorProps } from '../../types';
+import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { SECONDARY_DEFAULT_STATIC_COLOR } from './constants';
 
 export function getColorMode(
@@ -25,17 +25,21 @@ export function getColorMode(
   return 'dynamic';
 }
 
-export function getPrefixSelected(
+export function getSecondaryLabelSelected(
   state: VisualizationDimensionEditorProps<MetricVisualizationState>['state'],
   {
-    defaultPrefix,
+    defaultSecondaryLabel,
     colorMode,
     isPrimaryMetricNumeric,
-  }: { defaultPrefix: string; colorMode: SecondaryTrendType; isPrimaryMetricNumeric: boolean }
+  }: {
+    defaultSecondaryLabel: string;
+    colorMode: SecondaryTrendType;
+    isPrimaryMetricNumeric: boolean;
+  }
 ): { mode: 'auto' | 'none' } | { mode: 'custom'; label: string } {
-  const isAutoPrefix = state.secondaryPrefix === undefined;
-  const hasPrefixOverride =
-    isAutoPrefix &&
+  const isAutoSecondaryLabel = state.secondaryLabel === undefined;
+  const hasSecondaryLabelOverride =
+    isAutoSecondaryLabel &&
     // use colorMode as gatekeeper to avoid checking the secondaryTrend as dynamic when
     // it is not enabled due to other conflicts (i.e. primary metric is not numeric)
     colorMode === 'dynamic' &&
@@ -43,8 +47,8 @@ export function getPrefixSelected(
     state.secondaryTrend.baselineValue === 'primary' &&
     isPrimaryMetricNumeric;
 
-  if (isAutoPrefix) {
-    return hasPrefixOverride
+  if (isAutoSecondaryLabel) {
+    return hasSecondaryLabelOverride
       ? {
           mode: 'custom',
           label: i18n.translate('xpack.lens.metric.prefixText.labelTrendOverride', {
@@ -53,10 +57,10 @@ export function getPrefixSelected(
         }
       : { mode: 'auto' };
   }
-  if (state.secondaryPrefix === '') {
+  if (state.secondaryLabel === '') {
     return { mode: 'none' };
   }
-  return { mode: 'custom', label: state.secondaryPrefix ?? defaultPrefix };
+  return { mode: 'custom', label: state.secondaryLabel ?? defaultSecondaryLabel };
 }
 
 export function getDefaultConfigForMode(mode: SecondaryTrendType): SecondaryTrend {

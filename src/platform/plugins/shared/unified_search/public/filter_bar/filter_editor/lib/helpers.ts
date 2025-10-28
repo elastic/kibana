@@ -11,7 +11,8 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { Filter, isCombinedFilter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { isCombinedFilter } from '@kbn/es-query';
 import { validateParams } from './filter_editor_utils';
 
 export const strings = {

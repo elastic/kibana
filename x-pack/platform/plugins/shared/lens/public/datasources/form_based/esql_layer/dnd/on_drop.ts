@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { TextBasedLayerColumn, TextBasedPrivateState } from '../types';
+import type {
+  DatasourceDimensionDropHandlerProps,
+  TextBasedLayerColumn,
+  TextBasedPrivateState,
+} from '@kbn/lens-common';
+import { isOperation } from '../../../../types_guards';
 import { reorderElements } from '../../../../utils';
-import { DatasourceDimensionDropHandlerProps, isOperation } from '../../../../types';
 import { removeColumn } from '../remove_column';
 import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 

@@ -15,7 +15,10 @@ import {
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Vis } from '@kbn/visualizations-plugin/public';
-import { NavigateToLensContext, TagcloudVisConfiguration } from '@kbn/visualizations-plugin/common';
+import type {
+  NavigateToLensContext,
+  LensTagCloudState as TagcloudVisConfiguration,
+} from '@kbn/lens-common';
 import type { TagCloudVisParams } from '../types';
 import { getDataViewsStart } from '../services';
 

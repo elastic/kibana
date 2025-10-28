@@ -13,7 +13,7 @@ import { getDashboardBackupService } from '../../services/dashboard_backup_servi
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { coreServices } from '../../services/kibana_services';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
-import { DashboardSavedObjectUserContent } from '../types';
+import type { DashboardSavedObjectUserContent } from '../types';
 import { useDashboardListingTable } from './use_dashboard_listing_table';
 
 const clearStateMock = jest.fn();

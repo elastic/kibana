@@ -9,14 +9,17 @@ import { i18n } from '@kbn/i18n';
 import type { AstFunction } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { IndexPattern } from '../../../../../types';
-import { LayerType } from '../../../../../../common/types';
-import type { TimeScaleUnit } from '../../../../../../common/expressions';
-import type { FormBasedLayer } from '../../../types';
+import type {
+  ReferenceBasedIndexPatternColumn,
+  IndexPattern,
+  LensLayerType,
+  TimeScaleUnit,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
-import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
-import { FieldBasedOperationErrorMessage, operationDefinitionMap } from '..';
+import type { FieldBasedOperationErrorMessage } from '..';
+import { operationDefinitionMap } from '..';
 import {
   CALCULATIONS_DATE_HISTOGRAM_REQUIRED,
   CALCULATIONS_MISSING_COLUMN_REFERENCE,
@@ -38,7 +41,7 @@ export const buildLabelFunction =
     );
   };
 
-export function checkForDataLayerType(layerType: LayerType, name: string) {
+export function checkForDataLayerType(layerType: LensLayerType, name: string) {
   if (layerType === LayerTypes.REFERENCELINE) {
     return [
       i18n.translate('xpack.lens.indexPattern.calculations.layerDataType', {

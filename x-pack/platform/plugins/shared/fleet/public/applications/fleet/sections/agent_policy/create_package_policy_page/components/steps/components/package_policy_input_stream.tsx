@@ -27,14 +27,14 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
 } from '../../../../../../../../../common/constants';
 
-import { useConfig, sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
+import { sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
@@ -87,10 +87,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     totalStreams,
   }) => {
     const { docLinks } = useStartServices();
-
-    const config = useConfig();
-    const isExperimentalDataStreamSettingsEnabled =
-      config.enableExperimental?.includes('experimentalDataStreamSettings') ?? false;
 
     const {
       params: { packagePolicyId },
@@ -169,17 +165,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatastream);
     const hasAdvancedOptions = useMemo(() => {
-      return (
-        advancedVars.length > 0 ||
-        (isPackagePolicyEdit && showPipelinesAndMappings) ||
-        isExperimentalDataStreamSettingsEnabled
-      );
-    }, [
-      advancedVars.length,
-      isExperimentalDataStreamSettingsEnabled,
-      isPackagePolicyEdit,
-      showPipelinesAndMappings,
-    ]);
+      return advancedVars.length > 0 || (isPackagePolicyEdit && showPipelinesAndMappings);
+    }, [advancedVars.length, isPackagePolicyEdit, showPipelinesAndMappings]);
 
     const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
     const flexWidth = isBiggerScreen ? 7 : 5;
@@ -314,6 +301,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
+                          aria-label="Advanced options"
                           size="xs"
                           iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
                           onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
@@ -406,6 +394,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                   },
                                 });
                               }}
+                              name="dataStreamType"
                             />
                           </EuiFormRow>
                         </EuiFlexItem>

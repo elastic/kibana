@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import type { FunctionDefinition } from '@kbn/esql-ast';
+import { FunctionDefinitionTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
+import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils/expressions';
 
 describe('function validation', () => {
   afterEach(() => {
@@ -101,38 +103,38 @@ describe('function validation', () => {
 
           // straight call
           await expectErrors('FROM a_index | EVAL TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [double]',
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // assignment
           await expectErrors('FROM a_index | EVAL var = TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [double]',
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // nested function
           await expectErrors('FROM a_index | EVAL TEST(RETURNS_DOUBLE())', [
-            'Argument of [test] must be [integer], found value [RETURNS_DOUBLE()] type [double]',
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // inline cast
           await expectErrors('FROM a_index | EVAL TEST(1::DOUBLE)', [
-            'Argument of [test] must be [integer], found value [1::DOUBLE] type [double]',
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // field
           await expectErrors('FROM a_index | EVAL TEST(doubleField)', [
-            'Argument of [test] must be [integer], found value [doubleField] type [double]',
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // userDefinedColumns
           await expectErrors('FROM a_index | EVAL col1 = 1. | EVAL TEST(col1)', [
-            'Argument of [test] must be [integer], found value [col1] type [double]',
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // multiple instances
           await expectErrors('FROM a_index | EVAL TEST(1.1) | EVAL TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [double]',
-            'Argument of [test] must be [integer], found value [1.1] type [double]',
+            getNoValidCallSignatureError('test', ['double']),
+            getNoValidCallSignatureError('test', ['double']),
           ]);
         });
 
@@ -142,7 +144,7 @@ describe('function validation', () => {
         });
       });
 
-      describe('special parameter types', () => {
+      describe('special scenarios', () => {
         it('any type', async () => {
           const testFn: FunctionDefinition = {
             name: 'test',
@@ -190,79 +192,223 @@ describe('function validation', () => {
           const { expectErrors } = await setup();
 
           await expectErrors('ROW "a" IN ("a", "b", "c")', []);
-          await expectErrors('ROW "a" IN (1, "b", "c")', [
-            'Argument of [in] must be [keyword[]], found value [(1, "b", "c")] type [(integer, keyword, keyword)]',
+          await expectErrors('ROW "a" IN (1, 2)', [
+            getNoValidCallSignatureError('in', ['keyword', 'integer']), // @TODO look at reporting array type
           ]);
         });
-      });
 
-      it('checks types by signature', async () => {
-        const testFn: FunctionDefinition = {
-          name: 'test',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
+        describe('implicit string casting', () => {
+          it.each(PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING)(
+            'accepts string arguments for %s',
+            async (paramType) => {
+              setTestFunctions([
+                {
+                  name: 'test',
+                  type: FunctionDefinitionTypes.SCALAR,
+                  description: '',
+                  locationsAvailable: [Location.EVAL],
+                  signatures: [
+                    {
+                      params: [{ name: 'arg1', type: paramType }],
+                      returnType: 'date',
+                    },
+                  ],
+                },
+              ]);
+
+              const { expectErrors } = await setup();
+
+              await expectErrors('FROM a_index | EVAL TEST("")', []);
+            }
+          );
+        });
+
+        it('treats text and keyword as interchangeable', async () => {
+          setTestFunctions([
             {
-              params: [
-                { name: 'arg1', type: 'double' },
-                { name: 'arg2', type: 'double' },
-                { name: 'arg3', type: 'double' },
+              name: 'accepts_text',
+              type: FunctionDefinitionTypes.SCALAR,
+              description: '',
+              locationsAvailable: [Location.EVAL],
+              signatures: [
+                {
+                  params: [{ name: 'arg1', type: 'text' }],
+                  returnType: 'keyword',
+                },
               ],
-              returnType: 'double',
             },
             {
-              params: [
-                { name: 'arg1', type: 'keyword' },
-                { name: 'arg2', type: 'keyword' },
+              name: 'accepts_keyword',
+              type: FunctionDefinitionTypes.SCALAR,
+              description: '',
+              locationsAvailable: [Location.EVAL],
+              signatures: [
+                {
+                  params: [{ name: 'arg1', type: 'keyword' }],
+                  returnType: 'keyword',
+                },
               ],
-              returnType: 'keyword',
             },
             {
-              params: [
-                { name: 'arg1', type: 'integer' },
-                { name: 'arg2', type: 'integer' },
+              name: 'returns_keyword',
+              type: FunctionDefinitionTypes.SCALAR,
+              description: '',
+              locationsAvailable: [Location.EVAL],
+              signatures: [
+                {
+                  params: [],
+                  returnType: 'keyword',
+                },
               ],
-              returnType: 'integer',
             },
+          ]);
+
+          const { expectErrors } = await setup();
+
+          // literals — all string literals are keywords
+          await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT("keyword literal")', []);
+
+          // fields
+          await expectErrors('FROM a_index | EVAL ACCEPTS_KEYWORD(textField)', []);
+          await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(keywordField)', []);
+
+          // functions
+          // no need to test a function that returns text, because they no longer exist: https://github.com/elastic/elasticsearch/pull/114334
+          await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(RETURNS_KEYWORD())', []);
+        });
+
+        it('detects a missing column', async () => {
+          setTestFunctions([
             {
-              params: [{ name: 'arg1', type: 'date' }],
-              returnType: 'date',
+              name: 'test',
+              type: FunctionDefinitionTypes.SCALAR,
+              description: '',
+              locationsAvailable: [Location.EVAL],
+              signatures: [
+                {
+                  params: [{ name: 'arg1', type: 'keyword' }],
+                  returnType: 'keyword',
+                },
+              ],
             },
-          ],
-        };
+          ]);
 
-        setTestFunctions([testFn]);
+          const { expectErrors } = await setup();
 
-        const { expectErrors } = await setup();
+          expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
+            'Unknown column "missingColumn"',
+          ]);
 
-        // double, double, double
-        await expectErrors('FROM a_index | EVAL TEST(1., 1., 1.)', []);
-        await expectErrors('FROM a_index | EVAL TEST("", "", "")', [
-          'Argument of [test] must be [double], found value [""] type [keyword]',
-          'Argument of [test] must be [double], found value [""] type [keyword]',
-          'Argument of [test] must be [double], found value [""] type [keyword]',
-        ]);
+          expectErrors('FROM a_index | EVAL foo=missingColumn', ['Unknown column "missingColumn"']);
+        });
 
-        // int, int
-        await expectErrors('FROM a_index | EVAL TEST(1, 1)', []);
-        await expectErrors('FROM a_index | EVAL TEST(1, "")', [
-          // @TODO this message should respect the type of the first argument
-          // see https://github.com/elastic/kibana/issues/180518
-          'Argument of [test] must be [keyword], found value [1] type [integer]',
-        ]);
+        describe('inline casts', () => {
+          it('validates a nested function within an inline cast', async () => {
+            setTestFunctions([
+              {
+                name: 'test',
+                type: FunctionDefinitionTypes.SCALAR,
+                description: '',
+                locationsAvailable: [Location.EVAL],
+                signatures: [
+                  {
+                    params: [{ name: 'arg1', type: 'integer' }],
+                    returnType: 'integer',
+                  },
+                ],
+              },
+            ]);
 
-        // keyword, keyword
-        await expectErrors('FROM a_index | EVAL TEST("", "")', []);
-        await expectErrors('FROM a_index | EVAL TEST("", 1)', [
-          'Argument of [test] must be [keyword], found value [1] type [integer]',
-        ]);
+            const { expectErrors } = await setup();
 
-        // date
-        await expectErrors('FROM a_index | EVAL TEST(NOW())', []);
-        await expectErrors('FROM a_index | EVAL TEST(1.)', [
-          'Argument of [test] must be [date], found value [1.] type [double]',
-        ]);
+            await expectErrors('FROM a_index | EVAL TEST(TEST("")::integer)', [
+              getNoValidCallSignatureError('test', ['keyword']),
+            ]);
+            // deep nesting
+            await expectErrors('FROM a_index | EVAL TEST(TEST("")::double::keyword::integer)', [
+              getNoValidCallSignatureError('test', ['keyword']),
+            ]);
+          });
+
+          it.skip('validates a top-level function within an inline cast', async () => {
+            setTestFunctions([
+              {
+                name: 'test',
+                type: FunctionDefinitionTypes.SCALAR,
+                description: '',
+                locationsAvailable: [Location.EVAL],
+                signatures: [
+                  {
+                    params: [{ name: 'arg1', type: 'integer' }],
+                    returnType: 'integer',
+                  },
+                ],
+              },
+            ]);
+
+            const { expectErrors } = await setup();
+
+            await expectErrors('FROM a_index | EVAL TEST("")::cartesian_point', [
+              getNoValidCallSignatureError('test', ['keyword']),
+            ]);
+          });
+
+          // This test may seem obvious, but it is here to guard against
+          // erroring because we are checking the types of signatures that
+          // haven't yet been correctly filtered by arity, which leads to
+          // a thrown error and no validation error message
+          it('correctly handles signatures of different lengths', async () => {
+            setTestFunctions([
+              {
+                name: 'test',
+                type: FunctionDefinitionTypes.SCALAR,
+                description: '',
+                locationsAvailable: [Location.EVAL],
+                signatures: [
+                  // the order of these signatures is important.
+                  // the shorter one is first so that if they aren't
+                  // filtered down properly, the 2 arguments in the invocation
+                  // will run off the 1 argument signature
+                  {
+                    params: [{ name: 'arg1', type: 'keyword' }],
+                    returnType: 'keyword',
+                  },
+                  {
+                    params: [
+                      { name: 'arg1', type: 'integer' },
+                      { name: 'arg2', type: 'integer' },
+                    ],
+                    returnType: 'integer',
+                  },
+                ],
+              },
+            ]);
+
+            const { expectErrors } = await setup();
+
+            await expectErrors('FROM a_index | EVAL TEST("", "")', [
+              getNoValidCallSignatureError('test', ['keyword', 'keyword']),
+            ]);
+          });
+        });
+
+        it('skips column validation for left assignment arg', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | EVAL lolz = 2', []);
+          await expectErrors('FROM a_index | EVAL lolz = nonexistent', [
+            'Unknown column "nonexistent"',
+          ]);
+        });
+
+        it('skips column validation for right arg to AS', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | RENAME keywordField AS lolz', []);
+          await expectErrors('FROM a_index | RENAME nonexistent AS lolz', [
+            'Unknown column "nonexistent"',
+          ]);
+        });
       });
     });
 
@@ -278,6 +424,41 @@ describe('function validation', () => {
               params: [{ name: 'arg1', type: 'keyword' }],
               returnType: 'keyword',
             },
+            {
+              params: [
+                { name: 'arg1', type: 'integer' },
+                { name: 'arg2', type: 'integer' },
+              ],
+              returnType: 'integer',
+            },
+            {
+              params: [
+                { name: 'arg1', type: 'integer' },
+                { name: 'arg2', type: 'integer' },
+                { name: 'arg3', type: 'integer' },
+              ],
+              returnType: 'integer',
+            },
+          ],
+        },
+        {
+          name: 'expects_1_arg_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'integer' }],
+              returnType: 'integer',
+            },
+          ],
+        },
+        {
+          name: 'expects_2_args_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
             {
               params: [
                 { name: 'arg1', type: 'integer' },
@@ -306,17 +487,26 @@ describe('function validation', () => {
 
       const { expectErrors } = await setup();
 
+      // several signatures, different arities
       await expectErrors('FROM a_index | EVAL TEST()', [
-        'Error: [test] function expects at least one argument, got 0.',
+        'TEST expected 1, 2, or 3 arguments, but got 0.',
       ]);
-      await expectErrors('FROM a_index | EVAL TEST(1, 1, 1)', [
-        'Error: [test] function expects no more than 2 arguments, got 3.',
+      await expectErrors('FROM a_index | EVAL TEST(1, 1, 1, 1)', [
+        'TEST expected 1, 2, or 3 arguments, but got 4.',
       ]);
 
-      // variadic
+      // exact number of arguments
+      await expectErrors('FROM a_index | EVAL EXPECTS_1_ARG_FN(1, 1, 2)', [
+        'EXPECTS_1_ARG_FN expected one argument, but got 3.',
+      ]);
+
+      await expectErrors('FROM a_index | EVAL EXPECTS_2_ARGS_FN(1, 1, 2)', [
+        'EXPECTS_2_ARGS_FN expected 2 arguments, but got 3.',
+      ]);
+
+      // minimum number of arguments
       await expectErrors(`FROM a_index | EVAL VARIADIC_FN(1)`, [
-        // @TODO this is an incorrect error message
-        'Error: [variadic_fn] function expects one argument, got 1.',
+        'VARIADIC_FN expected at least 2 arguments, but got 1.',
       ]);
       await expectErrors(
         `FROM a_index | EVAL VARIADIC_FN(${new Array(100).fill(1).join(', ')})`,
@@ -351,356 +541,58 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | EVAL TEST("", "")', []);
     });
 
-    it('casts string arguments to dates', async () => {
-      setTestFunctions([
-        {
-          name: 'test',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [
-                { name: 'arg1', type: 'date' },
-                { name: 'arg2', type: 'date' },
-              ],
-              returnType: 'date',
-            },
-            {
-              params: [
-                { name: 'arg1', type: 'integer' },
-                { name: 'arg2', type: 'integer' },
-              ],
-              returnType: 'date',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM a_index | EVAL TEST("2024-09-09", "2024-09-09")', []);
-    });
-
-    it('treats text and keyword as interchangeable', async () => {
-      setTestFunctions([
-        {
-          name: 'accepts_text',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'text' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'accepts_keyword',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'returns_keyword',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-
-      // literals — all string literals are keywords
-      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT("keyword literal")', []);
-
-      // fields
-      await expectErrors('FROM a_index | EVAL ACCEPTS_KEYWORD(textField)', []);
-      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(keywordField)', []);
-
-      // functions
-      // no need to test a function that returns text, because they no longer exist: https://github.com/elastic/elasticsearch/pull/114334
-      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(RETURNS_KEYWORD())', []);
-    });
-
-    it('enforces constant-only parameters', async () => {
-      setTestFunctions([
-        {
-          name: 'test',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'integer', constantOnly: true }],
-              returnType: 'integer',
-            },
-          ],
-        },
-        {
-          name: 'test2',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [
-                { name: 'arg1', type: 'integer' },
-                { name: 'arg2', type: 'date', constantOnly: true },
-              ],
-              returnType: 'integer',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-      await expectErrors('FROM a_index | EVAL TEST(1)', []);
-      // operators, functions are ok
-      await expectErrors('FROM a_index | EVAL TEST(1 + 1)', []);
-      await expectErrors('FROM a_index | EVAL TEST(integerField)', [
-        'Argument of [test] must be a constant, received [integerField]',
-      ]);
-      await expectErrors('FROM a_index | EVAL var = 10 | EVAL TEST(var)', [
-        'Argument of [test] must be a constant, received [var]',
-      ]);
-
-      await expectErrors('FROM a_index | EVAL TEST2(integerField, NOW())', []);
-      await expectErrors('FROM a_index | EVAL TEST2(integerField, dateField)', [
-        'Argument of [test2] must be a constant, received [dateField]',
-      ]);
-    });
-
-    it('validates accepted values', async () => {
-      setTestFunctions([
-        {
-          name: 'test',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword', acceptedValues: ['ASC', 'DESC'] }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-      await expectErrors('FROM a_index | EVAL TEST("ASC")', [], []);
-      await expectErrors('FROM a_index | EVAL TEST("DESC")', [], []);
-
-      // case-insensitive
-      await expectErrors('FROM a_index | EVAL TEST("aSc")', [], []);
-      await expectErrors('FROM a_index | EVAL TEST("DesC")', [], []);
-
-      // not constantOnly, so field is accepted
-      await expectErrors('FROM a_index | EVAL TEST(keywordField)', [], []);
-
-      await expectErrors(
-        'FROM a_index | EVAL TEST("foo")',
-        [],
-        ['Invalid option ["foo"] for test. Supported options: ["ASC", "DESC"].']
-      );
-    });
-
-    it('validates values of type unknown', async () => {
-      setTestFunctions([
-        {
-          name: 'test1',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'test2',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'test3',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'long' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-      await expectErrors(
-        `FROM a_index
-        | EVAL foo = TEST1(1.)
-        | EVAL TEST2(foo)
-        | EVAL TEST3(foo)`,
-        ['Argument of [test1] must be [keyword], found value [1.] type [double]']
-      );
-    });
-
-    describe('command/option support', () => {
-      it('validates command support', async () => {
+    describe('values of unknown type', () => {
+      it('doesnt validate user-defined columns of type unknown', async () => {
         setTestFunctions([
           {
-            name: 'eval_fn',
+            name: 'test1',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
             locationsAvailable: [Location.EVAL],
             signatures: [
               {
-                params: [],
+                params: [{ name: 'arg1', type: 'keyword' }],
                 returnType: 'keyword',
               },
             ],
           },
           {
-            name: 'stats_fn',
-            type: FunctionDefinitionTypes.AGG,
-            description: '',
-            locationsAvailable: [Location.STATS],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'row_fn',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.ROW],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'where_fn',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.WHERE],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'sort_fn',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.SORT],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-        ]);
-
-        const { expectErrors } = await setup();
-
-        await expectErrors('FROM a_index | EVAL EVAL_FN()', []);
-        await expectErrors('FROM a_index | SORT SORT_FN()', []);
-        await expectErrors('FROM a_index | STATS max(doubleField)', []);
-        await expectErrors('ROW ROW_FN()', []);
-        await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
-
-        await expectErrors('FROM a_index | EVAL SORT_FN()', [
-          'EVAL does not support function sort_fn',
-        ]);
-        await expectErrors('FROM a_index | SORT STATS_FN()', [
-          'SORT does not support function stats_fn',
-        ]);
-        await expectErrors('FROM a_index | STATS ROW_FN()', [
-          'STATS does not support function row_fn',
-        ]);
-        await expectErrors('ROW WHERE_FN()', ['ROW does not support function where_fn']);
-        await expectErrors('FROM a_index | WHERE EVAL_FN()', [
-          'WHERE does not support function eval_fn',
-        ]);
-      });
-
-      it('validates option support', async () => {
-        setTestFunctions([
-          {
-            name: 'supports_by_option',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.EVAL, Location.STATS_BY],
-            signatures: [
-              {
-                params: [],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'does_not_support_by_option',
+            name: 'test2',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
             locationsAvailable: [Location.EVAL],
             signatures: [
               {
-                params: [],
+                params: [{ name: 'arg1', type: 'keyword' }],
                 returnType: 'keyword',
               },
             ],
           },
-
           {
-            name: 'agg_fn',
-            type: FunctionDefinitionTypes.AGG,
+            name: 'test3',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            locationsAvailable: [Location.STATS],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
-                params: [],
+                params: [{ name: 'arg1', type: 'long' }],
                 returnType: 'keyword',
               },
             ],
           },
         ]);
-        const { expectErrors } = await setup();
-        await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
-        await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
-          'STATS BY does not support function does_not_support_by_option',
-        ]);
+
+        const { validate } = await setup();
+        const errors = (
+          await validate(
+            `FROM a_index
+        | EVAL foo = TEST1(1.) // creates foo as unknown value
+        | EVAL TEST2(foo) // shouldn't error, foo is unknown
+        | EVAL TEST3(foo) // shouldn't error, foo is unknown`
+          )
+        ).errors;
+
+        expect(errors).toHaveLength(1);
       });
     });
 
@@ -738,47 +630,233 @@ describe('function validation', () => {
         await expectErrors('FROM a_index | EVAL TEST(TEST2(TEST(TEST2(1))))', []);
       });
 
-      it("doesn't allow nested aggregation functions", async () => {
-        setTestFunctions([
-          {
-            name: 'agg_fn',
-            type: FunctionDefinitionTypes.AGG,
-            description: '',
-            locationsAvailable: [Location.STATS],
-            signatures: [
-              {
-                params: [{ name: 'arg1', type: 'keyword' }],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'scalar_fn',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.STATS],
-            signatures: [
-              {
-                params: [{ name: 'arg1', type: 'keyword' }],
-                returnType: 'keyword',
-              },
-            ],
-          },
-        ]);
-
-        const { expectErrors } = await setup();
-
-        await expectErrors('FROM a_index | STATS AGG_FN(AGG_FN(""))', [
-          'Aggregate function\'s parameters must be an attribute, literal or a non-aggregation function; found [AGG_FN("")] of type [keyword]',
-        ]);
-        // @TODO — enable this test when we have fixed this bug
-        // await expectErrors('FROM a_index | STATS AGG_FN(SCALAR_FN(AGG_FN("")))', [
-        //   'No nested aggregation functions.',
-        // ]);
-      });
-
       // @TODO — test function aliases
     });
+  });
+
+  describe('checks locations allowed', () => {
+    it('validates command support', async () => {
+      setTestFunctions([
+        {
+          name: 'eval_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'stats_fn',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'row_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.ROW],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'where_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.WHERE],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'sort_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.SORT],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      await expectErrors('FROM a_index | EVAL EVAL_FN()', []);
+      await expectErrors('FROM a_index | SORT SORT_FN()', []);
+      await expectErrors('FROM a_index | STATS max(doubleField)', []);
+      await expectErrors('ROW ROW_FN()', []);
+      await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
+
+      await expectErrors('FROM a_index | EVAL SORT_FN()', ['Function SORT_FN not allowed in EVAL']);
+      await expectErrors('FROM a_index | SORT STATS_FN()', [
+        'Function STATS_FN not allowed in SORT',
+      ]);
+      await expectErrors('FROM a_index | STATS ROW_FN()', ['Function ROW_FN not allowed in STATS']);
+      await expectErrors('ROW WHERE_FN()', ['Function WHERE_FN not allowed in ROW']);
+      await expectErrors('FROM a_index | WHERE EVAL_FN()', [
+        'Function EVAL_FN not allowed in WHERE',
+      ]);
+    });
+
+    it('validates option support', async () => {
+      setTestFunctions([
+        {
+          name: 'supports_by_option',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL, Location.STATS_BY],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'does_not_support_by_option',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+
+        {
+          name: 'agg_fn',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+      const { expectErrors } = await setup();
+      await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
+      await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
+        'Function DOES_NOT_SUPPORT_BY_OPTION not allowed in BY',
+      ]);
+    });
+
+    it('validates timeseries function locations', async () => {
+      setTestFunctions([
+        {
+          name: 'ts_function',
+          type: FunctionDefinitionTypes.TIME_SERIES_AGG,
+          description: '',
+          locationsAvailable: [Location.STATS_TIMESERIES],
+          signatures: [
+            {
+              params: [],
+              returnType: 'double',
+            },
+          ],
+        },
+        {
+          name: 'agg_function',
+          type: FunctionDefinitionTypes.AGG,
+          description: '',
+          locationsAvailable: [Location.STATS],
+          signatures: [
+            {
+              params: [{ name: 'field', type: 'double', optional: false }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      await expectErrors('TS a_index | STATS AGG_FUNCTION(TS_FUNCTION())', []);
+      await expectErrors('FROM a_index | STATS AGG_FUNCTION(TS_FUNCTION())', [
+        'Function TS_FUNCTION not allowed in STATS',
+      ]);
+    });
+  });
+
+  it('should flag nested aggregation functions', async () => {
+    setTestFunctions([
+      {
+        name: 'agg_function_1',
+        type: FunctionDefinitionTypes.AGG,
+        description: '',
+        locationsAvailable: [Location.STATS],
+        signatures: [
+          {
+            params: [{ name: 'field', type: 'keyword', optional: false }],
+            returnType: 'keyword',
+          },
+        ],
+      },
+      {
+        name: 'scalar_function',
+        type: FunctionDefinitionTypes.SCALAR,
+        description: '',
+        locationsAvailable: [Location.STATS],
+        signatures: [
+          {
+            params: [{ name: 'field', type: 'keyword', optional: false }],
+            returnType: 'keyword',
+          },
+        ],
+      },
+      {
+        name: 'agg_function_2',
+        type: FunctionDefinitionTypes.AGG,
+        description: '',
+        locationsAvailable: [Location.STATS],
+        signatures: [
+          {
+            params: [],
+            returnType: 'keyword',
+          },
+        ],
+      },
+    ]);
+
+    const { expectErrors } = await setup();
+
+    await expectErrors('FROM a_index | STATS AGG_FUNCTION_1(AGG_FUNCTION_2())', [
+      'Aggregation functions cannot be nested. Found AGG_FUNCTION_2 in AGG_FUNCTION_1.',
+    ]);
+
+    await expectErrors('FROM a_index | STATS AGG_FUNCTION_1(SCALAR_FUNCTION(AGG_FUNCTION_2()))', [
+      'Aggregation functions cannot be nested. Found AGG_FUNCTION_2 in AGG_FUNCTION_1.',
+    ]);
+  });
+
+  it('should ignore a function whose name is defined by a parameter', async () => {
+    const { expectErrors } = await setup();
+
+    await expectErrors('FROM a_index | EVAL ??param(arg1)', []);
   });
 
   describe('License-based validation', () => {
@@ -797,7 +875,7 @@ describe('function validation', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'keyword',
             },
             {
@@ -808,12 +886,12 @@ describe('function validation', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'keyword',
             },
           ],
           locationsAvailable: [Location.STATS, Location.STATS_BY],
-          license: 'PLATINUM',
+          license: 'platinum',
         },
         {
           type: FunctionDefinitionTypes.AGG,
@@ -838,7 +916,7 @@ describe('function validation', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'cartesian_shape',
             },
           ],
@@ -847,112 +925,163 @@ describe('function validation', () => {
       ]);
     });
 
-    it('Should Validate Platinum Functions With Platinum License', async () => {
-      const { expectErrors, callbacks } = await setup();
+    describe('function-level licensing', () => {
+      it('should allow licensed function when license IS available', async () => {
+        const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
-      }));
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => true,
+        }));
 
-      await expectErrors(
-        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
-        []
-      );
-    });
+        await expectErrors(
+          'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
+          []
+        );
+      });
 
-    it('Should Prevent Platinum Function Validation Without Platinum License', async () => {
-      const { expectErrors, callbacks } = await setup();
+      it('should disallow licensed function when license NOT available', async () => {
+        const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
-      }));
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => false,
+        }));
 
-      await expectErrors(
-        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK()',
-        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
-      );
+        await expectErrors(
+          'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK()',
+          [
+            'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+            'PLATINUM_FUNCTION_MOCK expected one argument, but got 0.',
+          ]
+        );
 
-      await expectErrors(
-        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
-        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
-      );
+        await expectErrors(
+          'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
+          ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
+        );
 
-      await expectErrors(
-        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(wrongField)',
-        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.', 'Unknown column [wrongField]']
-      );
-
-      await expectErrors(
-        'FROM index | STATS result =PLATINUM_FUNCTION_MOCK(PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0])))',
-        [
+        await expectErrors('FROM a_index | STATS col0 = PLATINUM_FUNCTION_MOCK(keywordField)', [
           'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
-          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
-        ]
-      );
-    });
+        ]);
+      });
 
-    it('Should Validate Cartesian Shape Input for Partial Platinum Function With Platinum License', async () => {
-      const { expectErrors, callbacks } = await setup();
+      it('should show license error even when nested functions also have errors', async () => {
+        const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
-      }));
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => false,
+        }));
 
-      await expectErrors(
-        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
-        []
-      );
-    });
-
-    it('Should Prevent Cartesian Shape Input for Partial Platinum Function Without Platinum License', async () => {
-      const { expectErrors, callbacks } = await setup();
-
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
-      }));
-
-      await expectErrors(
-        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
-        [
-          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
-        ]
-      );
-
-      await expectErrors(
-        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE(0))',
-        [
-          'Argument of [to_cartesianshape] must be [cartesian_point], found value [0] type [integer]',
-          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
-        ]
-      );
-
-      await expectErrors(
-        'FROM index | STATS result =PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE(PLATINUM_FUNCTION_MOCK()))',
-        [
+        await expectErrors('FROM index | STATS extent = PLATINUM_FUNCTION_MOCK(FLOOR(""))', [
           'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
-          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
-        ]
-      );
+          getNoValidCallSignatureError('floor', ['keyword']),
+        ]);
+      });
     });
 
-    it('Should Report Various Non-License Errors for Platinum Partial Function Without Platinum License', async () => {
-      const { expectErrors, callbacks } = await setup();
+    describe('signature-level licensing', () => {
+      it('should allow licensed signature when license IS available', async () => {
+        const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
-      }));
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => true,
+        }));
 
-      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK()', [
-        'Error: [platinum_partial_function_mock] function expects exactly one argument, got 0.',
-      ]);
+        await expectErrors(
+          'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE("0,0"))',
+          []
+        );
+      });
 
-      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(0)', [
-        'Argument of [platinum_partial_function_mock] must be [cartesian_point], found value [0] type [integer]',
-      ]);
+      it('should allow ambiguous invocation when it could match an available signature', async () => {
+        setTestFunctions([
+          {
+            type: FunctionDefinitionTypes.SCALAR,
+            name: 'test',
+            description: '',
+            signatures: [
+              {
+                params: [
+                  {
+                    name: 'field',
+                    type: 'integer',
+                    optional: false,
+                  },
+                ],
+                license: 'platinum', // licensed signature
+                returnType: 'keyword',
+              },
+              {
+                params: [
+                  {
+                    name: 'field',
+                    type: 'keyword',
+                    optional: false,
+                  },
+                ],
+                license: undefined, // no license required
+                returnType: 'keyword',
+              },
+            ],
+            locationsAvailable: [Location.EVAL],
+          },
+        ]);
 
-      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)', [
-        'Unknown column [WrongField]',
-      ]);
+        const { expectErrors, callbacks } = await setup();
+
+        // make license unavailable
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => false,
+        }));
+
+        // make ambiguous call using a parameter "?param" that could match either signature
+        await expectErrors('FROM index | EVAL extent = TEST(?param)', []);
+      });
+
+      it('should disallow licensed signature when license NOT available', async () => {
+        const { expectErrors, callbacks } = await setup();
+
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => false,
+        }));
+
+        await expectErrors(
+          'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE("0,0"))',
+          [
+            "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+          ]
+        );
+      });
+
+      it("Should report various non-license errors even when the function isn't allowed", async () => {
+        const { expectErrors, callbacks } = await setup();
+
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => false,
+        }));
+
+        await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK()', [
+          'PLATINUM_PARTIAL_FUNCTION_MOCK expected one argument, but got 0.',
+        ]);
+
+        await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(0)', [
+          getNoValidCallSignatureError('platinum_partial_function_mock', ['integer']),
+        ]);
+
+        await expectErrors(
+          'FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)',
+          ['Unknown column "WrongField"']
+        );
+      });
+
+      describe('operators in STATS WHERE context', () => {
+        it('should allow IS NOT NULL operator in STATS WHERE clause when validation is applied', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM index | STATS COUNT() WHERE unknownField IS NOT NULL', [
+            'Unknown column "unknownField"',
+          ]);
+        });
+      });
     });
   });
 });

@@ -7,24 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import {
+import type {
   Datatable,
   DefaultInspectorAdapters,
   ExecutionContext,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type { LegendSize } from '@kbn/chart-expressions-common';
 
-import {
+import type {
   AllowedChartOverrides,
   AllowedSettingsOverrides,
   CustomPaletteState,
 } from '@kbn/charts-plugin/common';
-import type { LegendSize } from '@kbn/visualizations-plugin/public';
-import {
+import type {
   EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
   EXPRESSION_HEATMAP_GRID_NAME,

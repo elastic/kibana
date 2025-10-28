@@ -5,32 +5,34 @@
  * 2.0.
  */
 
-import {
+import type {
   HasLibraryTransforms,
   PublishesWritableTitle,
   PublishesWritableDescription,
   SerializedTitles,
   StateComparators,
   initializeTitleManager,
-  titleComparators,
 } from '@kbn/presentation-publishing';
+import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
-import { BehaviorSubject, Observable, map, merge } from 'rxjs';
-import { isTextBasedLanguage } from '../helper';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type {
   LensComponentProps,
   LensPanelProps,
   LensRuntimeState,
-  LensEmbeddableStartServices,
   LensOverrides,
   LensSharedProps,
   IntegrationCallbacks,
   LensInternalApi,
   LensApi,
   LensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
+import { isTextBasedLanguage } from '../helper';
+
+import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
-import { StateManagementConfig } from './initialize_state_management';
+import type { StateManagementConfig } from './initialize_state_management';
 
 // Convenience type for the serialized props of this initializer
 type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;
@@ -51,6 +53,7 @@ export const dashboardServicesComparators: StateComparators<SerializedProps> = {
   style: 'skip',
   className: 'skip',
   forceDSL: 'skip',
+  esqlVariables: 'skip',
 };
 
 export interface DashboardServicesConfig {

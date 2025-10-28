@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
-import { UpdateToolPayload, UpdateToolResponse } from '../../../../common/http_api/tools';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useCallback } from 'react';
+import type { UpdateToolPayload, UpdateToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
-import { useFlyoutState } from '../use_flyout_state';
+import { labels } from '../../utils/i18n';
 import { useOnechatServices } from '../use_onechat_service';
-import { useOnechatTool } from './use_tools';
+import { useToasts } from '../use_toasts';
+import { useTool } from './use_tools';
 
 interface EditToolMutationVariables {
   toolId: string;
@@ -23,20 +26,20 @@ type EditToolMutationOptions = UseMutationOptions<
   Error,
   EditToolMutationVariables
 >;
-type EditToolMutationSuccessCallback = NonNullable<EditToolMutationOptions['onSuccess']>;
-type EditToolMutationErrorCallback = NonNullable<EditToolMutationOptions['onError']>;
 
-export const useEditTool = ({
-  onSuccess,
-  onError,
-}: {
-  onSuccess?: EditToolMutationSuccessCallback;
-  onError?: EditToolMutationErrorCallback;
-}) => {
+export type EditToolSuccessCallback = NonNullable<EditToolMutationOptions['onSuccess']>;
+export type EditToolErrorCallback = NonNullable<EditToolMutationOptions['onError']>;
+
+export interface UseEditToolServiceProps {
+  onSuccess?: EditToolSuccessCallback;
+  onError?: EditToolErrorCallback;
+}
+
+export const useEditToolService = ({ onSuccess, onError }: UseEditToolServiceProps = {}) => {
   const queryClient = useQueryClient();
   const { toolsService } = useOnechatServices();
 
-  const { mutateAsync, isLoading } = useMutation<
+  const { mutate, mutateAsync, isLoading } = useMutation<
     UpdateToolResponse,
     Error,
     EditToolMutationVariables
@@ -47,73 +50,57 @@ export const useEditTool = ({
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.tools.all }),
   });
 
-  return { updateTool: mutateAsync, isLoading };
+  return { updateToolSync: mutate, updateTool: mutateAsync, isLoading };
 };
 
-export type EditToolSuccessCallback = (tool: UpdateToolResponse) => void;
-export type EditToolErrorCallback = (error: Error, variables: EditToolMutationVariables) => void;
-
-export const useEditToolFlyout = ({
-  onSuccess,
-  onError,
-}: {
+export interface UseEditToolProps {
+  toolId: string;
   onSuccess?: EditToolSuccessCallback;
   onError?: EditToolErrorCallback;
-}) => {
-  const { isOpen, openFlyout, closeFlyout } = useFlyoutState();
-  const [editingToolId, setEditingToolId] = useState<string | null>(null);
-  const { tool: editingTool, isLoading: isLoadingTool } = useOnechatTool(
-    editingToolId ?? undefined
-  );
+  onLoadingError?: (error: Error) => void;
+}
 
-  const handleOpenFlyout = useCallback(
-    (toolId: string) => {
-      setEditingToolId(toolId);
-      openFlyout();
+export const useEditTool = ({ toolId, onSuccess, onError, onLoadingError }: UseEditToolProps) => {
+  const { addSuccessToast, addErrorToast } = useToasts();
+  const { tool: editingTool, isLoading } = useTool({ toolId, onLoadingError });
+
+  const handleSuccess = useCallback<EditToolSuccessCallback>(
+    (response, variables, context) => {
+      addSuccessToast({
+        title: labels.tools.editEsqlToolSuccessToast(response.id),
+      });
+      onSuccess?.(response, variables, context);
     },
-    [openFlyout]
+    [addSuccessToast, onSuccess]
   );
 
-  const handleCloseFlyout = useCallback(() => {
-    setEditingToolId(null);
-    closeFlyout();
-  }, [closeFlyout]);
-
-  const handleSuccess = useCallback<EditToolMutationSuccessCallback>(
-    (tool) => {
-      closeFlyout();
-      onSuccess?.(tool);
+  const handleError = useCallback<EditToolErrorCallback>(
+    (error, variables, context) => {
+      addErrorToast({
+        title: labels.tools.editEsqlToolErrorToast(variables.toolId),
+        text: formatOnechatErrorMessage(error),
+      });
+      onError?.(error, variables, context);
     },
-    [closeFlyout, onSuccess]
+    [addErrorToast, onError]
   );
 
-  const handleError = useCallback<EditToolMutationErrorCallback>(
-    (error, variables) => {
-      onError?.(error, variables);
-    },
-    [onError]
-  );
-
-  const { updateTool, isLoading: isSubmitting } = useEditTool({
+  const { updateTool, isLoading: isSubmitting } = useEditToolService({
     onSuccess: handleSuccess,
     onError: handleError,
   });
 
-  const saveTool = useCallback(
+  const handleEditTool = useCallback(
     async (toolData: UpdateToolPayload) => {
-      if (!editingTool) return;
-      await updateTool({ toolId: editingTool.id, tool: toolData });
+      return updateTool({ toolId, tool: toolData });
     },
-    [updateTool, editingTool]
+    [updateTool, toolId]
   );
 
   return {
-    isOpen,
     tool: editingTool,
-    isLoading: isLoadingTool,
+    isLoading,
     isSubmitting,
-    openFlyout: handleOpenFlyout,
-    closeFlyout: handleCloseFlyout,
-    submit: saveTool,
+    editTool: handleEditTool,
   };
 };

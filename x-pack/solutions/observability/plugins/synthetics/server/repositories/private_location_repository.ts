@@ -8,11 +8,11 @@ import { i18n } from '@kbn/i18n';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { getAgentPoliciesAsInternalUser } from '../routes/settings/private_locations/get_agent_policies';
-import { PrivateLocationAttributes } from '../runtime_types/private_locations';
-import { PrivateLocationObject } from '../routes/settings/private_locations/add_private_location';
-import { RouteContext } from '../routes/types';
+import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
+import type { PrivateLocationObject } from '../routes/settings/private_locations/add_private_location';
+import type { RouteContext } from '../routes/types';
 import { privateLocationSavedObjectName } from '../../common/saved_objects/private_locations';
-import { EditPrivateLocationAttributes } from '../routes/settings/private_locations/edit_private_location';
+import type { EditPrivateLocationAttributes } from '../routes/settings/private_locations/edit_private_location';
 
 export class PrivateLocationRepository {
   internalSOClient: ISavedObjectsRepository;

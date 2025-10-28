@@ -11,12 +11,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@el
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared/src/alert_lifecycle_status_badge';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertStatus, ALERT_DURATION, ALERT_FLAPPING, TIMESTAMP, TAGS } from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_DURATION, ALERT_FLAPPING, TIMESTAMP, TAGS } from '@kbn/rule-data-utils';
 import { css } from '@emotion/react';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { asDuration } from '../../../../common/utils/formatters';
-import { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../typings/alerts';
 import { CaseLinks } from './case_links';
 
 export interface StatusBarProps {
@@ -65,6 +66,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
           </EuiText>
           <EuiToolTip content={moment(Number(alert.start)).format(dateFormat)}>
             <EuiText
+              tabIndex={0}
               css={css`
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}
@@ -105,6 +107,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
           </EuiText>
           <EuiToolTip content={moment(alert.fields[TIMESTAMP]).format(dateFormat)}>
             <EuiText
+              tabIndex={0}
               css={css`
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}

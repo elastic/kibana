@@ -21,7 +21,7 @@
   "testData": {
     "esArchives": [],
     "kbnArchives": [
-      "x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/saved_objects_mix.json"
+      "x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/saved_objects_mix.json"
     ]
   },
   "streams": [

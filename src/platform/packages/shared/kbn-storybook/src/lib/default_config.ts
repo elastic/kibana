@@ -83,7 +83,10 @@ export const defaultConfig: StorybookConfig = {
                     const req = JSON.stringify(
                       loaderContext.utils.contextify(
                         loaderContext.context || loaderContext.rootContext,
-                        resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                        resolve(
+                          REPO_ROOT,
+                          'src/core/public/styles/core_app/_globals_borealislight.scss'
+                        )
                       )
                     );
                     return `@import ${req};\n${content}`;
@@ -238,7 +241,7 @@ export const defaultConfig: StorybookConfig = {
   staticDirs: [
     UiSharedDepsNpm.distDir,
     UiSharedDepsSrc.distDir,
-    `${REPO_ROOT}/bazel-bin/src/platform/packages/shared/kbn-monaco/target_workers`,
+    `${REPO_ROOT}/target/build/src/platform/packages/shared/kbn-monaco/target_workers`,
     {
       from: `${REPO_ROOT}/src/platform/plugins/shared/kibana_react/public/assets`,
       to: 'plugins/kibanaReact/assets',

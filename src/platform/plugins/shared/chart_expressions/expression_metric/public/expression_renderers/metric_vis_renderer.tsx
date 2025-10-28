@@ -11,9 +11,9 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { css } from '@emotion/react';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createPerformanceTracker,
@@ -21,10 +21,11 @@ import {
   PERFORMANCE_TRACKER_TYPES,
 } from '@kbn/ebt-tools';
 import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plugin/common';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
-import { ExpressionMetricPluginStart } from '../plugin';
-import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
+import type { ExpressionMetricPluginStart } from '../plugin';
+import type { MetricVisRenderConfig, VisParams } from '../../common';
+import { EXPRESSION_METRIC_NAME } from '../../common';
 
 async function metricFilterable(
   dimensions: VisParams['dimensions'],

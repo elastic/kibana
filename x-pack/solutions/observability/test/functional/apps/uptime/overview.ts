@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export const UPTIME_HEARTBEAT_DATA =
   'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat';

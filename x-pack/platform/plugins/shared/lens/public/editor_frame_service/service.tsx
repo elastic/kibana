@@ -6,33 +6,33 @@
  */
 
 import React from 'react';
-import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import {
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-  DataViewsContract,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import {
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
-import type { LensDocument } from '../persistence';
-import {
+import type {
+  LensDocument,
   Datasource,
   Visualization,
   EditorFrameSetup,
   EditorFrameInstance,
   EditorFrameStart,
-} from '../types';
+} from '@kbn/lens-common';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -153,8 +153,6 @@ export class EditorFrameService {
                 getUserMessages={getUserMessages}
                 addUserMessages={addUserMessages}
                 indexPatternService={indexPatternService}
-                datasourceMap={resolvedDatasources}
-                visualizationMap={resolvedVisualizations}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
               />
             </div>

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -130,7 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should launch sample flights data set dashboard', async () => {
       await dashboard.navigateToApp();
       await dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-      await header.waitUntilLoadingHasFinished();
       await timePicker.setCommonlyUsedTime('sample_data range');
       await header.waitUntilLoadingHasFinished();
 

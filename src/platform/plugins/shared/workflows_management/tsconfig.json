@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -23,7 +24,6 @@
     "@kbn/workflows",
     "@kbn/zod",
     "@kbn/code-editor",
-    "@kbn/security-plugin-types-common",
     "@kbn/monaco",
     "@kbn/actions-plugin",
     "@kbn/features-plugin",
@@ -32,8 +32,37 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/core-application-common",
     "@kbn/security-plugin-types-server",
+    "@kbn/spaces-plugin",
+    "@kbn/css-utils",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/core-ui-settings-server",
+    "@kbn/logging-mocks",
+    "@kbn/discover-utils",
+    "@kbn/storybook",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-chrome-layout",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/react-field",
+    "@kbn/storage-adapter",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/core-lifecycle-browser-mocks",
+    "@kbn/serverless",
+    "@kbn/field-types",
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/es-query",
+    "@kbn/data-plugin",
+    "@kbn/rrule",
+    "@kbn/resizable-layout",
+    "@kbn/es-types",
+    "@kbn/search-types",
+    "@kbn/utility-types",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/react-query"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

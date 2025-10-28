@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiComboBox,
@@ -17,7 +18,6 @@ import {
   EuiFormLabel,
   EuiLink,
   useEuiTheme,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -28,11 +28,13 @@ import {
 } from '@kbn/field-formats-plugin/common';
 import { css } from '@emotion/react';
 import type { DocLinksStart } from '@kbn/core/public';
-import { TextBasedLayerColumn } from '../esql_layer/types';
-import { LensAppServices } from '../../../app_plugin/types';
-import { GenericIndexPatternColumn } from '../form_based';
+import type {
+  ValueFormatConfig,
+  TextBasedLayerColumn,
+  LensAppServices,
+  GenericIndexPatternColumn,
+} from '@kbn/lens-common';
 import { isColumnFormatted } from '../operations/definitions/helpers';
-import { ValueFormatConfig } from '../operations/definitions/column_types';
 import { DurationRowInputs } from './formatting/duration_input';
 import { Prepend, PrependWidthProvider } from '../../../shared_components/prepend_provider';
 

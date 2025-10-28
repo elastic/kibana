@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 
 /**
  * A publishing subject is a RxJS subject that can be used to listen to value changes, but does not allow pushing values via the Next method.

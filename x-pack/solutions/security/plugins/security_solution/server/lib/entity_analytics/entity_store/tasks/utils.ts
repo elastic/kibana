@@ -7,6 +7,12 @@
 
 import type { Logger } from '@kbn/logging';
 
+export const entityStoreTaskLogMessageFactory =
+  (taskId: string) =>
+  (message: string): string => {
+    return `[Entity Store] [task ${taskId}]: ${message}`;
+  };
+
 export const entityStoreTaskLogFactory =
   (logger: Logger, taskId: string) =>
   (message: string): void =>

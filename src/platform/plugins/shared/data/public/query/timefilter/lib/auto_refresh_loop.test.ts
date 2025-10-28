@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createAutoRefreshLoop, AutoRefreshDoneFn } from './auto_refresh_loop';
+import type { AutoRefreshDoneFn } from './auto_refresh_loop';
+import { createAutoRefreshLoop } from './auto_refresh_loop';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 

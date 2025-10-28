@@ -19,7 +19,7 @@ import { BehaviorSubject } from 'rxjs';
 import { AlertRuleFromVisAction } from './alert_rule_from_vis_ui_action';
 import * as AlertFlyoutComponentModule from './rule_flyout_component';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 
 // mock lazy flyout component
 jest.mock('@kbn/presentation-util', () => ({
@@ -84,6 +84,10 @@ const startDependenciesMock = {
   fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   coreStart: {
     ...embeddableServices.coreStart,
+    application: {
+      ...embeddableServices.coreStart.application,
+      currentAppId$: new BehaviorSubject('dashboards'),
+    },
     overlays: {
       ...embeddableServices.coreStart.overlays,
       openFlyout: jest.fn((a) => a),

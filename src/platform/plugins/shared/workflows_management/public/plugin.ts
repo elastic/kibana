@@ -7,42 +7,103 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  type AppMountParameters,
+  type CoreSetup,
+  type CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  type Plugin,
+} from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import type {
-  WorkflowsPluginSetup,
-  WorkflowsPluginStart,
-  AppPluginStartDependencies,
+  WorkflowsPublicPluginSetup,
+  WorkflowsPublicPluginSetupDependencies,
+  WorkflowsPublicPluginStart,
+  WorkflowsPublicPluginStartAdditionalServices,
+  WorkflowsPublicPluginStartDependencies,
+  WorkflowsServices,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+// Lazy import to avoid bundling connector dependencies in main plugin
 
-export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
-  public setup(core: CoreSetup): WorkflowsPluginSetup {
-    // Register an application into the side navigation menu
-    // TODO: add icon
+export class WorkflowsPlugin
+  implements
+    Plugin<
+      WorkflowsPublicPluginSetup,
+      WorkflowsPublicPluginStart,
+      WorkflowsPublicPluginSetupDependencies,
+      WorkflowsPublicPluginStartDependencies
+    >
+{
+  public setup(
+    core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>,
+    plugins: WorkflowsPublicPluginSetupDependencies
+  ): WorkflowsPublicPluginSetup {
+    // Check if workflows UI is enabled
+    const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
+
+    /* **************************************************************************************************************************** */
+    /* WARNING: DO NOT ADD ANYTHING ABOVE THIS LINE, which can expose workflows UI to users who don't have the feature flag enabled */
+    /* **************************************************************************************************************************** */
+    // Return early if workflows UI is not enabled, do not register the connector type and UI
+    if (!isWorkflowsUiEnabled) {
+      return {};
+    }
+
+    // Register workflows connector UI component lazily to reduce main bundle size
+    const registerConnectorType = async () => {
+      const { getWorkflowsConnectorType } = await import('./connectors/workflows');
+      plugins.triggersActionsUi.actionTypeRegistry.register(getWorkflowsConnectorType());
+    };
+
+    registerConnectorType();
+
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       appRoute: '/app/workflows',
+      euiIconType: 'workflowsApp',
       visibleIn: ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
-      async mount(params: AppMountParameters) {
+      category: DEFAULT_APP_CATEGORIES.management,
+      order: 9015,
+      mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
-        // Get start services as specified in kibana.json
-        const [coreStart, depsStart] = await core.getStartServices();
-        // Render the application
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        const services = await this.createWorkflowsStartServices(core);
+
+        // Set badge for classic navbar
+        services.chrome.setBadge({
+          text: 'Technical preview',
+          tooltip:
+            'This functionality is in technical preview. It may change or be removed in a future release.',
+          iconType: 'beaker',
+        });
+
+        return renderApp(services, params);
       },
     });
 
-    // Return methods that should be available to other plugins
-    return {
-      // TODO: add methods here
-    };
+    return {};
   }
 
-  public start(core: CoreStart): WorkflowsPluginStart {
+  public start(core: CoreStart): WorkflowsPublicPluginStart {
     return {};
   }
 
   public stop() {}
+
+  /** Creates the start services to be used in the Kibana services context of the workflows application */
+  private async createWorkflowsStartServices(
+    core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
+  ): Promise<WorkflowsServices> {
+    // Get start services as specified in kibana.jsonc
+    const [coreStart, depsStart] = await core.getStartServices();
+
+    const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
+      storage: new Storage(localStorage),
+    };
+
+    return { ...coreStart, ...depsStart, ...additionalServices };
+  }
 }

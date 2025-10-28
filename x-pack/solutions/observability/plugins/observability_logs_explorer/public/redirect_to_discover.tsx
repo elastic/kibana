@@ -9,9 +9,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { safeDecode } from '@kbn/rison';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   normalizeUrlState,
@@ -19,7 +19,7 @@ import {
   getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
   getDiscoverFiltersFromState,
 } from './logs_explorer_url_schema';
-import { DisplayOptions } from './logs_explorer_schema_types';
+import type { DisplayOptions } from './logs_explorer_schema_types';
 
 const DEFAULT_ALL_SELECTION = { selectionType: 'all' as const };
 

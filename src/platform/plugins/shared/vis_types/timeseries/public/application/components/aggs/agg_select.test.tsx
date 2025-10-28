@@ -12,7 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { AggSelect } from './agg_select';
 import { METRIC, SERIES } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';
-import { Metric } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 
 describe('TSVB AggSelect', () => {
   const setup = (panelType: string, value: string) => {

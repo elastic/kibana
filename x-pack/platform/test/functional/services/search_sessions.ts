@@ -8,132 +8,85 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_SEARCH_SESSION_REST_VERSION } from '@kbn/data-plugin/server';
 import expect from '@kbn/expect';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrService } from '../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { FtrService } from '@kbn/test-suites-src/functional/ftr_provider_context';
 
-const SEARCH_SESSION_INDICATOR_TEST_SUBJ = 'searchSessionIndicator';
-const SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ = 'searchSessionIndicatorPopoverContainer';
-
-export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;
-export const TOUR_RESTORE_STEP_KEY = `data.searchSession.tour.restore`;
-
-type SessionStateType =
-  | 'none'
-  | 'loading'
-  | 'completed'
-  | 'backgroundLoading'
-  | 'backgroundCompleted'
-  | 'restored'
-  | 'canceled';
+const BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT = 'openBackgroundSearchFlyoutButton';
+const BACKGROUND_SEARCH_SUBMIT_BUTTON = 'querySubmitButton-secondary-button';
+const BACKGROUND_SEARCH_CANCEL_BUTTON = 'queryCancelButton-secondary-button';
 
 export class SearchSessionsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
-  private readonly browser = this.ctx.getService('browser');
   private readonly security = this.ctx.getService('security');
+  private readonly toasts = this.ctx.getService('toasts');
   private readonly es = this.ctx.getService('es');
 
   public async find(): Promise<WebElementWrapper> {
-    return this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
+    return this.testSubjects.find(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
   }
 
   public async exists(): Promise<boolean> {
-    return this.testSubjects.exists(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
+    return this.testSubjects.exists(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
   }
 
   public async missingOrFail(): Promise<void> {
-    return this.testSubjects.missingOrFail(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
+    return this.testSubjects.missingOrFail(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
   }
 
   public async disabledOrFail() {
-    await this.exists();
-    await expect(await (await this.find()).getAttribute('data-save-disabled')).to.be('true');
+    const isDisabled = await this.testSubjects.getAttribute(
+      BACKGROUND_SEARCH_SUBMIT_BUTTON,
+      'disabled'
+    );
+    expect(isDisabled).to.be('true');
   }
 
-  public async expectState(state: SessionStateType, timeout = 10000) {
-    return this.retry.waitForWithTimeout(
-      `searchSessions indicator to get into state = ${state}`,
-      timeout,
+  public async save({
+    // Dashboards don't put the split button in the loading state so the selector is different
+    withRefresh = false,
+    isSubmitButton = false,
+  }: { searchSessionName?: string; isSubmitButton?: boolean; withRefresh?: boolean } = {}) {
+    this.log.debug('save the search session');
+    if (withRefresh) {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('querySubmitButton');
+    }
+
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(
+      isSubmitButton ? BACKGROUND_SEARCH_SUBMIT_BUTTON : BACKGROUND_SEARCH_CANCEL_BUTTON
+    );
+    await this.expectSearchSavedToast();
+  }
+
+  public async expectSearchSavedToast() {
+    await this.retry.waitFor(
+      'the toast appears indicating that the search session is saved',
       async () => {
-        const currentState = await (
-          await this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ)
-        ).getAttribute('data-state');
-        this.log.info(`searchSessions state current: ${currentState} expected: ${state}`);
-        return currentState === state;
+        const count = await this.toasts.getCount();
+        return count > 0;
       }
     );
   }
 
-  public async viewSearchSessions() {
-    this.log.debug('viewSearchSessions');
-    await this.ensurePopoverOpened();
-    await this.testSubjects.click('searchSessionIndicatorViewSearchSessionsLink');
+  public async openFlyoutFromToast() {
+    await this.expectSearchSavedToast();
+    await this.testSubjects.click('backgroundSearchToastLink');
   }
 
-  public async save({ searchSessionName }: { searchSessionName?: string } = {}) {
-    this.log.debug('save the search session');
-    await this.ensurePopoverOpened();
-    await this.testSubjects.click('searchSessionIndicatorSaveBtn');
-
-    if (searchSessionName) {
-      await this.testSubjects.click('searchSessionNameEdit');
-      await this.testSubjects.setValue('searchSessionNameInput', searchSessionName, {
-        clearWithKeyboard: true,
-      });
-      await this.testSubjects.click('searchSessionNameSave');
-    }
-
-    await this.ensurePopoverClosed();
+  public async openFlyout() {
+    await this.testSubjects.click(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
+    await this.expectManagementTable();
   }
 
-  public async cancel() {
-    this.log.debug('cancel the search session');
-    await this.ensurePopoverOpened();
-    await this.testSubjects.click('searchSessionIndicatorCancelBtn');
-    await this.ensurePopoverClosed();
+  public async closeFlyout() {
+    await this.testSubjects.click('euiFlyoutCloseButton');
+    await this.testSubjects.missingOrFail('searchSessionsMgmtUiTable');
   }
 
-  public async openPopover() {
-    await this.ensurePopoverOpened();
-  }
-
-  public async openedOrFail() {
-    return this.testSubjects.existOrFail(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ, {
-      timeout: 15000, // because popover auto opens after search takes 10s
-    });
-  }
-
-  public async closedOrFail() {
-    return this.testSubjects.missingOrFail(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ, {
-      timeout: 15000, // because popover auto opens after search takes 10s
-    });
-  }
-
-  private async ensurePopoverOpened() {
-    this.log.debug('ensurePopoverOpened');
-    const isAlreadyOpen = await this.testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ);
-    if (isAlreadyOpen) {
-      this.log.debug('Popover is already open');
-      return;
-    }
-    return this.retry.waitFor(`searchSessions popover opened`, async () => {
-      await this.testSubjects.click(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
-      return await this.testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ);
-    });
-  }
-
-  private async ensurePopoverClosed() {
-    this.log.debug('ensurePopoverClosed');
-    const isAlreadyClosed = !(await this.testSubjects.exists(
-      SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ
-    ));
-    if (isAlreadyClosed) return;
-    return this.retry.waitFor(`searchSessions popover closed`, async () => {
-      await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      return !(await this.testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ));
-    });
+  public async expectManagementTable() {
+    await this.testSubjects.existOrFail('searchSessionsMgmtUiTable');
   }
 
   /*
@@ -178,20 +131,6 @@ export class SearchSessionsService extends FtrService {
         })
       );
     });
-  }
-
-  public async markTourDone() {
-    await Promise.all([
-      this.browser.setLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY, 'true'),
-      this.browser.setLocalStorageItem(TOUR_RESTORE_STEP_KEY, 'true'),
-    ]);
-  }
-
-  public async markTourUndone() {
-    await Promise.all([
-      this.browser.removeLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY),
-      this.browser.removeLocalStorageItem(TOUR_RESTORE_STEP_KEY),
-    ]);
   }
 
   public async getAsyncSearchStatus(asyncSearchId: string) {

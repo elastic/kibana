@@ -7,8 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import type {
   ConcreteTaskInstance,
   TaskInstance,
   TaskManagerSetupContract,
@@ -19,11 +19,11 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 import moment from 'moment';
 import { MaintenanceWindowClient } from '@kbn/alerting-plugin/server/maintenance_window_client';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 import { isEmpty } from 'lodash';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import { registerCleanUpTask } from './private_location/clean_up_task';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
@@ -33,11 +33,11 @@ import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_se
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
-import { ServiceConfig } from '../config';
-import { ServiceAPIClient, ServiceData } from './service_api_client';
+import type { ServiceConfig } from '../config';
+import type { ServiceData } from './service_api_client';
+import { ServiceAPIClient } from './service_api_client';
 
-import {
-  ConfigKey,
+import type {
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
@@ -45,11 +45,12 @@ import {
   SyntheticsParams,
   ThrottlingOptions,
 } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
 import { normalizeSecrets } from './utils/secrets';
+import type { ConfigData } from './formatters/public_formatters/format_configs';
 import {
-  ConfigData,
   formatHeartbeatRequest,
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
@@ -199,9 +200,7 @@ export class SyntheticsService {
                   await service.pushConfigs();
                 } else {
                   if (!service.isAllowed) {
-                    service.logger.error(
-                      'User is not allowed to access Synthetics service. Please contact support.'
-                    );
+                    service.logger.debug('User is not allowed to access Synthetics service.');
                   }
                 }
               } catch (e) {
@@ -318,10 +317,12 @@ export class SyntheticsService {
   }
 
   async getOutput({ inspect }: { inspect: boolean } = { inspect: false }) {
-    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server: this.server });
+    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
+      server: this.server,
+    });
     // do not check for api key validity if inspecting
     if (!isValid && !inspect) {
-      this.server.logger.error(
+      this.server.logger.debug(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
       this.invalidApiKeyError = true;

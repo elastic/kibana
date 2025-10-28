@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  usageCollectorsStatsCollector,
-  CollectorsStatsCollectorParams,
-} from './usage_collector_stats_collector';
+import type { CollectorsStatsCollectorParams } from './usage_collector_stats_collector';
+import { usageCollectorsStatsCollector } from './usage_collector_stats_collector';
 import { UsageCollector } from '../usage_collector';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createCollectorFetchContextMock } from '../../mocks';

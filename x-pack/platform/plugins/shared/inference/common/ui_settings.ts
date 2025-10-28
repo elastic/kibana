@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 
@@ -38,6 +38,7 @@ const nerRuleSchema = schema.allOf([
         ])
       )
     ),
+    timeoutSeconds: schema.maybe(schema.number({ min: 1 })),
   }),
 ]);
 
@@ -61,6 +62,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
             modelId: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
             enabled: false,
             allowedEntityClasses: ['PER', 'ORG', 'LOC'],
+            timeoutSeconds: 30,
           },
         ],
       },
@@ -75,11 +77,13 @@ export const uiSettings: Record<string, UiSettingsParams> = {
             <li><strong>pattern:</strong> (regex type only) the regular-expression string to match</li>
             <li><strong>modelId:</strong> (ner type only) ID of the NER (Named Entity Recognition) model to use</li>
             <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
+            <li><strong>timeoutSeconds:</strong> (ner type only) maximum seconds <em>per inference request</em> before timing out (multiple requests may be issued during a single chat interaction)</li>
           </ul>`,
       values: {
         ul: (chunks) => `<ul>${chunks}</ul>`,
         li: (chunks) => `<li>${chunks}</li>`,
         strong: (chunks) => `<strong>${chunks}</strong>`,
+        em: (chunks) => `<em>${chunks}</em>`,
       },
     }),
     schema: schema.object({

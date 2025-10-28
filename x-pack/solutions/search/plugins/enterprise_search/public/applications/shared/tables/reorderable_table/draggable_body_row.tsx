@@ -8,28 +8,31 @@
 import React from 'react';
 
 import { EuiDraggable, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { BodyRow } from './body_row';
-import { Column } from './types';
+import type { Column } from './types';
 
 export interface DraggableBodyRowProps<Item> {
-  columns: Array<Column<Item>>;
-  item: Item;
-  rowIndex: number;
   additionalProps?: object;
+  ariaRowindex?: number;
+  columns: Array<Column<Item>>;
   disableDragging?: boolean;
   errors?: string[];
+  item: Item;
   rowIdentifier?: string;
+  rowIndex: number;
 }
 
 export const DraggableBodyRow = <Item extends object>({
-  columns,
-  item,
-  rowIndex,
   additionalProps,
+  ariaRowindex,
+  columns,
   disableDragging = false,
   errors,
+  item,
   rowIdentifier,
+  rowIndex,
 }: DraggableBodyRowProps<Item>) => {
   const draggableId = `draggable_row_${rowIndex}`;
 
@@ -38,23 +41,40 @@ export const DraggableBodyRow = <Item extends object>({
       index={rowIndex}
       draggableId={draggableId}
       isDragDisabled={disableDragging}
-      disableInteractiveElementBlocking={disableDragging}
+      customDragHandle={!disableDragging}
+      hasInteractiveChildren
+      usePortal
       {...additionalProps}
     >
-      <BodyRow
-        columns={columns}
-        item={item}
-        additionalProps={additionalProps}
-        leftAction={
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              {disableDragging ? <div style={{ width: '16px' }} /> : <EuiIcon type="grab" />}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rowIdentifier={rowIdentifier}
-        errors={errors}
-      />
+      {(provided) => (
+        <BodyRow
+          columns={columns}
+          item={item}
+          additionalProps={additionalProps}
+          leftAction={
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                {disableDragging ? (
+                  <div style={{ width: '16px' }} />
+                ) : (
+                  <div
+                    {...provided.dragHandleProps}
+                    aria-label={i18n.translate(
+                      'xpack.enterpriseSearch.draggableBodyRow.dragHandleLabel',
+                      { defaultMessage: 'Drag handle' }
+                    )}
+                  >
+                    <EuiIcon type="grab" />
+                  </div>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          rowIdentifier={rowIdentifier}
+          errors={errors}
+          ariaRowindex={ariaRowindex}
+        />
+      )}
     </EuiDraggable>
   );
 };

@@ -7,37 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApplicationStart } from '@kbn/core/public';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '@kbn/visualizations-common';
 import { getUISettings } from '../../services';
-import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '../../../common/constants';
+import type { VisualizeUserContent } from '../components/visualize_listing';
 
-export const getVisualizeListItemLink = (
-  application: ApplicationStart,
-  kbnUrlStateStorage: IKbnUrlStateStorage,
-  editApp: string | undefined,
-  editUrl: string | undefined,
-  error: string | undefined = undefined
-) => {
-  if (error || (!editApp && !editUrl)) {
-    return undefined;
-  }
+export const getVisualizeListItemLinkFn =
+  (application: ApplicationStart, kbnUrlStateStorage: IKbnUrlStateStorage) =>
+  (item: VisualizeUserContent) => {
+    const {
+      editor,
+      attributes: { error, readOnly },
+    } = item;
+    if (readOnly || (editor && 'onEdit' in editor)) return;
 
-  // for visualizations the editApp is undefined
-  let url = application.getUrlForApp(editApp ?? VISUALIZE_APP_NAME, {
-    path: editApp ? editUrl : `#${editUrl}`,
-  });
-  const useHash = getUISettings().get('state:storeInSessionStorage');
-  const globalStateInUrl =
-    kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY) || {};
+    const { editApp, editUrl } = editor ?? {};
+    if (error || (!editApp && !editUrl)) return;
 
-  url = setStateToKbnUrl<GlobalQueryStateFromUrl>(
-    GLOBAL_STATE_STORAGE_KEY,
-    globalStateInUrl,
-    { useHash },
-    url
-  );
-  return url;
-};
+    // for visualizations the editApp is undefined
+    let url = application.getUrlForApp(editApp ?? VISUALIZE_APP_NAME, {
+      path: editApp ? editUrl : `#${editUrl}`,
+    });
+    const useHash = getUISettings().get('state:storeInSessionStorage');
+    const globalStateInUrl =
+      kbnUrlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_STORAGE_KEY) || {};
+
+    url = setStateToKbnUrl<GlobalQueryStateFromUrl>(
+      GLOBAL_STATE_STORAGE_KEY,
+      globalStateInUrl,
+      { useHash },
+      url
+    );
+    return url;
+  };

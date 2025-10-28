@@ -6,19 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiComboBoxOptionOption,
-  EuiIcon,
-  EuiSpacer,
-  EuiToolTip,
-  useEuiPaddingSize,
-} from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiToolTip, useEuiPaddingSize } from '@elastic/eui';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
-import { FieldConflictsInfo, getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
+import type { FieldConflictsInfo } from '@kbn/securitysolution-list-utils';
+import { getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 import * as i18n from '../translations';
-import {
+import type {
   ComboBoxFields,
   DataViewField,
   FieldBaseProps,
@@ -195,7 +191,7 @@ export const useEsField = ({
           content={labelTooltipText}
           position="bottom"
         >
-          <>{label}</>
+          <span tabIndex={0}>{label}</span>
         </EuiToolTip>
       );
     }

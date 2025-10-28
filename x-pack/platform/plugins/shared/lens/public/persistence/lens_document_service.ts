@@ -5,75 +5,52 @@
  * 2.0.
  */
 
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
+import type { HttpStart } from '@kbn/core/public';
 
-import type { LensSavedObjectAttributes, LensSearchQuery } from '../../common/content_management';
-import { getLensClient } from './lens_client';
+import type {
+  LensDocument,
+  ILensDocumentService,
+  CheckDuplicateTitleOptions,
+} from '@kbn/lens-common';
+import { LensClient } from './lens_client';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
-import { LensDocument } from './types';
+import type { LensSearchRequestQuery } from '../../server';
 
-export interface CheckDuplicateTitleOptions {
-  id?: string;
-  title: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-}
-
-interface ILensDocumentService {
-  save: (vis: LensDocument) => Promise<{ savedObjectId: string }>;
-  load: (savedObjectId: string) => Promise<unknown>;
-  checkForDuplicateTitle: (
-    options: CheckDuplicateTitleOptions,
-    onTitleDuplicate: () => void
-  ) => Promise<boolean>;
+interface LensSaveResult {
+  savedObjectId: string;
 }
 
 export class LensDocumentService implements ILensDocumentService {
-  private client: VisualizationClient<'lens', LensSavedObjectAttributes>;
+  private client: LensClient;
 
-  constructor(cm: ContentManagementPublicStart) {
-    this.client = getLensClient(cm);
+  constructor(http: HttpStart) {
+    this.client = new LensClient(http);
   }
 
-  save = async (vis: LensDocument) => {
-    const { savedObjectId, type, references, ...attributes } = vis;
+  save = async (vis: LensDocument): Promise<LensSaveResult> => {
+    // TODO: Flatten LenDocument types to align with new LensItem, for now just keep it.
+    const { savedObjectId, references, ...attributes } = vis;
 
     if (savedObjectId) {
-      const result = await this.client.update({
-        id: savedObjectId,
-        data: attributes,
-        options: {
-          references,
-        },
-      });
-      return { ...vis, savedObjectId: result.item.id };
+      const {
+        item: { id },
+      } = await this.client.update(savedObjectId, attributes, references);
+      return { savedObjectId: id };
     }
-    const result = await this.client.create({
-      data: attributes,
-      options: {
-        references,
-      },
-    });
-    return { ...vis, savedObjectId: result.item.id };
+
+    const {
+      item: { id: newId },
+    } = await this.client.create(attributes, references);
+
+    return { savedObjectId: newId };
   };
 
   async load(savedObjectId: string) {
-    const resolveResult = await this.client.get(savedObjectId);
-
-    if (resolveResult.item.error) {
-      throw resolveResult.item.error;
-    }
-
-    return resolveResult;
+    return this.client.get(savedObjectId);
   }
 
-  async search(query: SearchQuery, options: LensSearchQuery) {
-    const result = await this.client.search(query, options);
-    return result;
+  async search(options: LensSearchRequestQuery) {
+    return this.client.search(options);
   }
 
   /**
@@ -104,18 +81,13 @@ export class LensDocumentService implements ILensDocumentService {
 
     // Elasticsearch will return the most relevant results first, which means exact matches should come
     // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
-    const response = await this.search(
-      {
-        limit: 10,
-        text: `"${title}"`,
-      },
-      {
-        searchFields: ['title'],
-      }
-    );
-    const duplicate = response.hits.find(
-      (obj) => obj.attributes.title.toLowerCase() === title.toLowerCase()
-    );
+    const response = await this.search({
+      perPage: 10,
+      query: `"${title}"`,
+      searchFields: ['title'],
+    });
+
+    const duplicate = response.find((item) => item.title.toLowerCase() === title.toLowerCase());
 
     if (!duplicate || duplicate.id === id) {
       return true;

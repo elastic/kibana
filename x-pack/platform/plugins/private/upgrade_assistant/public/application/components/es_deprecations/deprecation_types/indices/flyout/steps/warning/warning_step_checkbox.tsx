@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -23,8 +24,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
-import { IndexWarning, IndexWarningType } from '../../../../../../../../../common/types';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { IndexWarning, IndexWarningType } from '@kbn/reindex-service-plugin/common';
 
 export const hasIndexWarning = (
   warnings: IndexWarning[],

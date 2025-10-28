@@ -9,15 +9,17 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 
 import { SideNavFooter } from './footer';
 import { SideNavFooterItem } from './footer_item';
-import { SideNavLogo } from './logo';
+import { SideNavLogoComponent } from './logo';
 import { SideNavPanel } from './panel';
 import { SideNavPopover } from '../popover';
 import { SideNavPrimaryMenu } from './primary_menu';
 import { SideNavPrimaryMenuItem } from './primary_menu_item';
+import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '../../hooks/use_layout_width';
 
 export interface SideNavProps {
   children: ReactNode;
@@ -25,7 +27,7 @@ export interface SideNavProps {
 }
 
 interface SideNavComponent extends FC<SideNavProps> {
-  Logo: typeof SideNavLogo;
+  Logo: typeof SideNavLogoComponent;
   PrimaryMenu: typeof SideNavPrimaryMenu;
   PrimaryMenuItem: typeof SideNavPrimaryMenuItem;
   Popover: typeof SideNavPopover;
@@ -41,14 +43,15 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
     <div
       className="side-nav"
       css={css`
+        box-sizing: border-box;
         background-color: ${euiTheme.colors.backgroundBasePlain};
-        border-right: 1px solid ${euiTheme.colors.borderBaseSubdued};
+        border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
         display: flex;
         flex-direction: column;
         gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
         height: 100%;
         padding-bottom: ${euiTheme.size.base};
-        width: ${isCollapsed ? euiTheme.size.xxxl : '86px'};
+        width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
       `}
     >
       {children}
@@ -56,7 +59,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
   );
 };
 
-SideNav.Logo = SideNavLogo;
+SideNav.Logo = SideNavLogoComponent;
 SideNav.PrimaryMenu = SideNavPrimaryMenu;
 SideNav.PrimaryMenuItem = SideNavPrimaryMenuItem;
 SideNav.Popover = SideNavPopover;

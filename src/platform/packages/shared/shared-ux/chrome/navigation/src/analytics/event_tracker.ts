@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 
 interface ClickNavLinkEvent {
   id: string;

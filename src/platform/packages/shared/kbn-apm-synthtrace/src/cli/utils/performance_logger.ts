@@ -8,7 +8,7 @@
  */
 
 import { memoryUsage } from 'process';
-import { Logger } from '../../lib/utils/create_logger';
+import type { Logger } from '../../lib/utils/create_logger';
 
 export function startPerformanceLogger({
   logger,

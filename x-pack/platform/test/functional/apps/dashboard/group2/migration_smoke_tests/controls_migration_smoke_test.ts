@@ -12,7 +12,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
+  const browser = getService('browser');
 
   const { settings, savedObjects, dashboard, dashboardControls } = getPageObjects([
     'settings',
@@ -61,6 +62,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.loadSavedDashboard('[8.0.0] Controls Dashboard');
 
       // dashboard should load properly
+      await dashboard.expectOnDashboard('[8.0.0] Controls Dashboard');
+
+      // Refresh the dashboard to clear any stale search sessions from migration
+      await browser.refresh();
       await dashboard.expectOnDashboard('[8.0.0] Controls Dashboard');
       await dashboard.waitForRenderComplete();
 

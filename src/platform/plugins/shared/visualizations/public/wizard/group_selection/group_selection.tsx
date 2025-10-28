@@ -8,7 +8,8 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
 import {
   EuiFlexGroup,
@@ -31,7 +32,7 @@ import {
   euiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { BaseVisType, TypesStart } from '../../vis_types';
@@ -87,6 +88,10 @@ interface VisCardProps {
   shouldStretch?: boolean;
 }
 
+const legacyTabTitle = i18n.translate('visualizations.newVisWizard.legacyTab', {
+  defaultMessage: 'Legacy',
+});
+
 const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; dataTestSubj: string }> = [
   {
     id: 'recommended',
@@ -99,12 +104,13 @@ const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; dataTestSubj
     id: 'legacy',
     dataTestSubj: 'groupModalLegacyTab',
     label: (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          {i18n.translate('visualizations.newVisWizard.legacyTab', {
-            defaultMessage: 'Legacy',
-          })}
-        </EuiFlexItem>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        aria-label={legacyTabTitle}
+      >
+        <EuiFlexItem grow={false}>{legacyTabTitle}</EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiIconTip

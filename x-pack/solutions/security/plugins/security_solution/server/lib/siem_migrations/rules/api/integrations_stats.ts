@@ -9,9 +9,9 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { type GetRuleMigrationIntegrationsStatsResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from '../../common/utils/authz';
-import { withLicense } from '../../common/utils/with_license';
-import { SiemMigrationAuditLogger } from '../../common/utils/audit';
+import { authz } from '../../common/api/util/authz';
+import { withLicense } from '../../common/api/util/with_license';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 
 export const registerSiemRuleMigrationsIntegrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -34,14 +34,17 @@ export const registerSiemRuleMigrationsIntegrationsStatsRoute = (
           _req,
           res
         ): Promise<IKibanaResponse<GetRuleMigrationIntegrationsStatsResponse>> => {
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'rules'
+          );
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
             await siemMigrationAuditLogger.logGetAllIntegrationsStats();
 
             const allIntegrationsStats =
-              await ruleMigrationsClient.data.rules.getAllIntegrationsStats();
+              await ruleMigrationsClient.data.items.getAllIntegrationsStats();
 
             return res.ok({ body: allIntegrationsStats });
           } catch (error) {

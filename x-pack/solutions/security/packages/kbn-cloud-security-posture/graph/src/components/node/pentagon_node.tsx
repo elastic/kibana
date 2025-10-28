@@ -6,10 +6,10 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
-import styled from '@emotion/styled';
+import { useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
+  NodeContainer,
   NodeShapeContainer,
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
@@ -17,49 +17,93 @@ import {
   NodeButton,
   HandleStyleOverride,
   useNodeFillColor,
+  middleEntityNodeShapeStyle,
+  bottomEntityNodeShapeStyle,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { PentagonHoverShape, PentagonShape } from './shapes/pentagon_shape';
 import { NodeExpandButton } from './node_expand_button';
-import { Label } from './label';
 import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
-
-const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
-  transform: translate(-50%, -51.5%);
-`;
+import { NodeDetails } from './node_details';
+import {
+  GRAPH_ENTITY_NODE_ID,
+  GRAPH_ENTITY_NODE_HOVER_SHAPE_ID,
+  GRAPH_STACKED_SHAPE_ID,
+} from '../test_ids';
+import { showStackedShape } from '../utils';
 
 const NODE_SHAPE_WIDTH = 91;
-const NODE_SHAPE_HEIGHT = 88;
+const NODE_SHAPE_HEIGHT = 97;
+const NODE_SHAPE_Y_POS_DELTA = 7;
+const NODE_SHAPE_ON_HOVER_Y_POS_DELTA = 4;
+const NODE_SHAPE_ON_HOVER_STACKED_Y_POS_DELTA = 6;
 
 export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
-    props.data as EntityNodeViewModel;
+  const {
+    id,
+    color,
+    icon,
+    label,
+    tag,
+    count,
+    ips,
+    countryCodes,
+    interactive,
+    expandButtonClick,
+    nodeClick,
+    ipClickHandler,
+    countryClickHandler,
+  } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
+  const shadow = useEuiShadow('m', { property: 'filter' });
+  const fillColor = useNodeFillColor(color ?? 'primary');
+  const strokeColor = euiTheme.colors[color ?? 'primary'];
   return (
-    <>
+    <NodeContainer data-test-subj={GRAPH_ENTITY_NODE_ID}>
       <NodeShapeContainer>
         {interactive && (
-          <PentagonShapeOnHover
+          <NodeShapeOnHoverSvg
+            data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}
             width={NODE_SHAPE_WIDTH}
             height={NODE_SHAPE_HEIGHT}
             viewBox={`0 0 ${NODE_SHAPE_WIDTH} ${NODE_SHAPE_HEIGHT}`}
+            yPosDelta={
+              showStackedShape(count)
+                ? NODE_SHAPE_ON_HOVER_STACKED_Y_POS_DELTA
+                : NODE_SHAPE_ON_HOVER_Y_POS_DELTA
+            }
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <PentagonHoverShape stroke={euiTheme.colors[color ?? 'primary']} />
-          </PentagonShapeOnHover>
+            <PentagonHoverShape stroke={strokeColor} />
+          </NodeShapeOnHoverSvg>
         )}
         <NodeShapeSvg
           width="75"
-          height="72"
-          viewBox="0 0 75 72"
+          height="86"
+          viewBox="0 0 75 86"
+          yPosDelta={NODE_SHAPE_Y_POS_DELTA}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
+          shadow={shadow}
         >
-          <PentagonShape
-            fill={useNodeFillColor(color)}
-            stroke={euiTheme.colors[color ?? 'primary']}
-          />
+          {showStackedShape(count) && (
+            <PentagonShape
+              data-test-subj={GRAPH_STACKED_SHAPE_ID}
+              fill={fillColor}
+              stroke={strokeColor}
+              css={bottomEntityNodeShapeStyle(strokeColor)}
+            />
+          )}
+          {showStackedShape(count) && (
+            <PentagonShape
+              data-test-subj={GRAPH_STACKED_SHAPE_ID}
+              fill={fillColor}
+              stroke={strokeColor}
+              css={middleEntityNodeShapeStyle(strokeColor)}
+            />
+          )}
+          <PentagonShape fill={fillColor} stroke={strokeColor} />
           {icon && <NodeIcon x="12.5" y="14.5" icon={icon} color={color} />}
         </NodeShapeSvg>
         {interactive && (
@@ -92,8 +136,16 @@ export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <Label text={label ? label : id} />
-    </>
+      <NodeDetails
+        count={count}
+        tag={tag}
+        label={label ? label : id}
+        ips={ips}
+        countryCodes={countryCodes}
+        onIpClick={ipClickHandler}
+        onCountryClick={countryClickHandler}
+      />
+    </NodeContainer>
   );
 });
 

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
-import { ReactElement, forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 
 export interface ScrollableSectionWrapperApi {
   openAndScrollToSection: () => void;
@@ -23,6 +24,7 @@ export type ScrollableSectionWrapperChildrenProps = Pick<
 
 export interface ScrollableSectionWrapperProps {
   children: (props: ScrollableSectionWrapperChildrenProps) => ReactElement;
+  defaultState?: EuiAccordionProps['forceState'];
 }
 
 const SKIP_TRANSITION_CSS = css({
@@ -32,12 +34,12 @@ const SKIP_TRANSITION_CSS = css({
 export const ScrollableSectionWrapper = forwardRef<
   ScrollableSectionWrapperApi,
   ScrollableSectionWrapperProps
->(({ children }, ref) => {
+>(({ children, defaultState = 'closed' }, ref) => {
   const [{ forceState, skipTransition }, setState] = useState<{
-    forceState: 'closed' | 'open';
+    forceState: NonNullable<EuiAccordionProps['forceState']>;
     skipTransition: boolean;
   }>({
-    forceState: 'closed',
+    forceState: defaultState,
     skipTransition: false,
   });
   const onToggle = useCallback(
