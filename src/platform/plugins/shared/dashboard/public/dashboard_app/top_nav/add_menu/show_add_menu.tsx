@@ -48,7 +48,7 @@ const getAddControlButtonTitle = () =>
 
 const getAddESQLControlButtonTitle = () =>
   i18n.translate('dashboard.solutionToolbar.addESQLControlButtonLabel', {
-    defaultMessage: 'Variable Control',
+    defaultMessage: 'Variable control',
   });
 
 const getAddTimeSliderControlButtonTitle = () =>
