@@ -52,6 +52,10 @@ import type {
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindInternalOptions,
   ISavedObjectsRepository,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlObject,
+  SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeOwnershipOptions,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -88,6 +92,8 @@ import {
   performCollectMultiNamespaceReferences,
 } from './apis';
 import { createRepositoryHelpers } from './utils';
+import { performChangeOwnership } from './apis/change_ownership';
+import { performChangeAccessMode } from './apis/change_access_mode';
 
 /**
  * Constructor options for {@link SavedObjectsRepository}
@@ -576,5 +582,25 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         spacesExtension: this.extensions.spacesExtension?.asScopedToNamespace(namespace),
       },
     });
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.changeOwnership}
+   */
+  async changeOwnership(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeOwnershipOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse> {
+    return await performChangeOwnership({ objects, options }, this.apiExecutionContext);
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.changeAccessMode}
+   */
+  async changeAccessMode(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessModeOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse> {
+    return await performChangeAccessMode({ objects, options }, this.apiExecutionContext);
   }
 }

@@ -4383,6 +4383,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/access-control-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/actions-plugin@link:x-pack/platform/plugins/shared/actions":
   version "0.0.0"
   uid ""

@@ -8,6 +8,7 @@
  */
 
 import type {
+  SavedObjectAccessControl,
   SavedObjectReferenceWithContext,
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
@@ -68,6 +69,8 @@ export interface AuthorizeObject {
   id: string;
   /** The name of the object */
   name?: string;
+  /** Access control information for the object */
+  accessControl?: SavedObjectAccessControl;
 }
 
 /**
@@ -130,7 +133,7 @@ export interface AuthorizeCreateObject extends AuthorizeObjectWithExistingSpaces
 
 /**
  * The AuthorizeUpdateObject interface extends AuthorizeObjectWithExistingSpaces
- * and contains a object namespace override. Used by the authorizeUpdate
+ * and contains an object namespace override. Used by the authorizeUpdate
  * and authorizeBulkUpdate methods.
  */
 export interface AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces {
@@ -139,6 +142,31 @@ export interface AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces
    * passed to the repository's update or bulkUpdate method.
    */
   objectNamespace?: string;
+}
+
+/**
+ * The AuthorizeChangeAccessControlObject interface extends AuthorizeObjectWithExistingSpaces
+ * and contains an object namespace override. Used by the authorizeChangeAccessControl
+ * method.
+ */
+export interface AuthorizeChangeAccessControlObject extends AuthorizeObjectWithExistingSpaces {
+  /**
+   * The namespace in which to update this object. Populated by options
+   * passed to the repository's changeOwnership method.
+   */
+  objectNamespace?: string;
+}
+
+export interface AccessControlAuthorizeResult {
+  type: string;
+  id: string;
+  name?: string;
+  requiresManageAccessControl: boolean;
+}
+
+export interface GetTypesRequiringAccessControlCheckResult {
+  typesRequiringAccessControl: Set<string>;
+  results: AccessControlAuthorizeResult[];
 }
 
 /**
@@ -255,6 +283,15 @@ export interface AuthorizeFindParams {
 export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
 
 /**
+ * The AuthorizeChangeAccessControlParams interface extends AuthorizeParams and is
+ * used for the AuthorizeChangeAccessControl method of the ISavedObjectsSecurityExtension.
+ */
+export interface AuthorizeChangeAccessControlParams extends AuthorizeParams {
+  /** The objects to authorize */
+  objects: AuthorizeChangeAccessControlObject[];
+}
+
+/**
  * The AuthorizeAndRedactMultiNamespaceReferencesParams interface extends
  * AuthorizeParams and is used for the AuthorizeAndRedactMultiNamespaceReferences
  * method of the ISavedObjectsSecurityExtension.
@@ -325,6 +362,13 @@ export interface RedactNamespacesParams<T, A extends string> {
 }
 
 export type WithAuditName<T> = T & { name?: string };
+
+export interface SetAccessControlToWriteParams {
+  accessMode: SavedObjectAccessControl['accessMode'] | undefined;
+  type: string;
+  createdBy?: string;
+  preflightAccessControl?: SavedObjectAccessControl;
+}
 
 /**
  * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.
@@ -436,6 +480,21 @@ export interface ISavedObjectsSecurityExtension {
   ) => Promise<CheckAuthorizationResult<A>>;
 
   /**
+   * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
+   * @param params the namespace and object to authorize for changing ownership
+   * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
+   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeChangeAccessControl: <A extends string>(
+    params: AuthorizeChangeAccessControlParams,
+    operation: 'changeAccessMode' | 'changeOwnership'
+  ) => Promise<CheckAuthorizationResult<A>>;
+
+  getTypesRequiringAccessControlCheck: (
+    objects: AuthorizeObject[]
+  ) => GetTypesRequiringAccessControlCheckResult;
+
+  /**
    * Performs audit logging for the CLOSE_POINT_IN_TIME security action
    */
   auditClosePointInTime: () => void;
@@ -529,4 +588,11 @@ export interface ISavedObjectsSecurityExtension {
    * Retrieves whether we need to include save objects names in the audit out
    */
   includeSavedObjectNames: () => boolean;
+
+  /**
+   * Sets the access control for a saved object that supports access control
+   */
+  setAccessControlToWrite: (
+    params: SetAccessControlToWriteParams
+  ) => SavedObjectAccessControl | undefined;
 }

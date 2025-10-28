@@ -105,6 +105,8 @@ export const performBulkDelete = async <T>(
         const preflightResult =
           index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
 
+        // @ts-expect-error MultiGetHit._source is optional
+        const accessControl = preflightResult?._source?.accessControl;
         const name = preflightResult
           ? SavedObjectsUtils.getName(
               registry.getNameAttribute(type),
@@ -117,13 +119,17 @@ export const performBulkDelete = async <T>(
           type,
           id,
           name,
+          ...(accessControl ? { accessControl } : {}),
           // @ts-expect-error MultiGetHit._source is optional
           existingNamespaces: preflightResult?._source?.namespaces ?? [],
         };
       }
     );
 
-    await securityExtension.authorizeBulkDelete({ namespace, objects: authObjects });
+    await securityExtension.authorizeBulkDelete({
+      namespace,
+      objects: authObjects,
+    });
   }
 
   // Filter valid objects
@@ -284,7 +290,12 @@ function getExpectedBulkDeleteMultiNamespaceDocsResults(
       if (isLeft(expectedBulkGetResult)) {
         return { ...expectedBulkGetResult };
       }
-      const { esRequestIndex: esBulkGetRequestIndex, id, type } = expectedBulkGetResult.value;
+      const {
+        esRequestIndex: esBulkGetRequestIndex,
+        id,
+        type,
+        accessControl,
+      } = expectedBulkGetResult.value;
 
       let namespaces;
 
@@ -338,6 +349,7 @@ function getExpectedBulkDeleteMultiNamespaceDocsResults(
         type,
         id,
         namespaces,
+        ...(accessControl ? { accessControl } : {}),
         esRequestIndex: indexCounter++,
       };
 

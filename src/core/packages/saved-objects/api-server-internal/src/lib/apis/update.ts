@@ -110,12 +110,16 @@ export const executeUpdate = async <T>(
   });
 
   const existingNamespaces = preflightDocNSResult.savedObjectNamespaces ?? [];
+  const accessControl = preflightDocNSResult.rawDocSource?._source.accessControl;
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
     object: {
       type,
       id,
       existingNamespaces,
+      ...(accessControl && {
+        accessControl,
+      }),
       objectNamespace: namespace && registry.isSingleNamespace(type) ? namespace : undefined,
       name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
         attributes: { ...(preflightDocResult.rawDocSource?._source?.[type] ?? {}), ...attributes },
@@ -178,6 +182,13 @@ export const executeUpdate = async <T>(
 
   // UPSERT CASE START
   if (shouldPerformUpsert) {
+    // Note: Upsert does not support adding accessControl properties. To do so, the `create` API should be used.
+
+    if (registry.supportsAccessControl(type)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `"update" does not support "upsert" of objects that support access control. Use "create" or "bulk create" instead.`
+      );
+    }
     // ignore attributes if creating a new doc: only use the upsert attributes
     // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
     const migratedUpsert = migrationHelper.migrateInputDocument({
@@ -290,6 +301,7 @@ export const executeUpdate = async <T>(
       attributes: updatedAttributes,
       updated_at: time,
       updated_by: updatedBy,
+      ...(accessControl ? { accessControl } : {}),
       ...(Array.isArray(references) && { references }),
     });
 
