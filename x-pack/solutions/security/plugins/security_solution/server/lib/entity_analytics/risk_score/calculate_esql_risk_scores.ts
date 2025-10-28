@@ -94,11 +94,6 @@ export const calculateScoresWithESQL = async (
       })
     );
 
-    // Check if all queries failed due to index_not_found_exception
-    const allFailedWithIndexNotFound = responses.every(
-      ({ error }) => error instanceof Error && error.message.includes('index_not_found_exception')
-    );
-
     // Combine results from all entity queries
     const combinedAggregations: Partial<RiskScoreCompositeBuckets> = {};
     responses.forEach(({ entityType, response }) => {
@@ -112,10 +107,26 @@ export const calculateScoresWithESQL = async (
       }
     });
 
+    // Check if all queries that had errors failed due to index_not_found_exception
+    const errorsPresent = responses.filter(({ error }) => error).length;
+    const indexNotFoundErrors = responses.filter(({ error }) => {
+      if (!error) return false;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return (
+        errorMessage.includes('index_not_found_exception') ||
+        errorMessage.includes('no such index') ||
+        errorMessage.includes('NoShardAvailableActionException')
+      );
+    }).length;
+
+    // If we have no aggregations, return empty scores if:
+    // 1. All queries that had errors were index-not-found errors
+    // 2. OR there were no errors at all (valid index pattern with no data)
+    const shouldReturnEmptyScores =
+      errorsPresent === 0 || (errorsPresent > 0 && errorsPresent === indexNotFoundErrors);
+
     if (Object.keys(combinedAggregations).length === 0) {
-      // Only return empty scores if the failure was due to index not found
-      if (allFailedWithIndexNotFound) {
-        logger.info('No aggregations due to index not found, returning empty scores');
+      if (shouldReturnEmptyScores) {
         return {
           after_keys: {},
           scores: {
@@ -125,6 +136,16 @@ export const calculateScoresWithESQL = async (
           },
         };
       }
+      // Log the actual errors for debugging
+      responses.forEach(({ entityType, error }) => {
+        if (error) {
+          logger.error(
+            `Query failed for ${entityType}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      });
       // Otherwise, throw an error as before
       throw new Error('No aggregations in any composite response');
     }
@@ -355,7 +376,7 @@ export const buildRiskScoreBucket =
 
     const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
       const parsedRiskInputData = JSON.parse(input);
-      const value = parseFloat(parsedRiskInputData.score);
+      const value = parseFloat(parsedRiskInputData.risk_score);
       const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
       return {
         ...parsedRiskInputData,

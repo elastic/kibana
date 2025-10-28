@@ -120,7 +120,7 @@ export const riskScorePreviewRoute = (
           return response.ok({ body: result });
         } catch (e) {
           // If the error is related to a non-existent index, return empty scores instead of an error
-          if (e.message && e.message.includes('index_not_found_exception')) {
+          if (e instanceof Error && e.message && e.message.includes('index_not_found_exception')) {
             return response.ok({
               body: {
                 after_keys: {},
