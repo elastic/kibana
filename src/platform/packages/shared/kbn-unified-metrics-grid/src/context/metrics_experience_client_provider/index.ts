@@ -7,17 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useContext } from 'react';
-import { MetricsExperienceContext } from '../context/metrics_experience_provider';
-
-export function useMetricsExperience() {
-  const services = useContext(MetricsExperienceContext);
-
-  if (!services) {
-    throw new Error(
-      'MetricsExperienceContext not set. Did you wrap your component in `<MetricsExperienceProvider/>`?'
-    );
-  }
-
-  return services;
-}
+export { MetricsExperienceClientProvider } from './metrics_experience_client_provider';
+export { useMetricsExperienceClient } from './use_metrics_experience_client';

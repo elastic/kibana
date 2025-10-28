@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useDispatch, useSelector } from 'react-redux';
-import type { TypedUseSelectorHook } from 'react-redux';
-import type { RootState, AppDispatch } from '.';
+import { run } from '../../lib/spawn.mjs';
+import { REPO_ROOT } from '../../lib/paths.mjs';
+import { resolve } from 'path';
 
-// Use throughout your app instead of plain `useDispatch` and `useSelector`
-export const useAppDispatch = () => useDispatch<AppDispatch>();
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+/**
+ * Bootstraps the the .buildkite directory
+ * @return {Promise<*>}
+ */
+export function bootstrapBuildkite() {
+  return run('npm', ['i'], { cwd: resolve(REPO_ROOT, '.buildkite') });
+}
