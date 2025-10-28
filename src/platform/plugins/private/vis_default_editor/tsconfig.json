@@ -32,6 +32,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/palettes",
     "@kbn/css-utils",
+    "@kbn/visualizations-common",
+    "@kbn/chart-expressions-common",
   ],
   "exclude": [
     "target/**/*",

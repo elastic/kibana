@@ -34,7 +34,7 @@ logging:
 
 # xpack.fleet.registryUrl: https://localhost:8080
 
-# xpack.fleet.enableExperimental: []
+# xpack.fleet.experimentalFeatures: {}
 
 # Allows enrolling agents when standalone Fleet Server is in use
 # xpack.fleet.internal.fleetServerStandalone: true

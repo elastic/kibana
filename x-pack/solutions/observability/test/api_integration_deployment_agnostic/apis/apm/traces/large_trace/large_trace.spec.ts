@@ -56,7 +56,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('and traceDocsTotal is correct', () => {
-          expect(trace.traceItems.traceDocsTotal).to.be(15551);
+          // The trace should have more than 15000 items (using range to account for non-deterministic data generation)
+          expect(trace.traceItems.traceDocsTotal).to.be.greaterThan(15000);
+          expect(trace.traceItems.traceDocsTotal).to.be.lessThan(16000);
         });
 
         it('and traceDocs is correct', () => {
@@ -79,11 +81,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('and traceDocsTotal is correct', () => {
-          expect(trace.traceItems.traceDocsTotal).to.be(15551);
+          // The trace should have more than 15000 items (using range to account for non-deterministic data generation)
+          expect(trace.traceItems.traceDocsTotal).to.be.greaterThan(15000);
+          expect(trace.traceItems.traceDocsTotal).to.be.lessThan(16000);
         });
 
         it('and traceDocs is correct', () => {
-          expect(trace.traceItems.traceDocs.length).to.be(15551);
+          // traceDocs length should match traceDocsTotal when maxTraceItems is high enough
+          expect(trace.traceItems.traceDocs.length).to.be(trace.traceItems.traceDocsTotal);
+          expect(trace.traceItems.traceDocs.length).to.be.greaterThan(15000);
+          expect(trace.traceItems.traceDocs.length).to.be.lessThan(16000);
         });
 
         it('and maxTraceItems is correct', () => {

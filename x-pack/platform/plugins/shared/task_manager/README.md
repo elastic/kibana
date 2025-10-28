@@ -462,6 +462,8 @@ The danger is that in such a situation, a Task with that same `id` might already
 
 To achieve this you should use the `ensureScheduled` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
 
+The only exception to this is if you use `ensureScheduled` to schedule a task with a recurring schedule interval. In this case, if a task with the same `id` already exists, the API will attempt to update the schedule of the existing task if it has changed.
+
 #### runSoon
 
 Use `runSoon` to instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be `now`.
@@ -545,7 +547,7 @@ Use `bulkUpdatesSchedules` to instruct TaskManger to update the schedule interva
 When the interval is updated, new `runAt` will be computed and task will be updated with that value, using the formula
 
 ```
-newRunAt = oldRunAt - oldInterval + newInterval
+newRunAt = scheduledAt + newInterval
 ```
 
 Example:
@@ -817,15 +819,18 @@ Tasks can be scheduled with a user-scope, which allows the task to run with the 
 To schedule a task with a user scope, pass a KibanaRequest object as part of the schedule options:
 
 ```js
-const task = await taskManager.schedule({
-  taskType,
-  runAt,
-  schedule,
-  params,
-  scope: ['my-fanci-app'],
-}, {
-  request
-});
+const task = await taskManager.schedule(
+  {
+    taskType,
+    runAt,
+    schedule,
+    params,
+    scope: ['my-fanci-app'],
+  },
+  {
+    request,
+  }
+);
 ```
 
 Task Manager creates an API key using this request and stores this as an encrypted field on the task document. When the task runs, Task Manager decryptes the API key from the task document and generates a fake KibanaRequest using the decrypted API key in the authorization header. This fake request is then passed into the task runner defined in the task type

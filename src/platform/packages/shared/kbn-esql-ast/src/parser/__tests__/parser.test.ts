@@ -149,3 +149,160 @@ describe('Parser.parseCommand()', () => {
     expect(() => Parser.parseCommand(src)).toThrow();
   });
 });
+
+describe('Parser.parseHeaderCommand()', () => {
+  it('can parse a SET command with string value', () => {
+    const src = 'SET a = "foo"';
+    const { root, errors } = Parser.parseHeaderCommand(src);
+
+    expect(errors.length).toBe(0);
+    expect(root).toMatchObject({
+      type: 'header-command',
+      name: 'set',
+      args: [
+        {
+          type: 'function',
+          name: '=',
+          args: [
+            {
+              type: 'identifier',
+              name: 'a',
+            },
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              valueUnquoted: 'foo',
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('can parse a SET command with numeric value', () => {
+    const src = 'SET timeout = 300';
+    const { root, errors } = Parser.parseHeaderCommand(src);
+
+    expect(errors.length).toBe(0);
+    expect(root).toMatchObject({
+      type: 'header-command',
+      name: 'set',
+      args: [
+        {
+          type: 'function',
+          name: '=',
+          args: [
+            {
+              type: 'identifier',
+              name: 'timeout',
+            },
+            {
+              type: 'literal',
+              value: 300,
+              literalType: 'integer',
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('can parse a SET command with boolean value', () => {
+    const src = 'SET debug = TRUE';
+    const { root, errors } = Parser.parseHeaderCommand(src);
+
+    expect(errors.length).toBe(0);
+    expect(root).toMatchObject({
+      type: 'header-command',
+      name: 'set',
+      args: [
+        {
+          type: 'function',
+          name: '=',
+          args: [
+            {
+              type: 'identifier',
+              name: 'debug',
+            },
+            {
+              type: 'literal',
+              value: 'TRUE',
+              literalType: 'boolean',
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('allows a single trailing semicolon', () => {
+    const src = 'SET debug = TRUE;';
+    const { root, errors } = Parser.parseHeaderCommand(src);
+
+    expect(errors.length).toBe(0);
+    expect(root).toMatchObject({
+      type: 'header-command',
+      name: 'set',
+      args: [
+        {
+          type: 'function',
+          name: '=',
+        },
+      ],
+    });
+  });
+
+  it('can parse a SET command with whitespace', () => {
+    const src = '  SET   var   =   "value"  ';
+    const { root, errors } = Parser.parseHeaderCommand(src);
+
+    expect(errors.length).toBe(0);
+    expect(root).toMatchObject({
+      type: 'header-command',
+      name: 'set',
+    });
+  });
+
+  it('throws on invalid SET command syntax', () => {
+    const src = 'SET invalid';
+
+    expect(() => Parser.parseHeaderCommand(src)).toThrow('Invalid header command');
+  });
+
+  it('throws when double trailing semicolon present', () => {
+    const src = 'SET debug = TRUE;;';
+
+    expect(() => Parser.parseHeaderCommand(src)).toThrow(
+      new Error('Invalid header command: ' + src)
+    );
+  });
+
+  it('throws on empty string', () => {
+    const src = '';
+
+    expect(() => Parser.parseHeaderCommand(src)).toThrow();
+  });
+
+  it('throws on non-SET command', () => {
+    const src = 'FROM index';
+
+    expect(() => Parser.parseHeaderCommand(src)).toThrow();
+  });
+
+  it('preserves the ast property for backward compatibility', () => {
+    const src = 'SET x = 123';
+    const { root, ast } = Parser.parseHeaderCommand(src);
+
+    expect(ast).toBeDefined();
+    expect(ast.length).toBe(1);
+    expect(ast[0]).toBe(root);
+  });
+
+  it('returns tokens from parsing', () => {
+    const src = 'SET a = "foo"';
+    const { tokens } = Parser.parseHeaderCommand(src);
+
+    expect(tokens.length).toBeGreaterThan(0);
+    expect(tokens.some((token) => token.text === 'SET')).toBe(true);
+  });
+});

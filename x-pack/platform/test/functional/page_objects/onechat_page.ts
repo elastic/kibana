@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { ToolType } from '@kbn/onechat-common';
 import { subj } from '@kbn/test-subj-selector';
 import { last } from 'lodash';
@@ -133,13 +132,10 @@ export class OneChatPageObject extends FtrService {
    * Continue chatting in an existing conversation
    */
   async continueConversation(userMessage: string, expectedResponse: string, llmProxy: LlmProxy) {
-    // Set up LLM proxy
-    void llmProxy.interceptors.userMessage({
-      when: ({ messages }) => {
-        const lastMessage = last(messages)?.content as string;
-        return lastMessage?.includes(userMessage);
-      },
+    await setupAgentDirectAnswer({
+      proxy: llmProxy,
       response: expectedResponse,
+      continueConversation: true,
     });
 
     // Type and send the message
