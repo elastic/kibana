@@ -756,8 +756,11 @@ export function convertToWorkflowGraph(
   workflowSchema: WorkflowYaml,
   defaultSettings?: WorkflowSettings
 ): graphlib.Graph<GraphNodeUnion> {
+  const resolvedSettings = workflowSchema.settings
+    ? resolveWorklfowSettings(workflowSchema.settings, workflows)
+    : undefined;
   const context: GraphBuildContext = {
-    settings: workflowSchema.settings,
+    settings: resolvedSettings,
     stack: [],
     parentKey: '',
   };
@@ -777,6 +780,20 @@ export function convertToWorkflowGraph(
   }
 
   return finalGraph;
+}
+
+function resolveWorklfowSettings(
+  workflowSettings: WorkflowSettings,
+  defaultSettings?: WorkflowSettings
+): WorkflowSettings {
+  if (!defaultSettings) {
+    return workflowSettings;
+  }
+
+  return {
+    ...workflowSettings,
+    timeout: workflowSettings.timeout ?? defaultSettings.timeout,
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
