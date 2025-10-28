@@ -18,6 +18,8 @@ import {
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
+const NON_ENRICHED_ENTITY_TYPE = 'Entities';
+
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
   originEventIds: OriginEventId[];
@@ -301,6 +303,24 @@ ${
       targetEntitySubType,
       isOrigin,
       isOriginAlert
+| EVAL actorLabel = CASE(
+    actorEntityType == "${NON_ENRICHED_ENTITY_TYPE}" AND actorIdsCount == 1,
+    MV_FIRST(actorIds),
+    actorEntityType == "${NON_ENRICHED_ENTITY_TYPE}",
+    null,
+    actorEntitySubType IS NOT NULL,
+    actorEntitySubType,
+    MV_FIRST(actorIds)
+  )
+| EVAL targetLabel = CASE(
+    targetEntityType == "${NON_ENRICHED_ENTITY_TYPE}" AND targetIdsCount == 1,
+    MV_FIRST(targetIds),
+    targetEntityType == "${NON_ENRICHED_ENTITY_TYPE}",
+    null,
+    targetEntitySubType IS NOT NULL,
+    targetEntitySubType,
+    MV_FIRST(targetIds)
+  )
 | LIMIT 1000
 | SORT action DESC, isOrigin`;
 
