@@ -9115,6 +9115,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workflows-ui-components@link:src/platform/packages/shared/kbn-workflows-ui-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
   version "0.0.0"
   uid ""

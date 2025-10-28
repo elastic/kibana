@@ -4,18 +4,18 @@
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License v 1".
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
 import { EuiIcon } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { 
-  WorkflowSelector, 
-  useWorkflows, 
-  WorkflowsEmptyState, 
-  TagsBadge 
+import {
+  useWorkflows,
+  type WorkflowOption,
+  WorkflowSelector,
+  WorkflowsEmptyState,
 } from '@kbn/workflows-ui-components';
 import * as i18n from './translations';
 import type { WorkflowsActionParams } from './types';
@@ -28,7 +28,9 @@ export function WorkflowsParamsFields({
   errors,
 }: ActionParamsProps<WorkflowsActionParams>) {
   const { workflowId } = actionParams.subActionParams ?? {};
-  const [selectedWorkflowDisabledError, setSelectedWorkflowDisabledError] = useState<string | null>(null);
+  const [selectedWorkflowDisabledError, setSelectedWorkflowDisabledError] = useState<string | null>(
+    null
+  );
   const { http, application } = useKibana().services;
 
   // Use the shared hook
@@ -41,9 +43,23 @@ export function WorkflowsParamsFields({
     window.open(url, '_blank');
   }, [application]);
 
+  // Define sorting function for alert triggers
+  const sortByAlertTriggers = React.useCallback((a: WorkflowOption, b: WorkflowOption) => {
+    // Sort by alert trigger type
+    const aHasAlert = (a.definition?.triggers ?? []).some(
+      (trigger: { type: string }) => trigger.type === 'alert'
+    );
+    const bHasAlert = (b.definition?.triggers ?? []).some(
+      (trigger: { type: string }) => trigger.type === 'alert'
+    );
+    if (aHasAlert && !bHasAlert) return -1;
+    if (!aHasAlert && bHasAlert) return 1;
+    return 0;
+  }, []);
+
   // Process workflows with the same logic as before
   const workflows = React.useMemo(() => {
-    return rawWorkflows.map((workflow: any) => {
+    return rawWorkflows.map((workflow) => {
       const isDisabled = !workflow.enabled;
       const isSelected = workflow.id === workflowId;
       const wasSelectedButNowDisabled = isSelected && isDisabled;
@@ -71,26 +87,12 @@ export function WorkflowsParamsFields({
         );
       }
 
-      const workflowTags = workflow.definition?.tags || [];
-
       return {
         ...workflow,
         disabled: isDisabled,
         checked: isSelected ? 'on' : undefined,
         namePrepend: prependNameElement,
-        append: <TagsBadge tags={workflowTags} />,
       };
-    }).sort((a: any, b: any) => {
-      // Sort by alert trigger type
-      const aHasAlert = (a.definition?.triggers ?? []).some(
-        (trigger: any) => trigger.type === 'alert'
-      );
-      const bHasAlert = (b.definition?.triggers ?? []).some(
-        (trigger: any) => trigger.type === 'alert'
-      );
-      if (aHasAlert && !bHasAlert) return -1;
-      if (!aHasAlert && bHasAlert) return 1;
-      return 0;
     });
   }, [rawWorkflows, workflowId]);
 
@@ -123,15 +125,17 @@ export function WorkflowsParamsFields({
 
   return (
     <WorkflowSelector
-      workflows={workflows}
+      workflows={workflows as WorkflowOption[]}
       selectedWorkflowId={workflowId}
-      onWorkflowChange={(selectedWorkflowId: string) => editSubActionParams('workflowId', selectedWorkflowId)}
+      onWorkflowChange={(selectedWorkflowId: string) =>
+        editSubActionParams('workflowId', selectedWorkflowId)
+      }
       label={i18n.WORKFLOW_ID_LABEL}
-      error={displayError || undefined}
+      error={displayError ?? undefined}
       helpText={helpText}
       isInvalid={!!displayError}
       isLoading={isLoading}
-      loadError={loadError}
+      loadError={loadError ?? undefined}
       emptyStateComponent={(props) => (
         <WorkflowsEmptyState
           {...props}
@@ -143,6 +147,7 @@ export function WorkflowsParamsFields({
       onCreateWorkflow={handleOpenWorkflowManagementApp}
       placeholder={i18n.SELECT_WORKFLOW_PLACEHOLDER}
       data-test-subj="workflowIdSelect"
+      sortWorkflows={sortByAlertTriggers}
     />
   );
 }

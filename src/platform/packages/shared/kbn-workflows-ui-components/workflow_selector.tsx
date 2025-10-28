@@ -4,21 +4,16 @@
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License v 1".
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
-  EuiBadge,
-  EuiBadgeGroup,
-  EuiButton,
-  EuiEmptyPrompt,
   EuiFormRow,
   EuiHighlight,
   EuiIcon,
   EuiInputPopover,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
   EuiText,
@@ -29,115 +24,8 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-// Keep the same interfaces as the original
-export interface WorkflowOption {
-  id: string;
-  name: string;
-  description: string;
-  enabled: boolean;
-  tags: string[];
-  label: string;
-  disabled?: boolean;
-  checked?: 'on' | 'off';
-  namePrepend?: React.ReactNode;
-  prepend?: React.ReactNode;
-  append?: React.ReactNode;
-  data?: {
-    secondaryContent?: string;
-  };
-  [key: string]: unknown;
-}
-
-// Keep the same props interface as the original
-export interface WorkflowSelectorProps {
-  workflows: WorkflowOption[];
-  selectedWorkflowId?: string;
-  onWorkflowChange: (workflowId: string) => void;
-  label?: string;
-  error?: string;
-  helpText?: string;
-  isInvalid?: boolean;
-  isLoading?: boolean;
-  loadError?: string;
-  emptyStateComponent?: React.ComponentType<{ onCreateWorkflow: () => void }>;
-  onCreateWorkflow?: () => void;
-  placeholder?: string;
-  'data-test-subj'?: string;
-}
-
-// Move the TagsBadge component exactly as-is
-export const TagsBadge: React.FC<{ tags: string[] }> = ({ tags }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  if (tags.length === 0) {
-    return null;
-  }
-
-  const handlePopoverToggle = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    event.preventDefault();
-    setIsPopoverOpen(!isPopoverOpen);
-  };
-
-  return (
-    <EuiPopover
-      button={
-        <EuiBadge
-          color="hollow"
-          iconType="tag"
-          onClick={handlePopoverToggle}
-          onClickAriaLabel="Show tags"
-          style={{ cursor: 'pointer' }}
-        >
-          {tags.length}
-        </EuiBadge>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="s"
-      anchorPosition="downLeft"
-    >
-      <EuiBadgeGroup>
-        {tags.map((tag) => (
-          <EuiBadge key={tag} color="hollow" style={{ maxWidth: '150px' }}>
-            {tag}
-          </EuiBadge>
-        ))}
-      </EuiBadgeGroup>
-    </EuiPopover>
-  );
-};
-
-// Generic empty state component for workflows
-export const WorkflowsEmptyState: React.FC<{
-  onCreateWorkflow: () => void;
-  title?: string;
-  description?: string;
-  buttonText?: string;
-}> = ({
-  onCreateWorkflow,
-  title = "You don't have any workflows yet",
-  description = 'Workflows help you automate and streamline tasks.',
-  buttonText = 'Create your first workflow',
-}) => {
-  return (
-    <EuiEmptyPrompt
-      iconType="workflowsApp"
-      title={<span>{title}</span>}
-      body={<span>{description}</span>}
-      actions={[
-        <EuiButton
-          key="create-workflow"
-          onClick={onCreateWorkflow}
-          iconType="plusInCircle"
-          fill
-        >
-          {buttonText}
-        </EuiButton>,
-      ]}
-    />
-  );
-};
+import { TagsBadge } from './components/tags_badge';
+import type { WorkflowOption, WorkflowSelectorProps } from './types';
 
 // Move the renderWorkflowOption function exactly as-is
 const renderWorkflowOption = (option: WorkflowOption, searchValue: string) => {
@@ -147,10 +35,10 @@ const renderWorkflowOption = (option: WorkflowOption, searchValue: string) => {
         {option.namePrepend}
         <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
       </>
-      {option.data?.secondaryContent && (
+      {option.secondaryContent && (
         <EuiText size="xs" color="subdued" className="eui-displayBlock">
           <small>
-            <EuiHighlight search={searchValue}>{option.data.secondaryContent}</EuiHighlight>
+            <EuiHighlight search={searchValue}>{option.secondaryContent}</EuiHighlight>
           </small>
         </EuiText>
       )}
@@ -158,7 +46,7 @@ const renderWorkflowOption = (option: WorkflowOption, searchValue: string) => {
   );
 
   if (option.disabled) {
-    return <EuiToolTip content="This workflow is disabled">{content}</EuiToolTip>;
+    return <EuiToolTip content="Disabled workflow">{content}</EuiToolTip>;
   }
 
   return content;
@@ -179,11 +67,30 @@ export function WorkflowSelector({
   onCreateWorkflow,
   placeholder = 'Select workflow',
   'data-test-subj': dataTestSubj = 'workflowSelector',
+  sortWorkflows,
 }: WorkflowSelectorProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isSearching, setIsSearching] = useState(true);
   const { euiTheme } = useEuiTheme();
+
+  const processedWorkflows = React.useMemo(() => {
+    const processed = workflows.map((workflow) => {
+      return {
+        ...workflow,
+        append: <TagsBadge tags={workflow.tags || []} />,
+      } as WorkflowOption;
+    });
+
+    // Apply custom sorting if provided
+    if (sortWorkflows) {
+      processed.sort(sortWorkflows);
+    }
+
+    return processed;
+  }, [workflows, sortWorkflows]);
+
+  const workflowOptions = processedWorkflows;
 
   const handleWorkflowChange = useCallback(
     (options: WorkflowOption[]) => {
@@ -203,7 +110,6 @@ export function WorkflowSelector({
 
   const handlePopoverClose = useCallback(() => {
     setIsPopoverOpen(false);
-
     // If the user cleared the input but didn't select anything new,
     // revert to the currently selected workflow
     if (selectedWorkflowId && workflows.length > 0 && isSearching) {
@@ -234,8 +140,6 @@ export function WorkflowSelector({
       setIsSearching(true);
     }
   }, [selectedWorkflowId, workflows]);
-
-  const workflowOptions = workflows;
 
   const displayError = error;
   const displayHelpText = loadError || (isLoading ? 'Loading workflows...' : helpText);

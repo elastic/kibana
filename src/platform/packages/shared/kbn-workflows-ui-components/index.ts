@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License v 1".
  */
 
-export { WorkflowSelector, WorkflowsEmptyState, TagsBadge } from './workflow_selector';
+export { WorkflowSelector } from './workflow_selector';
+export { TagsBadge } from './components/tags_badge';
+export { WorkflowsEmptyState } from './components/workflows_empty_state';
 export { useWorkflows } from './use_workflows';
-export type { WorkflowOption, WorkflowSelectorProps } from './workflow_selector';
+export type { WorkflowOption, WorkflowSelectorProps } from './types';

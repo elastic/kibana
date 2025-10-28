@@ -10,7 +10,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { HttpStart } from '@kbn/core/public';
 import type { WorkflowListDto } from '@kbn/workflows';
-import type { WorkflowOption } from './workflow_selector';
+import type { WorkflowOption } from './types';
 
 export function useWorkflows(http: HttpStart) {
   const [workflows, setWorkflows] = useState<WorkflowOption[]>([]);
