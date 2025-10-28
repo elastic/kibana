@@ -34,6 +34,7 @@ import { getEntityUpdatesDataStreamName } from './elasticsearch_assets/updates_e
 import { engineDescriptionRegistry } from './installation/engine_description';
 import type { EntityDescription } from './entity_definitions/types';
 import type { FieldDescription } from './installation/types';
+import { ENTITY_ID_FIELD } from './constants';
 
 interface CustomEntityFieldsAttributesHolder {
   attributes?: Record<string, unknown>;
@@ -56,8 +57,6 @@ interface EntityStoreClientOpts {
   clusterClient: IScopedClusterClient;
   dataClient: EntityStoreDataClient;
 }
-
-const ENTITY_ID_FIELD = 'entity.id';
 
 export class EntityStoreCrudClient {
   private esClient: ElasticsearchClient;

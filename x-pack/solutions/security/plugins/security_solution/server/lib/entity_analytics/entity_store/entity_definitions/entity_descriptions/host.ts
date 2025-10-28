@@ -7,7 +7,11 @@
 
 import { collectValues as collect } from './field_utils';
 import type { EntityDescription } from '../types';
-import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
+import {
+  CALCULATED_IDENTITY_FIELD,
+  getCommonFieldDescriptions,
+  getEntityFieldsDescriptions,
+} from './common';
 
 export const HOST_DEFINITION_VERSION = '1.0.0';
 
@@ -15,7 +19,7 @@ const HOST_ENTITY_TYPE = 'Host';
 export const hostEntityEngineDescription: EntityDescription = {
   entityType: 'host',
   version: HOST_DEFINITION_VERSION,
-  identityField: 'host.entity.Calculated_id',
+  identityField: CALCULATED_IDENTITY_FIELD,
   calculatedIdentity: {
     filterOnAtLeastOneOf: ['host.entity.id', 'host.name'],
     script: `

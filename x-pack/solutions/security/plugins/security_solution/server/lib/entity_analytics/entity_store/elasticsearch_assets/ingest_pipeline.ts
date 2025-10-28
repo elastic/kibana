@@ -22,6 +22,7 @@ import { getFieldRetentionEnrichPolicyName } from './enrich_policy';
 import { fieldOperatorToIngestProcessor } from '../field_retention';
 import type { EntityEngineInstallationDescriptor } from '../installation/types';
 import { dynamicNewestRetentionSteps } from '../field_retention/dynamic_retention';
+import { ENTITY_ID_FIELD } from '../constants';
 
 const getPlatformPipelineId = (descriptionId: string) => {
   return `${descriptionId}-latest@platform`;
@@ -90,7 +91,7 @@ const buildIngestPipeline = ({
     {
       enrich: {
         policy_name: enrichPolicyName,
-        field: description.identityField,
+        field: ENTITY_ID_FIELD,
         target_field: ENRICH_FIELD,
       },
     },
