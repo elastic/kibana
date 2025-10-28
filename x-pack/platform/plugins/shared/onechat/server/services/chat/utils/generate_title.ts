@@ -12,7 +12,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { Conversation, ConversationRound, RoundInput } from '@kbn/onechat-common';
-import { conversationToLangchainMessages } from '../../agents/modes/utils';
+import { createUserMessage } from '@kbn/onechat-genai-utils/langchain';
 
 /**
  * Generates a title for a conversation
@@ -72,7 +72,7 @@ Conversation:
 
 Now, generate a title for the following conversation.`,
         ],
-        ...conversationToLangchainMessages({ previousRounds, nextInput, ignoreSteps: true }),
+        createUserMessage(nextInput.message),
       ];
 
       const { title } = await structuredModel.invoke(prompt);

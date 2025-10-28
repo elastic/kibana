@@ -60,7 +60,7 @@ export interface ReferenceAttachmentTypeDefinition<TContent = unknown> {
   /** resolve the attachment to a value that can be used by the LLM */
   // resolve: (input: unknown) => MaybePromise<unknown>;
   /** format the attachment to presented to the LLM */
-  format: (input: unknown) => MaybePromise<unknown>;
+  format: (input: unknown) => MaybePromise<AttachmentRepresentation>;
   /**
    * Check if the attachment is different from the previous one
    */

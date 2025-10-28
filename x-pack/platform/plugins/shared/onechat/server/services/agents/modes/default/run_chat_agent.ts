@@ -15,6 +15,7 @@ import {
   extractRound,
   selectProviderTools,
   conversationToLangchainMessages,
+  prepareConversation,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
@@ -44,7 +45,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentId,
     abortSignal,
   },
-  { logger, request, modelProvider, toolProvider, events }
+  { logger, request, modelProvider, toolProvider, attachments, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -74,9 +75,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
   const graphRecursionLimit = cycleLimit * 2 + 8;
 
-  const initialMessages = conversationToLangchainMessages({
+  const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
+    attachmentsService: attachments,
+  });
+
+  const initialMessages = conversationToLangchainMessages({
+    conversation: processedConversation,
   });
 
   const agentGraph = createAgentGraph({

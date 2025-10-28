@@ -91,6 +91,7 @@ export class ServiceManager {
       inference,
       toolsService: tools,
       agentsService: agents,
+      attachmentsService: attachments,
     });
     runner = runnerFactory.getRunner();
 
