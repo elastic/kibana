@@ -337,56 +337,27 @@ const ESQLEditorInternal = function ESQLEditor({
     openTimePickerPopover();
   });
 
-  monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
-    const position = editor1.current?.getPosition();
-    await triggerControl(
-      fixedQuery,
-      ESQLVariableType.TIME_LITERAL,
-      position,
-      uiActions,
-      esqlVariables,
-      controlsContext?.onSaveControl,
-      controlsContext?.onCancelControl
-    );
-  });
+  const controlCommands = [
+    { command: 'esql.control.multi_values.create', variableType: ESQLVariableType.MULTI_VALUES },
+    { command: 'esql.control.time_literal.create', variableType: ESQLVariableType.TIME_LITERAL },
+    { command: 'esql.control.fields.create', variableType: ESQLVariableType.FIELDS },
+    { command: 'esql.control.values.create', variableType: ESQLVariableType.VALUES },
+    { command: 'esql.control.functions.create', variableType: ESQLVariableType.FUNCTIONS },
+  ];
 
-  monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
-    const position = editor1.current?.getPosition();
-    await triggerControl(
-      fixedQuery,
-      ESQLVariableType.FIELDS,
-      position,
-      uiActions,
-      esqlVariables,
-      controlsContext?.onSaveControl,
-      controlsContext?.onCancelControl
-    );
-  });
-
-  monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
-    const position = editor1.current?.getPosition();
-    await triggerControl(
-      fixedQuery,
-      ESQLVariableType.VALUES,
-      position,
-      uiActions,
-      esqlVariables,
-      controlsContext?.onSaveControl,
-      controlsContext?.onCancelControl
-    );
-  });
-
-  monaco.editor.registerCommand('esql.control.functions.create', async (...args) => {
-    const position = editor1.current?.getPosition();
-    await triggerControl(
-      fixedQuery,
-      ESQLVariableType.FUNCTIONS,
-      position,
-      uiActions,
-      esqlVariables,
-      controlsContext?.onSaveControl,
-      controlsContext?.onCancelControl
-    );
+  controlCommands.forEach(({ command, variableType }) => {
+    monaco.editor.registerCommand(command, async (...args) => {
+      const position = editor1.current?.getPosition();
+      await triggerControl(
+        fixedQuery,
+        variableType,
+        position,
+        uiActions,
+        esqlVariables,
+        controlsContext?.onSaveControl,
+        controlsContext?.onCancelControl
+      );
+    });
   });
 
   editor1.current?.addCommand(
@@ -461,6 +432,34 @@ const ESQLEditorInternal = function ESQLEditor({
     showSuggestionsIfEmptyQuery();
     setLabelInFocus(true);
   }, [showSuggestionsIfEmptyQuery]);
+
+  const triggerSignatureHelpIfInsideParentheses = useCallback(
+    (e: monaco.editor.ICursorPositionChangedEvent) => {
+      if (!editorModel.current) {
+        return;
+      }
+
+      const position = e.position;
+      const line = editorModel.current.getLineContent(position.lineNumber);
+      const charBefore = line[position.column - 2];
+      const charAfter = line[position.column - 1];
+
+      if (charBefore === '(' && charAfter === ')') {
+        editor1.current?.trigger('esql', 'editor.action.triggerParameterHints', {});
+        // Apply height limits after Monaco renders the widget
+        const widget = document.querySelector('.parameter-hints-widget');
+
+        if (widget) {
+          const phwrapper = widget.querySelector('.phwrapper') as HTMLElement;
+          if (phwrapper) {
+            phwrapper.style.maxHeight = '150px';
+            phwrapper.style.overflow = 'auto';
+          }
+        }
+      }
+    },
+    []
+  );
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
@@ -1111,6 +1110,8 @@ const ESQLEditorInternal = function ESQLEditor({
                       await addLookupIndicesDecorator();
                       showSuggestionsIfEmptyQuery();
                     });
+
+                    editor.onDidChangeCursorPosition(triggerSignatureHelpIfInsideParentheses);
 
                     // Auto-focus the editor and move the cursor to the end.
                     if (!disableAutoFocus) {

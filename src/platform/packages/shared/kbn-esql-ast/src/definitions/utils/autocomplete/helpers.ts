@@ -142,6 +142,7 @@ interface FieldSuggestionsOptions {
   openSuggestions?: boolean;
   addComma?: boolean;
   promoteToTop?: boolean;
+  canBeMultiValue?: boolean;
 }
 
 export async function getFieldsSuggestions(
@@ -156,13 +157,20 @@ export async function getFieldsSuggestions(
     openSuggestions = false,
     addComma = false,
     promoteToTop = true,
+    canBeMultiValue = false,
   } = options;
+
+  const variableType = (() => {
+    if (canBeMultiValue) return ESQLVariableType.MULTI_VALUES;
+    if (values) return ESQLVariableType.VALUES;
+    return ESQLVariableType.FIELDS;
+  })();
 
   const suggestions = await getFieldsByType(types, ignoreColumns, {
     advanceCursor: addSpaceAfterField,
     openSuggestions,
     addComma,
-    variableType: values ? ESQLVariableType.VALUES : ESQLVariableType.FIELDS,
+    variableType,
   });
 
   return pushItUpInTheList(suggestions as ISuggestionItem[], promoteToTop);
@@ -495,18 +503,6 @@ export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionIte
       : {
           title: 'Trigger Suggestion Dialog',
           id: 'editor.action.triggerSuggest',
-        },
-  };
-}
-
-export function withSignatureHelp(suggestionItem: ISuggestionItem): ISuggestionItem {
-  return {
-    ...suggestionItem,
-    command: suggestionItem.command
-      ? suggestionItem.command
-      : {
-          title: 'Trigger Parameter Hints',
-          id: 'editor.action.triggerParameterHints',
         },
   };
 }
