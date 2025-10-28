@@ -29,8 +29,13 @@ export function transformControlGroupOut(
   const legacyControlGroupOptions: StoredControlGroupInput['ignoreParentSettings'] | undefined =
     ignoreParentSettingsJSON ? JSON.parse(ignoreParentSettingsJSON) : undefined;
   if (legacyControlGroupOptions) {
+    // Ignore filters if the legacy control group option is set to ignore filters, or if the legacy chaining system
+    // is set to NONE. Including the chaining system check inside this if block is okay to do, because we don't expect
+    // a legacy chaining system to be defined without legacyControlGroupOptions also being defined
     const ignoreFilters =
-      legacyControlGroupOptions.ignoreFilters || legacyControlGroupOptions.ignoreQuery;
+      controlGroupInput.chainingSystem === 'NONE' ||
+      legacyControlGroupOptions.ignoreFilters ||
+      legacyControlGroupOptions.ignoreQuery;
     controls = controls.reduce((prev, control) => {
       return [
         ...prev,

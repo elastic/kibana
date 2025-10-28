@@ -47,7 +47,6 @@ export function minMax$({
       if (!dataView || !dataViewField) {
         return { max: undefined, min: undefined };
       }
-      controlFetchContext.filters = getFetchContextFilters(controlFetchContext, useGlobalFilters);
 
       try {
         setIsLoading(true);
@@ -58,6 +57,7 @@ export function minMax$({
           dataView,
           field: dataViewField,
           ...controlFetchContext,
+          filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
         });
       } catch (error) {
         return { error, max: undefined, min: undefined };

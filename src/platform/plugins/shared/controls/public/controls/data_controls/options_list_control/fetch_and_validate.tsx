@@ -97,7 +97,6 @@ export function fetchAndValidate$({
 
         /** Fetch the suggestions list + perform validation */
         api.loadingSuggestions$.next(true);
-        fetchContext.filters = getFetchContextFilters(fetchContext, useGlobalFilters);
 
         const request = {
           sort,
@@ -111,6 +110,7 @@ export function fetchAndValidate$({
 
           ignoreValidations,
           ...fetchContext,
+          filters: getFetchContextFilters(fetchContext, useGlobalFilters),
 
           // TODO: get expensive queries setting
           allowExpensiveQueries: true,
