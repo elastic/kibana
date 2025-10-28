@@ -440,11 +440,11 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         },
       },
       '& .dvTopValues__wrapper': {
-        minWidth: 'fit-content',
+        minWidth: $panelWidthM,
       },
       '& .dvPanel__wrapper': {
         '&.dvPanel--compressed': {
-          width: $panelWidthS,
+          minWidth: $panelWidthS,
         },
         '&.dvPanel--uniform': {
           minWidth: $panelWidthS,
