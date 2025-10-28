@@ -87,6 +87,7 @@
     "@kbn/licensing-plugin",
     "@kbn/ai-assistant-connector-selector-action",
     "@kbn/elastic-assistant",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/react-query"
   ]
 }
