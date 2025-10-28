@@ -87,7 +87,7 @@ export function TraceWaterfallContextProvider({
 }: Props) {
   const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState } =
     useTraceWaterfall({
-      traceItems: traceItems || [],
+      traceItems,
     });
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
