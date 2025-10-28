@@ -50,6 +50,7 @@
     "@kbn/shared-ux-router",
     "@kbn/usage-collection-plugin",
     "@kbn/react-query",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*",
