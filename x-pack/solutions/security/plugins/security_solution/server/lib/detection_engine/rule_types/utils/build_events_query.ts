@@ -155,7 +155,7 @@ export const buildEventsSearchQuery = <
       },
     });
   }
-  sort.push('_shard_doc');
+  sort.push('_doc');
 
   const searchQuery = {
     allow_no_indices: true,
