@@ -297,6 +297,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.sleepForDebouncePeriod();
       await PageObjects.console.promptAutocomplete();
       expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+
+      // Clean up input file
+      unlinkSync(filePath);
     });
   });
 }
