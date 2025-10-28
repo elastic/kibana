@@ -15,3 +15,4 @@ export type {
 } from './http_apis';
 
 export { createRestClient } from './rest/create_client';
+export type { RestInferenceClient } from './rest/inference_client';
