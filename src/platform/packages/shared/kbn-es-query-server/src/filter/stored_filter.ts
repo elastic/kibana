@@ -30,6 +30,7 @@ export const filterMetaSchema = schema.object(
     group: schema.maybe(
       schema.string({ meta: { description: 'The group to which this filter belongs.' } })
     ),
+    relation: schema.maybe(schema.string()),
     // field is missing from the Filter type, but is stored in SerializedSearchSourceFields
     // see the todo in src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter.ts
     field: schema.maybe(schema.string()),
