@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import {
   ValueLabelsSettings,
   ToolbarTitleSettings,

@@ -7,7 +7,7 @@
 
 import type { RawRule } from '../../../types';
 import type { RuleDomain } from '../../../application/rule/types';
-import type { AdHocRunStatus } from '../../../../common/constants';
+import type { AdHocRunStatus, BackfillInitiator } from '../../../../common/constants';
 
 export interface AdHocRunSchedule extends Record<string, unknown> {
   interval: string;
@@ -54,6 +54,8 @@ export interface AdHocRunSO extends Record<string, unknown> {
   duration: string;
   enabled: boolean;
   end?: string;
+  initiator: BackfillInitiator;
+  initiatorId?: string;
   rule: AdHocRunSORule;
   spaceId: string;
   start: string;
@@ -69,6 +71,8 @@ export interface AdHocRun {
   enabled: boolean;
   end?: string;
   id: string;
+  initiator: BackfillInitiator;
+  initiatorId?: string;
   rule: AdHocRunRule;
   spaceId: string;
   start: string;

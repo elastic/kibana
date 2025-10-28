@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { AnalyticsEvents } from '../../common';
+import { EuiPageTemplate } from '@elastic/eui';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../common';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
 import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
+import { SearchGettingStartedConnectCode } from './connect_code';
+import { GettingStartedFooter } from './footer';
+import { SearchGettingStartedHeader } from './header';
 
 export const SearchGettingStartedPage: React.FC = () => {
   const usageTracker = useUsageTracker();
@@ -21,8 +24,17 @@ export const SearchGettingStartedPage: React.FC = () => {
 
   return (
     <SearchGettingStartedPageTemplate>
+      <EuiPageTemplate.Section paddingSize="xl" grow={false}>
+        <SearchGettingStartedHeader />
+      </EuiPageTemplate.Section>
       <EuiPageTemplate.Section paddingSize="xl">
         <ConsoleTutorialsGroup />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section data-test-subj="gettingStartedCodeExamples">
+        <SearchGettingStartedConnectCode />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section>
+        <GettingStartedFooter />
       </EuiPageTemplate.Section>
     </SearchGettingStartedPageTemplate>
   );
