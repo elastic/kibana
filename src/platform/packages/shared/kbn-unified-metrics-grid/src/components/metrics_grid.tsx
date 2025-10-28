@@ -30,6 +30,7 @@ export type MetricsGridProps = Pick<
 > & {
   filters?: Array<{ field: string; value: string }>;
   dimensions: string[];
+  searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
   fields: MetricField[];
@@ -49,6 +50,7 @@ export const MetricsGrid = ({
   abortController,
   requestParams,
   discoverFetch$,
+  searchTerm,
   filters = [],
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
@@ -172,6 +174,7 @@ export const MetricsGrid = ({
                   isFocused={isFocused}
                   onFocusCell={handleFocusCell}
                   onViewDetails={handleViewDetails}
+                  searchTerm={searchTerm}
                 />
               </EuiFlexItem>
             );
@@ -205,6 +208,7 @@ interface ChartItemProps
   rowIndex: number;
   colIndex: number;
   isFocused: boolean;
+  searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metric: MetricField) => void;
 }
@@ -229,6 +233,7 @@ const ChartItem = React.memo(
         rowIndex,
         colIndex,
         isFocused,
+        searchTerm,
         onFocusCell,
         onViewDetails,
       }: ChartItemProps,
@@ -281,6 +286,7 @@ const ChartItem = React.memo(
             onViewDetails={handleViewDetailsCallback}
             title={metric.name}
             chartLayers={chartLayers}
+            titleHighlight={searchTerm}
           />
         </A11yGridCell>
       );
