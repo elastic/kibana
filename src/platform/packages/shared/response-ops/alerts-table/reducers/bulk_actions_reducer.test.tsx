@@ -26,7 +26,7 @@ import type {
 import { mockDataGridProps } from '../components/alerts_data_grid.test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 const columns = [
@@ -282,6 +282,18 @@ describe('AlertsDataGrid bulk actions', () => {
           _index: 'idx0',
           data: [
             {
+              field: 'kibana.alert.case_ids',
+              value: ['test-case'],
+            },
+            {
+              field: 'kibana.alert.workflow_tags',
+              value: [],
+            },
+            {
+              field: 'kibana.alert.workflow_assignee_ids',
+              value: [],
+            },
+            {
               field: '_id',
               value: 'alert0',
             },
@@ -300,18 +312,6 @@ describe('AlertsDataGrid bulk actions', () => {
             {
               field: 'kibana.alert.rule.uuid',
               value: ['uuidone'],
-            },
-            {
-              field: 'kibana.alert.case_ids',
-              value: ['test-case'],
-            },
-            {
-              field: 'kibana.alert.workflow_tags',
-              value: [],
-            },
-            {
-              field: 'kibana.alert.workflow_assignee_ids',
-              value: [],
             },
           ],
           ecs: {
@@ -538,6 +538,18 @@ describe('AlertsDataGrid bulk actions', () => {
               _id: 'alert1',
               _index: 'idx1',
               data: [
+                {
+                  field: 'kibana.alert.case_ids',
+                  value: [],
+                },
+                {
+                  field: 'kibana.alert.workflow_tags',
+                  value: [],
+                },
+                {
+                  field: 'kibana.alert.workflow_assignee_ids',
+                  value: [],
+                },
                 { field: '_id', value: 'alert1' },
                 { field: '_index', value: 'idx1' },
                 {
@@ -551,18 +563,6 @@ describe('AlertsDataGrid bulk actions', () => {
                 {
                   field: 'kibana.alert.rule.uuid',
                   value: ['uuidtwo'],
-                },
-                {
-                  field: 'kibana.alert.case_ids',
-                  value: [],
-                },
-                {
-                  field: 'kibana.alert.workflow_tags',
-                  value: [],
-                },
-                {
-                  field: 'kibana.alert.workflow_assignee_ids',
-                  value: [],
                 },
               ],
               ecs: {
@@ -759,6 +759,18 @@ describe('AlertsDataGrid bulk actions', () => {
                 _index: 'idx0',
                 data: [
                   {
+                    field: 'kibana.alert.case_ids',
+                    value: [],
+                  },
+                  {
+                    field: 'kibana.alert.workflow_tags',
+                    value: [],
+                  },
+                  {
+                    field: 'kibana.alert.workflow_assignee_ids',
+                    value: [],
+                  },
+                  {
                     field: '_id',
                     value: 'alert0',
                   },
@@ -778,6 +790,16 @@ describe('AlertsDataGrid bulk actions', () => {
                     field: 'kibana.alert.rule.uuid',
                     value: ['uuidone'],
                   },
+                ],
+                ecs: {
+                  _id: 'alert0',
+                  _index: 'idx0',
+                },
+              },
+              {
+                _id: 'alert1',
+                _index: 'idx1',
+                data: [
                   {
                     field: 'kibana.alert.case_ids',
                     value: [],
@@ -790,16 +812,6 @@ describe('AlertsDataGrid bulk actions', () => {
                     field: 'kibana.alert.workflow_assignee_ids',
                     value: [],
                   },
-                ],
-                ecs: {
-                  _id: 'alert0',
-                  _index: 'idx0',
-                },
-              },
-              {
-                _id: 'alert1',
-                _index: 'idx1',
-                data: [
                   { field: '_id', value: 'alert1' },
                   { field: '_index', value: 'idx1' },
                   {
@@ -813,18 +825,6 @@ describe('AlertsDataGrid bulk actions', () => {
                   {
                     field: 'kibana.alert.rule.uuid',
                     value: ['uuidtwo'],
-                  },
-                  {
-                    field: 'kibana.alert.case_ids',
-                    value: [],
-                  },
-                  {
-                    field: 'kibana.alert.workflow_tags',
-                    value: [],
-                  },
-                  {
-                    field: 'kibana.alert.workflow_assignee_ids',
-                    value: [],
                   },
                 ],
                 ecs: {

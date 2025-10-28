@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
+import { WorkflowEditorStoreProvider } from '../lib/store';
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests
 jest.mock('../../../shared/ui/yaml_editor', () => ({
@@ -28,7 +30,7 @@ jest.mock('../../../shared/ui/yaml_editor', () => ({
 }));
 
 // Mock the validation hook
-jest.mock('../lib/use_yaml_validation', () => ({
+jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => ({
   useYamlValidation: () => ({
     error: null,
     validationErrors: [],
@@ -38,8 +40,8 @@ jest.mock('../lib/use_yaml_validation', () => ({
 }));
 
 // Mock the completion provider
-jest.mock('../lib/get_completion_item_provider', () => ({
-  getCompletionItemProvider: () => ({}),
+jest.mock('./hooks/use_completion_provider', () => ({
+  useCompletionProvider: jest.fn().mockReturnValue({}),
 }));
 
 // Mock the UnsavedChangesPrompt
@@ -52,22 +54,51 @@ jest.mock('./workflow_yaml_validation_errors', () => ({
   WorkflowYAMLValidationErrors: () => null,
 }));
 
+// Mock the useAvailableConnectors hook
+jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
+  useAvailableConnectors: jest.fn().mockReturnValue({
+    data: {
+      connectorTypes: {},
+      totalConnectors: 0,
+    },
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
+
 describe('WorkflowYAMLEditor', () => {
+  let queryClient: QueryClient;
+
   const defaultProps: WorkflowYAMLEditorProps = {
     value: '',
     workflowId: 'test-workflow',
+    onSave: jest.fn(),
+    onRun: jest.fn(),
+    onSaveAndRun: jest.fn(),
   };
 
   const renderWithI18n = (component: React.ReactElement) => {
     return render(
       <MemoryRouter>
-        <I18nProviderMock>{component}</I18nProviderMock>
+        <QueryClientProvider client={queryClient}>
+          <I18nProviderMock>
+            <WorkflowEditorStoreProvider>{component}</WorkflowEditorStoreProvider>
+          </I18nProviderMock>
+        </QueryClientProvider>
       </MemoryRouter>
     );
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
   });
 
   it('renders without crashing', () => {

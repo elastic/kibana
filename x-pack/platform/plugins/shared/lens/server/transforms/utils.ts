@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { LensByRefSerializedState } from '@kbn/lens-common';
 import type { LensSerializedState } from '../../public';
 import type {
   LensByRefSerializedAPIConfig,
   LensSerializedAPIConfig,
-  LensByRefSerializedState,
 } from '../../public/react_embeddable/types';
 
 export function isByRefLensState(state: LensSerializedState): state is LensByRefSerializedState {

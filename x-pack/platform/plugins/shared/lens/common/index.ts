@@ -6,7 +6,6 @@
  */
 
 export { DOCUMENT_FIELD_NAME } from './constants';
-export type { PersistableFilter, LegacyMetricState, ValueFormatConfig } from './types';
 export {
   type LensFeatureFlag,
   type LensFeatureFlags,
@@ -14,3 +13,4 @@ export {
   fetchLensFeatureFlags,
   getLensFeatureFlagDefaults,
 } from './feature_flags';
+export type { PersistableFilter, LegacyMetricState } from '@kbn/lens-common';

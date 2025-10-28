@@ -26,7 +26,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableRegistryDefinition, EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
@@ -44,6 +44,7 @@ import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
 import { getLensServerTransforms } from './transforms';
 import { fetchLensFeatureFlags } from '../common';
+import { getLensTransforms } from '../common/transforms';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -112,7 +113,18 @@ export class LensServerPlugin
       DataViewPersistableStateService.getAllMigrations.bind(DataViewPersistableStateService),
       this.customVisualizationMigrations
     );
-    plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
+
+    plugins.embeddable.registerEmbeddableFactory(
+      lensEmbeddableFactory() as unknown as EmbeddableRegistryDefinition
+    );
+
+    plugins.embeddable.registerTransforms(
+      LENS_EMBEDDABLE_TYPE,
+      getLensTransforms({
+        transformEnhancementsIn: plugins.embeddable.transformEnhancementsIn,
+        transformEnhancementsOut: plugins.embeddable.transformEnhancementsOut,
+      })
+    );
 
     const builder = new LensConfigBuilder();
     plugins.embeddable.registerTransforms(LENS_EMBEDDABLE_TYPE, getLensServerTransforms(builder));

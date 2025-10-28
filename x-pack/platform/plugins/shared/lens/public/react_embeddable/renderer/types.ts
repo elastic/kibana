@@ -11,7 +11,8 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ViewMode, useSearchApi } from '@kbn/presentation-publishing';
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
 
-import type { LensRuntimeState, LensSerializedAPIConfig } from '../types';
+import type { LensRuntimeState } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '../types';
 
 type SearchApi = ReturnType<typeof useSearchApi>;
 

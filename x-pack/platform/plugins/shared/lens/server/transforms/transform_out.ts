@@ -7,6 +7,7 @@
 
 import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 
+import type { LensByValueSerializedState } from '@kbn/lens-common';
 import {
   LENS_ITEM_VERSION_V1,
   transformToV1LensItemAttributes,
@@ -17,7 +18,6 @@ import type {
   LensTransformOut,
 } from './types';
 import { isByRefLensState } from './utils';
-import type { LensByValueSerializedState } from '../../public/react_embeddable/types';
 
 /**
  * Transform from Lens Serialized State to Lens API format
@@ -71,7 +71,10 @@ function migrateAttributes(attributes: LensByValueSerializedState['attributes'])
   if (version < LENS_ITEM_VERSION_V1) {
     newAttributes = {
       ...newAttributes,
-      ...transformToV1LensItemAttributes(attributes),
+      ...transformToV1LensItemAttributes({
+        ...attributes,
+        visualizationType: attributes.visualizationType ?? 'lnsXy',
+      }),
     };
   }
 

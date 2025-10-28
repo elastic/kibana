@@ -16,6 +16,8 @@ import { once } from 'lodash';
 export const INDEX_EDITOR_FLYOUT_OPENED_EVENT_TYPE = 'index_editor.flyout_opened';
 export const INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE = 'index_editor.save_submitted';
 export const INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE = 'index_editor.data_interaction';
+export const INDEX_EDITOR_CLICK_QUERY_THIS_INDEX_EVENT_TYPE =
+  'index_editor.query_this_index_clicked';
 
 /**
  * Registers the index editor analytics events.
@@ -128,6 +130,26 @@ export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServ
         _meta: {
           optional: true,
           description: 'The reason for a validation failure in the index editor.',
+        },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: INDEX_EDITOR_CLICK_QUERY_THIS_INDEX_EVENT_TYPE,
+    schema: {
+      flyout_mode: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The mode in which the index editor flyout was opened. Possible values are: create|view|edit',
+        },
+      },
+      search_query_length_bucket: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The bucket in which the length of the query in the search bar falls into. Possible values are: 0|1-50|51-100|101-200|200+',
         },
       },
     },

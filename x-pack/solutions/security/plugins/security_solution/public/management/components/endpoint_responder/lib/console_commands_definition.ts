@@ -184,7 +184,6 @@ export const getEndpointConsoleCommands = ({
 }: GetEndpointConsoleCommandsOptions): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
   const {
-    responseActionUploadEnabled: isUploadEnabled,
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
@@ -484,51 +483,48 @@ export const getEndpointConsoleCommands = ({
   ];
 
   // `upload` command
-  // planned for 8.9
-  if (isUploadEnabled) {
-    consoleCommands.push({
-      name: 'upload',
-      about: getCommandAboutInfo({
-        aboutInfo: CONSOLE_COMMANDS.upload.about,
-        isSupported: doesEndpointSupportCommand('upload'),
-      }),
-      RenderComponent: UploadActionResult,
-      meta: commandMeta,
-      exampleUsage: 'upload --file --overwrite --comment "script to fix registry"',
-      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator(agentType),
-      mustHaveArgs: true,
-      args: {
-        file: {
-          required: true,
-          allowMultiples: false,
-          about: CONSOLE_COMMANDS.upload.args.file.about,
-          mustHaveValue: 'truthy',
-          SelectorComponent: ArgumentFileSelector,
-        },
-        overwrite: {
-          required: false,
-          allowMultiples: false,
-          about: CONSOLE_COMMANDS.upload.args.overwrite.about,
-          mustHaveValue: false,
-        },
-        comment: {
-          required: false,
-          allowMultiples: false,
-          mustHaveValue: 'non-empty-string',
-          about: COMMENT_ARG_ABOUT,
-        },
+  consoleCommands.push({
+    name: 'upload',
+    about: getCommandAboutInfo({
+      aboutInfo: CONSOLE_COMMANDS.upload.about,
+      isSupported: doesEndpointSupportCommand('upload'),
+    }),
+    RenderComponent: UploadActionResult,
+    meta: commandMeta,
+    exampleUsage: 'upload --file --overwrite --comment "script to fix registry"',
+    exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+    validate: capabilitiesAndPrivilegesValidator(agentType),
+    mustHaveArgs: true,
+    args: {
+      file: {
+        required: true,
+        allowMultiples: false,
+        about: CONSOLE_COMMANDS.upload.args.file.about,
+        mustHaveValue: 'truthy',
+        SelectorComponent: ArgumentFileSelector,
       },
-      helpGroupLabel: HELP_GROUPS.responseActions.label,
-      helpGroupPosition: HELP_GROUPS.responseActions.position,
-      helpCommandPosition: 7,
-      helpDisabled: !doesEndpointSupportCommand('upload'),
-      helpHidden: !getRbacControl({
-        commandName: 'upload',
-        privileges: endpointPrivileges,
-      }),
-    });
-  }
+      overwrite: {
+        required: false,
+        allowMultiples: false,
+        about: CONSOLE_COMMANDS.upload.args.overwrite.about,
+        mustHaveValue: false,
+      },
+      comment: {
+        required: false,
+        allowMultiples: false,
+        mustHaveValue: 'non-empty-string',
+        about: COMMENT_ARG_ABOUT,
+      },
+    },
+    helpGroupLabel: HELP_GROUPS.responseActions.label,
+    helpGroupPosition: HELP_GROUPS.responseActions.position,
+    helpCommandPosition: 7,
+    helpDisabled: !doesEndpointSupportCommand('upload'),
+    helpHidden: !getRbacControl({
+      commandName: 'upload',
+      privileges: endpointPrivileges,
+    }),
+  });
 
   if (microsoftDefenderEndpointCancelEnabled) {
     const isSupported = canCancelForCurrentContext();
@@ -616,8 +612,6 @@ const adjustCommandsForSentinelOne = ({
   platform: string;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
-  const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
-  const isProcessesEnabled = featureFlags.responseActionsSentinelOneProcessesEnabled;
   const isRunscriptEnabled = featureFlags.responseActionsSentinelOneRunScriptEnabled;
 
   return commandList.map((command) => {
@@ -641,8 +635,6 @@ const adjustCommandsForSentinelOne = ({
 
     if (
       command.name === 'status' ||
-      (command.name === 'kill-process' && !isKillProcessEnabled) ||
-      (command.name === 'processes' && !isProcessesEnabled) ||
       !isAgentTypeAndActionSupported(
         'sentinel_one',
         RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
@@ -870,13 +862,11 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
   microsoftDefenderEndpointRunScriptEnabled: boolean;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
-  const isMicrosoftDefenderEndpointEnabled = featureFlags.responseActionsMSDefenderEndpointEnabled;
   const microsoftDefenderEndpointCancelEnabled =
     featureFlags.microsoftDefenderEndpointCancelEnabled;
 
   return commandList.map((command) => {
     if (
-      !isMicrosoftDefenderEndpointEnabled ||
       command.name === 'status' ||
       !isAgentTypeAndActionSupported(
         'microsoft_defender_endpoint',

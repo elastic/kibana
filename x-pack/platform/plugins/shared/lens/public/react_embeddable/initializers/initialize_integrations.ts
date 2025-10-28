@@ -11,44 +11,22 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import type { Reference } from '@kbn/content-management-utils';
-import {
-  SAVED_OBJECT_REF_NAME,
-  type HasSerializableState,
-  type SerializedPanelState,
-} from '@kbn/presentation-publishing';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { GetStateType, LensRuntimeState, IntegrationCallbacks } from '@kbn/lens-common';
 import { isTextBasedLanguage, transformOutputState } from '../helper';
 import type {
-  GetStateType,
   LensByRefSerializedAPIConfig,
   LensByValueSerializedAPIConfig,
-  LensEmbeddableStartServices,
-  LensRuntimeState,
   LensSerializedAPIConfig,
 } from '../types';
-import type { IntegrationCallbacks } from '../types';
-import { DOC_TYPE } from '../../../common/constants';
 
-function cleanupSerializedState({
-  rawState,
-  references,
-}: {
-  rawState: LensRuntimeState;
-  references: Reference[];
-}) {
-  const cleanedState = omit(rawState, 'searchSessionId');
-  return {
-    rawState: cleanedState,
-    references,
-  };
+function cleanupSerializedState(state: LensRuntimeState) {
+  const cleanedState = omit(state, 'searchSessionId');
+
+  return cleanedState;
 }
 
-export function initializeIntegrations(
-  getLatestState: GetStateType,
-  serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined,
-  { attributeService }: LensEmbeddableStartServices
-): {
+export function initializeIntegrations(getLatestState: GetStateType): {
   api: Omit<
     IntegrationCallbacks,
     | 'updateState'
@@ -68,40 +46,22 @@ export function initializeIntegrations(
        * Make sure to remove the attributes when the panel is by reference.
        */
       serializeState: (): SerializedPanelState<LensSerializedAPIConfig> => {
-        const currentState = getLatestState();
-        const cleanedState = cleanupSerializedState(
-          attributeService.extractReferences(currentState)
-        );
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-          serializeDynamicActions?.() ?? {};
-        if (cleanedState.rawState.savedObjectId) {
-          const { savedObjectId, attributes, ...byRefState } = cleanedState.rawState;
+        const currentState = cleanupSerializedState(getLatestState());
+
+        const { savedObjectId, attributes, ...state } = currentState;
+        if (savedObjectId) {
           return {
             rawState: {
-              ...byRefState,
-              ...dynamicActionsState,
+              ...state,
+              savedObjectId,
             },
-            references: [
-              ...cleanedState.references,
-              ...(dynamicActionsReferences ?? []),
-              {
-                name: SAVED_OBJECT_REF_NAME,
-                type: DOC_TYPE,
-                id: savedObjectId,
-              },
-            ],
           } satisfies SerializedPanelState<LensByRefSerializedAPIConfig>;
         }
 
-        const { rawState: transformedState, references: transformedReferences = [] } =
-          transformOutputState(cleanedState);
+        const transformedState = transformOutputState(currentState);
 
         return {
-          rawState: {
-            ...transformedState,
-            ...dynamicActionsState,
-          },
-          references: [...transformedReferences, ...(dynamicActionsReferences ?? [])],
+          rawState: transformedState,
         } satisfies SerializedPanelState<LensByValueSerializedAPIConfig>;
       },
       // TODO: workout why we have this duplicated

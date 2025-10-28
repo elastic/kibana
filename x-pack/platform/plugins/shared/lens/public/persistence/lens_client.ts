@@ -10,6 +10,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
 
+import type { LensSavedObjectAttributes } from '@kbn/lens-common';
 import { LENS_API_VERSION, LENS_VIS_API_PATH } from '../../common/constants';
 import type { LensAttributes, LensItem } from '../../server/content_management';
 import {
@@ -26,7 +27,11 @@ import type {
   LensItemMeta,
   LensUpdateRequestQuery,
 } from '../../server/api/routes/visualizations/types';
-import type { LensSavedObjectAttributes } from '../react_embeddable/types';
+
+export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
+  item: LensItem;
+  meta: LensItemMeta & M;
+}
 
 export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
   item: LensItem;

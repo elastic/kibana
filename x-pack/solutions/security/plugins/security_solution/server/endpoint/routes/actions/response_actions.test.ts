@@ -1500,7 +1500,6 @@ describe('Response actions', () => {
 
       testSetup.endpointAppContextMock.experimentalFeatures = {
         ...testSetup.endpointAppContextMock.experimentalFeatures,
-        responseActionsSentinelOneV1Enabled: true,
       };
 
       httpHandlerContextMock.actions = Promise.resolve({
@@ -1609,11 +1608,6 @@ describe('Response actions', () => {
       ({ httpHandlerContextMock, httpResponseMock } = testSetup);
       httpRequestMock = testSetup.createRequestMock();
 
-      testSetup.endpointAppContextMock.experimentalFeatures = {
-        ...testSetup.endpointAppContextMock.experimentalFeatures,
-        responseActionsMSDefenderEndpointEnabled: true,
-      };
-
       httpHandlerContextMock.actions = Promise.resolve({
         getActionsClient: () => sentinelOneMock.createConnectorActionsClient(),
       } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
@@ -1675,22 +1669,6 @@ describe('Response actions', () => {
         'microsoft_defender_endpoint',
         expect.anything()
       );
-    });
-
-    it('should error if feature is disabled', async () => {
-      testSetup.endpointAppContextMock.experimentalFeatures = {
-        ...testSetup.endpointAppContextMock.experimentalFeatures,
-        responseActionsMSDefenderEndpointEnabled: false,
-      };
-
-      await callHandler();
-
-      expect(httpResponseMock.customError).toHaveBeenCalledWith({
-        body: expect.objectContaining({
-          message: '[request body.agent_type]: feature is disabled',
-        }),
-        statusCode: 400,
-      });
     });
   });
 });

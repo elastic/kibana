@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
-
-import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
+import type { LensConfigBuilder, LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import type { LensSavedObject, LensUpdateIn } from '../../content_management';
 import type {
   LensCreateRequestBody,
@@ -27,7 +25,7 @@ export function getLensRequestConfig(
   const useApiFormat = builder.isSupported(chartType);
 
   if (useApiFormat) {
-    const config = request as LensApiState;
+    const config = request as LensApiSchemaType;
     const attributes = builder.fromAPIFormat(config);
 
     return {

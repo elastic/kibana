@@ -66,6 +66,7 @@ export const IndicatorsFieldSelector = memo<IndicatorsFieldSelectorProps>(
         options={fields}
         selectedOptions={selectedField}
         isClearable={false}
+        aria-label={COMBOBOX_PREPEND_LABEL}
       />
     );
   }

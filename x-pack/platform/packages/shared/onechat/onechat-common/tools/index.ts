@@ -28,6 +28,7 @@ export {
   EsqlToolFieldType,
   type EsqlToolFieldTypes,
   type EsqlToolParam,
+  type EsqlToolParamValue,
   type EsqlToolDefinition,
   type EsqlToolDefinitionWithSchema,
   isEsqlTool,
@@ -58,4 +59,9 @@ export {
   type ResourceResult,
   type TabularDataResult,
   type OtherResult,
+  isErrorResult,
+  isOtherResult,
+  isQueryResult,
+  isResourceResult,
+  isTabularDataResult,
 } from './tool_result';

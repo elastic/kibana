@@ -8,11 +8,13 @@
 import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
 
 import type {
-  LensSerializedAPIConfig,
-  LensSerializedState,
   LensByRefSerializedState,
-  LensByRefSerializedAPIConfig,
+  LensSerializedState,
   LensByValueSerializedState,
+} from '@kbn/lens-common';
+import type {
+  LensSerializedAPIConfig,
+  LensByRefSerializedAPIConfig,
   LensByValueSerializedAPIConfig,
 } from '../../public/react_embeddable/types';
 

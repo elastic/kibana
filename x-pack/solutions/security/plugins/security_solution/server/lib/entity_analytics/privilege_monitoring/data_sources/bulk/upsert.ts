@@ -34,6 +34,9 @@ if (params.new_privileged_status == false) {
 
     if (src.labels.sources.size() == 0) {
       src.user.is_privileged = false;
+      ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
+      ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
+      ctx._source.user.entity.attributes.Privileged = false;
     }
   }
 } else {
@@ -92,6 +95,9 @@ if (params.new_privileged_status == false) {
 
   if (src.user.is_privileged != true) {
     src.user.is_privileged = true;
+    ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
+    ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
+    ctx._source.user.entity.attributes.Privileged = true;
     modified = true;
   }
 
@@ -118,6 +124,9 @@ export const INDEX_SCRIPT = `
               }
 
               ctx._source.user.is_privileged = true;
+              ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
+              ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
+              ctx._source.user.entity.attributes.Privileged = true;
             `;
 /**
  * Builds a list of Elasticsearch bulk operations to upsert privileged users.
@@ -174,6 +183,9 @@ export const bulkUpsertOperationsFactory =
 
               if (ctx._source.user.is_privileged != true) {
                 ctx._source.user.is_privileged = true;
+                ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
+                ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
+                ctx._source.user.entity.attributes.Privileged = true;
                 userModified = true;
               }
               
@@ -196,7 +208,11 @@ export const bulkUpsertOperationsFactory =
           { index: { _index: userIndexName } },
           {
             '@timestamp': now,
-            user: { name: user.username, is_privileged: true },
+            user: {
+              name: user.username,
+              is_privileged: true,
+              entity: { attributes: { Privileged: true } },
+            },
             labels: {
               sources: ['index'],
               source_ids: [user.sourceId],
@@ -216,7 +232,11 @@ type ParamsBuilder<T extends PrivMonBulkUser> = (
 
 const buildCreateDoc = (user: PrivMonBulkUser, sourceLabel: string) => ({
   '@timestamp': new Date().toISOString(),
-  user: { name: user.username, is_privileged: true },
+  user: {
+    name: user.username,
+    is_privileged: true,
+    entity: { attributes: { Privileged: true } },
+  },
   ...(user.monitoringLabels
     ? { entity_analytics_monitoring: { labels: user.monitoringLabels } }
     : {}),
@@ -255,7 +275,6 @@ export const bulkUpsertOperationsFactoryShared =
 
 export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
-
   return (usersChunk: PrivMonBulkUser[], source: MonitoringEntitySource) =>
     buildOps({
       users: usersChunk,
@@ -281,5 +300,5 @@ export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) =
       sourceLabel: 'index_sync',
       buildUpdateParams: (user) => ({ source_id: user.sourceId }),
     });
-  return indexOperations;
+  return indexOperations || [];
 };

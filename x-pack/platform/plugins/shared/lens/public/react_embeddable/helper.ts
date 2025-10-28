@@ -13,7 +13,6 @@ import {
   getInheritedViewMode,
   type PublishingSubject,
   apiHasExecutionContext,
-  findSavedObjectRef,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
@@ -21,22 +20,24 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import type {
-  LensByValueSerializedAPIConfig,
-  LensEmbeddableStartServices,
   LensRuntimeState,
-  LensSerializedAPIConfig,
   LensSerializedState,
   StructuredDatasourceStates,
-} from './types';
+  DatasourceStates,
+  GeneralDatasourceStates,
+  FormBasedPersistedState,
+  TextBasedPersistedState,
+} from '@kbn/lens-common';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
-import type { DatasourceStates, GeneralDatasourceStates } from '../state_management';
-import type { FormBasedPersistedState } from '../datasources/form_based/types';
-import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
-import { DOC_TYPE } from '../../common/constants';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 import { getLensPublicTransforms } from './transforms';
 import { getLensFeatureFlags } from '../get_feature_flags';
+import type {
+  LensByValueSerializedAPIConfig,
+  LensEmbeddableStartServices,
+  LensSerializedAPIConfig,
+} from './types';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -74,19 +75,16 @@ export async function deserializeState(
     attributeService,
     ...services
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
-  rawState: LensSerializedAPIConfig,
-  references?: Reference[]
+  { savedObjectId, ...state }: LensSerializedState
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
-  const savedObjectRef = findSavedObjectRef(DOC_TYPE, references);
-  const savedObjectId = savedObjectRef?.id ?? rawState.savedObjectId;
 
   if (savedObjectId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
         await attributeService.loadFromLibrary(savedObjectId);
       return {
-        ...rawState,
+        ...state,
         savedObjectId,
         attributes,
         managed,
@@ -94,19 +92,11 @@ export async function deserializeState(
       } satisfies LensRuntimeState;
     } catch (e) {
       // return an empty Lens document if no saved object is found
-      return { ...rawState, attributes: fallbackAttributes };
+      return { ...state, attributes: fallbackAttributes };
     }
   }
 
-  const transformedState = transformInitialState(rawState, references);
-
-  // Inject applied only to by-value SOs
-  const newState = attributeService.injectReferences(
-    ('attributes' in transformedState
-      ? transformedState
-      : { attributes: transformedState }) as LensRuntimeState,
-    references?.length ? references : undefined
-  );
+  const newState = transformInitialState(state) as LensRuntimeState;
 
   if (newState.isNewPanel) {
     try {

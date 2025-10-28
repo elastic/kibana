@@ -258,6 +258,12 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
 
               openPreviewPanel(previewPanelProps);
             }}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
+              {
+                defaultMessage: 'Preview vulnerability details',
+              }
+            )}
           />
         ),
       },

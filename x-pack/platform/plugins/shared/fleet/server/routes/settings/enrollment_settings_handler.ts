@@ -62,7 +62,6 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   // ignore errors if the download source is not found
   try {
     settingsResponse.download_source = await getDownloadSource(
-      soClient,
       scopedAgentPolicy.download_source_id ?? undefined
     );
   } catch (e) {
@@ -173,10 +172,9 @@ export const getFleetServerOrAgentPolicies = async (
 };
 
 export const getDownloadSource = async (
-  soClient: SavedObjectsClientContract,
   downloadSourceId?: string
 ): Promise<Promise<GetEnrollmentSettingsResponse['download_source']>> => {
-  const sources = await downloadSourceService.list(soClient);
+  const sources = await downloadSourceService.list();
   const foundSource = downloadSourceId
     ? sources.items.find((s) => s.id === downloadSourceId)
     : undefined;

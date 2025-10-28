@@ -101,7 +101,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       setupTechnology,
       updateSetupTechnology,
       shouldRenderAgentlessSelector,
-      isServerless,
       hasInvalidRequiredVars,
     } = useLoadCloudSetup({
       newPolicy,
@@ -241,7 +240,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
           <>
             <EuiSpacer size="m" />
             <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
               disabled={isEditPage}
               setupTechnology={setupTechnology}
               allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
@@ -310,6 +308,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             updatePolicy={updatePolicy}
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
+            isEditPage={isEditPage}
           />
         )}
 
@@ -319,6 +318,8 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
+            cloud={cloud}
+            isEditPage={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             setupTechnology={setupTechnology}
           />

@@ -12,13 +12,13 @@ import { BehaviorSubject } from 'rxjs';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import type {
   LensApi,
+  LensParentApi,
   LensRendererProps,
-  LensSerializedAPIConfig,
   LensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { createEmptyLensState, transformOutputState } from '../helper';
-import type { LensParentApi } from './types';
+import type { LensSerializedAPIConfig } from '../types';
 
 // This little utility uses the same pattern of the useSearchApi hook:
 // create the Subject once and then update its value on change
@@ -161,11 +161,10 @@ export function LensRenderer({
           settings,
           // make sure to provide the initial state (useful for the comparison check)
           getSerializedStateForChild: () => {
-            const transformedState = transformOutputState({
-              rawState: initialStateRef.current,
-              references: [],
-            });
-            return transformedState;
+            const transformedState = transformOutputState(initialStateRef.current);
+            return {
+              rawState: transformedState,
+            };
           },
           forceDSL,
           esqlVariables$,

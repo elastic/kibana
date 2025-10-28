@@ -11,6 +11,7 @@ import type {
   OnechatToolEvent,
   ToolHandlerFn,
 } from '@kbn/onechat-server';
+import { getToolResultId } from '@kbn/onechat-server/tools/utils';
 import type { CreateScopedRunnerDepsMock, MockedTool, ToolRegistryMock } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
@@ -20,6 +21,10 @@ import {
 import { RunnerManager } from './runner';
 import { runTool } from './run_tool';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+
+jest.mock('@kbn/onechat-server/tools/utils');
+
+const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
 
 describe('runTool', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
@@ -32,13 +37,15 @@ describe('runTool', () => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
 
+    getToolResultIdMock.mockReturnValue('some-result-id');
+
     registry = createToolRegistryMock();
     const {
       toolsService: { getRegistry },
     } = runnerDeps;
     getRegistry.mockResolvedValue(registry);
 
-    toolHandler = jest.fn();
+    toolHandler = jest.fn().mockReturnValue({ results: [] });
 
     tool = createMockedTool({});
     tool.getSchema.mockReturnValue(
@@ -135,7 +142,13 @@ describe('runTool', () => {
     });
 
     expect(results).toEqual({
-      results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
+      results: [
+        {
+          tool_result_id: 'some-result-id',
+          type: ToolResultType.other,
+          data: { test: true, over: 9000 },
+        },
+      ],
     });
   });
 

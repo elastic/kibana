@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import type {
   LensByRefTransformInResult,
@@ -19,6 +19,9 @@ import { isByRefLensConfig } from './utils';
  */
 export const getTransformIn = (builder: LensConfigBuilder): LensTransformIn => {
   return function transformIn(config) {
+    if (!config?.attributes) {
+      throw new Error('Lens config is undefined');
+    }
     if (isByRefLensConfig(config)) {
       return {
         state: config,
@@ -28,7 +31,7 @@ export const getTransformIn = (builder: LensConfigBuilder): LensTransformIn => {
 
     const chartType = builder.getType(config.attributes);
 
-    if (!builder.isSupported(chartType)) {
+    if (!builder.isSupported(config.attributes)) {
       // TODO: remove this once all formats are supported
       // when not supported, no transform is needed
       return {

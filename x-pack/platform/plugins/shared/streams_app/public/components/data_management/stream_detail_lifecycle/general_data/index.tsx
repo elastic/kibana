@@ -13,22 +13,26 @@ import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { EditLifecycleModal } from './modal';
 import { IlmSummary } from './ilm_summary';
 import { IngestionRate } from './ingestion_rate';
-import { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
 import { getFormattedError } from '../../../../util/errors';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
+
 export const StreamDetailGeneralData = ({
   definition,
   refreshDefinition,
+  data,
 }: {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
+  data: ReturnType<typeof useDataStreamStats>;
 }) => {
   const {
     core: { http, notifications },
@@ -40,14 +44,10 @@ export const StreamDetailGeneralData = ({
     services: { telemetryClient },
   } = useKibana();
 
+  const { timeState } = useTimefilter();
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [updateInProgress, setUpdateInProgress] = useState(false);
-
-  const {
-    stats,
-    isLoading: isLoadingStats,
-    error: statsError,
-  } = useDataStreamStats({ definition });
 
   const { signal } = useAbortController();
 
@@ -122,19 +122,34 @@ export const StreamDetailGeneralData = ({
           <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <StorageSizeCard definition={definition} stats={stats} statsError={statsError} />
+          <StorageSizeCard
+            hasMonitorPrivileges={definition.privileges?.monitor}
+            stats={data.stats?.ds.stats}
+            statsError={data.error}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <IngestionCard definition={definition} stats={stats} statsError={statsError} />
+          <IngestionCard
+            hasMonitorPrivileges={definition.privileges?.monitor}
+            stats={data.stats?.ds.stats}
+            statsError={data.error}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
         <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
-          <IlmSummary definition={definition} stats={stats} />
+          <IlmSummary definition={definition} stats={data.stats?.ds.stats} />
         </EuiPanel>
       ) : null}
       <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
-        <IngestionRate definition={definition} isLoadingStats={isLoadingStats} stats={stats} />
+        <IngestionRate
+          definition={definition}
+          isLoadingStats={data.isLoading}
+          stats={data.stats?.ds.stats}
+          timeState={timeState}
+          statsError={data.error}
+          aggregations={data.stats?.ds.aggregations}
+        />
       </EuiPanel>
     </EuiFlexGroup>
   );

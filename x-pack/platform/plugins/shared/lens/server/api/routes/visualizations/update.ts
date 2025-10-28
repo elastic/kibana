@@ -80,7 +80,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
-      const requestBodyData = req.body.data;
+      const requestBodyData = req.body;
       if (!requestBodyData.visualizationType) {
         throw new Error('visualizationType is required');
       }

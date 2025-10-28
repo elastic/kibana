@@ -44,6 +44,8 @@ import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
 import { getPainlessScripts, type PainlessScripts } from './painless';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 
+const max10DecimalPlaces = (num: number) => Math.round(num * 1e10) / 1e10;
+
 const formatForResponse = ({
   bucket,
   criticality,
@@ -69,7 +71,7 @@ const formatForResponse = ({
   const categoryTwoCount = criticalityModifier ? 1 : 0;
 
   const newFields = {
-    category_2_score: categoryTwoScore,
+    category_2_score: max10DecimalPlaces(categoryTwoScore),
     category_2_count: categoryTwoCount,
     criticality_level: criticality?.criticality_level,
     criticality_modifier: criticalityModifier,
@@ -80,9 +82,9 @@ const formatForResponse = ({
     id_field: identifierField,
     id_value: bucket.key[identifierField],
     calculated_level: calculatedLevel,
-    calculated_score: riskDetails.value.score,
-    calculated_score_norm: normalizedScoreWithCriticality,
-    category_1_score: riskDetails.value.category_1_score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
+    calculated_score: max10DecimalPlaces(riskDetails.value.score),
+    calculated_score_norm: max10DecimalPlaces(normalizedScoreWithCriticality),
+    category_1_score: max10DecimalPlaces(riskDetails.value.category_1_score / RIEMANN_ZETA_VALUE), // normalize value to be between 0-100
     category_1_count: riskDetails.value.category_1_count,
     notes: riskDetails.value.notes,
     inputs: riskDetails.value.risk_inputs.map((riskInput) => ({

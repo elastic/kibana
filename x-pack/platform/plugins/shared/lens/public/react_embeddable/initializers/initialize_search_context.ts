@@ -13,13 +13,8 @@ import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfac
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, merge, map, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
-import type {
-  LensEmbeddableStartServices,
-  LensInternalApi,
-  LensRuntimeState,
-  LensSerializedAPIConfig,
-  LensUnifiedSearchContext,
-} from '../types';
+import type { LensInternalApi, LensRuntimeState, LensUnifiedSearchContext } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig, LensEmbeddableStartServices } from '../types';
 
 export const searchContextComparators: StateComparators<LensUnifiedSearchContext> = {
   ...timeRangeComparators,

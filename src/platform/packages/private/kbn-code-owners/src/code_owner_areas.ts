@@ -15,7 +15,7 @@ export const CODE_OWNER_AREAS = [
   'search',
   'observability',
   'security',
-  'chat',
+  'workplace_ai',
 ] as const;
 export type CodeOwnerArea = (typeof CODE_OWNER_AREAS)[number];
 
@@ -67,8 +67,8 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/streams-program-team',
   ],
   security: [
+    'elastic/contextual-security-apps',
     'elastic/integration-experience',
-    'elastic/kibana-cloud-security-posture',
     'elastic/security-asset-management',
     'elastic/security-data-analytics',
     'elastic/security-defend-workflows',
@@ -85,10 +85,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-threat-hunting-explore',
     'elastic/security-threat-hunting-investigations',
   ],
-  chat: [
-    // TODO add owner teams here (once they exist)
-    // https://github.com/elastic/kibana/issues/213469
-  ],
+  workplace_ai: ['elastic/search-kibana'],
 };
 
 /**

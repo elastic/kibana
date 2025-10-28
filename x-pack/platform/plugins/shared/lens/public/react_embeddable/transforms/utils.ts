@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type {
-  LensSerializedState,
-  LensByRefSerializedAPIConfig,
-  LensSerializedAPIConfig,
-  LensByRefSerializedState,
-} from '../types';
+import type { LensByRefSerializedState, LensSerializedState } from '@kbn/lens-common';
+import type { LensByRefSerializedAPIConfig, LensSerializedAPIConfig } from '../types';
 
 export function isByRefLensState(state: LensSerializedState): state is LensByRefSerializedState {
   return !state.attributes;

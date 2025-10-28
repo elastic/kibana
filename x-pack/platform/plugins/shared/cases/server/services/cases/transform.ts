@@ -56,6 +56,7 @@ export function transformUpdateResponseToExternalModel(
     updatedCase.attributes ??
     ({
       total_alerts: -1,
+      total_events: -1,
       total_comments: -1,
     } as CasePersistedAttributes);
 
@@ -200,6 +201,7 @@ export function transformSavedObjectToExternalModel(
     caseSavedObject.attributes ??
     ({
       total_alerts: -1,
+      total_events: -1,
       total_comments: -1,
     } as CasePersistedAttributes);
 

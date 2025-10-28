@@ -763,16 +763,16 @@
                 "path": "src/core/packages/plugins/server-internal/src/plugin_context.ts"
               },
               {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/plugin.ts"
+              },
+              {
                 "plugin": "observabilityOnboarding",
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/server/plugin.ts"
               },
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/server/plugin.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -2181,6 +2181,19 @@
             ],
             "signature": [
               "moment.Duration"
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IElasticsearchConfig.healthCheckRetry",
+            "type": "number",
+            "tags": [],
+            "label": "healthCheckRetry",
+            "description": [
+              "\nThe number of times to retry the health check request"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
             "deprecated": false,

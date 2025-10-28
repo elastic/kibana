@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
+import { lensApiStateSchema } from '@kbn/lens-embeddable-utils';
 import { lensItemDataSchema, lensSavedObjectSchema } from '../../../../content_management';
 import { pickFromObjectSchema } from '../../../../utils';
 

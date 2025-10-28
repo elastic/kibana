@@ -12,27 +12,24 @@ import type {
   SerializedTitles,
   StateComparators,
   initializeTitleManager,
-  SerializedPanelState,
 } from '@kbn/presentation-publishing';
 import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import { isTextBasedLanguage, transformOutputState } from '../helper';
 import type {
   LensComponentProps,
   LensPanelProps,
   LensRuntimeState,
-  LensEmbeddableStartServices,
   LensOverrides,
   LensSharedProps,
   IntegrationCallbacks,
   LensInternalApi,
   LensApi,
-  LensSerializedAPIConfig,
-  LensByRefSerializedAPIConfig,
-  LensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
+import { isTextBasedLanguage, transformOutputState } from '../helper';
+
+import type { LensEmbeddableStartServices, LensSerializedAPIConfig } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
 import type { StateManagementConfig } from './initialize_state_management';
 
@@ -134,18 +131,18 @@ export function initializeDashboardServices(
       canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
-        currentState.savedObjectId = newId;
-        const saveState = attributeService.extractReferences(
-          currentState
-        ) as unknown as SerializedPanelState<LensByRefSerializedAPIConfig>;
-        return saveState;
+        return {
+          rawState: {
+            ...currentState,
+            savedObjectId: newId,
+          },
+        };
       },
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        const saveState = attributeService.extractReferences(
-          byValueRuntimeState
-        ) as unknown as SerializedPanelState<LensSerializedState>;
-        return transformOutputState(saveState);
+        return {
+          rawState: transformOutputState(byValueRuntimeState),
+        };
       },
     },
     anyStateChange$: merge(
