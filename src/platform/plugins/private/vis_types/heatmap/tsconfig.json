@@ -25,6 +25,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
     "@kbn/chart-expressions-common",
+    "@kbn/lens-common",
   ],
   "exclude": [
     "target/**/*",

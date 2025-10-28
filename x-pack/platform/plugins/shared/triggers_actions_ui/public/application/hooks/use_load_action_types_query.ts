@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { loadActionTypes } from '../lib/action_connector_api';
