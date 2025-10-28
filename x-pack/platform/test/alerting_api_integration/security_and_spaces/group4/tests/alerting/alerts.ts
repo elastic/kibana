@@ -35,7 +35,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  describe('alerts', () => {
+  describe('alerts only', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
     const objectRemover = new ObjectRemover(supertest);
@@ -1527,6 +1527,10 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            state: {
+                              duration: '0',
+                              start: expectExpect.any(String),
+                            },
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1572,6 +1576,10 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            state: {
+                              duration: '0',
+                              start: expectExpect.any(String),
+                            },
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1787,6 +1795,10 @@ instanceStateValue: true
                       status: 'active',
                       workflow_status: 'open',
                       flapping: false,
+                      state: {
+                        duration: '0',
+                        start: expectExpect.any(String),
+                      },
                     },
                     space_ids: ['space1'],
                     version: expectExpect.any(String),
@@ -1832,6 +1844,10 @@ instanceStateValue: true
                       status: 'active',
                       workflow_status: 'open',
                       flapping: false,
+                      state: {
+                        duration: '0',
+                        start: expectExpect.any(String),
+                      },
                     },
                     space_ids: ['space1'],
                     version: expectExpect.any(String),
