@@ -643,9 +643,6 @@ function getStepTypeFromYaml(yamlDocument: any, stepIndex: number): string | nul
  */
 function getConnectorParamsSchema(stepType: string): z.ZodType | null {
   try {
-    // Import all connector definitions
-
-    // const { getAllConnectors } = require('../schema');
     const allConnectors = getAllConnectors();
 
     // Find the connector definition for this step type
