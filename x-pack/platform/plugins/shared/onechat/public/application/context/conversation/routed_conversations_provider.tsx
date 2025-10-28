@@ -67,21 +67,31 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     [shouldAllowConversationRedirectRef, navigateToOnechatUrl]
   );
 
-  const conversationActions = useConversationActions({
-    conversationId,
-    queryKey,
-    queryClient,
-    conversationsService,
-    onConversationCreated: ({ conversationId: id }) => {
+  const onConversationCreated = useCallback(
+    ({ conversationId: id }: { conversationId: string }) => {
       navigateToConversation({ nextConversationId: id });
     },
-    onDeleteConversation: ({ isCurrentConversation }) => {
+    [navigateToConversation]
+  );
+
+  const onDeleteConversation = useCallback(
+    ({ isCurrentConversation }: { isCurrentConversation: boolean }) => {
       if (isCurrentConversation) {
         // If deleting current conversation, navigate to new conversation
         const path = appPaths.chat.new;
         navigateToOnechatUrl(path, undefined, { shouldStickToBottom: true });
       }
     },
+    [navigateToOnechatUrl]
+  );
+
+  const conversationActions = useConversationActions({
+    conversationId,
+    queryKey,
+    queryClient,
+    conversationsService,
+    onConversationCreated,
+    onDeleteConversation,
   });
 
   // Handle agent ID syncing from URL params (moved from useSyncAgentId)

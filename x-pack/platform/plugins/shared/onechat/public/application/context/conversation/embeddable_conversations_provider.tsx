@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -47,21 +47,31 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
 
-  const conversationActions = useConversationActions({
-    conversationId,
-    queryKey,
-    queryClient,
-    conversationsService: services.conversationsService,
-    onConversationCreated: ({ conversationId: id }) => {
+  const onConversationCreated = useCallback(
+    ({ conversationId: id }: { conversationId: string }) => {
       // Update conversationId to show the newly created conversation in the UI
       setConversationId(id);
     },
-    onDeleteConversation: ({ isCurrentConversation }) => {
+    []
+  );
+
+  const onDeleteConversation = useCallback(
+    ({ isCurrentConversation }: { isCurrentConversation: boolean }) => {
       if (isCurrentConversation) {
         // For embeddable context, we can't navigate, just reset the conversation ID
         setConversationId(undefined);
       }
     },
+    []
+  );
+
+  const conversationActions = useConversationActions({
+    conversationId,
+    queryKey,
+    queryClient,
+    conversationsService: services.conversationsService,
+    onConversationCreated,
+    onDeleteConversation,
   });
 
   const conversationContextValue = useMemo(
