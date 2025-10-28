@@ -53,18 +53,18 @@ const VisualizationToolbar = memo(function VisualizationToolbar({
     ToolbarComponent = RegularToolbarComponent;
   }
 
+  if (!ToolbarComponent) {
+    return null;
+  }
+
   return (
-    <>
-      {ToolbarComponent && (
-        <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
-          {ToolbarComponent({
-            frame: framePublicAPI,
-            state: visualization.state,
-            setState: setVisualizationState,
-          })}
-        </EuiFlexItem>
-      )}
-    </>
+    <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+      {ToolbarComponent({
+        frame: framePublicAPI,
+        state: visualization.state,
+        setState: setVisualizationState,
+      })}
+    </EuiFlexItem>
   );
 });
 
