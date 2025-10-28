@@ -94,7 +94,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
         await options[0].click();
 
-        await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
         await find.clickByCssSelector(`[data-test-subj=${SOLUTION_SELECTOR_SUBJ}] button`);
         await find.clickByCssSelector(`button#security`);
 
@@ -345,7 +344,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         type: 'alert',
         id: ruleId,
         provider: 'alerting',
-        actions: new Map([['active-instance', { gte: 1 }]]),
+        actions: new Map([['execute', { gte: 1 }]]),
       });
     });
   };
