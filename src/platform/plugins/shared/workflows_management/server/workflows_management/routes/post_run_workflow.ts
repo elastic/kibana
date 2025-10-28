@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
+import { SecurityExecute } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -19,7 +19,7 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
     {
       path: '/api/workflows/{id}/run',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: WORKFLOW_EXECUTE_SECURITY,
+      security: SecurityExecute,
       validate: {
         params: schema.object({
           id: schema.string(),

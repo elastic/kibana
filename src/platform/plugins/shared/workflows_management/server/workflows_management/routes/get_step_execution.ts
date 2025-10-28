@@ -9,14 +9,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { handleRouteError } from './route_error_handlers';
-import { ADMIN_SECURITY } from './route_security';
+import { SecurityReadExecution } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerGetStepExecutionRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.get(
     {
       path: '/api/workflowExecutions/{executionId}/steps/{id}',
-      security: ADMIN_SECURITY,
+      security: SecurityReadExecution,
       validate: {
         params: schema.object({
           executionId: schema.string(),

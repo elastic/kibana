@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { WORKFLOW_DELETE_SECURITY } from './route_security';
+import { SecurityDelete } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerDeleteWorkflowsBulkRoute({
@@ -23,7 +23,7 @@ export function registerDeleteWorkflowsBulkRoute({
     {
       path: '/api/workflows',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: WORKFLOW_DELETE_SECURITY,
+      security: SecurityDelete,
       validate: {
         body: schema.object({
           ids: schema.arrayOf(schema.string()),

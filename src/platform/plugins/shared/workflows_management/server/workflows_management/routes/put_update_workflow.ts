@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { UpdateWorkflowCommandSchema } from '@kbn/workflows';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { WORKFLOW_UPDATE_SECURITY } from './route_security';
+import { SecurityUpdate } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerPutUpdateWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -19,7 +19,7 @@ export function registerPutUpdateWorkflowRoute({ router, api, logger, spaces }: 
     {
       path: '/api/workflows/{id}',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: WORKFLOW_UPDATE_SECURITY,
+      security: SecurityUpdate,
       validate: {
         params: schema.object({
           id: schema.string(),
