@@ -19,6 +19,7 @@ paths:
           schema:
             type: string
           example: "kb12345"
+          required: true
         - name: modelId
           in: query
           description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
@@ -75,6 +76,7 @@ paths:
           schema:
             type: string
           example: "kb12345"
+          required: true
       responses:
         200:
           description: Indicates a successful call.
