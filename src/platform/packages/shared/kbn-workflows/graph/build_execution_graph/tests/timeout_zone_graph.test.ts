@@ -156,7 +156,7 @@ describe('convertToWorkflowGraph', () => {
       );
     });
 
-    it('should use timeout from exeplicitly specified timeout in workflow', () => {
+    it('should use timeout from explicitly specified timeout in workflow', () => {
       const workflowDefinition = {
         settings: {
           timeout: '5m',
