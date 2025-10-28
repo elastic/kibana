@@ -243,7 +243,7 @@ class Package {
       // if the group is 'private-only', enforce it
       // KIBANA_SOLUTIONS - List of Kibana solutions
       const isSolution = Boolean(KIBANA_SOLUTIONS.find((solution) => solution === group));
-      if (!isSolution && group !== 'platform') {
+      if (!isSolution && !['platform', 'common'].includes(group)) {
         throw new Error(
           `Detected unknown group: ${group}, this module's definition of KIBANA_SOLUTIONS is probably outdated.`
         );
