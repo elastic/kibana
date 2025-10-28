@@ -23,7 +23,7 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
         try {
           const response = await (kbnClient as KbnClient).request({
             description: 'Check profiling status',
-            path: '/api/profiling/status',
+            path: '/api/profiling/setup/es_resources',
             method: 'GET',
           });
           return response.data as { has_setup: boolean; has_data: boolean };

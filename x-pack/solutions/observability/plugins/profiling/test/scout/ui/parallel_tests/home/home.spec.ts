@@ -24,11 +24,7 @@ test.describe('Home page', { tag: ['@ess'] }, () => {
     // Since we're using loginAsAdmin(), the user has privileges and won't see the limitation message
     // Instead, we should verify the page loads successfully
     await expect(
-      profilingHomePage.page.getByTestId('profilingPageTemplate').getByRole('heading', {
-        name: 'Universal Profiling',
-        level: 1,
-        exact: true,
-      })
+      profilingHomePage.page.getByTestId('profilingPageTemplate').getByText('Universal Profiling')
     ).toBeVisible();
   });
 

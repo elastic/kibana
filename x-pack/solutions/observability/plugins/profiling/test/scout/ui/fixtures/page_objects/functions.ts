@@ -106,7 +106,10 @@ export class FunctionsPage {
 
   // Settings methods
   async clickSettingsButton() {
-    await this.page.getByText('Settings').click();
+    await this.page
+      .getByTestId('headerAppActionMenu')
+      .getByRole('link', { name: 'Settings' })
+      .click();
   }
 
   async getSettingsModal() {

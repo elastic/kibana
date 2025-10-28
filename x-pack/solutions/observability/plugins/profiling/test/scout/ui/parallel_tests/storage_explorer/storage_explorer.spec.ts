@@ -31,9 +31,9 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
   }) => {
     await profilingStorageExplorerPage.gotoWithTimeRange(rangeFrom, rangeTo);
 
-    const firstRowProbabilisticValues = profilingStorageExplorerPage.page
-      .getByTestId('profilingStorageExplorerHostsTable')
-      .getByRole('cell', { name: '3145700' });
+    const firstRowProbabilisticValues = profilingStorageExplorerPage.page.getByTestId(
+      'profilingStorageExplorerHostsTableProjectId'
+    );
     await expect(firstRowProbabilisticValues).toContainText('3145700');
     await expect(
       profilingStorageExplorerPage.page.getByTestId('hostId_8457605156473051743')
@@ -75,6 +75,15 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
       { indexName: 'events', docSize: '3,242' },
     ];
 
+    // Cloud ECH data
+    // TODO check why it is different
+    // const indexData = [
+    //   { indexName: 'stackframes', docSize: '15,232' },
+    //   { indexName: 'stacktraces', docSize: '4,434' },
+    //   { indexName: 'executables', docSize: '170' },
+    //   { indexName: 'metrics', docSize: '0' },
+    //   { indexName: 'events', docSize: '6,484' },
+    // ];
     for (const { indexName, docSize } of indexData) {
       await expect(
         profilingStorageExplorerPage.page.getByTestId(`${indexName}_docSize`)
