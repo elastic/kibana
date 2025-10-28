@@ -16,11 +16,14 @@ export const TelemetryMetadataSchema = z
   .strict();
 
 // Connector schema
-export const ConfigSchema = schema.object({
-  apiUrl: schema.string(),
-  defaultModel: schema.string({ defaultValue: DEFAULT_BEDROCK_MODEL }),
-  contextWindowLength: schema.maybe(schema.number({})),
-});
+export const ConfigSchema = z
+  .object({
+    apiUrl: z.string(),
+    defaultModel: z.string().default(DEFAULT_BEDROCK_MODEL),
+    contextWindowLength: z.coerce.number().optional(),
+    temperature: z.coerce.number().optional(),
+  })
+  .strict();
 
 export const SecretsSchema = z
   .object({
