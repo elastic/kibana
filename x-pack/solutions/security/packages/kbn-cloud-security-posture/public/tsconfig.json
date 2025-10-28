@@ -38,5 +38,6 @@
     "@kbn/expandable-flyout",
     "@kbn/grouping",
     "@kbn/std",
+    "@kbn/react-query"
   ]
 }

@@ -19,6 +19,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   rename: { from: 'field', to: 'target_field', where: 'if' },
   set: { to: 'field', where: 'if' },
   append: { to: 'field', where: 'if' },
+  convert: { from: 'field', to: 'target_field', where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
 
