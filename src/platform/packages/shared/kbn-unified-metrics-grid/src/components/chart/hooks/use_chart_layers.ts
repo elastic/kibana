@@ -72,5 +72,5 @@ export const useChartLayers = ({
           : undefined,
       },
     ];
-  }, [dimensions, metric, color, seriesType, customFunction]);
+  }, [color, customFunction, dimensions, metric.instrument, metric.name, metric.unit, seriesType]);
 };

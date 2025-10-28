@@ -14,7 +14,7 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { MetricField, MetricFieldsResponse } from '../../../common/types';
 import { deduplicateFields } from '../../lib/fields/deduplicate_fields';
 import { extractMetricFields } from '../../lib/fields/extract_metric_fields';
-import { enrichMetricFields } from '../../lib/fields/enrich_metric_fields';
+import { enrichMetricFields, generateMapKey } from '../../lib/fields/enrich_metric_fields';
 import { extractDimensions } from '../../lib/dimensions/extract_dimensions';
 import { buildMetricField } from '../../lib/fields/build_metric_field';
 import { retrieveFieldCaps } from '../../lib/fields/retrieve_fieldcaps';
@@ -53,6 +53,7 @@ export async function getMetricFields({
     if (Object.keys(fieldCaps).length === 0) continue;
 
     const metricFields = extractMetricFields(fieldCaps);
+
     const allDimensions = extractDimensions(fieldCaps);
 
     const initialFields = metricFields.map(({ fieldName, type, typeInfo }) =>
@@ -69,7 +70,9 @@ export async function getMetricFields({
     allMetricFields.push(...deduped);
   }
 
-  allMetricFields.sort((a, b) => a.name.localeCompare(b.name));
+  allMetricFields.sort((a, b) =>
+    generateMapKey(a.index, a.name).localeCompare(generateMapKey(b.index, b.name))
+  );
 
   const enrichedMetricFields = await enrichMetricFields({
     esClient,

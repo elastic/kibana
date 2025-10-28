@@ -163,7 +163,6 @@ export const MetricsExperienceGrid = ({
         <EuiFlexItem grow>
           {isDiscoverLoading && <MetricsGridLoadingProgress />}
           <MetricsGrid
-            pivotOn="metric"
             columns={columns}
             dimensions={dimensions}
             filters={filters}
@@ -180,6 +179,8 @@ export const MetricsExperienceGrid = ({
         <EuiFlexItem grow={false}>
           <Pagination
             totalPages={totalPages}
+            loaded={currentPageFields.length}
+            total={fields.length}
             currentPage={currentPage}
             onPageChange={onPageChange}
           />
