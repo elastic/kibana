@@ -11,6 +11,7 @@ import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '..
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type WorkflowToolConfig = {
   workflow_id: string;
+  exclude_details?: boolean;
 };
 
 export type WorkflowToolDefinition = ToolDefinition<ToolType.workflow, WorkflowToolConfig>;

@@ -18,6 +18,7 @@ export const transformWorkflowToolToFormData = (
     toolId: tool.id,
     description: tool.description,
     workflow_id: tool.configuration.workflow_id,
+    exclude_details: tool.configuration.exclude_details,
     labels: tool.tags,
     type: ToolType.workflow,
   };
@@ -32,6 +33,7 @@ export const transformFormDataToWorkflowTool = (
     readonly: false,
     configuration: {
       workflow_id: data.workflow_id,
+      exclude_details: data.exclude_details,
     },
     type: ToolType.workflow,
     tags: data.labels,

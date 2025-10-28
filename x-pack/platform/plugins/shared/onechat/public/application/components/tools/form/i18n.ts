@@ -213,6 +213,25 @@ export const i18nMessages = {
             defaultMessage: 'Workflow',
           }
         ),
+        excludeDetailsLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.excludeDetailsLabel',
+          {
+            defaultMessage: 'Optimize output for LLM',
+          }
+        ),
+        excludeDetailsSwitchLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.excludeDetailsSwitchLabel',
+          {
+            defaultMessage: 'Exclude step-by-step details from tool response',
+          }
+        ),
+        excludeDetailsHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.excludeDetailsHelpText',
+          {
+            defaultMessage:
+              'When enabled, the tool returns only the aggregated outputs from the workflow, excluding detailed step-by-step execution information. This reduces token usage and improves performance for LLM processing.',
+          }
+        ),
       },
     },
   },

@@ -48,6 +48,7 @@ export interface IndexSearchToolFormData extends BaseToolFormData {
 export interface WorkflowToolFormData extends BaseToolFormData {
   type: ToolType.workflow;
   workflow_id: string;
+  exclude_details?: boolean;
 }
 
 export type ToolFormData =
