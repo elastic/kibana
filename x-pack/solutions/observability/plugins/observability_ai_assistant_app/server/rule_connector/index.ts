@@ -11,6 +11,7 @@ import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
@@ -81,36 +82,42 @@ const ParamsSchema = schema.object({
   message: schema.maybe(schema.string({ minLength: 1 })), // this is a legacy field
 });
 
-const RuleSchema = schema.object({
-  id: schema.string(),
-  name: schema.string(),
-  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  ruleUrl: schema.nullable(schema.string()),
-});
+const RuleSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    tags: z.array(z.string()).default([]),
+    ruleUrl: z.string().nullable().default(null),
+  })
+  .strict();
 
-const AlertSchema = schema.recordOf(schema.string(), schema.any());
+const AlertSchema = z.record(z.string(), z.any());
 
-const AlertSummarySchema = schema.object({
-  new: schema.arrayOf(AlertSchema),
-  recovered: schema.arrayOf(AlertSchema),
-});
+const AlertSummarySchema = z
+  .object({
+    new: z.array(AlertSchema),
+    recovered: z.array(AlertSchema),
+  })
+  .strict();
 
-const ConnectorParamsSchema = schema.object({
-  connector: schema.string(),
-  prompts: schema.arrayOf(
-    schema.object({
-      statuses: schema.arrayOf(schema.string()),
-      message: schema.string({ minLength: 1 }),
-    })
-  ),
-  rule: RuleSchema,
-  alerts: AlertSummarySchema,
-});
+const ConnectorParamsSchema = z
+  .object({
+    connector: z.string(),
+    prompts: z.array(
+      z.object({
+        statuses: z.array(z.string()),
+        message: z.string().min(1),
+      })
+    ),
+    rule: RuleSchema,
+    alerts: AlertSummarySchema,
+  })
+  .strict();
 
-type AlertSummary = TypeOf<typeof AlertSummarySchema>;
+type AlertSummary = z.infer<typeof AlertSummarySchema>;
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-export type ConnectorParamsType = TypeOf<typeof ConnectorParamsSchema>;
-type RuleType = TypeOf<typeof RuleSchema>;
+export type ConnectorParamsType = z.infer<typeof ConnectorParamsSchema>;
+type RuleType = z.infer<typeof RuleSchema>;
 
 export type ObsAIAssistantConnectorType = ConnectorType<{}, {}, ConnectorParamsType, unknown>;
 
@@ -135,14 +142,14 @@ export function getObsAIAssistantConnectorType(
     supportedFeatureIds: [AlertingConnectorFeatureId],
     validate: {
       config: {
-        schema: schema.object({}),
+        schema: z.object({}).strict(),
         customValidator: () => {},
       },
       params: {
         schema: ConnectorParamsSchema,
       },
       secrets: {
-        schema: schema.object({}),
+        schema: z.object({}).strict(),
       },
     },
     renderParameterTemplates,
