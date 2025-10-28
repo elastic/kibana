@@ -87,6 +87,7 @@ describe('useDynamicEntityFlyout', () => {
       result.current.openDynamicFlyout({
         entityType: 'user',
         entityName: 'testUser',
+        entityId: 'userId123',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -95,7 +96,12 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UserPanelKey,
-        params: { userName: 'testUser', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          userName: 'testUser',
+          userId: 'userId123',
+          scopeId: 'scope1',
+          contextId: 'context1',
+        },
       },
     });
   });
@@ -109,6 +115,7 @@ describe('useDynamicEntityFlyout', () => {
       result.current.openDynamicFlyout({
         entityType: 'host',
         entityName: 'testHost',
+        entityId: 'hostId456',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -117,7 +124,12 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: HostPanelKey,
-        params: { hostName: 'testHost', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          hostName: 'testHost',
+          hostId: 'hostId456',
+          scopeId: 'scope1',
+          contextId: 'context1',
+        },
       },
     });
   });

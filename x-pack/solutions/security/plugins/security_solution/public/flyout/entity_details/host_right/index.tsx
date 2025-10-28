@@ -42,6 +42,7 @@ export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   hostName: string;
+  hostId?: string;
   isPreviewMode?: boolean;
 }
 
@@ -59,7 +60,13 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostPanelProps) => {
+export const HostPanel = ({
+  contextID,
+  scopeId,
+  hostName,
+  hostId,
+  isPreviewMode,
+}: HostPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
@@ -170,7 +177,11 @@ export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostP
               isPreviewMode={isPreviewMode}
               isRulePreview={scopeId === TableId.rulePreview}
             />
-            <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
+            <HostPanelHeader
+              hostId={hostId}
+              hostName={hostName}
+              observedHost={observedHostWithAnomalies}
+            />
             <HostPanelContent
               hostName={hostName}
               observedHost={observedHostWithAnomalies}
