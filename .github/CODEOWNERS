@@ -2258,6 +2258,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
 
+/x-pack/platform/test/functional/apps/**/cases/ @elastic/security-threat-hunting-investigations
+
 
 # Enterprise Search
 # search
@@ -2456,6 +2458,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/plugins/security_solution/public/common/components/callouts @elastic/security-detections-response
 
 /x-pack/solutions/security/plugins/security_solution/public/flyout/ai_for_soc/components @elastic/security-threat-hunting-investigations @elastic/security-generative-ai
+
+/x-pack/platform/test/functional/apps/**/cases/ @elastic/security-threat-hunting-investigations
 
 /x-pack/solutions/security/plugins/security_solution/server/routes @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/utils @elastic/security-detections-response @elastic/security-threat-hunting
