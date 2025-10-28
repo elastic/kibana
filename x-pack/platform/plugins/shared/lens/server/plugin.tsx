@@ -42,7 +42,6 @@ import {
 } from '../common/constants';
 import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
-import { getLensServerTransforms } from './transforms';
 import { fetchLensFeatureFlags } from '../common';
 import { getLensTransforms } from '../common/transforms';
 
