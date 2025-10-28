@@ -79,6 +79,21 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         const importsVar = programPath.scope.generateUidIdentifier('imports');
 
         // ============================================================
+        // PHASE 0: Collect direct re-exports (export { x } from './module')
+        // Don't transform imports from modules that are being directly re-exported
+        // ============================================================
+        const directReExportSources = new Set();
+
+        programPath.traverse({
+          ExportNamedDeclaration(exportPath) {
+            // export { x, y } from './module'
+            if (exportPath.node.source && t.isStringLiteral(exportPath.node.source)) {
+              directReExportSources.add(exportPath.node.source.value);
+            }
+          },
+        });
+
+        // ============================================================
         // PHASE 1: Collect all top-level require declarations
         // ============================================================
         programPath.traverse({
@@ -187,6 +202,12 @@ module.exports = function lazyRequirePlugin({ types: t }) {
             }
 
             const importPath = path.node.source.value;
+
+            // Skip if this module is directly re-exported (export { x } from './module')
+            if (directReExportSources.has(importPath)) {
+              return;
+            }
+
             const isConst = true; // imports are always const
 
             // Ensure module cache exists for this import path
@@ -323,8 +344,15 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
           // Check top-level variable declarations
           VariableDeclaration(varDeclPath) {
-            // Only check top-level declarations
-            if (varDeclPath.parent !== programPath.node) {
+            // Check if this is a top-level declaration (direct or exported)
+            // Paths: Program > VariableDeclaration
+            //        Program > ExportNamedDeclaration > VariableDeclaration
+            const isTopLevel =
+              varDeclPath.parent === programPath.node ||
+              (t.isExportNamedDeclaration(varDeclPath.parent) &&
+                varDeclPath.parentPath.parent === programPath.node);
+
+            if (!isTopLevel) {
               return;
             }
 
