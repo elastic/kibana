@@ -300,7 +300,12 @@ export function initializeLayoutManager(
       layout$.next({ ...layout$.value, panels });
     } else if (controls[uuid]) {
       delete controls[uuid];
-      layout$.next({ ...layout$.value, controls });
+      // Recompute the order of the remaining controls
+      const nextControls: typeof controls = Object.entries(controls)
+        .sort(([, a], [, b]) => a.order - b.order)
+        .map(([key, value], i) => [key, { ...value, order: i }])
+        .reduce((result, [key, value]) => ({ ...result, [key as string]: value }), {});
+      layout$.next({ ...layout$.value, controls: nextControls });
     }
 
     const children = { ...children$.value };
