@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { D3SecuritySeverity } from './constants';
 
 // Connector schema
-export const D3SecurityConfigSchema = schema.object({
-  url: schema.string(),
-});
+export const D3SecurityConfigSchema = z
+  .object({
+    url: z.string(),
+  })
+  .strict();
 
-export const D3SecuritySecretsSchema = schema.object({ token: schema.string() });
+export const D3SecuritySecretsSchema = z.object({ token: z.string() }).strict();
 
 // Run action schema
-export const D3SecurityRunActionParamsSchema = schema.object({
-  body: schema.maybe(schema.string()),
-  severity: schema.maybe(schema.string({ defaultValue: D3SecuritySeverity.EMPTY })),
-  eventType: schema.maybe(schema.string({ defaultValue: '' })),
-});
+export const D3SecurityRunActionParamsSchema = z
+  .object({
+    body: z.string().optional(),
+    severity: z.string().default(D3SecuritySeverity.EMPTY).optional(),
+    eventType: z.string().default('').optional(),
+  })
+  .strict();
 
-export const D3SecurityRunActionResponseSchema = schema.object(
-  {
-    refid: schema.string(),
-  },
-  { unknowns: 'ignore' }
-);
+export const D3SecurityRunActionResponseSchema = z.object({
+  refid: z.string(),
+});
