@@ -21,7 +21,6 @@ import type { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;
-  deleteDashboards: (ids: string[]) => Promise<void>;
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
   updateDashboardMeta: (props: UpdateDashboardMetaProps) => Promise<void>;

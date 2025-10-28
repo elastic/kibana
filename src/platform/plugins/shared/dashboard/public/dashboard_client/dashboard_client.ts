@@ -22,6 +22,12 @@ const cache = new LRUCache<string, DashboardAPIGetOut>({
 });
 
 export const dashboardClient = {
+  delete: async (id: string): Promise<void> => {
+    cache.delete(id);
+    return coreServices.http.delete(`/api/dashboards/dashboard/${id}`, {
+      version: DASHBOARD_API_VERSION,
+    });
+  },
   get: async (id: string): Promise<DashboardAPIGetOut> => {
     if (cache.has(id)) {
       return cache.get(id)!;

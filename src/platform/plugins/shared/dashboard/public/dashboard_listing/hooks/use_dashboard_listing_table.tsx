@@ -16,6 +16,7 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
+import { asyncMap } from '@kbn/std';
 import type { DashboardSearchAPIResult } from '../../../server/content_management';
 import {
   SAVED_OBJECT_DELETE_TIME,
@@ -36,6 +37,7 @@ import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import type { DashboardSavedObjectUserContent } from '../types';
 import type { UpdateDashboardMetaProps } from '../../services/dashboard_content_management_service/lib/update_dashboard_meta';
 import { CONTENT_ID } from '../../../common/content_management';
+import { dashboardClient } from '../../dashboard_client/dashboard_client';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -244,12 +246,10 @@ export const useDashboardListingTable = ({
       try {
         const deleteStartTime = window.performance.now();
 
-        await dashboardContentManagementService.deleteDashboards(
-          dashboardsToDelete.map(({ id }) => {
-            dashboardBackupService.clearState(id);
-            return id;
-          })
-        );
+        await asyncMap(dashboardsToDelete, async ({ id }) => {
+          await dashboardClient.delete(id);
+          dashboardBackupService.clearState(id);
+        });
 
         const deleteDuration = window.performance.now() - deleteStartTime;
         reportPerformanceMetricEvent(coreServices.analytics, {
@@ -268,7 +268,7 @@ export const useDashboardListingTable = ({
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackupService, dashboardContentManagementService]
+    [dashboardBackupService]
   );
 
   const editItem = useCallback(
