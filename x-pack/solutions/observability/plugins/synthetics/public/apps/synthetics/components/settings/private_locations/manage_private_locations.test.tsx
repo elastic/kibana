@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render } from '../../../utils/testing/rtl_helpers';
 import * as permissionsHooks from '../../../hooks';
 import * as locationHooks from './hooks/use_locations_api';
