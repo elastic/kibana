@@ -88,13 +88,15 @@ export async function cleanFleetAgents(esClient: Client) {
 }
 
 export async function cleanFleetAgentPolicies(esClient: Client) {
-  await await pRetry(() =>
-    esClient.deleteByQuery({
-      index: AGENT_POLICY_INDEX,
-      q: '*',
-      refresh: true,
-      ignore_unavailable: true,
-    })
+  await await pRetry(
+    () =>
+      esClient.deleteByQuery({
+        index: AGENT_POLICY_INDEX,
+        q: '*',
+        refresh: true,
+        ignore_unavailable: true,
+      }),
+    { retries: DELETE_RETRIES }
   );
 }
 
