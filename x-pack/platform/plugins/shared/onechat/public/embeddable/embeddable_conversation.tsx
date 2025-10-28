@@ -10,7 +10,7 @@ import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SendMessageProvider } from '../application/context/send_message/send_message_context';
 import { OnechatServicesContext } from '../application/context/onechat_services_context';
 import type { EmbeddableConversationDependencies, EmbeddableConversationProps } from './types';
