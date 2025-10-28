@@ -264,4 +264,31 @@ describe('WorkflowTemplatingEngine', () => {
       expect(result).toBe('This is not JSON');
     });
   });
+
+  describe('base64 filters', () => {
+    it('should encode and decode strings correctly', () => {
+      const template = '{{ "Hello World" | base64_encode }}';
+      const result = templatingEngine.render(template, {});
+      expect(result).toBe('SGVsbG8gV29ybGQ=');
+    });
+
+    it('should decode base64 strings', () => {
+      const template = '{{ "SGVsbG8gV29ybGQ=" | base64_decode }}';
+      const result = templatingEngine.render(template, {});
+      expect(result).toBe('Hello World');
+    });
+
+    it('should handle round-trip encoding/decoding', () => {
+      const template = '{{ data | base64_encode | base64_decode }}';
+      const context = { data: 'Sensitive information' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('Sensitive information');
+    });
+
+    it('should handle non-string input gracefully', () => {
+      const template = '{{ 123 | base64_encode }}';
+      const result = templatingEngine.render(template, {});
+      expect(result).toBe('');
+    });
+  });
 });
