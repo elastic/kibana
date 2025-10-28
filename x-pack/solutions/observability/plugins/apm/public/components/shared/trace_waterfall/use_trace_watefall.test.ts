@@ -13,6 +13,7 @@ import {
   getTraceWaterfallDuration,
   getClockSkew,
   getLegends,
+  getColorByType,
   createColorLookupMap,
   getRootItemOrFallback,
   TraceDataState,
@@ -332,6 +333,86 @@ describe('getLegends', () => {
     expect(result[0].color).toBe('color0');
     expect(result[10].color).toBe('color10');
     expect(result[14].color).toBe('color14');
+  });
+});
+
+describe('getColorByType', () => {
+  const traceItems: TraceItem[] = [
+    {
+      id: '1',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcA',
+      errors: [],
+    },
+    {
+      id: '2',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcB',
+      errors: [],
+    },
+    {
+      id: '3',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      errors: [],
+    },
+    {
+      id: '4',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      type: 'db',
+      errors: [],
+    },
+    {
+      id: '5',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      type: 'http',
+      errors: [],
+    },
+    {
+      id: '6',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      type: 'cache',
+      errors: [],
+    },
+  ];
+
+  it('returns color by service name if more than one different service is present', () => {
+    const legends = getLegends(traceItems);
+
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.ServiceName);
+  });
+
+  it('returns color by type if only one service is present', () => {
+    const legends = getLegends(traceItems.slice(3));
+
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.Type);
+  });
+
+  it('defaults to color by type if no legends provided', () => {
+    const legends = getLegends([]);
+
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.Type);
   });
 });
 

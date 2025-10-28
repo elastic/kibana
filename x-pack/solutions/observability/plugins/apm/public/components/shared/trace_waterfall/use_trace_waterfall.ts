@@ -7,8 +7,7 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { useMemo } from 'react';
-import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
-import { WaterfallLegendType } from '../../../../common/waterfall/legend';
+import { type IWaterfallLegend, WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
 export interface TraceWaterfallItem extends TraceItem {
@@ -28,14 +27,7 @@ export function useTraceWaterfall({
 }) {
   const waterfall = useMemo(() => {
     const legends = getLegends(traceItems);
-    const colorBy =
-      legends.reduce(
-        (serviceNameCount, { type }) =>
-          type === WaterfallLegendType.ServiceName ? serviceNameCount + 1 : serviceNameCount,
-        0
-      ) > 1
-        ? WaterfallLegendType.ServiceName
-        : WaterfallLegendType.Type;
+    const colorBy = getColorByType(legends);
     const colorMap = createColorLookupMap(legends);
     const traceParentChildrenMap = getTraceParentChildrenMap(traceItems, isFiltered);
     const { rootItem, traceState, orphans } = getRootItemOrFallback(
@@ -64,6 +56,15 @@ export function useTraceWaterfall({
   }, [traceItems, isFiltered]);
 
   return waterfall;
+}
+
+export function getColorByType(legends: IWaterfallLegend[]) {
+  let count = 0;
+  for (const { type } of legends) {
+    if (type === WaterfallLegendType.ServiceName) count++;
+    if (count > 1) return WaterfallLegendType.ServiceName;
+  }
+  return WaterfallLegendType.Type;
 }
 
 export function getLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
