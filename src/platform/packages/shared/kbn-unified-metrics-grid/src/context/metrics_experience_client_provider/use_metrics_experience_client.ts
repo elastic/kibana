@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { configureStore } from '@reduxjs/toolkit';
-import { metricsGridSlice } from './slices/metrics_grid_slice';
+import { useContext } from 'react';
+import { MetricsExperienceClientContext } from './metrics_experience_client_provider';
 
-export const store = configureStore({
-  reducer: {
-    metricsGrid: metricsGridSlice.reducer,
-  },
-  devTools: process.env.NODE_ENV !== 'production',
-});
+export function useMetricsExperienceClient() {
+  const services = useContext(MetricsExperienceClientContext);
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+  if (!services) {
+    throw new Error(
+      'MetricsExperienceContext not set. Did you wrap your component in `<MetricsExperienceProvider/>`?'
+    );
+  }
+
+  return services;
+}

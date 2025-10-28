@@ -8,16 +8,17 @@
  */
 
 import { useContext } from 'react';
-import { MetricsExperienceContext } from '../context/metrics_experience_provider';
 
-export function useMetricsExperience() {
-  const services = useContext(MetricsExperienceContext);
+import { MetricsExperienceStateContext } from './metrics_experience_state_context';
 
-  if (!services) {
+export const useMetricsExperienceState = () => {
+  const context = useContext(MetricsExperienceStateContext);
+
+  if (!context) {
     throw new Error(
-      'MetricsExperienceContext not set. Did you wrap your component in `<MetricsExperienceProvider/>`?'
+      'useMetricsExperienceState must be used within a MetricsExperienceStateProvider'
     );
   }
 
-  return services;
-}
+  return context;
+};
