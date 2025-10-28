@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, take } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
-import { COMPARE_DEBOUNCE, initializeUnifiedSearchManager } from './unified_search_manager';
+import { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 
 describe('initializeUnifiedSearchManager', () => {
@@ -90,7 +90,7 @@ describe('initializeUnifiedSearchManager', () => {
         });
       });
 
-      test('Should not return timeRanage change when timeRestore resets to false', async () => {
+      test('Should not return timeRanage change when timeRestore resets to false', (done) => {
         const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
         const timeRestore$ = new BehaviorSubject<boolean | undefined>(false);
         const unifiedSearchManager = initializeUnifiedSearchManager(
@@ -103,34 +103,37 @@ describe('initializeUnifiedSearchManager', () => {
             useUnifiedSearchIntegration: false,
           }
         );
-        let unsavedChanges: object | undefined;
-        unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
-          unsavedChanges = changes;
-        });
+        let emitCount = 0;
+        unifiedSearchManager.internalApi
+          .startComparing$(lastSavedState$)
+          .pipe(take(2))
+          .subscribe((changes) => {
+            emitCount++;
+
+            if (emitCount === 1) {
+              expect(changes).toMatchInlineSnapshot(`
+              Object {
+                "timeRange": Object {
+                  "from": "now-30m",
+                  "to": "now",
+                },
+              }
+            `);
+              // reset timeRestore to false
+              timeRestore$.next(false);
+            }
+
+            if (emitCount === 2) {
+              expect(changes).toMatchInlineSnapshot(`Object {}`);
+              done();
+            }
+          });
 
         timeRestore$.next(true);
         unifiedSearchManager.api.setTimeRange({
           to: 'now',
           from: 'now-30m',
         });
-
-        await new Promise((resolve) => setTimeout(resolve, COMPARE_DEBOUNCE + 1));
-
-        expect(unsavedChanges).toMatchInlineSnapshot(`
-            Object {
-              "timeRange": Object {
-                "from": "now-30m",
-                "to": "now",
-              },
-            }
-          `);
-
-        // reset timeRestore to false
-        timeRestore$.next(false);
-
-        await new Promise((resolve) => setTimeout(resolve, COMPARE_DEBOUNCE + 1));
-
-        expect(unsavedChanges).toMatchInlineSnapshot(`Object {}`);
       });
     });
   });
