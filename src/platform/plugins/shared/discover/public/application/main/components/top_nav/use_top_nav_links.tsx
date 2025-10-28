@@ -49,6 +49,7 @@ import {
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
 import { onSaveDiscoverSession } from './save_discover_session';
+import { useIsCompareMode } from '../../hooks/use_is_compare_mode';
 
 /**
  * Helper function to build the top nav links
@@ -79,6 +80,7 @@ export const useTopNavLinks = ({
   persistedDiscoverSession: DiscoverSession | undefined;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
+  const isCompareMode = useIsCompareMode();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
   const currentTab = useCurrentTabSelector((tabState) => tabState);
@@ -287,6 +289,18 @@ export const useTopNavLinks = ({
       entries.unshift(esqLDataViewTransitionToggle);
     }
 
+    entries.unshift({
+      id: 'compare-mode',
+      label: isCompareMode ? 'Turn off compare mode' : 'Compare mode',
+      fill: false,
+      color: 'text',
+      run: () => {
+        dispatch(
+          internalStateActions.setIsCompareMode(!state.internalState.getState().compareMode)
+        );
+      },
+    });
+
     if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {
       const saveSearch = {
         id: 'save',
@@ -316,6 +330,7 @@ export const useTopNavLinks = ({
   }, [
     appMenuRegistry,
     services,
+    isCompareMode,
     defaultMenu?.saveItem?.disabled,
     isEsqlMode,
     dataView,

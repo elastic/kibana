@@ -20,6 +20,9 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { useCurrentTabSelector } from '@kbn/discover-plugin/public';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
@@ -32,7 +35,11 @@ import {
   OMIT_FIELDS,
   SUPPORTED_FIELD_TYPES,
 } from '../../../../common/constants';
-import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
+import type {
+  FieldRequestConfig,
+  SupportedFieldType,
+  FieldVisStats,
+} from '../../../../common/types';
 import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
@@ -74,6 +81,8 @@ export const useDataVisualizerGridData = (
   const { uiSettings, data, security, executionContext, analytics } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
+
+  const compareQuery = useCurrentTabSelector((tab) => tab.compareQuery);
 
   const componentExecutionContext: KibanaExecutionContext = useMemo(() => {
     const child: KibanaExecutionContext = {
@@ -288,6 +297,47 @@ export const useDataVisualizerGridData = (
     lastRefresh,
     dataVisualizerListState.probability
   );
+
+  const compareFieldStatsRequest: OverallStatsSearchStrategyParams | undefined = useMemo(() => {
+    if (fieldStatsRequest === undefined || compareQuery === undefined) {
+      return undefined;
+    }
+    const kqlAst = fromKueryExpression(compareQuery);
+    const esQuery = toElasticsearchQuery(kqlAst, undefined, {
+      dateFormatTZ: 'UTC',
+    });
+
+    const baseQuery =
+      typeof fieldStatsRequest?.searchQuery === 'object'
+        ? fieldStatsRequest.searchQuery
+        : {
+            bool: {
+              must: [],
+              filter: [],
+              should: [],
+              must_not: [],
+            },
+          };
+
+    const query = cloneDeep(baseQuery);
+
+    if (compareQuery && 'bool' in query && query.bool) {
+      query.bool.filter.push(esQuery);
+    }
+    return {
+      ...fieldStatsRequest,
+      searchQuery: query,
+    };
+  }, [fieldStatsRequest, compareQuery]);
+
+  const { overallStats: compareOverallStats, progress: _compareOverallStatsProgress } =
+    useOverallStats(
+      false,
+      compareFieldStatsRequest,
+      lastRefresh,
+      dataVisualizerListState.probability
+    );
+
   const configsWithoutStats = useMemo(() => {
     if (overallStatsProgress.loaded < 100) return;
     const existMetricFields = metricConfigs
@@ -325,6 +375,38 @@ export const useDataVisualizerGridData = (
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,
     configsWithoutStats,
+    dataVisualizerListState,
+    probability
+  );
+
+  const compareConfigsWithoutStats = useMemo(() => {
+    if (overallStatsProgress.loaded < 100 || compareQuery === undefined) return;
+    const existMetricFields = metricConfigs
+      .map((config) => {
+        return {
+          ...config,
+          cardinality: config.compareStats?.stats?.cardinality,
+        };
+      })
+      .filter((c) => c !== undefined) as FieldRequestConfig[];
+
+    // Pass the field name, type and cardinality in the request.
+    // Top values will be obtained on a sample if cardinality > 100000.
+    const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs
+      .map((config) => {
+        return {
+          ...config,
+          cardinality: config.compareStats?.stats?.cardinality,
+        };
+      })
+      .filter((c) => c !== undefined) as FieldRequestConfig[];
+
+    return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
+  }, [metricConfigs, nonMetricConfigs, overallStatsProgress.loaded, compareQuery]);
+
+  const compareStrategyResponse = useFieldStatsSearchStrategy(
+    compareFieldStatsRequest,
+    compareConfigsWithoutStats,
     dataVisualizerListState,
     probability
   );
@@ -389,6 +471,13 @@ export const useDataVisualizerGridData = (
       });
       if (!fieldData) return;
 
+      const compareFieldData = compareOverallStats
+        ? [
+            ...(compareOverallStats.aggregatableExistsFields || []),
+            ...(compareOverallStats.aggregatableNotExistsFields || []),
+          ].find((f) => f.fieldName === field.spec.name)
+        : undefined;
+
       const metricConfig: FieldVisConfig = {
         ...fieldData,
         fieldFormat: currentDataView.getFormatterForField(field),
@@ -398,6 +487,7 @@ export const useDataVisualizerGridData = (
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
         supportedAggs: getSupportedAggs(field),
+        compareStats: compareFieldData,
       };
       if (field.displayName !== metricConfig.fieldName) {
         metricConfig.displayName = field.displayName;
@@ -411,7 +501,14 @@ export const useDataVisualizerGridData = (
       visibleMetricsCount: metricFieldsToShow.length,
     });
     setMetricConfigs(configs);
-  }, [currentDataView, dataViewFields, metricsLoaded, overallStats, showEmptyFields]);
+  }, [
+    currentDataView,
+    dataViewFields,
+    metricsLoaded,
+    overallStats,
+    compareOverallStats,
+    showEmptyFields,
+  ]);
 
   const createNonMetricCards = useCallback(() => {
     const allNonMetricFields = dataViewFields.filter((f) => {
@@ -469,6 +566,16 @@ export const useDataVisualizerGridData = (
 
     nonMetricFieldsToShow.forEach((field) => {
       const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.spec.name);
+
+      const compareFieldData = compareOverallStats
+        ? [
+            ...(compareOverallStats.aggregatableExistsFields || []),
+            ...(compareOverallStats.aggregatableNotExistsFields || []),
+            ...(compareOverallStats.nonAggregatableExistsFields || []),
+            ...(compareOverallStats.nonAggregatableNotExistsFields || []),
+          ].find((f) => f.fieldName === field.spec.name)
+        : undefined;
+
       const nonMetricConfig: Partial<FieldVisConfig> = {
         ...(fieldData ? fieldData : {}),
         secondaryType: kbnTypeToSupportedType(field),
@@ -476,6 +583,7 @@ export const useDataVisualizerGridData = (
         aggregatable: field.aggregatable,
         loading: fieldData?.existsInDocs ?? true,
         deletable: field.runtimeField !== undefined,
+        compareStats: compareFieldData,
       };
 
       // Map the field type from the Kibana index pattern to the field type
@@ -498,13 +606,20 @@ export const useDataVisualizerGridData = (
     });
 
     setNonMetricConfigs(configs);
-  }, [currentDataView, dataViewFields, nonMetricsLoaded, overallStats, showEmptyFields]);
+  }, [
+    currentDataView,
+    dataViewFields,
+    nonMetricsLoaded,
+    overallStats,
+    compareOverallStats,
+    showEmptyFields,
+  ]);
 
   useEffect(() => {
     createMetricCards();
     createNonMetricCards();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [overallStats, showEmptyFields]);
+  }, [overallStats, compareOverallStats, showEmptyFields]);
 
   useEffect(() => {
     if (combinedProgress === 100 && loadIndexDataStartTime.current !== undefined) {
@@ -524,6 +639,7 @@ export const useDataVisualizerGridData = (
   const configs = useMemo(
     () => {
       const fieldStats = strategyResponse.fieldStats;
+      const compareFieldStats = compareStrategyResponse.fieldStats;
       let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
 
       combinedConfigs = filterFields(
@@ -544,6 +660,28 @@ export const useDataVisualizerGridData = (
             : c;
         });
       }
+
+      if (compareFieldStats) {
+        combinedConfigs = combinedConfigs.map((c) => {
+          const loadedCompareStats = compareFieldStats.get(c.fieldName);
+          if (loadedCompareStats && c.compareStats) {
+            // Destructure to separate fieldName from the rest of the stats
+            const { fieldName, ...statsWithoutFieldName } = loadedCompareStats;
+            return {
+              ...c,
+              compareStats: {
+                ...c.compareStats,
+                stats: {
+                  ...c.compareStats.stats,
+                  ...statsWithoutFieldName,
+                } as FieldVisStats,
+              },
+            };
+          }
+          return c;
+        });
+      }
+
       return combinedConfigs;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -553,6 +691,7 @@ export const useDataVisualizerGridData = (
       visibleFieldTypes,
       visibleFieldNames,
       strategyResponse.progress.loaded,
+      compareStrategyResponse.progress.loaded,
       dataVisualizerListState.pageIndex,
       dataVisualizerListState.pageSize,
     ]
@@ -609,6 +748,7 @@ export const useDataVisualizerGridData = (
     documentCountStats: overallStats.documentCountStats,
     metricsStats,
     overallStats,
+    compareOverallStats,
     timefilter,
     setLastRefresh,
   };

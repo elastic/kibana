@@ -36,6 +36,7 @@
       "dataViews",
       "kibanaReact",
       "kibanaUtils",
+      "discover",
       "maps",
       "fieldFormats",
       "uiActions",

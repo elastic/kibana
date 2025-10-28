@@ -149,7 +149,7 @@ export const DiscoverMainContent = ({
           data-test-subj="dscMainContent"
         >
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
-          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+          {viewMode === VIEW_MODE.DOCUMENT_LEVEL || viewMode === VIEW_MODE.COMPARE_LEVEL ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
               dataView={dataView}

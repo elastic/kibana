@@ -52,6 +52,7 @@ const initialState: DiscoverInternalState = {
   initializationState: { hasESData: false, hasUserDataView: false },
   userId: undefined,
   spaceId: undefined,
+  compareMode: false,
   persistedDiscoverSession: undefined,
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
@@ -209,6 +210,15 @@ export const internalStateSlice = createSlice({
     setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
       state.isESQLToDataViewTransitionModalVisible = action.payload;
     },
+
+    setIsCompareMode: (state, action: PayloadAction<boolean>) => {
+      state.compareMode = action.payload;
+    },
+
+    setCompareQuery: (state, action: TabAction<{ compareQuery: string | undefined }>) =>
+      withTab(state, action, (tab) => {
+        tab.compareQuery = action.payload.compareQuery;
+      }),
 
     setResetDefaultProfileState: {
       prepare: (

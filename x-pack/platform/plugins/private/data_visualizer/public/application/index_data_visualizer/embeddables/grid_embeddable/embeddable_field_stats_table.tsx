@@ -45,6 +45,7 @@ const EmbeddableFieldStatsTableWrapper = (
     extendedColumns,
     progress,
     overallStats,
+    compareOverallStats,
     overallStatsProgress,
     setLastRefresh,
   } = useDataVisualizerGridData(props, dataVisualizerListState);
@@ -88,6 +89,7 @@ const EmbeddableFieldStatsTableWrapper = (
   return (
     <DataVisualizerTable<FieldVisConfig>
       items={configs}
+      compareOverallStats={compareOverallStats}
       pageState={dataVisualizerListState}
       updatePageState={onTableChange}
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}

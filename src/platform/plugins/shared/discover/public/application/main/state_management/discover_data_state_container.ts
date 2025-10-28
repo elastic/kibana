@@ -344,8 +344,12 @@ export function getDataStateContainer({
           const timeRange = timefilter.getAbsoluteTime();
           const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
 
+          const tabState = getCurrentTab();
+
           await fetchAll({
             ...commonFetchParams,
+            internalState,
+            tabState,
             reset: options.reset,
             abortController,
             getCurrentTab,

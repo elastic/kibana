@@ -22,6 +22,7 @@ export type {
 
 export enum VIEW_MODE {
   DOCUMENT_LEVEL = 'documents',
+  COMPARE_LEVEL = 'compare_documents',
   AGGREGATED_LEVEL = 'aggregated',
   PATTERN_LEVEL = 'patterns',
 }

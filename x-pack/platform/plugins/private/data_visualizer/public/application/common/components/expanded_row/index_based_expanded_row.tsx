@@ -7,6 +7,9 @@
 
 import React, { useEffect } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useIsCompareMode } from '@kbn/discover-plugin/public';
 import { useExpandedRowCss } from './use_expanded_row_css';
 import { GeoPointContentWithMap } from './geo_point_content_with_map';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
@@ -50,39 +53,44 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   timeFieldName?: string;
   onVisibilityChange?: (visible: boolean, item: FieldVisConfig) => void;
 }) => {
+  const isCompareMode = useIsCompareMode();
   const config = { ...item, stats: { ...item.stats, totalDocuments } };
-  const { loading, existsInDocs, fieldName } = config;
+  const { loading, fieldName } = config;
   const type = config[typeAccessor];
   const dvExpandedRow = useExpandedRowCss();
 
-  function getCardContent() {
-    if (type === 'unknown' || type.includes('vector') || item.secondaryType?.includes('vector')) {
+  function getCardContent(configToRender: FieldVisConfig) {
+    if (
+      type === 'unknown' ||
+      type.includes('vector') ||
+      configToRender.secondaryType?.includes('vector')
+    ) {
       return <NotSupportedContent />;
     }
 
-    if (existsInDocs === false) {
+    if (configToRender.existsInDocs === false) {
       return <NotInDocsContent />;
     }
 
-    if (config.stats?.error) {
-      return <ErrorMessageContent fieldName={fieldName} error={config.stats?.error} />;
+    if (configToRender.stats?.error) {
+      return <ErrorMessageContent fieldName={fieldName} error={configToRender.stats?.error} />;
     }
 
     switch (type) {
       case SUPPORTED_FIELD_TYPES.NUMBER:
-        return <NumberContent config={config} onAddFilter={onAddFilter} />;
+        return <NumberContent config={configToRender} onAddFilter={onAddFilter} />;
 
       case SUPPORTED_FIELD_TYPES.BOOLEAN:
-        return <BooleanContent config={config} onAddFilter={onAddFilter} />;
+        return <BooleanContent config={configToRender} onAddFilter={onAddFilter} />;
 
       case SUPPORTED_FIELD_TYPES.DATE:
-        return <DateContent config={config} />;
+        return <DateContent config={configToRender} />;
 
       case SUPPORTED_FIELD_TYPES.GEO_POINT:
       case SUPPORTED_FIELD_TYPES.GEO_SHAPE:
         return (
           <GeoPointContentWithMap
-            config={config}
+            config={configToRender}
             dataView={dataView}
             combinedQuery={combinedQuery}
             esql={esql}
@@ -91,17 +99,17 @@ export const IndexBasedDataVisualizerExpandedRow = ({
         );
 
       case SUPPORTED_FIELD_TYPES.IP:
-        return <IpContent config={config} onAddFilter={onAddFilter} />;
+        return <IpContent config={configToRender} onAddFilter={onAddFilter} />;
 
       case SUPPORTED_FIELD_TYPES.KEYWORD:
       case SUPPORTED_FIELD_TYPES.VERSION:
-        return <KeywordContent config={config} onAddFilter={onAddFilter} />;
+        return <KeywordContent config={configToRender} onAddFilter={onAddFilter} />;
 
       case SUPPORTED_FIELD_TYPES.TEXT:
-        return <TextContent config={config} />;
+        return <TextContent config={configToRender} />;
 
       default:
-        return <OtherContent config={config} />;
+        return <OtherContent config={configToRender} />;
     }
   }
 
@@ -113,9 +121,55 @@ export const IndexBasedDataVisualizerExpandedRow = ({
     };
   }, [item, onVisibilityChange]);
 
+  if (loading === true) {
+    return (
+      <div css={dvExpandedRow} data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}>
+        <LoadingIndicator />
+      </div>
+    );
+  }
+
+  // If in compare mode and we have compare stats, show both baseline and comparison
+  if (isCompareMode && config.compareStats) {
+    const compareConfig = {
+      ...config,
+      stats: config.compareStats.stats,
+      existsInDocs: config.compareStats.existsInDocs,
+    };
+
+    return (
+      <div css={dvExpandedRow} data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h5>
+                {i18n.translate('xpack.dataVisualizer.dataGrid.expandedRow.baselineTitle', {
+                  defaultMessage: 'Baseline',
+                })}
+              </h5>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            {getCardContent(config)}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h5>
+                {i18n.translate('xpack.dataVisualizer.dataGrid.expandedRow.comparisonTitle', {
+                  defaultMessage: 'Comparison',
+                })}
+              </h5>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            {getCardContent(compareConfig)}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
+  }
+
   return (
     <div css={dvExpandedRow} data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}>
-      {loading === true ? <LoadingIndicator /> : getCardContent()}
+      {getCardContent(config)}
     </div>
   );
 };
