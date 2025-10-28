@@ -26,6 +26,7 @@ import type {
 } from '../simulation_state_machine';
 import type { MappedSchemaField } from '../../../schema_editor/types';
 import type { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
+import type { SchemaFieldsActorRef } from './schema_fields_actor';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -47,6 +48,7 @@ export interface StreamEnrichmentContextType {
   stepRefs: StepActorRef[];
   grokCollection: GrokCollection;
   simulatorRef: SimulationActorRef;
+  schemaFieldsRef: SchemaFieldsActorRef;
   urlState: EnrichmentUrlState;
 }
 

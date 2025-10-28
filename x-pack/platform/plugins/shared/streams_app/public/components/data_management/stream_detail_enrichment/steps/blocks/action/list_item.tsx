@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isActionBlock } from '@kbn/streamlang';
+import type { ConditionalTypeChangeError } from '@kbn/streamlang';
 import React from 'react';
 import { css } from '@emotion/react';
 import { useSelector } from '@xstate5/react';
@@ -29,6 +30,8 @@ import { ProcessorStatusIndicator } from './processor_status_indicator';
 import { getStepPanelColour } from '../../../utils';
 import { StepContextMenu } from '../context_menu';
 import { BlockDisableOverlay } from '../block_disable_overlay';
+import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import { selectTypeValidationResult } from '../../../state_management/stream_enrichment_state_machine/selectors';
 
 export const ActionBlockListItem = ({
   processorMetrics,
@@ -42,6 +45,17 @@ export const ActionBlockListItem = ({
 }: ActionBlockProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
   const { euiTheme } = useEuiTheme();
+
+  const validationResult = useStreamEnrichmentSelector((state) =>
+    selectTypeValidationResult(state.context)
+  );
+
+  const hasValidationError =
+    validationResult instanceof Error &&
+    validationResult.name === 'ConditionalTypeChangeError' &&
+    (validationResult as ConditionalTypeChangeError).customIdentifiers.includes(
+      step.customIdentifier
+    );
 
   const isUnsaved = useSelector(
     stepRef,
@@ -130,6 +144,24 @@ export const ActionBlockListItem = ({
                 {processorMetrics && (
                   <EuiFlexItem>
                     <ProcessorMetricBadges {...processorMetrics} />
+                  </EuiFlexItem>
+                )}
+                {hasValidationError && (
+                  <EuiFlexItem>
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.streams.actionBlockListItem.typeConflictTooltip',
+                        {
+                          defaultMessage: 'This processor has a type conflict',
+                        }
+                      )}
+                    >
+                      <EuiBadge color="danger">
+                        {i18n.translate('xpack.streams.actionBlockListItem.typeConflictBadge', {
+                          defaultMessage: 'Type conflict',
+                        })}
+                      </EuiBadge>
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
                 {isUnsaved && (

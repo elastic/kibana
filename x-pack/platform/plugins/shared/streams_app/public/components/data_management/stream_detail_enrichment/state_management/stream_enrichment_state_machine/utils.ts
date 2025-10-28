@@ -120,6 +120,17 @@ export function getConfiguredSteps(context: StreamEnrichmentContextType) {
     .map((proc) => proc.context.step);
 }
 
+/**
+ * Gets the most recent state of all steps, regardless of their configuration status.
+ * This includes steps that are being edited with their current (possibly unsaved) state.
+ * Use this when you need the complete, up-to-date view of the entire pipeline.
+ */
+export function getAllMostRecentSteps(context: StreamEnrichmentContextType) {
+  return context.stepRefs
+    .map((stepRef) => stepRef.getSnapshot())
+    .map((snapshot) => snapshot.context.step);
+}
+
 export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefinition | undefined {
   if (!context.simulatorRef) {
     return undefined;

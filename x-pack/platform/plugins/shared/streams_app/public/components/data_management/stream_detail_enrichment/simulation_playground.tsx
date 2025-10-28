@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiNotificationBadge,
   EuiProgress,
   EuiSpacer,
@@ -25,6 +26,7 @@ import {
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
 import { DataSourcesList } from './data_sources_list';
+import { selectTypeValidationResult } from './state_management/stream_enrichment_state_machine/selectors';
 
 export const SimulationPlayground = () => {
   const { refreshSimulation, viewSimulationPreviewData, viewSimulationDetectedFields } =
@@ -42,6 +44,10 @@ export const SimulationPlayground = () => {
   );
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+
+  const validationResult = useStreamEnrichmentSelector((state) =>
+    selectTypeValidationResult(state.context)
+  );
 
   return (
     <>
@@ -72,9 +78,17 @@ export const SimulationPlayground = () => {
                 isSelected={isViewingDetectedFields}
                 onClick={viewSimulationDetectedFields}
                 append={
-                  detectedFields.length > 0 ? (
-                    <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
-                  ) : undefined
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    {detectedFields.length > 0 ? (
+                      <EuiNotificationBadge size="m" color="subdued">
+                        {detectedFields.length}
+                      </EuiNotificationBadge>
+                    ) : null}
+                    {validationResult instanceof Error &&
+                      validationResult.name === 'ConditionalTypeChangeError' && (
+                        <EuiIcon type="error" color="danger" size="l" />
+                      )}
+                  </EuiFlexGroup>
                 }
               >
                 {i18n.translate(
@@ -92,7 +106,9 @@ export const SimulationPlayground = () => {
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}
-      {isViewingDetectedFields && <DetectedFieldsEditor detectedFields={detectedFields} />}
+      {isViewingDetectedFields && (
+        <DetectedFieldsEditor validationResult={validationResult} detectedFields={detectedFields} />
+      )}
     </>
   );
 };
