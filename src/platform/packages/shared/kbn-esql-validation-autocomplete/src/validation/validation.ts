@@ -16,8 +16,7 @@ import type {
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 
-import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '@kbn/esql-ast/src/types';
-import { LeafPrinter } from '@kbn/esql-ast/src/pretty_print/leaf_printer';
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { QueryColumns } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
@@ -43,33 +42,6 @@ function shouldValidateCallback<K extends keyof ESQLCallbacks>(
   name: K
 ): boolean {
   return callbacks?.[name] !== undefined;
-}
-
-/**
- * Retrieves the fields from a JOIN lookup index.
- */
-async function getJoinLookupFields(
-  command: ESQLAstJoinCommand,
-  getColumnsFor: (options: {
-    query: string;
-  }) => ESQLFieldWithMetadata[] | Promise<ESQLFieldWithMetadata[]>
-): Promise<ESQLFieldWithMetadata[]> {
-  const firstArg = command.args[0];
-  if (!firstArg || Array.isArray(firstArg)) {
-    return [];
-  }
-
-  let indexNode = firstArg;
-  if (firstArg.type === 'function' && firstArg.name === 'as') {
-    const asArg = firstArg.args[0];
-    if (!Array.isArray(asArg)) {
-      indexNode = asArg;
-    }
-  }
-
-  const joinIndexPattern = LeafPrinter.print(indexNode);
-  const result = await getColumnsFor({ query: `FROM ${joinIndexPattern}` });
-  return result || [];
 }
 
 /**
@@ -142,24 +114,16 @@ async function validateAst(
    */
   const subqueries = getSubqueriesToValidate(rootCommands);
   for (const subquery of subqueries) {
-    const subqueryUpToThisCommand = { ...subquery, commands: subquery.commands.slice(0, -1) };
-    const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryUpToThisCommand, queryString, callbacks).asMap()
-      : new Map();
-
-    // Enrich columns with lookup index fields for JOIN commands
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
-    if (currentCommand.name === 'join' && callbacks?.getColumnsFor) {
-      const lookupFields = await getJoinLookupFields(
-        currentCommand as ESQLAstJoinCommand,
-        callbacks.getColumnsFor
-      );
+    const subqueryForColumns =
+      currentCommand.name === 'join'
+        ? subquery
+        : { ...subquery, commands: subquery.commands.slice(0, -1) };
 
-      for (const field of lookupFields) {
-        columns.set(field.name, field);
-      }
-    }
+    const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
+      ? await new QueryColumns(subqueryForColumns, queryString, callbacks).asMap()
+      : new Map();
 
     const references: ReferenceMaps = {
       sources,
