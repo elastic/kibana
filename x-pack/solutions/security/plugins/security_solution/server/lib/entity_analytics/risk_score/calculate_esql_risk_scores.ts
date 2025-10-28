@@ -76,10 +76,12 @@ export const calculateScoresWithESQL = async (
           `Executing ESQL Risk Score query for ${entityType}:\n${JSON.stringify(query)}`
         );
 
+        let error: unknown = null;
         const response = await esClient
           .search<never, RiskScoreCompositeBuckets>(query)
           .catch((e) => {
             logger.error(`Error executing composite query for ${entityType}: ${e.message}`);
+            error = e;
             return null;
           });
 
@@ -87,8 +89,14 @@ export const calculateScoresWithESQL = async (
           entityType,
           response,
           query,
+          error,
         };
       })
+    );
+
+    // Check if all queries failed due to index_not_found_exception
+    const allFailedWithIndexNotFound = responses.every(
+      ({ error }) => error && error.message && error.message.includes('index_not_found_exception')
     );
 
     // Combine results from all entity queries
@@ -105,15 +113,20 @@ export const calculateScoresWithESQL = async (
     });
 
     if (Object.keys(combinedAggregations).length === 0) {
-      logger.info('No aggregations in any composite response, returning empty scores');
-      return {
-        after_keys: {},
-        scores: {
-          host: [],
-          user: [],
-          service: [],
-        },
-      };
+      // Only return empty scores if the failure was due to index not found
+      if (allFailedWithIndexNotFound) {
+        logger.info('No aggregations due to index not found, returning empty scores');
+        return {
+          after_keys: {},
+          scores: {
+            host: [],
+            user: [],
+            service: [],
+          },
+        };
+      }
+      // Otherwise, throw an error as before
+      throw new Error('No aggregations in any composite response');
     }
 
     const promises = toEntries(combinedAggregations as Record<string, unknown>).map(
@@ -310,8 +323,8 @@ export const getESQL = (
 
   const query = /* SQL */ `
   FROM ${index} METADATA _index
-    | WHERE kibana.alert.rule.risk_score IS NOT NULL AND KQL("${rangeClause}")
-    | RENAME kibana.alert.rule.risk_score as risk_score,
+    | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
+    | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,

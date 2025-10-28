@@ -16,6 +16,7 @@ describe('riskEngineConfigurationType', () => {
     expect(riskEngineConfigurationType.modelVersions).toHaveProperty('1');
     expect(riskEngineConfigurationType.modelVersions).toHaveProperty('2');
     expect(riskEngineConfigurationType.modelVersions).toHaveProperty('3');
+    expect(riskEngineConfigurationType.modelVersions).toHaveProperty('4');
   });
 
   it('should have filters field in mappings', () => {
@@ -33,12 +34,12 @@ describe('riskEngineConfigurationType', () => {
     });
   });
 
-  describe('version 3 migration', () => {
+  describe('version 4 migration', () => {
     it('should add filters field to existing configurations', () => {
-      const version3 = (
+      const version4 = (
         riskEngineConfigurationType.modelVersions as Record<string, SavedObjectsModelVersion>
-      )?.['3'];
-      expect(version3).toBeDefined();
+      )?.['4'];
+      expect(version4).toBeDefined();
 
       const mockDocument = {
         id: 'test-id',
@@ -64,8 +65,8 @@ describe('riskEngineConfigurationType', () => {
       };
 
       const result =
-        version3?.changes[1]?.type === 'data_backfill'
-          ? version3.changes[1].backfillFn(
+        version4?.changes[1]?.type === 'data_backfill'
+          ? version4.changes[1].backfillFn(
               mockDocument,
               {} as SavedObjectModelTransformationContext
             )
@@ -80,10 +81,10 @@ describe('riskEngineConfigurationType', () => {
     });
 
     it('should preserve existing filters if they exist', () => {
-      const version3 = (
+      const version4 = (
         riskEngineConfigurationType.modelVersions as Record<string, SavedObjectsModelVersion>
-      )?.['3'];
-      expect(version3).toBeDefined();
+      )?.['4'];
+      expect(version4).toBeDefined();
 
       const existingFilters = [{ entity_types: ['host'], filter: 'agent.type: filebeat' }];
 
@@ -112,8 +113,8 @@ describe('riskEngineConfigurationType', () => {
       };
 
       const result =
-        version3?.changes[1]?.type === 'data_backfill'
-          ? version3.changes[1].backfillFn(
+        version4?.changes[1]?.type === 'data_backfill'
+          ? version4.changes[1].backfillFn(
               mockDocument,
               {} as SavedObjectModelTransformationContext
             )
