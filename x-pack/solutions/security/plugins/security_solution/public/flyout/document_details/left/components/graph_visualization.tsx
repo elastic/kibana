@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -154,10 +154,14 @@ export const GraphVisualization: React.FC = memo(() => {
     [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
   );
 
-  const originEventIds = eventIds.map((id) => ({
-    id,
-    isAlert,
-  }));
+  const originEventIds = useMemo(
+    () =>
+      eventIds.map((id) => ({
+        id,
+        isAlert,
+      })),
+    [eventIds, isAlert]
+  );
 
   // Calculate unified time range that covers both alert and original event times
   const { start, end } = getUnifiedTimeRange(
@@ -165,7 +169,7 @@ export const GraphVisualization: React.FC = memo(() => {
     isAlert,
     originalEventTime
   );
-  const initialTimeRange = { from: start, to: end };
+  const initialTimeRange = useMemo(() => ({ from: start, to: end }), [start, end]);
 
   const { investigateInTimeline } = useInvestigateInTimeline();
   const openTimelineCallback = useCallback(
