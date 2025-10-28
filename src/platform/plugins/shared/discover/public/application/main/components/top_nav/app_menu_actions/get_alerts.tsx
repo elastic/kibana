@@ -29,6 +29,7 @@ const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.LOGS,
   AlertConsumers.OBSERVABILITY,
   STACK_ALERTS_FEATURE_ID,
+  AlertConsumers.ALERTS,
 ];
 
 interface EsQueryAlertMetaData extends RuleTypeMetaData {
