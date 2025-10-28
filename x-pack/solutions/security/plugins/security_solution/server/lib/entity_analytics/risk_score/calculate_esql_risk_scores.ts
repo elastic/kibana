@@ -96,7 +96,7 @@ export const calculateScoresWithESQL = async (
 
     // Check if all queries failed due to index_not_found_exception
     const allFailedWithIndexNotFound = responses.every(
-      ({ error }) => error && error.message && error.message.includes('index_not_found_exception')
+      ({ error }) => error instanceof Error && error.message.includes('index_not_found_exception')
     );
 
     // Combine results from all entity queries
