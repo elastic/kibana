@@ -79,8 +79,7 @@ export const defaultExpression: MetricExpression = {
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 const EMPTY_FILTERS: Filter[] = [];
 
-// Helper function to convert time window to minutes
-const convertToMinutes = (timeWindowSize: number, timeWindowUnit: string): number => {
+const convertToMinutes = (timeWindowSize: number, timeWindowUnit: TimeUnitChar): number => {
   switch (timeWindowUnit) {
     case 's':
       return timeWindowSize / 60;
