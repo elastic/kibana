@@ -11,7 +11,7 @@ export interface CloudConnectorSecretReference {
   id: string;
 }
 
-export interface CloudConnectorRoleArn {
+export interface CloudConnectorVar {
   type?: 'text';
   value: string;
 }
@@ -25,15 +25,21 @@ export interface CloudConnectorSecretVar {
 }
 
 export interface AwsCloudConnectorVars {
-  role_arn: CloudConnectorRoleArn;
+  role_arn: CloudConnectorVar;
   external_id: CloudConnectorSecretVar;
 }
 
-export interface CloudConnectorVars {
-  role_arn?: CloudConnectorRoleArn;
-  external_id?: CloudConnectorSecretVar;
-  // TODO: Add other cloud providers vars
+export interface AzureCloudConnectorVars {
+  tenant_id: CloudConnectorVar;
+  client_id: CloudConnectorVar;
+  azure_credentials_cloud_connector_id: CloudConnectorVar;
 }
+
+export type CloudConnectorVars =
+  | AwsCloudConnectorVars
+  | AzureCloudConnectorVars
+  // TODO: Remove Record<string, unknown> in https://github.com/elastic/security-team/issues/14284
+  | Record<string, unknown>;
 
 export interface CloudConnector {
   id: string;

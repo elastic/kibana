@@ -16,6 +16,62 @@ describe('WorkflowTemplatingEngine', () => {
     templatingEngine = new WorkflowTemplatingEngine();
   });
 
+  describe('object rendering', () => {
+    it('should render object with string templates', () => {
+      const obj = {
+        message: 'Hello, {{user.name}}!',
+        details: {
+          age: '{{user.age}}',
+          address: '{{user.address.street}}, {{user.address.city}}',
+        },
+        tags: ['{{user.tag1}}', '{{user.tag2}}'],
+      };
+
+      const context = {
+        user: {
+          name: 'Alice',
+          age: 30,
+          address: {
+            street: '123 Main St',
+            city: 'Wonderland',
+          },
+          tag1: 'admin',
+          tag2: 'editor',
+        },
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        message: 'Hello, Alice!',
+        details: {
+          age: '30',
+          address: '123 Main St, Wonderland',
+        },
+        tags: ['admin', 'editor'],
+      });
+    });
+
+    it('should handle non-string values without modification', () => {
+      const obj = {
+        number: 42,
+        boolean: true,
+        nullValue: null,
+        undefinedValue: undefined,
+        array: [1, 2, 3],
+        nested: {
+          value: 3.14,
+        },
+      };
+
+      const context = {};
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual(obj);
+    });
+  });
+
   describe('basic rendering', () => {
     it('should render simple variables', () => {
       const template = 'Hello {{ name }}!';
@@ -206,6 +262,33 @@ describe('WorkflowTemplatingEngine', () => {
       const context = { text: 'This is not JSON' };
       const result = templatingEngine.render(template, context);
       expect(result).toBe('This is not JSON');
+    });
+  });
+
+  describe('base64 filters', () => {
+    it('should encode and decode strings correctly', () => {
+      const template = '{{ "Hello World" | base64_encode }}';
+      const result = templatingEngine.render(template, {});
+      expect(result).toBe('SGVsbG8gV29ybGQ=');
+    });
+
+    it('should decode base64 strings', () => {
+      const template = '{{ "SGVsbG8gV29ybGQ=" | base64_decode }}';
+      const result = templatingEngine.render(template, {});
+      expect(result).toBe('Hello World');
+    });
+
+    it('should handle round-trip encoding/decoding', () => {
+      const template = '{{ data | base64_encode | base64_decode }}';
+      const context = { data: 'Sensitive information' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('Sensitive information');
+    });
+
+    it('should handle non-string input gracefully', () => {
+      const template = '{{ 123 | base64_encode }}';
+      const result = templatingEngine.render(template, {});
+      expect(result).toBe('');
     });
   });
 });
