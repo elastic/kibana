@@ -43,6 +43,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
           const isCurrentRound = index === conversationRounds.length - 1;
           const isLoading = isResponseLoading && isCurrentRound;
           const isError = Boolean(error) && isCurrentRound;
+          const isHistorical = !isCurrentRound;
 
           return (
             <RoundLayout
@@ -62,6 +63,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
                     response={response}
                     steps={steps}
                     isLoading={isLoading}
+                    isHistorical={isHistorical}
                   />
                 )
               }

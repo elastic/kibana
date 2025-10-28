@@ -30,19 +30,29 @@ import {
   createVisualizationRenderer,
   loadingCursorPlugin,
   visualizationTagParser,
+  browserToolTagParser,
+  createBrowserToolRenderer,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 interface Props {
   content: string;
   steps: ConversationRoundStep[];
+  messageId?: string;
+  isHistorical?: boolean;
 }
 
 /**
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
  */
-export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props) {
+export function ChatMessageText({
+  content,
+  steps: stepsFromCurrentRound,
+  messageId,
+  isHistorical = false,
+}: Props) {
   const { euiTheme } = useEuiTheme();
 
   const containerClassName = css`
@@ -60,6 +70,12 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
 
   const { startDependencies } = useOnechatServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
+  const { browserApiTools } = useConversationContext();
+
+  const browserApiToolsMap = useMemo(() => {
+    if (!browserApiTools) return new Map();
+    return new Map(browserApiTools.map((tool) => [tool.id, tool]));
+  }, [browserApiTools]);
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
@@ -123,6 +139,10 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
+      browser_tool: createBrowserToolRenderer({
+        browserApiTools: browserApiToolsMap,
+        shouldExecute: !isHistorical,
+      }),
     };
 
     return {
@@ -130,11 +150,18 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationTagParser,
+        browserToolTagParser(),
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
     };
-  }, [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]);
+  }, [
+    startDependencies,
+    stepsFromCurrentRound,
+    stepsFromPrevRounds,
+    browserApiToolsMap,
+    isHistorical,
+  ]);
 
   return (
     <EuiText size="s" className={containerClassName}>
