@@ -277,8 +277,6 @@ const SkipFields = [
   'kibana.alert.rule.execution.uuid',
   'kibana.alert.rule.execution.timestamp',
   'kibana.alert.state.start',
-  'kibana.alert.state.end',
-  'kibana.alert.state.duration',
 
   // fields under our control we test separately
   'runCount',

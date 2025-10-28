@@ -1641,6 +1641,10 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            state: {
+                              duration: expectExpect.any(String),
+                              start: expectExpect.any(String),
+                            },
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),
@@ -1686,6 +1690,10 @@ instanceStateValue: true
                             status: 'active',
                             workflow_status: 'open',
                             flapping: false,
+                            state: {
+                              duration: expectExpect.any(String),
+                              start: expectExpect.any(String),
+                            },
                           },
                           space_ids: ['space1'],
                           version: expectExpect.any(String),

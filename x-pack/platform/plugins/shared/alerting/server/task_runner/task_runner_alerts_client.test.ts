@@ -104,6 +104,7 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
@@ -648,6 +649,10 @@ describe('Task Runner', () => {
               [SPACE_IDS]: ['default'],
               [VERSION]: '8.8.0',
               [TAGS]: ['rule-', '-tags'],
+              [ALERT_STATE_NAMESPACE]: {
+                duration: '0',
+                start: '1970-01-01T00:00:00.000Z',
+              },
             },
           ],
         });
