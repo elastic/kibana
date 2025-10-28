@@ -225,31 +225,43 @@ export function convertFromFilterGroup(group: FilterGroup, baseStored: StoredFil
     };
   }
 
-  // Standard group filter conversion
-  const clauses = group.conditions.map((condition) => {
+  // Standard group filter conversion - use combined filter format
+  const filterParams = group.conditions.map((condition) => {
     const typedCondition = condition as SimpleFilterCondition | FilterGroup;
-    if (isNestedFilterGroup(typedCondition)) {
-      // Nested group - recursively convert
-      const nestedStored = convertFromFilterGroup(typedCondition, baseStored);
-      return nestedStored.query;
-    } else {
-      // Simple condition
-      const conditionStored = convertFromSimpleCondition(typedCondition, baseStored);
-      return conditionStored.query;
-    }
+
+    // Create a clean base for sub-filters
+    const cleanBase: StoredFilter = {
+      $state: baseStored.$state,
+      meta: {
+        index: baseStored.meta.index,
+        disabled: false,
+        negate: false,
+        alias: null,
+      },
+    };
+
+    // Convert condition to a complete filter
+    const filter = isNestedFilterGroup(typedCondition)
+      ? convertFromFilterGroup(typedCondition, cleanBase)
+      : convertFromSimpleCondition(typedCondition, cleanBase);
+
+    // Clean up filter: remove $state, alias, and disabled from sub-filters
+    const { $state, meta: filterMeta, ...cleanedUpFilter } = filter;
+    const { alias, disabled, ...cleanedUpMeta } = filterMeta;
+    return { ...cleanedUpFilter, meta: cleanedUpMeta };
   });
 
-  // Build bool query
-  const boolQuery: any = {};
-  boolQuery[group.type === 'AND' ? 'must' : 'should'] = clauses;
+  // Create combined filter format with meta.params
+  meta = {
+    ...meta,
+    type: 'combined',
+    relation: group.type,
+    params: filterParams,
+  } as typeof meta & { relation: 'AND' | 'OR'; params: StoredFilter[] };
 
-  if (group.type === 'OR') {
-    boolQuery.minimum_should_match = 1;
-  }
-
+  // Combined filters don't have a query property - filters are in meta.params
   return {
     ...baseStored,
-    query: { bool: boolQuery },
     meta,
   };
 }

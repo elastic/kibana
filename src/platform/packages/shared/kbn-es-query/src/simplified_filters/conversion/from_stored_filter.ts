@@ -200,9 +200,38 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
  * Convert stored filter to filter group
  */
 export function convertToFilterGroup(storedFilter: any): FilterGroup {
+  // Handle combined filter format (legacy): meta.type === 'combined' with params array
+  if (storedFilter.meta?.type === 'combined' && Array.isArray(storedFilter.meta.params)) {
+    const type = storedFilter.meta.relation === 'OR' ? 'OR' : 'AND';
+
+    const conditions: Array<SimpleFilterCondition | FilterGroup> = storedFilter.meta.params.map(
+      (param: any) => {
+        // Each param is itself a complete stored filter
+        // Recursively convert it to get the condition
+        const paramFilter = fromStoredFilter(param);
+
+        // Extract just the condition from the converted filter
+        if ('condition' in paramFilter && paramFilter.condition) {
+          return paramFilter.condition;
+        }
+        if ('group' in paramFilter && paramFilter.group) {
+          return paramFilter.group;
+        }
+        // If it's a DSL filter, we can't convert it to a condition
+        throw new FilterConversionError('Cannot convert combined filter param to condition');
+      }
+    );
+
+    return {
+      type,
+      conditions,
+    };
+  }
+
+  // Handle bool query format (modern)
   const query = storedFilter.query?.bool;
   if (!query) {
-    throw new FilterConversionError('Expected bool query for group filter');
+    throw new FilterConversionError('Expected bool query or combined meta for group filter');
   }
 
   const type = query.must ? 'AND' : 'OR';
@@ -247,6 +276,7 @@ export function convertWithEnhancement(storedFilter: any): SimpleFilterCondition
  */
 export function parseQueryFilter(storedFilter: any): SimpleFilterCondition {
   const query = storedFilter.query;
+  const meta = storedFilter.meta || {};
 
   // Handle match_phrase queries
   if (query.match_phrase) {
@@ -255,7 +285,7 @@ export function parseQueryFilter(storedFilter: any): SimpleFilterCondition {
 
     return {
       field,
-      operator: 'is',
+      operator: meta.negate ? 'is_not' : 'is',
       value: typeof value === 'object' ? value.query : value,
     };
   }
@@ -269,7 +299,7 @@ export function parseQueryFilter(storedFilter: any): SimpleFilterCondition {
     if (config.type === 'phrase' || (typeof config === 'object' && config.query)) {
       return {
         field,
-        operator: 'is',
+        operator: meta.negate ? 'is_not' : 'is',
         value: config.query || config,
       };
     }
@@ -291,7 +321,6 @@ export function parseQueryFilter(storedFilter: any): SimpleFilterCondition {
   if (query.term) {
     const field = Object.keys(query.term)[0];
     const value = query.term[field];
-    const meta = storedFilter.meta || {};
 
     return {
       field,
@@ -304,7 +333,6 @@ export function parseQueryFilter(storedFilter: any): SimpleFilterCondition {
   if (query.terms) {
     const field = Object.keys(query.terms)[0];
     const values = query.terms[field];
-    const meta = storedFilter.meta || {};
 
     return {
       field,
@@ -315,7 +343,6 @@ export function parseQueryFilter(storedFilter: any): SimpleFilterCondition {
 
   // Handle exists queries
   if (query.exists) {
-    const meta = storedFilter.meta || {};
     return {
       field: query.exists.field,
       operator: meta.negate ? 'not_exists' : 'exists',

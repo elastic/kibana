@@ -155,10 +155,24 @@ export function isEnhancedCompatible(storedFilter: any): boolean {
  * Detect if this represents a grouped filter with multiple conditions
  */
 export function isStoredGroupFilter(storedFilter: any): boolean {
-  return Boolean(
+  // Combined filter format (legacy): meta.type === 'combined' with params array
+  if (
+    storedFilter.meta?.type === 'combined' &&
+    Array.isArray(storedFilter.meta.params) &&
+    storedFilter.meta.params.length > 0
+  ) {
+    return true;
+  }
+
+  // Bool query format (modern): bool with must/should clauses
+  if (
     storedFilter.query?.bool &&
-      (storedFilter.query.bool.must?.length > 1 || storedFilter.query.bool.should?.length > 1)
-  );
+    (storedFilter.query.bool.must?.length > 1 || storedFilter.query.bool.should?.length > 1)
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 // ====================================================================

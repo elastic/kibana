@@ -102,7 +102,7 @@ export function demoModularAPI() {
   const isFullyCompatibleResult = isFullyCompatibleFn(legacyStoredFilter);
   const isEnhancedCompatibleResult = isEnhancedCompatibleFn(legacyStoredFilter);
 
-  // 2. Extract base properties (useful for metadata analysis)
+  // 2. Extract base properties (useful for analysis)
   const baseProps = extractBaseProperties(legacyStoredFilter);
 
   // 3. Convert using the appropriate function
@@ -215,7 +215,6 @@ export function demoDashboardFilters() {
   const businessFilter = createFilter()
     .indexPattern('business-metrics-*')
     .label('High Value Customers')
-    .metadata({ createdBy: 'business-dashboard', version: '2.1.0' })
     .group(
       and()
         .addCondition(field('customer.tier').is('premium'))
