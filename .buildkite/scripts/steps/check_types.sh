@@ -10,7 +10,7 @@ source .buildkite/scripts/common/util.sh
 restore_target_folders
 
 echo --- Check Types
- node scripts/type_check
+node scripts/type_check
 
 # Try to archive target folders for future caching
 archive_target_folders

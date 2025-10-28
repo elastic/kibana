@@ -233,7 +233,7 @@ restore_target_folders() {
 archive_target_folders() {
   echo "--- Archiving target folders for caching"
   mkdir -p target_archive
-  find . -type d -name target -exec rsync -avR {}/ ./target_archive/ \;
+  find . -type d -name target -exec rsync -avqR {}/ ./target_archive/ \;
 
   rm -rf target_archive/target
   rm -rf target_archive/node_modules
