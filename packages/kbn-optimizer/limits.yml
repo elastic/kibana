@@ -150,7 +150,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79987
-  securitySolution: 119566
+  securitySolution: 119452
   securitySolutionEss: 43319
   securitySolutionServerless: 62964
   serverless: 7852
@@ -198,4 +198,4 @@ pageLoadAssetSize:
   visualizations: 38374
   watcher: 10485
   workflowsManagement: 7268
-  workplaceAIApp: 5822
+  workplaceAIApp: 5821
