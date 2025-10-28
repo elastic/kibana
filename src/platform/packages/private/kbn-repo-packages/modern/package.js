@@ -21,6 +21,11 @@ const { readPackageManifest } = require('./parse_package_manifest');
 const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : path);
 
 /**
+ * @type {import('@kbn/projects-solutions-groups').KibanaSolution[]}
+ */
+const KIBANA_SOLUTIONS = ['search', 'security', 'observability', 'workplace_ai'];
+
+/**
  * Representation of a Package in the Kibana repository
  * @class
  */
@@ -236,10 +241,14 @@ class Package {
       // this conditional branch is the only one that applies in production
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
-      //  BOOKMARK - List of Kibana solutions - FIXME we could use KIBANA_SOLUTIONS array here once we modernize this / get rid of Bazel
-      visibility = ['search', 'security', 'observability', 'workplaceai'].includes(group)
-        ? 'private'
-        : this.manifest.visibility ?? 'shared';
+      // KIBANA_SOLUTIONS - List of Kibana solutions
+      const isSolution = Boolean(KIBANA_SOLUTIONS.find((solution) => solution === group));
+      if (!isSolution && !['platform', 'common'].includes(group)) {
+        throw new Error(
+          `Detected unknown group: ${group}, this module's definition of KIBANA_SOLUTIONS is probably outdated.`
+        );
+      }
+      visibility = isSolution ? 'private' : this.manifest.visibility ?? 'shared';
     }
 
     return { group, visibility };
