@@ -10,7 +10,11 @@
 import { compare as semverCompare } from 'semver';
 import { getFlattenedObject } from '@kbn/std';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsFullModelVersionSchemaDefinitions,
+  SavedObjectsModelVersionSchemaDefinitions,
+  SavedObjectsType,
+} from '@kbn/core-saved-objects-server';
 import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
 
@@ -33,7 +37,8 @@ export interface ModelVersionSummary {
   hasTransformation: boolean;
   newMappings: string[];
   schemas: {
-    forwardCompatibility: boolean;
+    create: boolean | object;
+    forwardCompatibility: boolean | object;
   };
 }
 
@@ -62,16 +67,16 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
       const { changes, schemas } = modelVersion ?? { changes: [] };
       return {
         version,
-        changeTypes: [...new Set(changes.map((change) => change.type))].sort(),
+        changeTypes: [...new Set(changes.map((change) => change.type))].sort(), // changes is an array of objects
         hasTransformation: hasTransformation(changes),
         newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(changes))),
         schemas: {
-          forwardCompatibility: !!schemas?.forwardCompatibility,
+          forwardCompatibility: extractOrCastForwardCompatibility(schemas),
+          create: extractOrCastCreateSchema(schemas),
         },
       };
     }
   );
-
   return {
     name: soType.name,
     namespaceType: soType.namespaceType,
@@ -88,4 +93,25 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
 const changesWithTransform = ['data_backfill', 'data_removal', 'unsafe_transform'];
 const hasTransformation = (changes: SavedObjectsModelChange[]): boolean => {
   return changes.some((change) => changesWithTransform.includes(change.type));
+};
+
+const extractOrCastForwardCompatibility = (
+  schemas?:
+    | SavedObjectsModelVersionSchemaDefinitions
+    | SavedObjectsFullModelVersionSchemaDefinitions
+): boolean | object => {
+  if (!schemas?.forwardCompatibility) return false;
+  if (typeof schemas.forwardCompatibility === 'function') return true; // can't access args and cannot execute
+  if (typeof schemas.forwardCompatibility === 'object') return schemas.forwardCompatibility;
+  return !!schemas.forwardCompatibility;
+};
+
+const extractOrCastCreateSchema = (
+  schemas?:
+    | SavedObjectsModelVersionSchemaDefinitions
+    | SavedObjectsFullModelVersionSchemaDefinitions
+): boolean | object => {
+  if (!schemas?.create) return false;
+  if (typeof schemas.create === 'object') return schemas.create;
+  return !!schemas.create;
 };
