@@ -108,7 +108,6 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
             // TODO: verify visibility of Users and Roles link
             {
               cloudLink: 'userAndRoles',
-              title: i18nStrings.stackManagement.access.usersAndRoles,
             },
           ],
         },
