@@ -136,7 +136,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         ...selections.internalApi,
         uuid,
         makeSelection(key?: string) {
-          const singleSelect = initialState.singleSelect ?? true;
+          const singleSelect = selections.api.singleSelect$.value ?? true;
           if (singleSelect && key) {
             selections.internalApi.setSelectedOptions([key]);
           } else if (key) {
