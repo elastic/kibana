@@ -16,23 +16,18 @@ import type {
   ESQLAst,
 } from '../../../types';
 import { isBinaryExpression, isIdentifier, isSource } from '../../../ast/is';
-import type { ESQLFieldWithMetadata, ICommandCallbacks, ICommandContext } from '../../types';
+import type { ICommandCallbacks, ICommandContext } from '../../types';
 import { errors } from '../../../definitions/utils/errors';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
-import { createEnrichedContext, getOnOption } from './utils';
+import { getOnOption } from './utils';
 import type { ESQLSingleAstItem } from '../../../types';
 
-// Type for callbacks that include getColumnsFor (from ESQLCallbacks)
-type CallbacksWithGetColumnsFor = ICommandCallbacks & {
-  getColumnsFor?: (params: { query: string }) => Promise<ESQLFieldWithMetadata[]>;
-};
-
-export const validate = async (
+export const validate = (
   command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
-  callbacks?: CallbacksWithGetColumnsFor
-): Promise<ESQLMessage[]> => {
+  callbacks?: ICommandCallbacks
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const { commandType, args } = command as ESQLAstJoinCommand;
   const joinSources = context?.joinSources || [];
@@ -86,22 +81,6 @@ export const validate = async (
     return messages;
   }
 
-  // Enrich context with lookup index fields for proper validation
-  let contextForValidation = context;
-
-  if (callbacks?.getColumnsFor) {
-    const joinCommand = command as ESQLAstJoinCommand;
-
-    // Adapter: createEnrichedContext expects callback with (query: string) signature, but getColumnsFor uses ({ query: string })
-    const normalizedCallback = async (query: string): Promise<ESQLFieldWithMetadata[]> => {
-      const result = await callbacks.getColumnsFor!({ query });
-
-      return result || [];
-    };
-
-    contextForValidation = await createEnrichedContext(context, joinCommand, normalizedCallback);
-  }
-
   // Validate JOIN ON expressions
   const onOption = getOnOption(command as ESQLAstJoinCommand);
 
@@ -109,7 +88,7 @@ export const validate = async (
     messages.push(...validateOnExpressions(command as ESQLAstJoinCommand));
   }
 
-  messages.push(...validateCommandArguments(command, ast, contextForValidation, callbacks));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };

@@ -16,12 +16,12 @@ import { errors } from '../../../definitions/utils';
 const MIN_BRANCHES = 2;
 const MAX_BRANCHES = 8;
 
-export const validate = async (
+export const validate = (
   command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
   callbacks?: ICommandCallbacks
-): Promise<ESQLMessage[]> => {
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
   if (command.args.length < MIN_BRANCHES) {
@@ -37,24 +37,11 @@ export const validate = async (
   for (const arg of command.args.flat()) {
     if (!Array.isArray(arg) && arg.type === 'query') {
       // all the args should be commands
-      const validationPromises = arg.commands.map(async (subCommand) => {
+      arg.commands.forEach((subCommand) => {
         const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
-        const validationMessages = await subCommandMethods?.validate?.(
-          subCommand,
-          arg.commands,
-          context
-        );
-
-        return validationMessages || [];
+        const validationMessages = subCommandMethods?.validate?.(subCommand, arg.commands, context);
+        messages.push(...(validationMessages || []));
       });
-
-      const results = await Promise.allSettled(validationPromises);
-
-      for (const result of results) {
-        if (result.status === 'fulfilled') {
-          messages.push(...result.value);
-        }
-      }
     }
   }
 

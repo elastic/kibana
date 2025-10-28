@@ -16,7 +16,8 @@ import type {
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 
-import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
+import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '@kbn/esql-ast/src/types';
+import { LeafPrinter } from '@kbn/esql-ast/src/pretty_print/leaf_printer';
 import { QueryColumns } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
@@ -42,6 +43,33 @@ function shouldValidateCallback<K extends keyof ESQLCallbacks>(
   name: K
 ): boolean {
   return callbacks?.[name] !== undefined;
+}
+
+/**
+ * Retrieves the fields from a JOIN lookup index.
+ */
+async function getJoinLookupFields(
+  command: ESQLAstJoinCommand,
+  getColumnsFor: (options: {
+    query: string;
+  }) => ESQLFieldWithMetadata[] | Promise<ESQLFieldWithMetadata[]>
+): Promise<ESQLFieldWithMetadata[]> {
+  const firstArg = command.args[0];
+  if (!firstArg || Array.isArray(firstArg)) {
+    return [];
+  }
+
+  let indexNode = firstArg;
+  if (firstArg.type === 'function' && firstArg.name === 'as') {
+    const asArg = firstArg.args[0];
+    if (!Array.isArray(asArg)) {
+      indexNode = asArg;
+    }
+  }
+
+  const joinIndexPattern = LeafPrinter.print(indexNode);
+  const result = await getColumnsFor({ query: `FROM ${joinIndexPattern}` });
+  return result || [];
 }
 
 /**
@@ -99,7 +127,7 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
     };
 
-    const commandMessages = await validateCommand(command, references, rootCommands, {
+    const commandMessages = validateCommand(command, references, rootCommands, {
       ...callbacks,
       hasMinimumLicenseRequired,
     });
@@ -119,6 +147,20 @@ async function validateAst(
       ? await new QueryColumns(subqueryUpToThisCommand, queryString, callbacks).asMap()
       : new Map();
 
+    // Enrich columns with lookup index fields for JOIN commands
+    const currentCommand = subquery.commands[subquery.commands.length - 1];
+
+    if (currentCommand.name === 'join' && callbacks?.getColumnsFor) {
+      const lookupFields = await getJoinLookupFields(
+        currentCommand as ESQLAstJoinCommand,
+        callbacks.getColumnsFor
+      );
+
+      for (const field of lookupFields) {
+        columns.set(field.name, field);
+      }
+    }
+
     const references: ReferenceMaps = {
       sources,
       columns,
@@ -127,15 +169,10 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
     };
 
-    const commandMessages = await validateCommand(
-      subquery.commands[subquery.commands.length - 1],
-      references,
-      rootCommands,
-      {
-        ...callbacks,
-        hasMinimumLicenseRequired,
-      }
-    );
+    const commandMessages = validateCommand(currentCommand, references, rootCommands, {
+      ...callbacks,
+      hasMinimumLicenseRequired,
+    });
     messages.push(...commandMessages);
   }
 
@@ -158,12 +195,12 @@ async function validateAst(
   };
 }
 
-async function validateCommand(
+function validateCommand(
   command: ESQLAstAllCommands,
   references: ReferenceMaps,
   rootCommands: ESQLCommand[],
   callbacks?: ICommandCallbacks
-): Promise<ESQLMessage[]> {
+): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
     return messages;
@@ -201,12 +238,7 @@ async function validateCommand(
   };
 
   if (commandDefinition.methods.validate) {
-    const allErrors = await commandDefinition.methods.validate(
-      command,
-      rootCommands,
-      context,
-      callbacks
-    );
+    const allErrors = commandDefinition.methods.validate(command, rootCommands, context, callbacks);
 
     const filteredErrors = allErrors.filter((error) => {
       if (error.errorType === 'semantic' && error.requiresCallback) {

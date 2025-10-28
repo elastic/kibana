@@ -8,22 +8,11 @@
  */
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
+import { expectErrors } from '../../../__tests__/validation';
 import { getNoValidCallSignatureError } from '../../../definitions/utils/validation/utils';
 
-const forkExpectErrors = async (query: string, expectedErrors: string[], context = mockContext) => {
-  const { Parser } = await import('../../../parser');
-  const { root } = Parser.parse(query);
-  const command = root.commands.find((cmd) => cmd.name === 'fork');
-  if (!command) {
-    throw new Error('FORK command not found in the parsed query');
-  }
-  const result = await validate(command, root.commands, context);
-
-  const errors: string[] = [];
-  result.forEach((error) => {
-    errors.push(error.text);
-  });
-  expect(errors).toEqual(expectedErrors);
+const forkExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
+  return expectErrors(query, expectedErrors, context, 'fork', validate);
 };
 
 describe('FORK Validation', () => {
@@ -31,8 +20,8 @@ describe('FORK Validation', () => {
     jest.clearAllMocks();
   });
 
-  test('no errors for valid command', async () => {
-    await forkExpectErrors(
+  test('no errors for valid command', () => {
+    forkExpectErrors(
       `FROM index
 | FORK
   (WHERE keywordField != "" | LIMIT 100)
@@ -40,7 +29,7 @@ describe('FORK Validation', () => {
       []
     );
 
-    await forkExpectErrors(
+    forkExpectErrors(
       `FROM index
 | FORK
   (WHERE keywordField != "" | LIMIT 100)
@@ -50,8 +39,8 @@ describe('FORK Validation', () => {
     );
   });
 
-  test('requires at least two branches', async () => {
-    await forkExpectErrors(
+  test('requires at least two branches', () => {
+    forkExpectErrors(
       `FROM index
 | FORK
     (WHERE keywordField != "")`,
@@ -59,15 +48,13 @@ describe('FORK Validation', () => {
     );
   });
 
-  test('supports a maximum of 8 branches', async () => {
+  test('supports a maximum of 8 branches', () => {
     const branches = Array(9).fill('(WHERE keywordField != "")').join(' ');
-    await forkExpectErrors(`FROM index| FORK ${branches}`, [
-      `[FORK] Supports a maximum of 8 branches.`,
-    ]);
+    forkExpectErrors(`FROM index| FORK ${branches}`, [`[FORK] Supports a maximum of 8 branches.`]);
   });
 
-  test('enforces only one fork command', async () => {
-    await forkExpectErrors(
+  test('enforces only one fork command', () => {
+    forkExpectErrors(
       `FROM index
 | FORK
     (WHERE keywordField != "" | LIMIT 100)
@@ -81,8 +68,8 @@ describe('FORK Validation', () => {
   });
 
   describe('_fork field', () => {
-    test('DOES recognize _fork field AFTER FORK', async () => {
-      await forkExpectErrors(
+    test('DOES recognize _fork field AFTER FORK', () => {
+      forkExpectErrors(
         `FROM index
   | FORK
     (WHERE keywordField != "" | LIMIT 100)
@@ -94,8 +81,8 @@ describe('FORK Validation', () => {
   });
 
   describe('... (SUBCOMMAND ...) ...', () => {
-    test('validates within subcommands', async () => {
-      await forkExpectErrors(
+    test('validates within subcommands', () => {
+      forkExpectErrors(
         `FROM index
 | FORK
     (WHERE TO_UPPER(doubleField) != "" | LIMIT 100)
@@ -108,8 +95,8 @@ describe('FORK Validation', () => {
       );
     });
 
-    test('forwards syntax errors', async () => {
-      await forkExpectErrors(
+    test('forwards syntax errors', () => {
+      forkExpectErrors(
         `FROM index
 | FORK
     (EVAL TO_UPPER(keywordField) | LIMIT 100)
@@ -119,8 +106,8 @@ describe('FORK Validation', () => {
     });
 
     describe('user-defined columns', () => {
-      it('allows columns to be defined within sub-commands', async () => {
-        await forkExpectErrors(
+      it('allows columns to be defined within sub-commands', () => {
+        forkExpectErrors(
           `FROM index
   | FORK
       (EVAL col0 = TO_UPPER(keywordField) | LIMIT 100)
@@ -129,8 +116,8 @@ describe('FORK Validation', () => {
         );
       });
 
-      it('recognizes user-defined columns within branches', async () => {
-        await forkExpectErrors(
+      it('recognizes user-defined columns within branches', () => {
+        forkExpectErrors(
           `FROM index
   | FORK
       (EVAL col0 = TO_UPPER(keywordField) | WHERE col0 | LIMIT 100)
@@ -139,8 +126,8 @@ describe('FORK Validation', () => {
         );
       });
 
-      it.skip('does not recognize user-defined columns between branches', async () => {
-        await forkExpectErrors(
+      it.skip('does not recognize user-defined columns between branches', () => {
+        forkExpectErrors(
           `FROM index
   | FORK
       (EVAL col0 = TO_UPPER(keywordField) | LIMIT 100)
@@ -150,7 +137,7 @@ describe('FORK Validation', () => {
       });
 
       it('recognizes user-defined columns from all branches after FORK', async () => {
-        await forkExpectErrors(
+        forkExpectErrors(
           `FROM index
   | FORK
       (EVAL col0 = 1)
