@@ -695,7 +695,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: totalAgents,
+          totalAgents,
           aggregations: {
             totalRowCount: 0,
             totalResponded: 0,
@@ -799,7 +799,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: totalAgents,
+          totalAgents,
           aggregations: {
             totalRowCount: 0,
             totalResponded: 0,

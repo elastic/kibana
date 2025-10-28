@@ -35,6 +35,7 @@ const DEFAULT_PAGE_SIZE = 20;
 const DEFAULT_PAGE_INDEX = 0;
 const AGENT_DETAILS_CACHE_TIME_MS = 30000;
 const TABLE_MAX_HEIGHT_PX = 500;
+const ESTIMATED_ROW_HEIGHT_PX = 41; // EUI table row default height
 const BULK_AGENT_DETAILS_ROUTE = '/internal/osquery/fleet_wrapper/agents/_bulk';
 
 const renderErrorMessage = (error: string) => (
@@ -43,8 +44,27 @@ const renderErrorMessage = (error: string) => (
   </EuiCodeBlock>
 );
 
+// Calculate minimum table body height based on expected rows on current page
+const calculateMinTableBodyHeight = (
+  pageSize: number,
+  pageIndex: number,
+  totalItemCount: number
+): number => {
+  const expectedItemsOnPage = Math.min(
+    pageSize,
+    Math.max(0, totalItemCount - pageIndex * pageSize)
+  );
+
+  const minHeight =
+    expectedItemsOnPage > 0
+      ? Math.min(expectedItemsOnPage * ESTIMATED_ROW_HEIGHT_PX, TABLE_MAX_HEIGHT_PX)
+      : 0;
+
+  return minHeight;
+};
+
 // CSS-in-JS styles for scrollable table with dynamic height
-const statusTableCss = {
+const createStatusTableCss = (pageSize: number, pageIndex: number, totalItemCount: number) => ({
   '.euiTable': {
     display: 'block',
   },
@@ -55,6 +75,7 @@ const statusTableCss = {
   },
   '.euiTable tbody': {
     display: 'block',
+    minHeight: `${calculateMinTableBodyHeight(pageSize, pageIndex, totalItemCount)}px`,
     maxHeight: `${TABLE_MAX_HEIGHT_PX}px`,
     overflowY: 'auto' as const,
   },
@@ -63,7 +84,7 @@ const statusTableCss = {
     width: '100%',
     tableLayout: 'fixed' as const,
   },
-};
+});
 
 const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
@@ -76,6 +97,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const setErrorToast = useErrorToast();
   const [pageIndex, setPageIndex] = useState(DEFAULT_PAGE_INDEX);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+
   const expired = useMemo(
     () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
     [expirationDate]
@@ -280,6 +302,11 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
       showPerPageOptions: true,
     }),
     [pageIndex, pageSize, agentIds?.length]
+  );
+
+  const statusTableCss = useMemo(
+    () => createStatusTableCss(pageSize, pageIndex, agentIds?.length ?? 0),
+    [pageSize, pageIndex, agentIds?.length]
   );
 
   // Guard against race conditions when updating isLive

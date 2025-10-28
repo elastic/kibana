@@ -22,12 +22,9 @@ import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
-import { TOO_MANY_AGENT_IDS } from '../../../common/translations/errors';
 import type {
   ActionResultsRequestOptions,
   ActionResultsStrategyResponse,
-  ActionDetailsRequestOptions,
-  ActionDetailsStrategyResponse,
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -89,116 +86,22 @@ export const getActionResultsRoute = (
 
           const search = await context.search;
 
-          // Parse agentIds from query parameter if provided (for external API consumers)
-          const requestedAgentIds = request.query.agentIds
+          // Parse agentIds from query parameter
+          const agentIds = request.query.agentIds
             ? request.query.agentIds.split(',').map((id) => id.trim())
-            : undefined;
-
-          if (requestedAgentIds && requestedAgentIds.length > 100) {
-            return response.badRequest({
-              body: TOO_MANY_AGENT_IDS,
-            });
-          }
+            : [];
 
           const page = request.query.page ?? 0;
           const pageSize = request.query.pageSize ?? 100;
-          const startIndex = page * pageSize;
 
-          let agentIds: string[];
-          let agentIdsForCurrentPage: string[];
-          let totalAgentCount: number = 0;
-
-          console.log({ requestedAgentIds });
-          if (requestedAgentIds) {
-            // Client has full agent list and handles pagination UI.
-            // Server only returns results for the provided agents (current page).
-            agentIdsForCurrentPage = requestedAgentIds;
-            totalAgentCount = requestedAgentIds.length;
-
-            logger.info(
-              `Using client-provided agent IDs for action ${request.params.actionId} (fallback path)`,
-              {
-                reason: 'action_document_unavailable',
-                currentPageSize: requestedAgentIds.length,
-                page,
-              }
-            );
-          } else {
-            // Primary path: Fetch action details from action document (preferred)
-            // This is the main code path for internal UI - fetches agent list from Elasticsearch
-            try {
-              logger.debug(
-                `Fetching action document for ${request.params.actionId} (primary path)`
-              );
-
-              const actionDetailsResponse = await lastValueFrom(
-                search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
-                  {
-                    actionId: request.params.actionId,
-                    factoryQueryType: OsqueryQueries.actionDetails,
-                    spaceId:
-                      (await context.core).savedObjects.client.getCurrentNamespace() || 'default',
-                  },
-                  { abortSignal, strategy: 'osquerySearchStrategy' }
-                )
-              );
-
-              const { actionDetails } = actionDetailsResponse;
-
-              // The action details query uses fields API, so data is in fields, not _source
-              // Extract data from fields (which returns arrays) or fallback to _source
-              const actionData = actionDetails?._source || {
-                agents: actionDetails?.fields?.agents?.[0],
-                queries: actionDetails?.fields?.queries?.[0],
-              };
-
-              console.log({ actionData });
-              console.log({ matchingQuery });
-
-              // Extract agent IDs from action document
-              if (actionData?.agents || actionData?.queries) {
-                // Check if actionId is a child query action_id
-                const queries = actionData.queries || [];
-                const matchingQuery = queries.find((q) => q.action_id === request.params.actionId);
-
-                // Use query-specific agents if found, otherwise use parent action's agents
-                agentIds = matchingQuery?.agents || actionData.agents || [];
-
-                console.log({ agentIds });
-                totalAgentCount = agentIds.length;
-
-                if (agentIds.length > 100000) {
-                  logger.warn(`Action ${request.params.actionId} has ${agentIds.length} agents`);
-                }
-              } else {
-                logger.warn(
-                  `Action details for ${request.params.actionId} has no agents data in _source or fields, setting agentIds to empty array`
-                );
-                agentIds = [];
-                totalAgentCount = 0;
-              }
-            } catch (fetchError) {
-              logger.error(
-                `Failed to fetch action details for actionId ${request.params.actionId}: ${fetchError}`
-              );
-
-              return response.customError({
-                statusCode: 404,
-                body: {
-                  message: `Action with ID "${request.params.actionId}" not found or inaccessible. Please verify the action exists and you have the necessary permissions.`,
-                },
-              });
-            }
-
-            agentIdsForCurrentPage = agentIds.slice(startIndex, endIndex);
-          }
+          const totalAgentCount = agentIds.length;
 
           const res = await lastValueFrom(
             search.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.actionResults,
-                agentIds: agentIdsForCurrentPage,
+                agentIds,
                 kuery: request.query.kuery,
                 startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(page, pageSize),
@@ -229,18 +132,14 @@ export const getActionResultsRoute = (
 
           let processedEdges = res.edges;
 
-          // Create placeholders for agents that haven't responded yet
-          // This works for both internal UI (action document) and client-provided agents
-          if (agentIdsForCurrentPage.length > 0) {
-            // Extract agent IDs that already have responses
+          // Create placeholders for agents that haven't responded
+          if (agentIds.length > 0) {
             const respondedAgentIds = new Set(
               res.edges
                 .map((edge) => getAgentIdFromFields(edge.fields))
                 .filter((id): id is string => id !== undefined)
             );
-
-            // Create placeholder edges ONLY for agents that haven't responded
-            const placeholderEdges = agentIdsForCurrentPage
+            const placeholderEdges = agentIds
               .filter((agentId) => agentId && !respondedAgentIds.has(agentId))
               .map((agentId) => ({
                 _index: '.logs-osquery_manager.action.responses-default',
@@ -248,8 +147,6 @@ export const getActionResultsRoute = (
                 _source: {},
                 fields: { agent_id: [agentId] },
               }));
-
-            // Merge real results with placeholders (no deduplication needed since placeholders are non-overlapping)
             processedEdges = [...res.edges, ...placeholderEdges] as typeof res.edges;
           }
 

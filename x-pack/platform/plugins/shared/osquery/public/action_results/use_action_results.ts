@@ -54,17 +54,6 @@ interface ActionResultsResponse {
   inspect?: InspectResponse;
 }
 
-/**
- * Hook to fetch action results with hybrid pagination strategy.
- *
- * HYBRID PAGINATION APPROACH:
- * - Server attempts to fetch agent IDs from action document (preferred)
- * - If document unavailable, client provides current page agent IDs as fallback
- * - Client sends ONLY current page IDs (20-100 agents) to avoid URL length issues
- * - Client handles pagination UI using its full agentIds array
- *
- * This approach handles scenarios where action documents may be missing
- */
 export const useActionResults = ({
   actionId,
   activePage,
@@ -82,7 +71,6 @@ export const useActionResults = ({
   return useQuery<ActionResultsResponse, Error, ActionResultsArgs>(
     ['actionResults', { actionId, activePage, limit, direction, sortField }],
     () => {
-      // Calculate current page agent IDs for fallback (maintains server-side pagination)
       // Only send ~20-100 IDs per page, NOT all agents (avoids URL length issues)
       const startIndex = activePage * limit;
       const endIndex = startIndex + limit;
@@ -97,9 +85,6 @@ export const useActionResults = ({
           sortOrder: direction,
           ...(kuery && { kuery }),
           ...(startDate && { startDate }),
-          // Send current page agent IDs as fallback when action document missing
-          // This maintains server-side pagination (only ~20 IDs sent, not all agents)
-          // Client handles overall pagination using full agentIds array
           ...(currentPageAgentIds.length > 0 && {
             agentIds: currentPageAgentIds.join(','),
           }),
