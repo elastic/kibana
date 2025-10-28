@@ -31,7 +31,7 @@ import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../../sourcerer';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';

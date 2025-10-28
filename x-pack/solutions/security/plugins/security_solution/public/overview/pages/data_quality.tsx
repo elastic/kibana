@@ -7,12 +7,12 @@
 
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
-  DataQualityPanel,
   DATA_QUALITY_SUBTITLE,
+  DataQualityPanel,
   ECS_REFERENCE_URL,
 } from '@kbn/ecs-data-quality-dashboard';
 import type { OnTimeChangeProps } from '@elastic/eui';
-import { EuiLink, EuiLoadingSpinner, EuiText, EuiToolTip, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiLink, EuiLoadingSpinner, EuiSuperDatePicker, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
@@ -23,15 +23,15 @@ import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { APP_ID, DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer';
 import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
 import {
+  DataQualityEventTypes,
   type ReportDataQualityCheckAllCompletedParams,
   type ReportDataQualityIndexCheckedParams,
-  DataQualityEventTypes,
 } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';

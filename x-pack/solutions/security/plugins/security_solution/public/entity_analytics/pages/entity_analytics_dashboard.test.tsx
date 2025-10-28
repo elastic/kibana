@@ -6,17 +6,17 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { EntityAnalyticsPage } from './entity_analytics_dashboard';
 import { TestProviders } from '../../common/mock';
 
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 
-jest.mock('../../sourcerer/containers', () => ({
+jest.mock('../../sourcerer', () => ({
   useSourcererDataView: jest.fn(() => ({
     indicesExist: true,
     loading: false,

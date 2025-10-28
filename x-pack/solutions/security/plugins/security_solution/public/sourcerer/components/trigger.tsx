@@ -8,9 +8,9 @@
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
-import * as i18n from './translations';
-import { getTooltipContent, StyledBadge, StyledButtonEmpty } from './helpers';
-import type { ModifiedTypes } from './use_pick_index_patterns';
+import * as i18n from '../translations';
+import { getTooltipContent, StyledBadge, StyledButtonEmpty } from '../utils/helpers';
+import type { ModifiedTypes } from '../hooks/use_pick_index_patterns';
 
 interface Props {
   activePatterns?: string[];
@@ -24,7 +24,7 @@ interface Props {
   selectedPatterns: string[];
   signalIndexName: string | null;
 }
-export const TriggerComponent: FC<Props> = ({
+const TriggerComponent: FC<Props> = ({
   activePatterns,
   disabled,
   isModified,
@@ -84,7 +84,6 @@ export const TriggerComponent: FC<Props> = ({
         disabled={disabled}
         isLoading={loading}
         onClick={onClick}
-        size="s"
         title={i18n.DATA_VIEW}
       >
         {i18n.DATA_VIEW}

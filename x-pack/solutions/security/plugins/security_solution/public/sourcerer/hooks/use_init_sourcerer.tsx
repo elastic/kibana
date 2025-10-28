@@ -16,11 +16,11 @@ import { TimelineId } from '../../../common/types';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { getScopePatternListSelection } from '../store/helpers';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import { createSourcererDataView } from './create_sourcerer_data_view';
-import { useDataView } from '../../common/containers/source/use_data_view';
+import { createSourcererDataView } from '../containers/create_sourcerer_data_view';
+import { useDataView } from './use_data_view';
 import type { State } from '../../common/store/types';
 import { useKibana } from '../../common/lib/kibana';
-import { useSourcererDataView } from '.';
+import { useSourcererDataView } from './use_sourcerer_data_view';
 import { useSyncSourcererUrlState } from '../../data_view_manager/hooks/use_sync_url_state';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 

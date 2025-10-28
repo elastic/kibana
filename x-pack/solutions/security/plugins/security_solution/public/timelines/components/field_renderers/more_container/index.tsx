@@ -13,10 +13,10 @@ import { TimelineContext } from '../../timeline/context';
 import { getSourcererScopeId } from '../../../../helpers';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../../sourcerer';
 import {
-  SecurityCellActions,
   CellActionsMode,
+  SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 

@@ -8,12 +8,11 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import type { KibanaDataView, SourcererModel } from '../../sourcerer/store/model';
-import { initDataView } from '../../sourcerer/store/model';
-import { createSourcererDataView } from '../../sourcerer/containers/create_sourcerer_data_view';
+import type { KibanaDataView, SourcererModel } from '../../sourcerer';
+import { createSourcererDataView, initDataView } from '../../sourcerer';
 import {
-  DEFAULT_DATA_VIEW_ID,
   DEFAULT_ALERT_DATA_VIEW_ID,
+  DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
 } from '../../../common/constants';

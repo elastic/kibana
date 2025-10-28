@@ -56,7 +56,7 @@ const defaultUseSourcererReturn = {
   indexPattern: '',
 };
 const mockUseSourcererDataView = jest.fn(() => defaultUseSourcererReturn);
-jest.mock('../../sourcerer/containers', () => ({
+jest.mock('../../sourcerer', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
 

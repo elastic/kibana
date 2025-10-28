@@ -12,14 +12,14 @@ import { useLensAttributes } from './use_lens_attributes';
 import {
   fieldNameExistsFilter,
   getDetailsPageFilter,
-  getIndexFilters,
-  sourceOrDestinationIpExistsFilter,
-  getNetworkDetailsPageFilter,
   getESQLGlobalFilters,
+  getIndexFilters,
+  getNetworkDetailsPageFilter,
+  sourceOrDestinationIpExistsFilter,
 } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../sourcerer';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { SecurityPageName } from '../../../app/types';
@@ -36,7 +36,7 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
-jest.mock('../../../sourcerer/containers');
+jest.mock('../../../sourcerer');
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn(),
 }));

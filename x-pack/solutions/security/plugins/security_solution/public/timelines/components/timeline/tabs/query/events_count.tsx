@@ -31,9 +31,8 @@ import type {
 } from '../../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../../../sourcerer';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineColumns } from '../shared/use_timeline_columns';

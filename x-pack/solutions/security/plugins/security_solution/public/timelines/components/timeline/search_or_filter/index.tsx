@@ -22,7 +22,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../../sourcerer';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store';
@@ -33,7 +33,6 @@ import { SearchOrFilter } from './search_or_filter';
 import { setDataProviderVisibility } from '../../../store/actions';
 import { getNonDropAreaFilters } from '../helpers';
 import * as i18n from './translations';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 interface OwnProps {
   filterManager: FilterManager;

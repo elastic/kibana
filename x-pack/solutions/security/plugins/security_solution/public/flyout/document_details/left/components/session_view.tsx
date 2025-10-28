@@ -15,14 +15,13 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import type { CustomProcess } from '../../session_view/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { SESSION_VIEW_TEST_ID } from './test_ids';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { SourcererScopeName, useSourcererDataView } from '../../../../sourcerer';
 import {
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsSessionViewPanelKey,
 } from '../../shared/constants/panel_keys';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';

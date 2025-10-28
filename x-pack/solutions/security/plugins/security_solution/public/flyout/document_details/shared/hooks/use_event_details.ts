@@ -13,8 +13,7 @@ import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../comm
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { SourcererScopeName, useSourcererDataView } from '../../../../sourcerer';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import type { GetFieldsData } from './use_get_fields_data';

@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 
 import { useBulkActionsByTableType } from './use_bulk_actions';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as useBulkAlertAssigneesItemsModule from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';

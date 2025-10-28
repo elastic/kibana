@@ -6,19 +6,19 @@
  */
 
 import React from 'react';
-import { screen, render, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import {
-  RowItemOverflowComponent,
-  OverflowFieldComponent,
   getRowItemsWithActions,
+  OverflowFieldComponent,
+  RowItemOverflowComponent,
 } from './helpers';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
 
 jest.mock('../../lib/kibana');
 
-jest.mock('../../hooks/use_get_field_spec');
+jest.mock('../../../sourcerer/hooks/use_get_field_spec');
 
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];

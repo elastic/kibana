@@ -7,7 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEmpty } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
@@ -21,7 +21,7 @@ import type {
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
-import type { RunTimeMappings } from '../../sourcerer/store/model';
+import type { RunTimeMappings } from '../../sourcerer';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store';
@@ -29,8 +29,8 @@ import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
-  TimelineEventsAllStrategyResponse,
   TimelineEdges,
+  TimelineEventsAllStrategyResponse,
   TimelineItem,
   TimelineRequestSortField,
 } from '../../../common/search_strategy';

@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import * as i18n from './translations';
-import { Blockquote, ResetButton } from './helpers';
+import * as i18n from '../translations';
+import { Blockquote, ResetButton } from '../utils/helpers';
 
 interface Props {
   isShowing: boolean;

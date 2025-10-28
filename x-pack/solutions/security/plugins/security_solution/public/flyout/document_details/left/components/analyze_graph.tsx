@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel } from '@elastic/eui';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../../sourcerer';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
@@ -21,7 +21,6 @@ import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_ke
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreviewNoDataMessage } from '../../right/components/analyzer_preview_container';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';

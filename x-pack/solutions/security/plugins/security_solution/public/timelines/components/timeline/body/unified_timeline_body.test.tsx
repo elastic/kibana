@@ -15,7 +15,7 @@ import { UnifiedTimelineBody } from './unified_timeline_body';
 import { render } from '@testing-library/react';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
+import { mockSourcererScope } from '../../../../sourcerer/__mocks__';
 import { DataView } from '@kbn/data-views-plugin/common';
 
 jest.mock('../unified_components', () => {
@@ -32,7 +32,7 @@ const mockDataView = new DataView({
 // Not returning an actual dataView here, just an object as a non-null value;
 const mockUseGetScopedSourcererDataView = jest.fn().mockImplementation(() => mockDataView);
 
-jest.mock('../../../../sourcerer/components/use_get_sourcerer_data_view', () => ({
+jest.mock('../../../../sourcerer/hooks/use_get_sourcerer_data_view', () => ({
   useGetScopedSourcererDataView: () => mockUseGetScopedSourcererDataView(),
 }));
 

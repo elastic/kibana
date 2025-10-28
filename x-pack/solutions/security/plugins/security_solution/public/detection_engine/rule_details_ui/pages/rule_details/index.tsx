@@ -103,8 +103,7 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName, useSignalHelpers, useSourcererDataView } from '../../../../sourcerer';
 import {
   canEditRuleWithActions,
   explainLackOfPermission,
@@ -135,7 +134,6 @@ import type { BadgeOptions } from '../../../../common/components/header_page/typ
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import type { RuleResponse, Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
-import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
 import { EditRuleSettingButtonLink } from './edit_rule_settings_button_link/edit_rule_settings_button_link';

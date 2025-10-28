@@ -14,7 +14,7 @@ import { DetailsFlyout } from '.';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../../sourcerer';
 import { useUpdateAttackDiscoverySchedule } from '../logic/use_update_schedule';
 import { useGetAttackDiscoverySchedule } from '../logic/use_get_schedule';
 import { mockAttackDiscoverySchedule } from '../../../mock/mock_attack_discovery_schedule';
@@ -25,7 +25,7 @@ jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors');
 jest.mock('../logic/use_update_schedule');
 jest.mock('../logic/use_get_schedule');
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../sourcerer');
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({

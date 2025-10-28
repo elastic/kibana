@@ -47,8 +47,8 @@ import type { RowRenderer, SortColumnTimeline as Sort } from '../../../../common
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import type { SourcererScopeName } from '../../../sourcerer';
+import { useGetFieldSpec, useSourcererDataView } from '../../../sourcerer';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
 import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
@@ -64,7 +64,6 @@ import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
 import { globalFiltersQuerySelector, globalQuerySelector } from '../../store/inputs/selectors';
-import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';

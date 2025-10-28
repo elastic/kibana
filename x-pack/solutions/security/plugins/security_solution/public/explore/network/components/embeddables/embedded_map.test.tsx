@@ -17,7 +17,7 @@ import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('./map_config');
-jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../sourcerer');
 jest.mock('../../../containers/fields');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('./index_patterns_missing_prompt', () => ({

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-
 import { getScopePatternListSelection } from '../store/helpers';
 import { sourcererActions, sourcererModel } from '../store';
-import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
+import { getDataViewSelectOptions, getPatternListWithoutSignals } from '../utils/helpers';
 import { SourcererScopeName } from '../store/model';
-import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
+import { sortWithExcludesAtEnd } from '../utils/sourcerer';
 import { useKibana } from '../../common/lib/kibana';
 import { getSourcererDataView } from '../containers/get_sourcerer_data_view';
 

@@ -8,7 +8,7 @@ import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { RELOAD_PAGE_TITLE } from './translations';
+import { RELOAD_PAGE_TITLE } from '../translations';
 
 const StyledRefreshButton = styled(EuiButton)`
   float: right;
