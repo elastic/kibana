@@ -105,11 +105,19 @@ export const calculateScoresWithESQL = async (
     });
 
     if (Object.keys(combinedAggregations).length === 0) {
-      throw new Error('No aggregations in any composite response');
+      logger.info('No aggregations in any composite response, returning empty scores');
+      return {
+        after_keys: {},
+        scores: {
+          host: [],
+          user: [],
+          service: [],
+        },
+      };
     }
 
     const promises = toEntries(combinedAggregations as Record<string, unknown>).map(
-      ([entityType, aggregationData]: [string, unknown]) => {
+      async ([entityType, aggregationData]: [string, unknown]) => {
         const { buckets, after_key: afterKey } = aggregationData as {
           buckets: Array<{ key: Record<string, string> }>;
           after_key?: Record<string, string>;
@@ -135,10 +143,12 @@ export const calculateScoresWithESQL = async (
           entityType as EntityType,
           bounds,
           params.alertSampleSizePerShard || 10000,
-          params.pageSize
+          params.pageSize,
+          params.index
         );
 
         const entityFilter = getFilters(params, entityType as EntityType);
+
         return esClient.esql
           .query({
             query,
@@ -286,7 +296,8 @@ export const getESQL = (
     upper?: string;
   },
   sampleSize: number,
-  pageSize: number
+  pageSize: number,
+  index: string = '.alerts-security.alerts-default'
 ) => {
   const identifierField = EntityTypeToIdentifierField[entityType];
 
@@ -298,9 +309,9 @@ export const getESQL = (
   const rangeClause = [lower, upper].filter(Boolean).join(' and ');
 
   const query = /* SQL */ `
-  FROM .alerts-security.alerts-default METADATA _index
-    | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
-    | RENAME kibana.alert.risk_score as risk_score,
+  FROM ${index} METADATA _index
+    | WHERE kibana.alert.rule.risk_score IS NOT NULL AND KQL("${rangeClause}")
+    | RENAME kibana.alert.rule.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
