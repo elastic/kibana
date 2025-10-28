@@ -93,6 +93,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           params.stepId
         );
 
+        // In case when a step does not reference any other data/steps
+        // we submit step run without additional actions from the user
         if (!Object.keys(contextOverrideData.stepContext).length) {
           submitStepRun(params.stepId, {});
           return;
