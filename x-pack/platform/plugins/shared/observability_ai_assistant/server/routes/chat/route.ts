@@ -327,7 +327,6 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
     const { response$: chatResponse$, conversationPromise } = await chatComplete(resources);
 
     const isStream = params.body.isStream ?? true;
-    console.log('isStream:', isStream, params.body.isStream);
     if (!isStream) {
       return waitForBufferedResponse(chatResponse$, conversationPromise);
     }
