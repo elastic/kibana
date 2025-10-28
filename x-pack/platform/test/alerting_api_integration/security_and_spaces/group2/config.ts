@@ -20,4 +20,5 @@ export default createTestConfig('security_and_spaces', {
     'crowdstrikeConnectorOn',
     'microsoftDefenderEndpointOn',
   ],
+  indexRefreshInterval: '1s',
 });
