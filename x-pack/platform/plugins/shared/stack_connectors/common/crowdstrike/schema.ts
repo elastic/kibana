@@ -5,388 +5,366 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { SUB_ACTION } from './constants';
 
 // Connector schema
-export const CrowdstrikeConfigSchema = schema.object({
-  url: schema.string(),
-});
-export const CrowdstrikeSecretsSchema = schema.object({
-  clientId: schema.string(),
-  clientSecret: schema.string(),
-});
+export const CrowdstrikeConfigSchema = z
+  .object({
+    url: z.string(),
+  })
+  .strict();
+export const CrowdstrikeSecretsSchema = z
+  .object({
+    clientId: z.string(),
+    clientSecret: z.string(),
+  })
+  .strict();
 
-export const CrowdstrikeApiDoNotValidateResponsesSchema = schema.any();
+export const CrowdstrikeApiDoNotValidateResponsesSchema = z.any();
 
-export const RelaxedCrowdstrikeBaseApiResponseSchema = schema.maybe(
-  schema.object({}, { unknowns: 'allow' })
-);
-export const CrowdstrikeBaseApiResponseSchema = schema.object(
-  {
-    resources: schema.arrayOf(schema.any()),
-    errors: schema.nullable(schema.arrayOf(schema.any())),
-    meta: schema.object(
-      {
-        query_time: schema.maybe(schema.number()),
-        powered_by: schema.maybe(schema.string()),
-        trace_id: schema.maybe(schema.string()),
-      },
-      { unknowns: 'allow' }
+export const RelaxedCrowdstrikeBaseApiResponseSchema = z.object({}).passthrough().optional();
+
+export const CrowdstrikeBaseApiResponseSchema = z
+  .object({
+    resources: z.array(z.any()),
+    errors: z.array(z.any()).nullable().default(null),
+    meta: z
+      .object({
+        query_time: z.coerce.number().optional(),
+        powered_by: z.string().optional(),
+        trace_id: z.string().optional(),
+      })
+      .passthrough(),
+  })
+  .passthrough();
+
+export const CrowdstrikeGetAgentOnlineStatusResponseSchema = z
+  .object({
+    resources: z.array(
+      z
+        .object({
+          state: z.string().optional(),
+          id: z.string().optional(),
+          last_seen: z.string().optional(),
+        })
+        .passthrough()
     ),
-  },
-  { unknowns: 'allow' }
-);
+    errors: z.array(z.any()).nullable().default(null),
+    meta: z
+      .object({
+        query_time: z.coerce.number().optional(),
+        powered_by: z.string().optional(),
+        trace_id: z.string().optional(),
+      })
+      .passthrough(),
+  })
+  .passthrough();
 
-export const CrowdstrikeGetAgentOnlineStatusResponseSchema = schema.object(
-  {
-    resources: schema.arrayOf(
-      schema.object(
-        {
-          state: schema.maybe(schema.string()),
-          id: schema.maybe(schema.string()),
-          last_seen: schema.maybe(schema.string()),
-        },
-        { unknowns: 'allow' }
-      )
-    ),
-    errors: schema.nullable(schema.arrayOf(schema.any())),
-    meta: schema.object(
-      {
-        query_time: schema.maybe(schema.number()),
-        powered_by: schema.maybe(schema.string()),
-        trace_id: schema.maybe(schema.string()),
-      },
-      { unknowns: 'allow' }
-    ),
-  },
-  { unknowns: 'allow' }
-);
-
-export const CrowdstrikeGetAgentsResponseSchema = schema.object(
-  {
-    resources: schema.arrayOf(
-      schema.object(
-        {
-          device_id: schema.maybe(schema.string()),
-          cid: schema.maybe(schema.string()),
-          agent_load_flags: schema.maybe(schema.string()),
-          agent_local_time: schema.maybe(schema.string()),
-          agent_version: schema.maybe(schema.string()),
-          bios_manufacturer: schema.maybe(schema.string()),
-          bios_version: schema.maybe(schema.string()),
-          config_id_base: schema.maybe(schema.string()),
-          config_id_build: schema.maybe(schema.string()),
-          config_id_platform: schema.maybe(schema.string()),
-          cpu_signature: schema.maybe(schema.string()),
-          cpu_vendor: schema.maybe(schema.string()),
-          external_ip: schema.maybe(schema.string()),
-          mac_address: schema.maybe(schema.string()),
-          instance_id: schema.maybe(schema.string()),
-          service_provider: schema.maybe(schema.string()),
-          service_provider_account_id: schema.maybe(schema.string()),
-          hostname: schema.maybe(schema.string()),
-          first_seen: schema.maybe(schema.string()),
-          last_login_timestamp: schema.maybe(schema.string()),
-          last_login_user: schema.maybe(schema.string()),
-          last_login_uid: schema.maybe(schema.string()),
-          last_seen: schema.maybe(schema.string()),
-          local_ip: schema.maybe(schema.string()),
-          major_version: schema.maybe(schema.string()),
-          minor_version: schema.maybe(schema.string()),
-          os_version: schema.maybe(schema.string()),
-          platform_id: schema.maybe(schema.string()),
-          platform_name: schema.maybe(schema.string()),
-          policies: schema.maybe(
-            schema.arrayOf(
-              schema.object(
-                {
-                  policy_type: schema.maybe(schema.string()),
-                  policy_id: schema.maybe(schema.string()),
-                  applied: schema.maybe(schema.boolean()),
-                  settings_hash: schema.maybe(schema.string()),
-                  assigned_date: schema.maybe(schema.string()),
-                  applied_date: schema.maybe(schema.string()),
-                  rule_groups: schema.maybe(schema.any()),
-                },
-                { unknowns: 'allow' }
-              )
+export const CrowdstrikeGetAgentsResponseSchema = z
+  .object({
+    resources: z.array(
+      z
+        .object({
+          device_id: z.string().optional(),
+          cid: z.string().optional(),
+          agent_load_flags: z.string().optional(),
+          agent_local_time: z.string().optional(),
+          agent_version: z.string().optional(),
+          bios_manufacturer: z.string().optional(),
+          bios_version: z.string().optional(),
+          config_id_base: z.string().optional(),
+          config_id_build: z.string().optional(),
+          config_id_platform: z.string().optional(),
+          cpu_signature: z.string().optional(),
+          cpu_vendor: z.string().optional(),
+          external_ip: z.string().optional(),
+          mac_address: z.string().optional(),
+          instance_id: z.string().optional(),
+          service_provider: z.string().optional(),
+          service_provider_account_id: z.string().optional(),
+          hostname: z.string().optional(),
+          first_seen: z.string().optional(),
+          last_login_timestamp: z.string().optional(),
+          last_login_user: z.string().optional(),
+          last_login_uid: z.string().optional(),
+          last_seen: z.string().optional(),
+          local_ip: z.string().optional(),
+          major_version: z.string().optional(),
+          minor_version: z.string().optional(),
+          os_version: z.string().optional(),
+          platform_id: z.string().optional(),
+          platform_name: z.string().optional(),
+          policies: z
+            .array(
+              z
+                .object({
+                  policy_type: z.string().optional(),
+                  policy_id: z.string().optional(),
+                  applied: z.boolean().optional(),
+                  settings_hash: z.string().optional(),
+                  assigned_date: z.string().optional(),
+                  applied_date: z.string().optional(),
+                  rule_groups: z.any().optional(),
+                })
+                .passthrough()
             )
-          ),
-          reduced_functionality_mode: schema.maybe(schema.string()),
-          device_policies: schema.maybe(
-            schema.object(
-              {
-                prevention: schema.object(
-                  {
-                    policy_type: schema.maybe(schema.string()),
-                    policy_id: schema.maybe(schema.string()),
-                    applied: schema.maybe(schema.boolean()),
-                    settings_hash: schema.maybe(schema.string()),
-                    assigned_date: schema.maybe(schema.string()),
-                    applied_date: schema.maybe(schema.string()),
-                    rule_groups: schema.maybe(schema.any()),
-                  },
-                  { unknowns: 'allow' }
-                ),
-                sensor_update: schema.object(
-                  {
-                    policy_type: schema.maybe(schema.string()),
-                    policy_id: schema.maybe(schema.string()),
-                    applied: schema.maybe(schema.boolean()),
-                    settings_hash: schema.maybe(schema.string()),
-                    assigned_date: schema.maybe(schema.string()),
-                    applied_date: schema.maybe(schema.string()),
-                    uninstall_protection: schema.maybe(schema.string()),
-                  },
-                  { unknowns: 'allow' }
-                ),
-                global_config: schema.object(
-                  {
-                    policy_type: schema.maybe(schema.string()),
-                    policy_id: schema.maybe(schema.string()),
-                    applied: schema.maybe(schema.boolean()),
-                    settings_hash: schema.maybe(schema.string()),
-                    assigned_date: schema.maybe(schema.string()),
-                    applied_date: schema.maybe(schema.string()),
-                  },
-                  { unknowns: 'allow' }
-                ),
-                remote_response: schema.object(
-                  {
-                    policy_type: schema.maybe(schema.string()),
-                    policy_id: schema.maybe(schema.string()),
-                    applied: schema.maybe(schema.boolean()),
-                    settings_hash: schema.maybe(schema.string()),
-                    assigned_date: schema.maybe(schema.string()),
-                    applied_date: schema.maybe(schema.string()),
-                  },
-                  { unknowns: 'allow' }
-                ),
-              },
-              { unknowns: 'allow' }
-            )
-          ),
-          groups: schema.maybe(schema.arrayOf(schema.any())),
-          group_hash: schema.maybe(schema.string()),
-          product_type_desc: schema.maybe(schema.string()),
-          provision_status: schema.maybe(schema.string()),
-          serial_number: schema.maybe(schema.string()),
-          status: schema.maybe(schema.string()),
-          system_manufacturer: schema.maybe(schema.string()),
-          system_product_name: schema.maybe(schema.string()),
-          tags: schema.maybe(schema.arrayOf(schema.any())),
-          modified_timestamp: schema.any(),
-          meta: schema.maybe(
-            schema.object(
-              {
-                version: schema.maybe(schema.string()),
-                version_string: schema.maybe(schema.string()),
-              },
-              { unknowns: 'allow' }
-            )
-          ),
-          zone_group: schema.maybe(schema.string()),
-          kernel_version: schema.maybe(schema.string()),
-          chassis_type: schema.maybe(schema.string()),
-          chassis_type_desc: schema.maybe(schema.string()),
-          connection_ip: schema.maybe(schema.string()),
-          default_gateway_ip: schema.maybe(schema.string()),
-          connection_mac_address: schema.maybe(schema.string()),
-          linux_sensor_mode: schema.maybe(schema.string()),
-          deployment_type: schema.maybe(schema.string()),
-        },
-        { unknowns: 'allow' }
-      )
+            .optional(),
+          reduced_functionality_mode: z.string().optional(),
+          device_policies: z
+            .object({
+              prevention: z
+                .object({
+                  policy_type: z.string().optional(),
+                  policy_id: z.string().optional(),
+                  applied: z.boolean().optional(),
+                  settings_hash: z.string().optional(),
+                  assigned_date: z.string().optional(),
+                  applied_date: z.string().optional(),
+                  rule_groups: z.any().optional(),
+                })
+                .passthrough(),
+              sensor_update: z
+                .object({
+                  policy_type: z.string().optional(),
+                  policy_id: z.string().optional(),
+                  applied: z.boolean().optional(),
+                  settings_hash: z.string().optional(),
+                  assigned_date: z.string().optional(),
+                  applied_date: z.string().optional(),
+                  uninstall_protection: z.string().optional(),
+                })
+                .passthrough(),
+              global_config: z
+                .object({
+                  policy_type: z.string().optional(),
+                  policy_id: z.string().optional(),
+                  applied: z.boolean().optional(),
+                  settings_hash: z.string().optional(),
+                  assigned_date: z.string().optional(),
+                  applied_date: z.string().optional(),
+                })
+                .passthrough(),
+              remote_response: z
+                .object({
+                  policy_type: z.string().optional(),
+                  policy_id: z.string().optional(),
+                  applied: z.boolean().optional(),
+                  settings_hash: z.string().optional(),
+                  assigned_date: z.string().optional(),
+                  applied_date: z.string().optional(),
+                })
+                .passthrough(),
+            })
+            .passthrough()
+            .optional(),
+          groups: z.array(z.any()).optional(),
+          group_hash: z.string().optional(),
+          product_type_desc: z.string().optional(),
+          provision_status: z.string().optional(),
+          serial_number: z.string().optional(),
+          status: z.string().optional(),
+          system_manufacturer: z.string().optional(),
+          system_product_name: z.string().optional(),
+          tags: z.array(z.any()).optional(),
+          modified_timestamp: z.any(),
+          meta: z
+            .object({
+              version: z.string().optional(),
+              version_string: z.string().optional(),
+            })
+            .passthrough()
+            .optional(),
+          zone_group: z.string().optional(),
+          kernel_version: z.string().optional(),
+          chassis_type: z.string().optional(),
+          chassis_type_desc: z.string().optional(),
+          connection_ip: z.string().optional(),
+          default_gateway_ip: z.string().optional(),
+          connection_mac_address: z.string().optional(),
+          linux_sensor_mode: z.string().optional(),
+          deployment_type: z.string().optional(),
+        })
+        .passthrough()
     ),
-    errors: schema.nullable(schema.arrayOf(schema.any())),
-    meta: schema.object(
-      {
-        query_time: schema.maybe(schema.number()),
-        powered_by: schema.maybe(schema.string()),
-        trace_id: schema.maybe(schema.string()),
-      },
-      { unknowns: 'allow' }
+    errors: z.array(z.any()).nullable().default(null),
+    meta: z
+      .object({
+        query_time: z.coerce.number().optional(),
+        powered_by: z.string().optional(),
+        trace_id: z.string().optional(),
+      })
+      .passthrough(),
+  })
+  .passthrough();
+export const CrowdstrikeHostActionsResponseSchema = z
+  .object({
+    resources: z.array(
+      z
+        .object({
+          id: z.string().optional(),
+          path: z.string().optional(),
+        })
+        .passthrough()
     ),
-  },
-  { unknowns: 'allow' }
-);
-export const CrowdstrikeHostActionsResponseSchema = schema.object(
-  {
-    resources: schema.arrayOf(
-      schema.object(
-        {
-          id: schema.maybe(schema.string()),
-          path: schema.maybe(schema.string()),
-        },
-        { unknowns: 'allow' }
-      )
-    ),
-    meta: schema.object(
-      {
-        query_time: schema.maybe(schema.number()),
-        powered_by: schema.maybe(schema.string()),
-        trace_id: schema.maybe(schema.string()),
-      },
-      { unknowns: 'allow' }
-    ),
-    errors: schema.nullable(schema.arrayOf(schema.any())),
-  },
-  { unknowns: 'allow' }
-);
+    meta: z
+      .object({
+        query_time: z.coerce.number().optional(),
+        powered_by: z.string().optional(),
+        trace_id: z.string().optional(),
+      })
+      .passthrough(),
+    errors: z.array(z.any()).nullable().default(null),
+  })
+  .passthrough();
 
 // TODO temporary any value
-export const CrowdstrikeRTRCommandParamsSchema = schema.any();
-export const CrowdstrikeHostActionsParamsSchema = schema.object({
-  command: schema.oneOf([schema.literal('contain'), schema.literal('lift_containment')]),
-  actionParameters: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  ids: schema.arrayOf(schema.string()),
-  alertIds: schema.maybe(schema.arrayOf(schema.string())),
-  comment: schema.maybe(schema.string()),
-});
+export const CrowdstrikeRTRCommandParamsSchema = z.any();
+export const CrowdstrikeHostActionsParamsSchema = z
+  .object({
+    command: z.enum(['contain', 'lift_containment']),
+    actionParameters: z.object({}).passthrough().optional(),
+    ids: z.array(z.string()),
+    alertIds: z.array(z.string()).optional(),
+    comment: z.string().optional(),
+  })
+  .strict();
 
-export const CrowdstrikeGetAgentsParamsSchema = schema.object({
-  ids: schema.arrayOf(schema.string()),
-});
-export const CrowdstrikeGetTokenResponseSchema = schema.object(
-  {
-    access_token: schema.string(),
-    expires_in: schema.number(),
-    token_type: schema.string(),
-    id_token: schema.maybe(schema.string()),
-    issued_token_type: schema.maybe(schema.string()),
-    refresh_token: schema.maybe(schema.string()),
-    scope: schema.maybe(schema.string()),
-  },
-  { unknowns: 'allow' }
-);
+export const CrowdstrikeGetAgentsParamsSchema = z
+  .object({
+    ids: z.array(z.string()),
+  })
+  .strict();
+export const CrowdstrikeGetTokenResponseSchema = z
+  .object({
+    access_token: z.string(),
+    expires_in: z.coerce.number(),
+    token_type: z.string(),
+    id_token: z.string().optional(),
+    issued_token_type: z.string().optional(),
+    refresh_token: z.string().optional(),
+    scope: z.string().optional(),
+  })
+  .passthrough();
 
-export const CrowdstrikeHostActionsSchema = schema.object({
-  subAction: schema.literal(SUB_ACTION.HOST_ACTIONS),
-  subActionParams: CrowdstrikeHostActionsParamsSchema,
-});
+export const CrowdstrikeHostActionsSchema = z
+  .object({
+    subAction: z.literal(SUB_ACTION.HOST_ACTIONS),
+    subActionParams: CrowdstrikeHostActionsParamsSchema,
+  })
+  .strict();
 
-export const CrowdstrikeActionParamsSchema = schema.oneOf([CrowdstrikeHostActionsSchema]);
+export const CrowdstrikeActionParamsSchema = CrowdstrikeHostActionsSchema;
 
-export const CrowdstrikeInitRTRResponseSchema = schema.object(
-  {
-    meta: schema.maybe(
-      schema.object(
-        {
-          query_time: schema.maybe(schema.number()),
-          powered_by: schema.maybe(schema.string()),
-          trace_id: schema.maybe(schema.string()),
-        },
-        { unknowns: 'allow' }
+export const CrowdstrikeInitRTRResponseSchema = z
+  .object({
+    meta: z
+      .object({
+        query_time: z.coerce.number().optional(),
+        powered_by: z.string().optional(),
+        trace_id: z.string().optional(),
+      })
+      .passthrough()
+      .optional(),
+    batch_id: z.string().optional(),
+    resources: z
+      .record(
+        z.string(),
+        z
+          .object({
+            session_id: z.string().optional(),
+            task_id: z.string().optional(),
+            complete: z.boolean().optional(),
+            stdout: z.string().optional(),
+            stderr: z.string().optional(),
+            base_command: z.string().optional(),
+            aid: z.string().optional(),
+            errors: z.array(z.any()).optional(),
+            query_time: z.coerce.number().optional(),
+            offline_queued: z.boolean().optional(),
+          })
+          .passthrough()
       )
-    ),
-    batch_id: schema.maybe(schema.string()),
-    resources: schema.maybe(
-      schema.recordOf(
-        schema.string(),
-        schema.object(
-          {
-            session_id: schema.maybe(schema.string()),
-            task_id: schema.maybe(schema.string()),
-            complete: schema.maybe(schema.boolean()),
-            stdout: schema.maybe(schema.string()),
-            stderr: schema.maybe(schema.string()),
-            base_command: schema.maybe(schema.string()),
-            aid: schema.maybe(schema.string()),
-            errors: schema.maybe(schema.arrayOf(schema.any())),
-            query_time: schema.maybe(schema.number()),
-            offline_queued: schema.maybe(schema.boolean()),
-          },
-          { unknowns: 'allow' }
-        )
-      )
-    ),
-    errors: schema.maybe(schema.arrayOf(schema.any())),
-  },
-  { unknowns: 'allow' }
-);
+      .optional(),
+    errors: z.array(z.any()).optional(),
+  })
+  .passthrough();
 
-export const CrowdstrikeInitRTRParamsSchema = schema.object({
-  endpoint_ids: schema.arrayOf(schema.string()),
-});
+export const CrowdstrikeInitRTRParamsSchema = z
+  .object({
+    endpoint_ids: z.array(z.string()),
+  })
+  .strict();
 
-export const CrowdstrikeExecuteRTRResponseSchema = schema.object(
-  {
-    combined: schema.object(
-      {
-        resources: schema.recordOf(
-          schema.string(),
-          schema.object(
-            {
-              session_id: schema.string(),
-              task_id: schema.string(),
-              complete: schema.boolean(),
-              stdout: schema.string(),
-              stderr: schema.string(),
-              base_command: schema.string(),
-              aid: schema.string(),
-              errors: schema.arrayOf(schema.any()),
-              query_time: schema.number(),
-              offline_queued: schema.boolean(),
-            },
-            { unknowns: 'allow' }
-          )
+export const CrowdstrikeExecuteRTRResponseSchema = z
+  .object({
+    combined: z
+      .object({
+        resources: z.record(
+          z.string(),
+          z
+            .object({
+              session_id: z.string(),
+              task_id: z.string(),
+              complete: z.boolean(),
+              stdout: z.string(),
+              stderr: z.string(),
+              base_command: z.string(),
+              aid: z.string(),
+              errors: z.array(z.any()),
+              query_time: z.coerce.number(),
+              offline_queued: z.boolean(),
+            })
+            .passthrough()
         ),
-      },
-      { unknowns: 'allow' }
-    ),
-    meta: schema.object(
-      {
-        query_time: schema.number(),
-        powered_by: schema.string(),
-        trace_id: schema.string(),
-      },
-      { unknowns: 'allow' }
-    ),
-    errors: schema.nullable(schema.arrayOf(schema.any())),
-  },
-  { unknowns: 'allow' }
-);
+      })
+      .passthrough(),
+    meta: z
+      .object({
+        query_time: z.coerce.number(),
+        powered_by: z.string(),
+        trace_id: z.string(),
+      })
+      .passthrough(),
+    errors: z.array(z.any()).nullable().default(null),
+  })
+  .passthrough();
 
-export const CrowdstrikeGetScriptsResponseSchema = schema.object(
-  {
-    meta: schema.maybe(
-      schema.object(
-        {
-          query_time: schema.maybe(schema.number()),
-          powered_by: schema.maybe(schema.string()),
-          trace_id: schema.maybe(schema.string()),
-        },
-        { unknowns: 'allow' }
+export const CrowdstrikeGetScriptsResponseSchema = z
+  .object({
+    meta: z
+      .object({
+        query_time: z.coerce.number().optional(),
+        powered_by: z.string().optional(),
+        trace_id: z.string().optional(),
+      })
+      .passthrough()
+      .optional(),
+    resources: z
+      .array(
+        z
+          .object({
+            content: z.string().optional(),
+            created_by: z.string().optional(),
+            created_by_uuid: z.string().optional(),
+            created_timestamp: z.string().optional(),
+            file_type: z.string().optional(),
+            id: z.string().optional(),
+            description: z.string().optional(),
+            modified_by: z.string().optional(),
+            modified_timestamp: z.string().optional(),
+            name: z.string().optional(),
+            permission_type: z.string().optional(),
+            platform: z.array(z.string()).optional(),
+            run_attempt_count: z.coerce.number().optional(),
+            run_success_count: z.coerce.number().optional(),
+            sha256: z.string().optional(),
+            size: z.coerce.number().optional(),
+            write_access: z.boolean().optional(),
+          })
+          .passthrough()
       )
-    ),
-    resources: schema.maybe(
-      schema.arrayOf(
-        schema.object(
-          {
-            content: schema.maybe(schema.string()),
-            created_by: schema.maybe(schema.string()),
-            created_by_uuid: schema.maybe(schema.string()),
-            created_timestamp: schema.maybe(schema.string()),
-            file_type: schema.maybe(schema.string()),
-            id: schema.maybe(schema.string()),
-            description: schema.maybe(schema.string()),
-            modified_by: schema.maybe(schema.string()),
-            modified_timestamp: schema.maybe(schema.string()),
-            name: schema.maybe(schema.string()),
-            permission_type: schema.maybe(schema.string()),
-            platform: schema.maybe(schema.arrayOf(schema.string())),
-            run_attempt_count: schema.maybe(schema.number()),
-            run_success_count: schema.maybe(schema.number()),
-            sha256: schema.maybe(schema.string()),
-            size: schema.maybe(schema.number()),
-            write_access: schema.maybe(schema.boolean()),
-          },
-          { unknowns: 'allow' }
-        )
-      )
-    ),
-    errors: schema.maybe(schema.arrayOf(schema.any())),
-  },
-  { unknowns: 'allow' }
-);
+      .optional(),
+    errors: z.array(z.any()).optional(),
+  })
+  .passthrough();
