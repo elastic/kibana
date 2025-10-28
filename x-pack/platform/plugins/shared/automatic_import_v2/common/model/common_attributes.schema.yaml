@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Automatic Import Samples document model
+  title: Automatic Import Common Attributes Model
   version: 'not applicable'
 paths: {}
 components:
