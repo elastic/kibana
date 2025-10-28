@@ -75,24 +75,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
 
   const tabs: CloudConnectorTab[] = [
     {
-      id: TABS.EXISTING_CONNECTION,
-      name: (
-        <FormattedMessage
-          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.existingConnectionTab"
-          defaultMessage="Existing Connection"
-        />
-      ),
-      content: (
-        <ReusableCloudConnectorForm
-          isEditPage={isEditPage}
-          newPolicy={newPolicy}
-          cloudProvider={cloudProvider}
-          credentials={existingConnectionCredentials}
-          setCredentials={updatePolicyWithExistingCredentials}
-        />
-      ),
-    },
-    {
       id: TABS.NEW_CONNECTION,
       name: (
         <FormattedMessage
@@ -141,6 +123,24 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             setCredentials={updatePolicyWithNewCredentials}
           />
         </>
+      ),
+    },
+    {
+      id: TABS.EXISTING_CONNECTION,
+      name: (
+        <FormattedMessage
+          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.existingConnectionTab"
+          defaultMessage="Existing Connection"
+        />
+      ),
+      content: (
+        <ReusableCloudConnectorForm
+          isEditPage={isEditPage}
+          newPolicy={newPolicy}
+          cloudProvider={cloudProvider}
+          credentials={existingConnectionCredentials}
+          setCredentials={updatePolicyWithExistingCredentials}
+        />
       ),
     },
   ];
