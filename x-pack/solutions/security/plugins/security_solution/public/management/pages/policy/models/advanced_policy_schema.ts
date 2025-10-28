@@ -2579,7 +2579,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.agent.orphaned_remediation',
       {
         defaultMessage:
-          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+          'Attempt to start Agent service when Endpoint becomes orphaned. Default: false.',
       }
     ),
   },
@@ -2590,7 +2590,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.agent.orphaned_remediation',
       {
         defaultMessage:
-          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+          'Attempt to start Agent service when Endpoint becomes orphaned. Default: false.',
       }
     ),
   },
