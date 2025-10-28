@@ -38,7 +38,6 @@ export interface TabbedContentProps
     | 'onClearRecentlyClosed'
     | 'disableCloseButton'
     | 'disableInlineLabelEditing'
-    | 'disablePreview'
     | 'disableDragAndDrop'
     | 'disableTabsBarMenu'
   > {
@@ -78,7 +77,6 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   customNewTabButton,
   disableCloseButton = false,
   disableInlineLabelEditing = false,
-  disablePreview = false,
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
 }) => {
@@ -344,7 +342,6 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       customNewTabButton={customNewTabButton}
       disableCloseButton={disableCloseButton}
       disableInlineLabelEditing={disableInlineLabelEditing}
-      disablePreview={disablePreview}
       disableDragAndDrop={disableDragAndDrop}
       disableTabsBarMenu={disableTabsBarMenu}
     />

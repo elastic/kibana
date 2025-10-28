@@ -52,7 +52,6 @@ export interface TabProps {
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
   disableCloseButton?: boolean;
   disableInlineLabelEditing?: boolean;
-  disablePreview?: boolean;
   disableDragAndDrop?: boolean;
 }
 
@@ -82,7 +81,6 @@ export const Tab: React.FC<TabProps> = (props) => {
     onSelectedTabKeyDown,
     disableCloseButton = false,
     disableInlineLabelEditing = false,
-    disablePreview = false,
     disableDragAndDrop = false,
   } = props;
   const { euiTheme } = useEuiTheme();
@@ -304,13 +302,13 @@ export const Tab: React.FC<TabProps> = (props) => {
     </TabWithBackground>
   );
 
-  if (disablePreview || !previewData) {
+  if (!previewData) {
     return tabWithBackground;
   }
 
   return (
     <TabPreview
-      showPreview={!disablePreview && showPreview}
+      showPreview={showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
       tabItem={item}
