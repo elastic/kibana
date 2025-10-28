@@ -63,11 +63,13 @@ export class WorkflowTemplatingEngine {
     const openExpressionIndex = resolvedExpression.indexOf('{{');
     const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
 
-    if (openExpressionIndex !== -1 && closeExpressionIndex !== -1) {
-      resolvedExpression = resolvedExpression
-        .substring(openExpressionIndex + 2, closeExpressionIndex)
-        .trim();
+    if (!openExpressionIndex && !closeExpressionIndex) {
+      throw new Error(`The provided expression is invalid. Got: ${template}.`);
     }
+
+    resolvedExpression = resolvedExpression
+      .substring(openExpressionIndex + 2, closeExpressionIndex)
+      .trim();
 
     try {
       return this.engine.evalValueSync(resolvedExpression, context);

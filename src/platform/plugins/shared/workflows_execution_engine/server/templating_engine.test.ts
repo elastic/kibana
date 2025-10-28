@@ -310,14 +310,6 @@ describe('WorkflowTemplatingEngine', () => {
       });
     });
 
-    describe('expressions without curly braces', () => {
-      it('should evaluate expression without curly braces', () => {
-        const template = `"foo,bar,dak" | split: ","`;
-        const actual = templatingEngine.evaluateExpression(template, {});
-        expect(actual).toEqual(['foo', 'bar', 'dak']);
-      });
-    });
-
     describe('string manipulation', () => {
       it('should evaluate split filter over string', () => {
         const template = `{{ "foo,bar,dak" | split: "," }}`;

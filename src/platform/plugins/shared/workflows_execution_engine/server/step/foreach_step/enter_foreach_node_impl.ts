@@ -98,25 +98,14 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
   private getItems(): unknown[] {
     const expression = this.node.configuration.foreach;
+    let resolvedValue = this.resolveForeach();
 
-    if (!expression) {
-      throw new Error(
-        'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
-      );
-    }
-
-    // Try to resolve the expression as JSON first
-    let resolvedValue = this.tryParseJSON(expression);
-
-    // If parsing as JSON failed, evaluate the expression in context
-    if (!resolvedValue) {
-      resolvedValue =
-        this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);
-    }
-
-    // Try to parse again if the expression resolved to a string
     if (typeof resolvedValue === 'string') {
-      resolvedValue = this.tryParseJSON(resolvedValue) ?? resolvedValue;
+      try {
+        resolvedValue = JSON.parse(resolvedValue);
+      } catch {
+        throw new Error(`Unable to parse rendered value: ${resolvedValue}`);
+      }
     }
 
     if (!Array.isArray(resolvedValue)) {
@@ -137,14 +126,19 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     return resolvedValue;
   }
 
-  private tryParseJSON(value: string): unknown | undefined {
-    let parsed;
-    try {
-      parsed = JSON.parse(value);
-    } catch (error) {
-      return undefined;
+  private resolveForeach() {
+    const expression = this.node.configuration.foreach;
+
+    if (!expression) {
+      throw new Error(
+        'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
+      );
     }
 
-    return parsed;
+    if (expression.startsWith('{{') && expression.endsWith('}}')) {
+      return this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);
+    } else {
+      return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
+    }
   }
 }
