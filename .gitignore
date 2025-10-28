@@ -22,6 +22,7 @@ target
 .claude
 .cursor
 .windsurf
+claude.md
 *.iml
 *.log
 types.eslint.config.js

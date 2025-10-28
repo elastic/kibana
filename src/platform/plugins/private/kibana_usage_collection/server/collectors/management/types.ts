@@ -50,6 +50,7 @@ export interface UsageStats {
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
   'agentBuilder:enabled': boolean;
+  'agentBuilder:dashboardTools': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
