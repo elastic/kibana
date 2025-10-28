@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiButton,
@@ -20,10 +21,17 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiPanel,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import {
+  createChildFlyoutDescriptionItems,
+  createMainFlyoutDescriptionItems,
+  FlyoutOwnFocusSwitch,
+  FlyoutTypeSwitch,
+} from '../utils';
 
 interface FlyoutSessionFromComponents {
   title: string;
@@ -37,6 +45,7 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
   const { title, mainSize, childSize, mainMaxWidth, childMaxWidth } = props;
 
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
+  const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isChildFlyoutVisible, setIsChildFlyoutVisible] = useState(false);
 
@@ -77,11 +86,23 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label="Push"
-            checked={flyoutType === 'push'}
-            onChange={(e) => setFlyoutType(e.target.checked ? 'push' : 'overlay')}
-          />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FlyoutTypeSwitch
+                // switch for flyout type: push or overlay
+                flyoutType={flyoutType}
+                onChange={setFlyoutType}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FlyoutOwnFocusSwitch
+                // switch for ownFocus behavior
+                flyoutOwnFocus={flyoutOwnFocus}
+                onChange={setFlyoutOwnFocus}
+                disabled={flyoutType === 'push'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
@@ -99,7 +120,7 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
           size={mainSize}
           maxWidth={mainMaxWidth}
           type={flyoutType}
-          ownFocus={false}
+          ownFocus={flyoutOwnFocus}
           pushAnimation={true}
           onActive={mainFlyoutOnActive}
           onClose={mainFlyoutOnClose}
@@ -119,22 +140,19 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
               <EuiSpacer size="s" />
               <EuiDescriptionList
                 type="column"
-                listItems={[
-                  { title: 'Flyout type', description: flyoutType },
-                  { title: 'Main flyout size', description: mainSize },
-                  {
-                    title: 'Main flyout maxWidth',
-                    description: mainMaxWidth ?? 'N/A',
-                  },
-                  {
-                    title: 'Rendering method',
-                    description: 'EuiFlyout component',
-                  },
-                ]}
+                listItems={createMainFlyoutDescriptionItems(
+                  flyoutType,
+                  flyoutOwnFocus,
+                  mainSize,
+                  mainMaxWidth,
+                  <>
+                    <EuiCode>EuiFlyout</EuiCode> component
+                  </>
+                )}
               />
               {childSize && (
                 <EuiButton onClick={handleOpenChildFlyout} disabled={isChildFlyoutVisible}>
-                  Open child flyout
+                  Open child Flyout
                 </EuiButton>
               )}
             </EuiText>
@@ -167,20 +185,13 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
                   <EuiSpacer size="s" />
                   <EuiDescriptionList
                     type="column"
-                    listItems={[
-                      {
-                        title: 'Child flyout size',
-                        description: childSize ?? 'N/A',
-                      },
-                      {
-                        title: 'Child flyout maxWidth',
-                        description: childMaxWidth ?? 'N/A',
-                      },
-                      {
-                        title: 'Rendering method',
-                        description: 'EuiFlyout component',
-                      },
-                    ]}
+                    listItems={createChildFlyoutDescriptionItems(
+                      childSize,
+                      childMaxWidth,
+                      <>
+                        <EuiCode>EuiFlyout</EuiCode> component
+                      </>
+                    )}
                   />
                 </EuiText>
               </EuiFlyoutBody>
@@ -205,6 +216,7 @@ FlyoutSessionFromComponents.displayName = 'FlyoutSessionFromComponents';
 
 const NonSessionFlyout: React.FC = () => {
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
+  const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const handleOpenFlyout = () => {
@@ -225,16 +237,28 @@ const NonSessionFlyout: React.FC = () => {
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label="Push"
-            checked={flyoutType === 'push'}
-            onChange={(e) => setFlyoutType(e.target.checked ? 'push' : 'overlay')}
-          />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FlyoutTypeSwitch
+                // switch for flyout type: push or overlay
+                flyoutType={flyoutType}
+                onChange={setFlyoutType}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FlyoutOwnFocusSwitch
+                // switch for ownFocus behavior
+                flyoutOwnFocus={flyoutOwnFocus}
+                onChange={setFlyoutOwnFocus}
+                disabled={flyoutType === 'push'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>
             <EuiButton disabled={isFlyoutVisible} onClick={handleOpenFlyout}>
-              Open non-session flyout
+              Open Non-session Flyout
             </EuiButton>
           </EuiText>
         </EuiFlexItem>
@@ -245,9 +269,8 @@ const NonSessionFlyout: React.FC = () => {
           onActive={flyoutOnActive}
           onClose={flyoutOnClose}
           type={flyoutType}
-          size="s"
-          side="left"
-          ownFocus={false}
+          size="m"
+          ownFocus={flyoutOwnFocus}
           session="never"
         >
           <EuiFlyoutHeader hasBorder>
@@ -280,28 +303,73 @@ const NonSessionFlyout: React.FC = () => {
 
 export const FlyoutWithComponent: React.FC = () => {
   return (
-    <EuiDescriptionList
-      type="column"
-      columnGutterSize="m"
-      listItems={[
-        {
-          title: 'Session J: main size = s, child size = s',
-          description: <FlyoutSessionFromComponents title="Session J" mainSize="s" childSize="s" />,
-        },
-        {
-          title: 'Session K: main size = m, child size = s',
-          description: <FlyoutSessionFromComponents title="Session K" mainSize="m" childSize="s" />,
-        },
-        {
-          title: 'Session L: main size = fill',
-          description: <FlyoutSessionFromComponents title="Session L" mainSize="fill" />,
-        },
-        {
-          title: 'Non-session flyout',
-          description: <NonSessionFlyout />,
-        },
-      ]}
-    />
+    <>
+      <EuiTitle>
+        <h2>
+          Flyouts with <EuiCode>EuiFlyout</EuiCode>
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h3>
+            With <EuiCode>{'session="start"'}</EuiCode>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          type="column"
+          columnGutterSize="m"
+          listItems={[
+            {
+              title: 'Session J: main size = s, child size = s',
+              description: (
+                <FlyoutSessionFromComponents title="Session J" mainSize="s" childSize="s" />
+              ),
+            },
+            {
+              title: 'Session K: main size = m, child size = s',
+              description: (
+                <FlyoutSessionFromComponents title="Session K" mainSize="m" childSize="s" />
+              ),
+            },
+            {
+              title: 'Session L: main size = fill',
+              description: <FlyoutSessionFromComponents title="Session L" mainSize="fill" />,
+            },
+          ]}
+          css={css`
+            dt {
+              min-width: 25em;
+            }
+          `}
+        />
+
+        <EuiSpacer size="m" />
+
+        <EuiTitle size="s">
+          <h3>
+            With <EuiCode>{'session="never"'}</EuiCode>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          type="column"
+          columnGutterSize="m"
+          listItems={[
+            {
+              title: 'Non-session flyout: size = m',
+              description: <NonSessionFlyout />,
+            },
+          ]}
+          css={css`
+            dt {
+              min-width: 25em;
+            }
+          `}
+        />
+      </EuiPanel>
+    </>
   );
 };
 

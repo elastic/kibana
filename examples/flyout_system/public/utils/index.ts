@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { FlyoutOwnFocusSwitch } from './flyout_ownfocus_switch';
 export { FlyoutTypeSwitch } from './flyout_type_switch';
-export type { FlyoutTypeSwitchProps } from './flyout_type_switch';
 
 export {
-  createMainFlyoutDescriptionItems,
   createChildFlyoutDescriptionItems,
+  createMainFlyoutDescriptionItems,
 } from './flyout_description_items';
-export type { FlyoutDescriptionItem } from './flyout_description_items';
 
-export { createMainFlyoutProps, createChildFlyoutProps } from './flyout_props';
-export type { FlyoutConfig } from './flyout_props';
+export { createChildFlyoutProps, createMainFlyoutProps } from './flyout_props';

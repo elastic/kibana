@@ -8,16 +8,19 @@
  */
 
 import React, { useCallback, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -25,15 +28,19 @@ import {
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core/public';
 
+import type { RenderingService } from '@kbn/core-rendering-browser';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+
 import {
   createChildFlyoutDescriptionItems,
   createMainFlyoutDescriptionItems,
+  FlyoutOwnFocusSwitch,
   FlyoutTypeSwitch,
 } from '../utils';
-import { FlyoutOwnFocusSwitch } from '../utils/flyout_ownfocus_switch';
 
 export interface FlyoutFromOverlaysProps {
   overlays: OverlayStart;
+  rendering: RenderingService;
 }
 
 interface FlyoutSessionProps {
@@ -48,25 +55,99 @@ interface FlyoutSessionProps {
 const ChildFlyoutContent: React.FC<Pick<FlyoutSessionProps, 'childSize' | 'childMaxWidth'>> =
   React.memo((props) => {
     const { childSize, childMaxWidth } = props;
-    const childDescriptionItems = createChildFlyoutDescriptionItems(
-      childSize,
-      childMaxWidth,
-      'Overlays service'
-    );
 
     return (
       <EuiFlyoutBody>
         <EuiText>
           <p>
-            This is a child flyout opened from the flyout that was opened using the overlays
-            service.
+            This is a child flyout opened from the flyout that was opened using the{' '}
+            <EuiCode>openSystemFlyout</EuiCode> method.
           </p>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList type="column" listItems={childDescriptionItems} />
         </EuiText>
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          type="column"
+          listItems={createChildFlyoutDescriptionItems(
+            childSize,
+            childMaxWidth,
+            <EuiCode>openSystemFlyout</EuiCode>
+          )}
+        />
       </EuiFlyoutBody>
     );
   });
+
+interface FlyoutContentProps {
+  title: string;
+  flyoutType: 'overlay' | 'push';
+  flyoutOwnFocus: boolean;
+  mainSize: 's' | 'm' | 'l' | 'fill';
+  mainMaxWidth?: number;
+  childSize?: 's' | 'm' | 'fill';
+  isChildFlyoutOpen: boolean;
+  handleCloseChildFlyout: () => void;
+  openChildFlyout: () => void;
+  handleCloseFlyout: () => void;
+}
+
+const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
+  const {
+    title,
+    flyoutType,
+    flyoutOwnFocus,
+    mainSize,
+    mainMaxWidth,
+    childSize,
+    isChildFlyoutOpen,
+    handleCloseChildFlyout,
+    openChildFlyout,
+    handleCloseFlyout,
+  } = props;
+
+  return (
+    <>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2 id={`flyoutHeading-${title}`}>Flyout {title}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiText>
+          <p>
+            This flyout uses the <EuiCode>openSystemFlyout</EuiCode> service with full EUI Flyout
+            Manager integration.
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          type="column"
+          listItems={createMainFlyoutDescriptionItems(
+            flyoutType,
+            flyoutOwnFocus,
+            mainSize,
+            mainMaxWidth,
+            <EuiCode>openSystemFlyout</EuiCode>
+          )}
+        />
+        <EuiSpacer />
+        {childSize && (
+          <EuiButton onClick={isChildFlyoutOpen ? handleCloseChildFlyout : openChildFlyout}>
+            {isChildFlyoutOpen ? 'Close child flyout' : 'Open child flyout'}
+          </EuiButton>
+        )}
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={handleCloseFlyout} aria-label="Close">
+              Close
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </>
+  );
+});
 
 const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
   const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, overlays } = props;
@@ -145,129 +226,242 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
     }
   }, [childSize, childMaxWidth, overlays, title]);
 
-  const FlyoutContent: React.FC = React.memo(() => {
-    const mainDescriptionItems = createMainFlyoutDescriptionItems(
-      flyoutType,
-      flyoutOwnFocus,
-      mainSize,
-      mainMaxWidth,
-      'openSystemFlyout'
+  const openFlyout = useCallback(() => {
+    flyoutRef.current = overlays.openSystemFlyout(
+      <FlyoutContent
+        title={title}
+        flyoutType={flyoutType}
+        flyoutOwnFocus={flyoutOwnFocus}
+        mainSize={mainSize}
+        mainMaxWidth={mainMaxWidth}
+        childSize={childSize}
+        isChildFlyoutOpen={isChildFlyoutOpen}
+        handleCloseChildFlyout={handleCloseChildFlyout}
+        openChildFlyout={openChildFlyout}
+        handleCloseFlyout={handleCloseFlyout}
+      />,
+      {
+        id: `mainFlyout-${title}`,
+        title,
+        type: flyoutType,
+        ownFocus: flyoutOwnFocus,
+        size: mainSize,
+        maxWidth: mainMaxWidth,
+        onActive: mainFlyoutOnActive,
+        onClose: mainFlyoutOnClose,
+        ['aria-labelledby']: `flyoutHeading-${title}`,
+      }
     );
-
-    return (
-      <>
-        <EuiFlyoutHeader>
-          <EuiTitle>
-            <h2 id={`flyoutHeading-${title}`}>Flyout {title}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiText>
-            <p>
-              This flyout uses the openSystemFlyout service with full EUI Flyout Manager
-              integration.
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiDescriptionList type="column" listItems={mainDescriptionItems} />
-          <EuiSpacer />
-          {childSize && (
-            <EuiButton onClick={isChildFlyoutOpen ? handleCloseChildFlyout : openChildFlyout}>
-              {isChildFlyoutOpen ? 'Close child flyout' : 'Open child flyout'}
-            </EuiButton>
-          )}
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={handleCloseFlyout} aria-label="Close">
-                Close
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </>
-    );
-  });
-
-  const openFlyout = () => {
-    flyoutRef.current = overlays.openSystemFlyout(<FlyoutContent />, {
-      id: `mainFlyout-${title}`,
-      title,
-      type: flyoutType,
-      ownFocus: flyoutOwnFocus,
-      size: mainSize,
-      maxWidth: mainMaxWidth,
-      onActive: mainFlyoutOnActive,
-      onClose: mainFlyoutOnClose,
-      ['aria-labelledby']: `flyoutHeading-${title}`,
-    });
     setIsFlyoutOpen(true);
-  };
+  }, [
+    title,
+    flyoutType,
+    flyoutOwnFocus,
+    mainSize,
+    mainMaxWidth,
+    childSize,
+    isChildFlyoutOpen,
+    handleCloseChildFlyout,
+    openChildFlyout,
+    handleCloseFlyout,
+    overlays,
+    mainFlyoutOnActive,
+    mainFlyoutOnClose,
+  ]);
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
-          <FlyoutTypeSwitch flyoutType={flyoutType} onChange={setFlyoutType} />
-          <FlyoutOwnFocusSwitch flyoutOwnFocus={flyoutOwnFocus} onChange={setFlyoutOwnFocus} />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FlyoutTypeSwitch
+                // switch for flyout type: push or overlay
+                flyoutType={flyoutType}
+                onChange={setFlyoutType}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FlyoutOwnFocusSwitch
+                // switch for ownFocus behavior
+                flyoutOwnFocus={flyoutOwnFocus}
+                onChange={setFlyoutOwnFocus}
+                disabled={flyoutType === 'push'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={isFlyoutOpen ? handleCloseFlyout : openFlyout}>
-            {isFlyoutOpen ? `Close ${title}` : `Open ${title}`}
+          <EuiButton onClick={openFlyout} disabled={isFlyoutOpen}>
+            Open {title}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
     </>
   );
 });
 
 FlyoutSession.displayName = 'FlyoutSession';
 
-export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays }) => {
+const NonSessionFlyout: React.FC<FlyoutFromOverlaysProps> = React.memo(
+  ({ overlays, rendering }) => {
+    const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
+    const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
+    const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
+    const flyoutRef = useRef<OverlayRef | null>(null);
+
+    const openFlyout = useCallback(() => {
+      // Create a handler that will be called to close the flyout
+      const handleClose = () => {
+        if (flyoutRef.current) {
+          flyoutRef.current.close();
+          flyoutRef.current = null;
+        }
+        setIsFlyoutOpen(false);
+      };
+
+      const ref = overlays.openFlyout(
+        toMountPoint(
+          <>
+            <EuiFlyoutHeader>
+              <EuiTitle>
+                <h2 id="nonSessionFlyoutHeading">Non-session Flyout</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <EuiText>
+                <p>
+                  This flyout is opened using the non-session aware <EuiCode>openFlyout</EuiCode>{' '}
+                  API.
+                </p>
+              </EuiText>
+            </EuiFlyoutBody>
+            <EuiFlyoutFooter>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={handleClose} aria-label="Close">
+                    Close
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutFooter>
+          </>,
+          rendering
+        ),
+        {
+          id: 'nonSessionFlyout',
+          size: 'm',
+          ['aria-labelledby']: 'nonSessionFlyoutHeading',
+          type: flyoutType,
+          ownFocus: flyoutOwnFocus,
+          onClose: handleClose,
+        }
+      );
+      flyoutRef.current = ref;
+      setIsFlyoutOpen(true);
+    }, [overlays, rendering, flyoutType, flyoutOwnFocus]);
+
+    return (
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FlyoutTypeSwitch
+                // switch for flyout type: push or overlay
+                flyoutType={flyoutType}
+                onChange={setFlyoutType}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FlyoutOwnFocusSwitch
+                // switch for ownFocus behavior
+                flyoutOwnFocus={flyoutOwnFocus}
+                onChange={setFlyoutOwnFocus}
+                disabled={flyoutType === 'push'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={openFlyout} disabled={isFlyoutOpen}>
+            Open Non-session Flyout
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+
+NonSessionFlyout.displayName = 'NonSessionFlyout';
+
+export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays, rendering }) => {
   return (
     <>
-      <EuiDescriptionList
-        type="column"
-        columnGutterSize="m"
-        listItems={[
-          {
-            title: 'Session X: main size = s, child size = s',
-            description: (
-              <FlyoutSession title="Session X" mainSize="s" childSize="s" overlays={overlays} />
-            ),
-          },
-          {
-            title: 'Session Y: main size = m, child size = s',
-            description: (
-              <FlyoutSession title="Session Y" mainSize="m" childSize="s" overlays={overlays} />
-            ),
-          },
-          {
-            title: 'Session Z: main size = fill',
-            description: <FlyoutSession title="Session Z" mainSize="fill" overlays={overlays} />,
-          },
-        ]}
-      />
-      <EuiText>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam scelerisque aliquam odio
-          et faucibus. Nulla rhoncus feugiat eros quis consectetur. Morbi neque ex, condimentum
-          dapibus congue et, vulputate ut ligula. Vestibulum sit amet urna turpis. Mauris euismod
-          elit et nisi ultrices, ut faucibus orci tincidunt. Duis a quam nec dui luctus dignissim.
-          Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis
-          egestas. Integer convallis erat vel felis facilisis, at convallis erat elementum.
-        </p>
-        <p>
-          Aenean ac eleifend lacus, in mollis lectus. Vivamus sodales, augue in facilisis commodo,
-          odio augue ornare metus, ut fringilla augue justo vel mi. Morbi vitae diam augue. Aliquam
-          vel mauris a nibh auctor commodo. Praesent et nisi eu justo eleifend convallis. Quisque
-          suscipit maximus vestibulum. Phasellus congue mollis orci, sit amet luctus augue fringilla
-          vel. Curabitur vitae orci nec massa volutpat posuere in sed felis. Pellentesque
-          sollicitudin fringilla purus, eu pretium massa euismod eu.
-        </p>
-      </EuiText>
+      <EuiTitle>
+        <h2>
+          Flyouts with <EuiCode>core.overlays</EuiCode> services
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h3>
+            With <EuiCode>core.overlays.openSystemFlyout</EuiCode>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          type="column"
+          columnGutterSize="m"
+          listItems={[
+            {
+              title: 'Session X: main size = s, child size = s',
+              description: (
+                <FlyoutSession title="Session X" mainSize="s" childSize="s" overlays={overlays} />
+              ),
+            },
+            {
+              title: 'Session Y: main size = m, child size = s',
+              description: (
+                <FlyoutSession title="Session Y" mainSize="m" childSize="s" overlays={overlays} />
+              ),
+            },
+            {
+              title: 'Session Z: main size = fill',
+              description: <FlyoutSession title="Session Z" mainSize="fill" overlays={overlays} />,
+            },
+          ]}
+          css={css`
+            dt {
+              min-width: 25em;
+            }
+          `}
+        />
+
+        <EuiSpacer size="m" />
+
+        <EuiTitle size="s">
+          <h3>
+            With <EuiCode>core.overlays.openFlyout</EuiCode>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          type="column"
+          columnGutterSize="m"
+          listItems={[
+            {
+              title: 'Non-session flyout: size = m',
+              description: <NonSessionFlyout overlays={overlays} rendering={rendering} />,
+            },
+          ]}
+          css={css`
+            dt {
+              min-width: 25em;
+            }
+          `}
+        />
+      </EuiPanel>
     </>
   );
 };

@@ -14,6 +14,7 @@ export interface FlyoutOwnFocusSwitchProps {
   flyoutOwnFocus: boolean;
   onChange: (ownFocus: boolean) => void;
   label?: string;
+  disabled?: boolean;
 }
 
 /**
@@ -23,12 +24,14 @@ export const FlyoutOwnFocusSwitch: React.FC<FlyoutOwnFocusSwitchProps> = ({
   flyoutOwnFocus,
   onChange,
   label = 'Own Focus',
+  disabled = false,
 }) => {
   return (
     <EuiSwitch
       label={label}
       checked={flyoutOwnFocus}
       onChange={(e) => onChange(e.target.checked)}
+      disabled={disabled}
     />
   );
 };
