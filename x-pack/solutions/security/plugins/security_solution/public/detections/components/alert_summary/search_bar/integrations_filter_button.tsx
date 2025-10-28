@@ -42,7 +42,7 @@ export interface IntegrationFilterButtonProps {
 
 /**
  * Filter button displayed next to the KQL bar at the top of the alert summary page.
- * For the AI for SOC effort, each integration has one rule associated with.
+ * For EASE effort, each integration has one rule associated with.
  * This means that deselecting an integration is equivalent to filtering out by the rule for that integration.
  * The EuiFilterButton works as follow:
  * - if an integration is selected, this means that no filters live in filterManager
@@ -108,7 +108,7 @@ export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilter
   );
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup compressed={true}>
       <EuiPopover
         button={button}
         closePopover={togglePopover}

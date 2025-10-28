@@ -40,3 +40,8 @@ export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
   typeof ActionGroupId,
   StackAlertType
 >;
+
+export type EsQuerySourceFields = Array<{
+  label: string;
+  searchPath: string;
+}>;

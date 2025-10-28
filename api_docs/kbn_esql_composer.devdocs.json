@@ -30,7 +30,13 @@
         ],
         "signature": [
           "(columns: (string | string[])[]) => ",
-          "QueryOperator"
+          {
+            "pluginId": "@kbn/esql-composer",
+            "scope": "common",
+            "docId": "kibKbnEsqlComposerPluginApi",
+            "section": "def-common.QueryOperator",
+            "text": "QueryOperator"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/drop.ts",
         "deprecated": false,
@@ -70,7 +76,13 @@
         ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
-          "QueryOperator"
+          {
+            "pluginId": "@kbn/esql-composer",
+            "scope": "common",
+            "docId": "kibKbnEsqlComposerPluginApi",
+            "section": "def-common.QueryOperator",
+            "text": "QueryOperator"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/eval.ts",
         "deprecated": false,
@@ -122,9 +134,7 @@
         "type": "Function",
         "tags": [],
         "label": "from",
-        "description": [
-          "\nThe entry point for the ESQL composer pipeline. Creates a new query\nstarting with a `FROM` clause.\n"
-        ],
+        "description": [],
         "signature": [
           "(patterns: (string | string[])[]) => ",
           "QueryPipeline"
@@ -139,9 +149,7 @@
             "type": "Array",
             "tags": [],
             "label": "patterns",
-            "description": [
-              "The index patterns to query."
-            ],
+            "description": [],
             "signature": [
               "(string | string[])[]"
             ],
@@ -151,9 +159,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "A `QueryPipeline` instance to which other composer commands can be chained."
-        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -167,7 +173,13 @@
         ],
         "signature": [
           "(columns: (string | string[])[]) => ",
-          "QueryOperator"
+          {
+            "pluginId": "@kbn/esql-composer",
+            "scope": "common",
+            "docId": "kibKbnEsqlComposerPluginApi",
+            "section": "def-common.QueryOperator",
+            "text": "QueryOperator"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/keep.ts",
         "deprecated": false,
@@ -207,7 +219,13 @@
         ],
         "signature": [
           "(value: number) => ",
-          "QueryOperator"
+          {
+            "pluginId": "@kbn/esql-composer",
+            "scope": "common",
+            "docId": "kibKbnEsqlComposerPluginApi",
+            "section": "def-common.QueryOperator",
+            "text": "QueryOperator"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/limit.ts",
         "deprecated": false,
@@ -238,6 +256,134 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.rename",
+        "type": "Function",
+        "tags": [],
+        "label": "rename",
+        "description": [
+          "\nAppends an `RENAME` command to the ESQL composer pipeline.\n"
+        ],
+        "signature": [
+          "(body: TQuery, params: TParams | undefined) => ",
+          {
+            "pluginId": "@kbn/esql-composer",
+            "scope": "common",
+            "docId": "kibKbnEsqlComposerPluginApi",
+            "section": "def-common.QueryOperator",
+            "text": "QueryOperator"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/rename.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.rename.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "The body of the `RENAME` command."
+            ],
+            "signature": [
+              "TQuery"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/rename.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.rename.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "The parameters to use in the `RENAME` command."
+            ],
+            "signature": [
+              "TParams | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/rename.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "A `QueryPipeline` instance with the `RENAME` command appended."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.replaceParameters",
+        "type": "Function",
+        "tags": [],
+        "label": "replaceParameters",
+        "description": [],
+        "signature": [
+          "(queryAst: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstQueryExpression",
+            "text": "ESQLAstQueryExpression"
+          },
+          ", params: ",
+          "Params",
+          "<string> | undefined) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.replaceParameters.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "queryAst",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstQueryExpression",
+                "text": "ESQLAstQueryExpression"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.replaceParameters.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Params",
+              "<string> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.sort",
         "type": "Function",
         "tags": [],
@@ -247,7 +393,13 @@
         ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
-          "QueryOperator"
+          {
+            "pluginId": "@kbn/esql-composer",
+            "scope": "common",
+            "docId": "kibKbnEsqlComposerPluginApi",
+            "section": "def-common.QueryOperator",
+            "text": "QueryOperator"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
         "deprecated": false,
@@ -298,7 +450,13 @@
         "description": [],
         "signature": [
           "(sorts: SortArgs[]) => ",
-          "QueryOperator"
+          {
+            "pluginId": "@kbn/esql-composer",
+            "scope": "common",
+            "docId": "kibKbnEsqlComposerPluginApi",
+            "section": "def-common.QueryOperator",
+            "text": "QueryOperator"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
         "deprecated": false,
@@ -332,7 +490,13 @@
         "description": [],
         "signature": [
           "(firstArg: SortArgs | TQuery, secondArg: SortArgs | TParams | undefined, restSorts: SortArgs[]) => ",
-          "QueryOperator"
+          {
+            "pluginId": "@kbn/esql-composer",
+            "scope": "common",
+            "docId": "kibKbnEsqlComposerPluginApi",
+            "section": "def-common.QueryOperator",
+            "text": "QueryOperator"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
         "deprecated": false,
@@ -398,7 +562,13 @@
         ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
-          "QueryOperator"
+          {
+            "pluginId": "@kbn/esql-composer",
+            "scope": "common",
+            "docId": "kibKbnEsqlComposerPluginApi",
+            "section": "def-common.QueryOperator",
+            "text": "QueryOperator"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/stats.ts",
         "deprecated": false,
@@ -446,6 +616,40 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.timeseries",
+        "type": "Function",
+        "tags": [],
+        "label": "timeseries",
+        "description": [],
+        "signature": [
+          "(patterns: (string | string[])[]) => ",
+          "QueryPipeline"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.timeseries.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "patterns",
+            "description": [],
+            "signature": [
+              "(string | string[])[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.where",
         "type": "Function",
         "tags": [],
@@ -455,7 +659,13 @@
         ],
         "signature": [
           "(body: TQuery, params: TParams | undefined) => ",
-          "QueryOperator"
+          {
+            "pluginId": "@kbn/esql-composer",
+            "scope": "common",
+            "docId": "kibKbnEsqlComposerPluginApi",
+            "section": "def-common.QueryOperator",
+            "text": "QueryOperator"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/where.ts",
         "deprecated": false,
@@ -517,7 +727,43 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.QueryOperator",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryOperator",
+        "description": [],
+        "signature": [
+          "(sourceQuery: ",
+          "Query",
+          ") => ",
+          "Query"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.QueryOperator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "sourceQuery",
+            "description": [],
+            "signature": [
+              "Query"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

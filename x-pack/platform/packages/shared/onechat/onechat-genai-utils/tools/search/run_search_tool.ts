@@ -7,8 +7,9 @@
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { ScopedModel } from '@kbn/onechat-server';
+import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ToolResult } from '@kbn/onechat-common/tools';
+import type { ToolEventEmitter, ToolHandlerResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import { createSearchToolGraph } from './graph';
 
@@ -17,13 +18,17 @@ export const runSearchTool = async ({
   index,
   model,
   esClient,
+  logger,
+  events,
 }: {
   nlQuery: string;
   index?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
-}): Promise<ToolResult[]> => {
-  const toolGraph = createSearchToolGraph({ model, esClient });
+  logger: Logger;
+  events: ToolEventEmitter;
+}): Promise<ToolHandlerResult[]> => {
+  const toolGraph = createSearchToolGraph({ model, esClient, logger, events });
 
   return withActiveInferenceSpan(
     'SearchToolGraph',
@@ -34,7 +39,7 @@ export const runSearchTool = async ({
     },
     async () => {
       const outState = await toolGraph.invoke(
-        { nlQuery, index },
+        { nlQuery, targetPattern: index },
         { tags: ['search_tool'], metadata: { graphName: 'search_tool' } }
       );
 

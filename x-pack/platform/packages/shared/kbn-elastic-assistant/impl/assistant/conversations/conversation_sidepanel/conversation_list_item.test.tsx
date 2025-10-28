@@ -21,9 +21,9 @@ const mockPaginationObserver = jest.fn();
 const ownerConvo = { ...welcomeConvo, isConversationOwner: true };
 const testProps = {
   conversation: ownerConvo,
+  currentUser: { name: 'elastic' },
   handleCopyUrl: mockCopyUrl,
   handleDuplicateConversation: mockDuplicate,
-  isAssistantSharingEnabled: true,
   isActiveConversation: false,
   lastConversationId: ownerConvo.id,
   onConversationSelected: mockSelect,
@@ -174,13 +174,5 @@ describe('ConversationListItem', () => {
     expect(screen.getByTestId('convo-context-menu-item-copy')).toBeInTheDocument();
     expect(screen.getByTestId('convo-context-menu-item-duplicate')).toBeInTheDocument();
     expect(screen.queryByTestId('convo-context-menu-item-delete')).not.toBeInTheDocument();
-  });
-
-  it('renders extraAction when sharing is disabled', () => {
-    render(<ConversationListItem {...testProps} isAssistantSharingEnabled={false} />);
-    // The extraAction is a delete button
-    expect(screen.getByTestId('delete-option')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('delete-option'));
-    expect(mockDelete).toHaveBeenCalledWith(expect.objectContaining({ id: ownerConvo.id }));
   });
 });

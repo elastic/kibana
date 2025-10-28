@@ -50,9 +50,15 @@ export class ServerlessPlugin
     chrome.setChromeStyle('project');
 
     if (cloud.serverless.projectName) {
-      project.setProjectName(cloud.serverless.projectName);
+      project.setKibanaName(cloud.serverless.projectName);
     }
-    project.setCloudUrls(cloud);
+
+    project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
+    cloud.getPrivilegedUrls().then((privilegedUrls) => {
+      if (Object.keys(privilegedUrls).length === 0) return;
+
+      project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
+    });
 
     chrome.navControls.registerRight({
       order: 1,

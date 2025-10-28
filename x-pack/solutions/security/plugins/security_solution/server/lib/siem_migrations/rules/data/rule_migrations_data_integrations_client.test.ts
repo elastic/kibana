@@ -10,7 +10,8 @@ import type {
   IScopedClusterClient,
   AuthenticatedUser,
 } from '@kbn/core/server';
-import type { RuleMigrationIntegration, RuleMigrationsClientDependencies } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { RuleMigrationIntegration } from '../types';
 import type { PackageList, PackageListItem, RegistryDataStream } from '@kbn/fleet-plugin/common';
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
@@ -50,7 +51,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
   const mockGetPackages = mockPackageService.asInternalUser.getPackages;
   const dependencies = {
     packageService: mockPackageService,
-  } as unknown as RuleMigrationsClientDependencies;
+  } as unknown as SiemMigrationsClientDependencies;
 
   let client: RuleMigrationsDataIntegrationsClient;
 
@@ -90,7 +91,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         currentUser,
         esScopedClientMock,
         logger,
-        { packageService: undefined } as unknown as RuleMigrationsClientDependencies
+        { packageService: undefined } as unknown as SiemMigrationsClientDependencies
       );
 
       const result = await brokenClient.getSecurityLogsPackages();
@@ -171,7 +172,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         currentUser,
         esScopedClientMock,
         logger,
-        { packageService: undefined } as unknown as RuleMigrationsClientDependencies
+        { packageService: undefined } as unknown as SiemMigrationsClientDependencies
       );
 
       await noPackageClient.populate();
@@ -227,16 +228,21 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       expect(esClientMock.search).toHaveBeenCalledWith({
         index: 'mock-index',
         query: {
-          bool: {
-            should: [
-              { semantic: { query, field: 'elser_embedding', boost: 1.5 } },
-              { multi_match: { query, fields: ['title^2', 'description'], boost: 3 } },
-            ],
-            filter: { exists: { field: 'data_streams' } },
+          function_score: {
+            query: {
+              bool: {
+                must: { semantic: { query, field: 'elser_embedding' } },
+                must_not: { ids: { values: ['splunk', 'elastic_security'] } },
+                filter: { exists: { field: 'data_streams' } },
+              },
+            },
+            functions: expect.any(Array),
+            score_mode: 'multiply' as const,
+            boost_mode: 'multiply' as const,
           },
         },
         size: 5,
-        min_score: 40,
+        min_score: 7,
       });
       expect(results).toHaveLength(1);
       expect(results[0].title).toBe('Integration 1');

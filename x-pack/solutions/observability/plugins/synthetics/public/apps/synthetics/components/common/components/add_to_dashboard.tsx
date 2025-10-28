@@ -57,7 +57,7 @@ export const useAddToDashboard = ({
   const { embeddable } = useKibana<ClientPluginsStart>().services;
 
   const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId }) => {
+    async ({ dashboardId }) => {
       const stateTransfer = embeddable.getStateTransfer();
 
       const state = {
@@ -67,8 +67,8 @@ export const useAddToDashboard = ({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },

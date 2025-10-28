@@ -8,20 +8,30 @@
  */
 
 import {
-  EuiBadge,
   EuiBeacon,
+  EuiFlexGroup,
+  type EuiFlexGroupProps,
+  EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiText,
+  type EuiTextProps,
   type EuiThemeComputed,
+  EuiToolTip,
+  formatDate,
+  useEuiTheme,
 } from '@elastic/eui';
-import { ExecutionStatus } from '@kbn/workflows';
-import React from 'react';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { TokenColor } from '@elastic/eui/src/components/token/token_types';
+import { css } from '@emotion/react';
+import React from 'react';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { ExecutionStatus } from '@kbn/workflows';
 import { getStatusLabel } from '../translations';
-
 interface ExecutionStatusColors {
   color: string;
   backgroundColor: string;
+  tokenColor: TokenColor | undefined;
 }
 
 const getExecutionStatusColorsMap = (
@@ -31,45 +41,69 @@ const getExecutionStatusColorsMap = (
     [ExecutionStatus.COMPLETED]: {
       color: euiTheme.colors.vis.euiColorVisSuccess0,
       backgroundColor: euiTheme.colors.backgroundBaseSuccess,
+      tokenColor: 'euiColorVis0' as const,
     },
     [ExecutionStatus.FAILED]: {
       color: euiTheme.colors.danger,
       backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      tokenColor: 'euiColorVis6' as const,
     },
     [ExecutionStatus.PENDING]: {
       color: euiTheme.colors.textSubdued,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      tokenColor: 'gray' as const,
     },
     [ExecutionStatus.RUNNING]: {
       color: euiTheme.colors.textSubdued,
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      backgroundColor: euiTheme.colors.backgroundLightNeutral,
+      tokenColor: 'euiColorVis3' as const,
     },
     [ExecutionStatus.WAITING]: {
       color: euiTheme.colors.warning,
       backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      tokenColor: 'euiColorVis9' as const,
     },
     [ExecutionStatus.WAITING_FOR_INPUT]: {
       color: euiTheme.colors.warning,
       backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      tokenColor: 'euiColorVis9' as const,
     },
     [ExecutionStatus.CANCELLED]: {
-      color: euiTheme.colors.danger,
-      backgroundColor: euiTheme.colors.backgroundBaseDanger,
-    },
-    [ExecutionStatus.SKIPPED]: {
       color: euiTheme.colors.textSubdued,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      tokenColor: 'gray',
+    },
+    [ExecutionStatus.TIMED_OUT]: {
+      color: euiTheme.colors.danger,
+      backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      tokenColor: 'euiColorVis6' as const,
+    },
+    [ExecutionStatus.SKIPPED]: {
+      color: euiTheme.colors.textDisabled,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      tokenColor: 'gray',
     },
   };
 };
 
-export const getExecutionStatusColors = (euiTheme: EuiThemeComputed, status: ExecutionStatus) => {
+export const getExecutionStatusColors = (
+  euiTheme: EuiThemeComputed,
+  status: ExecutionStatus | null
+) => {
+  if (!status) {
+    return {
+      color: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      tokenColor: 'gray',
+    };
+  }
   return getExecutionStatusColorsMap(euiTheme)[status];
 };
 
 const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
   [ExecutionStatus.COMPLETED]: 'checkInCircleFilled',
   [ExecutionStatus.FAILED]: 'errorFilled',
+  [ExecutionStatus.TIMED_OUT]: 'errorFilled',
   [ExecutionStatus.PENDING]: 'clock',
   [ExecutionStatus.RUNNING]: 'play',
   [ExecutionStatus.WAITING]: 'clock',
@@ -95,30 +129,38 @@ export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: Execu
   );
 };
 
-export function StatusBadge({ status }: { status: ExecutionStatus | undefined }) {
-  if (!status) {
-    return <EuiBadge color="subdued">-</EuiBadge>;
-  }
+export function StatusBadge({
+  status,
+  date,
+  textProps,
+  ...props
+}: {
+  status: ExecutionStatus | undefined;
+  date?: string | undefined;
+  textProps?: EuiTextProps;
+} & EuiFlexGroupProps) {
+  const { euiTheme } = useEuiTheme();
+  if (!status) return;
 
   const statusLabel = getStatusLabel(status);
+  const icon = getExecutionStatusIcon(euiTheme, status);
 
-  switch (status) {
-    case 'completed':
-      return <EuiBadge color="success">{statusLabel}</EuiBadge>;
-    case 'failed':
-      return <EuiBadge color="danger">{statusLabel}</EuiBadge>;
-    case 'pending':
-      return <EuiBadge color="subdued">{statusLabel}</EuiBadge>;
-    case 'running':
-      return (
-        <EuiBadge color="subdued" iconType={() => <EuiLoadingSpinner size="s" />}>
-          &nbsp;{statusLabel}
-        </EuiBadge>
-      );
-    case 'waiting_for_input':
-    case 'cancelled':
-    case 'skipped':
-    default:
-      return <EuiBadge color="subdued">{statusLabel}</EuiBadge>;
-  }
+  return (
+    <EuiToolTip content={date ? `${statusLabel} ${date ? `on ${formatDate(date)}` : ''}` : null}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" {...props}>
+        <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+        <EuiFlexItem grow={false} className="eui-hideFor--s">
+          <EuiText
+            size="s"
+            {...textProps}
+            css={css`::first-letter {
+              text-transform: capitalize;
+            `}
+          >
+            {date ? <FormattedRelative value={date} /> : statusLabel}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
 }

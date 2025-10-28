@@ -318,6 +318,25 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams, schedule: scheduleToUse });
   };
 
+  const scheduleCsvWithNotification = async (
+    job: JobParamsCSV,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    notification: { email: { to: string[] } } = { email: { to: ['test@test.com'] } },
+    startedAt?: string
+  ) => {
+    const jobParams = rison.encode(job);
+    const scheduleToUse = startedAt
+      ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
+      : schedule;
+    return await supertestWithoutAuth
+      .post(`/internal/reporting/schedule/csv_searchsource`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ jobParams, schedule: scheduleToUse, notification });
+  };
+
   /**
    * Methods for various Reporting API operations.
    */
@@ -334,7 +353,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return res.body;
   };
 
-  const disableScheduledReports = async (
+  const disableReportSchedules = async (
     ids: string[],
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme'
@@ -345,6 +364,37 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ ids })
       .expect(200);
+    return body;
+  };
+
+  const deleteReportSchedules = async (
+    ids: string[],
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .delete(INTERNAL_ROUTES.SCHEDULED.BULK_DELETE)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ ids })
+      .expect(200);
+    return body;
+  };
+
+  const updateScheduledReport = async (
+    id: string,
+    title?: string,
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    status: number = 200
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .put(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/${id}`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ title, schedule })
+      .expect(status);
     return body;
   };
 
@@ -476,6 +526,14 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     );
   };
 
+  const runTelemetryTask = async () => {
+    return await supertest
+      .post(`/api/reporting_fixture_telemetry/run_soon`)
+      .set('kbn-xsrf', 'xxx')
+      .send({ taskId: 'Reporting-reporting_telemetry' })
+      .expect(200);
+  };
+
   return {
     logTaskManagerHealth,
     initEcommerce,
@@ -504,6 +562,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     schedulePdf,
     schedulePng,
     scheduleCsv,
+    scheduleCsvWithNotification,
     listReports,
     postJob,
     postJobJSON,
@@ -518,6 +577,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     getTask,
     deleteTasks,
     listScheduledReports,
-    disableScheduledReports,
+    disableReportSchedules,
+    deleteReportSchedules,
+    runTelemetryTask,
+    updateScheduledReport,
   };
 }

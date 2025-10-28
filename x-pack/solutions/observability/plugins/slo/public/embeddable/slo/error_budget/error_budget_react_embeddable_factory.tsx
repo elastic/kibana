@@ -16,9 +16,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { PluginContext } from '../../../context/plugin_context';
@@ -115,27 +113,25 @@ export const getErrorBudgetEmbeddableFactory = ({
           const queryClient = new QueryClient();
 
           return (
-            <Router history={createBrowserHistory()}>
-              <KibanaContextProvider services={deps}>
-                <PluginContext.Provider
-                  value={{
-                    observabilityRuleTypeRegistry:
-                      pluginsStart.observability.observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate:
-                      pluginsStart.observabilityShared.navigation.PageTemplate,
-                    sloClient,
-                  }}
-                >
-                  <QueryClientProvider client={queryClient}>
-                    <SloErrorBudget
-                      sloId={sloId}
-                      sloInstanceId={sloInstanceId}
-                      reloadSubject={reload$}
-                    />
-                  </QueryClientProvider>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </Router>
+            <KibanaContextProvider services={deps}>
+              <PluginContext.Provider
+                value={{
+                  observabilityRuleTypeRegistry:
+                    pluginsStart.observability.observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate:
+                    pluginsStart.observabilityShared.navigation.PageTemplate,
+                  sloClient,
+                }}
+              >
+                <QueryClientProvider client={queryClient}>
+                  <SloErrorBudget
+                    sloId={sloId}
+                    sloInstanceId={sloInstanceId}
+                    reloadSubject={reload$}
+                  />
+                </QueryClientProvider>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
           );
         },
       };

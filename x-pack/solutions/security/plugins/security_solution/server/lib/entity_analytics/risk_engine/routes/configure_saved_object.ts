@@ -93,6 +93,7 @@ export const riskEngineConfigureSavedObjectRoute = (
               excludeAlertStatuses: request.body.exclude_alert_statuses,
               range: request.body.range,
               excludeAlertTags: request.body.exclude_alert_tags,
+              enableResetToZero: request.body.enable_reset_to_zero,
             });
             return response.ok({ body: { risk_engine_saved_object_configured: true } });
           } catch (e) {

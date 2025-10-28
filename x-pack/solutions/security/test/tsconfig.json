@@ -27,6 +27,10 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
+    {
+      "path": "security_solution_api_integration/config/services/detections_response/tsconfig.json"
+    },
+    "@kbn/security-solution-test-api-clients",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",
@@ -36,7 +40,6 @@
     "@kbn/tooling-log",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/cloud-security-posture-common",
-    "@kbn/test-suites-xpack",
     "@kbn/security-solution-plugin",
     "@kbn/dev-utils",
     "@kbn/test-suites-src",
@@ -58,18 +61,9 @@
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
     "@kbn/es-archiver",
-    "@kbn/task-manager-plugin",
-    "@kbn/openapi-common",
-    "@kbn/spaces-plugin",
-    "@kbn/securitysolution-exceptions-common",
-    "@kbn/securitysolution-endpoint-exceptions-common",
-    "@kbn/securitysolution-lists-common",
-    "@kbn/osquery-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/rison",
     "@kbn/core-chrome-browser",
-    "@kbn/openapi-common",
-    "@kbn/spaces-plugin",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
   ]
 }

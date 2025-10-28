@@ -99,6 +99,66 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body.data).toEqual(expectedRuleDocuments);
       });
 
+      it('should filter by search term failed translations', async () => {
+        const migrationId = uuidv4();
+        const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
+          const title = `${index < 5 ? 'Elastic' : 'Splunk'} rule - ${index}`;
+          const originalRule = { ...defaultOriginalRule, title };
+          const elasticRule = { ...defaultElasticRule, title };
+          const status = index < 5 ? SiemMigrationStatus.FAILED : SiemMigrationStatus.COMPLETED;
+          return {
+            migration_id: migrationId,
+            original_rule: originalRule,
+            elastic_rule: elasticRule,
+            status,
+          };
+        };
+        const migrationRuleDocuments = getMigrationRuleDocuments(10, overrideCallback).map(
+          (doc, index) => {
+            if (index < 5) {
+              const { elastic_rule: _, ...restDoc } = doc;
+              return restDoc;
+            }
+            return doc;
+          }
+        );
+        await createMigrationRules(es, migrationRuleDocuments);
+
+        // Search by word `Elastic`
+        let expectedRuleDocuments = expect.arrayContaining(
+          migrationRuleDocuments
+            .slice(0, 5)
+            .map(({ '@timestamp': timestamp, updated_at: updatedAt, ...rest }) =>
+              expect.objectContaining(rest)
+            )
+        );
+
+        // fetch migration rules
+        let response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: { search_term: 'Elastic' },
+        });
+        expect(response.body.total).toEqual(5);
+        expect(response.body.data).toEqual(expectedRuleDocuments);
+
+        // Search by word `Splunk`
+        expectedRuleDocuments = expect.arrayContaining(
+          migrationRuleDocuments
+            .slice(5)
+            .map(({ '@timestamp': timestamp, updated_at: updatedAt, ...rest }) =>
+              expect.objectContaining(rest)
+            )
+        );
+
+        // fetch migration rules
+        response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: { search_term: 'Splunk' },
+        });
+        expect(response.body.total).toEqual(5);
+        expect(response.body.data).toEqual(expectedRuleDocuments);
+      });
+
       it('should fetch rules filtered by `ids`', async () => {
         const migrationId = uuidv4();
         const migrationRuleDocuments = getMigrationRuleDocuments(10, () => ({
@@ -307,6 +367,34 @@ export default ({ getService }: FtrProviderContext) => {
           queryParams: { is_untranslatable: false },
         });
         expect(response.body.total).toEqual(5);
+      });
+
+      it('should fetch rules filtered by `missingIndex`', async () => {
+        const migrationId = uuidv4();
+        const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
+          const missingIndex = index < 4 ? true : false;
+          return {
+            migration_id: migrationId,
+            elastic_rule: {
+              query: missingIndex ? '[indexPattern]' : 'from logs-* | LIMIT 1',
+              title: 'Elastic rule',
+            },
+          };
+        };
+
+        const migrationRuleDocuments = getMigrationRuleDocuments(10, overrideCallback);
+        await createMigrationRules(es, migrationRuleDocuments);
+
+        let response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: { is_missing_index: true },
+        });
+        expect(response.body.total).toEqual(4);
+
+        response = await migrationRulesRoutes.getRules({
+          migrationId,
+        });
+        expect(response.body.total).toEqual(10);
       });
     });
 

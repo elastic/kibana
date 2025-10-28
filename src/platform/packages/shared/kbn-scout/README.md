@@ -190,14 +190,14 @@ your-plugin/
 │       ├── ui/
 │       │   ├── playwright.config.ts
 │       │   ├── parallel.playwright.config.ts
-│       │   └── parallel_tests/               # Your UI test specs, that are run in parallel
-│       │   └── tests/                        # Your UI test specs, that are run sequentially
+│       │   └── parallel_tests/               # Your UI test specs (*.spec.ts), that are run in parallel
+│       │   └── tests/                        # Your UI test specs (*.spec.ts), that are run sequentially
 │       ├── api/
 │       │   ├── playwright.config.ts
-│       │   └── tests/                        # Your API test specs, that are run sequentially
+│       │   └── tests/                        # Your API test specs (*.spec.ts), that are run sequentially
 │       └── common/                           # For shared code across UI and API tests
 │           ├── constants.ts
-│           └── fixtures/                        
+│           └── fixtures/
 ```
 
 #### UI Tests
@@ -344,6 +344,18 @@ To start the servers locally and run tests in one step, use:
 
 ```bash
 node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --config <plugin-path>/test/scout/ui/playwright.config.ts
+```
+
+To start the servers locally and run a single test file, use:
+
+```bash
+node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --testFiles <plugin-path>/test/scout/ui/tests/your_test_spec.ts
+```
+
+To start the servers locally and run a tests sub-directory, use:
+
+```bash
+node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --testFiles <plugin-path>/test/scout/ui/tests/test_sub_directory
 ```
 
 - **`--stateful`** or **`--serverless`**: Specifies the deployment type.
@@ -560,3 +572,7 @@ On merge commits, Scout tests run in a non-blocking mode.
 | 1         | Missing configuration (e.g. SCOUT_CONFIG_GROUP_KEY and SCOUT_CONFIG_GROUP_TYPE environment variables not set) |
 | 2         | No tests in Playwright config                                                                                 |
 | 10        | Tests failed                                                                                                  |
+
+### AI prompts to help you migrate from FTR
+
+The `@kbn/scout-info` package contains [AI prompts](https://github.com/elastic/kibana/tree/main/src/platform/packages/private/kbn-scout-info/llms) to help you migrate FTR test files.

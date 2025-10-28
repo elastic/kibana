@@ -128,10 +128,16 @@
     "@kbn/esql",
     "@kbn/apm-synthtrace-client",
     "@kbn/scout-oblt",
+    "@kbn/licensing-types",
+    "@kbn/deeplinks-management",
     "@kbn/content-management-content-editor",
     "@kbn/saved-objects-tagging-plugin",
-    "@kbn/page-attachment-schema",
-    "@kbn/licensing-types"
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/discover-utils",
+    "@kbn/deeplinks-management",
+    "@kbn/observability-nav-icons",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

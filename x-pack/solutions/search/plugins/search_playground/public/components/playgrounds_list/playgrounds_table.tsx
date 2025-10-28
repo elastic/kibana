@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import type {
   CriteriaWithPagination,
   EuiBasicTableColumn,
@@ -58,7 +58,7 @@ export const PlaygroundsTable = ({
     () => [
       {
         name: i18n.translate('xpack.searchPlayground.playgroundsList.table.columns.name.header', {
-          defaultMessage: 'RAG Playground',
+          defaultMessage: 'Playground',
         }),
         render: ({ id, name }: PlaygroundListObject) => (
           <EuiLink
@@ -94,7 +94,7 @@ export const PlaygroundsTable = ({
               i18n.translate(
                 'xpack.searchPlayground.playgroundsList.table.columns.actions.delete.description',
                 {
-                  defaultMessage: 'Delete RAG playground {name}',
+                  defaultMessage: 'Delete playground {name}',
                   values: { name: playground.name },
                 }
               ),

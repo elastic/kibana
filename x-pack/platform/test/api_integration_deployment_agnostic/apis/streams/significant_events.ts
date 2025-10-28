@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
-import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import { isDslLifecycle, isIlmLifecycle, emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -53,9 +53,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: {
-            steps: [],
-          },
+          processing: { steps: [] },
+          settings: {},
           wired: {
             routing: [],
             fields: {},
@@ -66,16 +65,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       beforeEach(async () => {
         await putStream(apiClient, STREAM_NAME, {
           stream,
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
         }).then((response) => expect(response).to.have.property('acknowledged', true));
-        await alertingApi.deleteRules({ roleAuthc });
+      });
+
+      afterEach(async () => {
+        await deleteStream(apiClient, STREAM_NAME);
       });
 
       it('updates the queries', async () => {
         const response = await putStream(apiClient, STREAM_NAME, {
           stream,
-          dashboards: [],
+          ...emptyAssets,
           queries: [{ id: 'aaa', title: 'OOM Error', kql: { query: "message: 'OOM Error'" } }],
         });
         expect(response).to.have.property('acknowledged', true);
@@ -109,7 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           },
-          dashboards: [],
+          ...emptyAssets,
           queries: [
             {
               id: 'logs.queries-test.query1',
@@ -148,7 +149,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           },
-          dashboards: [],
+          ...emptyAssets,
           queries: [
             {
               id: 'logs.queries-test.child.query1',
@@ -161,7 +162,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         response = await putStream(apiClient, 'logs.queries-test.child.first', {
           stream,
-          dashboards: [],
+          ...emptyAssets,
           queries: [
             {
               id: 'logs.queries-test.child.first.query1',
@@ -191,14 +192,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: {
-              steps: [],
-            },
+            processing: { steps: [] },
+            settings: {},
             classic: {},
           },
         },
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
       };
 
       const createDataStream = async (name: string, lifecycle: IngestStreamLifecycle) => {
@@ -246,6 +245,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         streamDefinition = await getStream(apiClient, indexName);
+
         expect(streamDefinition.queries.length).to.eql(1);
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
@@ -254,6 +254,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await clean();
+        await deleteStream(apiClient, indexName);
       });
     });
   });

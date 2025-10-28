@@ -37,6 +37,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
           {i18n.ADD_ENDPOINT_LABEL}
         </EuiButton>,
         <EuiButtonEmpty
+          aria-label={i18n.API_DOCUMENTATION_LINK}
           iconType="popout"
           iconSide="right"
           iconSize="s"
@@ -48,6 +49,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
           {i18n.API_DOCUMENTATION_LINK}
         </EuiButtonEmpty>,
         <EuiButtonEmpty
+          aria-label={i18n.VIEW_YOUR_MODELS_LINK}
           href={trainedModelPageUrl}
           iconType="popout"
           iconSide="right"
@@ -57,6 +59,18 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
           data-test-subj="view-your-models"
         >
           {i18n.VIEW_YOUR_MODELS_LINK}
+        </EuiButtonEmpty>,
+        <EuiButtonEmpty
+          aria-label={i18n.EIS_DOCUMENTATION_LINK}
+          href={docLinks.elasticInferenceService}
+          iconType="popout"
+          iconSide="right"
+          iconSize="s"
+          flush="both"
+          target="_blank"
+          data-test-subj="eis-documentation"
+        >
+          {i18n.EIS_DOCUMENTATION_LINK}
         </EuiButtonEmpty>,
       ]}
     />

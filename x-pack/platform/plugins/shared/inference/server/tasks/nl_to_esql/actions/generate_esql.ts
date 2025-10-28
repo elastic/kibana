@@ -29,13 +29,41 @@ import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/con
 import type { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
+import { generateEsqlPrompt } from './prompts';
 
-const MAX_CALLS = 5;
+const MAX_CALLS = 8;
 
-export const generateEsqlTask = <TToolOptions extends ToolOptions>({
+interface LlmEsqlTaskOptions {
+  documentationRequest: { commands?: string[]; functions?: string[] };
+  callCount?: number;
+}
+
+type LlmEsqlTask<TToolOptions extends ToolOptions = ToolOptions> = (
+  options: LlmEsqlTaskOptions
+) => Observable<NlToEsqlTaskEvent<TToolOptions>>;
+
+interface GenerateEsqlTaskOptions
+  extends Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'> {
+  connectorId: string;
+  messages: Message[];
+  chatCompleteApi: ChatCompleteAPI;
+  docBase: EsqlDocumentBase;
+  logger: Pick<Logger, 'debug'>;
+  metadata?: ChatCompleteMetadata;
+  maxCallsAllowed?: number;
+  additionalSystemInstructions?: string;
+}
+
+export function generateEsqlTask<TToolOptions extends ToolOptions>(
+  options: GenerateEsqlTaskOptions & {
+    toolOptions: TToolOptions;
+  }
+): LlmEsqlTask<TToolOptions>;
+
+export function generateEsqlTask({
   chatCompleteApi,
   connectorId,
-  systemMessage,
+  additionalSystemInstructions,
   messages,
   toolOptions: { tools, toolChoice },
   docBase,
@@ -43,34 +71,23 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   maxRetries,
   retryConfiguration,
   logger,
-  system,
   metadata,
   maxCallsAllowed = MAX_CALLS,
-}: {
-  connectorId: string;
-  systemMessage: string;
-  messages: Message[];
+}: GenerateEsqlTaskOptions & {
   toolOptions: ToolOptions;
-  chatCompleteApi: ChatCompleteAPI;
-  docBase: EsqlDocumentBase;
-  logger: Pick<Logger, 'debug'>;
-  metadata?: ChatCompleteMetadata;
-  system?: string;
-  maxCallsAllowed?: number;
-} & Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'>) => {
+}): LlmEsqlTask {
   return function askLlmToRespond({
     documentationRequest: { commands, functions },
     callCount = 0,
-  }: {
-    documentationRequest: { commands?: string[]; functions?: string[] };
-    callCount?: number;
-  }): Observable<NlToEsqlTaskEvent<TToolOptions>> {
+  }: LlmEsqlTaskOptions): Observable<NlToEsqlTaskEvent<ToolOptions>> {
     const functionLimitReached = callCount >= maxCallsAllowed;
     const keywords = [...(commands ?? []), ...(functions ?? [])];
     const requestedDocumentation = docBase.getDocumentation(keywords);
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
 
-    return merge(
+    const availableTools = Object.keys(tools ?? {});
+
+    const next$ = merge(
       of<
         OutputCompleteEvent<
           'request_documentation',
@@ -92,32 +109,12 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         retryConfiguration,
         metadata,
         stream: true,
-        system: `${systemMessage}
-
-          # Current task
-
-          Your current task is to respond to the user's question. If there is a tool
-          suitable for answering the user's question, use that tool, preferably
-          with a natural language reply included.
-
-          Format any ES|QL query as follows:
-          \`\`\`esql
-          <query>
-          \`\`\`
-
-          When generating ES|QL, it is VERY important that you only use commands and functions present in the
-          requested documentation, and follow the syntax as described in the documentation and its examples.
-          Assume that ONLY the set of capabilities described in the provided ES|QL documentation is valid, and
-          do not try to guess parameters or syntax based on other query languages.
-
-          If what the user is asking for is not technically achievable with ES|QL's capabilities, just inform
-          the user. DO NOT invent capabilities not described in the documentation just to provide
-          a positive answer to the user. E.g. Pagination is not supported by the language, do not try to invent
-          workarounds based on other languages.
-
-          When converting queries from one language to ES|QL, make sure that the functions are available
-          and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
-          ${system ? `## Additional instructions\n\n${system}` : ''}`,
+        system: generateEsqlPrompt({
+          esqlPrompts: docBase.getPrompts(),
+          additionalSystemInstructions,
+          availableTools,
+          hasTools: !functionLimitReached && Object.keys(tools ?? {}).length > 0,
+        }),
         messages: [
           ...messages,
           {
@@ -136,7 +133,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         ],
         toolChoice: !functionLimitReached ? toolChoice : ToolChoiceType.none,
         tools: functionLimitReached
-          ? {}
+          ? undefined
           : {
               ...tools,
               request_documentation: {
@@ -160,7 +157,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         }),
         switchMap((generateEvent) => {
           if (isChatCompletionMessageEvent(generateEvent)) {
-            const toolCalls = generateEvent.toolCalls as ToolCall[];
+            const toolCalls = generateEvent.toolCalls;
             const onlyToolCall = toolCalls.length === 1 ? toolCalls[0] : undefined;
 
             if (onlyToolCall && onlyToolCall.function.name === 'request_documentation') {
@@ -193,8 +190,10 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         })
       )
     );
+
+    return next$;
   };
-};
+}
 
 const correctEsqlMistakes = ({
   content,

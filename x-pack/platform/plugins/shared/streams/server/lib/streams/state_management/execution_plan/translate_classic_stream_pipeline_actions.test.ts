@@ -1043,6 +1043,10 @@ function emptyActionsByType(): ActionsByType {
     update_default_ingest_pipeline: [],
     upsert_dot_streams_document: [],
     delete_dot_streams_document: [],
+    update_data_stream_mappings: [],
     delete_queries: [],
+    unlink_assets: [],
+    unlink_features: [],
+    update_ingest_settings: [],
   };
 }

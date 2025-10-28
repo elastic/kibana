@@ -29,6 +29,10 @@ import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/ins
 import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { IndexPatternAdapter } from '@kbn/index-adapter';
+import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import type { ESSearchRequest } from '@kbn/es-types';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -44,7 +48,10 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import { conversationsFieldMap } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
+import {
+  conversationsAssistantInterruptsFieldMap,
+  conversationsFieldMap,
+} from '../ai_assistant_data_clients/conversations/field_maps_configuration';
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
@@ -69,6 +76,7 @@ import {
   ANONYMIZATION_FIELDS_INDEX_TEMPLATE,
   ANONYMIZATION_FIELDS_RESOURCE,
 } from './constants';
+import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -110,6 +118,15 @@ export type CreateDataStream = (params: {
   writeIndexOnly?: boolean;
 }) => DataStreamSpacesAdapter;
 
+export type CreateIndexPattern = (params: {
+  resource: 'checkpoints' | 'checkpointWrites';
+  fieldMap: FieldMap;
+  kibanaVersion: string;
+  spaceId?: string;
+  settings?: IndicesIndexSettings;
+  writeIndexOnly?: boolean;
+}) => IndexPatternAdapter;
+
 export class AIAssistantService {
   private initialized: boolean;
   private isInitializing: boolean = false;
@@ -121,12 +138,18 @@ export class AIAssistantService {
   private alertSummaryDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private defendInsightsDataStream: DataStreamSpacesAdapter;
+  private checkpointsDataStream: IndexPatternAdapter;
+  private checkpointWritesDataStream: IndexPatternAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
   private isKBSetupInProgress: Map<string, boolean> = new Map();
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
   private isProductDocumentationInProgress: boolean = false;
+  private isCheckpointSaverEnabled: boolean = false;
+  // Temporary 'feature flag' to determine if we should initialize the assistant interrupts mappings.
+  private assistantInterruptsEnabled: boolean = false;
+  private assistantInterruptsInitialized: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -164,6 +187,17 @@ export class AIAssistantService {
       fieldMap: alertSummaryFieldsFieldMap,
     });
 
+    this.checkpointsDataStream = this.createIndexPattern({
+      resource: 'checkpoints',
+      kibanaVersion: options.kibanaVersion,
+      fieldMap: ElasticSearchSaver.checkpointsFieldMap,
+    });
+    this.checkpointWritesDataStream = this.createIndexPattern({
+      resource: 'checkpointWrites',
+      kibanaVersion: options.kibanaVersion,
+      fieldMap: ElasticSearchSaver.checkpointWritesFieldMap,
+    });
+
     this.initPromise = this.initializeResources();
 
     this.resourceInitializationHelper = createResourceInstallationHelper(
@@ -178,6 +212,14 @@ export class AIAssistantService {
       .catch((error) => {
         this.options.logger.warn(`Failed to initialize productDocManager: ${error.message}`);
       });
+  }
+
+  public getIsCheckpointSaverEnabled() {
+    return this.isCheckpointSaverEnabled;
+  }
+
+  public setIsCheckpointSaverEnabled(isEnabled: boolean) {
+    this.isCheckpointSaverEnabled = isEnabled;
   }
 
   public isInitialized() {
@@ -199,6 +241,42 @@ export class AIAssistantService {
   public setIsProductDocumentationInProgress(isInProgress: boolean) {
     this.isProductDocumentationInProgress = isInProgress;
   }
+
+  private createIndexPattern: CreateIndexPattern = ({
+    resource,
+    kibanaVersion,
+    fieldMap,
+    settings,
+    writeIndexOnly,
+  }) => {
+    const newIndexPattern = new IndexPatternAdapter(this.resourceNames.aliases[resource], {
+      kibanaVersion,
+      totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+      writeIndexOnly,
+    });
+
+    newIndexPattern.setComponentTemplate({
+      name: this.resourceNames.componentTemplate[resource],
+      fieldMap,
+      settings,
+    });
+
+    newIndexPattern.setIndexTemplate({
+      name: this.resourceNames.indexTemplate[resource],
+      componentTemplateRefs: [this.resourceNames.componentTemplate[resource]],
+      // Apply `default_pipeline` if pipeline exists for resource
+      ...(resource in this.resourceNames.pipelines && {
+        template: {
+          settings: {
+            'index.default_pipeline':
+              this.resourceNames.pipelines[resource as keyof typeof this.resourceNames.pipelines],
+          },
+        },
+      }),
+    });
+
+    return newIndexPattern;
+  };
 
   private createDataStream: CreateDataStream = ({
     resource,
@@ -329,6 +407,17 @@ export class AIAssistantService {
         });
       }
 
+      // If assistantInterruptsEnabled is true, re-install data stream resources for new mappings if it has not been done already
+      if (this.assistantInterruptsEnabled && !this.assistantInterruptsInitialized) {
+        this.options.logger.debug(`Creating conversation datastream with assistant interrupts`);
+        this.conversationsDataStream = this.createDataStream({
+          resource: 'conversations',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: conversationsAssistantInterruptsFieldMap,
+        });
+        this.assistantInterruptsInitialized = true;
+      }
+
       await this.conversationsDataStream.install({
         esClient,
         logger: this.options.logger,
@@ -424,6 +513,18 @@ export class AIAssistantService {
         logger: this.options.logger,
         pluginStop$: this.options.pluginStop$,
       });
+
+      await this.checkpointsDataStream.install({
+        esClient,
+        logger: this.options.logger,
+        pluginStop$: this.options.pluginStop$,
+      });
+
+      await this.checkpointWritesDataStream.install({
+        esClient,
+        logger: this.options.logger,
+        pluginStop$: this.options.pluginStop$,
+      });
     } catch (error) {
       this.options.logger.warn(`Error initializing AI assistant resources: ${error.message}`);
       this.initialized = false;
@@ -443,6 +544,8 @@ export class AIAssistantService {
       prompts: getResourceName('component-template-prompts'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_COMPONENT_TEMPLATE),
       defendInsights: getResourceName('component-template-defend-insights'),
+      checkpoints: getResourceName('component-template-checkpoints'),
+      checkpointWrites: getResourceName('component-template-checkpoint-writes'),
     },
     aliases: {
       alertSummary: getResourceName('alert-summary'),
@@ -451,6 +554,8 @@ export class AIAssistantService {
       prompts: getResourceName('prompts'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_RESOURCE),
       defendInsights: getResourceName('defend-insights'),
+      checkpoints: getResourceName('checkpoints'),
+      checkpointWrites: getResourceName('checkpoint-writes'),
     },
     indexPatterns: {
       alertSummary: getResourceName('alert-summary*'),
@@ -459,6 +564,8 @@ export class AIAssistantService {
       prompts: getResourceName('prompts*'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_INDEX_PATTERN),
       defendInsights: getResourceName('defend-insights*'),
+      checkpoints: getResourceName('checkpoints*'),
+      checkpointWrites: getResourceName('checkpoint-writes*'),
     },
     indexTemplate: {
       alertSummary: getResourceName('index-template-alert-summary'),
@@ -467,6 +574,8 @@ export class AIAssistantService {
       prompts: getResourceName('index-template-prompts'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_INDEX_TEMPLATE),
       defendInsights: getResourceName('index-template-defend-insights'),
+      checkpoints: getResourceName('index-template-checkpoints'),
+      checkpointWrites: getResourceName('index-template-checkpoint-writes'),
     },
     pipelines: {
       knowledgeBase: getResourceName('ingest-pipeline-knowledge-base'),
@@ -542,6 +651,18 @@ export class AIAssistantService {
       return null;
     }
 
+    // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag her
+    if (opts.assistantInterruptsEnabled) {
+      this.assistantInterruptsEnabled = true;
+    }
+
+    /**
+     * Initialize the assistant interrupts mappings if they are not already initialized.
+     */
+    if (this.assistantInterruptsEnabled && !this.assistantInterruptsInitialized) {
+      await this.initializeResources();
+    }
+
     return new AIAssistantConversationsDataClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
@@ -550,6 +671,26 @@ export class AIAssistantService {
       indexPatternsResourceName: this.resourceNames.aliases.conversations,
       currentUser: opts.currentUser,
     });
+  }
+
+  public async createCheckpointSaver(opts: CreateAIAssistantClientParams) {
+    const esClient = await this.options.elasticsearchClientPromise;
+    const checkpointIndex = getIndexTemplateAndPattern(
+      this.resourceNames.aliases.checkpoints,
+      opts.spaceId
+    ).alias;
+    const checkpointWritesIndex = getIndexTemplateAndPattern(
+      this.resourceNames.aliases.checkpointWrites,
+      opts.spaceId
+    ).alias;
+
+    const elasticSearchSaver = new ElasticSearchSaver({
+      client: esClient,
+      checkpointIndex,
+      checkpointWritesIndex,
+      logger: this.options.logger,
+    });
+    return elasticSearchSaver;
   }
 
   public async createAIAssistantKnowledgeBaseDataClient(
@@ -754,6 +895,17 @@ export class AIAssistantService {
       if (!alertSummaryIndexName) {
         await this.alertSummaryDataStream.installSpace(spaceId);
       }
+      const checkpointsIndexName = await this.checkpointsDataStream.getInstalledIndexName(spaceId);
+      if (!checkpointsIndexName) {
+        await this.checkpointsDataStream.createIndex(spaceId);
+      }
+
+      const checkpointWritesIndexName = await this.checkpointWritesDataStream.getInstalledIndexName(
+        spaceId
+      );
+      if (!checkpointWritesIndexName) {
+        await this.checkpointWritesDataStream.createIndex(spaceId);
+      }
     } catch (error) {
       this.options.logger.warn(
         `Error initializing AI assistant namespace level resources: ${error.message}`
@@ -762,7 +914,7 @@ export class AIAssistantService {
     }
   }
 
-  private async createDefaultAnonymizationFields(spaceId: string) {
+  public async createDefaultAnonymizationFields(spaceId: string): Promise<void> {
     const dataClient = new AIAssistantDataClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
@@ -772,17 +924,42 @@ export class AIAssistantService {
       currentUser: null,
     });
 
-    const existingAnonymizationFields = await (
+    const defaultAnonymizationFields = getDefaultAnonymizationFields(spaceId);
+    // ElasticSearch query to returns all default anonymization fields that exist in the environment
+    const defaultAnonymizationFieldsQuery = {
+      terms: { field: defaultAnonymizationFields.map((field) => field.field) },
+    };
+
+    // It only contains default anonymization fields that are stored in the environment.
+    // It does not contain fields created by the user that are not present in defaultAnonymizationFields array.
+    // If a user created a field with the same name as a default anonymization field, it will be returned in the response.
+    const existingAnonymizationFieldsResponse = await (
       await dataClient?.getReader()
-    ).search({
-      size: 1,
+    ).search<ESSearchRequest, AnonymizationFieldResponse>({
+      size: defaultAnonymizationFields.length,
       allow_no_indices: true,
+      query: defaultAnonymizationFieldsQuery,
     });
-    if (existingAnonymizationFields.hits.total.value === 0) {
+
+    // Verify if the stored default anonymization fields in the environment count is equal to DefaultAnonymizationFields array length.
+    if (
+      existingAnonymizationFieldsResponse.hits.total.value !== defaultAnonymizationFields.length
+    ) {
+      const existingAnonymizationFields = new Set(
+        existingAnonymizationFieldsResponse.hits.hits.map((doc) => doc._source.field)
+      );
+
+      // Only create fields that are not present in the environment, we don't want to update any fields that the users might have already created with the same name.
+      const documentsToCreate = defaultAnonymizationFields.filter(
+        (field) => !existingAnonymizationFields.has(field.field)
+      );
+
       const writer = await dataClient?.getWriter();
+
       const res = await writer?.bulk({
-        documentsToCreate: getDefaultAnonymizationFields(spaceId),
+        documentsToCreate,
       });
+
       this.options.logger.info(`Created default anonymization fields: ${res?.docs_created.length}`);
     }
   }

@@ -110,7 +110,7 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
         return {
           type: Gemini.SchemaType.ARRAY,
           description: def.description,
-          items: convertSchemaType({ def: def.items }) as Gemini.FunctionDeclarationSchema,
+          items: convertSchemaType({ def: def.items }),
         };
       case 'object':
         return {
@@ -118,33 +118,33 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
           description: def.description,
           required: def.required as string[],
           properties: def.properties
-            ? Object.entries(def.properties).reduce<
-                Record<string, Gemini.FunctionDeclarationSchema>
-              >((properties, [key, prop]) => {
-                properties[key] = convertSchemaType({
-                  def: prop,
-                }) as Gemini.FunctionDeclarationSchema;
-                return properties;
-              }, {})
-            : undefined,
+            ? Object.entries(def.properties).reduce<Record<string, Gemini.Schema>>(
+                (properties, [key, prop]) => {
+                  properties[key] = convertSchemaType({
+                    def: prop,
+                  }) as Gemini.Schema;
+                  return properties;
+                },
+                {}
+              )
+            : {},
         };
       case 'string':
         return {
           type: Gemini.SchemaType.STRING,
+          format: 'enum',
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
+          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : [],
         };
       case 'boolean':
         return {
           type: Gemini.SchemaType.BOOLEAN,
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
       case 'number':
         return {
           type: Gemini.SchemaType.NUMBER,
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
     }
   };
@@ -228,9 +228,10 @@ function messageToGeminiMapper() {
               functionResponse: {
                 name: message.toolCallId,
                 // gemini expects a structured response shape, making sure we're not sending a string
-                response: (typeof message.response === 'string'
-                  ? { response: message.response }
-                  : (message.response as string)) as object,
+                response:
+                  typeof message.response === 'string'
+                    ? { response: message.response }
+                    : message.response,
               },
             },
           ],

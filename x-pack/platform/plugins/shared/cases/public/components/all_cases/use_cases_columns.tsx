@@ -40,6 +40,7 @@ import { SeverityHealth } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { IncrementalIdText } from '../incremental_id';
 
 type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>
@@ -66,6 +67,7 @@ export interface GetCasesColumn {
   connectors?: ActionConnector[];
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
+  disabledCases?: Set<string>;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -81,6 +83,7 @@ export const useCasesColumns = ({
   onRowClick,
   disableActions = false,
   selectedColumns,
+  disabledCases,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -88,7 +91,7 @@ export const useCasesColumns = ({
   const {
     data: { customFields },
     isFetching: isLoadingColumns,
-  } = useGetCaseConfiguration();
+  } = useGetCaseConfiguration({ keepPreviousData: true });
 
   const assignCaseAction = useCallback(
     async (theCase: CaseUI) => {
@@ -110,9 +113,14 @@ export const useCasesColumns = ({
             const caseDetailsLinkComponent = isSelectorView ? (
               theCase.title
             ) : (
-              <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
-                <TruncatedText text={theCase.title} />
-              </CaseDetailsLink>
+              <div>
+                <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+                  <TruncatedText text={theCase.title} />
+                </CaseDetailsLink>
+                {typeof theCase.incrementalId === 'number' ? (
+                  <IncrementalIdText incrementalId={theCase.incrementalId} />
+                ) : null}
+              </div>
             );
 
             return caseDetailsLinkComponent;
@@ -190,6 +198,16 @@ export const useCasesColumns = ({
         render: (totalAlerts: CaseUI['totalAlerts']) =>
           totalAlerts != null
             ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+            : getEmptyCellValue(),
+        width: !isSelectorView ? '70px' : '55px',
+      },
+      totalEvents: {
+        field: casesColumnsConfig.totalEvents.field,
+        name: casesColumnsConfig.totalEvents.name,
+        align: RIGHT_ALIGNMENT,
+        render: (totalEvents: CaseUI['totalEvents']) =>
+          totalEvents != null
+            ? renderStringField(`${totalEvents}`, `case-table-column-eventsCount`)
             : getEmptyCellValue(),
         width: !isSelectorView ? '70px' : '55px',
       },
@@ -311,15 +329,16 @@ export const useCasesColumns = ({
         align: RIGHT_ALIGNMENT,
         render: (theCase: CaseUI) => {
           if (theCase.id != null) {
+            const disabled = disabledCases?.has(theCase.id) ?? false;
             return (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
-                onClick={() => {
-                  assignCaseAction(theCase);
-                }}
+                onClick={() => assignCaseAction(theCase)}
                 size="s"
+                iconType={disabled ? 'check' : undefined}
+                disabled={disabled}
               >
-                {i18n.SELECT}
+                {disabled ? i18n.ALREADY_ATTACHED : i18n.SELECT}
               </EuiButton>
             );
           }
@@ -328,7 +347,7 @@ export const useCasesColumns = ({
         width: '120px',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]
+    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, disabledCases]
   );
 
   // we need to extend the columnsDict with the columns of

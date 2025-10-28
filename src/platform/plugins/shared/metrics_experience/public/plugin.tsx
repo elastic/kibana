@@ -7,50 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
-import { dynamic } from '@kbn/shared-ux-utility';
-import { createMetricsExperienceRepositoryClient } from './api';
-import type { MetricsExperiencePluginClass, MetricsExperienceService } from './types';
-
-const MetricsExperienceApplication = dynamic(() =>
-  import('./application').then((mod) => ({ default: mod.Application }))
-);
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import { createMetricsExperienceClient } from './api';
+import type { MetricsExperiencePluginClass } from './types';
+import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../common/constants';
 
 export class MetricsExperiencePlugin implements MetricsExperiencePluginClass {
   public setup(core: CoreSetup) {
-    // Register app
-    core.application.register({
-      id: 'metricsExperience',
-      title: 'Metrics Experience',
-      async mount(appMountParameters: AppMountParameters) {
-        const { element } = appMountParameters;
-        const [coreStart] = await core.getStartServices();
-
-        const services: MetricsExperienceService = {
-          callApi: createMetricsExperienceRepositoryClient(core),
-        };
-
-        ReactDOM.render(
-          coreStart.rendering.addContext(
-            <MetricsExperienceApplication
-              coreStart={coreStart}
-              appMountParameters={appMountParameters}
-              service={services}
-            />
-          ),
-          element
-        );
-        return () => ReactDOM.unmountComponentAtNode(element);
-      },
-    });
-
     return {};
   }
 
   public start(_core: CoreStart) {
-    return {};
+    const isEnabled = _core.featureFlags.getBooleanValue(METRICS_EXPERIENCE_FEATURE_FLAG_KEY, true);
+
+    return {
+      metricsExperienceClient: isEnabled ? createMetricsExperienceClient(_core) : undefined,
+    };
   }
 
   public stop() {}

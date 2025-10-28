@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { differenceBy } from 'lodash';
 import {
   type TypedUseSelectorHook,
   type ReactReduxContextValue,
@@ -43,8 +42,9 @@ export const InternalStateProvider = ({
   </ReduxProvider>
 );
 
-export const useInternalStateDispatch: () => InternalStateDispatch =
-  createDispatchHook(internalStateContext);
+export const useInternalStateDispatch = createDispatchHook(
+  internalStateContext
+) as () => InternalStateDispatch;
 
 export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
   createSelectorHook(internalStateContext);
@@ -99,18 +99,9 @@ export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
 export const useCurrentChartPortalNode = () => useCurrentTabContext().currentChartPortalNode;
 
 export const useDataViewsForPicker = () => {
-  const originalAdHocDataViews = useAdHocDataViews();
+  const adHocDataViews = useAdHocDataViews();
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
-  const defaultProfileAdHocDataViewIds = useInternalStateSelector(
-    (state) => state.defaultProfileAdHocDataViewIds
-  );
-
   return useMemo(() => {
-    const managedDataViews = originalAdHocDataViews.filter(
-      ({ id }) => id && defaultProfileAdHocDataViewIds.includes(id)
-    );
-    const adHocDataViews = differenceBy(originalAdHocDataViews, managedDataViews, 'id');
-
-    return { savedDataViews, managedDataViews, adHocDataViews };
-  }, [defaultProfileAdHocDataViewIds, originalAdHocDataViews, savedDataViews]);
+    return { savedDataViews, adHocDataViews };
+  }, [adHocDataViews, savedDataViews]);
 };

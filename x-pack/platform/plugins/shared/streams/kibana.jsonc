@@ -12,6 +12,7 @@
     "server": true,
     "requiredPlugins": [
       "alerting",
+      "console",
       "data",
       "encryptedSavedObjects",
       "features",
@@ -20,9 +21,10 @@
       "ruleRegistry",
       "security",
       "taskManager",
-      "usageCollection"
+      "usageCollection",
+      "fieldsMetadata"
     ],
-    "optionalPlugins": ["cloud", "serverless", "globalSearch"],
+    "optionalPlugins": ["cloud", "serverless", "globalSearch", "spaces"],
     "requiredBundles": [],
     "extraPublicDirs": ["common"]
   }

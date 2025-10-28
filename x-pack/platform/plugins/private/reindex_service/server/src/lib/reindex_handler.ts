@@ -13,12 +13,12 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { Version } from '@kbn/upgrade-assistant-pkg-server';
 
-import type { ReindexOperation } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus, type Version } from '@kbn/upgrade-assistant-pkg-common';
+import { getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
+import { type ReindexOperation } from '../../../common';
 
 import { reindexActionsFactory } from './reindex_actions';
 import { reindexServiceFactory } from './reindex_service';
@@ -29,8 +29,9 @@ interface ReindexHandlerArgs {
   savedObjects: SavedObjectsClientContract;
   dataClient: IScopedClusterClient;
   indexName: string;
+  newIndexName: string;
   log: Logger;
-  licensing: LicensingPluginSetup;
+  licensing: LicensingPluginStart;
   request: KibanaRequest;
   credentialStore: CredentialStore;
   reindexOptions?: {
@@ -38,6 +39,7 @@ interface ReindexHandlerArgs {
   };
   security?: SecurityPluginStart;
   version: Version;
+  rollupsEnabled: boolean;
 }
 
 export const reindexHandler = async ({
@@ -45,16 +47,24 @@ export const reindexHandler = async ({
   dataClient,
   request,
   indexName,
+  newIndexName,
   licensing,
   log,
   savedObjects,
   reindexOptions,
   security,
   version,
+  rollupsEnabled,
 }: // accept index settings as params
 ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.asCurrentUser;
-  const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, log, version);
+  const reindexActions = reindexActionsFactory(
+    savedObjects,
+    callAsCurrentUser,
+    log,
+    getRollupJobByIndexName,
+    rollupsEnabled
+  );
   const reindexService = reindexServiceFactory(
     callAsCurrentUser,
     reindexActions,
@@ -63,11 +73,12 @@ ReindexHandlerArgs): Promise<ReindexOperation> => {
     version
   );
 
-  if (!(await reindexService.hasRequiredPrivileges(indexName))) {
+  if (!(await reindexService.hasRequiredPrivileges([indexName, newIndexName]))) {
     throw error.accessForbidden(
-      i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
-        defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
-        values: { indexName },
+      i18n.translate('xpack.reindexService.indexPrivilegesErrorBatch', {
+        defaultMessage:
+          'You do not have adequate privileges to reindex "{indexName}" to "{newIndexName}".',
+        values: { indexName, newIndexName },
       })
     );
   }
@@ -78,7 +89,11 @@ ReindexHandlerArgs): Promise<ReindexOperation> => {
   const reindexOp =
     existingOp && existingOp.attributes.status === ReindexStatus.paused
       ? await reindexService.resumeReindexOperation(indexName, reindexOptions)
-      : await reindexService.createReindexOperation(indexName, reindexOptions);
+      : await reindexService.createReindexOperation({
+          indexName,
+          newIndexName,
+          opts: reindexOptions,
+        });
 
   // Add users credentials for the worker to use
   await credentialStore.set({ reindexOp, request, security });

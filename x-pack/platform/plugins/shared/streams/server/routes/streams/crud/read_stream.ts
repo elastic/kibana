@@ -9,17 +9,19 @@ import {
   Streams,
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
+  getInheritedSettings,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { partition } from 'lodash';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
+  getDataStreamSettings,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
-import type { DashboardLink } from '../../../../common/assets';
+import type { DashboardLink, RuleLink, QueryLink } from '../../../../common/assets';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
 export async function readStream({
@@ -33,18 +35,33 @@ export async function readStream({
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
 }): Promise<Streams.all.GetResponse> {
-  const [streamDefinition, { [name]: dashboardsAndQueries }] = await Promise.all([
+  const [streamDefinition, { [name]: assets }] = await Promise.all([
     streamsClient.getStream(name),
-    assetClient.getAssetLinks([name], ['dashboard', 'query']),
+    assetClient.getAssetLinks([name], ['dashboard', 'rule', 'query']),
   ]);
 
-  const [dashboardLinks, queryLinks] = partition(
-    dashboardsAndQueries,
-    (asset): asset is DashboardLink => asset[ASSET_TYPE] === 'dashboard'
+  const assetsByType = assets.reduce(
+    (acc, asset) => {
+      const assetType = asset[ASSET_TYPE];
+      if (assetType === 'dashboard') {
+        acc.dashboards.push(asset);
+      } else if (assetType === 'rule') {
+        acc.rules.push(asset);
+      } else if (assetType === 'query') {
+        acc.queries.push(asset);
+      }
+      return acc;
+    },
+    {
+      dashboards: [] as DashboardLink[],
+      rules: [] as RuleLink[],
+      queries: [] as QueryLink[],
+    }
   );
 
-  const dashboards = dashboardLinks.map((dashboard) => dashboard['asset.id']);
-  const queries = queryLinks.map((query) => {
+  const dashboards = assetsByType.dashboards.map((dashboard) => dashboard['asset.id']);
+  const rules = assetsByType.rules.map((rule) => rule['asset.id']);
+  const queries = assetsByType.queries.map((query) => {
     return query.query;
   });
 
@@ -52,20 +69,32 @@ export async function readStream({
     return {
       stream: streamDefinition,
       dashboards,
+      rules,
       queries,
     };
   }
 
+  const privileges = await streamsClient.getPrivileges(name);
+
   // These queries are only relavant for IngestStreams
-  const [ancestors, dataStream, privileges] = await Promise.all([
+  const [ancestors, dataStream, dataStreamSettings] = await Promise.all([
     streamsClient.getAncestors(name),
-    streamsClient.getDataStream(name).catch((e) => {
-      if (e.statusCode === 404) {
-        return null;
-      }
-      throw e;
-    }),
-    streamsClient.getPrivileges(name),
+    privileges.view_index_metadata
+      ? streamsClient.getDataStream(name).catch((e) => {
+          if (isNotFoundError(e)) {
+            return null;
+          }
+          throw e;
+        })
+      : Promise.resolve(null),
+    privileges.view_index_metadata
+      ? scopedClusterClient.asCurrentUser.indices.getDataStreamSettings({ name }).catch((e) => {
+          if (isNotFoundError(e)) {
+            return null;
+          }
+          throw e;
+        })
+      : Promise.resolve(null),
   ]);
 
   if (Streams.ClassicStream.Definition.is(streamDefinition)) {
@@ -81,7 +110,9 @@ export async function readStream({
           : undefined,
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
+      effective_settings: getDataStreamSettings(dataStreamSettings?.data_streams[0]),
       dashboards,
+      rules,
       queries,
     } satisfies Streams.ClassicStream.GetResponse;
   }
@@ -94,9 +125,11 @@ export async function readStream({
   const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
     dashboards,
+    rules,
     privileges,
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
+    effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,
   };
 

@@ -6,13 +6,17 @@
  */
 
 import type { ZodObject } from '@kbn/zod';
+import type { ToolResult, ToolType } from '@kbn/onechat-common';
 import { createBadRequestError } from '@kbn/onechat-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
   ToolHandlerContext,
   ScopedRunnerRunToolsParams,
+  ToolHandlerReturn,
   RunToolReturn,
 } from '@kbn/onechat-server';
+import { createErrorResult } from '@kbn/onechat-server';
+import { getToolResultId } from '@kbn/onechat-server/tools';
 import { registryToProvider } from '../tools/utils';
 import { forkContextForToolRun } from './utils/run_context';
 import { createToolEventEmitter } from './utils/events';
@@ -30,16 +34,21 @@ export const runTool = async <TParams = Record<string, unknown>>({
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId });
   const manager = parentManager.createChild(context);
-  const { toolsService, request } = manager.deps;
+  const { toolsService, request, resultStore } = manager.deps;
 
   const toolRegistry = await toolsService.getRegistry({ request });
-  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<any, ZodObject<any>>;
+  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
+    ToolType,
+    any,
+    ZodObject<any>
+  >;
 
-  const toolReturn = await withExecuteToolSpan(
+  const { results } = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams } },
-    async () => {
-      const validation = tool.schema.safeParse(toolParams);
+    async (): Promise<ToolHandlerReturn> => {
+      const schema = await tool.getSchema();
+      const validation = schema.safeParse(toolParams);
       if (validation.error) {
         throw createBadRequestError(
           `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
@@ -50,18 +59,32 @@ export const runTool = async <TParams = Record<string, unknown>>({
         toolExecutionParams,
         manager,
       });
-      const toolReturnInternal = await tool.handler(
-        validation.data as Record<string, any>,
-        toolHandlerContext
-      );
 
-      return toolReturnInternal;
+      try {
+        const toolHandler = await tool.getHandler();
+        return await toolHandler(validation.data as Record<string, any>, toolHandlerContext);
+      } catch (err) {
+        return {
+          results: [createErrorResult(err.message)],
+        };
+      }
     }
   );
 
+  const resultsWithIds = results.map<ToolResult>(
+    (result) =>
+      ({
+        ...result,
+        tool_result_id: result.tool_result_id ?? getToolResultId(),
+      } as ToolResult)
+  );
+
+  resultsWithIds.forEach((result) => {
+    resultStore.add(result);
+  });
+
   return {
-    runId: manager.context.runId,
-    ...toolReturn,
+    results: resultsWithIds,
   };
 };
 
@@ -73,8 +96,15 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
   const { onEvent } = toolExecutionParams;
-  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
-    manager.deps;
+  const {
+    request,
+    defaultConnectorId,
+    elasticsearch,
+    modelProviderFactory,
+    toolsService,
+    resultStore,
+    logger,
+  } = manager.deps;
   return {
     request,
     logger,
@@ -86,6 +116,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       getRunner: manager.getRunner,
       request,
     }),
+    resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };

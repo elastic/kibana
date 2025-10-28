@@ -12,7 +12,7 @@ import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@tanstack/react-query';
+} from '@kbn/react-query';
 import type {
   ApiConfig,
   PromptResponse,
@@ -292,7 +292,7 @@ export const useCurrentConversation = ({
     handleOnConversationSelected({
       cId: lastConversation.id,
       cTitle: lastConversation.title,
-      silent: true,
+      silent: false,
     });
   }, [lastConversation, handleOnConversationSelected, currentConversation, mayUpdateConversations]);
 

@@ -7,132 +7,104 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback } from 'react';
-
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
-import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
-import { WorkflowStepExecutionList } from './workflow_step_execution_list';
+import { EuiPanel } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import {
+  ResizableLayout,
+  ResizableLayoutDirection,
+  ResizableLayoutMode,
+  ResizableLayoutOrder,
+} from '@kbn/resizable-layout';
+import { useWorkflowExecutionPolling } from './hooks/use_workflow_execution_polling';
+import { WorkflowStepExecutionList } from './workflow_execution_list';
+import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { WorkflowStepExecutionFlyout } from './workflow_step_execution_flyout';
 
-export interface WorkflowExecutionProps {
-  workflowExecutionId: string;
-  workflowYaml: string;
-  fields?: Array<keyof EsWorkflowStepExecution>;
+const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
+const DefaultSidebarWidth = 300;
+export interface WorkflowExecutionDetailProps {
+  executionId: string;
+  onClose: () => void;
 }
 
-export const WorkflowExecutionDetail: React.FC<WorkflowExecutionProps> = ({
-  workflowExecutionId,
-}) => {
-  const {
-    data: workflowExecution,
-    isLoading,
-    error,
-    refetch,
-  } = useWorkflowExecution(workflowExecutionId);
+export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
+  ({ executionId, onClose }) => {
+    const { workflowExecution, isLoading, error } = useWorkflowExecutionPolling(executionId);
 
-  const { setSelectedStepExecution, selectedStepExecutionId, setSelectedExecution } =
-    useWorkflowUrlState();
-
-  const closeFlyout = useCallback(() => {
-    setSelectedStepExecution(null);
-  }, [setSelectedStepExecution]);
-
-  useEffect(() => {
-    if (!workflowExecution) {
-      return;
-    }
-
-    const intervalId = setInterval(() => {
-      if (
-        ![
-          ExecutionStatus.COMPLETED,
-          ExecutionStatus.FAILED,
-          ExecutionStatus.CANCELLED,
-          ExecutionStatus.SKIPPED,
-        ].includes(workflowExecution.status)
-      ) {
-        refetch();
-        return;
-      }
-
-      clearInterval(intervalId);
-    }, 500); // Refresh every 500ms
-
-    return () => clearInterval(intervalId);
-  }, [workflowExecution, refetch]);
-
-  const renderSelectedStepExecutionFlyout = useCallback(() => {
-    if (!workflowExecution?.stepExecutions?.length) {
-      return null;
-    }
-
-    const selectedStepExecutionIndex = workflowExecution.stepExecutions.findIndex(
-      (step) => step.id === selectedStepExecutionId
+    const { activeTab, setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
+    const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
+      WidthStorageKey,
+      DefaultSidebarWidth
     );
-    const selectedStepExecution = workflowExecution.stepExecutions[selectedStepExecutionIndex];
+    const showBackButton = activeTab === 'executions';
 
-    if (!selectedStepExecution) {
+    useEffect(() => {
+      if (workflowExecution && !selectedStepExecutionId) {
+        // Auto-select the first step execution if none is selected
+        const firstStepExecutionId = workflowExecution.stepExecutions?.[0]?.id;
+        if (firstStepExecutionId) {
+          setSelectedStepExecution(firstStepExecutionId);
+        }
+      }
+    }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution]);
+
+    const setSelectedStepExecutionId = useCallback(
+      (stepExecutionId: string | null) => {
+        setSelectedStepExecution(stepExecutionId);
+      },
+      [setSelectedStepExecution]
+    );
+
+    const workflowDefinition = useMemo(() => {
+      if (workflowExecution) {
+        return workflowExecution.workflowDefinition;
+      }
       return null;
-    }
+    }, [workflowExecution]);
 
-    const goNext =
-      selectedStepExecutionIndex < workflowExecution.stepExecutions.length - 1
-        ? () => {
-            const nextStepExecutionIndex =
-              (selectedStepExecutionIndex + 1) % workflowExecution.stepExecutions.length;
-            const nextStepExecution = workflowExecution.stepExecutions[nextStepExecutionIndex];
-            setSelectedStepExecution(nextStepExecution.id);
-          }
-        : undefined;
-
-    const goPrevious =
-      selectedStepExecutionIndex > 0
-        ? () => {
-            const previousStepExecutionIndex =
-              (selectedStepExecutionIndex - 1 + workflowExecution.stepExecutions.length) %
-              workflowExecution.stepExecutions.length;
-            const previousStepExecution =
-              workflowExecution.stepExecutions[previousStepExecutionIndex];
-            setSelectedStepExecution(previousStepExecution.id);
-          }
-        : undefined;
+    const selectedStepExecution = useMemo(() => {
+      if (!workflowExecution?.stepExecutions?.length || !selectedStepExecutionId) {
+        return undefined;
+      }
+      return workflowExecution.stepExecutions.find((step) => step.id === selectedStepExecutionId);
+    }, [workflowExecution?.stepExecutions, selectedStepExecutionId]);
 
     return (
-      <WorkflowStepExecutionFlyout
-        workflowExecutionId={workflowExecutionId}
-        stepId={selectedStepExecution.stepId}
-        closeFlyout={closeFlyout}
-        goNext={goNext}
-        goPrevious={goPrevious}
-      />
+      <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
+        <ResizableLayout
+          fixedPanel={
+            <WorkflowStepExecutionList
+              definition={workflowDefinition}
+              execution={workflowExecution ?? null}
+              showBackButton={showBackButton}
+              isLoading={isLoading}
+              error={error}
+              onClose={onClose}
+              onStepExecutionClick={setSelectedStepExecutionId}
+              selectedId={selectedStepExecutionId ?? null}
+            />
+          }
+          fixedPanelSize={sidebarWidth}
+          onFixedPanelSizeChange={setSidebarWidth}
+          minFixedPanelSize={200}
+          fixedPanelOrder={ResizableLayoutOrder.Start}
+          flexPanel={
+            <WorkflowStepExecutionDetails
+              workflowExecutionId={executionId}
+              stepExecution={selectedStepExecution}
+              isLoading={isLoading}
+            />
+          }
+          minFlexPanelSize={200}
+          mode={ResizableLayoutMode.Resizable}
+          direction={ResizableLayoutDirection.Horizontal}
+          resizeButtonClassName="workflowExecutionDetailResizeButton"
+          data-test-subj="WorkflowEditorWithExecutionDetailLayout"
+          className="workflowExecutionDetailResizableLayout"
+        />
+      </EuiPanel>
     );
-  }, [
-    workflowExecution?.stepExecutions,
-    workflowExecutionId,
-    selectedStepExecutionId,
-    setSelectedStepExecution,
-    closeFlyout,
-  ]);
-
-  const closeSidePanel = useCallback(() => {
-    setSelectedExecution(null);
-  }, [setSelectedExecution]);
-
-  return (
-    <>
-      {renderSelectedStepExecutionFlyout()}
-      <WorkflowStepExecutionList
-        execution={workflowExecution ?? null}
-        isLoading={isLoading}
-        error={error as Error | null}
-        onStepExecutionClick={(stepExecutionId) => {
-          setSelectedStepExecution(stepExecutionId);
-        }}
-        onClose={closeSidePanel}
-        selectedId={selectedStepExecutionId ?? null}
-      />
-    </>
-  );
-};
+  }
+);
+WorkflowExecutionDetail.displayName = 'WorkflowExecutionDetail';

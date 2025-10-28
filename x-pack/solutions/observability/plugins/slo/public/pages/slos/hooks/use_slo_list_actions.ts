@@ -28,7 +28,7 @@ export function useSloListActions({
   };
 
   const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
       const embeddableInput = {
         title: newTitle,
@@ -45,8 +45,8 @@ export function useSloListActions({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },

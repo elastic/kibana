@@ -15,7 +15,6 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -34,7 +33,7 @@ import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
-import { StreamsTelemetryService } from './lib/telemetry/service';
+import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
 import type { RouteHandlerScopedClients } from './routes/types';
 import type {
@@ -43,6 +42,8 @@ import type {
   StreamsServer,
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
+import { FeatureService } from './lib/streams/feature/feature_service';
+import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -67,12 +68,15 @@ export class StreamsPlugin
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
-  private telemetryService = new StreamsTelemetryService();
+  private ebtTelemetryService = new EbtTelemetryService();
+  private statsTelemetryService = new StatsTelemetryService();
+  private processorSuggestionsService: ProcessorSuggestionsService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.processorSuggestionsService = new ProcessorSuggestionsService();
   }
 
   public setup(
@@ -84,7 +88,12 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
-    this.telemetryService.setup(core.analytics);
+    this.ebtTelemetryService.setup(core.analytics);
+    this.statsTelemetryService.setup(
+      core,
+      this.logger.get('streams-stats-telemetry'),
+      plugins.usageCollection
+    );
 
     const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
       ruleTypeId,
@@ -95,6 +104,7 @@ export class StreamsPlugin
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
+    const featureService = new FeatureService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
 
@@ -104,8 +114,7 @@ export class StreamsPlugin
         defaultMessage: 'Streams',
       }),
       order: 600,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      category: DEFAULT_APP_CATEGORIES.management,
       app: [STREAMS_FEATURE_ID],
       privilegesTooltip: i18n.translate('xpack.streams.featureRegistry.privilegesTooltip', {
         defaultMessage: 'All Spaces is required for Streams access.',
@@ -157,44 +166,56 @@ export class StreamsPlugin
       repository: streamsRouteRepository,
       dependencies: {
         assets: assetService,
+        features: featureService,
         server: this.server,
-        telemetry: this.telemetryService.getClient(),
+        telemetry: this.ebtTelemetryService.getClient(),
+        processorSuggestions: this.processorSuggestionsService,
         getScopedClients: async ({
           request,
         }: {
           request: KibanaRequest;
         }): Promise<RouteHandlerScopedClients> => {
-          const [[coreStart, pluginsStart], assetClient, contentClient] = await Promise.all([
-            core.getStartServices(),
-            assetService.getClientWithRequest({ request }),
-            contentService.getClient(),
-          ]);
+          const [[coreStart, pluginsStart], assetClient, featureClient, contentClient] =
+            await Promise.all([
+              core.getStartServices(),
+              assetService.getClientWithRequest({ request }),
+              featureService.getClientWithRequest({ request }),
+              contentService.getClient(),
+            ]);
 
-          const queryClient = await queryService.getClientWithRequest({
-            request,
-            assetClient,
-          });
+          const [queryClient, uiSettingsClient] = await Promise.all([
+            queryService.getClientWithRequest({
+              request,
+              assetClient,
+            }),
+            coreStart.uiSettings.asScopedToClient(coreStart.savedObjects.getScopedClient(request)),
+          ]);
 
           const streamsClient = await streamsService.getClientWithRequest({
             request,
             assetClient,
             queryClient,
+            featureClient,
           });
 
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const inferenceClient = pluginsStart.inference.getClient({ request });
           const licensing = pluginsStart.licensing;
+          const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
           return {
             scopedClusterClient,
             soClient,
             assetClient,
             streamsClient,
+            featureClient,
             inferenceClient,
             contentClient,
             queryClient,
+            fieldsMetadataClient,
             licensing,
+            uiSettingsClient,
           };
         },
       },
@@ -203,7 +224,7 @@ export class StreamsPlugin
       runDevModeChecks: this.isDev,
     });
 
-    registerFeatureFlags(core, plugins, this.logger);
+    registerFeatureFlags(core, this.logger);
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
@@ -222,6 +243,8 @@ export class StreamsPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.taskManager = plugins.taskManager;
     }
+
+    this.processorSuggestionsService.setConsoleStart(plugins.console);
 
     return {};
   }

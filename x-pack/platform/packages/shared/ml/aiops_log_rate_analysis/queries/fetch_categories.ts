@@ -85,7 +85,9 @@ export const getCategoryRequest = (
     undefined,
     undefined,
     false,
-    false
+    false,
+    // categoryLimit reduced to avoid extensive mSearch requests
+    100
   );
 
   // In this case we're only interested in the aggregation which

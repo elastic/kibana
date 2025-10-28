@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import type { MonitoredUserDoc } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
+import type { MonitoredUserDoc } from '../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import type { PrivMonBulkUser } from '../../types';
 
-export const findStaleUsersForIndexFactory =
+export const findStaleUsersFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
-  async (sourceId: string, userNames: string[]): Promise<PrivMonBulkUser[]> => {
+  async (
+    sourceId: string,
+    userNames: string[],
+    labelsSource: 'index' | 'entity_analytics_integration'
+  ): Promise<PrivMonBulkUser[]> => {
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
 
     const response = await esClient.search<MonitoredUserDoc>({
@@ -22,7 +26,7 @@ export const findStaleUsersForIndexFactory =
         bool: {
           must: [
             { term: { 'user.is_privileged': true } },
-            { term: { 'labels.sources': 'index' } },
+            { term: { 'labels.sources': labelsSource } },
             { term: { 'labels.source_ids.keyword': sourceId } },
           ],
           must_not: {
@@ -36,5 +40,6 @@ export const findStaleUsersForIndexFactory =
       username: hit._source?.user?.name ?? 'unknown',
       existingUserId: hit._id,
       sourceId,
+      isPrivileged: false,
     }));
   };

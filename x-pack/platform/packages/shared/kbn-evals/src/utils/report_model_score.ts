@@ -8,244 +8,305 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { sumBy, keyBy, uniq } from 'lodash';
+import type { Client as EsClient } from '@elastic/elasticsearch';
+import { sumBy } from 'lodash';
 import { table } from 'table';
 import chalk from 'chalk';
-import { mean, median, deviation, min, max } from 'd3';
+import { hostname } from 'os';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
+import {
+  EvaluationScoreRepository,
+  type EvaluationScoreDocument,
+  parseScoreDocuments,
+} from './score_repository';
+import {
+  buildEvaluationResults,
+  calculateEvaluatorStats,
+  getUniqueEvaluatorNames,
+  calculateOverallStats,
+  type DatasetScoreWithStats,
+  type EvaluatorStats,
+} from './evaluation_stats';
 
-interface DatasetScore {
-  id: string;
-  name: string;
-  numExamples: number;
-  evaluatorScores: Map<string, number[]>;
-  evaluatorStats?: Map<string, EvaluatorStats>;
-}
-
-interface EvaluatorStats {
-  mean: number;
-  median: number;
-  stdDev: number;
-  min: number;
-  max: number;
-  count: number;
-  percentage: number;
-}
-
-export async function reportModelScore({
-  log,
-  phoenixClient,
-  model,
-  experiments,
-  repetitions,
-}: {
-  log: SomeDevLog;
-  phoenixClient: KibanaPhoenixClient;
+/**
+ * Evaluation report containing dataset scores with computed statistics
+ * Ready for export to Elasticsearch and display via reporters
+ */
+export interface EvaluationReport {
+  datasetScoresWithStats: DatasetScoreWithStats[];
   model: Model;
-  experiments: RanExperiment[];
+  evaluatorModel: Model;
   repetitions: number;
-}): Promise<void> {
-  const allDatasetIds = uniq(experiments.flatMap((experiment) => experiment.datasetId));
+  runId: string;
+}
 
-  const datasetInfos = await phoenixClient.getDatasets(allDatasetIds);
+/**
+ * Function signature for evaluation reporters
+ * Reporters provide evaluation results to users (e.g., terminal, file, dashboard)
+ */
+export type EvaluationReporter = (
+  scoreRepository: EvaluationScoreRepository,
+  runId: string,
+  log: SomeDevLog
+) => Promise<void>;
 
-  const datasetInfosById = keyBy(datasetInfos, (datasetInfo) => datasetInfo.id);
+/**
+ * Builds an evaluation report from Phoenix experiments
+ * Aggregates raw experiment data and computes statistics for each dataset and evaluator
+ */
+export async function buildEvaluationReport({
+  phoenixClient,
+  experiments,
+  model,
+  evaluatorModel,
+  repetitions,
+  runId,
+}: {
+  phoenixClient: KibanaPhoenixClient;
+  experiments: RanExperiment[];
+  model: Model;
+  evaluatorModel: Model;
+  repetitions: number;
+  runId?: string;
+}): Promise<EvaluationReport> {
+  const { datasetScores } = await buildEvaluationResults(experiments, phoenixClient);
 
-  const datasetScoresMap = new Map<string, DatasetScore>();
-
-  for (const experiment of experiments) {
-    const { datasetId, evaluationRuns, runs } = experiment;
-
-    const numExamplesForExperiment = runs ? Object.keys(runs).length : 0;
-
-    // Ensure dataset entry exists
-    if (!datasetScoresMap.has(datasetId)) {
-      datasetScoresMap.set(datasetId, {
-        id: datasetId,
-        name: datasetInfosById[datasetId]?.name ?? datasetId,
-        numExamples: 0,
-        evaluatorScores: new Map<string, number[]>(),
-      });
-    }
-
-    const datasetScore = datasetScoresMap.get(datasetId)!;
-    datasetScore.numExamples += numExamplesForExperiment;
-
-    if (evaluationRuns) {
-      evaluationRuns.forEach((evalRun) => {
-        const score = evalRun.result?.score ?? 0;
-
-        // If evaluatorScores doesn't contain that evaluator by key, create an empty array
-        if (!datasetScore.evaluatorScores.has(evalRun.name)) {
-          datasetScore.evaluatorScores.set(evalRun.name, []);
-        }
-
-        datasetScore.evaluatorScores.get(evalRun.name)!.push(score);
-      });
-    }
-  }
-
-  // Get all unique evaluator names across all datasets
-  const allEvaluatorNames = new Set<string>();
-  Array.from(datasetScoresMap.values()).forEach((dataset) => {
-    dataset.evaluatorScores.forEach((_, evaluatorName) => {
-      allEvaluatorNames.add(evaluatorName);
-    });
-  });
-  const evaluatorNames = Array.from(allEvaluatorNames).sort();
-
-  const datasetScores = Array.from(datasetScoresMap.values()).map((dataset) => ({
+  // Add evaluator stats to dataset scores
+  const datasetScoresWithStats: DatasetScoreWithStats[] = datasetScores.map((dataset) => ({
     ...dataset,
     evaluatorStats: new Map(
-      evaluatorNames.map((evaluatorName) => {
-        const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-        if (scores.length === 0) {
-          return [
-            evaluatorName,
-            {
-              mean: 0,
-              median: 0,
-              stdDev: 0,
-              min: 0,
-              max: 0,
-              count: 0,
-              percentage: 0,
-            } as EvaluatorStats,
-          ];
-        }
-        const totalScore = scores.reduce((sum, score) => sum + score, 0);
-        return [
-          evaluatorName,
-          {
-            mean: mean(scores) ?? 0,
-            median: median(scores) ?? 0,
-            stdDev: deviation(scores) ?? 0,
-            min: min(scores) ?? 0,
-            max: max(scores) ?? 0,
-            count: scores.length,
-            percentage: dataset.numExamples > 0 ? totalScore / dataset.numExamples : 0,
-          } as EvaluatorStats,
-        ];
+      Array.from(dataset.evaluatorScores.entries()).map(([evaluatorName, scores]) => {
+        const stats = calculateEvaluatorStats(scores, dataset.numExamples);
+        return [evaluatorName, stats];
       })
     ),
   }));
 
-  if (datasetScores.length === 0) {
-    log.error(`No dataset scores were available`);
+  const currentRunId = runId || process.env.TEST_RUN_ID;
+
+  return {
+    datasetScoresWithStats,
+    model,
+    evaluatorModel,
+    repetitions,
+    runId: currentRunId!,
+  };
+}
+
+/**
+ * Exports evaluation results to an Elasticsearch datastream
+ * This ensures results are persisted for analysis and comparison
+ */
+export async function exportEvaluations(
+  report: EvaluationReport,
+  esClient: EsClient,
+  log: SomeDevLog
+): Promise<void> {
+  if (report.datasetScoresWithStats.length === 0) {
+    log.warning('No dataset scores available to export to Elasticsearch');
     return;
   }
 
-  // Calculate overall statistics for each evaluator
-  const overallEvaluatorStats = new Map<string, EvaluatorStats>();
-  const totalExamples = sumBy(datasetScores, (d) => d.numExamples);
+  log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-  evaluatorNames.forEach((evaluatorName) => {
-    // Get all scores across all datasets for this evaluator
-    const allScores = datasetScores.flatMap((d) => d.evaluatorScores.get(evaluatorName) || []);
+  const exporter = new EvaluationScoreRepository(esClient, log);
 
-    if (allScores.length === 0) {
-      overallEvaluatorStats.set(evaluatorName, {
-        mean: 0,
-        median: 0,
-        stdDev: 0,
-        min: 0,
-        max: 0,
-        count: 0,
-        percentage: 0,
-      });
+  await exporter.exportScores({
+    datasetScoresWithStats: report.datasetScoresWithStats,
+    model: report.model,
+    evaluatorModel: report.evaluatorModel,
+    runId: report.runId,
+    repetitions: report.repetitions,
+  });
+
+  log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
+  log.info(
+    chalk.gray(
+      `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${
+        report.model.id || 'unknown'
+      }" AND run_id:"${report.runId}"`
+    )
+  );
+}
+
+/**
+ * Formats Elasticsearch documents into structured report data
+ */
+export function formatReportData(scores: EvaluationScoreDocument[]): EvaluationReport {
+  if (scores.length === 0) {
+    throw new Error('No documents to format');
+  }
+
+  const scoresWithStats = parseScoreDocuments(scores);
+
+  // Assumes all evaluation datasets are repeated the same number of times
+  const repetitions = scores[0].repetitions ?? 1;
+
+  return {
+    datasetScoresWithStats: scoresWithStats,
+    model: scores[0].model as Model,
+    evaluatorModel: scores[0].evaluator_model as Model,
+    repetitions,
+    runId: scores[0].run_id,
+  };
+}
+
+/**
+ * Default terminal reporter implementation
+ * Displays evaluation results as a formatted table in the terminal
+ */
+export function createDefaultTerminalReporter(): EvaluationReporter {
+  return async (scoreRepository: EvaluationScoreRepository, runId: string, log: SomeDevLog) => {
+    const docs = await scoreRepository.getScoresByRunId(runId);
+
+    if (docs.length === 0) {
+      log.error(`No evaluation results found for run ID: ${runId}`);
       return;
     }
 
-    // Calculate weighted percentage (total score across all datasets / total examples)
-    const totalScore = sumBy(datasetScores, (d) => {
-      const scores = d.evaluatorScores.get(evaluatorName) || [];
-      return scores.reduce((sum, score) => sum + score, 0);
-    });
+    const report = formatReportData(docs);
 
-    overallEvaluatorStats.set(evaluatorName, {
-      mean: mean(allScores) ?? 0,
-      median: median(allScores) ?? 0,
-      stdDev: deviation(allScores) ?? 0,
-      min: min(allScores) ?? 0,
-      max: max(allScores) ?? 0,
-      count: allScores.length,
-      percentage: totalExamples > 0 ? totalScore / totalExamples : 0,
-    });
-  });
+    const header = buildReportHeader(report.model, report.evaluatorModel);
+    const summaryTable = createEvaluationReportTable(report);
 
-  const header = [`Model: ${model.id} (${model.family}/${model.provider})`];
+    log.info(`\n\n${header.join('\n')}`);
+    log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
+  };
+}
 
-  // Create summary table with dataset-level and overall descriptive statistics
-  const createSummaryTable = () => {
-    const repetitionAwareExampleCount = (numExamples: number): string => {
-      return repetitions > 1
-        ? `${repetitions} x ${numExamples / repetitions}`
-        : numExamples.toString();
-    };
+/**
+ * Builds the report header with model information
+ */
+function buildReportHeader(model: Model, evaluatorModel: Model): string[] {
+  return [
+    `Model: ${model.id} (${model.family}/${model.provider})`,
+    `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`,
+  ];
+}
 
-    const examplesHeader =
-      repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
+export interface EvaluationTableOptions {
+  firstColumnHeader?: string;
+  styleRowName?: (name: string) => string;
+  statsToInclude?: Array<keyof EvaluatorStats>;
+}
 
-    const tableHeaders = ['Dataset', examplesHeader, ...evaluatorNames];
+/**
+ * Creates a formatted table from an EvaluationReport
+ * Can be used by any reporter to display results in a consistent format
+ */
+export function createEvaluationReportTable(
+  report: EvaluationReport,
+  options: EvaluationTableOptions = {}
+): string {
+  const { firstColumnHeader = 'Dataset', styleRowName = (name) => name, statsToInclude } = options;
 
-    const datasetRows = datasetScores.map((dataset) => {
-      const row = [dataset.name, repetitionAwareExampleCount(dataset.numExamples)];
+  const { datasetScoresWithStats, repetitions } = report;
 
-      evaluatorNames.forEach((evaluatorName) => {
-        const stats = dataset.evaluatorStats.get(evaluatorName);
-        if (stats && stats.count > 0) {
-          // Combine all statistics in a single cell with multiple lines
-          const cellContent = [
-            chalk.bold.yellow(`${(stats.percentage * 100).toFixed(1)}%`),
-            chalk.cyan(`mean: ${stats.mean.toFixed(3)}`),
-            chalk.cyan(`median: ${stats.median.toFixed(3)}`),
-            chalk.cyan(`std: ${stats.stdDev.toFixed(3)}`),
-            chalk.cyan(`min: ${stats.min.toFixed(3)}`),
-            chalk.cyan(`max: ${stats.max.toFixed(3)}`),
-          ].join('\n');
-          row.push(cellContent);
-        } else {
-          row.push(chalk.gray('-'));
-        }
-      });
+  const evaluatorNames = getUniqueEvaluatorNames(datasetScoresWithStats);
+  const overallStats = calculateOverallStats(datasetScoresWithStats);
+  const totalExamples = sumBy(datasetScoresWithStats, (d) => d.numExamples);
 
-      return row;
-    });
+  const formatExampleCount = (numExamples: number): string => {
+    return repetitions > 1
+      ? `${repetitions} x ${numExamples / repetitions}`
+      : numExamples.toString();
+  };
 
-    // Add overall statistics row
-    const overallRow = [chalk.bold.green('Overall'), repetitionAwareExampleCount(totalExamples)];
+  const examplesHeader =
+    repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
+
+  const tableHeaders = [firstColumnHeader, examplesHeader, ...evaluatorNames];
+
+  const datasetRows = datasetScoresWithStats.map((dataset) => {
+    const row = [styleRowName(dataset.name), formatExampleCount(dataset.numExamples)];
+
     evaluatorNames.forEach((evaluatorName) => {
-      const stats = overallEvaluatorStats.get(evaluatorName);
+      const stats = dataset.evaluatorStats.get(evaluatorName);
       if (stats && stats.count > 0) {
-        const cellContent = [
-          chalk.bold.yellow(`${(stats.percentage * 100).toFixed(1)}%`),
-          chalk.bold.green(`mean: ${stats.mean.toFixed(3)}`),
-          chalk.bold.green(`median: ${stats.median.toFixed(3)}`),
-          chalk.bold.green(`std: ${stats.stdDev.toFixed(3)}`),
-          chalk.bold.green(`min: ${stats.min.toFixed(3)}`),
-          chalk.bold.green(`max: ${stats.max.toFixed(3)}`),
-        ].join('\n');
-        overallRow.push(cellContent);
+        const cellContent = formatStatsCell(stats, false, statsToInclude);
+        row.push(cellContent);
       } else {
-        overallRow.push(chalk.bold.green('-'));
+        row.push(chalk.gray('-'));
       }
     });
 
-    // Build column alignment configuration
-    const columnConfig: Record<number, { alignment: 'right' | 'left' }> = {
-      0: { alignment: 'left' },
-    };
-    for (let i = 1; i < tableHeaders.length; i++) {
-      columnConfig[i] = { alignment: 'right' };
-    }
+    return row;
+  });
 
-    return table([tableHeaders, ...datasetRows, overallRow], {
-      columns: columnConfig,
-    });
+  const overallRow = [
+    chalk.bold.green('Overall'),
+    chalk.bold.green(formatExampleCount(totalExamples)),
+  ];
+
+  evaluatorNames.forEach((evaluatorName) => {
+    const stats = overallStats.get(evaluatorName);
+    if (stats && stats.count > 0) {
+      const cellContent = formatStatsCell(stats, true, statsToInclude);
+      overallRow.push(cellContent);
+    } else {
+      overallRow.push(chalk.bold.green('-'));
+    }
+  });
+
+  const columnConfig = buildColumnAlignment(tableHeaders.length);
+
+  return table([tableHeaders, ...datasetRows, overallRow], { columns: columnConfig });
+}
+
+/**
+ * Formats a statistics cell for display in the evaluation table
+ */
+function formatStatsCell(
+  stats: Partial<EvaluatorStats>,
+  isBold: boolean,
+  statsToInclude?: Array<keyof EvaluatorStats>
+): string {
+  const colorFn = isBold ? chalk.bold.green : chalk.cyan;
+  const percentageColor = isBold ? chalk.bold.yellow : chalk.bold.yellow;
+
+  const lines: string[] = [];
+
+  const shouldInclude = (stat: keyof EvaluatorStats) => {
+    return !statsToInclude || statsToInclude.includes(stat);
   };
 
-  const summaryTable = createSummaryTable();
+  if (shouldInclude('percentage') && stats.percentage !== undefined) {
+    lines.push(percentageColor(`${(stats.percentage * 100).toFixed(1)}%`));
+  }
 
-  log.info(`\n\n${header[0]}`);
-  log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
+  if (shouldInclude('mean') && stats.mean !== undefined) {
+    lines.push(colorFn(`mean: ${stats.mean.toFixed(3)}`));
+  }
+
+  if (shouldInclude('median') && stats.median !== undefined) {
+    lines.push(colorFn(`median: ${stats.median.toFixed(3)}`));
+  }
+
+  if (shouldInclude('stdDev') && stats.stdDev !== undefined) {
+    lines.push(colorFn(`std: ${stats.stdDev.toFixed(3)}`));
+  }
+
+  if (shouldInclude('min') && stats.min !== undefined) {
+    lines.push(colorFn(`min: ${stats.min.toFixed(3)}`));
+  }
+
+  if (shouldInclude('max') && stats.max !== undefined) {
+    lines.push(colorFn(`max: ${stats.max.toFixed(3)}`));
+  }
+
+  return lines.join('\n');
+}
+
+function buildColumnAlignment(
+  columnCount: number
+): Record<number, { alignment: 'right' | 'left' }> {
+  const config: Record<number, { alignment: 'right' | 'left' }> = {
+    0: { alignment: 'left' },
+  };
+
+  for (let i = 1; i < columnCount; i++) {
+    config[i] = { alignment: 'right' };
+  }
+
+  return config;
 }

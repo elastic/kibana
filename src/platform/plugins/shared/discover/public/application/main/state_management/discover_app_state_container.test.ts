@@ -20,7 +20,6 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
-import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { omit } from 'lodash';
 import type { InternalStateStore, TabState } from './redux';
 import {
@@ -32,6 +31,7 @@ import {
 } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createTabsStorageManager, type TabsStorageManager } from './tabs_storage_manager';
+import { DiscoverSearchSessionManager } from './discover_search_session';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
@@ -59,15 +59,19 @@ describe('Test discover app state container', () => {
       runtimeStateManager: createRuntimeStateManager(),
       urlStateStorage: stateStorage,
       tabsStorageManager,
+      searchSessionManager: new DiscoverSearchSessionManager({
+        history: discoverServiceMock.history,
+        session: discoverServiceMock.data.search.session,
+      }),
     });
-    internalState.dispatch(
-      internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
-    );
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
-      globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
       internalState,
+      getCurrentTab: () => getCurrentTab(),
     });
+    await internalState.dispatch(
+      internalStateActions.initializeTabs({ discoverSessionId: savedSearchState.getState()?.id })
+    );
     getCurrentTab = () =>
       selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
   });

@@ -11,6 +11,7 @@ import { Builder } from '../builder';
 import { BasicPrettyPrinter, LeafPrinter } from '../pretty_print';
 import { isProperNode } from '../ast/is';
 import { SynthNode } from './synth_node';
+import { SynthLiteralFragment } from './synth_literal_fragment';
 import type { SynthColumnShorthand, SynthTemplateHole } from './types';
 
 class UnexpectedSynthHoleError extends Error {
@@ -54,7 +55,16 @@ export const holeToFragment = (hole: SynthTemplateHole): string => {
 
       return LeafPrinter.literal(node);
     }
+    case 'boolean': {
+      const node = Builder.expression.literal.boolean(hole);
+
+      return LeafPrinter.literal(node);
+    }
     case 'object': {
+      if (hole instanceof SynthLiteralFragment) {
+        return hole.value;
+      }
+
       if (isColumnShorthand(hole)) {
         const node = Builder.expression.column(hole);
 

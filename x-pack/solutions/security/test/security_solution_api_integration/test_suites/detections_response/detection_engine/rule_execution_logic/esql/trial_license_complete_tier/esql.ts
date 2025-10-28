@@ -68,7 +68,8 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe('@ess @serverless ES|QL rule type', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/235886
+  describe.skip('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -694,7 +695,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -938,7 +939,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1017,7 +1018,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -1079,7 +1080,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits).toHaveLength(100);
 
             // re-trigger rule execution
-            runSoonRule(supertest, createdRule.id);
+            await runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,

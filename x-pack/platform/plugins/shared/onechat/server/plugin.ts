@@ -18,6 +18,8 @@ import type {
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
+import type { OnechatHandlerContext } from './request_handler_context';
+import { registerOnechatHandlerContext } from './request_handler_context';
 
 export class OnechatPlugin
   implements
@@ -40,22 +42,25 @@ export class OnechatPlugin
 
   setup(
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
-    pluginsSetup: OnechatSetupDependencies
+    setupDeps: OnechatSetupDependencies
   ): OnechatPluginSetup {
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
+      workflowsManagement: setupDeps.workflowsManagement,
     });
 
-    registerFeatures({ features: pluginsSetup.features });
+    registerFeatures({ features: setupDeps.features });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    const router = coreSetup.http.createRouter();
+    registerOnechatHandlerContext({ coreSetup });
+
+    const router = coreSetup.http.createRouter<OnechatHandlerContext>();
     registerRoutes({
       router,
       coreSetup,
       logger: this.logger,
-      pluginsSetup,
+      pluginsSetup: setupDeps,
       getInternalServices: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
@@ -69,33 +74,33 @@ export class OnechatPlugin
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
+      agents: {
+        register: serviceSetups.agents.register.bind(serviceSetups.agents),
+      },
     };
   }
 
   start(
-    { elasticsearch, security }: CoreStart,
-    { inference }: OnechatStartDependencies
+    { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
+    { inference, spaces }: OnechatStartDependencies
   ): OnechatPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
       inference,
+      spaces,
+      uiSettings,
+      savedObjects,
     });
 
-    const { tools, agents, runnerFactory } = startServices;
+    const { tools, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
-      },
-      agents: {
-        getScopedClient: (args) => agents.getScopedClient(args),
-        execute: async (args) => {
-          return agents.execute(args);
-        },
       },
     };
   }

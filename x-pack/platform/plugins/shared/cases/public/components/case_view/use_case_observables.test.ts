@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useCaseObservables } from './use_case_observables';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../../common/constants';
+import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../../common/constants/observables';
 import { caseData } from './mocks';
 
 const mockCaseData = {

@@ -9,47 +9,28 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { WorkflowsPluginStartDependencies } from './types';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { QueryClientProvider } from '@kbn/react-query';
 import { WorkflowsRoutes } from './routes';
-
-const queryClient = new QueryClient();
+import { queryClient } from './shared/lib/query_client';
+import type { WorkflowsServices } from './types';
 
 export const renderApp = (
-  coreStart: CoreStart,
-  pluginsStart: WorkflowsPluginStartDependencies,
+  services: WorkflowsServices,
   { history, element }: AppMountParameters
 ) => {
-  const { chrome, analytics, i18n: i18nService, theme, executionContext } = coreStart;
-
-  chrome.setBreadcrumbs([
-    {
-      text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
-    },
-  ]);
+  const { theme } = services;
 
   ReactDOM.render(
-    <KibanaRenderContextProvider
-      analytics={analytics}
-      i18n={i18nService}
-      theme={theme}
-      executionContext={executionContext}
-    >
-      <KibanaContextProvider
-        services={{
-          ...coreStart,
-          ...pluginsStart,
-        }}
-      >
+    <KibanaThemeProvider theme={theme}>
+      <KibanaContextProvider services={services}>
         <QueryClientProvider client={queryClient}>
           <WorkflowsRoutes history={history} />
         </QueryClientProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    </KibanaThemeProvider>,
     element
   );
 

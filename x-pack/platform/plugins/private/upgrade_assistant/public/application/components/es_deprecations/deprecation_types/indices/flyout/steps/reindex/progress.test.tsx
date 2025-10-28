@@ -8,7 +8,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../../../common/types';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';

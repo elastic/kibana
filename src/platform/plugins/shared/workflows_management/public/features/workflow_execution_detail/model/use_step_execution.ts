@@ -8,21 +8,21 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useQuery } from '@kbn/react-query';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { useQuery } from '@tanstack/react-query';
 
-export function useStepExecution(workflowExecutionId: string, stepId: string) {
+export function useStepExecution(workflowExecutionId: string, stepExecutionId: string) {
   const { http } = useKibana().services;
 
   return useQuery({
-    queryKey: ['stepExecution', workflowExecutionId, stepId],
+    queryKey: ['stepExecution', workflowExecutionId, stepExecutionId],
     queryFn: async () => {
-      const response = await http!.get<EsWorkflowStepExecution>(
-        `/api/workflowExecutions/${workflowExecutionId}/steps/${stepId}`
+      const response = await http?.get<EsWorkflowStepExecution>(
+        `/api/workflowExecutions/${workflowExecutionId}/steps/${stepExecutionId}`
       );
       return response;
     },
-    enabled: !!workflowExecutionId && !!stepId,
+    enabled: !!workflowExecutionId && !!stepExecutionId,
     staleTime: 5000, // Refresh every 5 seconds for real-time logs
     refetchInterval: 5000, // Auto-refresh logs
   });

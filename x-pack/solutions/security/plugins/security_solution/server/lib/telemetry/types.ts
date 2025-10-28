@@ -7,6 +7,7 @@
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 
+import type { RuleSource } from '../../../common/api/detection_engine/model/rule_schema';
 import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 import type { AllowlistFields } from './filterlists/types';
 import type { RssGrowthCircuitBreakerConfig } from './diagnostic/circuit_breakers/rss_growth_circuit_breaker';
@@ -86,6 +87,10 @@ export interface TelemetryEvent {
       pod?: SearchTypes;
     };
   };
+  'kibana.alert.rule.parameters'?: {
+    rule_source?: RuleSource;
+  };
+  customizations?: PrebuiltRuleCustomizations;
 }
 
 /**
@@ -497,6 +502,12 @@ export interface ValueListIndicatorMatchResponseAggregation {
   };
 }
 
+export interface TelemetryQueryConfiguration {
+  pageSize: number;
+  maxResponseSize: number;
+  maxCompressedResponseSize: number;
+}
+
 export interface TelemetryConfiguration {
   telemetry_max_buffer_size: number;
   max_security_list_telemetry_batch: number;
@@ -511,6 +522,8 @@ export interface TelemetryConfiguration {
   indices_metadata_config?: IndicesMetadataConfiguration;
   ingest_pipelines_stats_config?: IngestPipelinesStatsConfiguration;
   health_diagnostic_config?: HealthDiagnosticConfiguration;
+  query_config?: TelemetryQueryConfiguration;
+  encryption_public_keys?: Record<string, string>;
 }
 
 export interface IndicesMetadataConfiguration {
@@ -590,3 +603,8 @@ export interface FleetAgentResponse {
 }
 
 export type AnyObject = Record<string, unknown>;
+
+export interface PrebuiltRuleCustomizations {
+  customized_fields: string[];
+  num_functional_fields: number;
+}

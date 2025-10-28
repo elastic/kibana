@@ -9,9 +9,10 @@
 
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 const create = () => {
-  const mock: jest.Mocked<ISavedObjectsRepository> = {
+  const mock: jest.Mocked<ISavedObjectsRepository> = lazyObject({
     checkConflicts: jest.fn(),
     create: jest.fn(),
     bulkCreate: jest.fn(),
@@ -34,7 +35,7 @@ const create = () => {
     updateObjectsSpaces: jest.fn(),
     getCurrentNamespace: jest.fn(),
     asScopedToNamespace: jest.fn().mockImplementation(create),
-  };
+  });
 
   mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({
     savedObjectsMock: mock,

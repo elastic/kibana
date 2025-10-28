@@ -33,13 +33,6 @@ describe(
   'Trusted Devices',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
-        ],
-      },
-    },
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -72,23 +65,23 @@ describe(
           value: 'test-user',
         },
       ],
-      os_types: ['windows', 'macos'],
+      os_types: ['windows'],
     });
 
     describe('Renders Trusted Devices form fields', () => {
-      it('Correctly renders trusted devices form for Windows and Mac', () => {
+      it('Correctly renders trusted devices form for Windows only with Username field', () => {
         openTrustedDevices({ create: true });
 
-        selectOs('Windows and Mac');
+        selectOs('Windows');
 
         selectField('Username');
         selectOperator('is');
         fillValue('test-user');
       });
 
-      it('Renders all field options correctly', () => {
+      it('Renders all field options correctly for Windows only', () => {
         openTrustedDevices({ create: true });
-        selectOs('Windows and Mac');
+        selectOs('Windows');
 
         const fields: Array<'Username' | 'Host' | 'Device ID' | 'Manufacturer' | 'Product ID'> = [
           'Username',
@@ -103,6 +96,26 @@ describe(
           cy.getByTestSubj('trustedDevices-form-fieldSelect').should('contain', field);
         });
       });
+
+      it('Shows limited field options for Windows and Mac (no Username)', () => {
+        openTrustedDevices({ create: true });
+        selectOs('Windows and Mac');
+
+        cy.getByTestSubj('trustedDevices-form-fieldSelect').click();
+
+        const availableFields: Array<'Host' | 'Device ID' | 'Manufacturer' | 'Product ID'> = [
+          'Host',
+          'Device ID',
+          'Manufacturer',
+          'Product ID',
+        ];
+
+        availableFields.forEach((field) => {
+          cy.get('[role="option"]').should('contain', field);
+        });
+
+        cy.get('[role="option"]').should('not.contain', 'Username');
+      });
     });
 
     describe('Handles CRUD with device fields', () => {
@@ -110,12 +123,12 @@ describe(
         removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
       });
 
-      it('Correctly creates a trusted device with a single username field on Windows and Mac', () => {
+      it('Correctly creates a trusted device with a single username field on Windows only', () => {
         const expectedCondition = /user\.name\s*IS\s*test-user/i;
 
         openTrustedDevices({ create: true });
         fillOutTrustedDevicesFlyout();
-        selectOs('Windows and Mac');
+        selectOs('Windows');
         selectField('Username');
         selectOperator('is');
         fillValue('test-user');

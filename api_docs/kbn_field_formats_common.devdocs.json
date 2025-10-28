@@ -1,0 +1,82 @@
+{
+  "id": "@kbn/field-formats-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/field-formats-common",
+        "id": "def-common.EMPTY_LABEL",
+        "type": "string",
+        "tags": [],
+        "label": "EMPTY_LABEL",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-field-formats-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-formats-common",
+        "id": "def-common.MISSING_TOKEN",
+        "type": "string",
+        "tags": [],
+        "label": "MISSING_TOKEN",
+        "description": [],
+        "signature": [
+          "\"__missing__\""
+        ],
+        "path": "src/platform/packages/shared/kbn-field-formats-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-formats-common",
+        "id": "def-common.NAN_LABEL",
+        "type": "string",
+        "tags": [],
+        "label": "NAN_LABEL",
+        "description": [],
+        "signature": [
+          "\"NaN\""
+        ],
+        "path": "src/platform/packages/shared/kbn-field-formats-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-formats-common",
+        "id": "def-common.NULL_LABEL",
+        "type": "string",
+        "tags": [],
+        "label": "NULL_LABEL",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-field-formats-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

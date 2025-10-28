@@ -140,7 +140,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmapped',
+      value: 'Unmanaged',
     });
 
     // Open the field actions menu
@@ -150,7 +150,10 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     // Verify the flyout opens and set field mapping type
     await pageObjects.streams.expectFieldFlyoutOpen();
     await pageObjects.streams.setFieldMappingType('ip');
-    await pageObjects.streams.saveFieldMappingChanges();
+    await pageObjects.streams.stageFieldMappingChanges();
+
+    await pageObjects.streams.reviewStagedFieldMappingChanges();
+    await pageObjects.streams.submitSchemaChanges();
 
     // Verify the field is now mapped
     await pageObjects.streams.expectCellValueContains({
@@ -179,7 +182,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmapped',
+      value: 'Unmanaged',
     });
 
     // Open the field actions menu
@@ -189,7 +192,11 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     // Verify the flyout opens and set field mapping type
     await pageObjects.streams.expectFieldFlyoutOpen();
     await pageObjects.streams.setFieldMappingType('ip');
-    await pageObjects.streams.saveFieldMappingChanges();
+    await pageObjects.streams.stageFieldMappingChanges();
+
+    await pageObjects.streams.reviewStagedFieldMappingChanges();
+    await pageObjects.streams.submitSchemaChanges();
+    await pageObjects.toasts.closeAll();
 
     // Verify the field is now mapped
     await pageObjects.streams.expectCellValueContains({
@@ -206,6 +213,9 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     // Now attempt to unmap the field
     await pageObjects.streams.unmapField();
 
+    await pageObjects.streams.reviewStagedFieldMappingChanges();
+    await pageObjects.streams.submitSchemaChanges();
+
     // Verify the field is now unmapped
     await pageObjects.streams.expectCellValueContains({
       columnName: 'name',
@@ -215,7 +225,59 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmapped',
+      value: 'Unmanaged',
+    });
+  });
+
+  test('should allow manually adding a new field', async ({ page, pageObjects }) => {
+    // Wait for the schema editor table to load
+    await pageObjects.streams.expectSchemaEditorTableVisible();
+
+    // Click the "Add field" button
+    await page.getByTestId('streamsAppContentAddFieldButton').click();
+
+    // Verify the add field flyout opens
+    await expect(page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')).toBeVisible();
+
+    // Fill in the field name
+    const fieldName = 'attributes.id';
+    await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
+    await page.keyboard.type(fieldName);
+    await page.keyboard.press('Enter');
+
+    // Select field type
+    await pageObjects.streams.setFieldMappingType('keyword');
+
+    // Click the "Add field" button in the flyout
+    await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
+
+    // Verify the flyout closes
+    await expect(page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')).toBeHidden();
+
+    // Review and submit the staged changes
+    await pageObjects.streams.reviewStagedFieldMappingChanges();
+    await pageObjects.streams.submitSchemaChanges();
+
+    await pageObjects.toasts.closeAll();
+    await pageObjects.streams.expectSchemaEditorTableVisible();
+    // Search for the newly added field
+    await pageObjects.streams.searchFields(fieldName);
+
+    // Verify the field was added and is mapped
+    await pageObjects.streams.expectCellValueContains({
+      columnName: 'name',
+      rowIndex: 0,
+      value: fieldName,
+    });
+    await pageObjects.streams.expectCellValueContains({
+      columnName: 'type',
+      rowIndex: 0,
+      value: 'keyword',
+    });
+    await pageObjects.streams.expectCellValueContains({
+      columnName: 'status',
+      rowIndex: 0,
+      value: 'Mapped',
     });
   });
 });

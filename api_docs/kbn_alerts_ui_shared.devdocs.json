@@ -1605,6 +1605,17 @@
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.ActionConnectorProps.isConnectorTypeDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isConnectorTypeDeprecated",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2320,17 +2331,50 @@
           },
           {
             "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.ActionTypeModel.hideInUi",
-            "type": "CompoundType",
+            "id": "def-public.ActionTypeModel.getHideInUi",
+            "type": "Function",
             "tags": [],
-            "label": "hideInUi",
+            "label": "getHideInUi",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "((actionTypes: ",
+              {
+                "pluginId": "@kbn/actions-types",
+                "scope": "common",
+                "docId": "kibKbnActionsTypesPluginApi",
+                "section": "def-common.ActionType",
+                "text": "ActionType"
+              },
+              "[]) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerts-ui-shared",
+                "id": "def-public.ActionTypeModel.getHideInUi.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "actionTypes",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/actions-types",
+                    "scope": "common",
+                    "docId": "kibKbnActionsTypesPluginApi",
+                    "section": "def-common.ActionType",
+                    "text": "ActionType"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/alerts-ui-shared",
@@ -2464,7 +2508,7 @@
             "label": "alertStatus",
             "description": [],
             "signature": [
-              "\"recovered\" | \"active\" | \"untracked\""
+              "\"active\" | \"recovered\" | \"untracked\""
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
             "deprecated": false,
@@ -4456,7 +4500,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"enabled\" | \"monitoring\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -5618,7 +5662,7 @@
         "description": [],
         "signature": [
           "Omit<",
-          "OptionsListControlState",
+          "OptionsListDSLControlState",
           ", \"dataViewId\"> & { persist?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
@@ -5813,7 +5857,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; getEditorConfig: () => ",
+          "> | undefined; onSave?: (() => void) | undefined; } | undefined) => void; untilInitialized: () => Promise<void>; untilFiltersPublished: () => Promise<void>; getEditorConfig: () => ",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -5887,7 +5931,7 @@
         "description": [],
         "signature": [
           "{ [x: string]: Pick<",
-          "OptionsListControlState",
+          "OptionsListDSLControlState",
           ", \"title\" | \"fieldName\" | \"exclude\" | \"selectedOptions\" | \"existsSelected\">; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
@@ -6587,22 +6631,6 @@
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
-          ", \"name\">; \"alerts.recovered.count\": Omit<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.ActionVariable",
-            "text": "ActionVariable"
-          },
-          ", \"name\">; \"alerts.recovered.data\": Omit<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.ActionVariable",
-            "text": "ActionVariable"
-          },
           ", \"name\">; \"alerts.new.count\": Omit<",
           {
             "pluginId": "@kbn/alerting-types",
@@ -6612,6 +6640,22 @@
             "text": "ActionVariable"
           },
           ", \"name\">; \"alerts.new.data\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.recovered.count\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.recovered.data\": Omit<",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",

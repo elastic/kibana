@@ -8,7 +8,7 @@
  */
 import { camelCase } from 'lodash';
 import type { FieldType, FunctionParameterType, FunctionReturnType } from '@kbn/esql-ast';
-import { TRIGGER_SUGGESTION_COMMAND, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { withAutoSuggest, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   Location,
@@ -46,15 +46,27 @@ export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
+    userDefined: false as const,
+    // suggestedAs is optional and omitted here
   })),
-  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'double' },
+  {
+    name: 'any#Char$Field',
+    type: 'double',
+    suggestedAs: '`any#Char$Field`',
+    userDefined: false as const,
+  },
+  {
+    name: 'kubernetes.something.something',
+    type: 'double',
+    suggestedAs: undefined,
+    userDefined: false as const,
+  },
 ];
 
 export const lookupIndexFields: TestField[] = [
-  { name: 'booleanField', type: 'boolean' },
-  { name: 'dateField', type: 'date' },
-  { name: 'joinIndexOnlyField', type: 'text' },
+  { name: 'booleanField', type: 'boolean', userDefined: false },
+  { name: 'dateField', type: 'date', userDefined: false },
+  { name: 'joinIndexOnlyField', type: 'text', userDefined: false },
 ];
 
 export const indexes = (
@@ -303,7 +315,8 @@ export function createCustomCallbackMocks(
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
-      if (queryString.includes('logs*')) {
+      // from * is called in the empty state
+      if (queryString.includes('logs*') || queryString === 'from *') {
         return {
           recommendedQueries: editorExtensions.recommendedQueries,
           recommendedFields: editorExtensions.recommendedFields,
@@ -393,8 +406,7 @@ export const attachTriggerCommand = (
   s: string | PartialSuggestionWithText
 ): PartialSuggestionWithText =>
   typeof s === 'string'
-    ? {
+    ? withAutoSuggest({
         text: s,
-        command: TRIGGER_SUGGESTION_COMMAND,
-      }
-    : { ...s, command: TRIGGER_SUGGESTION_COMMAND };
+      } as ISuggestionItem)
+    : withAutoSuggest(s as ISuggestionItem);

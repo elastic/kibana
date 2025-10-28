@@ -65,10 +65,12 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, phoenix
 
 ### Available fixtures
 
-| Fixture           | Description                                                       |
-| ----------------- | ----------------------------------------------------------------- |
-| `inferenceClient` | Bound to the connector declared by the active Playwright project. |
-| `phoenixClient`   | Client for the Phoenix API (to run experiments)                   |
+| Fixture                     | Description                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------- |
+| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                           |
+| `phoenixClient`             | Client for the Phoenix API (to run experiments)                                             |
+| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets |
+| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)          |
 
 ## Running the suite
 
@@ -102,6 +104,117 @@ Now run the tests exactly like a normal Scout/Playwright suite in another termin
 
 ```bash
 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+```
+
+## Customizing Report Display
+
+By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
+
+```ts
+// my_eval.test.ts
+import {
+  evaluate as base,
+  type EvaluationScoreRepository,
+  type EvaluationScoreDocument,
+} from '@kbn/evals';
+
+export const evaluate = base.extend({
+  reportModelScore: async ({}, use) => {
+    // Custom reporter implementation
+    await use(async (scoreRepository, runId, log) => {
+      // Query Elasticsearch for evaluation results
+      const docs = await scoreRepository.getScoresByRunId(runId);
+
+      if (docs.length === 0) {
+        log.error(`No results found for run: ${runId}`);
+        return;
+      }
+
+      // Build your custom report
+      log.info('=== CUSTOM REPORT ===');
+      log.info(`Model: ${docs[0].model.id}`);
+      log.info(`Run ID: ${runId}`);
+      log.info(`Total evaluations: ${docs.length}`);
+
+      // Group by dataset, calculate aggregates, write to file, etc.
+      const datasetResults = groupByDataset(docs);
+      writeToFile(`report-${runId}.json`, datasetResults);
+    });
+  },
+});
+
+evaluate('my test', async ({ phoenixClient }) => {
+  // Your test logic here
+});
+```
+
+**Note:** Elasticsearch export always happens first and is not affected by custom reporters. This ensures all results are persisted regardless of custom reporting logic.
+
+## Elasticsearch Export
+
+The evaluation results are automatically exported to Elasticsearch in datastream called `.kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
+
+### Datastream Structure
+
+The evaluation data is stored with the following structure:
+
+- **Index Pattern**: `.kibana-evaluations*`
+- **Datastream**: `.kibana-evaluations`
+- **Document Structure**:
+
+  ```json
+  {
+    "@timestamp": "2025-08-28T14:21:35.886Z",
+    "run_id": "026c5060fbfc7dcb",
+    "model": {
+      "id": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+      "family": "anthropic",
+      "provider": "bedrock"
+    },
+    "dataset": {
+      "id": "dataset_id",
+      "name": "my-dataset",
+      "examples_count": 10
+    },
+    "evaluator": {
+      "name": "Factuality",
+      "stats": {
+        "mean": 0.85,
+        "median": 1.0,
+        "std_dev": 0.37,
+        "min": 0.0,
+        "max": 1.0,
+        "count": 10,
+        "percentage": 85.0
+      },
+      "scores": [1.0, 0.8, 1.0, 0.6, 1.0]
+    },
+    "experiments": [{ "id": "experiment_id_1" }],
+    "environment": {
+      "hostname": "your-hostname"
+    },
+    "tags": ["tag1", "tag2"]
+  }
+  ```
+
+### Querying Evaluation Data
+
+After running evaluations, you can query the results in Kibana using the query filter provided in the logs:
+
+```kql
+environment.hostname:"your-hostname" AND model.id:"model-id" AND run_id:"run-id"
+```
+
+### Using the Evaluation Analysis Service
+
+The `evaluationAnalysisService` fixture provides methods to analyze and compare evaluation results:
+
+```ts
+evaluate('compare model performance', async ({ evaluationAnalysisService }) => {
+  // The service automatically retrieves scores from Elasticsearch
+  // and provides statistical analysis capabilities
+  // Analysis happens automatically after experiments complete
+});
 ```
 
 ### LLM-as-a-judge

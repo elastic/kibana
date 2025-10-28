@@ -33,11 +33,18 @@ const ConnectorCasesWebhookTypeFieldsRt = rt.strict({
  * Jira
  */
 
-export const JiraFieldsRt = rt.strict({
-  issueType: rt.union([rt.string, rt.null]),
-  priority: rt.union([rt.string, rt.null]),
-  parent: rt.union([rt.string, rt.null]),
-});
+export const JiraFieldsRt = rt.intersection([
+  rt.strict({
+    issueType: rt.union([rt.string, rt.null]),
+    priority: rt.union([rt.string, rt.null]),
+    parent: rt.union([rt.string, rt.null]),
+  }),
+  rt.exact(
+    rt.partial({
+      otherFields: rt.union([rt.string, rt.null]),
+    })
+  ),
+]);
 
 export type JiraFieldsType = rt.TypeOf<typeof JiraFieldsRt>;
 
@@ -50,17 +57,31 @@ const ConnectorJiraTypeFieldsRt = rt.strict({
  * Resilient
  */
 
-export const ResilientFieldsRt = rt.strict({
-  incidentTypes: rt.union([rt.array(rt.string), rt.null]),
-  severityCode: rt.union([rt.string, rt.null]),
-});
+export const ResilientFieldsRt = rt.intersection([
+  rt.strict({
+    incidentTypes: rt.union([rt.array(rt.string), rt.null]),
+    severityCode: rt.union([rt.string, rt.null]),
+  }),
+  rt.exact(
+    rt.partial({
+      additionalFields: rt.union([rt.string, rt.null]),
+    })
+  ),
+]);
 
 export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRt>;
 
-const ConnectorResilientTypeFieldsRt = rt.strict({
-  type: rt.literal(ConnectorTypes.resilient),
-  fields: rt.union([ResilientFieldsRt, rt.null]),
-});
+const ConnectorResilientTypeFieldsRt = rt.intersection([
+  rt.strict({
+    type: rt.literal(ConnectorTypes.resilient),
+    fields: rt.union([ResilientFieldsRt, rt.null]),
+  }),
+  rt.exact(
+    rt.partial({
+      additionalFields: rt.union([rt.string, rt.null]),
+    })
+  ),
+]);
 
 /**
  * ServiceNow

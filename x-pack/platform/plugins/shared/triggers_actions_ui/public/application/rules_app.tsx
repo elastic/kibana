@@ -17,7 +17,6 @@ import type {
 } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -31,8 +30,13 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { ruleDetailsRoute, createRuleRoute, editRuleRoute } from '@kbn/rule-data-utils';
-import { QueryClientProvider } from '@tanstack/react-query';
+import {
+  ruleDetailsRoute,
+  createRuleRoute,
+  editRuleRoute,
+  createRuleFromTemplateRoute,
+} from '@kbn/rule-data-utils';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -99,16 +103,14 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 
   const sectionsRegex = sections.join('|');
   setDataViewsService(dataViews);
-  return (
-    <KibanaRenderContextProvider {...deps}>
-      <KibanaContextProvider services={{ ...deps }}>
-        <Router history={deps.history}>
-          <QueryClientProvider client={queryClient}>
-            <AppWithoutRouter sectionsRegex={sectionsRegex} />
-          </QueryClientProvider>
-        </Router>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+  return deps.rendering.addContext(
+    <KibanaContextProvider services={{ ...deps }}>
+      <Router history={deps.history}>
+        <QueryClientProvider client={queryClient}>
+          <AppWithoutRouter sectionsRegex={sectionsRegex} />
+        </QueryClientProvider>
+      </Router>
+    </KibanaContextProvider>
   );
 };
 
@@ -124,6 +126,11 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
       value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
     >
       <Routes>
+        <Route
+          exact
+          path={createRuleFromTemplateRoute}
+          component={suspendedComponentWithProps(RuleFormRoute, 'xl')}
+        />
         <Route
           exact
           path={createRuleRoute}

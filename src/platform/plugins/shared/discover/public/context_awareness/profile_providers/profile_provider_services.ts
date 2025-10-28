@@ -10,14 +10,15 @@
 import {
   createLogsContextService,
   type LogsContextService,
-  createTracesContextService,
-  type TracesContextService,
-  createApmErrorsContextService,
-  type ApmErrorsContextService,
+  createMetricsContextService,
+  type MetricsContextService,
+  type ApmContextService,
+  createApmContextService,
 } from '@kbn/discover-utils';
 
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { MetricsExperiencePluginStart } from '@kbn/metrics-experience-plugin/public';
 import type { DiscoverServices } from '../../build_services';
 
 /**
@@ -26,6 +27,7 @@ import type { DiscoverServices } from '../../build_services';
 export interface ProfileProviderDeps extends DiscoverServices {
   logsDataAccess?: LogsDataAccessPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
+  metricsExperience?: MetricsExperiencePluginStart;
 }
 
 /**
@@ -36,8 +38,8 @@ export interface ProfileProviderServices extends DiscoverServices {
    * A service containing methods used for logs profiles
    */
   logsContextService: LogsContextService;
-  tracesContextService: TracesContextService;
-  apmErrorsContextService: ApmErrorsContextService;
+  apmContextService: ApmContextService;
+  metricsContextService: MetricsContextService;
 }
 
 /**
@@ -53,11 +55,11 @@ export const createProfileProviderServices = async (
     logsContextService: await createLogsContextService({
       logsDataAccess: discoverServices.logsDataAccess,
     }),
-    tracesContextService: await createTracesContextService({
+    apmContextService: await createApmContextService({
       apmSourcesAccess: discoverServices.apmSourcesAccess,
     }),
-    apmErrorsContextService: await createApmErrorsContextService({
-      apmSourcesAccess: discoverServices.apmSourcesAccess,
+    metricsContextService: await createMetricsContextService({
+      metricsExperience: discoverServices.metricsExperience,
     }),
   };
 };

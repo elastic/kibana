@@ -32,6 +32,8 @@ import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data'
 
 import { registerNavigationEventTypes } from './analytics';
 
+import { SolutionNavigationTourManager } from './solution_tour/solution_tour';
+
 export class NavigationPublicPlugin
   implements
     Plugin<
@@ -104,9 +106,22 @@ export class NavigationPublicPlugin
         activeSpace,
       });
 
+      const feedbackUrlParams = this.buildFeedbackUrlParams(
+        isServerless,
+        cloud?.isCloudEnabled ?? false
+      );
+      chrome.project.setFeedbackUrlParams(feedbackUrlParams);
+
       if (!this.isSolutionNavEnabled) return;
 
-      chrome.project.setCloudUrls(cloud!);
+      if (cloud) {
+        chrome.project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately
+        cloud.getPrivilegedUrls().then((privilegedUrls) => {
+          if (Object.keys(privilegedUrls).length === 0) return;
+
+          chrome.project.setCloudUrls({ ...privilegedUrls, ...cloud.getUrls() }); // Merge the privileged URLs once available
+        });
+      }
     };
 
     if (this.getIsUnauthenticated(core.http)) {
@@ -114,6 +129,21 @@ export class NavigationPublicPlugin
       initSolutionNavigation();
     } else {
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
+    }
+
+    if (this.isSolutionNavEnabled || isServerless) {
+      const hideAnnouncements = core.settings.client.get('hideAnnouncements', false);
+      if (!hideAnnouncements) {
+        const { project } = core.chrome as InternalChromeStart;
+        const tourManager = new SolutionNavigationTourManager({
+          navigationTourManager: project.navigationTourManager,
+          spacesSolutionViewTourManager: spaces?.solutionViewTourManager,
+          userProfile: core.userProfile,
+          capabilities: core.application.capabilities,
+          featureFlags: core.featureFlags,
+        });
+        void tourManager.startTour();
+      }
     }
 
     return {
@@ -175,6 +205,15 @@ export class NavigationPublicPlugin
   private getIsUnauthenticated(http: HttpStart) {
     const { anonymousPaths } = http;
     return anonymousPaths.isAnonymous(window.location.pathname);
+  }
+
+  private buildFeedbackUrlParams(isServerless: boolean, isCloudEnabled: boolean) {
+    const version = this.initializerContext.env.packageInfo.version;
+    const type = isServerless ? 'serverless' : isCloudEnabled ? 'ech' : 'local';
+    return new URLSearchParams({
+      version,
+      type,
+    });
   }
 }
 

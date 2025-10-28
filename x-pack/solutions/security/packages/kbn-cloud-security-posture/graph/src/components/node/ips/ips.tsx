@@ -6,75 +6,110 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiText, EuiToolTip, useEuiFontSize } from '@elastic/eui';
+import { EuiFlexGroup, EuiText, EuiButtonEmpty, useEuiFontSize, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { ToolTipButton } from '../styles';
-
-export const TEST_SUBJ_TEXT = 'ips-text';
-export const TEST_SUBJ_PLUS_COUNT = 'ips-plus-count';
-export const TEST_SUBJ_TOOLTIP = 'ips-tooltip';
-export const TEST_SUBJ_TOOLTIP_CONTENT = 'ips-tooltip-content';
-export const TEST_SUBJ_TOOLTIP_IP = 'ips-tooltip-ip';
+import {
+  useNodeDetailsPopover,
+  type UseNodeDetailsPopoverReturn,
+} from '../../graph_investigation/use_node_details_popover';
+import {
+  GRAPH_IPS_TEXT_ID,
+  GRAPH_IPS_PLUS_COUNT_ID,
+  GRAPH_IPS_POPOVER_CONTENT_ID,
+  GRAPH_IPS_POPOVER_IP_ID,
+  GRAPH_IPS_POPOVER_ID,
+  GRAPH_IPS_PLUS_COUNT_BUTTON_ID,
+  GRAPH_IPS_BUTTON_ID,
+  GRAPH_IPS_VALUE_ID,
+} from '../../test_ids';
+import { createPreviewItems } from '../utils';
 
 export const VISIBLE_IPS_LIMIT = 1;
-export const MAX_IPS_IN_TOOLTIP = 10;
 
-const toolTipTitle = i18n.translate('securitySolutionPackages.csp.graph.ips.toolTipTitle', {
-  defaultMessage: 'IP Addresses',
-});
+const popoverTipAriaLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.ips.popoverAriaLabel',
+  {
+    defaultMessage: 'Show IP address details',
+  }
+);
 
-const openFlyoutText = i18n.translate('securitySolutionPackages.csp.graph.ips.ipsOverLimit', {
-  defaultMessage: 'Open full details in flyout',
-});
+export type UseIpPopoverReturn = UseNodeDetailsPopoverReturn & {
+  onIpClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+};
+
+export const useIpPopover = (ips: string[], scopeId?: string): UseIpPopoverReturn => {
+  const items = scopeId
+    ? createPreviewItems('network-preview', ips, scopeId)
+    : ips.map((ip, index) => ({
+        key: `${index}-${ip}`,
+        label: ip,
+      }));
+
+  const { id, onClick, PopoverComponent, actions, state } = useNodeDetailsPopover({
+    popoverId: 'ips-popover',
+    items,
+    contentTestSubj: GRAPH_IPS_POPOVER_CONTENT_ID,
+    itemTestSubj: GRAPH_IPS_POPOVER_IP_ID,
+    popoverTestSubj: GRAPH_IPS_POPOVER_ID,
+  });
+
+  return {
+    id,
+    onIpClick: onClick,
+    PopoverComponent,
+    actions,
+    state,
+    onClick,
+  };
+};
 
 export interface IpsProps {
   ips: string[];
+  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const Ips = ({ ips }: IpsProps) => {
+export const Ips = ({ ips, onIpClick }: IpsProps) => {
   const sFontSize = useEuiFontSize('s');
   const xsFontSize = useEuiFontSize('xs');
 
   if (ips.length === 0) return null;
 
-  return (
-    <EuiToolTip
-      data-test-subj={TEST_SUBJ_TOOLTIP}
-      position="right"
-      title={toolTipTitle}
-      content={
-        ips.length > VISIBLE_IPS_LIMIT ? (
-          <ul data-test-subj={TEST_SUBJ_TOOLTIP_CONTENT}>
-            {ips.slice(0, MAX_IPS_IN_TOOLTIP).map((ip) => (
-              <li key={ip}>
-                <EuiText data-test-subj={TEST_SUBJ_TOOLTIP_IP} size="m">
-                  {ip}
-                </EuiText>
-              </li>
-            ))}
-            {ips.length > MAX_IPS_IN_TOOLTIP ? (
-              <>
-                <li>
-                  <br />
-                </li>
-                <li>{openFlyoutText}</li>
-              </>
-            ) : null}
-          </ul>
-        ) : null
-      }
-    >
-      {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
-      <ToolTipButton>
-        <EuiFlexGroup
-          responsive={false}
-          gutterSize="xs"
-          alignItems="center"
-          justifyContent="center"
+  const visibleIps = (
+    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText
+          data-test-subj={GRAPH_IPS_TEXT_ID}
+          size="s"
+          color="subdued"
+          css={css`
+            font-weight: medium;
+            ${sFontSize};
+          `}
         >
+          {'IP: '}
+        </EuiText>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        {ips.length === 1 && onIpClick ? (
+          <EuiButtonEmpty
+            size="s"
+            color="text"
+            data-test-subj={GRAPH_IPS_BUTTON_ID}
+            onClick={onIpClick}
+            aria-label={popoverTipAriaLabel}
+            flush="both"
+            css={css`
+              font-weight: medium;
+              ${sFontSize};
+            `}
+          >
+            {ips[0]}
+          </EuiButtonEmpty>
+        ) : (
           <EuiText
-            data-test-subj={TEST_SUBJ_TEXT}
+            data-test-subj={GRAPH_IPS_VALUE_ID}
             size="s"
             color="subdued"
             css={css`
@@ -82,24 +117,49 @@ export const Ips = ({ ips }: IpsProps) => {
               ${sFontSize};
             `}
           >
-            {'IP: '}
             {ips.slice(0, VISIBLE_IPS_LIMIT).join(', ')}
           </EuiText>
-          {ips.length > VISIBLE_IPS_LIMIT ? (
-            <EuiText
-              size="xs"
-              color="default"
-              data-test-subj={TEST_SUBJ_PLUS_COUNT}
-              css={css`
-                font-weight: medium;
-                ${xsFontSize};
-              `}
-            >
-              {`+${ips.length - VISIBLE_IPS_LIMIT}`}
-            </EuiText>
-          ) : null}
-        </EuiFlexGroup>
-      </ToolTipButton>
-    </EuiToolTip>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const counter =
+    ips.length > VISIBLE_IPS_LIMIT ? (
+      onIpClick ? (
+        <EuiButtonEmpty
+          size="xs"
+          color="text"
+          data-test-subj={GRAPH_IPS_PLUS_COUNT_BUTTON_ID}
+          onClick={onIpClick}
+          aria-label={popoverTipAriaLabel}
+          flush="both"
+          css={css`
+            font-weight: medium;
+          `}
+        >
+          {`+${ips.length - VISIBLE_IPS_LIMIT}`}
+        </EuiButtonEmpty>
+      ) : (
+        <EuiText
+          size="xs"
+          color="subdued"
+          aria-label={popoverTipAriaLabel}
+          data-test-subj={GRAPH_IPS_PLUS_COUNT_ID}
+          css={css`
+            font-weight: medium;
+            ${xsFontSize};
+          `}
+        >
+          {`+${ips.length - VISIBLE_IPS_LIMIT}`}
+        </EuiText>
+      )
+    ) : null;
+
+  return (
+    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
+      <EuiFlexItem grow={false}>{visibleIps}</EuiFlexItem>
+      {counter && <EuiFlexItem grow={false}>{counter}</EuiFlexItem>}
+    </EuiFlexGroup>
   );
 };

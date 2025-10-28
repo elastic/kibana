@@ -159,7 +159,9 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+              "{ start: () => string; clear: () => void; reset: () => void; save: () => Promise<",
+              "SearchSessionSavedObject",
+              ">; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -177,7 +179,13 @@
               "Observable",
               "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
-              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<string | undefined>; isSaving: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isStored: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => void; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -664,6 +672,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.ISearchStart.isBackgroundSearchEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isBackgroundSearchEnabled",
+            "description": [
+              "\nFeature flag value to make it easier to use in different plugins"
+            ],
+            "path": "src/platform/plugins/shared/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.ISearchStart.searchSource",
             "type": "Object",
             "tags": [],
@@ -694,7 +715,9 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+              "{ start: () => string; clear: () => void; reset: () => void; save: () => Promise<",
+              "SearchSessionSavedObject",
+              ">; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -712,7 +735,13 @@
               "Observable",
               "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
-              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<string | undefined>; isSaving: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isStored: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => void; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -1196,7 +1225,9 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+          "{ start: () => string; clear: () => void; reset: () => void; save: () => Promise<",
+          "SearchSessionSavedObject",
+          ">; destroy: () => void; readonly state$: ",
           "Observable",
           "<",
           {
@@ -1214,7 +1245,13 @@
           "Observable",
           "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
           "Observable",
-          "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+          "<string | undefined>; isSaving: (state?: ",
+          "SessionStateContainer",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isStored: (state?: ",
+          "SessionStateContainer",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
+          "SessionStateContainer",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => void; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
           {
             "pluginId": "@kbn/search-types",
             "scope": "common",
@@ -1730,7 +1767,7 @@
             "label": "find",
             "description": [],
             "signature": [
-              "({ savedObjectsClient, internalElasticsearchClient }: ",
+              "({ savedObjectsClient, asCurrentUserElasticsearchClient }: ",
               "SearchSessionStatusDependencies",
               ", user: ",
               "AuthenticatedUser",
@@ -1755,7 +1792,7 @@
                 "id": "def-server.SearchSessionService.find.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjectsClient, internalElasticsearchClient }",
+                "label": "{ savedObjectsClient, asCurrentUserElasticsearchClient }",
                 "description": [],
                 "signature": [
                   "SearchSessionStatusDependencies"
@@ -12898,7 +12935,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          ") => [",
+          ", options?: { refNamePrefix?: string | undefined; } | undefined) => [",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12934,6 +12971,33 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.extractReferences.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.extractReferences.$2.refNamePrefix",
+                "type": "string",
+                "tags": [],
+                "label": "refNamePrefix",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],

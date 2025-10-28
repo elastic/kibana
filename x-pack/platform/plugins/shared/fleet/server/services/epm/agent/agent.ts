@@ -19,19 +19,11 @@ import {
   getHandlebarsCompiledTemplateCache,
   setHandlebarsCompiledTemplateCache,
 } from '../packages/cache';
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 
 const handlebars = Handlebars.create();
 
-export function compileTemplate(
-  variables: PackagePolicyConfigRecord,
-  templateStr: string,
-  inputType?: string,
-  otelcolSuffixId?: string
-) {
+export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
   const logger = appContextService.getLogger();
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-
   const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
@@ -51,18 +43,9 @@ export function compileTemplate(
   try {
     const yamlFromCompiledTemplate = load(compiledTemplate, {});
 
-    let patchedYaml = yamlFromCompiledTemplate;
-    if (
-      experimentalFeature.enableOtelIntegrations &&
-      inputType === OTEL_COLLECTOR_INPUT_TYPE &&
-      otelcolSuffixId
-    ) {
-      patchedYaml = patchYamlForOtelcol(yamlFromCompiledTemplate, otelcolSuffixId);
-    }
-
     // Hack to keep empty string ('') values around in the end yaml because
     // `load` replaces empty strings with null
-    const patchedYamlFromCompiledTemplate = Object.entries(patchedYaml).reduce(
+    const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
       (acc, [key, value]) => {
         if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
           acc[key] = '';
@@ -76,54 +59,27 @@ export function compileTemplate(
 
     return replaceVariablesInYaml(yamlValues, patchedYamlFromCompiledTemplate);
   } catch (error) {
-    throw new PackagePolicyValidationError(error);
+    const errorMessage = handleYamlError(error, compiledTemplate);
+    throw new PackagePolicyValidationError(errorMessage, error);
   }
 }
-// Patch YAML for OTEL Collector
-function patchYamlForOtelcol(yaml: any, otelcolSuffixId: string): string | undefined {
-  const parentKeys = ['receivers', 'processors', 'extensions'];
 
-  const updatedYaml = replaceKeyByParent(yaml, parentKeys, otelcolSuffixId);
-
-  return updatedYaml;
-}
-
-// Recursive function, appends suffix to the first key under the keys specified in targetParents.
-export function replaceKeyByParent(
-  obj: any,
-  targetParents: string[],
-  suffix: string,
-  parentKey: string | null = null
-): any {
-  if (Array.isArray(obj)) {
-    const oldKey = obj[0];
-    if (parentKey && targetParents.includes(parentKey)) {
-      return obj.map((item) =>
-        item === oldKey
-          ? `${oldKey}/${suffix}`
-          : replaceKeyByParent(item, targetParents, suffix, parentKey)
-      );
-    } else {
-      return obj.map((item) => replaceKeyByParent(item, targetParents, suffix, parentKey));
-    }
-  } else if (typeof obj === 'object' && obj !== null) {
-    const newObj: any = {};
-
-    for (const key in obj) {
-      if (Object.hasOwn(obj, key)) {
-        const value = obj[key];
-        if (parentKey && targetParents.includes(parentKey)) {
-          const oldKey = Object.keys(obj)[0];
-          const updatedKey = key === oldKey ? `${oldKey}/${suffix}` : key;
-          newObj[updatedKey] = replaceKeyByParent(value, targetParents, suffix, key);
-        } else {
-          newObj[key] = replaceKeyByParent(value, targetParents, suffix, key);
-        }
+function handleYamlError(err: any, yaml: string): string {
+  if (err?.reason === 'duplicated mapping key') {
+    let position = err.mark?.position;
+    let key = 'unknown';
+    // Read key if position is available
+    if (position) {
+      key = '';
+      while (position < yaml.length && yaml.charAt(position) !== ':') {
+        key += yaml.charAt(position);
+        position++;
       }
     }
-    return newObj;
+    return `YAMLException: Duplicated key "${key}" found in agent policy yaml, please check your yaml variables.`;
   }
-  return obj;
+
+  return err.message;
 }
 
 function isValidKey(key: string) {

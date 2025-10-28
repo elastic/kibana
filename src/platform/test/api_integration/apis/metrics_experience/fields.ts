@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { timerange } from './timerange';
+import { toggleMetricsExperienceFeature } from './utils/helpers';
 
 const ENDPOINT = '/internal/metrics_experience/fields';
 
@@ -32,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'src/platform/test/api_integration/fixtures/es_archiver/metrics_experience'
       );
+      await toggleMetricsExperienceFeature(supertest, true);
     });
 
     it('should return a list of fields', async () => {
@@ -79,6 +81,17 @@ export default function ({ getService }: FtrProviderContext) {
     it('should use default parameters if none are provided', async () => {
       const { status } = await sendRequest({});
       expect(status).to.be(200);
+    });
+
+    it('should return 404 if feature flag is disabled', async () => {
+      await toggleMetricsExperienceFeature(supertest, false);
+
+      const { status } = await sendRequest({
+        index: 'fieldsense-station-metrics',
+        from: timerange.min,
+        to: timerange.max,
+      });
+      expect(status).to.be(404);
     });
   });
 }

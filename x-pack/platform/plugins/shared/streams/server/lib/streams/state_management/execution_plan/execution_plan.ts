@@ -15,9 +15,11 @@ import {
 import {
   deleteDataStream,
   updateDataStreamsLifecycle,
+  updateDataStreamsMappings,
   rolloverDataStream,
   upsertDataStream,
   updateDefaultIngestPipeline,
+  putDataStreamsSettings,
 } from '../../data_streams/manage_data_streams';
 import { deleteTemplate, upsertTemplate } from '../../index_templates/manage_index_templates';
 import {
@@ -39,6 +41,7 @@ import type {
   DeleteIngestPipelineAction,
   DeleteQueriesAction,
   ElasticsearchAction,
+  UpdateDataStreamMappingsAction,
   UpdateLifecycleAction,
   UpsertComponentTemplateAction,
   UpsertDatastreamAction,
@@ -47,6 +50,9 @@ import type {
   UpsertIngestPipelineAction,
   RolloverAction,
   UpdateDefaultIngestPipelineAction,
+  UnlinkAssetsAction,
+  UnlinkFeaturesAction,
+  UpdateIngestSettingsAction,
 } from './types';
 
 /**
@@ -78,7 +84,11 @@ export class ExecutionPlan {
       delete_datastream: [],
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
+      update_data_stream_mappings: [],
       delete_queries: [],
+      unlink_assets: [],
+      unlink_features: [],
+      update_ingest_settings: [],
     };
   }
 
@@ -164,7 +174,11 @@ export class ExecutionPlan {
         delete_datastream,
         upsert_dot_streams_document,
         delete_dot_streams_document,
+        update_data_stream_mappings,
         delete_queries,
+        unlink_assets,
+        unlink_features,
+        update_ingest_settings,
         ...rest
       } = this.actionsByType;
       assertEmptyObject(rest);
@@ -185,9 +199,11 @@ export class ExecutionPlan {
         this.upsertIndexTemplates(upsert_index_template),
       ]);
       await this.upsertDatastreams(upsert_datastream);
+      await this.updateIngestSettings(update_ingest_settings);
       await Promise.all([
         this.rollover(rollover),
         this.updateLifecycle(update_lifecycle),
+        this.updateDataStreamMappingsAndRollover(update_data_stream_mappings),
         this.updateDefaultIngestPipeline(update_default_ingest_pipeline),
       ]);
 
@@ -201,6 +217,8 @@ export class ExecutionPlan {
         this.deleteComponentTemplates(delete_component_template),
         this.deleteIngestPipelines(delete_ingest_pipeline),
         this.deleteQueries(delete_queries),
+        this.unlinkAssets(unlink_assets),
+        this.unlinkFeatures(unlink_features),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
@@ -221,6 +239,32 @@ export class ExecutionPlan {
 
     return Promise.all(
       actions.map((action) => this.dependencies.queryClient.deleteAll(action.request.name))
+    );
+  }
+
+  private async unlinkAssets(actions: UnlinkAssetsAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.flatMap((action) => [
+        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'dashboard'),
+        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'rule'),
+        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'slo'),
+      ])
+    );
+  }
+
+  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.map((action) =>
+        this.dependencies.featureClient.syncFeatureList(action.request.name, [])
+      )
     );
   }
 
@@ -281,6 +325,19 @@ export class ExecutionPlan {
           names: [action.request.name],
           lifecycle: action.request.lifecycle,
           isServerless: this.dependencies.isServerless,
+        })
+      )
+    );
+  }
+
+  private async updateDataStreamMappingsAndRollover(actions: UpdateDataStreamMappingsAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        updateDataStreamsMappings({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          name: action.request.name,
+          mappings: action.request.mappings,
         })
       )
     );
@@ -369,6 +426,18 @@ export class ExecutionPlan {
       operations: actions.map(dotDocumentActionToBulkOperation),
       refresh: true,
     });
+  }
+
+  private async updateIngestSettings(actions: UpdateIngestSettingsAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        putDataStreamsSettings({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          names: [action.request.name],
+          settings: action.request.settings,
+        })
+      )
+    );
   }
 }
 

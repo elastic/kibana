@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiProvider } from '@elastic/eui';
 import React from 'react';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
@@ -14,6 +15,9 @@ import { RuleGroupEditor } from './rule_group_editor';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 
+const mountWithEuiProvider = (node: React.ReactElement) =>
+  mountWithIntl(<EuiProvider>{node}</EuiProvider>);
+
 describe('VisualRuleEditor', () => {
   it('renders an add rule prompt when no rules are defined', () => {
     const props = {
@@ -22,7 +26,7 @@ describe('VisualRuleEditor', () => {
       onSwitchEditorMode: jest.fn(),
       onChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
+    const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
 
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
     expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -39,7 +43,7 @@ describe('VisualRuleEditor', () => {
       onSwitchEditorMode: jest.fn(),
       onChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
+    const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
     expect(findTestSubject(wrapper, 'roleMappingsNoRulesDefined')).toHaveLength(1);
     expect(findTestSubject(wrapper, 'roleMappingsRulesTooComplex')).toHaveLength(0);
   });
@@ -51,7 +55,7 @@ describe('VisualRuleEditor', () => {
       onSwitchEditorMode: jest.fn(),
       onChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
+    const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
     findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -82,7 +86,7 @@ describe('VisualRuleEditor', () => {
       onSwitchEditorMode: jest.fn(),
       onChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
+    const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
 
     expect(wrapper.find(RuleGroupEditor)).toHaveLength(5);
     expect(wrapper.find(FieldRuleEditor)).toHaveLength(4);
@@ -122,7 +126,7 @@ describe('VisualRuleEditor', () => {
       onSwitchEditorMode: jest.fn(),
       onChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
+    const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
     expect(findTestSubject(wrapper, 'roleMappingsRulesTooComplex')).toHaveLength(1);
   });
 
@@ -135,7 +139,7 @@ describe('VisualRuleEditor', () => {
         onChange: jest.fn(),
         readOnly: true,
       };
-      const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
+      const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
 
       expect(findTestSubject(wrapper, 'roleMappingsAddRuleButton')).toHaveLength(0);
     });
@@ -155,7 +159,7 @@ describe('VisualRuleEditor', () => {
         onChange: jest.fn(),
         readOnly: true,
       };
-      const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
+      const wrapper = mountWithEuiProvider(<VisualRuleEditor {...props} />);
 
       const groupEditors = wrapper.find(RuleGroupEditor);
       expect(groupEditors).toHaveLength(5);

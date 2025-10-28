@@ -56,19 +56,25 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       setSelectedSettingsTab,
       navigateToApp,
       assistantAvailability: { isAssistantManagementEnabled, hasConnectorsAllPrivilege },
+      settings,
     } = useAssistantContext();
 
     useEffect(() => {
       if (contextSettingsTab) {
         // contextSettingsTab can be selected from Conversations > System Prompts > Add System Prompt
         onTabChange?.(contextSettingsTab);
+        setSelectedSettingsTab(null);
       }
     }, [onTabChange, contextSettingsTab, setSelectedSettingsTab]);
 
     const { data: connectors } = useLoadConnectors({
       http,
+      settings,
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+    const defaultConnector = useMemo(
+      () => getDefaultConnector(connectors, settings),
+      [connectors, settings]
+    );
 
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');

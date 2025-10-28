@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
 import type { Node } from 'yaml';
-import type { YamlValidationErrorSeverity } from '../model/types';
+import { monaco } from '@kbn/monaco';
+import type { YamlValidationErrorSeverity } from '../../../features/validate_workflow_yaml/model/types';
 
 // Copied from monaco-editor/esm/vs/editor/editor.api.d.ts because we can't import with turbopack
 export enum MarkerSeverity {
@@ -45,39 +45,10 @@ export function navigateToErrorPosition(
   editor.revealLineInCenter(lineNumber);
 }
 
-export function getHighlightStepDecorations(
-  model: monaco.editor.ITextModel,
-  range: monaco.IRange
-): monaco.editor.IModelDeltaDecoration[] {
-  const rangeBefore = new monaco.Range(0, 0, range.startLineNumber, range.startColumn);
-  const rangeAfter = new monaco.Range(
-    range.endLineNumber,
-    range.endColumn,
-    model.getLineCount(),
-    0
-  );
-  return [
-    {
-      range: rangeBefore,
-      options: {
-        inlineClassName: 'dimmed',
-        stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-      },
-    },
-    {
-      range: rangeAfter,
-      options: {
-        inlineClassName: 'dimmed',
-        stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-      },
-    },
-  ];
-}
-
 export function getMonacoRangeFromYamlNode(
   model: monaco.editor.ITextModel,
   node: Node
-): monaco.IRange | null {
+): monaco.Range | null {
   const [startOffset, _, endOffset] = node.range ?? [];
   if (!startOffset || !endOffset) {
     return null;

@@ -10,10 +10,7 @@ import { createPrivilegeMonitoringIndicesRoute } from './create_index';
 import { healthCheckPrivilegeMonitoringRoute } from './health';
 import { initPrivilegeMonitoringEngineRoute } from './init';
 import { scheduleNowMonitoringEngineRoute } from './schedule_now';
-import {
-  monitoringEntitySourceRoute,
-  listMonitoringEntitySourceRoute,
-} from './monitoring_entity_source';
+import { registerMonitoringEntitySourceRoutes } from './monitoring_entity_source';
 import { searchPrivilegeMonitoringIndicesRoute } from './search_indices';
 
 import {
@@ -40,17 +37,16 @@ export const registerPrivilegeMonitoringRoutes = ({
   padGetStatusRoute(router, logger, config);
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   scheduleNowMonitoringEngineRoute(router, logger, config);
-  deletePrivilegeMonitoringEngineRoute(router, logger, config);
-  healthCheckPrivilegeMonitoringRoute(router, logger, config);
+  deletePrivilegeMonitoringEngineRoute(router, logger);
+  healthCheckPrivilegeMonitoringRoute(router, logger);
   privilegesCheckPrivilegeMonitoringRoute(router, logger, getStartServices);
   searchPrivilegeMonitoringIndicesRoute(router, logger);
   createPrivilegeMonitoringIndicesRoute(router, logger);
-  monitoringEntitySourceRoute(router, logger, config);
-  listMonitoringEntitySourceRoute(router, logger, config);
   createUserRoute(router, logger);
   deleteUserRoute(router, logger);
   listUsersRoute(router, logger);
   updateUserRoute(router, logger);
   uploadUsersCSVRoute(router, logger, config);
-  disablePrivilegeMonitoringEngineRoute(router, logger, config);
+  disablePrivilegeMonitoringEngineRoute(router, logger);
+  registerMonitoringEntitySourceRoutes(router, logger, config);
 };

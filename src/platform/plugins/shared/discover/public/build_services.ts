@@ -29,9 +29,9 @@ import type {
 import type {
   FilterManager,
   TimefilterContract,
-  DataViewsContract,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -65,12 +65,14 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { MetricsExperiencePluginStart } from '@kbn/metrics-experience-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from './constants';
 
 /**
  * Location state of internal Discover history instance
@@ -85,6 +87,10 @@ export interface UrlTracker {
   setTrackingEnabled: (value: boolean) => void;
 }
 
+export interface DiscoverFeatureFlags {
+  getTabsEnabled: () => boolean;
+}
+
 export interface DiscoverServices {
   aiops?: AiopsPluginStart;
   application: ApplicationStart;
@@ -97,6 +103,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
+  discoverFeatureFlags: DiscoverFeatureFlags;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
@@ -146,6 +153,7 @@ export interface DiscoverServices {
   logsDataAccess?: LogsDataAccessPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
+  metricsExperience?: MetricsExperiencePluginStart;
 }
 
 export const buildServices = ({
@@ -190,6 +198,9 @@ export const buildServices = ({
     data: plugins.data,
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
+    discoverFeatureFlags: {
+      getTabsEnabled: () => core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, true),
+    },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
     i18n: core.i18n,
@@ -241,5 +252,6 @@ export const buildServices = ({
     logsDataAccess: plugins.logsDataAccess,
     embeddableEnhanced: plugins.embeddableEnhanced,
     apmSourcesAccess: plugins.apmSourcesAccess,
+    metricsExperience: plugins.metricsExperience,
   };
 };

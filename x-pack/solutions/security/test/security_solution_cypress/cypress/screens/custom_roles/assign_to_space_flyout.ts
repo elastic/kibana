@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
+
 export const SPACE_SELECTOR_COMBO_BOX = '[data-test-subj="spaceSelectorComboBox"]';
 
 // Privileges
 export const SECURITY_CATEGORY = '[data-test-subj="featureCategory_securitySolution"]';
 
 // Sub-privileges
-export const SECURITY_FEATURE = '[data-test-subj="featureCategory_securitySolution_siemV3"]';
+export const SECURITY_FEATURE = `[data-test-subj="featureCategory_securitySolution_${SECURITY_FEATURE_ID}"]`;
 export const SECURITY_FEATURE_DESCRIPTION = '[aria-describedby="Security description text"]';
 
 export const CASES_FEATURE =

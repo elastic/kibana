@@ -18,7 +18,11 @@ export type {
   Provider,
   ProviderInput,
   RunWorkflowCommand,
+  RunStepCommand,
   RunWorkflowResponseDto,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
+  StackFrame,
   UpdatedWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,
@@ -28,9 +32,24 @@ export type {
   WorkflowExecutionListDto,
   WorkflowExecutionListItemDto,
   WorkflowExecutionLogModel,
+  WorkflowStepExecutionDto,
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+  // enums
+  ExecutionStatusUnion,
+  ExecutionTypeUnion,
+  // connector types
+  ConnectorSubAction,
+  ConnectorInstance,
+  ConnectorTypeInfo,
+  ConnectorTypeInfoMinimal,
+  ConnectorContractUnion,
+  EnhancedInternalConnectorContract,
+  InternalConnectorContract,
+  DynamicConnectorContract,
 } from './v1';
 
 // exported full to use enum as values
@@ -38,26 +57,9 @@ export {
   // command schemas
   CreateWorkflowCommandSchema,
   ExecutionStatus,
+  ExecutionType,
+  ExecutionStatusValues,
+  ExecutionTypeValues,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from './v1';
-
-export type {
-  AtomicGraphNode,
-  EnterConditionBranchNode,
-  EnterConditionBranchNodeSchema,
-  EnterForeachNode,
-  EnterIfNode,
-  EnterRetryNode,
-  ExitConditionBranchNode,
-  ExitConditionBranchNodeSchema,
-  ExitForeachNode,
-  ExitIfNode,
-  ExitRetryNode,
-  EnterContinueNode,
-  ExitContinueNode,
-  HttpGraphNode,
-  HttpGraphNodeSchema,
-  WaitGraphNode,
-  WaitGraphNodeSchema,
-} from './execution';

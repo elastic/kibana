@@ -10,6 +10,7 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import { getHardcodedMappings } from './hardcoded_mappings';
+import { sortObjectByKeys } from './sorting_utils';
 import type {
   ResolvedSemconvYaml,
   YamlGroup,
@@ -97,7 +98,7 @@ function mapOtelTypeToEsType(otelType?: unknown): string {
 }
 
 /**
- * Extract the first example from examples array or convert single example to string
+ * Extract the first example from examples array, handling multi-line JSON safely
  */
 function extractFirstExample(examples?: unknown[]): string | undefined {
   if (!examples || examples.length === 0) return undefined;
@@ -105,7 +106,18 @@ function extractFirstExample(examples?: unknown[]): string | undefined {
   const firstExample = examples[0];
   if (firstExample === null || firstExample === undefined) return undefined;
 
-  return String(firstExample);
+  const exampleStr = String(firstExample);
+
+  // Try to parse as JSON and compact it to prevent multi-line formatting issues
+  try {
+    const parsed = JSON.parse(exampleStr.trim());
+    return JSON.stringify(parsed); // Compact JSON format
+  } catch {
+    // Not valid JSON, normalize as regular string
+    return exampleStr
+      .replace(/\s+/g, ' ') // Collapse multiple whitespaces into single space
+      .trim(); // Remove leading/trailing whitespace
+  }
 }
 
 /**
@@ -274,7 +286,12 @@ export function processSemconvYaml(
   const hardcodedFields = getHardcodedMappings();
 
   // Merge all fields - hardcoded fields are added first, semantic convention fields can override
-  const totalFields = { ...hardcodedFields, ...registryFields, ...metricFields };
+  // Apply deterministic sorting to ensure consistent field ordering across builds
+  const totalFields = sortObjectByKeys({
+    ...hardcodedFields,
+    ...registryFields,
+    ...metricFields,
+  });
 
   const result: ProcessingResult = {
     registryFields,
@@ -292,3 +309,6 @@ export function processSemconvYaml(
 
   return result;
 }
+
+// Export for testing purposes
+export { extractFirstExample };

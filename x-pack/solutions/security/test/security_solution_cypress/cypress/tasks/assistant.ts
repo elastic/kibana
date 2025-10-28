@@ -69,7 +69,7 @@ import {
   CONVO_CONTEXT_MENU_DUPLICATE,
   SHARED_SELECT_OPTION,
 } from '../screens/ai_assistant';
-import { SUCCESS_TOASTER_HEADER } from '../screens/alerts_detection_rules';
+import { SUCCESS_TOASTER_HEADER, TOASTER } from '../screens/alerts_detection_rules';
 
 export const openAssistant = (context?: 'rule' | 'alert') => {
   if (!context) {
@@ -100,6 +100,8 @@ export const selectConnector = (connectorName: string) => {
   cy.get(CONNECTOR_SELECTOR).click();
   cy.get(CONNECTOR_SELECT(connectorName)).click();
   assertConnectorSelected(connectorName);
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
+  cy.wait(2000);
 };
 export const resetConversation = () => {
   cy.get(CONVERSATION_SETTINGS_MENU).click();
@@ -127,6 +129,7 @@ export const submitMessage = () => {
 };
 
 export const typeAndSendMessage = (message: string) => {
+  cy.get(USER_PROMPT).click();
   cy.get(USER_PROMPT).type(message);
   submitMessage();
 };
@@ -135,6 +138,7 @@ export const typeAndSendMessage = (message: string) => {
 export const createAndTitleConversation = (newTitle = 'Something else') => {
   createNewChat();
   assertNewConversation(false, 'New chat');
+  selectConnector(azureConnectorAPIPayload.name);
   assertConnectorSelected(azureConnectorAPIPayload.name);
   typeAndSendMessage('hello');
   assertMessageSent('hello');
@@ -446,3 +450,11 @@ export const duplicateConversation = (conversationName: string) => {
 export const assertMessageUser = (user: string, messageIndex: number) => {
   cy.get(`.euiCommentEvent__headerUsername`).eq(messageIndex).should('have.text', user);
 };
+
+export function assertAccessErrorToast(): void {
+  cy.get(TOASTER).should('contain', 'Access denied to conversation');
+}
+
+export function assertGenericConversationErrorToast(): void {
+  cy.get(TOASTER).should('contain', 'Error fetching conversation by id');
+}

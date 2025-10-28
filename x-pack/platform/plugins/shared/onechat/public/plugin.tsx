@@ -12,10 +12,21 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { ONECHAT_UI_SETTING_ID } from '../common/constants';
-import { registerAnalytics, registerApp } from './register';
-import type { OnechatInternalService } from './services';
-import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { docLinks } from '../common/doc_links';
+import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
+import { registerLocators } from './locator/register_locators';
+import { registerAnalytics, registerApp, registerManagementSection } from './register';
+import {
+  AgentBuilderAccessChecker,
+  AgentService,
+  ChatService,
+  ConversationsService,
+  NavigationService,
+  ToolsService,
+  type OnechatInternalService,
+} from './services';
+import { createPublicToolContract } from './services/tools';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -23,6 +34,7 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
+import { openConversationFlyout } from './flyout/open_conversation_flyout';
 
 export class OnechatPlugin
   implements
@@ -35,12 +47,28 @@ export class OnechatPlugin
 {
   logger: Logger;
   private internalServices?: OnechatInternalService;
+  private setupServices?: {
+    navigationService: NavigationService;
+  };
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
-  setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
-    const isOnechatUiEnabled = core.uiSettings.get<boolean>(ONECHAT_UI_SETTING_ID, false);
+  setup(
+    core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
+    deps: OnechatSetupDependencies
+  ): OnechatPluginSetup {
+    const isOnechatUiEnabled = core.settings.client.get<boolean>(
+      AGENT_BUILDER_ENABLED_SETTING_ID,
+      true
+    );
+
+    const navigationService = new NavigationService({
+      management: deps.management.locator,
+      licenseManagement: deps.licenseManagement?.locator,
+    });
+
+    this.setupServices = { navigationService };
 
     if (isOnechatUiEnabled) {
       registerApp({
@@ -54,24 +82,59 @@ export class OnechatPlugin
       });
 
       registerAnalytics({ analytics: core.analytics });
+      registerLocators(deps.share);
+    }
+
+    try {
+      core.getStartServices().then(([coreStart]) => {
+        const { capabilities } = coreStart.application;
+        if (capabilities[ONECHAT_FEATURE_ID][uiPrivileges.showManagement]) {
+          registerManagementSection({ core, management: deps.management });
+        }
+      });
+    } catch (error) {
+      this.logger.error('Error registering Agent Builder management section', error);
     }
 
     return {};
   }
 
-  start({ http }: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
+  start(core: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
+    const { http } = core;
+    const { licensing, inference } = startDependencies;
+    docLinks.setDocLinks(core.docLinks.links);
+
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
+    const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
-    this.internalServices = {
+    if (!this.setupServices) {
+      throw new Error('plugin start called before plugin setup');
+    }
+
+    const { navigationService } = this.setupServices;
+
+    const internalServices: OnechatInternalService = {
       agentService,
       chatService,
       conversationsService,
+      navigationService,
       toolsService,
+      startDependencies,
+      accessChecker,
     };
 
-    return {};
+    this.internalServices = internalServices;
+
+    return {
+      tools: createPublicToolContract({ toolsService }),
+      openConversationFlyout: (options) =>
+        openConversationFlyout(options, {
+          coreStart: core,
+          services: internalServices,
+        }),
+    };
   }
 }

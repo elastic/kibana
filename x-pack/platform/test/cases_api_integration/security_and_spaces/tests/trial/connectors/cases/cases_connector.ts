@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [alerts.0]: Alert ID and index must be defined)'
+          `Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Alert ID and index must be defined",\n    "path": [\n      "alerts",\n      0\n    ]\n  }\n])`
         );
       });
 
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [groupingBy]: array size is [2], but cannot be greater than [1])'
+          'Request validation failed ([\n  {\n    "code": "too_big",\n    "maximum": 1,\n    "type": "array",\n    "inclusive": true,\n    "exact": false,\n    "message": "Array must contain at most 1 element(s)",\n    "path": [\n      "groupingBy"\n    ]\n  }\n])'
         );
       });
 
@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [timeWindow]: Not a valid time window)'
+          'Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  },\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  }\n])'
         );
       });
 
@@ -128,23 +128,32 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [timeWindow]: Not a valid time window)'
+          'Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  }\n])'
         );
       });
 
       it('returns 400 for unsupported time units', async () => {
-        for (const unit of ['s', 'H']) {
-          const res = await executeSystemConnector({
-            supertest,
-            connectorId,
-            req: getRequest({ timeWindow: `5${unit}` }),
-          });
+        const res1 = await executeSystemConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ timeWindow: `5s` }),
+        });
 
-          expect(res.status).to.be('error');
-          expect(res.serviceMessage).to.be(
-            'Request validation failed (Error: [timeWindow]: Not a valid time window)'
-          );
-        }
+        expect(res1.status).to.be('error');
+        expect(res1.serviceMessage).to.be(
+          'Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  }\n])'
+        );
+
+        const res2 = await executeSystemConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ timeWindow: `5H` }),
+        });
+
+        expect(res2.status).to.be('error');
+        expect(res2.serviceMessage).to.be(
+          'Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  },\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  }\n])'
+        );
       });
 
       it('returns 400 for timeWindow < 5m ', async () => {
@@ -155,7 +164,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [timeWindow]: Time window should be at least 5 minutes)'
+          'Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Time window should be at least 5 minutes",\n    "path": [\n      "timeWindow"\n    ]\n  }\n])'
         );
       });
 
@@ -168,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [maximumCasesToOpen]: Value must be equal to or lower than [20].)'
+          'Request validation failed ([\n  {\n    "code": "too_big",\n    "maximum": 20,\n    "type": "number",\n    "inclusive": true,\n    "exact": false,\n    "message": "Number must be less than or equal to 20",\n    "path": [\n      "maximumCasesToOpen"\n    ]\n  }\n])'
         );
       });
 
@@ -181,7 +190,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [maximumCasesToOpen]: Value must be equal to or greater than [1].)'
+          'Request validation failed ([\n  {\n    "code": "too_small",\n    "minimum": 1,\n    "type": "number",\n    "inclusive": true,\n    "exact": false,\n    "message": "Number must be greater than or equal to 1",\n    "path": [\n      "maximumCasesToOpen"\n    ]\n  }\n])'
         );
       });
     });
@@ -340,6 +349,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'low',
             status: 'open',
@@ -347,6 +357,7 @@ export default ({ getService }: FtrProviderContext): void => {
             title: 'Test rule (Auto-created)',
             totalAlerts: 5,
             totalComment: 0,
+            totalEvents: 0,
             updated_by: {
               email: null,
               full_name: null,
@@ -453,6 +464,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'high',
             status: 'open',
@@ -460,6 +472,7 @@ export default ({ getService }: FtrProviderContext): void => {
             title: 'Case with sample template',
             totalAlerts: 5,
             totalComment: 0,
+            totalEvents: 0,
             updated_by: {
               email: null,
               full_name: null,
@@ -824,6 +837,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -838,6 +852,7 @@ export default ({ getService }: FtrProviderContext): void => {
               title: 'Test rule - Grouping by A (Auto-created)',
               totalAlerts: 3,
               totalComment: 0,
+              totalEvents: 0,
               updated_by: {
                 email: null,
                 full_name: null,
@@ -872,6 +887,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -886,6 +902,7 @@ export default ({ getService }: FtrProviderContext): void => {
               title: 'Test rule - Grouping by B (Auto-created)',
               totalAlerts: 2,
               totalComment: 0,
+              totalEvents: 0,
               updated_by: {
                 email: null,
                 full_name: null,
@@ -1339,6 +1356,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1351,6 +1369,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 'test',
               ],
               title: 'custom-title',
+              totalEvents: 0,
               totalAlerts: 2,
               totalComment: 1,
               updated_by: {
@@ -1387,6 +1406,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1401,6 +1421,7 @@ export default ({ getService }: FtrProviderContext): void => {
               title: 'Test rule - Grouping by field_value_2 (Auto-created)',
               totalAlerts: 2,
               totalComment: 2,
+              totalEvents: 0,
               updated_by: {
                 email: null,
                 full_name: null,
@@ -1435,6 +1456,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1449,6 +1471,7 @@ export default ({ getService }: FtrProviderContext): void => {
               title: 'Test rule - Grouping by field_value_3 (Auto-created)',
               totalAlerts: 1,
               totalComment: 0,
+              totalEvents: 0,
               updated_by: {
                 email: null,
                 full_name: null,
@@ -1895,6 +1918,10 @@ const createCaseWithId = async ({
         type: ConnectorTypes.none,
         fields: null,
       },
+      settings: {
+        syncAlerts: req?.settings?.syncAlerts ?? false,
+        extractObservables: req?.settings?.extractObservables ?? false,
+      },
       // @ts-ignore
       status: STATUS_EXTERNAL_TO_ESMODEL[req?.status ?? CaseStatuses.open],
       // @ts-ignore
@@ -1909,6 +1936,7 @@ const createCaseWithId = async ({
       external_service: null,
       total_alerts: 0,
       total_comments: 0,
+      total_events: 0,
       observables: [],
       incremental_id: undefined,
     },

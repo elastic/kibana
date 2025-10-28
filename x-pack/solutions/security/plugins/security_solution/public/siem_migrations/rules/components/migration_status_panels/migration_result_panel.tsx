@@ -30,10 +30,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { css } from '@emotion/react';
 import { PanelText } from '../../../../common/components/panel_text';
-import {
-  convertTranslationResultIntoText,
-  useResultVisColors,
-} from '../../utils/translation_results';
+import { convertTranslationResultIntoText, useResultVisColors } from '../../../common/utils';
 import type { RuleMigrationTranslationStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
@@ -42,8 +39,9 @@ import type { RuleMigrationStats } from '../../types';
 import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
-import { RuleMigrationsLastError } from './last_error';
-import { MigrationPanelTitle } from './migration_panel_title';
+import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
+import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
+import { TotalExecutionTime } from '../../../common/components/total_execution_time';
 
 const headerStyle = css`
   &:hover {
@@ -64,13 +62,13 @@ const useCompleteBadgeStyles = () => {
   `;
 };
 
-export interface MigrationResultPanelProps {
+export interface RuleMigrationResultPanelProps {
   migrationStats: RuleMigrationStats;
   isCollapsed: boolean;
   onToggleCollapsed: (isCollapsed: boolean) => void;
 }
 
-export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
+export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps>(
   ({ migrationStats, isCollapsed = false, onToggleCollapsed }) => {
     const { data: translationStats, isLoading: isLoadingTranslationStats } =
       useGetMigrationTranslationStats(migrationStats.id);
@@ -88,7 +86,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
             <EuiFlexItem onClick={toggleCollapsed} css={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <MigrationPanelTitle migrationStats={migrationStats} />
+                  <MigrationPanelTitle migrationStats={migrationStats} migrationType="rule" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <PanelText size="s" subdued>
@@ -98,6 +96,12 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
                         moment(migrationStats.last_updated_at).fromNow()
                       )}
                     </p>
+                    {migrationStats.last_execution?.total_execution_time_ms && (
+                      <TotalExecutionTime
+                        migrationType="rule"
+                        milliseconds={migrationStats.last_execution.total_execution_time_ms}
+                      />
+                    )}
                   </PanelText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -124,7 +128,10 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
           <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
             {migrationStats.last_execution?.error && (
               <>
-                <RuleMigrationsLastError message={migrationStats.last_execution.error} />
+                <MigrationsLastError
+                  message={migrationStats.last_execution.error}
+                  migrationType="rule"
+                />
                 <EuiSpacer size="m" />
               </>
             )}
@@ -182,7 +189,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
     );
   }
 );
-MigrationResultPanel.displayName = 'MigrationResultPanel';
+RuleMigrationResultPanel.displayName = 'MigrationResultPanel';
 
 const TranslationResultsChart = React.memo<{
   translationStats: RuleMigrationTranslationStats;

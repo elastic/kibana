@@ -7,42 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiEmptyPromptProps } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiIcon, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import { EuiText } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { JSONDataView, type JSONDataViewProps } from '../../../shared/ui/json_data_view';
+import type { JsonValue } from '@kbn/utility-types';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { JSONDataView } from '../../../shared/ui/json_data_view';
 
-interface StepExecutionDataViewProps extends JSONDataViewProps {
-  data: Record<string, unknown> | null | undefined;
+const Titles = {
+  output: i18n.translate('workflowsManagement.stepExecutionDataView.outputTitle', {
+    defaultMessage: 'Output',
+  }),
+  error: i18n.translate('workflowsManagement.stepExecutionDataView.errorTitle', {
+    defaultMessage: 'Error',
+  }),
+  input: i18n.translate('workflowsManagement.stepExecutionDataView.inputTitle', {
+    defaultMessage: 'Input',
+  }),
+};
+
+interface StepExecutionDataViewProps {
+  stepExecution: WorkflowStepExecutionDto;
+  mode: 'input' | 'output';
 }
 
-export const StepExecutionDataView = ({ title, data, ...props }: StepExecutionDataViewProps) => {
-  const { euiTheme } = useEuiTheme();
-  const containerCss = {
-    padding: euiTheme.size.s,
-  };
-  const emptyPromptCommonProps: EuiEmptyPromptProps = {
-    titleSize: 's',
-    paddingSize: 's',
-  };
-  if (!data) {
-    return (
-      <EuiEmptyPrompt
-        {...emptyPromptCommonProps}
-        css={containerCss}
-        icon={<EuiIcon type="info" size="l" />}
-        title={
-          <h2>
-            <FormattedMessage
-              id="workflows.stepExecutionDataTable.noDataFound"
-              defaultMessage="No {title} found"
-              values={{ title: title?.toLowerCase() ?? 'data' }}
-            />
-          </h2>
+export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
+  ({ stepExecution, mode }) => {
+    const { data, title } = useMemo<{ data: JsonValue | undefined; title: string }>(() => {
+      if (mode === 'input') {
+        return { data: stepExecution.input, title: Titles.input };
+      } else {
+        if (stepExecution.error) {
+          return { data: { error: stepExecution.error }, title: Titles.error };
         }
-      />
+        return { data: stepExecution.output, title: Titles.output };
+      }
+    }, [mode, stepExecution]);
+
+    const fieldPathActionsPrefix: string | undefined = useMemo(() => {
+      if (mode !== 'output' || stepExecution.error) {
+        return undefined; // Make field path actions available only for output data and not error.
+      }
+      return `steps.${stepExecution.stepId}.${mode}`;
+    }, [mode, stepExecution.stepId, stepExecution.error]);
+
+    if (data === undefined) {
+      return (
+        <EuiText color="subdued" size="xs">
+          <FormattedMessage
+            id="workflowsManagement.stepExecutionDataView.noData"
+            defaultMessage="No {mode} data"
+            values={{ mode: Titles[mode].toLowerCase() }}
+          />
+        </EuiText>
+      );
+    }
+
+    return (
+      <JSONDataView data={data} title={title} fieldPathActionsPrefix={fieldPathActionsPrefix} />
     );
   }
-  return <JSONDataView data={data} title={title} {...props} />;
-};
+);
+
+StepExecutionDataView.displayName = 'StepExecutionDataView';

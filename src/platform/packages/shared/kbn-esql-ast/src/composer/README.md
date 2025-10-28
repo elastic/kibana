@@ -87,6 +87,43 @@ query.toRequest();
 query.toRequest().params; // [{ input : 123 }]
 ```
 
+## Conditionally add commands
+
+The simplest way to conditionally add commands to a query is to first construct
+the base `query` object and then use `.pipe` to add commands based on
+conditions:
+
+```ts
+// Build query conditionally
+let query = esql`FROM index`;
+
+if (includeFilters) {
+  query = query.pipe`WHERE foo > 42`;
+}
+
+query = query.limit(10); // or: query.pipe `LIMIT 10`;
+```
+
+Another approach is to inline conditional command into the original query
+using command holes. You can manually insert a no-op command `WHERE TRUE` or
+use the `esql.nop` helper:
+
+```ts
+// Build query with conditional command hole
+const query = esql`FROM index
+  | ${includeFilters ? esql.cmd`WHERE foo > 42` : esql.nop}
+  | LIMIT 10`;
+
+// same as:
+const query = esql`FROM index
+  | ${includeFilters ? esql.cmd`WHERE foo > 42` : esql.cmd`WHERE TRUE`}
+  | LIMIT 10`;
+```
+
+The `WHERE TRUE` commands are automatically removed from the final AST, so the
+resulting query does not contain any no-op commands. However, even if they
+were present, Elasticsearch would simply ignore them.
+
 ## API Reference
 
 ### Basic Usage Patterns
@@ -208,6 +245,39 @@ const query = esql.from('index').where`status == ${status}`
   .limit(50);
 ```
 
+#### SET Header Instructions
+
+ES|QL supports SET instructions at the beginning of queries to configure query-level settings. You can add SET instructions either directly in the template or programmatically:
+
+```ts
+// Direct in template (recommended)
+const query = esql`SET a = 123; FROM index | LIMIT 10`;
+
+// Multiple SET instructions
+const query = esql`
+  SET threshold = 100;
+  SET limit = 50;
+  FROM logs | WHERE value > ?threshold | LIMIT ?limit`;
+
+// Programmatically add SET instructions
+const query = esql`FROM index | LIMIT 10`;
+query.addSetCommand('setting1', 'value1');
+query.addSetCommand('setting2', 42);
+query.addSetCommand('setting3', true);
+
+// Get all SET instructions
+const sets = query.getSetCommands();
+// Returns: [{ name: 'setting1', value: '"value1"' }, ...]
+
+// Remove specific SET instruction
+query.removeSetCommand('setting2');
+
+// Clear all SET instructions
+query.clearSetCommands();
+```
+
+SET instructions support string, numeric, and boolean values and are preserved when combining queries or adding more commands.
+
 #### Output Methods
 
 ```ts
@@ -238,11 +308,74 @@ query.setParam('customParam', 'value');
 // Get all parameters
 const allParams = query.getParams();
 
+// Inline individual parameter
+query.inlineParam('customParam');
+
+// Inline all parameters (convert parameterized query to static query)
+query.inlineParams();
+
 // Access AST directly
 const ast = query.ast;
 ```
 
 ### Advanced Features
+
+#### Parameter Inlining
+
+The `.inlineParams()` method converts a parameterized query into a static query by replacing all parameter placeholders with their actual values directly in the query text:
+
+```ts
+// Create a parameterized query
+const query = esql`FROM logs | WHERE user == ${{ userName: 'admin' }} | LIMIT ${{ limit: 100 }}`;
+
+console.log(query.print());
+// FROM logs | WHERE user == ?userName | LIMIT ?limit
+
+console.log(query.getParams());
+// { userName: 'admin', limit: 100 }
+
+// Inline all parameters
+query.inlineParams();
+
+console.log(query.print());
+// FROM logs | WHERE user == "admin" | LIMIT 100
+
+console.log(query.getParams());
+// {} (empty - all parameters have been inlined)
+```
+
+**Inline Individual Parameters:**
+
+```ts
+// Inline specific parameters while keeping others parameterized
+const query = esql`FROM logs | WHERE user == ${{ userName: 'admin' }} AND level == ${{
+  level: 'error',
+}}`;
+
+query.inlineParam('userName'); // Inline only the userName parameter
+
+console.log(query.print());
+// FROM logs | WHERE user == "admin" AND level == ?level
+
+console.log(query.getParams());
+// { level: 'error' }
+```
+
+**Supported Parameter Types:**
+
+- `string` - Converted to string literals with proper escaping
+- `number` - Converted to numeric literals
+- `boolean` - Converted to boolean literals
+- Column names (when used with `??` param syntax)
+- Nested column name parts (both `?` and `??` param syntax)
+- Function names (both `?` and `??` param syntax)
+
+**Important Notes:**
+
+- Inlining is irreversible - parameters cannot be extracted back
+- The parameter map is cleared after inlining all parameters
+- Type validation ensures only supported types can be inlined
+- Special handling for column names and function identifiers
 
 #### Dynamic Query Construction
 
@@ -288,6 +421,9 @@ const query = esql`FROM ${sources}`;
 
 // Using convenience method
 const query = esql.from('logs-app1-*', 'logs-app2-*');
+
+// Using convenience method with metadata fields
+const query = esql.from(['logs-app1-*', 'logs-app2-*'], ['_id', '_index']);
 ```
 
 ### Column References

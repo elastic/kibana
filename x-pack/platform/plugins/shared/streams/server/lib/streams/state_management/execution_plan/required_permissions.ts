@@ -66,11 +66,15 @@ export function getRequiredPermissionsForActions({
     rollover,
     update_default_ingest_pipeline,
     delete_datastream,
+    update_data_stream_mappings,
+    update_ingest_settings,
     // we don't need to validate permissions for these actions
     // since they are done by the kibana system user
     upsert_dot_streams_document,
     delete_dot_streams_document,
     delete_queries,
+    unlink_assets,
+    unlink_features,
     ...rest
   } = actionsByType;
   assertEmptyObject(rest);
@@ -149,6 +153,17 @@ export function getRequiredPermissionsForActions({
     });
   }
 
+  if (update_data_stream_mappings.length > 0) {
+    const indexPermissions: Record<string, string[]> = {};
+    update_data_stream_mappings.forEach((action) => {
+      indexPermissions[action.request.name] = ['manage'];
+    });
+    permissions.push({
+      cluster: [],
+      index: indexPermissions,
+    });
+  }
+
   if (update_lifecycle.length > 0) {
     const indexPermissions: Record<string, string[]> = {};
     update_lifecycle.forEach((action) => {
@@ -177,6 +192,17 @@ export function getRequiredPermissionsForActions({
     const indexPermissions: Record<string, string[]> = {};
     delete_datastream.forEach((action) => {
       indexPermissions[action.request.name] = ['delete_index'];
+    });
+    permissions.push({
+      cluster: [],
+      index: indexPermissions,
+    });
+  }
+
+  if (update_ingest_settings.length > 0) {
+    const indexPermissions: Record<string, string[]> = {};
+    update_ingest_settings.forEach((action) => {
+      indexPermissions[action.request.name] = ['manage'];
     });
     permissions.push({
       cluster: [],

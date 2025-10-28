@@ -43,7 +43,7 @@ export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {
   handleClose?: () => void;
 };
 
-const defaultPanelStyles = { width: '410px' };
+const defaultPanelStyles = { width: '420px' };
 
 export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = ({
   children,
@@ -78,6 +78,7 @@ export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = 
             isDisabled={isDisabled}
             groupPosition={groupPosition}
             data-test-subj={buttonDataTestSubj}
+            size="s"
           />
         }
         isOpen={isOpen}
@@ -86,7 +87,7 @@ export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = 
           handleClose?.();
         }}
         anchorPosition="downRight"
-        panelPaddingSize="s"
+        panelPaddingSize="m"
         {...euiPopoverProps}
       >
         <EuiPopoverTitle data-test-subj={`${euiPopoverProps['data-test-subj']}_title`}>

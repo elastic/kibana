@@ -304,6 +304,7 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   revision: schema.number(),
   agents: schema.maybe(schema.number()),
   unprivileged_agents: schema.maybe(schema.number()),
+  fips_agents: schema.maybe(schema.number()),
   is_protected: schema.boolean({
     meta: {
       description:
@@ -336,6 +337,7 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
       version: schema.string(),
       agents: schema.number(),
       failedUpgradeAgents: schema.number(),
+      failedUpgradeActionIds: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
   totalAgents: schema.number(),
@@ -479,11 +481,14 @@ export const FullAgentPolicyResponseSchema = schema.object({
         logs: schema.boolean(),
         traces: schema.boolean(),
         apm: schema.maybe(schema.any()),
+        _runtime_experimental: schema.maybe(schema.string()),
       }),
       download: schema.object({
         sourceURI: schema.string(),
         ssl: schema.maybe(BaseSSLSchema),
         secrets: schema.maybe(BaseSecretsSchema),
+        timeout: schema.maybe(schema.string()),
+        target_directory: schema.maybe(schema.string()),
       }),
       features: schema.recordOf(
         schema.string(),
@@ -507,6 +512,11 @@ export const FullAgentPolicyResponseSchema = schema.object({
               rotateeverybytes: schema.maybe(schema.number()),
               keepfiles: schema.maybe(schema.number()),
               interval: schema.maybe(schema.string()),
+            })
+          ),
+          metrics: schema.maybe(
+            schema.object({
+              period: schema.maybe(schema.string()),
             })
           ),
         })

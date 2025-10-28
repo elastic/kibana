@@ -14,11 +14,14 @@ import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  PRIVMON_INDICES_URL,
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { SearchPrivilegesIndicesRequestQuery } from '../../../../../common/api/entity_analytics/monitoring';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { createDataSourcesService } from '../data_sources/data_sources_service';
+import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
+import { monitoringEntitySourceType } from '../saved_objects';
 
 // Return a subset of all indices that contain the user.name field
 const LIMIT = 20;
@@ -30,7 +33,7 @@ export const searchPrivilegeMonitoringIndicesRoute = (
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/privileges/indices',
+      path: PRIVMON_INDICES_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -58,7 +61,16 @@ export const searchPrivilegeMonitoringIndicesRoute = (
         );
 
         const dataClient = secSol.getPrivilegeMonitoringDataClient();
-        const service = createDataSourcesService(dataClient);
+        const config = secSol.getConfig();
+        const maxUsersAllowed =
+          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+        const soClient = dataClient.getScopedSoClient(request, {
+          includedHiddenTypes: [
+            PrivilegeMonitoringApiKeyType.name,
+            monitoringEntitySourceType.name,
+          ],
+        });
+        const service = createDataSourcesService(dataClient, soClient, maxUsersAllowed);
         try {
           const indices = await service.searchPrivilegesIndices(query);
 

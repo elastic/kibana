@@ -14,7 +14,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -278,19 +278,22 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               {showActionGroupErrorIcon() ? (
-                <EuiToolTip content={ACTION_ERROR_TOOLTIP}>
-                  <EuiIcon
-                    data-test-subj="action-group-error-icon"
-                    type="warning"
-                    color="danger"
-                    size="l"
-                  />
-                </EuiToolTip>
+                <EuiIconTip
+                  content={ACTION_ERROR_TOOLTIP}
+                  type="warning"
+                  color="danger"
+                  size="l"
+                  iconProps={{
+                    'data-test-subj': 'action-group-error-icon',
+                  }}
+                />
               ) : (
                 <Suspense fallback={null}>
-                  <EuiToolTip content={actionType?.name}>
-                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
-                  </EuiToolTip>
+                  <EuiIconTip
+                    content={actionType?.name}
+                    size="l"
+                    type={actionTypeModel.iconClass}
+                  />
                 </Suspense>
               )}
             </EuiFlexItem>
@@ -315,7 +318,12 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
               {warning && !isOpen && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={ACTION_WARNING_TITLE}>
-                    <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning" />
+                    <EuiBadge
+                      tabIndex={0}
+                      data-test-subj="warning-badge"
+                      iconType="warning"
+                      color="warning"
+                    />
                   </EuiToolTip>
                 </EuiFlexItem>
               )}

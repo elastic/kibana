@@ -223,6 +223,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         columns={metricsOnboardingEnabled ? 2 : 3}
         role="group"
         aria-labelledby={categorySelectorTitleId}
+        data-test-subj="observabilityOnboardingUseCaseGrid"
       >
         {options.map((option) => (
           <EuiFlexItem
@@ -267,8 +268,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                         {option.showIntegrationsBadge && (
                           <EuiBadge color="hollow">
                             <FormattedMessage
-                              defaultMessage="+ Integrations"
                               id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
+                              defaultMessage="+ Integrations"
                               description="A badge indicating that the user can add additional observability integrations to their deployment via this option"
                             />
                           </EuiBadge>

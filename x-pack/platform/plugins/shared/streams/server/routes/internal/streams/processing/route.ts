@@ -48,14 +48,16 @@ export const simulateProcessorRoute = createServerRoute({
   },
   params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
+      request,
+    });
 
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
-    return simulateProcessing({ params, scopedClusterClient, streamsClient });
+    return simulateProcessing({ params, scopedClusterClient, streamsClient, fieldsMetadataClient });
   },
 });
 
@@ -94,9 +96,10 @@ export const processingGrokSuggestionRoute = createServerRoute({
       throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
+      await getScopedClients({
+        request,
+      });
 
     // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
     // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
@@ -106,6 +109,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
         inferenceClient,
         streamsClient,
         scopedClusterClient,
+        fieldsMetadataClient,
       })
     ).pipe(
       map((grokProcessor) => ({

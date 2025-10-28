@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ESQLMessage, ESQLCommand, ESQLAst } from '../types';
-import type { ISuggestionItem, ESQLFieldWithMetadata, ICommandCallbacks } from './types';
+import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '../types';
+import type {
+  ISuggestionItem,
+  ICommandCallbacks,
+  ESQLColumnData,
+  ESQLFieldWithMetadata,
+} from './types';
 
 /**
  * Interface defining the methods that each ES|QL command should register.
@@ -25,8 +30,8 @@ export interface ICommandMethods<TContext = any> {
    * @returns Return an array of validation errors/warnings.
    */
   validate?: (
-    command: ESQLCommand,
-    ast: ESQLAst,
+    command: ESQLAstAllCommands,
+    ast: ESQLCommand[],
     context?: TContext,
     callbacks?: ICommandCallbacks
   ) => ESQLMessage[];
@@ -43,7 +48,7 @@ export interface ICommandMethods<TContext = any> {
    */
   autocomplete: (
     query: string,
-    command: ESQLCommand,
+    command: ESQLAstAllCommands,
     callbacks?: ICommandCallbacks,
     context?: TContext,
     cursorPosition?: number
@@ -59,9 +64,10 @@ export interface ICommandMethods<TContext = any> {
    */
   columnsAfter?: (
     command: ESQLCommand,
-    previousColumns: ESQLFieldWithMetadata[],
-    context?: TContext
-  ) => ESQLFieldWithMetadata[];
+    previousColumns: ESQLColumnData[],
+    query: string,
+    newFields: IAdditionalFields
+  ) => Promise<ESQLColumnData[]> | ESQLColumnData[];
 }
 
 export interface ICommandMetadata {
@@ -112,6 +118,12 @@ export interface ICommandRegistry {
    * @returns The ICommand object if found, otherwise undefined.
    */
   getCommandByName(commandName: string): ICommand | undefined;
+}
+
+export interface IAdditionalFields {
+  fromJoin: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
+  fromEnrich: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
+  fromFrom: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
 }
 
 /**

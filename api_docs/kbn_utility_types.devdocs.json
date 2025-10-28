@@ -18,7 +18,76 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.maybe",
+        "type": "Function",
+        "tags": [],
+        "label": "maybe",
+        "description": [
+          "\nMark a value as possibly undefined. Useful for array and object access\nwhich won't account for the possibility where the item at the specified\nindex is undefined. E.g.:\n\nconst val = maybe(obj[key]);"
+        ],
+        "signature": [
+          "(value: T) => T | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/maybe.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/utility-types",
+            "id": "def-common.maybe.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-utility-types/src/maybe.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.maybe",
+        "type": "Function",
+        "tags": [],
+        "label": "maybe",
+        "description": [],
+        "signature": [
+          "(val: unknown) => unknown"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/maybe.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/utility-types",
+            "id": "def-common.maybe.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "val",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-utility-types/src/maybe.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/utility-types",
@@ -707,6 +776,31 @@
             "text": "RecursiveReadonly"
           },
           "<T[K]>; }> : T"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.RecursiveWritable",
+        "type": "Type",
+        "tags": [],
+        "label": "RecursiveWritable",
+        "description": [
+          "\n Makes an object with readonly properties mutable."
+        ],
+        "signature": [
+          "{ -readonly [K in keyof T]: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursiveWritable",
+            "text": "RecursiveWritable"
+          },
+          "<T[K]>; }"
         ],
         "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,

@@ -18,8 +18,12 @@ import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Subscription } from 'rxjs';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
+import { SchemaSelector } from '../../../../../components/schema_selector';
 import { getControlPanelConfigs } from './control_panels_config';
 import { ControlTitle } from './controls_title';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
+import { isPending } from '../../../../../hooks/use_fetcher';
 
 interface Props {
   dataView: DataView | undefined;
@@ -27,7 +31,8 @@ interface Props {
   filters: Filter[];
   query: Query;
 
-  schema?: DataSchemaFormat | null;
+  schema: DataSchemaFormat | null;
+  schemas: DataSchemaFormat[];
   onFiltersChange: (filters: Filter[]) => void;
 }
 
@@ -38,12 +43,16 @@ export const ControlsContent = ({
   timeRange,
   schema,
   onFiltersChange,
+  schemas,
 }: Props) => {
   const controlConfigs = useMemo(() => getControlPanelConfigs(schema), [schema]);
   const [controlPanels, setControlPanels] = useControlPanels(controlConfigs.controls, dataView);
   const controlGroupAPI = useRef<ControlGroupRendererApi | undefined>();
-
   const subscriptions = useRef<Subscription>(new Subscription());
+  const { onPreferredSchemaChange } = useUnifiedSearchContext();
+  const { status } = useTimeRangeMetadataContext();
+
+  const isLoading = isPending(status);
 
   const getInitialInput = useCallback(async () => {
     const initialInput: Partial<ControlGroupRuntimeState> = {
@@ -131,6 +140,13 @@ export const ControlsContent = ({
         query={query}
         filters={filters}
       />
+      <SchemaSelector
+        isHostsView
+        onChange={onPreferredSchemaChange}
+        schemas={schemas}
+        value={schema ?? 'semconv'}
+        isLoading={isLoading}
+      />
     </ControlGroupContainer>
   );
 };
@@ -138,5 +154,7 @@ export const ControlsContent = ({
 const ControlGroupContainer = styled.div`
   .controlGroup {
     min-height: ${(props) => props.theme.euiTheme.size.xxl};
+    align-items: start;
+    margin-bottom: ${(props) => props.theme.euiTheme.size.s};
   }
 `;

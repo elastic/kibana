@@ -179,7 +179,7 @@ export const MappingsEditor = React.memo(
         {multipleMappingsDeclared ? (
           <MultipleMappingsWarning />
         ) : (
-          <div className="mappingsEditor">
+          <div>
             <EuiTabs>
               <EuiTab
                 onClick={() => changeTab('fields')}

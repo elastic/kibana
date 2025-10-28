@@ -100,7 +100,6 @@
     "@kbn/monaco",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/presentation-containers",
-    "@kbn/presentation-panel-plugin",
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-context-render",
@@ -145,5 +144,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/presentation-util",
     "@kbn/licensing-types",
+    "@kbn/data-service-server",
+    "@kbn/es-query-server",
+    "@kbn/presentation-publishing-schemas",
   ]
 }

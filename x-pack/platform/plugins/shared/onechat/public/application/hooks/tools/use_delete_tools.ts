@@ -6,9 +6,9 @@
  */
 
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useCallback, useRef, useState } from 'react';
 import type { BulkDeleteToolResponse, DeleteToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
@@ -98,12 +98,22 @@ export const useDeleteTool = ({
 } = {}) => {
   const { addSuccessToast, addErrorToast } = useToasts();
   const [deleteToolId, setDeleteToolId] = useState<string | null>(null);
+  const onConfirmCallbackRef = useRef<() => void>();
+  const onCancelCallbackRef = useRef<() => void>();
 
   const isModalOpen = deleteToolId !== null;
 
-  const deleteTool = useCallback((toolId: string) => {
-    setDeleteToolId(toolId);
-  }, []);
+  const deleteTool = useCallback(
+    (
+      toolId: string,
+      { onConfirm, onCancel }: { onConfirm?: () => void; onCancel?: () => void } = {}
+    ) => {
+      setDeleteToolId(toolId);
+      onConfirmCallbackRef.current = onConfirm;
+      onCancelCallbackRef.current = onCancel;
+    },
+    []
+  );
 
   const handleSuccess: DeleteToolSuccessCallback = (data, { toolId }) => {
     if (!data.success) {
@@ -140,10 +150,14 @@ export const useDeleteTool = ({
     }
 
     await deleteToolMutation({ toolId: deleteToolId }, { onSuccess, onError });
+    onConfirmCallbackRef.current?.();
+    onConfirmCallbackRef.current = undefined;
   }, [deleteToolId, deleteToolMutation, onSuccess, onError]);
 
   const cancelDelete = useCallback(() => {
     setDeleteToolId(null);
+    onCancelCallbackRef.current?.();
+    onCancelCallbackRef.current = undefined;
   }, []);
 
   return {

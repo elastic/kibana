@@ -7,24 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StoryObj } from '@storybook/react';
-import React, { type ReactNode } from 'react';
+import type { Decorator, StoryObj } from '@storybook/react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ExecutionStatus } from '@kbn/workflows';
-import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
+import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import { WorkflowDetailStoreProvider } from '../lib/store';
+
+const StoryProviders: Decorator = (story: Function) => {
+  return (
+    <MemoryRouter>
+      <WorkflowDetailStoreProvider>
+        <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>{story()}</div>
+      </WorkflowDetailStoreProvider>
+    </MemoryRouter>
+  );
+};
 
 export default {
   title: 'Workflows Management/Workflow YAML Editor',
   component: WorkflowYAMLEditor,
-  decorators: [
-    kibanaReactDecorator,
-    (story: () => ReactNode) => (
-      <MemoryRouter>
-        <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>{story()}</div>
-      </MemoryRouter>
-    ),
-  ],
+  decorators: [kibanaReactDecorator, StoryProviders],
 };
 
 const workflowYaml = `name: Print famous people
@@ -81,119 +85,106 @@ type Story = StoryObj<typeof WorkflowYAMLEditor>;
 
 export const Default: Story = {
   args: {
-    workflowId: '1',
-    filename: 'workflow.yaml',
+    workflowYaml,
     readOnly: false,
-    hasChanges: false,
-    lastUpdatedAt: new Date(),
-    highlightStep: undefined,
-    stepExecutions: [],
-    onMount: () => {},
-    onChange: () => {},
-    onSave: () => {},
-    onValidationErrors: () => {},
-    value: workflowYaml,
   },
 };
 
-export const WithHighlightStep: Story = {
+export const ReadOnly: Story = {
   args: {
-    workflowId: '1',
-    filename: 'workflow.yaml',
-    readOnly: false,
-    hasChanges: false,
-    lastUpdatedAt: new Date(),
-    highlightStep: 'analysis',
-    value: workflowYaml,
+    workflowYaml,
+    readOnly: true,
   },
 };
 
 export const WithStepExecutions: Story = {
   args: {
-    workflowId: '1',
-    filename: 'workflow.yaml',
+    workflowYaml,
     readOnly: false,
-    hasChanges: false,
-    lastUpdatedAt: new Date(),
-    highlightStep: undefined,
-    value: workflowYaml,
     stepExecutions: [
       {
         stepId: 'analysis',
         status: ExecutionStatus.COMPLETED,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'debug_ai_response',
         status: ExecutionStatus.FAILED,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'print-enter-dash',
         status: ExecutionStatus.WAITING_FOR_INPUT,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'foreachstep',
         status: ExecutionStatus.RUNNING,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'log-name-surname',
         status: ExecutionStatus.COMPLETED,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'slack_it',
         status: ExecutionStatus.COMPLETED,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'print-exit-dash',
         status: ExecutionStatus.SKIPPED,
-        spaceId: '1',
         id: '1',
         workflowRunId: '1',
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
     ],
   },

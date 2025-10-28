@@ -6,7 +6,11 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsClientMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { MockRouter } from '../__mocks__/routes.mock';
@@ -14,6 +18,9 @@ import { createMockRouter, routeHandlerContextMock } from '../__mocks__/routes.m
 import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { errors as esErrors } from '@elastic/elasticsearch';
+import { ReindexServiceWrapper } from '../lib/reindex_service_wrapper';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import { REINDEX_SERVICE_BASE_PATH } from '../../../common';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -27,20 +34,13 @@ const mockReindexService = {
   getIndexAliases: jest.fn().mockResolvedValue({}),
   getIndexInfo: jest.fn().mockResolvedValue({ aliases: {}, settings: {} }),
 };
-jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_version_precheck', () => ({
-  versionCheckHandlerWrapper: () => (a: any) => a,
-}));
 
 jest.mock('../lib/reindex_service', () => ({
   reindexServiceFactory: () => mockReindexService,
 }));
 
-jest.mock('../lib/index_settings', () => ({
-  generateNewIndexName: () => 'reindexed-foo',
-}));
-
-import type { ReindexSavedObject } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexSavedObject } from '../lib/types';
 import { credentialStoreFactory } from '../lib/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 
@@ -55,7 +55,7 @@ describe('reindex API', () => {
   let routeDependencies: any;
   let mockRouter: MockRouter;
 
-  const credentialStore = credentialStoreFactory(logMock);
+  const credentialStore = credentialStoreFactory(logMock.get());
   const worker = {
     includes: jest.fn(),
     forceRefresh: jest.fn(),
@@ -63,15 +63,29 @@ describe('reindex API', () => {
 
   beforeEach(() => {
     mockRouter = createMockRouter();
+    const securityMockInstance = securityMock.createStart();
+    const licensingMockInstance = licensingMock.createStart();
+    const version = { getMajorVersion: () => 8, getMinorVersion: () => 7 } as any as Version;
     routeDependencies = {
       credentialStore,
       router: mockRouter,
-      licensing: licensingMock.createSetup(),
+      licensing: licensingMockInstance,
       lib: { handleEsError },
-      getSecurityPlugin: () => securityMock.createStart(),
-      version: { getMajorVersion: () => 8, getMinorVersion: () => 7 },
+      getSecurityPlugin: () => Promise.resolve(securityMockInstance),
+      getReindexService: async () => {
+        return new ReindexServiceWrapper({
+          soClient: savedObjectsClientMock.create(),
+          credentialStore,
+          clusterClient: elasticsearchServiceMock.createClusterClient(),
+          logger: logMock,
+          licensing: licensingMockInstance,
+          security: securityMockInstance,
+          version,
+          rollupsEnabled: true,
+        });
+      },
     };
-    registerReindexIndicesRoutes(routeDependencies, () => worker);
+    registerReindexIndicesRoutes(routeDependencies);
 
     mockReindexService.hasRequiredPrivileges.mockResolvedValue(true);
     mockReindexService.detectReindexWarnings.mockReset();
@@ -92,7 +106,7 @@ describe('reindex API', () => {
     jest.clearAllMocks();
   });
 
-  describe('GET /api/upgrade_assistant/reindex/{indexName}', () => {
+  describe(`GET ${REINDEX_SERVICE_BASE_PATH}/{indexName}`, () => {
     it('returns the attributes of the reindex operation and reindex warnings', async () => {
       mockReindexService.findReindexOperation.mockResolvedValueOnce({
         attributes: { indexName: 'wowIndex', status: ReindexStatus.inProgress },
@@ -108,7 +122,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: `${REINDEX_SERVICE_BASE_PATH}/{indexName}`,
       })(
         routeHandlerContextMock,
         createRequestMock({ params: { indexName: 'wowIndex' } }),
@@ -141,7 +155,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: `${REINDEX_SERVICE_BASE_PATH}/{indexName}`,
       })(
         routeHandlerContextMock,
         createRequestMock({ params: { indexName: 'anIndex' } }),
@@ -157,7 +171,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: `${REINDEX_SERVICE_BASE_PATH}/{indexName}`,
       })(
         routeHandlerContextMock,
         createRequestMock({ params: { indexName: 'anIndex' } }),
@@ -171,7 +185,7 @@ describe('reindex API', () => {
     });
   });
 
-  describe('POST /api/upgrade_assistant/reindex/{indexName}', () => {
+  describe(`POST ${REINDEX_SERVICE_BASE_PATH}`, () => {
     it('creates a new reindexOp', async () => {
       mockReindexService.createReindexOperation.mockResolvedValueOnce({
         attributes: { indexName: 'theIndex' },
@@ -179,37 +193,25 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: REINDEX_SERVICE_BASE_PATH,
       })(
         routeHandlerContextMock,
-        createRequestMock({ params: { indexName: 'theIndex' } }),
+        createRequestMock({ body: { indexName: 'theIndex', newIndexName: 'theIndexReindexed' } }),
         kibanaResponseFactory
       );
 
       // It called create correctly
-      expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith('theIndex', undefined);
+      expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith({
+        indexName: 'theIndex',
+        newIndexName: 'theIndexReindexed',
+        opts: undefined,
+        settings: undefined,
+      });
 
       // It returned the right results
       expect(resp.status).toEqual(200);
       const data = resp.payload;
       expect(data).toEqual({ indexName: 'theIndex' });
-    });
-
-    it('calls worker.forceRefresh', async () => {
-      mockReindexService.createReindexOperation.mockResolvedValueOnce({
-        attributes: { indexName: 'theIndex' },
-      });
-
-      await routeDependencies.router.getHandler({
-        method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
-      })(
-        routeHandlerContextMock,
-        createRequestMock({ params: { indexName: 'theIndex' } }),
-        kibanaResponseFactory
-      );
-
-      expect(worker.forceRefresh).toHaveBeenCalled();
     });
 
     it('inserts headers into the credentialStore', async () => {
@@ -220,14 +222,14 @@ describe('reindex API', () => {
 
       await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: REINDEX_SERVICE_BASE_PATH,
       })(
         routeHandlerContextMock,
         createRequestMock({
           headers: {
             'kbn-auth-x': 'HERE!',
           },
-          params: { indexName: 'theIndex' },
+          body: { indexName: 'theIndex', newIndexName: 'theIndexReindexed' },
         }),
         kibanaResponseFactory
       );
@@ -245,11 +247,11 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: REINDEX_SERVICE_BASE_PATH,
       })(
         routeHandlerContextMock,
         createRequestMock({
-          params: { indexName: 'theIndex' },
+          body: { indexName: 'theIndex', newIndexName: 'theIndexReindexed' },
         }),
         kibanaResponseFactory
       );
@@ -268,11 +270,11 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: REINDEX_SERVICE_BASE_PATH,
       })(
         routeHandlerContextMock,
         createRequestMock({
-          params: { indexName: 'theIndex' },
+          body: { indexName: 'theIndex', newIndexName: 'theIndexReindexed' },
         }),
         kibanaResponseFactory
       );
@@ -281,13 +283,13 @@ describe('reindex API', () => {
     });
   });
 
-  describe('POST /api/upgrade_assistant/reindex/{indexName}/cancel', () => {
+  describe(`POST ${REINDEX_SERVICE_BASE_PATH}/{indexName}/cancel`, () => {
     it('returns a 501', async () => {
       mockReindexService.cancelReindexing.mockResolvedValueOnce({});
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}/cancel',
+        pathPattern: `${REINDEX_SERVICE_BASE_PATH}/{indexName}/cancel`,
       })(
         routeHandlerContextMock,
         createRequestMock({

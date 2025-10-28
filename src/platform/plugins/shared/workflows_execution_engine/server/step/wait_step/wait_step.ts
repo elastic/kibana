@@ -6,19 +6,21 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { WaitGraphNode } from '@kbn/workflows';
-import type { StepImplementation } from '../step_base';
+import type { WaitGraphNode } from '@kbn/workflows/graph';
+import { parseDuration } from '../../utils';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
-import { parseDuration } from '../../utils';
+import type { NodeImplementation } from '../node_implementation';
 
-export class WaitStepImpl implements StepImplementation {
+export class WaitStepImpl implements NodeImplementation {
   private static readonly SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
   private durationCache: number | null = null;
 
   constructor(
     private node: WaitGraphNode,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger,
     private workflowTaskManager: WorkflowTaskManager
@@ -42,17 +44,23 @@ export class WaitStepImpl implements StepImplementation {
   }
 
   public async handleShortDuration(): Promise<void> {
-    await this.workflowRuntime.startStep(this.node.id);
+    await this.stepExecutionRuntime.startStep();
     this.logStartWait();
     const durationInMs = this.getDurationInMs();
-    await new Promise((resolve) => setTimeout(resolve, durationInMs));
+    await new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(resolve, durationInMs);
+      this.stepExecutionRuntime.abortController.signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId);
+        reject(new Error('Wait step was aborted'));
+      });
+    });
     this.logFinishWait();
-    await this.workflowRuntime.finishStep(this.node.id);
-    this.workflowRuntime.goToNextStep();
+    await this.stepExecutionRuntime.finishStep();
+    this.workflowRuntime.navigateToNextNode();
   }
 
   public handleLongDuration(): Promise<void> {
-    const stepState = this.workflowRuntime.getStepState(this.node.id);
+    const stepState = this.stepExecutionRuntime.getCurrentStepState();
 
     if (stepState?.resumeExecutionTaskId) {
       return this.exitLongWait();
@@ -63,7 +71,7 @@ export class WaitStepImpl implements StepImplementation {
 
   private async enterLongWait(): Promise<void> {
     const durationInMs = this.getDurationInMs();
-    await this.workflowRuntime.startStep(this.node.id);
+    await this.stepExecutionRuntime.startStep();
     const workflowExecution = this.workflowRuntime.getWorkflowExecution();
     const runAt = new Date(new Date().getTime() + durationInMs);
     const resumeExecutionTask = await this.workflowTaskManager.scheduleResumeTask({
@@ -76,21 +84,21 @@ export class WaitStepImpl implements StepImplementation {
         resumeExecutionTask.taskId
       }.\nExecution will resume at ${runAt.toISOString()}`
     );
-    await this.workflowRuntime.setStepState(this.node.id, {
+    await this.stepExecutionRuntime.setCurrentStepState({
       resumeExecutionTaskId: resumeExecutionTask.taskId,
     });
     this.logStartWait();
-    await this.workflowRuntime.setWaitStep(this.node.id);
+    await this.stepExecutionRuntime.setWaitStep();
   }
 
   private async exitLongWait(): Promise<void> {
-    await this.workflowRuntime.setStepState(this.node.id, undefined);
+    await this.stepExecutionRuntime.setCurrentStepState(undefined);
     this.workflowLogger.logDebug(
       `Resuming execution of wait step "${this.node.id}" after long wait.`
     );
     this.logFinishWait();
-    await this.workflowRuntime.finishStep(this.node.id);
-    this.workflowRuntime.goToNextStep();
+    await this.stepExecutionRuntime.finishStep();
+    this.workflowRuntime.navigateToNextNode();
   }
 
   private logStartWait(): void {
