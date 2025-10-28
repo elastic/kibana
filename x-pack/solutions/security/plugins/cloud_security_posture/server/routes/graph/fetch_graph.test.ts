@@ -519,4 +519,91 @@ describe('fetchGraph', () => {
       expect(result).toEqual([{ id: 'dummy' }]);
     });
   });
+
+  describe('event and alert counting logic', () => {
+    it('should calculate totalEventsCount as all distinct event.id values', async () => {
+      const result = await fetchGraph({
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [],
+        showUnknownTarget: false,
+        indexPatterns: ['logs-*', '.alerts-security.alerts-*'],
+        spaceId: 'default',
+      });
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify we count ALL event.id values first
+      expect(query).toContain('totalEventsCount = COUNT_DISTINCT(event.id)');
+
+      // Verify alerts are still counted the same way
+      expect(query).toContain(
+        'uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, event.id, null))'
+      );
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should calculate uniqueEventsCount by subtracting alerts from total', async () => {
+      const result = await fetchGraph({
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [],
+        showUnknownTarget: false,
+        indexPatterns: ['logs-*'],
+        spaceId: 'default',
+      });
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify subtraction happens AFTER STATS (after BY clause)
+      const byClauseIndex = query.indexOf('BY action = event.action');
+      const evalIndex = query.indexOf(
+        '| EVAL uniqueEventsCount = totalEventsCount - uniqueAlertsCount'
+      );
+
+      expect(evalIndex).toBeGreaterThan(byClauseIndex);
+      expect(evalIndex).toBeGreaterThan(0);
+
+      // Verify it happens BEFORE LIMIT
+      const limitIndex = query.indexOf('| LIMIT');
+      expect(evalIndex).toBeLessThan(limitIndex);
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should ensure alerts are not double-counted as both events and alerts', async () => {
+      const result = await fetchGraph({
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [],
+        showUnknownTarget: false,
+        indexPatterns: ['logs-*', '.alerts-security.alerts-*'],
+        spaceId: 'default',
+      });
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Document the behavior: totalEventsCount includes everything,
+      // then we subtract uniqueAlertsCount to get true non-alert events
+      expect(query).toContain('totalEventsCount = COUNT_DISTINCT(event.id)');
+      expect(query).toContain('| EVAL uniqueEventsCount = totalEventsCount - uniqueAlertsCount');
+
+      // This ensures: if event.id appears in both logs and alerts indices,
+      // it's counted once in total, once in alerts, and zero times in events (total - alerts = 0)
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+  });
 });
