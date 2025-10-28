@@ -56,9 +56,9 @@ export const policies = [
 
 function createCustomCallbackMocks() {
   return {
-    getFieldsFor: jest.fn(async () => fields),
     getSources: jest.fn(async () => indexes),
     getPolicies: jest.fn(async () => policies),
+    getColumnsFor: jest.fn(async () => fields),
   };
 }
 

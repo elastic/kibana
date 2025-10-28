@@ -6627,6 +6627,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/global-redirect-app-links@link:src/platform/packages/private/kbn-global-redirect-app-links":
+  version "0.0.0"
+  uid ""
+
 "@kbn/global-search-bar-plugin@link:x-pack/platform/plugins/private/global_search_bar":
   version "0.0.0"
   uid ""
@@ -8384,14 +8388,6 @@
   uid ""
 
 "@kbn/shared-ux-file-util@link:src/platform/packages/shared/shared-ux/file/util":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-link-redirect-app-mocks@link:src/platform/packages/shared/shared-ux/link/redirect_app/mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-link-redirect-app-types@link:src/platform/packages/shared/shared-ux/link/redirect_app/types":
   version "0.0.0"
   uid ""
 

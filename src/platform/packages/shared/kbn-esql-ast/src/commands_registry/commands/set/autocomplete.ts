@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstAllCommands } from '../../../types';
 import { getSettingsCompletionItems } from '../../../definitions/utils/settings';
@@ -21,6 +20,7 @@ import {
 } from '../../../..';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
+import { COMPLETIONS_BY_SETTING_NAME } from './utils';
 
 // SET <setting> = <value>;
 export async function autocomplete(
@@ -98,33 +98,3 @@ export async function autocomplete(
 
   return [];
 }
-
-const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
-  return [
-    {
-      label: '_alias:_origin',
-      text: '_alias:_origin',
-      kind: 'Value',
-      detail: i18n.translate(
-        'kbn-esql-ast.esql.autocomplete.set.projectRouting.currentProjectDoc',
-        {
-          defaultMessage: 'Search only the current project',
-        }
-      ),
-      sortText: '1',
-    },
-    {
-      label: '_alias: *',
-      text: '_alias: *',
-      kind: 'Value',
-      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.set.projectRouting.allProjectsDoc', {
-        defaultMessage: 'Search all projects',
-      }),
-      sortText: '1',
-    },
-  ];
-};
-
-const COMPLETIONS_BY_SETTING_NAME: Record<string, ISuggestionItem[]> = {
-  project_routing: getProjectRoutingCommonCompletionItems(),
-};
