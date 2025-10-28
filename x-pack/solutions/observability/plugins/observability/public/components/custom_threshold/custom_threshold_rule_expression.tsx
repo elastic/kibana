@@ -40,7 +40,6 @@ import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import moment from 'moment';
 import { useKibana } from '../../utils/kibana_react';
 import {
   Aggregators,
@@ -79,6 +78,22 @@ export const defaultExpression: MetricExpression = {
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 const EMPTY_FILTERS: Filter[] = [];
+
+// Helper function to convert time window to minutes
+const convertToMinutes = (timeWindowSize: number, timeWindowUnit: string): number => {
+  switch (timeWindowUnit) {
+    case 's':
+      return timeWindowSize / 60;
+    case 'm':
+      return timeWindowSize;
+    case 'h':
+      return timeWindowSize * 60;
+    case 'd':
+      return timeWindowSize * 60 * 24;
+    default:
+      return timeWindowSize;
+  }
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
@@ -119,11 +134,8 @@ export default function Expressions(props: Props) {
     [dataView]
   );
 
-  const showRecommendedTimeSizeWarning = useShowRecommendedTimeSize({
-    timeSize,
-    timeUnit,
-    recommendedTimeSize: { timeSize: 5, timeUnit: 'm' },
-  });
+  const isTimeSizeBelowRecommended =
+    timeSize && timeUnit ? convertToMinutes(timeSize, timeUnit) < 5 : false;
 
   const initSearchSource = async (resetDataView: boolean, thisData: DataPublicPluginStart) => {
     let initialSearchConfiguration = resetDataView ? undefined : ruleParams.searchConfiguration;
@@ -642,7 +654,7 @@ export default function Expressions(props: Props) {
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         display="fullWidth"
-        isTimeSizeBelowRecommended={showRecommendedTimeSizeWarning}
+        isTimeSizeBelowRecommended={isTimeSizeBelowRecommended}
       />
 
       <EuiSpacer size="m" />
@@ -743,37 +755,4 @@ export default function Expressions(props: Props) {
       <EuiSpacer size="m" />
     </>
   );
-}
-
-interface RecommendedTimeSize {
-  timeSize: number;
-  timeUnit: TimeUnitChar;
-}
-
-function useShowRecommendedTimeSize({
-  timeSize,
-  timeUnit,
-  recommendedTimeSize,
-}: {
-  timeSize?: number;
-  timeUnit?: TimeUnitChar;
-  recommendedTimeSize?: RecommendedTimeSize;
-}) {
-  const [showRecommendedTimeSizeWarning, setShowRecommendedTimeSizeWarning] = useState(false);
-
-  useEffect(() => {
-    if (timeSize === undefined || recommendedTimeSize === undefined) {
-      return;
-    }
-
-    const currentTimeSize = moment.duration(timeSize, timeUnit).asMilliseconds();
-    const recommendedWindowSizeAsMillis = moment
-      .duration(recommendedTimeSize.timeSize, recommendedTimeSize.timeUnit)
-      .asMilliseconds();
-
-    const shouldShow = currentTimeSize < recommendedWindowSizeAsMillis;
-    setShowRecommendedTimeSizeWarning(shouldShow);
-  }, [timeSize, timeUnit, recommendedTimeSize]);
-
-  return showRecommendedTimeSizeWarning;
 }
