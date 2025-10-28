@@ -11,14 +11,17 @@ import { EuiButtonEmpty } from '@elastic/eui';
 export interface LinkToAlertsRuleProps {
   onClick?: () => void;
   ['data-test-subj']: string;
+  buttonRef?: React.Ref<HTMLButtonElement>;
 }
 
 export const CreateAlertRuleButton = ({
   onClick,
   ['data-test-subj']: dataTestSubj,
+  buttonRef,
 }: LinkToAlertsRuleProps) => {
   return (
     <EuiButtonEmpty
+      buttonRef={buttonRef}
       data-test-subj={dataTestSubj}
       onClick={onClick}
       size="xs"
