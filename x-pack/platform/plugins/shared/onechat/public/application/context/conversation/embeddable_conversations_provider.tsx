@@ -72,7 +72,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       setConversationId: (id: string) => {
         setConversationId(id);
       },
-      ...conversationActions,
+      conversationActions,
     }),
     [conversationId, conversationActions]
   );

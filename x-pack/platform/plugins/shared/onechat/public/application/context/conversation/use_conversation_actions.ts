@@ -25,6 +25,40 @@ import { createNewConversation, newConversationId } from '../../utils/new_conver
 
 const pendingRoundId = '__pending__';
 
+export interface ConversationActions {
+  removeNewConversationQuery: () => void;
+  invalidateConversation: () => void;
+  addOptimisticRound: ({ userMessage }: { userMessage: string }) => void;
+  removeOptimisticRound: () => void;
+  setAgentId: (agentId: string) => void;
+  addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
+  addToolCall: ({ step }: { step: ToolCallStep }) => void;
+  setToolCallProgress: ({
+    progress,
+    toolCallId,
+  }: {
+    progress: ToolCallProgress;
+    toolCallId: string;
+  }) => void;
+  setToolCallResult: ({
+    results,
+    toolCallId,
+  }: {
+    results: ToolResult[];
+    toolCallId: string;
+  }) => void;
+  setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
+  addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
+  onConversationCreated: ({
+    conversationId,
+    title,
+  }: {
+    conversationId: string;
+    title: string;
+  }) => void;
+  deleteConversation: (id: string) => Promise<void>;
+}
+
 interface UseConversationActionsParams {
   conversationId?: string;
   queryKey: string[];
@@ -41,7 +75,7 @@ export const useConversationActions = ({
   conversationsService,
   onConversationCreated,
   onDeleteConversation,
-}: UseConversationActionsParams) => {
+}: UseConversationActionsParams): ConversationActions => {
   const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
 
   const setConversation = useCallback(

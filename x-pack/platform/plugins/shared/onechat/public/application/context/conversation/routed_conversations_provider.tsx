@@ -106,7 +106,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       conversationId,
       shouldStickToBottom,
       isEmbeddedContext: false,
-      ...conversationActions,
+      conversationActions,
     }),
     [conversationId, shouldStickToBottom, conversationActions]
   );

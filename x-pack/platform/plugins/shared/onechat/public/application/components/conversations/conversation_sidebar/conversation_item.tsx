@@ -22,15 +22,15 @@ interface ConversationItemProps {
 export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation }) => {
   const { createOnechatUrl } = useNavigation();
   const currentConversationId = useConversationId();
-  const { deleteConversation, isEmbeddedContext, setConversationId } = useConversationContext();
+  const { conversationActions, isEmbeddedContext, setConversationId } = useConversationContext();
   const isActive = currentConversationId === conversation.id;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
 
   const handleDelete = useCallback(async () => {
     setShowDeleteModal(false);
-    await deleteConversation(conversation.id);
-  }, [conversation.id, deleteConversation]);
+    await conversationActions.deleteConversation(conversation.id);
+  }, [conversation.id, conversationActions]);
 
   const handleClick = useCallback(() => {
     setConversationId?.(conversation.id);

@@ -29,7 +29,7 @@ export const useSubscribeToChatEvents = ({
   setIsResponseLoading: (isResponseLoading: boolean) => void;
   isAborted: () => boolean;
 }) => {
-  const conversationActions = useConversationContext();
+  const { conversationActions } = useConversationContext();
 
   return (events$: Observable<ChatEvent>) => {
     return new Promise<void>((resolve, reject) => {

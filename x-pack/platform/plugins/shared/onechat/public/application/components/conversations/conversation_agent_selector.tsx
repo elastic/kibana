@@ -21,10 +21,10 @@ export const ConversationAgentSelector: React.FC<ConversationAgentSelectorProps>
 }) => {
   const { agents, isLoading: isLoadingAgents } = useOnechatAgents();
   const hasActiveConversation = useHasActiveConversation();
-  const { setAgentId } = useConversationContext();
+  const { conversationActions } = useConversationContext();
 
   const handleAgentChange = (newAgentId: string) => {
-    setAgentId(newAgentId);
+    conversationActions.setAgentId(newAgentId);
   };
 
   if (isLoadingAgents || !agentId) {

@@ -6,47 +6,14 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { ReasoningStep, ToolCallProgress, ToolCallStep } from '@kbn/onechat-common';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
   conversationId?: string;
   shouldStickToBottom?: boolean;
   isEmbeddedContext: boolean;
   setConversationId?: (conversationId: string) => void;
-
-  // Conversation actions (moved from useConversationActions)
-  removeNewConversationQuery: () => void;
-  invalidateConversation: () => void;
-  addOptimisticRound: ({ userMessage }: { userMessage: string }) => void;
-  removeOptimisticRound: () => void;
-  setAgentId: (agentId: string) => void;
-  addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
-  addToolCall: ({ step }: { step: ToolCallStep }) => void;
-  setToolCallProgress: ({
-    progress,
-    toolCallId,
-  }: {
-    progress: ToolCallProgress;
-    toolCallId: string;
-  }) => void;
-  setToolCallResult: ({
-    results,
-    toolCallId,
-  }: {
-    results: ToolResult[];
-    toolCallId: string;
-  }) => void;
-  setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
-  addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
-  onConversationCreated: ({
-    conversationId,
-    title,
-  }: {
-    conversationId: string;
-    title: string;
-  }) => void;
-  deleteConversation: (id: string) => Promise<void>;
+  conversationActions: ConversationActions;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(undefined);
