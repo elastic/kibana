@@ -1,6 +1,6 @@
 # @kbn/babel-plugin-lazy-require
 
-Babel plugin that transforms top-level `require()` and `import` statements into lazy-loaded getters, reducing memory usage and improving Jest test startup time.
+Babel plugin that transforms top-level `require()` and `import` statements into lazy-loaded getters, reducing memory usage and improving startup time.
 
 ## Problem
 
@@ -33,15 +33,6 @@ const _imports = {
 _imports.foo.doSomething(); // Only foo loads, bar never loads
 ```
 
-**Key benefits**:
-- Modules load only when accessed
-- Shared cache for destructured imports: `const { a, b } = require('./m')` loads once
-- ES6 imports supported: `import React, { useState } from 'react'` shares one cache
-
-## Usage
-
-Automatically applied to Jest tests via `src/platform/packages/shared/kbn-test/src/jest/transforms/babel/transformer_config.js`. No code changes needed.
-
 ## Supported Patterns
 
 **Transforms**:
@@ -57,15 +48,3 @@ Automatically applied to Jest tests via `src/platform/packages/shared/kbn-test/s
 - Function-scoped: `function f() { require('./m') }`
 - Complex destructuring: `const { a: { b } } = require('./m')`
 - Module-level usage: `const x = <Component />`
-
-## Benefits
-
-- Reduced memory (only load what's used)
-- Faster test startup (avoid cascading imports)
-- Better isolation (tests load only their dependencies)
-
-## How To Test
-
-```bash
-node scripts/jest --config src/platform/packages/shared/kbn-babel-plugin-lazy-require/jest.config.js
-```
