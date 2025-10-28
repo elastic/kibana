@@ -630,17 +630,16 @@ class AgentPolicyService {
     }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
-    const _soClient =
-      (policy.space_ids ?? []).length > 1
-        ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
-        : soClient;
-
+    const isMultispace = (policy.space_ids ?? []).length > 1;
+    const _soClient = isMultispace
+      ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
+      : soClient;
     const results = await _soClient
       .find<AgentPolicySOAttributes>({
         type: savedObjectType,
         searchFields: ['name'],
         search: escapeSearchQueryPhrase(policy.name),
-        namespaces: policy.space_ids,
+        ...(isMultispace ? { namespaces: policy.space_ids } : {}),
       })
       .catch(
         catchAndSetErrorStackTrace.withMessage(
