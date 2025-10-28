@@ -15,17 +15,12 @@ import type { SavedObjectsRawDocSource } from '../..';
  *
  * @public
  */
-export interface SavedObjectsSearchOptions extends Omit<estypes.SearchRequest, 'index' | 'query'> {
+export interface SavedObjectsSearchOptions extends Omit<estypes.SearchRequest, 'index'> {
   /** The type or types of objects to find. */
   type: string | string[];
 
   /** The namespaces to search within. */
   namespaces: string[];
-
-  /** Queries must be written as bools to allow our filters to be combined */
-  query?: {
-    bool: estypes.QueryDslBoolQuery;
-  };
 }
 
 /**

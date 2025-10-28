@@ -15,6 +15,7 @@ import {
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { estypes } from '@elastic/elasticsearch';
 import { getReferencesFilter } from './references_filter';
 
 type KueryNode = any;
@@ -160,7 +161,9 @@ export function getNamespacesBoolFilter({
   registry,
   types,
   typeToNamespacesMap,
-}: Pick<QueryParams, 'namespaces' | 'registry' | 'typeToNamespacesMap'> & { types: string[] }) {
+}: Pick<QueryParams, 'namespaces' | 'registry' | 'typeToNamespacesMap'> & {
+  types: string[];
+}): NamespacesBoolFilter {
   return {
     bool: {
       should: types.map((shouldType) => {
@@ -172,6 +175,10 @@ export function getNamespacesBoolFilter({
       minimum_should_match: 1,
     },
   };
+}
+
+export interface NamespacesBoolFilter {
+  bool: { should: estypes.QueryDslQueryContainer[]; minimum_should_match: number };
 }
 
 /**

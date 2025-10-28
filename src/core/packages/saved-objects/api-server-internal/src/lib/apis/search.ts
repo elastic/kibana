@@ -8,7 +8,6 @@
  */
 
 import { castArray } from 'lodash';
-import deepMerge from 'deepmerge';
 import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
@@ -24,6 +23,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { ApiExecutionContext } from './types';
 import { getNamespacesBoolFilter } from '../search';
+import type { NamespacesBoolFilter } from '../search/search_dsl/query_params';
 
 export interface PerformSearchParams {
   options: SavedObjectsSearchOptions;
@@ -108,13 +108,10 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
     }
   }
 
-  const query = deepMerge(
-    esOptions.query ?? {},
-    getNamespacesBoolFilter({ namespaces, registry, types, typeToNamespacesMap }),
-    {
-      // merge the filter array by putting our namespace filter first
-      arrayMerge: (target, source) => source.concat(target),
-    }
+  const query = mergeUserQueryWithNamespacesBoolForSearch(
+    // We nest the provided query in a bool to allow for merging with the namespaces bool filter
+    esOptions.query,
+    getNamespacesBoolFilter({ namespaces, registry, types, typeToNamespacesMap })
   );
 
   const result = await client.search<T, A>(
@@ -199,4 +196,23 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
   result.body.hits.hits = processedHits;
 
   return result.body;
+}
+
+/**
+ * This is how we inject our namespaces scope into the user query. We create a
+ * nested `bool.must` clause for the user query and keep our query in a neighboring
+ * `bool.should` clause.
+ */
+export function mergeUserQueryWithNamespacesBoolForSearch(
+  userQuery: undefined | estypes.QueryDslQueryContainer,
+  namespacesBoolFilter: NamespacesBoolFilter
+): estypes.QueryDslQueryContainer {
+  const { should, minimum_should_match: minimumShouldMatch } = namespacesBoolFilter.bool;
+  return {
+    bool: {
+      ...(userQuery ? { must: userQuery } : {}),
+      should,
+      minimum_should_match: minimumShouldMatch,
+    },
+  };
 }

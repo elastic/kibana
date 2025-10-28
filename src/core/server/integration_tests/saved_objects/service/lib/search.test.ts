@@ -104,6 +104,19 @@ describe('SOR - search API', () => {
       type: 'test-type',
       namespaces: ['default'],
       query: {
+        match_all: {},
+      },
+    });
+
+    expect(documents.hits.total).toHaveProperty('value', 5);
+    expect(documents.hits.hits).toHaveProperty('0._source.test-type.name', 'John Doe');
+  });
+
+  it('should perform objects search using bool query', async () => {
+    const documents = await savedObjectsRepository.search({
+      type: 'test-type',
+      namespaces: ['default'],
+      query: {
         bool: {
           must: [
             {
