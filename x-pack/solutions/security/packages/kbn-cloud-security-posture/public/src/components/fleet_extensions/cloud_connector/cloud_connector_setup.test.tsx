@@ -18,7 +18,7 @@ import { isCloudConnectorReusableEnabled } from './utils';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CloudConnectorSetupProps } from './cloud_connector_setup';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import type { CloudConnector, CloudProvider } from '@kbn/fleet-plugin/public';
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
 import { AWS_PROVIDER } from './constants';
