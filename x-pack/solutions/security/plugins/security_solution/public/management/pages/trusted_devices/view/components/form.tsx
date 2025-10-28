@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiForm,
@@ -35,8 +35,7 @@ import type { ArtifactFormComponentProps } from '../../../../components/artifact
 import { FormattedError } from '../../../../components/formatted_error';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { TrustedDevicesApiClient } from '../../service/api_client';
+import { useGetTrustedDeviceSuggestions } from '../../hooks/use_get_trusted_device_suggestions';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/translations';
@@ -177,7 +176,6 @@ const ConditionsSection = memo<{
   disabled: boolean;
   visitedFields: Record<string, boolean>;
   validationResult: ValidationResult;
-  apiClient: TrustedDevicesApiClient;
 }>(
   ({
     getTestId,
@@ -191,40 +189,18 @@ const ConditionsSection = memo<{
     disabled,
     visitedFields,
     validationResult,
-    apiClient,
   }) => {
-    const [suggestions, setSuggestions] = useState<string[]>([]);
-    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
-
     // Get field options based on selected OS
     const availableFieldOptions = useMemo(() => {
       return getFieldOptionsForOs(selectedOs);
     }, [selectedOs]);
 
-    // Load suggestions when field changes
-    useEffect(() => {
-      const loadSuggestions = async () => {
-        if (!currentEntry.field || disabled) {
-          setSuggestions([]);
-          return;
-        }
-
-        setIsLoadingSuggestions(true);
-        try {
-          const results = await apiClient.getSuggestions({
-            field: currentEntry.field,
-            query: '',
-          });
-          setSuggestions(results);
-        } catch (error) {
-          setSuggestions([]);
-        } finally {
-          setIsLoadingSuggestions(false);
-        }
-      };
-
-      loadSuggestions();
-    }, [currentEntry.field, disabled, apiClient]);
+    // Load suggestions when field changes - useQuery handles race conditions automatically
+    const { data: suggestions = [], isLoading: isLoadingSuggestions } =
+      useGetTrustedDeviceSuggestions({
+        field: currentEntry.field || '',
+        enabled: !disabled,
+      });
 
     return (
       <>
@@ -380,8 +356,6 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     const [hasFormChanged, setHasFormChanged] = useState(false);
 
     const getTestId = useTestIdGenerator('trustedDevices-form');
-    const { http } = useKibana().services;
-    const apiClient = useMemo(() => new TrustedDevicesApiClient(http), [http]);
 
     const [visitedFields, setVisitedFields] = useState<Record<string, boolean>>({});
 
@@ -669,7 +643,6 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           disabled={disabled}
           visitedFields={visitedFields}
           validationResult={validationResult}
-          apiClient={apiClient}
         />
 
         {showAssignmentSection ? (

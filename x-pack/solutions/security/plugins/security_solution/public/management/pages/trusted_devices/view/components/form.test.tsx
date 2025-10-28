@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, cleanup, act, fireEvent, within, waitFor } from '@testing-library/react';
+import { screen, cleanup, act, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -22,6 +22,7 @@ import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/
 import { INPUT_ERRORS, CONDITION_FIELD_TITLE, OPERATOR_TITLES } from '../translations';
 import { TrustedDevicesForm } from './form';
 import { licenseService } from '../../../../../common/hooks/use_license';
+import { useGetTrustedDeviceSuggestions } from '../../hooks/use_get_trusted_device_suggestions';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/hooks/use_license', () => {
@@ -37,6 +38,8 @@ jest.mock('../../../../../common/hooks/use_license', () => {
   };
 });
 
+jest.mock('../../hooks/use_get_trusted_device_suggestions');
+
 describe('Trusted devices form', () => {
   const formPrefix = 'trustedDevices-form';
   let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
@@ -50,10 +53,6 @@ describe('Trusted devices form', () => {
 
   const render = async () => {
     renderResult = mockedContext.render(getUI());
-    // Wait for async useEffect (getSuggestions) to complete
-    await waitFor(() => {
-      expect(mockedContext.coreStart.http.post).toHaveBeenCalled();
-    });
     return renderResult;
   };
 
@@ -177,8 +176,13 @@ describe('Trusted devices form', () => {
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
 
-    // Mock the getSuggestions API call
-    mockedContext.coreStart.http.post.mockResolvedValue([]);
+    // Mock the useGetTrustedDeviceSuggestions hook
+    (useGetTrustedDeviceSuggestions as jest.Mock).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
 
     formProps = {
       item: latestUpdatedItem,
