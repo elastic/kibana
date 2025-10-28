@@ -12,6 +12,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type {
   UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
@@ -25,6 +26,7 @@ export type LensProps = Pick<
   | 'viewMode'
   | 'timeRange'
   | 'attributes'
+  | 'esqlVariables'
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
@@ -37,6 +39,7 @@ export const useLensProps = ({
   getTimeRange,
   fetch$,
   visContext,
+  esqlVariables,
   onLoad,
   lastReloadRequestTime,
 }: {
@@ -44,6 +47,7 @@ export const useLensProps = ({
   getTimeRange: () => TimeRange;
   fetch$: Observable<UnifiedHistogramInputMessage>;
   visContext?: UnifiedHistogramVisContext;
+  esqlVariables?: ESQLControlVariable[];
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
   lastReloadRequestTime?: number;
 }) => {
@@ -60,11 +64,12 @@ export const useLensProps = ({
         searchSessionId: request?.searchSessionId,
         getTimeRange,
         attributes,
+        esqlVariables,
         onLoad,
         lastReloadRequestTime,
       }),
     };
-  }, [visContext, getTimeRange, onLoad, request?.searchSessionId, lastReloadRequestTime]);
+  }, [visContext, request?.searchSessionId, getTimeRange, esqlVariables, onLoad, lastReloadRequestTime]);
 
   // Initialize with undefined to avoid rendering Lens until a fetch has been triggered
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
@@ -82,12 +87,14 @@ export const getLensProps = ({
   searchSessionId,
   getTimeRange,
   attributes,
+  esqlVariables,
   onLoad,
   lastReloadRequestTime,
 }: {
   searchSessionId?: string;
   getTimeRange: () => TimeRange;
   attributes: TypedLensByValueInput['attributes'];
+  esqlVariables?: ESQLControlVariable[];
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
   lastReloadRequestTime?: number;
 }): LensProps => ({
@@ -95,6 +102,7 @@ export const getLensProps = ({
   viewMode: 'view',
   timeRange: getTimeRange(),
   attributes,
+  esqlVariables,
   noPadding: true,
   searchSessionId,
   executionContext: {

@@ -11,7 +11,7 @@ import {
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
-import { createPackagePolicy } from '../helper';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import { EsIndexDataProvider } from '../utils';
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 import type { FtrProviderContext } from '../../../ftr_provider_context';

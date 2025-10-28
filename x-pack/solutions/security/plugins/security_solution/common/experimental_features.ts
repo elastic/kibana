@@ -46,16 +46,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
-   * Space awareness for Elastic Defend management.
-   * Feature depends on Fleet's corresponding features also being enabled:
-   * - `subfeaturePrivileges`
-   * - `useSpaceAwareness`
-   * and Fleet must set it runtime mode to spaces by calling the following API:
-   * - `POST /internal/fleet/enable_space_awareness`
-   */
-  endpointManagementSpaceAwarenessEnabled: true,
-
-  /**
    * Disables new notes
    */
   securitySolutionNotesDisabled: false,
@@ -64,21 +54,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
-
-  /**
-   * Enables the Managed User section inside the new user details flyout.
-   */
-  newUserDetailsFlyoutManagedUser: false,
-
-  /**
-   * Enable risk engine client and initialisation of datastream, component templates and mappings
-   */
-  riskScoringPersistence: true,
-
-  /**
-   * Enables experimental Entity Analytics HTTP endpoints
-   */
-  riskScoringRoutesEnabled: true,
 
   /**
    * Disables ESQL-based risk scoring
@@ -96,6 +71,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoreAssistantToolDisabled: false,
 
   /**
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   */
+  entityDetailsHighlightsEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
@@ -104,12 +84,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
-
-  /**
-   * Enables Response actions telemetry collection
-   * Should be enabled in 8.17.0
-   */
-  responseActionsTelemetryEnabled: true,
 
   /**
    * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
@@ -168,11 +142,6 @@ export const allowedExperimentalValues = Object.freeze({
   endpointExceptionsMovedUnderManagement: false,
 
   /**
-   * Disables flyout history and new preview navigation
-   */
-  newExpandableFlyoutNavigationDisabled: false,
-
-  /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
@@ -213,9 +182,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   microsoftDefenderEndpointCancelEnabled: true,
   /**
-   * Protects all the work related to the attacks and alert alignment effort
+   * Protects all the work related to the attacks and alerts alignment effort
    */
-  attacksAlertAlignment: false,
+  attacksAlertsAlignment: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

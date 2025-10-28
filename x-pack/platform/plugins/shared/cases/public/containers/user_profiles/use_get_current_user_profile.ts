@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
