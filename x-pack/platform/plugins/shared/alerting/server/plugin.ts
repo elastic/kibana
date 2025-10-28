@@ -641,6 +641,7 @@ export class AlertingPlugin {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
       securityService: core.security,
+      elasticsearchClient: core.elasticsearch.client.asInternalUser,
     });
 
     rulesSettingsClientFactory.initialize({

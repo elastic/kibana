@@ -145,6 +145,8 @@ const ALERT_SCHEDULED_ACTION_THROTTLING = `${ALERT_SCHEDULED_ACTION_NAMESPACE}.t
 // kibana.alert.index_pattern - index pattern for the alert
 const ALERT_INDEX_PATTERN = `${ALERT_NAMESPACE}.index_pattern` as const;
 
+const ALERT_MUTED = `${ALERT_NAMESPACE}.muted` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
@@ -197,6 +199,7 @@ export const fields = {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_MUTED,
 };
 
 export {
@@ -251,6 +254,7 @@ export {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_MUTED,
 };
 
 export type DefaultAlertFieldName = ValuesType<typeof fields & typeof namespaces>;

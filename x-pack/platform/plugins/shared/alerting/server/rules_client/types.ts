@@ -12,6 +12,7 @@ import type {
   PluginInitializerContext,
   ISavedObjectsRepository,
   UiSettingsServiceStart,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import type {
@@ -87,6 +88,7 @@ export interface RulesClientContext {
   readonly backfillClient: BackfillClient;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
+  readonly elasticsearchClient: ElasticsearchClient;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

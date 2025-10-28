@@ -57,6 +57,7 @@ import {
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_INDEX_PATTERN,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_MUTED,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
@@ -316,6 +317,11 @@ export const alertFieldMap = {
   },
   [ALERT_INDEX_PATTERN]: {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_MUTED]: {
+    type: 'boolean',
     array: false,
     required: false,
   },

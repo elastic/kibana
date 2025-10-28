@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { ALERT_MUTED, ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { Rule } from '../../../../types';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { UnmuteAlertParams } from './types';
@@ -77,6 +78,35 @@ async function unmuteInstanceWithOCC(
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
+    const esClient = context.elasticsearchClient;
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
+    if (indices && indices.length > 0) {
+      try {
+        await esClient.updateByQuery({
+          index: indices,
+          conflicts: 'proceed',
+          refresh: true,
+          query: {
+            bool: {
+              must: [
+                { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
+                { term: { [ALERT_RULE_UUID]: ruleId } },
+              ],
+            },
+          },
+          script: {
+            source: `ctx._source['${ALERT_MUTED}'] = false;`,
+            lang: 'painless',
+          },
+        });
+      } catch (error) {
+        context.logger.error(
+          `Error updating muted field for alert instance ${alertInstanceId}: ${error.message}`
+        );
+      }
+    }
+
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
