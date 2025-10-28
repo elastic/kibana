@@ -90,12 +90,10 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
     [idx, popoverOpen, togglePopover]
   );
 
-  const maxVisibleTooltipItems = useMemo(() => {
-    // Adjust tooltip items to ensure "Total" series is fully visible up to 8 series (the same number that fits in the side legend without scrolling)
-    // For up to 8 series, add two extra tooltip lines (series.length + 2) so the "Total" entry isn't truncated.
-    // If there are more than 8 series, cap the visible items to 9. Right click will be needed to see all.
-    return series.length <= 8 ? series.length + 2 : 9;
-  }, [series.length]);
+  // Adjust tooltip items to ensure "Total" series is fully visible up to 8 series (the same number that fits in the side legend without scrolling)
+  // For up to 8 series, add two extra tooltip lines (series.length + 2) so the "Total" entry isn't truncated.
+  // If there are more than 8 series, cap the visible items to 9. Right click will be needed to see all.
+  const maxVisibleTooltipItems = series.length <= 8 ? series.length + 2 : 9;
 
   return (
     <EuiFlexItem grow={false} key={metricType}>
