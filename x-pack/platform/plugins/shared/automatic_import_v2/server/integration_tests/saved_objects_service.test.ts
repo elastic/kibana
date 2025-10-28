@@ -7,7 +7,6 @@
 
 import type {
   SavedObjectsClientContract,
-  Logger,
   KibanaRequest,
   SecurityServiceStart,
 } from '@kbn/core/server';
@@ -35,7 +34,6 @@ import { dataStreamSavedObjectType } from '../services/saved_objects/data_stream
 import { createMockSecurity } from './__mocks__/security';
 
 describe('AutomaticImportSavedObjectService', () => {
-  let mockLogger: jest.Mocked<Logger>;
   let mockSecurity: jest.Mocked<SecurityServiceStart>;
   let mockRequest: KibanaRequest;
   let manageES: TestElasticsearchUtils;
@@ -56,10 +54,10 @@ describe('AutomaticImportSavedObjectService', () => {
       coreStart = await kbnRoot.start();
     } catch (error) {
       if (kbnRoot) {
-        await kbnRoot.shutdown().catch(() => {});
+        await kbnRoot.shutdown().catch(() => { });
       }
       if (manageES) {
-        await manageES.stop().catch(() => {});
+        await manageES.stop().catch(() => { });
       }
       throw error;
     }
@@ -67,15 +65,14 @@ describe('AutomaticImportSavedObjectService', () => {
 
   afterAll(async () => {
     if (kbnRoot) {
-      await kbnRoot.shutdown().catch(() => {});
+      await kbnRoot.shutdown().catch(() => { });
     }
     if (manageES) {
-      await manageES.stop().catch(() => {});
+      await manageES.stop().catch(() => { });
     }
   });
 
   beforeEach(() => {
-    mockLogger = loggerMock.create();
     mockRequest = httpServerMock.createKibanaRequest();
     mockSecurity = createMockSecurity();
   });
@@ -429,10 +426,10 @@ describe('AutomaticImportSavedObjectService', () => {
         } finally {
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-getall-1')
-            .catch(() => {});
+            .catch(() => { });
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-getall-2')
-            .catch(() => {});
+            .catch(() => { });
         }
       });
 
@@ -441,7 +438,7 @@ describe('AutomaticImportSavedObjectService', () => {
         for (const integration of existing.saved_objects) {
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, integration.id)
-            .catch(() => {});
+            .catch(() => { });
         }
 
         const result = await savedObjectService.getAllIntegrations();
@@ -1005,13 +1002,13 @@ describe('AutomaticImportSavedObjectService', () => {
         } finally {
           await savedObjectsClient
             .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-1')
-            .catch(() => {});
+            .catch(() => { });
           await savedObjectsClient
             .delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-getall-ds-2')
-            .catch(() => {});
+            .catch(() => { });
           await savedObjectsClient
             .delete(INTEGRATION_SAVED_OBJECT_TYPE, 'getall-ds-integration')
-            .catch(() => {});
+            .catch(() => { });
         }
       });
     });

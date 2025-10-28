@@ -28,8 +28,8 @@ import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects
 export class AutomaticImportService {
   private pluginStop$: Subject<void>;
   private samplesIndexService: AutomaticImportSamplesIndexService;
-  private security: SecurityServiceStart;
-  private savedObjectService: AutomaticImportSavedObjectService;
+  private security: SecurityServiceStart | null = null;
+  private savedObjectService: AutomaticImportSavedObjectService | null = null;
   private logger: LoggerFactory;
   private savedObjectsClientPromise: Promise<SavedObjectsClientContract>;
 
@@ -60,6 +60,9 @@ export class AutomaticImportService {
   }
 
   public async addSamplesToDataStream(dataStream: DataStreamSamples, request: KibanaRequest) {
+    if (!this.security) {
+      throw new Error('Security service not initialized');
+    }
     const currentAuthenticatedUser = getAuthenticatedUser(request, this.security);
     await this.samplesIndexService.addSamplesToDataStream(currentAuthenticatedUser, dataStream);
   }
@@ -69,6 +72,9 @@ export class AutomaticImportService {
     data: IntegrationAttributes,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<IntegrationAttributes>> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.insertIntegration(request, data, options);
   }
 
@@ -78,14 +84,23 @@ export class AutomaticImportService {
     versionUpdate?: 'major' | 'minor' | 'patch',
     options?: SavedObjectsUpdateOptions<IntegrationAttributes>
   ): Promise<SavedObjectsUpdateResponse<IntegrationAttributes>> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.updateIntegration(data, expectedVersion, versionUpdate, options);
   }
 
   public async getIntegration(integrationId: string): Promise<SavedObject<IntegrationAttributes>> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.getIntegration(integrationId);
   }
 
   public async getAllIntegrations(): Promise<SavedObjectsFindResponse<IntegrationAttributes>> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.getAllIntegrations();
   }
 
@@ -97,6 +112,9 @@ export class AutomaticImportService {
     dataStreamsDeleted: number;
     errors: Array<{ id: string; error: string }>;
   }> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.deleteIntegration(integrationId, options);
   }
 
@@ -105,6 +123,9 @@ export class AutomaticImportService {
     data: DataStreamAttributes,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<DataStreamAttributes>> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.insertDataStream(request, data, options);
   }
 
@@ -114,20 +135,32 @@ export class AutomaticImportService {
     versionUpdate?: 'major' | 'minor' | 'patch',
     options?: SavedObjectsUpdateOptions<DataStreamAttributes>
   ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.updateDataStream(data, expectedVersion, versionUpdate, options);
   }
 
   public async getDataStream(dataStreamId: string): Promise<SavedObject<DataStreamAttributes>> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.getDataStream(dataStreamId);
   }
 
   public async getAllDataStreams(): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.getAllDataStreams();
   }
 
   public async findAllDataStreamsByIntegrationId(
     integrationId: string
   ): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.findAllDataStreamsByIntegrationId(integrationId);
   }
 
@@ -135,6 +168,9 @@ export class AutomaticImportService {
     dataStreamId: string,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
+    if (!this.savedObjectService) {
+      throw new Error('Saved object service not initialized');
+    }
     return this.savedObjectService.deleteDataStream(dataStreamId, options);
   }
 

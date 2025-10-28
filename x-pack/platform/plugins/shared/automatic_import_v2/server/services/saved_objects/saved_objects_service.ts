@@ -26,7 +26,7 @@ import {
 } from './constants';
 
 export class AutomaticImportSavedObjectService {
-  private savedObjectsClient: SavedObjectsClientContract;
+  private savedObjectsClient: SavedObjectsClientContract | null = null;
   private logger: Logger;
   private security: SecurityServiceStart | null = null;
 
@@ -104,6 +104,9 @@ export class AutomaticImportSavedObjectService {
     data: IntegrationAttributes,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<IntegrationAttributes>> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     const authenticatedUser = this.security?.authc.getCurrentUser(request);
     if (!authenticatedUser) {
       throw new Error('No user authenticated');
@@ -168,6 +171,9 @@ export class AutomaticImportSavedObjectService {
     versionUpdate?: 'major' | 'minor' | 'patch',
     options?: SavedObjectsUpdateOptions<IntegrationAttributes>
   ): Promise<SavedObjectsUpdateResponse<IntegrationAttributes>> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     const {
       integration_id: integrationId,
       data_stream_count: dataStreamCount = 0,
@@ -230,6 +236,9 @@ export class AutomaticImportSavedObjectService {
    * @returns The integration
    */
   public async getIntegration(integrationId: string): Promise<SavedObject<IntegrationAttributes>> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     try {
       this.logger.debug(`Getting integration: ${integrationId}`);
       return await this.savedObjectsClient.get<IntegrationAttributes>(
@@ -246,6 +255,9 @@ export class AutomaticImportSavedObjectService {
    * @returns All integrations
    */
   public async getAllIntegrations(): Promise<SavedObjectsFindResponse<IntegrationAttributes>> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     try {
       this.logger.debug('Getting all integrations');
       return await this.savedObjectsClient.find<IntegrationAttributes>({
@@ -271,6 +283,9 @@ export class AutomaticImportSavedObjectService {
     dataStreamsDeleted: number;
     errors: Array<{ id: string; error: string }>;
   }> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     this.logger.debug(`Starting cascade deletion for integration: ${integrationId}`);
 
     const deletionErrors: Array<{ id: string; error: string }> = [];
@@ -367,9 +382,9 @@ export class AutomaticImportSavedObjectService {
       if (!allDataStreamsDeleted && !options?.force) {
         throw new Error(
           `Cannot delete integration ${integrationId}: Failed to delete ${deletionErrors.length} data streams. ` +
-            `Use force option to delete the integration anyway. Errors: ${JSON.stringify(
-              deletionErrors
-            )}`
+          `Use force option to delete the integration anyway. Errors: ${JSON.stringify(
+            deletionErrors
+          )}`
         );
       }
 
@@ -411,6 +426,9 @@ export class AutomaticImportSavedObjectService {
     data: DataStreamAttributes,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<DataStreamAttributes>> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     const authenticatedUser = this.security?.authc.getCurrentUser(request);
     if (!authenticatedUser) {
       throw new Error('No user authenticated');
@@ -540,6 +558,9 @@ export class AutomaticImportSavedObjectService {
     versionUpdate?: 'major' | 'minor' | 'patch',
     options?: SavedObjectsUpdateOptions<DataStreamAttributes>
   ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     const {
       integration_id: integrationId,
       data_stream_id: dataStreamId,
@@ -615,6 +636,9 @@ export class AutomaticImportSavedObjectService {
    * @returns The data stream
    */
   public async getDataStream(dataStreamId: string): Promise<SavedObject<DataStreamAttributes>> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     try {
       this.logger.debug(`Getting data stream: ${dataStreamId}`);
       return await this.savedObjectsClient.get<DataStreamAttributes>(
@@ -632,6 +656,9 @@ export class AutomaticImportSavedObjectService {
    * @returns All data streams
    */
   public async getAllDataStreams(): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     try {
       this.logger.debug('Getting all data streams');
       return await this.savedObjectsClient.find<DataStreamAttributes>({
@@ -651,6 +678,9 @@ export class AutomaticImportSavedObjectService {
   public async findAllDataStreamsByIntegrationId(
     integrationId: string
   ): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     try {
       this.logger.debug(`Finding all data streams for integration: ${integrationId}`);
 
@@ -678,6 +708,9 @@ export class AutomaticImportSavedObjectService {
     dataStreamId: string,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
+    if (!this.savedObjectsClient) {
+      throw new Error('Saved objects client not initialized');
+    }
     let parentIntegrationId: string | undefined;
     try {
       const dataStream = await this.getDataStream(dataStreamId);
