@@ -23,7 +23,7 @@ import type {
   OperationDescriptor,
   OperationMetadata,
   Visualization,
-} from '../../types';
+} from '@kbn/lens-common';
 import { GROUP_ID } from './constants';
 import { getMetricVisualization } from './visualization';
 import type { Ast } from '@kbn/interpreter';

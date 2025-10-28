@@ -9,7 +9,7 @@ import React from 'react';
 import Chance from 'chance';
 import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { TestProvider } from '../../test/test_provider';
 import { type RouteComponentProps } from 'react-router-dom';
 import type { PageUrlParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';

@@ -22,9 +22,16 @@ import {
   SAMLLogin,
 } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import { securityTelemetry } from '../../otel/instrumentation';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
+
+jest.mock('../../otel/instrumentation', () => ({
+  securityTelemetry: {
+    recordLogoutAttempt: jest.fn(),
+  },
+}));
 
 describe('Common authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;
@@ -106,6 +113,10 @@ describe('Common authentication routes', () => {
       expect(response.status).toBe(500);
       expect(response.payload).toEqual(unhandledException);
       expect(authc.logout).toHaveBeenCalledWith(mockRequest);
+
+      expect(securityTelemetry.recordLogoutAttempt).toHaveBeenCalledWith({
+        outcome: 'failure',
+      });
     });
 
     it('returns 500 if authenticator fails to logout.', async () => {
@@ -117,6 +128,10 @@ describe('Common authentication routes', () => {
       expect(response.status).toBe(500);
       expect(response.payload).toEqual(failureReason);
       expect(authc.logout).toHaveBeenCalledWith(mockRequest);
+
+      expect(securityTelemetry.recordLogoutAttempt).toHaveBeenCalledWith({
+        outcome: 'failure',
+      });
     });
 
     it('returns 400 for AJAX requests that can not handle redirect.', async () => {
@@ -140,6 +155,10 @@ describe('Common authentication routes', () => {
       expect(response.payload).toBeUndefined();
       expect(response.options).toEqual({ headers: { location: 'https://custom.logout' } });
       expect(authc.logout).toHaveBeenCalledWith(mockRequest);
+
+      expect(securityTelemetry.recordLogoutAttempt).toHaveBeenCalledWith({
+        outcome: 'success',
+      });
     });
 
     it('redirects user to the base path if deauthentication succeeds.', async () => {
@@ -151,6 +170,10 @@ describe('Common authentication routes', () => {
       expect(response.payload).toBeUndefined();
       expect(response.options).toEqual({ headers: { location: '/mock-server-basepath/' } });
       expect(authc.logout).toHaveBeenCalledWith(mockRequest);
+
+      expect(securityTelemetry.recordLogoutAttempt).toHaveBeenCalledWith({
+        outcome: 'success',
+      });
     });
 
     it('redirects user to the base path if deauthentication is not handled.', async () => {
@@ -162,6 +185,10 @@ describe('Common authentication routes', () => {
       expect(response.payload).toBeUndefined();
       expect(response.options).toEqual({ headers: { location: '/mock-server-basepath/' } });
       expect(authc.logout).toHaveBeenCalledWith(mockRequest);
+
+      expect(securityTelemetry.recordLogoutAttempt).toHaveBeenCalledWith({
+        outcome: 'success',
+      });
     });
   });
 

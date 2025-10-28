@@ -42,7 +42,7 @@ paths:
                "name": "Daily Security Analysis",
                "enabled": true,
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -55,14 +55,28 @@ paths:
                "schedule": {
                  "interval": "24h"
                },
-               "actions": []
+               "actions": [
+                  {
+                     "action_type_id": ".cases",
+                     "id": "system-connector-.cases",
+                     "params": {
+                       "subAction": "run",
+                       "subActionParams": {
+                         "timeWindow": "7d",
+                         "reopenClosedCases": false,
+                         "groupingBy": [],
+                         "templateId": null
+                       }
+                     },
+                     "uuid": "12345678-1234-1234-1234-123456789012"
+                   }
+               ]
              }'
       x-labels: [ess, serverless]
       operationId: CreateAttackDiscoverySchedules
-      description: Creates a new Attack discovery schedule that analyzes security alerts at specified intervals. The schedule defines when and how Attack discovery analysis should run, including which alerts to analyze, which AI connector to use, and what actions to take when discoveries are found.
+      x-state: Technical Preview; added in 9.2.0
+      description: Creates a new Attack discovery schedule that analyzes security alerts at specified intervals. The schedule defines when and how Attack discovery analysis should run, including which alerts to analyze, which AI connector to use, and what actions to take when discoveries are found. `Technical preview`
       summary: Create Attack discovery schedule
-      tags:
-        - Attack discovery API
       requestBody:
         required: true
         description: Attack discovery schedule configuration including name, parameters, schedule interval, and actions
@@ -74,7 +88,7 @@ paths:
               name: "Daily Security Analysis"
               enabled: true
               params:
-                alerts_index_pattern: ".alerts-security.alerts-*"
+                alerts_index_pattern: ".alerts-security.alerts-default"
                 api_config:
                   actionTypeId: "bedrock"
                   connectorId: "my-bedrock-connector"
@@ -101,7 +115,7 @@ paths:
                 updated_at: "2023-10-31T10:00:00.000Z"
                 enabled: true
                 params:
-                  alerts_index_pattern: ".alerts-security.alerts-*"
+                  alerts_index_pattern: ".alerts-security.alerts-default"
                   api_config:
                     actionTypeId: "bedrock"
                     connectorId: "my-bedrock-connector"
@@ -136,10 +150,9 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: GetAttackDiscoverySchedules
-      description: Retrieves a specific Attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history.
+      x-state: Technical Preview; added in 9.2.0
+      description: Retrieves a specific Attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history. `Technical preview`
       summary: Get Attack discovery schedule by ID
-      tags:
-        - Attack discovery API
       parameters:
         - name: id
           in: path
@@ -164,7 +177,7 @@ paths:
                 updated_at: "2023-10-31T10:00:00.000Z"
                 enabled: true
                 params:
-                  alerts_index_pattern: ".alerts-security.alerts-*"
+                  alerts_index_pattern: ".alerts-security.alerts-default"
                   api_config:
                     actionTypeId: "bedrock"
                     connectorId: "my-bedrock-connector"
@@ -202,7 +215,7 @@ paths:
              --data '{
                "name": "Updated Daily Security Analysis",
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -219,10 +232,9 @@ paths:
              }'
       x-labels: [ess, serverless]
       operationId: UpdateAttackDiscoverySchedules
-      description: Updates an existing Attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions. The update operation replaces the entire schedule configuration with the provided values.
+      x-state: Technical Preview; added in 9.2.0
+      description: Updates an existing Attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions. The update operation replaces the entire schedule configuration with the provided values. `Technical preview`
       summary: Update Attack discovery schedule
-      tags:
-        - Attack discovery API
       parameters:
         - name: id
           in: path
@@ -241,7 +253,7 @@ paths:
             example:
               name: "Updated Daily Security Analysis"
               params:
-                alerts_index_pattern: ".alerts-security.alerts-*"
+                alerts_index_pattern: ".alerts-security.alerts-default"
                 api_config:
                   actionTypeId: "bedrock"
                   connectorId: "my-bedrock-connector"
@@ -268,7 +280,7 @@ paths:
                 updated_at: "2023-10-31T12:00:00.000Z"
                 enabled: true
                 params:
-                  alerts_index_pattern: ".alerts-security.alerts-*"
+                  alerts_index_pattern: ".alerts-security.alerts-default"
                   api_config:
                     actionTypeId: "bedrock"
                     connectorId: "my-bedrock-connector"
@@ -301,10 +313,9 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: DeleteAttackDiscoverySchedules
-      description: Permanently deletes an Attack discovery schedule and all associated configuration.
+      x-state: Technical Preview; added in 9.2.0
+      description: Permanently deletes an Attack discovery schedule and all associated configuration. `Technical preview`
       summary: Delete Attack discovery schedule
-      tags:
-        - Attack discovery API
       parameters:
         - name: id
           in: path
@@ -340,22 +351,21 @@ paths:
                 message: "Invalid request parameters"
 
   /api/attack_discovery/schedules/{id}/_enable:
-    put:
+    post:
       x-codegen-enabled: true
       x-code-samples:
         - lang: curl
           label: Enable an Attack discovery schedule
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: EnableAttackDiscoverySchedules
-      description: Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration.
+      x-state: Technical Preview; added in 9.2.0
+      description: Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration. `Technical preview`
       summary: Enable Attack discovery schedule
-      tags:
-        - Attack discovery API
       parameters:
         - name: id
           in: path
@@ -391,22 +401,21 @@ paths:
                 message: "Invalid request parameters"
 
   /api/attack_discovery/schedules/{id}/_disable:
-    put:
+    post:
       x-codegen-enabled: true
       x-code-samples:
         - lang: curl
           label: Disable an Attack discovery schedule
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: DisableAttackDiscoverySchedules
-      description: Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started.
+      x-state: Technical Preview; added in 9.2.0
+      description: Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started. `Technical preview`
       summary: Disable Attack discovery schedule
-      tags:
-        - Attack discovery API
       parameters:
         - name: id
           in: path

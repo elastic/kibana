@@ -550,7 +550,13 @@
                 "text": "GaugeState"
               },
               " & { colorMode: ",
-              "GaugeColorMode",
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.GaugeColorMode",
+                "text": "GaugeColorMode"
+              },
               "; palette?: ",
               {
                 "pluginId": "@kbn/coloring",
@@ -608,9 +614,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -630,9 +636,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -652,9 +658,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -674,9 +680,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -750,7 +756,13 @@
             "label": "colorMode",
             "description": [],
             "signature": [
-              "GaugeColorMode",
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.GaugeColorMode",
+                "text": "GaugeColorMode"
+              },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
@@ -907,7 +919,7 @@
         "signature": [
           "{ gauge?: { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
-          "; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
+          "; bands?: number | number[] | undefined; domain: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -917,7 +929,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -1041,7 +1053,13 @@
             "text": "GaugeState"
           },
           " & { colorMode: ",
-          "GaugeColorMode",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.GaugeColorMode",
+            "text": "GaugeColorMode"
+          },
           "; palette?: ",
           {
             "pluginId": "@kbn/coloring",
@@ -1059,6 +1077,21 @@
             "text": "CustomPaletteState"
           },
           "> | undefined; ariaLabel?: string | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionGauge",
+        "id": "def-common.GaugeColorMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeColorMode",
+        "description": [],
+        "signature": [
+          "\"none\" | \"palette\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1185,15 +1218,15 @@
           },
           "; renderComplete: () => void; uiState: ",
           {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.PersistedState",
+            "pluginId": "@kbn/visualizations-common",
+            "scope": "common",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
+            "section": "def-common.PersistedState",
             "text": "PersistedState"
           },
           "; overrides?: (Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
-          "; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
+          "; bands?: number | number[] | undefined; domain: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1203,7 +1236,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",

@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // disable some reports
-      const result = await reportingAPI.disableScheduledReports(
+      const result = await reportingAPI.disableReportSchedules(
         [scheduledReportIds[1], scheduledReportIds[4]],
         reportingAPI.REPORTING_USER_USERNAME,
         reportingAPI.REPORTING_USER_PASSWORD

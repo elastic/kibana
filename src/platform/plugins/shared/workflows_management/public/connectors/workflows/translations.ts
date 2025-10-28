@@ -101,3 +101,31 @@ export const OPEN_WORKFLOW_LINK = i18n.translate(
     defaultMessage: 'Open workflow',
   }
 );
+
+export const DISABLED_WORKFLOW_TOOLTIP = i18n.translate(
+  'xpack.stackConnectors.components.workflows.disabledWorkflowTooltip',
+  {
+    defaultMessage: 'Disabled workflow',
+  }
+);
+
+export const EMPTY_STATE_TITLE = i18n.translate(
+  'xpack.stackConnectors.components.workflows.emptyStateTitle',
+  {
+    defaultMessage: "You don't have any workflows yet",
+  }
+);
+
+export const EMPTY_STATE_DESCRIPTION = i18n.translate(
+  'xpack.stackConnectors.components.workflows.emptyStateDescription',
+  {
+    defaultMessage: 'Workflows help you automate and streamline tasks.',
+  }
+);
+
+export const EMPTY_STATE_BUTTON_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.workflows.emptyStateButtonText',
+  {
+    defaultMessage: 'Create your first workflow',
+  }
+);

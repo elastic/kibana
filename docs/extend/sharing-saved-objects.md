@@ -237,7 +237,7 @@ See an example of this in [step 3 of the POC](https://github.com/elastic/kibana/
     ```
 
     1. The `aliasPurpose` field is required as of 8.2, because the API response now includes the reason the alias was created to inform the client whether a toast should be shown or not.
-    2. The `objectNoun` field is optional. It just changes "object" in the toast to whatever you specify — you may want the toast to say "dashboard" or "data view" instead.
+    2. The `objectNoun` field is optional. It just changes "object" in the toast to whatever you specify; you may want the toast to say "dashboard" or "data view" instead.
 
 5. And finally, in your deep link page, add a function that will create a callout in the case of a `'conflict'` outcome:
 
@@ -292,7 +292,7 @@ Reminder, don’t forget to add unit tests and functional tests!
 After [Step 3](#sharing-saved-objects-step-3) is complete, you can add the code to convert your objects.
 
 ::::{warning}
-The previous steps can be backported to the 7.x branch, but this step — the conversion itself — can only take place in 8.0! You should use a separate pull request for this.
+The previous steps can be backported to the 7.x branch, but this step, the conversion itself, can only take place in 8.0! You should use a separate pull request for this.
 ::::
 
 
@@ -436,7 +436,7 @@ Users will need a way to view what spaces your objects are currently assigned to
 
     1. The `icon` field is optional. It specifies an [EUI icon](https://elastic.github.io/eui/#/display/icons) type that will be displayed in the flyout header.
     2. The `title` field is optional. It specifies a human-readable identifier for your object that will be displayed in the flyout header.
-    3. The `noun` field is optional. It just changes "object" in the flyout to whatever you specify — you may want the flyout to say "dashboard" or "data view" instead.
+    3. The `noun` field is optional. It just changes "object" in the flyout to whatever you specify; you may want the flyout to say "dashboard" or "data view" instead.
     4. The `behaviorContext` field is optional. It controls how the space list is displayed. When using an `"outside-space"` behavior context, the space list is rendered outside of any particular space, so the active space is included in the list. On the other hand, when using a `"within-space"` behavior context, the space list is rendered within the active space, so the active space is excluded from the list.
 
 2. Allow users to access your objects in the [Saved Objects Management page](docs-content://explore-analyze/find-and-organize/saved-objects.md) in [Stack Management](docs-content://deploy-manage/index.md). You can do this by ensuring that your objects are marked as [importable and exportable](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/server/src/saved_objects_management.ts) in your [saved object type registration](/extend/saved-objects-service.md#saved-objects-type-registration):
@@ -508,9 +508,9 @@ Aliases are meant to be mostly invisible to end-users by design. There is no UI 
 
 The `resolve()` function checks both if an object with the given ID exists, *and* if an object has an alias with the given ID.
 
-1. If only the former is true, the outcome is an `'exactMatch'` — we found the exact object we were looking for.
-2. If only the latter is true, the outcome is an `'aliasMatch'` — we found an alias with this ID, that pointed us to an object with a different ID.
-3. Finally, if *both conditions* are true, the outcome is a `'conflict'` — we found two objects using this ID. Instead of returning an error in this situation, in the interest of usability, we decided to return the *most correct match*, which is the exact match. By informing the consumer that this is a conflict, the consumer can render an appropriate UI to the end-user explaining that this might not be the object they are actually looking for.
+1. If only the former is true, the outcome is an `'exactMatch'`, we found the exact object we were looking for.
+2. If only the latter is true, the outcome is an `'aliasMatch'`, we found an alias with this ID, that pointed us to an object with a different ID.
+3. Finally, if *both conditions* are true, the outcome is a `'conflict'`, we found two objects using this ID. Instead of returning an error in this situation, in the interest of usability, we decided to return the *most correct match*, which is the exact match. By informing the consumer that this is a conflict, the consumer can render an appropriate UI to the end-user explaining that this might not be the object they are actually looking for.
 
 **Outcome 1**
 
@@ -530,13 +530,13 @@ This outcome can only happen in non-Default spaces.
 
 **Outcome 3**
 
-The third outcome is an edge case that is a combination of the others. If you resolve an object ID and two objects are found — one as an exact match, the other as an alias match — the outcome is a `'conflict'`:
+The third outcome is an edge case that is a combination of the others. If you resolve an object ID and two objects are found, one as an exact match and the other as an alias match, then the outcome is a `'conflict'`:
 
 ![Sharing Saved Objects resolve outcome 3 (conflict)](images/sharing-saved-objects-faq-resolve-outcomes-3.png)
 
 We actually have controls in place to prevent this scenario from happening when you share, import, or copy objects. However, this scenario *could* still happen in a few different situations, if objects are created a certain way or if a user tampers with an object’s raw ES document. Since we can’t 100% rule out this scenario, we must handle it gracefully, but we do expect this will be a rare occurrence.
 
-It is important to note that when a `'conflict'` occurs, the object that is returned is the "most correct" match — the one with the ID that exactly matches.
+It is important to note that when a `'conflict'` occurs, the object that is returned is the "most correct" match, the one with the ID that exactly matches.
 
 
 ### 6. Should I always use resolve instead of get? [sharing-saved-objects-faq-resolve-instead-of-get]

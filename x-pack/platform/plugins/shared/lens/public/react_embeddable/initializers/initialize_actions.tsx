@@ -19,22 +19,23 @@ import type {
 import { partition } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { Visualization } from '../..';
-import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
-import type { TableInspectorAdapter } from '../../editor_frame_service/types';
-
-import type { Datasource, IndexPatternMap } from '../../types';
-import { getMergedSearchContext } from '../expressions/merged_search_context';
-import { isTextBasedLanguage } from '../helper';
 import type {
+  Datasource,
+  IndexPatternMap,
+  TableInspectorAdapter,
+  Visualization,
   GetStateType,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,
   LensSerializedState,
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
-} from '../types';
+} from '@kbn/lens-common';
+import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
+
+import { getMergedSearchContext } from '../expressions/merged_search_context';
+import { isTextBasedLanguage } from '../helper';
+import type { LensEmbeddableStartServices } from '../types';
 import { getActiveDatasourceIdFromDoc, getActiveVisualizationIdFromDoc } from '../../utils';
 
 function getViewUnderlyingDataArgs({

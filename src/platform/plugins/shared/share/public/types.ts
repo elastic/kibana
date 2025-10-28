@@ -18,6 +18,7 @@ import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 import type { AnonymousAccessServiceContract } from '../common/anonymous_access';
+import type { DraftModeCalloutProps } from './components/common/draft_mode_callout';
 
 export interface ShareRegistryApiStart {
   capabilities: Capabilities;
@@ -35,9 +36,15 @@ export type InternalShareActionIntent = Exclude<ShareTypes, 'integration' | 'leg
 
 type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string, unknown>> = {
   /**
-   * The title of the share action
+   * The draft mode callout content to be shown when there are unsaved changes.
+   * - `true`: Shows the default callout.
+   * - `false` or `undefined`: Shows no callout.
+   * - `DraftModeCalloutProps`:
+   *   - `message`: callout message custom content
    */
-  draftModeCallOut?: ReactNode;
+
+  // TODO Remove ReactNode type https://github.com/elastic/kibana/issues/238877
+  draftModeCallOut?: boolean | DraftModeCalloutProps | ReactNode;
   helpText?: ReactNode;
   CTAButtonConfig?: {
     id: string;
@@ -390,6 +397,7 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   allowShortUrl: boolean;
   onClose?: () => void;
   publicAPIEnabled?: boolean;
+  onSave?: () => Promise<void | object>;
 }
 
 export interface ClientConfigType {

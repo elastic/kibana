@@ -65,8 +65,12 @@ export const useChartLayers = ({
             ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
           },
         ],
-        breakdown: hasDimensions ? DIMENSIONS_COLUMN : undefined,
+        breakdown: hasDimensions
+          ? dimensions.length === 1
+            ? dimensions[0]
+            : DIMENSIONS_COLUMN
+          : undefined,
       },
     ];
-  }, [dimensions, metric, color, seriesType, customFunction]);
+  }, [color, customFunction, dimensions, metric.instrument, metric.name, metric.unit, seriesType]);
 };

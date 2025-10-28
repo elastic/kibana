@@ -581,10 +581,6 @@ describe('EndpointActionsClient', () => {
 
   describe('and Space Awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assign to readonly property
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 

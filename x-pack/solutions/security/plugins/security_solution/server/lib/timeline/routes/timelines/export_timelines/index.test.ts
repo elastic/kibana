@@ -23,6 +23,10 @@ import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
 import { convertSavedObjectToSavedNote } from '../../../saved_object/notes/saved_object';
 import { convertSavedObjectToSavedPinnedEvent } from '../../../saved_object/pinned_events';
 import { convertSavedObjectToSavedTimeline } from '../../../saved_object/timelines/convert_saved_object_to_savedtimeline';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../../detection_engine/routes/__mocks__/request_context';
 
 jest.mock('../../../saved_object/timelines/convert_saved_object_to_savedtimeline', () => {
   return {
@@ -45,7 +49,8 @@ jest.mock('../../../saved_object/pinned_events', () => {
 });
 describe('export timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -58,6 +63,11 @@ describe('export timelines', () => {
       mockPinnedEvents()
     );
     exportTimelinesRoute(server.router, createMockConfig());
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {

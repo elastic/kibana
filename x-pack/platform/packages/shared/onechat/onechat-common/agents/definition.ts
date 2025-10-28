@@ -69,11 +69,38 @@ export interface AgentDefinition {
 
 export interface AgentConfiguration {
   /**
-   * Custom instruction for the agent
+   * Custom instruction for the agent.
+   *
+   * Instructions specified that way will be added to both the research and answer prompts.
+   * For custom per-step instructions, use the `research` and `answer` configuration fields instead.
    */
   instructions?: string;
   /**
    * List of tools exposed to the agent
    */
   tools: ToolSelection[];
+
+  /**
+   * Custom configuration for the research step of the agent.
+   */
+  research?: AgentResearchStepConfiguration;
+
+  /**
+   * Custom configuration for the answer step of the agent.
+   */
+  answer?: AgentAnswerStepConfiguration;
+}
+
+export interface AgentResearchStepConfiguration {
+  /**
+   * Custom instruction for the agent's research step.
+   */
+  instructions?: string;
+}
+
+export interface AgentAnswerStepConfiguration {
+  /**
+   * Custom instruction for the agent's answer step.
+   */
+  instructions?: string;
 }

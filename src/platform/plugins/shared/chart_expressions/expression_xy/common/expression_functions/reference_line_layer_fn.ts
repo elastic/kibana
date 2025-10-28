@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { validateAccessor } from '@kbn/chart-expressions-common';
 import { LayerTypes, REFERENCE_LINE_LAYER } from '../constants';
 import type { ReferenceLineLayerFn } from '../types';
 

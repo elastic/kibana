@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { RedirectAppLinks as RedirectAppLinksContainer } from './src/redirect_app_links.container';
-export { RedirectAppLinks as RedirectAppLinksComponent } from './src/redirect_app_links.component';
-export { RedirectAppLinks } from './src/redirect_app_links';
-export { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './src/services';
-
-export type {
-  RedirectAppLinksServices,
-  RedirectAppLinksKibanaDependencies,
-  RedirectAppLinksProps,
-} from '@kbn/shared-ux-link-redirect-app-types';
+export {
+  RedirectAppLinks,
+  type RedirectAppLinksServices,
+  type RedirectAppLinksKibanaDependencies,
+  type RedirectAppLinksProps,
+} from './src/deprecated_redirect_app_links.component';
+export { RedirectAppLinks as RedirectAppLinksContainer } from './src/deprecated_redirect_app_links.component';
+export { RedirectAppLinks as RedirectAppLinksComponent } from './src/deprecated_redirect_app_links.component';

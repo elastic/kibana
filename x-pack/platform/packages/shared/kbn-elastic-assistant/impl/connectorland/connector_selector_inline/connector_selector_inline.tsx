@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
@@ -27,6 +27,12 @@ interface Props {
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation, apiConfig?: ApiConfig) => void;
   stats?: AttackDiscoveryStats | null;
+
+  /**
+   * Allows parent components to control whether the default connector should be
+   * automatically selected or the explicit user selection action required.
+   */
+  explicitConnectorSelection?: boolean;
 }
 
 const inputContainerClassName = css`
@@ -77,8 +83,8 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     onConnectorIdSelected,
     onConnectorSelected,
     stats = null,
+    explicitConnectorSelection,
   }) => {
-    const { euiTheme } = useEuiTheme();
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { assistantAvailability } = useAssistantContext();
     const { setApiConfig } = useConversation();
@@ -145,11 +151,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           <ConnectorSelector
             fullWidth={fullWidth}
             displayFancy={(label) => (
-              <EuiText
-                className={inputDisplayClassName}
-                size="s"
-                color={euiTheme.colors.textPrimary}
-              >
+              <EuiText className={inputDisplayClassName} size="s">
                 {label}
               </EuiText>
             )}
@@ -159,6 +161,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             setIsOpen={setIsOpen}
             onConnectorSelectionChange={onChange}
             stats={stats}
+            explicitConnectorSelection={explicitConnectorSelection}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

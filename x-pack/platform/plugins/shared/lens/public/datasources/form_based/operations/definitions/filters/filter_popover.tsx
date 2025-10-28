@@ -8,16 +8,16 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
-// Need to keep it separate to make it work Jest mocks in dimension_panel tests
-// import { QueryInput } from '../../../../shared_components/query_input';
 import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  LensAggFilterValue as FilterValue,
+  IndexPattern,
+  LensAppServices,
+} from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../../../../../common/constants';
-import type { IndexPattern } from '../../../../../types';
-import type { FilterValue } from '.';
-import { defaultLabel } from '.';
+import { filtersDefaultLabel } from '.';
 import { LabelInput } from '../shared_components';
-import type { LensAppServices } from '../../../../../app_plugin/types';
 
 export const FilterPopover = ({
   filter,
@@ -50,7 +50,7 @@ export const FilterPopover = ({
 
   const getPlaceholder = (query: Query['query']) => {
     if (query === '') {
-      return defaultLabel;
+      return filtersDefaultLabel;
     }
     if (query === 'object') return JSON.stringify(query);
     else {

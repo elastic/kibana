@@ -22,7 +22,7 @@ export function registerHomeAddData(home: HomePublicPluginSetup, resultsLinks: R
     name: i18n.translate('xpack.dataVisualizer.file.embeddedTabTitle', {
       defaultMessage: 'Upload file',
     }),
-    getComponent: () => getFileDataVisualizerWrapper(resultsLinks),
+    getComponent: () => getFileDataVisualizerWrapper('home-add-data', resultsLinks),
   });
 }
 

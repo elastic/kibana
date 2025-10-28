@@ -131,7 +131,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
         });
       }
-      await dataViews.editFromSearchBar({ newName: updatedPattern, newTimeField: 'timestamp' });
+      await dataViews.editFromSearchBar({
+        newIndexPattern: updatedPattern,
+        newTimeField: 'timestamp',
+      });
       await retry.try(async () => {
         expect(await discover.getHitCountInt()).to.be(3);
       });

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { queryClient } from '../query_client';
 import type { EmbeddableAlertsTableConfig } from '../types';
 import { ConfigEditorContent } from './config_editor_content';

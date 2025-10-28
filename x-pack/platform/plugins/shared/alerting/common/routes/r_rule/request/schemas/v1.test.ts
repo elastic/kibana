@@ -33,6 +33,18 @@ describe('rRuleRequestSchema', () => {
     expect(rRuleRequestSchema.validate(basicRequest)).toEqual(basicRequest);
   });
 
+  describe('frequency', () => {
+    test('no errors on freq 4', () => {
+      expect(rRuleRequestSchema.validate({ ...basicRequest, freq: 4 })).toEqual({
+        ...basicRequest,
+        freq: 4,
+      });
+    });
+    test('returns an error with invalid values', () => {
+      expect(() => rRuleRequestSchema.validate({ ...basicRequest, freq: 5 })).toThrow();
+    });
+  });
+
   describe('tzid', () => {
     test('returns an error with invalid values', () => {
       expect(() => rRuleRequestSchema.validate({ ...basicRequest, tzid: 'invalid' })).toThrow();

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { UiSettingsServiceStart, SavedObjectsServiceStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolType } from '@kbn/onechat-common';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
+import { platformCoreTools } from '@kbn/onechat-common/tools/constants';
+import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ToolProviderFn, ReadonlyToolProvider } from '../tool_provider';
 import type { BuiltinToolRegistry } from './builtin_registry';
 import type {
@@ -22,12 +25,27 @@ export const createBuiltinProviderFn =
   ({
     registry,
     toolTypes,
+    uiSettings,
+    savedObjects,
   }: {
     registry: BuiltinToolRegistry;
     toolTypes: AnyToolTypeDefinition[];
+    uiSettings: UiSettingsServiceStart;
+    savedObjects: SavedObjectsServiceStart;
   }): ToolProviderFn<true> =>
-  ({ request, space }) => {
-    return createBuiltinToolProvider({ registry, toolTypes, request, space });
+  async ({ request, space }) => {
+    const soClient = savedObjects.getScopedClient(request);
+    const uiSettingsClient = uiSettings.asScopedToClient(soClient);
+    const createVisualizationsEnabled = await uiSettingsClient.get<boolean>(
+      AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID
+    );
+    return createBuiltinToolProvider({
+      registry,
+      toolTypes,
+      request,
+      space,
+      createVisualizationsEnabled,
+    });
   };
 
 export const createBuiltinToolProvider = ({
@@ -35,11 +53,13 @@ export const createBuiltinToolProvider = ({
   toolTypes,
   request,
   space,
+  createVisualizationsEnabled,
 }: {
   registry: BuiltinToolRegistry;
   toolTypes: AnyToolTypeDefinition[];
   request: KibanaRequest;
   space: string;
+  createVisualizationsEnabled: boolean;
 }): ReadonlyToolProvider => {
   const definitionMap = toolTypes
     .filter((def) => !isDisabledDefinition(def))
@@ -48,17 +68,29 @@ export const createBuiltinToolProvider = ({
       return map;
     }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
 
+  const isToolEnabled = (toolId: string): boolean => {
+    if (toolId === platformCoreTools.createVisualization) {
+      return createVisualizationsEnabled;
+    }
+    return true;
+  };
   const context = { spaceId: space, request };
 
   return {
     id: 'builtin',
     readonly: true,
     has(toolId: string) {
-      return registry.has(toolId);
+      if (!registry.has(toolId)) {
+        return false;
+      }
+      return isToolEnabled(toolId);
     },
     get(toolId) {
       const tool = registry.get(toolId);
       if (!tool) {
+        throw createToolNotFoundError({ toolId });
+      }
+      if (!isToolEnabled(toolId)) {
         throw createToolNotFoundError({ toolId });
       }
       const definition = definitionMap[tool.type];
@@ -74,6 +106,7 @@ export const createBuiltinToolProvider = ({
           // evict unknown tools - atm it's used for workflow tools if the plugin is disabled.
           return definitionMap[tool.type];
         })
+        .filter((tool) => isToolEnabled(tool.id))
         .map((tool) => {
           const definition = definitionMap[tool.type]!;
           return convertTool({ tool, definition, context });

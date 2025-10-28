@@ -6,11 +6,28 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { FleetServerAgentComponentStatus } from '@kbn/fleet-plugin/common';
 import { generateGroupOption } from './agent_grouper';
-import { getNumOverlapped, getNumAgentsInGrouping, generateAgentSelection } from './helpers';
+import {
+  getNumOverlapped,
+  getNumAgentsInGrouping,
+  generateAgentSelection,
+  isOsqueryComponentHealthy,
+  getAgentOsqueryAvailability,
+  type AgentComponent,
+} from './helpers';
 import type { GroupOption, Overlap, SelectedGroups } from './types';
 import { AGENT_GROUP_KEY } from './types';
 import { processAggregations } from '../../common/utils/aggregations';
+
+// Test helper to create properly typed component objects
+const createComponent = (
+  type: string,
+  status: FleetServerAgentComponentStatus
+): AgentComponent => ({
+  type,
+  status,
+});
 
 describe('generateAgentSelection', () => {
   it('should handle empty input', () => {
@@ -274,5 +291,165 @@ describe('getNumOverlapped', () => {
 
     const computedOverlap = getNumOverlapped(selectedGroups, overlap);
     expect(computedOverlap).toBe(25);
+  });
+});
+
+describe('isOsqueryComponentHealthy', () => {
+  it('should return true for HEALTHY status', () => {
+    const agent = {
+      components: [createComponent('osquery', 'HEALTHY')],
+    };
+    expect(isOsqueryComponentHealthy(agent)).toBe(true);
+  });
+
+  it('should return true for DEGRADED status', () => {
+    const agent = {
+      components: [createComponent('osquery', 'DEGRADED')],
+    };
+    expect(isOsqueryComponentHealthy(agent)).toBe(true);
+  });
+
+  it('should return false for FAILED status', () => {
+    const agent = {
+      components: [createComponent('osquery', 'FAILED')],
+    };
+    expect(isOsqueryComponentHealthy(agent)).toBe(false);
+  });
+
+  it('should return false for STOPPED status', () => {
+    const agent = {
+      components: [createComponent('osquery', 'STOPPED')],
+    };
+    expect(isOsqueryComponentHealthy(agent)).toBe(false);
+  });
+
+  it('should return false when components array is empty', () => {
+    const agent = { components: [] };
+    expect(isOsqueryComponentHealthy(agent)).toBe(false);
+  });
+
+  it('should return false when components is undefined', () => {
+    const agent = {};
+    expect(isOsqueryComponentHealthy(agent)).toBe(false);
+  });
+
+  it('should return false when osquery component is not found', () => {
+    const agent = {
+      components: [createComponent('filebeat', 'HEALTHY')],
+    };
+    expect(isOsqueryComponentHealthy(agent)).toBe(false);
+  });
+
+  it('should handle multiple components and find osquery', () => {
+    const agent = {
+      components: [
+        createComponent('filebeat', 'HEALTHY'),
+        createComponent('osquery', 'DEGRADED'),
+        createComponent('endpoint', 'FAILED'),
+      ],
+    };
+    expect(isOsqueryComponentHealthy(agent)).toBe(true);
+  });
+});
+
+describe('getAgentOsqueryAvailability', () => {
+  it('should return "online" for healthy agent with healthy Osquery', () => {
+    const agent = {
+      status: 'online',
+      last_checkin: '2025-10-16T11:59:00Z',
+      components: [createComponent('osquery', 'HEALTHY')],
+    };
+    expect(getAgentOsqueryAvailability(agent)).toBe('online');
+  });
+
+  it('should return "degraded" for degraded agent with healthy Osquery', () => {
+    const agent = {
+      status: 'degraded',
+      last_checkin: '2025-10-16T11:59:00Z',
+      components: [createComponent('osquery', 'HEALTHY')],
+    };
+    expect(getAgentOsqueryAvailability(agent)).toBe('degraded');
+  });
+
+  it('should return "osquery_unavailable" for online agent with failed Osquery', () => {
+    const agent = {
+      status: 'online',
+      last_checkin: '2025-10-16T11:59:00Z',
+      components: [createComponent('osquery', 'FAILED')],
+    };
+    expect(getAgentOsqueryAvailability(agent)).toBe('osquery_unavailable');
+  });
+
+  it('should return "offline" when status is offline', () => {
+    const agent = {
+      status: 'offline',
+      last_checkin: '2025-10-16T11:59:00Z',
+      components: [createComponent('osquery', 'HEALTHY')],
+    };
+    expect(getAgentOsqueryAvailability(agent)).toBe('offline');
+  });
+
+  it('should return "offline" when status is offline even with recent check-in', () => {
+    const agent = {
+      status: 'offline',
+      last_checkin: new Date().toISOString(), // Now
+      components: [createComponent('osquery', 'HEALTHY')],
+    };
+    expect(getAgentOsqueryAvailability(agent)).toBe('offline');
+  });
+
+  it('should return "osquery_unavailable" when BOTH agent AND Osquery are DEGRADED (double degradation)', () => {
+    const agent = {
+      status: 'degraded',
+      last_checkin: '2025-10-16T11:59:00Z',
+      components: [createComponent('osquery', 'DEGRADED')],
+    };
+    // When both are degraded, it's too unreliable - treat as unavailable
+    expect(getAgentOsqueryAvailability(agent)).toBe('osquery_unavailable');
+  });
+
+  it('should return "osquery_unavailable" for degraded agent with failed Osquery', () => {
+    const agent = {
+      status: 'degraded',
+      last_checkin: '2025-10-16T11:59:00Z',
+      components: [createComponent('osquery', 'FAILED')],
+    };
+    expect(getAgentOsqueryAvailability(agent)).toBe('osquery_unavailable');
+  });
+
+  it('should return "osquery_unavailable" when agent has no components', () => {
+    const agent = {
+      status: 'online',
+      last_checkin: '2025-10-16T11:59:00Z',
+      components: [],
+    };
+    expect(getAgentOsqueryAvailability(agent)).toBe('osquery_unavailable');
+  });
+
+  it('should return "osquery_unavailable" when components is undefined', () => {
+    const agent = {
+      status: 'online',
+      last_checkin: '2025-10-16T11:59:00Z',
+    };
+    expect(getAgentOsqueryAvailability(agent)).toBe('osquery_unavailable');
+  });
+
+  it('should handle agent with status undefined as not offline', () => {
+    const agent = {
+      last_checkin: '2025-10-16T11:59:00Z',
+      components: [createComponent('osquery', 'HEALTHY')],
+    };
+    // Status not online but not offline either, so it's degraded
+    expect(getAgentOsqueryAvailability(agent)).toBe('degraded');
+  });
+
+  it('should return "degraded" for online agent with DEGRADED Osquery (single degradation)', () => {
+    const agent = {
+      status: 'online',
+      last_checkin: '2025-10-16T11:59:00Z',
+      components: [createComponent('osquery', 'DEGRADED')],
+    };
+    // Agent is checking in fine, just Osquery is degraded - queries should still work
+    expect(getAgentOsqueryAvailability(agent)).toBe('degraded');
   });
 });

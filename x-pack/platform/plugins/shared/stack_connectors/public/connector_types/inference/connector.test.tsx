@@ -12,6 +12,7 @@ import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const providersSchemas = [
   {
@@ -743,7 +744,7 @@ jest.mock('@kbn/inference-endpoint-ui-common/src/hooks/use_providers', () => ({
   })),
 }));
 
-const openAiConnector = {
+const openAiConnector = createMockActionConnector({
   actionTypeId: '.inference',
   name: 'AI Connector',
   id: '123',
@@ -762,7 +763,7 @@ const openAiConnector = {
     },
   },
   isDeprecated: false,
-};
+});
 
 const googleaistudioConnector = {
   ...openAiConnector,

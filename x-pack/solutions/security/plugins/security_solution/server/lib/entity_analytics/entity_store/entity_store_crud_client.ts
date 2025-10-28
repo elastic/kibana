@@ -9,6 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
 import { EntityStoreCapability } from '@kbn/entities-schema';
+import type {
+  BulkOperationContainer,
+  BulkUpdateAction,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { EntityContainer } from '../../../../common/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type {
@@ -21,6 +26,7 @@ import {
   EngineNotRunningError,
   CapabilityNotEnabledError,
   DocumentVersionConflictError,
+  EntityNotFoundError,
 } from './errors';
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
@@ -34,6 +40,10 @@ interface CustomEntityFieldsAttributesHolder {
   lifecycle?: Record<string, unknown>;
   behaviors?: Record<string, unknown>;
   relationships?: Record<string, unknown>;
+}
+
+interface DeleteRequestBody {
+  id: string;
 }
 
 type CustomECSEntityField = EntityField & CustomEntityFieldsAttributesHolder;
@@ -60,6 +70,46 @@ export class EntityStoreCrudClient {
     this.namespace = namespace;
     this.logger = logger;
     this.dataClient = dataClient;
+  }
+
+  public async upsertEntitiesBulk(entities: EntityContainer[], force = false) {
+    const docs: Record<EntityType, (BulkOperationContainer | BulkUpdateAction)[]> = {
+      [EntityType.user]: [],
+      [EntityType.host]: [],
+      [EntityType.service]: [],
+      [EntityType.generic]: [],
+    };
+
+    for (const { type, record } of entities) {
+      if (docs[type].length === 0) {
+        // if no operations in type yet, verify if it's all enabled
+        await this.assertEngineIsRunning(type);
+        await this.assertCRUDApiIsEnabled(type);
+      }
+
+      const normalizedDocToECS = normalizeToECS(record);
+      const flatProps = getFlattenedObject(normalizedDocToECS);
+      const entityTypeDescription = engineDescriptionRegistry[type];
+      const fieldDescriptions = getFieldDescriptions(flatProps, entityTypeDescription);
+
+      if (!force) {
+        assertOnlyNonForcedAttributesInReq(fieldDescriptions);
+      }
+
+      docs[type].push({ create: {} }, buildDocumentToUpdate(type, normalizedDocToECS));
+    }
+
+    const reqs = Object.entries(docs)
+      .filter(([_, ops]) => ops.length > 0)
+      .map(([type, ops]) => {
+        this.logger.info(`Bulk updating entities (amount: ${ops.length / 2}, type: ${type})`);
+        return this.esClient.bulk({
+          index: getEntityUpdatesDataStreamName(type as EntityType, this.namespace),
+          operations: ops,
+        });
+      });
+
+    await Promise.all(reqs);
   }
 
   public async upsertEntity(type: APIEntityType, doc: Entity, force = false) {
@@ -106,6 +156,39 @@ export class EntityStoreCrudClient {
       index: getEntityUpdatesDataStreamName(type, this.namespace),
       document: buildDocumentToUpdate(type, normalizedDocToECS),
     });
+  }
+
+  public async deleteEntity(type: APIEntityType, body: DeleteRequestBody) {
+    await this.assertEngineIsRunning(type);
+    await this.assertCRUDApiIsEnabled(type);
+
+    if (body.id === '') {
+      throw new BadCRUDRequestError(`The entity ID cannot be blank`);
+    }
+
+    const deleteByQueryResp = await this.esClient.deleteByQuery({
+      index: getEntitiesIndexName(type, this.namespace),
+      query: {
+        term: {
+          'entity.id': body.id,
+        },
+      },
+      conflicts: 'proceed',
+    });
+
+    if (deleteByQueryResp.failures !== undefined && deleteByQueryResp.failures.length > 0) {
+      throw new Error(`Failed to delete entity of type '${type}' and ID '${body.id}'`);
+    }
+
+    if (deleteByQueryResp.version_conflicts) {
+      throw new DocumentVersionConflictError();
+    }
+
+    if (!deleteByQueryResp.deleted) {
+      throw new EntityNotFoundError(type, body.id);
+    }
+
+    return { deleted: true };
   }
 
   private async assertEngineIsRunning(type: APIEntityType) {

@@ -73,8 +73,6 @@ export const createSearchToolGraph = ({
 
     if (explorerRes.resources.length > 0) {
       const selectedResource = explorerRes.resources[0];
-      events?.reportProgress(progressMessages.selectedTarget(selectedResource.name));
-
       return {
         indexIsValid: true,
         searchTarget: { type: selectedResource.type, name: selectedResource.name },
@@ -96,7 +94,11 @@ export const createSearchToolGraph = ({
   });
 
   const callSearchAgent = async (state: StateType) => {
-    events?.reportProgress(progressMessages.resolvingSearchStrategy());
+    events?.reportProgress(
+      progressMessages.resolvingSearchStrategy({
+        target: state.searchTarget.name,
+      })
+    );
     const response = await searchModel.invoke(
       getSearchPrompt({ nlQuery: state.nlQuery, searchTarget: state.searchTarget })
     );

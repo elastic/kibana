@@ -10,7 +10,6 @@ import { waitFor, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import { connector, resilientIncidentTypes, resilientSeverity } from '../mock';
-import { KibanaServices } from '../../../common/lib/kibana';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import Fields from './case_fields';
@@ -22,7 +21,6 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
 
-const getConfigMock = KibanaServices.getConfig as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 
@@ -59,13 +57,6 @@ describe('ResilientParamsFields renders', () => {
   });
 
   beforeEach(() => {
-    getConfigMock.mockReturnValue({
-      resilient: {
-        additionalFields: {
-          enabled: true,
-        },
-      },
-    });
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -84,22 +75,6 @@ describe('ResilientParamsFields renders', () => {
     expect(screen.getByText('Malware')).toBeInTheDocument();
     expect(screen.getByTestId('severitySelect')).toHaveValue('6');
     expect(screen.getByTestId('additionalFieldsEditor')).toBeInTheDocument();
-  });
-
-  it('does not render the additional fields when it is disabled', () => {
-    getConfigMock.mockReturnValue({
-      resilient: {
-        additionalFields: {
-          enabled: false,
-        },
-      },
-    });
-    renderWithTestingProviders(
-      <MockFormWrapperComponent fields={fields}>
-        <Fields connector={connector} />
-      </MockFormWrapperComponent>
-    );
-    expect(screen.queryByTestId('additionalFieldsEditor')).not.toBeInTheDocument();
   });
 
   it('disabled the fields when loading incident types', async () => {

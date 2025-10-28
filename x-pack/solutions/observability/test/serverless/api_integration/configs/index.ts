@@ -14,7 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('../test_suites/apm_api_integration/feature_flags.ts'));
     loadTestFile(require.resolve('../test_suites/cases'));
     loadTestFile(require.resolve('../test_suites/synthetics'));
-    loadTestFile(require.resolve('../test_suites/dataset_quality_api_integration'));
     loadTestFile(require.resolve('../test_suites/platform_security'));
   });
 }

@@ -9,10 +9,10 @@
 
 import { z } from '@kbn/zod';
 import {
-  HttpStepSchema,
-  WaitStepSchema,
   ElasticsearchStepSchema,
+  HttpStepSchema,
   KibanaStepSchema,
+  WaitStepSchema,
 } from '../../../spec/schema';
 
 export const GraphNodeSchema = z.object({

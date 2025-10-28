@@ -266,6 +266,28 @@ export default function (providerContext: FtrProviderContext) {
         await assertPackageInstallVersion(pkgName, oldPkgVersion);
         await assertPackagePoliciesVersion(policyIds, oldPkgVersion);
       });
+
+      it('should fail when rollback TTL expired', async () => {
+        await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, policyIds, true);
+
+        // Setting 8d ago to ensure TTL of 7d is expired
+        const previousInstallDate = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+        await kibanaServer.savedObjects.update({
+          id: pkgName,
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          attributes: {
+            install_started_at: previousInstallDate,
+          },
+        });
+
+        const res = await supertest
+          .post(`/api/fleet/epm/packages/${pkgName}/rollback`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+        expect(res.body.message).to.eql(
+          `Failed to roll back package ${pkgName}: Rollback not allowed as TTL expired`
+        );
+      });
     });
   }
 

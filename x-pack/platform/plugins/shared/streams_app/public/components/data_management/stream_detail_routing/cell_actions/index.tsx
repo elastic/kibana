@@ -7,7 +7,7 @@
 
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StringOrNumberOrBoolean } from '@kbn/streamlang';
+import type { StringOrNumberOrBoolean, OperatorKeys } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import React from 'react';
 import {
@@ -17,12 +17,12 @@ import {
 import type { RoutingDefinitionWithUIAttributes } from '../types';
 
 type BtnMode = '+' | '-';
-type FilterOperator = 'eq' | 'neq' | 'exist';
+type FilterOperator = Extract<OperatorKeys, 'eq' | 'neq' | 'exists'>;
 export type RoutingFilterFn = (routingRule: Partial<RoutingDefinitionWithUIAttributes>) => void;
 
 const getOperator = (value: StringOrNumberOrBoolean, mode: BtnMode): FilterOperator => {
   if (typeof value === 'boolean') {
-    return 'exist';
+    return 'exists';
   }
 
   return mode === '+' ? 'eq' : 'neq';
@@ -30,7 +30,7 @@ const getOperator = (value: StringOrNumberOrBoolean, mode: BtnMode): FilterOpera
 
 const getCondition = (value: StringOrNumberOrBoolean, operator: FilterOperator) => {
   if (typeof value === 'boolean') {
-    return { exist: value };
+    return { exists: value };
   }
 
   return { [operator]: `${value}` };

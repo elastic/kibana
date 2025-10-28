@@ -568,7 +568,7 @@ macOS users on a machine with a discrete graphics card may see significant speed
 
 - Open Preferences (Command + ,)
 - In the General tab, under the "Magic" section, ensure "GPU rendering" is checked
-- Open "Advanced GPU Settings…​"
+- Open "Advanced GPU Settings…"
 - Uncheck the "Prefer integrated to discrete GPU" option
 - Restart iTerm
 

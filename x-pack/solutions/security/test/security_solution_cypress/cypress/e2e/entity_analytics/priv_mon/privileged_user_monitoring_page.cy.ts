@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ONBOARDING_PANEL } from '../../../screens/privileged_user_monitoring';
-import { togglePrivilegedUserMonitoring } from '../../../tasks/entity_analytics/privmon';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../../urls/navigation';
@@ -22,17 +21,12 @@ describe(
 
     beforeEach(() => {
       login();
-
-      togglePrivilegedUserMonitoring();
     });
 
-    afterEach(() => {
-      togglePrivilegedUserMonitoring();
-    });
+    afterEach(() => {});
 
     after(() => {
       cy.task('esArchiverUnload', { archiveName: 'linux_process' });
-      togglePrivilegedUserMonitoring();
     });
 
     it('renders page as expected', () => {

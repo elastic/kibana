@@ -6,7 +6,8 @@
  */
 
 import type { InfluencerInput } from '../types';
-import { influencersOrCriteriaToString, getThreshold } from './use_anomalies_table_data';
+import { influencersOrCriteriaToString } from './use_anomalies_table_data';
+import { getThreshold } from '../../../../../common/utils/ml';
 
 describe('use_anomalies_table_data', () => {
   test('should return a reduced single influencer to string', () => {

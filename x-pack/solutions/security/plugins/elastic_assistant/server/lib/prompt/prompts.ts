@@ -17,7 +17,7 @@ const BASE_GEMINI_PROMPT =
 const KB_CATCH =
   'If the knowledge base tool gives empty results, do your best to answer the question from the perspective of an expert security analyst.';
 export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt}\n\n${KB_CATCH}\n\n{formattedTime}`;
-export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.\n\n Ensure that the final response always includes all instructions from the tool responses. Never omit earlier parts of the response.`;
+export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response.\n\nIMPORTANT: After using tools, you must provide a complete response that includes:\n1. The tool results (include the exact response from GenerateESQLTool verbatim)\n2. Any additional context, recommendations, or insights requested by the user\n\nNever end your response with just tool results. Always provide your complete analysis after using tools.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
 export const ATTACK_DISCOVERY_DEFAULT = `
@@ -181,6 +181,32 @@ export const ALERT_SUMMARY_SYSTEM_PROMPT =
   'The response should look like this:\n' +
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
 
+export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate markdown text with most important information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration. Limit your response to 500 characters. Only reply with the required sections, and nothing else.
+  ### Format  
+  Return a string with markdown text without any explanations, or variable assignments. Do **not** wrap the output in triple backticks. 
+    The result must be a list of bullet points, nothing more.
+    Generate summaries for the following sections, but omit any section that if the information isn't available in the context:
+      - Risk score: Summarize the entity's risk score and the main factors contributing to it.
+      - Criticality: Note the entity's criticality level and its impact on the risk score.
+      - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
+      - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.  
+    The generated data **MUST** follow this pattern:
+  """- **{title1}**: {description1}
+  - **{title2}**: {description2}
+  ...
+  - **{titleN}**: {descriptionN}
+  
+  **Recommended action**: {description}"""
+  
+    **Strict rules**:
+      _ Only reply with the required sections, and nothing else.
+      - Limit your total response to 500 characters.
+      - Never return an section which there is no data available in the context.
+      - Use inline code (backticks) for technical values like file paths, process names, arguments, etc.
+      - Recommended action title should be bold and text should be inline.    
+      - **Do not** include any extra explanation, reasoning or text.
+    `;
+
 export const RULE_ANALYSIS =
   'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +
   '- The rule name and a brief summary of its purpose.\n' +
@@ -219,7 +245,7 @@ Formatting Requirements:
   - Include relevant emojis in section headers for visual clarity (e.g., 📝, 🛡️, 🔍, 📚).
 `;
 
-export const ENTITY_ANALYSIS = `Your primary function is to analyze asset and entity data to provide security insights. You will be provided with a JSON object containing the context of a specific asset (e.g., a host, user, service or cloud resource). Your response must be structured, contextual, and directly address the user's query if one is provided. If no specific query is given, provide a general analysis based on the structure below.
+export const ENTITY_ANALYSIS = `Analyze asset data described above to provide security insights. The data contains the context of a specific asset (e.g., a host, user, service or cloud resource). Your response must be structured, contextual, and provide a general analysis based on the structure below.
 Your response must be in markdown format and include the following sections:
 **1. 🔍 Asset Overview**
    - Begin by acknowledging the asset you are analyzing using its primary identifiers (e.g., "Analyzing host \`[host.name]\` with IP \`[host.ip]\`").
@@ -227,14 +253,10 @@ Your response must be in markdown format and include the following sections:
    - Describe its key relationships and dependencies (e.g., "This asset is part of the \`[cloud.project.name]\` project and is located in the \`[cloud.availability_zone]\` zone.").
 **2. 💡 Investigation & Analytics**
    - Based on the asset's type and attributes, suggest potential investigation paths or common attack vectors.
-   - **Generate contextual ES|QL queries** to help the user investigate further. Format all queries as code blocks. Your generated queries should address common analytical questions, such as:
-     - Finding related security events (e.g., login attempts, network traffic, process executions).
-     - Identifying other assets with similar attributes.
-     - Searching for Indicators of Compromise (IoCs) relevant to the asset type.
-   - If the user asks a question that can be answered with a query, provide the query as the primary answer.
+   - **Generate one contextual ES|QL query** to help the user investigate further. Your generated query should address a common analytical question related to the asset type and sub type. Suggest other possible queries and ask if the user wants to generate more queries.
 **General Instructions:**
-- **Context Awareness:** Your entire analysis must be derived from the provided asset context. If a piece of information is not available in the context (or appears to be anonymized), state that and proceed with the available data.
-- **Query Generation:** When asked to "write a query" or a similar request, your primary output for that section should be a valid, ready-to-use ES|QL query based on the entity's schema.
+- **Context Awareness:** Your entire analysis must be derived from the provided asset context. If a piece of information is not available in the context state that and proceed with the available data.
+- **Query Generation:** When generating a query, your primary output for that section should be a valid, ready-to-use ES|QL query based on the asset's schema. Use ES|QL tool for query generation. Format all queries as code blocks.
 - **Formatting:** Use markdown headers, tables, code blocks, and bullet points to ensure the output is clear, organized, and easily readable. Use concise, actionable language.`;
 
 export const starterPromptTitle1 = 'Alerts';

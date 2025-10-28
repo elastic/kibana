@@ -109,6 +109,16 @@
       "userDefined": false
     },
     {
+      "name": "aggregateMetricDoubleField",
+      "type": "aggregate_metric_double",
+      "userDefined": false
+    },
+    {
+      "name": "denseVectorField",
+      "type": "dense_vector",
+      "userDefined": false
+    },
+    {
       "name": "any#Char$Field",
       "type": "double",
       "userDefined": false
@@ -245,6 +255,13 @@
       "query": "ROW a=1::LONG | LOOKUP JOIN t ON a",
       "error": [
         "\"t\" is not a valid JOIN index. Please use a \"lookup\" mode index."
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM a_index | LEFT JOIN join_index ON textField == keywordField, booleanField",
+      "error": [
+        "JOIN ON clause must be a comma separated list of fields or a single expression"
       ],
       "warning": []
     },
@@ -658,6 +675,26 @@
       "error": [
         {
           "sample": "SyntaxError:",
+          "inverse": false
+        }
+      ],
+      "warning": []
+    },
+    {
+      "query": "SET time_zone = \"CEST\";",
+      "error": [
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
+      ],
+      "warning": []
+    },
+    {
+      "query": "SET invalid_setting = \"_alias:_origin\"; FROM index",
+      "error": [
+        {
+          "sample": "Unknown setting invalid_setting",
           "inverse": false
         }
       ],

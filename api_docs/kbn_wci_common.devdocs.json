@@ -39,7 +39,7 @@
           },
           ") => string"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integration_tools.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +59,7 @@
                 "text": "ToolNameAndIntegrationId"
               }
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integration_tools.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,7 +93,7 @@
             "text": "ContentRef"
           }
         ],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -104,7 +104,7 @@
             "tags": [],
             "label": "{ sourceId, sourceType }",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -124,7 +124,7 @@
                     "text": "ContentRefSourceType"
                   }
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -135,7 +135,7 @@
                 "tags": [],
                 "label": "sourceId",
                 "description": [],
-                "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -164,7 +164,7 @@
             "text": "ContentRef"
           }
         ],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,7 +178,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -204,7 +204,7 @@
             "text": "ToolNameAndIntegrationId"
           }
         ],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integration_tools.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -218,7 +218,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integration_tools.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -247,7 +247,7 @@
           },
           ") => string"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -267,7 +267,7 @@
                 "text": "ContentRef"
               }
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -287,7 +287,7 @@
         "description": [
           "\nRepresents a reference to a content"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -309,7 +309,7 @@
                 "text": "ContentRefSourceType"
               }
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -322,7 +322,7 @@
             "description": [
               "\nId of the source"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -335,7 +335,7 @@
             "description": [
               "\nUnique ID this content (for this sourceId)."
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -351,7 +351,7 @@
         "description": [
           "\nRepresents a definition for an index source.\n\nThe definition contains all what's necessary for the system to build\nthe MCP tool that will then be used by the LLM to query the data."
         ],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -364,7 +364,7 @@
             "description": [
               "\nID of the index that is going to be used for this index source"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -377,7 +377,7 @@
             "description": [
               "\nA short description of what the index contains"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -400,7 +400,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -423,7 +423,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -440,7 +440,7 @@
               "IndexSourceContentFields",
               "[]"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -454,7 +454,7 @@
         "tags": [],
         "label": "IndexSourceFilter",
         "description": [],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,7 +467,7 @@
             "description": [
               "\nThe name / path to the field\nE.g. `content` or `reference.id`"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -480,7 +480,7 @@
             "description": [
               "\nThe type of field. Should be the same type as defined in the mappings"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -493,7 +493,7 @@
             "description": [
               "\nA human-readable description for this filter."
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -506,7 +506,7 @@
             "description": [
               "\nIf true, the field's top values will be fetched at query time,\nand added to the description. The parameter will also be restricted\nto only allow those values"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -522,7 +522,7 @@
         "description": [
           "\nRepresents a field that will be used for full-text search."
         ],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -535,7 +535,7 @@
             "description": [
               "\nThe name / path to the field\nE.g. `content` or `reference.id`"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -548,7 +548,7 @@
             "description": [
               "\nThe type of field. Should be the same type as defined in the mappings"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/index_source.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -562,7 +562,7 @@
         "tags": [],
         "label": "Integration",
         "description": [],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integrations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -573,7 +573,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integrations.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -584,7 +584,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integrations.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -604,7 +604,7 @@
                 "text": "IntegrationType"
               }
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integrations.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -615,7 +615,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integrations.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -629,7 +629,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integrations.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -640,7 +640,7 @@
             "tags": [],
             "label": "createdAt",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integrations.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -651,7 +651,7 @@
             "tags": [],
             "label": "updatedAt",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integrations.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -662,7 +662,7 @@
             "tags": [],
             "label": "createdBy",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integrations.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -678,7 +678,7 @@
         "description": [
           "\nRepresents a tool call that was requested by the assistant"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/tool_calls.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/tool_calls.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -691,7 +691,7 @@
             "description": [
               "\nThe id the of tool call"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/tool_calls.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/tool_calls.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -704,7 +704,7 @@
             "description": [
               "\nThe complete tool name (containing the integrationId)"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/tool_calls.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/tool_calls.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -720,7 +720,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/tool_calls.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/tool_calls.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -734,7 +734,7 @@
         "tags": [],
         "label": "ToolNameAndIntegrationId",
         "description": [],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integration_tools.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -745,7 +745,7 @@
             "tags": [],
             "label": "integrationId",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integration_tools.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -756,7 +756,7 @@
             "tags": [],
             "label": "toolName",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integration_tools.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -772,7 +772,7 @@
         "tags": [],
         "label": "IntegrationType",
         "description": [],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/constants.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -786,7 +786,7 @@
         "tags": [],
         "label": "ContentRefSourceType",
         "description": [],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/content_ref.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -801,7 +801,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-common/src/integrations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

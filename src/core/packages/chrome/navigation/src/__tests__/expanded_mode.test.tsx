@@ -385,7 +385,7 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -421,7 +421,7 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -490,7 +490,7 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -538,7 +538,7 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 

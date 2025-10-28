@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import {
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,

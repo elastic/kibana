@@ -32,7 +32,7 @@ describe('Outputs handler', () => {
     jest.spyOn(appContextService, 'getLogger').mockReturnValue({ error: jest.fn() } as any);
     jest.spyOn(outputService, 'create').mockResolvedValue({ id: 'output1' } as any);
     jest.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
-    jest.spyOn(outputService, 'get').mockImplementation((_, id: string) => {
+    jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
       if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
         return { hosts: ['http://elasticsearch:9200'] } as any;
       } else {
@@ -149,7 +149,7 @@ describe('Outputs handler', () => {
   it('should return error on put elasticsearch output in serverless if host url is different from default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
     // The original output should provide the output type
-    jest.spyOn(outputService, 'get').mockImplementation((_, id: string) => {
+    jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
       if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
         return { hosts: ['http://elasticsearch:9200'] } as any;
       } else {
@@ -310,6 +310,7 @@ describe('Outputs handler', () => {
       statusCode: 400,
     });
   });
+
   it('should return ok if one of ssl.key and secrets.ssl.key is provided for elasticsearch output', async () => {
     jest
       .spyOn(appContextService, 'getCloud')

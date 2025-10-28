@@ -49,6 +49,7 @@ export function createOpenFileUploadLiteAction(
       indexSettings,
       initialIndexName,
       flyoutContent,
+      location,
     }: OpenFileUploadLiteContext) {
       try {
         createFlyout(coreStart, plugins, {
@@ -59,6 +60,7 @@ export function createOpenFileUploadLiteAction(
           indexSettings,
           initialIndexName,
           flyoutContent,
+          location,
         });
       } catch (e) {
         return Promise.reject();

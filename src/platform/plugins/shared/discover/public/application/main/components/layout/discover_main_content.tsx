@@ -46,7 +46,10 @@ export interface DiscoverMainContentProps {
   stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
-  onFieldEdited: () => Promise<void>;
+  onFieldEdited: (options: {
+    editedDataView: DataView;
+    removedFieldName?: string;
+  }) => Promise<void>;
   onDropFieldToTable?: () => void;
   columns: string[];
   panelsToggle: ReactElement<PanelsToggleProps>;

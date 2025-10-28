@@ -6,7 +6,6 @@
  */
 
 import { isEmpty, isPlainObject } from 'lodash';
-import type { Type } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import type {
   AxiosBasicCredentials,
@@ -25,6 +24,7 @@ import type { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { inspect } from 'util';
+import type { ZodType } from '@kbn/zod';
 import type { ConnectorUsageCollector } from '../usage';
 import { assertURL } from './helpers/validators';
 import type { ActionsConfigurationUtilities } from '../actions_config';
@@ -103,9 +103,9 @@ export abstract class SubActionConnector<Config, Secrets> {
     return { 'Content-Type': 'application/json', ...headersWithBasicAuth };
   }
 
-  private validateResponse(responseSchema: Type<unknown>, data: unknown) {
+  private validateResponse(responseSchema: ZodType<unknown>, data: unknown) {
     try {
-      responseSchema.validate(data);
+      responseSchema.parse(data);
     } catch (resValidationError) {
       const err = new Error(`Response validation failed (${resValidationError})`);
       this.logger.debug(() => `${err.message}:\n${inspect(data, { depth: 10 })}`);

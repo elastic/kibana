@@ -5,157 +5,163 @@
  * 2.0.
  */
 
-import { type TypeOf, schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { Coerced } from '../../../common/lib';
 import { validateKeysAllowed, validateRecordMaxKeys } from '../lib/validators';
 
 export const ExternalIncidentServiceConfiguration = {
-  apiUrl: schema.string(),
-  orgId: schema.string(),
+  apiUrl: z.string(),
+  orgId: z.string(),
 };
 
-export const ExternalIncidentServiceConfigurationSchema = schema.object(
-  ExternalIncidentServiceConfiguration
-);
+export const ExternalIncidentServiceConfigurationSchema = z
+  .object(ExternalIncidentServiceConfiguration)
+  .strict();
 
 export const ExternalIncidentServiceSecretConfiguration = {
-  apiKeyId: schema.string(),
-  apiKeySecret: schema.string(),
+  apiKeyId: z.string(),
+  apiKeySecret: z.string(),
 };
 
-export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
-  ExternalIncidentServiceSecretConfiguration
-);
+export const ExternalIncidentServiceSecretConfigurationSchema = z
+  .object(ExternalIncidentServiceSecretConfiguration)
+  .strict();
 
 const MAX_ADDITIONAL_FIELDS_LENGTH = 50;
 
 const AdditionalFields = {
-  additionalFields: schema.nullable(
-    schema.recordOf(
-      schema.string({
-        validate: (value) => validateOtherFieldsKeys(value),
-      }),
-      schema.any(),
-      {
-        validate: (value) =>
-          validateRecordMaxKeys({
-            record: value,
-            maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
-            fieldName: 'additionalFields',
-          }),
-      }
-    )
+  additionalFields: Coerced(
+    z
+      .record(
+        z.string().superRefine((value, ctx) => {
+          validateOtherFieldsKeys(value, ctx);
+        }),
+        z.any()
+      )
+      .superRefine((val, ctx) =>
+        validateRecordMaxKeys({
+          record: val,
+          ctx,
+          maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
+          fieldName: 'additionalFields',
+        })
+      )
+      .nullable()
+      .default(null)
   ),
 };
 
 const CommonIncidentAttributes = {
-  name: schema.string(),
-  description: schema.nullable(schema.string()),
-  externalId: schema.nullable(schema.string()),
-  incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
-  severityCode: schema.nullable(schema.number()),
+  name: z.string(),
+  description: z.string().nullable().default(null),
+  externalId: z.string().nullable().default(null),
+  incidentTypes: z.array(z.coerce.number()).nullable().default(null),
+  severityCode: z.coerce.number().nullable().default(null),
   ...AdditionalFields,
 };
 
 export const commonIncidentSchemaObjectProperties = Object.keys(CommonIncidentAttributes);
 
-const validateOtherFieldsKeys = (key: string): string | undefined => {
-  return validateKeysAllowed({
+const validateOtherFieldsKeys = (key: string, ctx: z.RefinementCtx) => {
+  validateKeysAllowed({
     key,
+    ctx,
     disallowList: commonIncidentSchemaObjectProperties,
     fieldName: 'additionalFields',
   });
 };
 
-export const ExecutorSubActionPushParamsSchema = schema.object({
-  incident: schema.object({
-    ...CommonIncidentAttributes,
-  }),
-  comments: schema.nullable(
-    schema.arrayOf(
-      schema.object({
-        comment: schema.string(),
-        commentId: schema.string(),
-      })
+export const ExecutorSubActionPushParamsSchema = z.object({
+  incident: z
+    .object({
+      ...CommonIncidentAttributes,
+    })
+    .strict(),
+  comments: z
+    .array(
+      z
+        .object({
+          comment: z.string(),
+          commentId: z.string(),
+        })
+        .strict()
     )
-  ),
+    .nullable()
+    .default(null),
 });
 
 export const PushToServiceIncidentSchema = {
-  name: schema.string(),
-  description: schema.nullable(schema.string()),
-  incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
-  severityCode: schema.nullable(schema.number()),
+  name: z.string(),
+  description: z.string().nullable().default(null),
+  incidentTypes: z.array(z.coerce.number()).nullable().default(null),
+  severityCode: z.coerce.number().nullable().default(null),
   ...AdditionalFields,
 };
 
 // Reserved for future implementation
-export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
-export const ExecutorSubActionGetIncidentTypesParamsSchema = schema.object({});
-export const ExecutorSubActionGetSeverityParamsSchema = schema.object({});
+export const ExecutorSubActionCommonFieldsParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetIncidentTypesParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetSeverityParamsSchema = z.object({}).strict();
 
-const ArrayOfValuesSchema = schema.arrayOf(
-  schema.object(
-    {
-      value: schema.number(),
-      label: schema.string(),
-    },
-    { unknowns: 'allow' }
-  )
+const ArrayOfValuesSchema = z.array(
+  z
+    .object({
+      value: z.coerce.number(),
+      label: z.string(),
+    })
+    .passthrough()
 );
 
-export const GetIncidentTypesResponseSchema = schema.object(
-  {
+export const GetIncidentTypesResponseSchema = z
+  .object({
     values: ArrayOfValuesSchema,
-  },
-  { unknowns: 'allow' }
-);
+  })
+  .passthrough();
 
-export const GetSeverityResponseSchema = schema.object(
-  {
+export const GetSeverityResponseSchema = z
+  .object({
     values: ArrayOfValuesSchema,
-  },
-  { unknowns: 'allow' }
-);
+  })
+  .passthrough();
 
-const ValuesItemSchema = schema.object(
-  {
-    value: schema.oneOf([schema.number(), schema.string()]),
-    label: schema.string(),
-    enabled: schema.boolean(),
-    hidden: schema.boolean(),
-    default: schema.boolean(),
-  },
-  { unknowns: 'allow' }
-);
+const ValuesItemSchema = z
+  .object({
+    value: z.union([z.coerce.number(), z.string()]),
+    label: z.string(),
+    enabled: z.boolean(),
+    hidden: z.boolean(),
+    default: z.boolean(),
+  })
+  .passthrough();
 
-export const ExternalServiceFieldsSchema = schema.object(
-  {
-    input_type: schema.string(),
-    name: schema.string(),
-    read_only: schema.boolean(),
-    required: schema.nullable(schema.string()),
-    text: schema.string(),
-    prefix: schema.nullable(schema.string()),
-    values: schema.nullable(schema.arrayOf(ValuesItemSchema)),
-  },
-  { unknowns: 'allow' }
-);
+export const ExternalServiceFieldsSchema = z
+  .object({
+    input_type: z.string(),
+    name: z.string(),
+    read_only: z.boolean(),
+    required: z.string().nullable().default(null),
+    text: z.string(),
+    prefix: z.string().nullable().default(null),
+    values: z.array(ValuesItemSchema).nullable().default(null),
+  })
+  .passthrough();
 
-export type ResilientFieldMeta = TypeOf<typeof ExternalServiceFieldsSchema>;
+export type ResilientFieldMeta = z.input<typeof ExternalServiceFieldsSchema>;
 
-export const GetCommonFieldsResponseSchema = schema.arrayOf(ExternalServiceFieldsSchema);
+export const GetCommonFieldsResponseSchema = z.array(ExternalServiceFieldsSchema);
 
-export const ExternalServiceIncidentResponseSchema = schema.object({
-  id: schema.string(),
-  title: schema.string(),
-  url: schema.string(),
-  pushedDate: schema.string(),
-});
+export const ExternalServiceIncidentResponseSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    url: z.string(),
+    pushedDate: z.string(),
+  })
+  .strict();
 
-export const GetIncidentResponseSchema = schema.object(
-  {
-    id: schema.number(),
-    inc_last_modified_date: schema.number(),
-  },
-  { unknowns: 'allow' }
-);
+export const GetIncidentResponseSchema = z
+  .object({
+    id: z.coerce.number(),
+    inc_last_modified_date: z.coerce.number(),
+  })
+  .passthrough();

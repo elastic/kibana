@@ -40,6 +40,7 @@ export const SurveyKubernetes = () => {
         isCloudEnv={isCloudEnv}
         isServerlessEnv={isServerlessEnv}
         surveyButtonText={FEEDBACK_BUTTON_KUBERNETES_TEXT}
+        sanitizedPath={document.location.pathname}
       />
       {!isToastSeen && (
         <EuiGlobalToastList
@@ -75,6 +76,7 @@ export const SurveyKubernetes = () => {
                         isCloudEnv={isCloudEnv}
                         isServerlessEnv={isServerlessEnv}
                         surveyButtonText={START_SURVEY_BUTTON_TEXT}
+                        sanitizedPath={document.location.pathname}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

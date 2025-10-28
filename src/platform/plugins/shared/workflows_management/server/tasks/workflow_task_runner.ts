@@ -8,17 +8,17 @@
  */
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { Logger, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import type { WorkflowsService } from '../workflows_management/workflows_management_service';
-import { getScheduledTriggers } from '../lib/schedule_utils';
 import {
-  RRULE_FREQUENCY_REVERSE_MAP,
   getReadableFrequency,
   getReadableInterval,
+  RRULE_FREQUENCY_REVERSE_MAP,
 } from '../lib/rrule_logging_utils';
+import { getScheduledTriggers } from '../lib/schedule_utils';
+import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 export interface WorkflowTaskParams {
   workflowId: string;
@@ -58,7 +58,7 @@ export function createWorkflowTaskRunner({
       async run() {
         logger.info(`Running scheduled workflow task for workflow ${workflowId}`);
 
-        let rruleTriggers: any[] = [];
+        let rruleTriggers: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         try {
           // Get the workflow
@@ -135,7 +135,7 @@ export function createWorkflowTaskRunner({
             : await workflowsExecutionEngine.executeWorkflow(
                 workflowExecutionModel,
                 executionContext,
-                {} as any // Fallback when no user context is available
+                {} as any // eslint-disable-line @typescript-eslint/no-explicit-any -- Fallback when no user context is available
               );
 
           const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';

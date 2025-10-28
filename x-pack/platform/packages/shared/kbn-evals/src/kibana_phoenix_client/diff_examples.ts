@@ -7,13 +7,14 @@
 
 import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import objectHash from 'object-hash';
+import { isEmpty, omitBy } from 'lodash';
 import type { ExampleWithId } from '../types';
 
 function normaliseExample(example: Example | ExampleWithId) {
   return {
     input: example.input,
     output: example.output,
-    metadata: example.metadata,
+    metadata: omitBy(example.metadata, isEmpty),
   };
 }
 

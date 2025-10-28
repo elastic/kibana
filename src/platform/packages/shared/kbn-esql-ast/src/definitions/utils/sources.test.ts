@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SOURCES_TYPES } from '@kbn/esql-types';
 import { joinIndices, timeseriesIndices } from '../../__tests__/context_fixtures';
 
-import { specialIndicesToSuggestions, shouldBeQuotedSource, sourceExists } from './sources';
+import {
+  specialIndicesToSuggestions,
+  shouldBeQuotedSource,
+  sourceExists,
+  buildSourcesDefinitions,
+} from './sources';
 
 describe('specialIndicesToSuggestions()', () => {
   test('converts join indices to suggestions', () => {
@@ -142,5 +148,29 @@ describe('sourceExists', () => {
 
   it('should handle empty string gracefully (false)', () => {
     expect(sourceExists('', mockSources)).toBe(false);
+  });
+});
+
+describe('buildSourcesDefinitions with timeseries', () => {
+  test('converts timeseries sources with FROM->TS replacement', () => {
+    const sources = [
+      { name: 'my_timeseries_index', isIntegration: false, type: SOURCES_TYPES.TIMESERIES },
+      { name: 'regular_index', isIntegration: false, type: SOURCES_TYPES.INDEX },
+    ];
+
+    const suggestions = buildSourcesDefinitions(sources, 'FROM ');
+
+    // Find the timeseries suggestion
+    const timeseriesSuggestion = suggestions.find((s) => s.label === 'my_timeseries_index');
+    const regularSuggestion = suggestions.find((s) => s.label === 'regular_index');
+
+    // Timeseries suggestion should have TS prefix and range replacement
+    expect(timeseriesSuggestion?.text).toBe('TS my_timeseries_index');
+    expect(timeseriesSuggestion?.rangeToReplace).toBeDefined();
+    expect(timeseriesSuggestion?.rangeToReplace?.start).toBe(0); // FROM starts at position 0
+
+    // Regular suggestion should not have TS prefix or range replacement
+    expect(regularSuggestion?.text).toBe('regular_index');
+    expect(regularSuggestion?.rangeToReplace).toBeUndefined();
   });
 });

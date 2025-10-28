@@ -78,6 +78,7 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
+                is_connector_type_deprecated: false,
               });
               expect(typeof response.body.id).to.be('string');
               // Ensure AAD isn't broken
@@ -190,8 +191,7 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'error validating action type secrets: [encrypted]: expected value of type [string] but got [undefined]',
+                message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"encrypted\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
               });
               break;
             default:
@@ -315,6 +315,7 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
+                is_connector_type_deprecated: false,
               });
               expect(typeof response.body.id).to.be('string');
               // Ensure AAD isn't broken

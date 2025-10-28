@@ -76,8 +76,10 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * creating a new instance, we prevent other uses of llm from binding and changing
    * the state unintentionally. For this reason, only call createLlmInstance at runtime
    */
-  const createLlmInstance = async () =>
-    !inferenceChatModelDisabled
+  const createLlmInstance = async () => {
+    const connector = await actionsClient.get({ id: connectorId });
+    const defaultModel = connector?.config?.defaultModel;
+    return !inferenceChatModelDisabled
       ? inference.getChatModel({
           request,
           connectorId,
@@ -102,7 +104,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
           logger,
           // possible client model override,
           // let this be undefined otherwise so the connector handles the model
-          model: request.body.model,
+          model: request.body.model ?? defaultModel,
           // ensure this is defined because we default to it in the language_models
           // This is where the LangSmith logs (Metadata > Invocation Params) are set
           temperature: getDefaultArguments(llmType).temperature,
@@ -117,6 +119,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
             pluginId: 'security_ai_assistant',
           },
         });
+  };
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({

@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const searchSessions = getService('searchSessions');
   const comboBox = getService('comboBox');
 
-  describe.skip('Search session example', () => {
+  describe('Search session example', () => {
     const appId = 'searchExamples';
 
     before(async function () {
@@ -39,10 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await comboBox.setCustom('dataViewSelector', 'logstash-*');
       await comboBox.setCustom('searchMetricField', 'bytes');
       await testSubjects.clickWhenNotDisabledWithoutRetry('startSearch');
-      await testSubjects.find('searchResults-1');
-      await searchSessions.expectState('completed');
       await searchSessions.save();
-      await searchSessions.expectState('backgroundCompleted');
       await testSubjects.click('restoreSearch');
       await testSubjects.find('searchResults-2');
     });

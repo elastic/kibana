@@ -24,9 +24,9 @@ import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { LayerAction, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { LayerActions } from './layer_actions';
-import type { LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
-import { isOperation } from '../../../types';
+import { isOperation } from '../../../types_guards';
 import { LayerHeader } from './layer_header';
 import type { LayerPanelProps } from './types';
 import { DimensionContainer } from './dimension_container';
@@ -43,10 +43,13 @@ import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import { ESQLEditor } from './esql_editor';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export function LayerPanel(props: LayerPanelProps) {
+  const { datasourceMap } = useEditorFrameService();
+
   const [openDimension, setOpenDimension] = useState<{
     isComplete?: boolean;
     openColumnId?: string;
@@ -66,8 +69,6 @@ export function LayerPanel(props: LayerPanelProps) {
     registerNewLayerRef,
     layerIndex,
     activeVisualization,
-    visualizationMap,
-    datasourceMap,
     updateVisualization,
     updateDatasource,
     toggleFullscreen,
@@ -150,7 +151,7 @@ export function LayerPanel(props: LayerPanelProps) {
       layerDatasourceState = datasourceStates[aliasId].state;
     }
   }
-  const layerDatasource = datasourceId ? props.datasourceMap[datasourceId] : undefined;
+  const layerDatasource = datasourceId ? datasourceMap[datasourceId] : undefined;
 
   const layerDatasourceConfigProps = {
     state: layerDatasourceState,
@@ -413,8 +414,6 @@ export function LayerPanel(props: LayerPanelProps) {
                       }),
                   }}
                   activeVisualizationId={activeVisualization.id}
-                  visualizationMap={visualizationMap}
-                  datasourceMap={datasourceMap}
                   onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                 />
               </EuiFlexItem>
@@ -450,9 +449,7 @@ export function LayerPanel(props: LayerPanelProps) {
               uiSettings={core.uiSettings}
               isTextBasedLanguage={isTextBasedLanguage}
               framePublicAPI={framePublicAPI}
-              datasourceMap={datasourceMap}
               layerId={layerId}
-              visualizationMap={visualizationMap}
               {...editorProps}
             />
             {activeVisualization.LayerPanelComponent && (

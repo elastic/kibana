@@ -8,11 +8,11 @@
  */
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
-import type { NodeImplementation, MonitorableNode } from '../../node_implementation';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
 import { parseDuration } from '../../../utils';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { MonitorableNode, NodeImplementation } from '../../node_implementation';
 
 export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {
   constructor(
@@ -28,6 +28,7 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
 
   public monitor(monitoredContext: StepExecutionRuntime): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const stepExecution = this.stepExecutionRuntime.stepExecution!;
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
     const currentTimeMs = new Date().getTime();

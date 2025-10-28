@@ -510,11 +510,13 @@ describe('Both modes', () => {
           expect(link).toBeInTheDocument();
         });
 
-        const twelfthLink = screen.queryByRole('link', {
-          name: securityMock.navItems.primaryItems[11].label,
-        });
+        await waitFor(() => {
+          const twelfthLink = screen.queryByRole('link', {
+            name: securityMock.navItems.primaryItems[11].label,
+          });
 
-        expect(twelfthLink).not.toBeInTheDocument();
+          expect(twelfthLink).not.toBeInTheDocument();
+        });
 
         const moreButton = screen.getByRole('button', {
           name: 'More',
@@ -559,7 +561,7 @@ describe('Both modes', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -602,7 +604,7 @@ describe('Both modes', () => {
         // Security mock has exactly 13 primary menu items
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -644,7 +646,7 @@ describe('Both modes', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -1294,7 +1296,7 @@ describe('Both modes', () => {
       it('should move focus to the first or last item in the popover when pressing Home or End', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1335,7 +1337,7 @@ describe('Both modes', () => {
       it('should return focus to the menu item that opened the popover when it is closed', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         await user.click(moreButton);
 
@@ -1365,7 +1367,7 @@ describe('Both modes', () => {
       it('should move focus to the next primary menu or footer menu item when pressing Tab', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1399,7 +1401,7 @@ describe('Both modes', () => {
       it('should move focus to the previous primary menu or footer menu item when pressing Shift + Tab', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1435,7 +1437,7 @@ describe('Both modes', () => {
       it('should focus the "Go back" button when opening a nested panel with Enter', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1471,7 +1473,7 @@ describe('Both modes', () => {
       it('should keep focus within nested submenu items when using arrow keys', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1538,7 +1540,7 @@ describe('Both modes', () => {
       it('should return focus to the trigger that opened the nested panel when activating the "Go back" button', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1568,6 +1570,36 @@ describe('Both modes', () => {
 
         // Expect the "Machine learning" button to regain focus
         expect(within(popover).getByRole('button', { name: 'Machine learning' })).toHaveFocus();
+      });
+
+      // https://github.com/elastic/kibana/issues/239726
+      it('does NOT close the popover when onBlur has relatedTarget === null (Safari quirk)', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = await screen.findByRole('button', { name: 'More' });
+        act(() => {
+          moreButton.focus();
+        });
+
+        const popover = await screen.findByRole('dialog', { name: 'More' });
+        expect(popover).toBeInTheDocument();
+
+        // Enter to open the popover content
+        await user.keyboard('{Enter}');
+
+        // Focus an element inside the popover to make the blur meaningful
+        const mlBtn = within(popover).getByRole('button', { name: 'Machine learning' });
+        expect(mlBtn).toHaveFocus();
+
+        // Simulate Safari: blur/focusout with null relatedTarget
+        // Use focusout (bubbling) because React's onBlur maps to it.
+        act(() => {
+          fireEvent.focusOut(popover, { relatedTarget: null });
+        });
+        flushPopoverTimers(); // allow any delayed close to run
+
+        // Blur handler should skip close when nextElement is null -> popover stays open
+        expect(screen.getByRole('dialog', { name: 'More' })).toBeInTheDocument();
       });
     });
   });

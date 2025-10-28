@@ -6,7 +6,7 @@
  */
 
 import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { keyBy, uniq } from 'lodash';
+import { keyBy } from 'lodash';
 import { mean, median, deviation, min, max } from 'd3';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
 
@@ -25,7 +25,7 @@ export interface DatasetScore {
   name: string;
   numExamples: number;
   evaluatorScores: Map<string, number[]>;
-  experiments: Array<{ id?: string }>;
+  experimentId: string;
 }
 
 export interface DatasetScoreWithStats extends DatasetScore {
@@ -67,43 +67,34 @@ export async function processExperimentsToDatasetScores(
   experiments: RanExperiment[],
   phoenixClient: KibanaPhoenixClient
 ): Promise<DatasetScore[]> {
-  const allDatasetIds = uniq(experiments.flatMap((experiment) => experiment.datasetId));
-  const datasetInfos = await phoenixClient.getDatasets(allDatasetIds);
+  const datasetIds = experiments.map((experiment) => experiment.datasetId);
+  const datasetInfos = await phoenixClient.getDatasets(datasetIds);
   const datasetInfosById = keyBy(datasetInfos, (datasetInfo) => datasetInfo.id);
 
-  const datasetScoresMap = new Map<string, DatasetScore>();
+  return experiments.map((experiment) => {
+    const { datasetId, evaluationRuns, runs, id } = experiment;
+    const numExamples = runs ? Object.keys(runs).length : 0;
 
-  for (const experiment of experiments) {
-    const { datasetId, evaluationRuns, runs } = experiment;
-    const numExamplesForExperiment = runs ? Object.keys(runs).length : 0;
-
-    if (!datasetScoresMap.has(datasetId)) {
-      datasetScoresMap.set(datasetId, {
-        id: datasetId,
-        name: datasetInfosById[datasetId]?.name ?? datasetId,
-        numExamples: 0,
-        evaluatorScores: new Map<string, number[]>(),
-        experiments: [],
-      });
-    }
-
-    const datasetScore = datasetScoresMap.get(datasetId)!;
-    datasetScore.numExamples += numExamplesForExperiment;
-
-    datasetScore.experiments.push({ id: experiment.id });
+    const evaluatorScores = new Map<string, number[]>();
 
     if (evaluationRuns) {
       evaluationRuns.forEach((evalRun) => {
         const score = evalRun.result?.score ?? 0;
-        if (!datasetScore.evaluatorScores.has(evalRun.name)) {
-          datasetScore.evaluatorScores.set(evalRun.name, []);
+        if (!evaluatorScores.has(evalRun.name)) {
+          evaluatorScores.set(evalRun.name, []);
         }
-        datasetScore.evaluatorScores.get(evalRun.name)!.push(score);
+        evaluatorScores.get(evalRun.name)!.push(score);
       });
     }
-  }
 
-  return Array.from(datasetScoresMap.values());
+    return {
+      id: datasetId,
+      name: datasetInfosById[datasetId]?.name ?? datasetId,
+      numExamples,
+      evaluatorScores,
+      experimentId: id ?? '',
+    };
+  });
 }
 
 /**
@@ -122,12 +113,11 @@ export function getUniqueEvaluatorNames(datasetScores: DatasetScore[]): string[]
 /**
  * Calculate overall statistics across all datasets for each evaluator
  */
-export function calculateOverallStats(
-  datasetScores: DatasetScore[],
-  evaluatorNames: string[]
-): Map<string, EvaluatorStats> {
+export function calculateOverallStats(datasetScores: DatasetScore[]): Map<string, EvaluatorStats> {
   const overallStats = new Map<string, EvaluatorStats>();
   const totalExamples = datasetScores.reduce((sum, d) => sum + d.numExamples, 0);
+
+  const evaluatorNames = getUniqueEvaluatorNames(datasetScores);
 
   evaluatorNames.forEach((evaluatorName) => {
     // Get all scores across all datasets for this evaluator
@@ -174,12 +164,10 @@ export async function buildEvaluationResults(
   phoenixClient: KibanaPhoenixClient
 ): Promise<{
   datasetScores: DatasetScore[];
-  evaluatorNames: string[];
   overallStats: Map<string, EvaluatorStats>;
 }> {
   const datasetScores = await processExperimentsToDatasetScores(experiments, phoenixClient);
-  const evaluatorNames = getUniqueEvaluatorNames(datasetScores);
-  const overallStats = calculateOverallStats(datasetScores, evaluatorNames);
+  const overallStats = calculateOverallStats(datasetScores);
 
-  return { datasetScores, evaluatorNames, overallStats };
+  return { datasetScores, overallStats };
 }

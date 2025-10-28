@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parse, stringify } from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
 
@@ -45,7 +45,7 @@ export function useWorkflowUrlState() {
       };
 
       // Remove undefined values to keep URL clean
-      const cleanParams: Record<string, any> = {};
+      const cleanParams: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
       Object.entries(newParams).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           cleanParams[key] = value;

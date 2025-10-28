@@ -104,7 +104,9 @@ export const createDetectionRuleFromBenchmarkRule = async (
       },
       index: [FINDINGS_INDEX_PATTERN],
       query: generateFindingsRuleQuery(benchmarkRule),
-      references: convertReferencesLinksToArray(benchmarkRule.references),
+      references: convertReferencesLinksToArray(
+        benchmarkRule.reference || benchmarkRule.references
+      ),
       name: benchmarkRule.name,
       description: benchmarkRule.rationale,
       tags: generateBenchmarkRuleTags(benchmarkRule),

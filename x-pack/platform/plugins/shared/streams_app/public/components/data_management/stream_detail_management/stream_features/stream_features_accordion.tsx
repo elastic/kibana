@@ -9,7 +9,15 @@ import React from 'react';
 import { EuiAccordion, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { StreamExistingFeaturesTable } from './stream_existing_features_table';
+
+const getUnderlineOnHoverStyle = (textDecorationValue: 'underline' | 'none') => css`
+  &:hover,
+  &:focus {
+    text-decoration: ${textDecorationValue};
+  }
+`;
 
 export const StreamFeaturesAccordion = ({
   definition,
@@ -28,7 +36,7 @@ export const StreamFeaturesAccordion = ({
       id="stream-features-accordion"
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={getUnderlineOnHoverStyle('underline')}>
             {i18n.translate('xpack.streams.streamFeaturesAccordion.buttonLabel', {
               defaultMessage: 'Features',
             })}
@@ -38,6 +46,7 @@ export const StreamFeaturesAccordion = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       }
+      buttonProps={{ css: getUnderlineOnHoverStyle('none') }}
     >
       <EuiSpacer size="s" />
       <StreamExistingFeaturesTable

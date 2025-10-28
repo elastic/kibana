@@ -9,8 +9,7 @@ import type { AxiosError } from 'axios';
 import { omitBy, isNil } from 'lodash/fp';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { CaseConnector, getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type {
@@ -55,7 +54,7 @@ export class ResilientConnector extends CaseConnector<
 
   constructor(
     params: ServiceParams<ResilientConfig, ResilientSecrets>,
-    pushToServiceParamsExtendedSchema: Record<string, Type<unknown>>
+    pushToServiceParamsExtendedSchema: Record<string, z.ZodType<unknown>>
   ) {
     super(params, pushToServiceParamsExtendedSchema);
 
@@ -172,13 +171,12 @@ export class ResilientConnector extends CaseConnector<
           method: 'POST',
           data,
           headers: this.getAuthHeaders(),
-          responseSchema: schema.object(
-            {
-              id: schema.number(),
-              create_date: schema.number(),
-            },
-            { unknowns: 'allow' }
-          ),
+          responseSchema: z
+            .object({
+              id: z.coerce.number(),
+              create_date: z.coerce.number(),
+            })
+            .passthrough(),
         },
         connectorUsageCollector
       );
@@ -220,10 +218,9 @@ export class ResilientConnector extends CaseConnector<
           url: `${this.urls.incident}/${incidentId}`,
           data,
           headers: this.getAuthHeaders(),
-          responseSchema: schema.object(
-            { success: schema.boolean(), message: schema.nullable(schema.string()) },
-            { unknowns: 'allow' }
-          ),
+          responseSchema: z
+            .object({ success: z.boolean(), message: z.string().nullable().default(null) })
+            .passthrough(),
         },
         connectorUsageCollector
       );
@@ -261,7 +258,7 @@ export class ResilientConnector extends CaseConnector<
           url: this.urls.comment.replace('{inc_id}', incidentId),
           data: { text: { format: 'text', content: comment } },
           headers: this.getAuthHeaders(),
-          responseSchema: schema.object({}, { unknowns: 'allow' }),
+          responseSchema: z.object({}).passthrough(),
         },
         connectorUsageCollector
       );

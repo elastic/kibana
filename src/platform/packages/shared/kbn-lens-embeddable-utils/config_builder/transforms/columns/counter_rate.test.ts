@@ -8,7 +8,7 @@
  */
 
 import { fromCounterRateAPItoLensState, fromCounterRateLensStateToAPI } from './counter_rate';
-import type { CounterRateIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { CounterRateIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiCounterRateOperation, LensApiMetricOperation } from '../../schema/metric_ops';
 
 describe('Counter Rate Transforms', () => {

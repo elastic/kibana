@@ -184,7 +184,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       getOneAgentPolicyHandler
     );
 
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+  const experimentalFeatures = parseExperimentalConfigValue(
+    config.enableExperimental || [],
+    config.experimentalFeatures || {}
+  );
   if (experimentalFeatures.enableAutomaticAgentUpgrades) {
     router.versioned
       .get({
@@ -423,8 +426,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },
@@ -463,8 +467,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },
@@ -498,8 +503,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },

@@ -25,7 +25,7 @@ const secrets = {
 };
 
 const defaultConfig = {
-  defaultModel: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+  defaultModel: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
 };
 
 export default function bedrockTest({ getService }: FtrProviderContext) {
@@ -94,6 +94,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
           config,
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -117,6 +118,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           is_deprecated: false,
           name,
           connector_type_id: connectorTypeId,
+          is_connector_type_deprecated: false,
           is_missing_secrets: false,
           config,
         });
@@ -138,8 +140,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -182,8 +183,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [accessKey]: expected value of type [string] but got [undefined]',
+              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"accessKey\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"secret\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -204,8 +204,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [accessKey]: expected value of type [string] but got [undefined]',
+              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"accessKey\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -226,8 +225,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [secret]: expected value of type [string] but got [undefined]',
+              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"secret\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -263,8 +261,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: bedrockActionId,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -626,8 +623,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             connector_id: bedrockActionId,
             errorSource: TaskErrorSource.USER,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             retry: false,
           });
         });

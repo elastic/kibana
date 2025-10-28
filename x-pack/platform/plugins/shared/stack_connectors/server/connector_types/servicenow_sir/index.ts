@@ -6,7 +6,7 @@
  */
 
 import { curry } from 'lodash';
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 
 import type {
   ActionType as ConnectorType,
@@ -51,7 +51,7 @@ import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
 
 export { ServiceNowSIRConnectorTypeId, serviceNowSIRTable };
 
-export type ActionParamsType = TypeOf<typeof ExecutorParamsSchemaSIR>;
+export type ActionParamsType = z.infer<typeof ExecutorParamsSchemaSIR>;
 
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,

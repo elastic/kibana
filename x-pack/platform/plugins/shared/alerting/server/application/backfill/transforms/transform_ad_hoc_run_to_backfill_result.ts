@@ -78,6 +78,8 @@ export const transformAdHocRunToBackfillResult = ({
     start: attributes.start,
     status: attributes.status,
     schedule: attributes.schedule,
+    initiator: attributes.initiator,
+    initiatorId: attributes.initiatorId,
   };
 };
 

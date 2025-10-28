@@ -49,6 +49,7 @@ import type {
 } from './types';
 import { setupRoutes } from './routes/setup_routes';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
+import { deleteOldAndLegacyCdrDataViewsForAllSpaces } from './saved_objects/data_views';
 import { initializeCspIndices } from './create_indices/create_indices';
 import {
   deletePreviousTransformsVersions,
@@ -239,8 +240,10 @@ export class CspPlugin
   ): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
+    const soClient = core.savedObjects.createInternalRepository();
     const isIntegrationVersionIncludesTransformAsset =
       isTransformAssetIncluded(packagePolicyVersion);
+
     await initializeCspIndices(
       esClient,
       this.config,
@@ -252,8 +255,13 @@ export class CspPlugin
       isIntegrationVersionIncludesTransformAsset,
       this.logger
     );
+
     await scheduleFindingsStatsTask(taskManager, this.logger);
     await this.initializeIndexAlias(esClient, this.logger);
+
+    // Delete old and legacy CDR data views for all spaces
+    await deleteOldAndLegacyCdrDataViewsForAllSpaces(soClient, this.logger);
+
     this.#isInitialized = true;
   }
 

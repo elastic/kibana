@@ -40,6 +40,10 @@ const HASH_PARENTS = ['dll', 'file', 'process'] as const;
 
 const defaultObservableTypes = [
   {
+    label: i18n.AGENT_ID,
+    value: ['agent.id'],
+  },
+  {
     label: i18n.HOST_NAME,
     value: ['host.name'],
   },

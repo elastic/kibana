@@ -21,15 +21,15 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
-import { APP_ID, getEditPath } from '../../../common/constants';
 import type {
   GetStateType,
-  LensEmbeddableStartServices,
   LensHasEditPanel,
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
-} from '../types';
+} from '@kbn/lens-common';
+import { APP_ID, getEditPath } from '../../../common/constants';
+import type { LensEmbeddableStartServices } from '../types';
 import { extractInheritedViewModeObservable } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';

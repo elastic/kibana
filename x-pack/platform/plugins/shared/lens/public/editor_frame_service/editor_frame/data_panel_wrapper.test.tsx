@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { DataPanelWrapper } from './data_panel_wrapper';
-import type { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../../types';
+import type { Datasource, DatasourceDataPanelProps, VisualizationMap } from '@kbn/lens-common';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createMockFramePublicAPI, mockStoreDeps, renderWithReduxStore } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
@@ -16,6 +16,7 @@ import { selectTriggerApplyChanges } from '../../state_management';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { EditorFrameServiceProvider } from '../editor_frame_service_context';
 
 describe('Data Panel Wrapper', () => {
   describe('Datasource data panel properties', () => {
@@ -33,21 +34,24 @@ describe('Data Panel Wrapper', () => {
         } as unknown as Datasource,
       };
       const renderResult = renderWithReduxStore(
-        <DataPanelWrapper
+        <EditorFrameServiceProvider
           datasourceMap={datasourceMap}
           visualizationMap={{} as VisualizationMap}
-          showNoDataPopover={() => {}}
-          core={{} as DatasourceDataPanelProps['core']}
-          dropOntoWorkspace={() => {}}
-          hasSuggestionForField={() => true}
-          plugins={{
-            uiActions: {} as UiActionsStart,
-            dataViews: {} as DataViewsPublicPluginStart,
-            eventAnnotationService: {} as EventAnnotationServiceType,
-          }}
-          indexPatternService={createIndexPatternServiceMock()}
-          frame={createMockFramePublicAPI()}
-        />,
+        >
+          <DataPanelWrapper
+            showNoDataPopover={() => {}}
+            core={{} as DatasourceDataPanelProps['core']}
+            dropOntoWorkspace={() => {}}
+            hasSuggestionForField={() => true}
+            plugins={{
+              uiActions: {} as UiActionsStart,
+              dataViews: {} as DataViewsPublicPluginStart,
+              eventAnnotationService: {} as EventAnnotationServiceType,
+            }}
+            indexPatternService={createIndexPatternServiceMock()}
+            frame={createMockFramePublicAPI()}
+          />
+        </EditorFrameServiceProvider>,
         {},
         {
           preloadedState: {

@@ -16,7 +16,7 @@ import type {
   TableSuggestionColumn,
   TableSuggestion,
   TableChangeType,
-} from '../../types';
+} from '@kbn/lens-common';
 import { getColorMappingDefaults } from '../../utils';
 import type { State, XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';

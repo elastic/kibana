@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
-import type { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
+import type {
+  FramePublicAPI,
+  VisualizationDimensionEditorProps,
+  LegacyMetricState,
+} from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { MetricDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -18,7 +22,6 @@ import { act } from 'react-dom/test-utils';
 
 import { PalettePanelContainer } from '../../shared_components';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LegacyMetricState } from '../../../common/types';
 import type { DatasourcePublicAPI } from '../..';
 import { mountWithProviders } from '../../test_utils/test_utils';
 

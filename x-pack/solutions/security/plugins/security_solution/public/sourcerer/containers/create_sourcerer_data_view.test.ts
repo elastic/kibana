@@ -9,6 +9,7 @@ import { createSourcererDataView } from './create_sourcerer_data_view';
 import { DEFAULT_TIME_FIELD } from '../../../common/constants';
 import {
   DEFAULT_SECURITY_ALERT_DATA_VIEW,
+  DEFAULT_SECURITY_ATTACK_DATA_VIEW,
   DEFAULT_SECURITY_DATA_VIEW,
 } from '../../data_view_manager/components/data_view_picker/translations';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
@@ -20,9 +21,10 @@ describe('createSourcererDataView', () => {
 
   it('should return null if dataViewId is null', async () => {
     const result = await createSourcererDataView({
-      body: { patternList: [] },
       dataViewService: {} as unknown as jest.Mocked<DataViewsServicePublic>,
-      dataViewId: null,
+      defaultDetails: { dataViewId: null, patternList: [] },
+      alertDetails: {},
+      attackDetails: {},
     });
 
     expect(result).toEqual(undefined);
@@ -43,9 +45,9 @@ describe('createSourcererDataView', () => {
       } as unknown as jest.Mocked<DataViewsServicePublic>;
 
       const result = await createSourcererDataView({
-        body: { patternList },
         dataViewService,
-        dataViewId: 'dataViewId',
+        defaultDetails: { dataViewId: 'dataViewId', patternList },
+        alertDetails: {},
       });
 
       expect(mockCreateAndSave).toHaveBeenCalledWith(
@@ -100,9 +102,9 @@ describe('createSourcererDataView', () => {
       } as unknown as jest.Mocked<DataViewsServicePublic>;
 
       const result = await createSourcererDataView({
-        body: { patternList },
         dataViewService,
-        dataViewId: 'dataViewId',
+        defaultDetails: { dataViewId: 'dataViewId', patternList },
+        alertDetails: {},
       });
 
       expect(mockUpdateSavedObject).toHaveBeenCalledWith({
@@ -151,9 +153,9 @@ describe('createSourcererDataView', () => {
       } as unknown as jest.Mocked<DataViewsServicePublic>;
 
       const result = await createSourcererDataView({
-        body: { patternList },
         dataViewService,
-        dataViewId: 'dataViewId',
+        defaultDetails: { dataViewId: 'dataViewId', patternList },
+        alertDetails: {},
       });
 
       expect(mockUpdateSavedObject).toHaveBeenCalledWith({
@@ -208,11 +210,12 @@ describe('createSourcererDataView', () => {
       } as unknown as jest.Mocked<DataViewsServicePublic>;
 
       const result = await createSourcererDataView({
-        body: { patternList },
         dataViewService,
-        dataViewId: 'dataViewId',
-        alertDataViewId: 'alertDataViewId',
-        signalIndexName: 'signalIndexName',
+        defaultDetails: { dataViewId: 'dataViewId', patternList },
+        alertDetails: {
+          dataViewId: 'alertDataViewId',
+          indexName: 'signalIndexName',
+        },
       });
 
       expect(mockCreateAndSave).toHaveBeenCalledWith(
@@ -272,10 +275,9 @@ describe('createSourcererDataView', () => {
       } as unknown as jest.Mocked<DataViewsServicePublic>;
 
       const result = await createSourcererDataView({
-        body: { patternList },
         dataViewService,
-        dataViewId: 'dataViewId',
-        alertDataViewId: 'alertsDataViewId',
+        defaultDetails: { dataViewId: 'dataViewId', patternList },
+        alertDetails: { dataViewId: 'alertsDataViewId' },
       });
 
       expect(mockUpdateSavedObject).toHaveBeenCalledWith({
@@ -305,6 +307,78 @@ describe('createSourcererDataView', () => {
           id: 'alertsDataViewId',
           patternList: [],
           title: '',
+        },
+      });
+    });
+  });
+
+  describe('attacks data view', () => {
+    it('should create new attacks data view if it does not exist', async () => {
+      const patternList = ['index1', 'index2'];
+
+      const mockCreateAndSave = jest.fn();
+      const dataViewService = {
+        getIdsWithTitle: jest.fn().mockReturnValue([
+          {
+            id: 'dataViewId',
+            title: 'dataViewTitle',
+          },
+        ]),
+        createAndSave: mockCreateAndSave.mockReturnValue({
+          id: 'attackDataViewId',
+          title: 'index1,index2',
+        }),
+        getExistingIndices: jest.fn(),
+        get: jest.fn().mockReturnValue({
+          id: 'dataViewId',
+          title: 'dataViewTitle',
+        }),
+        updateSavedObject: jest.fn(),
+      } as unknown as jest.Mocked<DataViewsServicePublic>;
+
+      const result = await createSourcererDataView({
+        dataViewService,
+        defaultDetails: { dataViewId: 'dataViewId', patternList },
+        alertDetails: {},
+        attackDetails: {
+          dataViewId: 'attackDataViewId',
+          patternList: ['attackIndexName', 'alertIndexName'],
+        },
+      });
+
+      expect(mockCreateAndSave).toHaveBeenCalledWith(
+        {
+          allowNoIndex: true,
+          id: 'attackDataViewId',
+          title: 'alertIndexName,attackIndexName',
+          timeFieldName: DEFAULT_TIME_FIELD,
+          name: DEFAULT_SECURITY_ATTACK_DATA_VIEW,
+          managed: true,
+        },
+        true
+      );
+      expect(result).toEqual({
+        defaultDataView: {
+          id: 'dataViewId',
+          patternList: undefined,
+          title: 'index1,index2',
+        },
+        kibanaDataViews: [
+          {
+            id: 'dataViewId',
+            patternList: undefined,
+            title: 'index1,index2',
+          },
+        ],
+        alertDataView: {
+          id: '',
+          patternList: [],
+          title: '',
+        },
+        attackDataView: {
+          id: 'attackDataViewId',
+          patternList: ['index1', 'index2'],
+          title: 'index1,index2',
         },
       });
     });

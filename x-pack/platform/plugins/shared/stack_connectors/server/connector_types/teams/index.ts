@@ -10,8 +10,7 @@ import { isString } from 'lodash';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { pipe } from 'fp-ts/pipeable';
 import { map, getOrElse } from 'fp-ts/Option';
 import type {
@@ -46,20 +45,22 @@ export type TeamsConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
 
 // secrets definition
 
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
+export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 
 const secretsSchemaProps = {
-  webhookUrl: schema.string(),
+  webhookUrl: z.string(),
 };
-const SecretsSchema = schema.object(secretsSchemaProps);
+const SecretsSchema = z.object(secretsSchemaProps).strict();
 
 // params definition
 
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+export type ActionParamsType = z.infer<typeof ParamsSchema>;
 
-const ParamsSchema = schema.object({
-  message: schema.string({ minLength: 1 }),
-});
+const ParamsSchema = z
+  .object({
+    message: z.string().min(1),
+  })
+  .strict();
 
 export const ConnectorTypeId = '.teams';
 // connector type definition
@@ -76,7 +77,7 @@ export function getConnectorType(): TeamsConnectorType {
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
       secrets: {
         schema: SecretsSchema,
         customValidator: validateConnectorTypeConfig,

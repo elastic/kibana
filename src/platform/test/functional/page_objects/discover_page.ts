@@ -478,6 +478,15 @@ export class DiscoverPageObject extends FtrService {
     return await this.find.byClassName('monaco-editor');
   }
 
+  public async expectDocTableToBeLoaded() {
+    const renderComplete = await this.testSubjects.getAttribute(
+      'discoverDocTable',
+      'data-render-complete'
+    );
+
+    expect(renderComplete).to.be('true');
+  }
+
   public async findFieldByNameOrValueInDocViewer(name: string) {
     await this.retry.waitForWithTimeout('field search input value', 5000, async () => {
       const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
@@ -801,6 +810,7 @@ export class DiscoverPageObject extends FtrService {
       await this.fieldEditor.setPopularity(popularity);
     }
     await this.fieldEditor.save();
+    await this.fieldEditor.waitUntilClosed();
     await this.header.waitUntilLoadingHasFinished();
   }
 

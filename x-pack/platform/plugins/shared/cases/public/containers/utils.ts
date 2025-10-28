@@ -140,19 +140,24 @@ export const createUpdateSuccessToaster = (
 
   if (
     valueToUpdateIsSettings(key, value) &&
-    ((value?.syncAlerts && caseHasAlerts) || value?.extractObservables)
+    value?.syncAlerts &&
+    caseHasAlerts &&
+    caseBeforeUpdate.settings.syncAlerts !== value?.syncAlerts
   ) {
-    if (value?.extractObservables !== caseBeforeUpdate.settings.extractObservables) {
-      return {
-        ...toast,
-        title: i18n.EXTRACT_OBSERVABLES(caseAfterUpdate.title),
-      };
-    } else {
-      return {
-        ...toast,
-        title: i18n.SYNC_CASE(caseAfterUpdate.title),
-      };
-    }
+    return {
+      ...toast,
+      title: i18n.SYNC_CASE(caseAfterUpdate.title),
+    };
+  }
+
+  if (
+    valueToUpdateIsSettings(key, value) &&
+    caseBeforeUpdate.settings.extractObservables !== value?.extractObservables
+  ) {
+    return {
+      ...toast,
+      title: i18n.EXTRACT_OBSERVABLES(caseAfterUpdate.title),
+    };
   }
 
   if (valueToUpdateIsStatus(key, value) && caseHasAlerts && caseBeforeUpdate.settings.syncAlerts) {

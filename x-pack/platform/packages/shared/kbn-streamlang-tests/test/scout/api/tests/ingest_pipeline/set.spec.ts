@@ -158,10 +158,18 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
-      const docs = [{ attributes: { status: 'active' } }];
-      await expect(testBed.ingest('some-index', docs, processors)).rejects.toThrowError(
-        '[value] required property is missing'
+      expect(() => transpile(streamlangDSL)).toThrowError(
+        JSON.stringify(
+          [
+            {
+              code: 'custom',
+              message: 'Set processor must have either value or copy_from, but not both.',
+              path: ['steps', 0, 'value', 'copy_from'],
+            },
+          ],
+          null,
+          2
+        )
       );
     });
 
@@ -177,10 +185,18 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
-      const docs = [{ attributes: { status: 'active' } }];
-      await expect(testBed.ingest('some-index', docs, processors)).rejects.toThrowError(
-        '[copy_from] cannot set both `copy_from` and `value` in the same processor'
+      expect(() => transpile(streamlangDSL)).toThrowError(
+        JSON.stringify(
+          [
+            {
+              code: 'custom',
+              message: 'Set processor must have either value or copy_from, but not both.',
+              path: ['steps', 0, 'value', 'copy_from'],
+            },
+          ],
+          null,
+          2
+        )
       );
     });
   }

@@ -35,6 +35,12 @@
       "end": {
         "type": "date"
       },
+      "initiator": {
+        "type": "keyword"
+      },
+      "initiatorId": {
+        "type": "keyword"
+      },
       "rule": {
         "properties": {
           "alertTypeId": {
@@ -637,6 +643,9 @@
             "type": "keyword"
           },
           "value": {
+            "type": "keyword"
+          },
+          "description": {
             "type": "keyword"
           }
         },

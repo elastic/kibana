@@ -8,7 +8,6 @@
 import { each, map, some, uniq } from 'lodash';
 import { containsDynamicQuery } from '@kbn/osquery-plugin/common/utils/replace_params_query';
 import { requiredOptional } from '@kbn/zod-helpers';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { ResponseActionAlerts } from './types';
 import type { SetupPlugins } from '../../../plugin_contract';
@@ -33,7 +32,7 @@ export const osqueryResponseAction = (
 
   const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
   // Extract space information from the first alert (all alerts should be from the same space)
-  let spaceId = alerts[0]?.kibana?.space_ids?.[0];
+  const spaceId = alerts[0]?.kibana?.space_ids?.[0];
 
   const processResponseActionClientError = (err: Error, endpointIds: string[]): Promise<void> => {
     logger.error(
@@ -45,18 +44,13 @@ export const osqueryResponseAction = (
     return Promise.resolve();
   };
 
-  if (endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    if (!spaceId) {
-      const ruleId = alerts[0].kibana.alert?.rule.uuid;
-      const ruleName = alerts[0].kibana.alert?.rule.name;
-      logger.error(
-        `Unable to identify the space ID from alert data ('kibana.space_ids') for rule [${ruleName}][${ruleId}]`
-      );
-      return;
-    }
-  } else {
-    // force the space to `default` when space awareness is not enabled
-    spaceId = DEFAULT_SPACE_ID;
+  if (!spaceId) {
+    const ruleId = alerts[0].kibana.alert?.rule.uuid;
+    const ruleName = alerts[0].kibana.alert?.rule.name;
+    logger.error(
+      `Unable to identify the space ID from alert data ('kibana.space_ids') for rule [${ruleName}][${ruleId}]`
+    );
+    return;
   }
 
   if (!containsDynamicQueries) {

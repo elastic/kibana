@@ -11,8 +11,8 @@ import { type CustomPaletteState } from '@kbn/charts-plugin/common';
 import { type PaletteOutput, CUSTOM_PALETTE } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { type SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getFormatService, getPaletteService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 

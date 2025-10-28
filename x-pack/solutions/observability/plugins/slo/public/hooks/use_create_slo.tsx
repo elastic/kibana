@@ -14,8 +14,8 @@ import {
   type CreateSLOResponse,
   type FindSLOResponse,
 } from '@kbn/slo-schema';
-import type { QueryKey } from '@tanstack/react-query';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryKey } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { EuiLink } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -8,11 +8,88 @@
  */
 
 import type { MutableRefObject } from 'react';
-import { useCallback, useRef, useState, useLayoutEffect } from 'react';
+import { useCallback, useRef, useState, useLayoutEffect, useMemo } from 'react';
 
 import type { MenuItem } from '../../types';
 import { MAX_MENU_ITEMS } from '../constants';
 import { getStyleProperty } from '../utils/get_style_property';
+import { useRafDebouncedCallback } from './use_raf_debounced';
+
+interface ResponsiveMenuState {
+  primaryMenuRef: MutableRefObject<HTMLElement | null>;
+  visibleMenuItems: MenuItem[];
+  overflowMenuItems: MenuItem[];
+}
+
+/**
+ * Custom hook for handling responsive menu behavior with dynamic height measurement
+ * @param isCollapsed - Whether the side nav is collapsed
+ * @param items - Navigation items
+ * @returns Object with menu ref and partitioned menu items
+ */
+export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
+  const primaryMenuRef = useRef<HTMLElement | null>(null);
+  const heightsCacheRef = useRef<number[]>([]);
+
+  const [visibleCount, setVisibleCount] = useState<number>(items.length);
+
+  const visibleMenuItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
+  const overflowMenuItems = useMemo(() => items.slice(visibleCount), [items, visibleCount]);
+  const stableItemsReference = useStableItemsReference(items);
+
+  const recalculateMenuLayout = useCallback(() => {
+    if (!primaryMenuRef.current) return;
+
+    // Primary menu
+    const menu = primaryMenuRef.current;
+    const menuHeight = menu.clientHeight;
+
+    // 1. Cache the heights of all children
+    cacheHeights(heightsCacheRef, menu, stableItemsReference);
+
+    if (heightsCacheRef.current.length === 0) return;
+
+    // Primary menu items
+    const childrenHeights = heightsCacheRef.current;
+    const childrenGap = getStyleProperty(menu, 'gap');
+
+    // 2. Calculate the number of visible menu items
+    const nextVisibleCount = countVisibleItems(childrenHeights, childrenGap, menuHeight);
+
+    // 3. Update the visible count if needed
+    setVisibleCount(nextVisibleCount);
+  }, [stableItemsReference]);
+
+  const [scheduleRecalc, cancelRecalc] = useRafDebouncedCallback(recalculateMenuLayout);
+
+  useLayoutEffect(() => {
+    // Invalidate the cache when items change
+    setVisibleCount(stableItemsReference.length);
+    heightsCacheRef.current = [];
+
+    const observer = new ResizeObserver(() => {
+      scheduleRecalc();
+    });
+
+    if (primaryMenuRef.current) {
+      observer.observe(primaryMenuRef.current);
+    }
+
+    // Initial calculation
+    scheduleRecalc();
+
+    return () => {
+      observer.disconnect();
+      cancelRecalc();
+    };
+  }, [isCollapsed, stableItemsReference, scheduleRecalc, cancelRecalc]);
+
+  return {
+    primaryMenuRef,
+    visibleMenuItems,
+    overflowMenuItems,
+  };
+}
 
 /**
  * Utility function to cache the heights of the menu items in a ref.
@@ -80,72 +157,35 @@ const countVisibleItems = (heights: number[], gap: number, menuHeight: number): 
   return initialVisibleCount;
 };
 
-interface ResponsiveMenuState {
-  primaryMenuRef: MutableRefObject<HTMLElement | null>;
-  visibleMenuItems: MenuItem[];
-  overflowMenuItems: MenuItem[];
-}
-
 /**
- * Custom hook for handling responsive menu behavior with dynamic height measurement
- * @param isCollapsed - Whether the side nav is collapsed
- * @param items - Navigation items
- * @returns Object with menu ref and partitioned menu items
+ * Get a stable reference to the items array that changes only when we need to recalculate the height.
+ * @param items - menu items
  */
-export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
-  const primaryMenuRef = useRef<HTMLElement | null>(null);
-  const heightsCacheRef = useRef<number[]>([]);
+const useStableItemsReference = (items: MenuItem[]): MenuItem[] => {
+  const ref = useRef<MenuItem[]>(items);
+  const out = haveSameHeightSignature(ref.current, items) ? ref.current : items;
 
-  const [visibleMenuItems, setVisibleMenuItems] = useState<MenuItem[]>(items);
-  const [overflowMenuItems, setOverflowMenuItems] = useState<MenuItem[]>([]);
-
-  const recalculateMenuLayout = useCallback(() => {
-    if (!primaryMenuRef.current) return;
-
-    // Primary menu
-    const menu = primaryMenuRef.current;
-    const menuHeight = menu.clientHeight;
-
-    // 1. Cache the heights of all children
-    cacheHeights(heightsCacheRef, menu, items);
-
-    if (heightsCacheRef.current.length === 0) return;
-
-    // Primary menu items
-    const childrenHeights = heightsCacheRef.current;
-    const childrenGap = getStyleProperty(menu, 'gap');
-
-    // 2. Calculate the number of visible menu items
-    const visibleCount = countVisibleItems(childrenHeights, childrenGap, menuHeight);
-
-    // 3. Update the visible and overflow menu items
-    setVisibleMenuItems(items.slice(0, visibleCount));
-    setOverflowMenuItems(items.slice(visibleCount));
+  // don’t write to a ref during render
+  useLayoutEffect(() => {
+    if (!haveSameHeightSignature(ref.current, items)) {
+      ref.current = items;
+    }
   }, [items]);
 
-  useLayoutEffect(() => {
-    setVisibleMenuItems(items);
-    setOverflowMenuItems([]);
+  return out;
+};
 
-    // Invalidate the cache when items change
-    heightsCacheRef.current = [];
-
-    const observer = new ResizeObserver(recalculateMenuLayout);
-
-    if (primaryMenuRef.current) {
-      observer.observe(primaryMenuRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [isCollapsed, items, recalculateMenuLayout]);
-
-  useLayoutEffect(() => {
-    recalculateMenuLayout();
-  }, [isCollapsed, recalculateMenuLayout]);
-
-  return {
-    primaryMenuRef,
-    visibleMenuItems,
-    overflowMenuItems,
-  };
-}
+/**
+ * Precheck to see if the item's height might have changed and if we need to do a full recalculation.
+ * @param prev - prev menu items
+ * @param next - next menu items
+ */
+const haveSameHeightSignature = (prev: MenuItem[], next: MenuItem[]): boolean => {
+  if (prev === next) return true;
+  if (prev.length !== next.length) return false;
+  for (let i = 0; i < prev.length; i++) {
+    // Only compare properties that might affect height
+    if (prev[i].label !== next[i].label) return false;
+  }
+  return true;
+};

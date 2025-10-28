@@ -35,10 +35,10 @@ export const useStreamFeatures = (definition: Streams.all.Definition) => {
   );
 
   return {
-    refresh,
+    refreshFeatures: refresh,
     features,
     featuresByName,
-    loading,
+    featuresLoading: loading,
     error,
   };
 };

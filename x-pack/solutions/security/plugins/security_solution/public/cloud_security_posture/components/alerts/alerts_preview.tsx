@@ -64,12 +64,10 @@ export const AlertsPreview = ({
   alertsData,
   isPreviewMode,
   openDetailsPanel,
-  isLinkEnabled,
 }: {
   alertsData: ParsedAlertsData;
-  isPreviewMode?: boolean;
+  isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isLinkEnabled: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -101,27 +99,26 @@ export const AlertsPreview = ({
 
   const hasNonClosedAlerts = totalAlertsCount > 0;
 
-  const goToEntityInsightTab = useCallback(() => {
-    openDetailsPanel({
-      tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      subTab: CspInsightLeftPanelSubTab.ALERTS,
-    });
-  }, [openDetailsPanel]);
+  const goToEntityInsightTab = useCallback(
+    () =>
+      openDetailsPanel({
+        tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+        subTab: CspInsightLeftPanelSubTab.ALERTS,
+      }),
+    [openDetailsPanel]
+  );
 
   const link = useMemo(
-    () =>
-      isLinkEnabled
-        ? {
-            callback: goToEntityInsightTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.alerts.alertsTooltip"
-                defaultMessage="Show all alerts"
-              />
-            ),
-          }
-        : undefined,
-    [isLinkEnabled, goToEntityInsightTab]
+    () => ({
+      callback: goToEntityInsightTab,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.alerts.alertsTooltip"
+          defaultMessage="Show all alerts"
+        />
+      ),
+    }),
+    [goToEntityInsightTab]
   );
   return (
     <ExpandablePanel

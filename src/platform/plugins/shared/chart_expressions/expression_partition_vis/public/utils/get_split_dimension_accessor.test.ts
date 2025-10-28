@@ -12,7 +12,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createMockVisData } from '../mocks';
 import { getSplitDimensionAccessor } from './get_split_dimension_accessor';
 import type { BucketColumns } from '../../common/types';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 
 describe('getSplitDimensionAccessor', () => {
   const visData = createMockVisData();

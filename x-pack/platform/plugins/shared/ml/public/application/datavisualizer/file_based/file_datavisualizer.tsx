@@ -140,6 +140,7 @@ export const FileDataVisualizerPage: FC = () => {
             />
           </MlPageHeader>
           <FileDataVisualizer
+            location={'ml-file-data-visualizer'}
             getAdditionalLinks={getAdditionalLinks}
             resultLinks={resultLinks ?? undefined}
           />

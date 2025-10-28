@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { createChatService, type ChatService, type ChatConverseParams } from './chat_service';
+export { createChatService } from './chat_service';
+export type { ChatService, ChatConverseParams } from './types';

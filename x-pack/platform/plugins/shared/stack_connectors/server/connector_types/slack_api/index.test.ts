@@ -62,9 +62,18 @@ describe('validate config', () => {
   test('should throw error when config are invalid', () => {
     expect(() => {
       validateConfig(connectorType, { message: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [message]: definition for this key is missing"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type config: [
+        {
+          \\"code\\": \\"unrecognized_keys\\",
+          \\"keys\\": [
+            \\"message\\"
+          ],
+          \\"path\\": [],
+          \\"message\\": \\"Unrecognized key(s) in object: 'message'\\"
+        }
+      ]"
+    `);
   });
 
   test('should validate when config are valid', () => {
@@ -79,19 +88,185 @@ describe('validate params', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: types that failed validation:
-      - [0.subAction]: expected value to equal [validChannelId]
-      - [1.subAction]: expected value to equal [postMessage]
-      - [2.subAction]: expected value to equal [postBlockkit]"
+      "error validating action params: [
+        {
+          \\"code\\": \\"invalid_union\\",
+          \\"unionErrors\\": [
+            {
+              \\"issues\\": [
+                {
+                  \\"code\\": \\"invalid_literal\\",
+                  \\"expected\\": \\"validChannelId\\",
+                  \\"path\\": [
+                    \\"subAction\\"
+                  ],
+                  \\"message\\": \\"Invalid literal value, expected \\\\\\"validChannelId\\\\\\"\\"
+                },
+                {
+                  \\"code\\": \\"invalid_type\\",
+                  \\"expected\\": \\"object\\",
+                  \\"received\\": \\"undefined\\",
+                  \\"path\\": [
+                    \\"subActionParams\\"
+                  ],
+                  \\"message\\": \\"Required\\"
+                }
+              ],
+              \\"name\\": \\"ZodError\\"
+            },
+            {
+              \\"issues\\": [
+                {
+                  \\"code\\": \\"invalid_literal\\",
+                  \\"expected\\": \\"postMessage\\",
+                  \\"path\\": [
+                    \\"subAction\\"
+                  ],
+                  \\"message\\": \\"Invalid literal value, expected \\\\\\"postMessage\\\\\\"\\"
+                },
+                {
+                  \\"code\\": \\"invalid_type\\",
+                  \\"expected\\": \\"object\\",
+                  \\"received\\": \\"undefined\\",
+                  \\"path\\": [
+                    \\"subActionParams\\"
+                  ],
+                  \\"message\\": \\"Required\\"
+                }
+              ],
+              \\"name\\": \\"ZodError\\"
+            },
+            {
+              \\"issues\\": [
+                {
+                  \\"code\\": \\"invalid_literal\\",
+                  \\"expected\\": \\"postBlockkit\\",
+                  \\"path\\": [
+                    \\"subAction\\"
+                  ],
+                  \\"message\\": \\"Invalid literal value, expected \\\\\\"postBlockkit\\\\\\"\\"
+                },
+                {
+                  \\"code\\": \\"invalid_type\\",
+                  \\"expected\\": \\"object\\",
+                  \\"received\\": \\"undefined\\",
+                  \\"path\\": [
+                    \\"subActionParams\\"
+                  ],
+                  \\"message\\": \\"Required\\"
+                }
+              ],
+              \\"name\\": \\"ZodError\\"
+            }
+          ],
+          \\"path\\": [],
+          \\"message\\": \\"Invalid input\\"
+        }
+      ]"
     `);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: types that failed validation:
-      - [0.subAction]: expected value to equal [validChannelId]
-      - [1.subAction]: expected value to equal [postMessage]
-      - [2.subAction]: expected value to equal [postBlockkit]"
+      "error validating action params: [
+        {
+          \\"code\\": \\"invalid_union\\",
+          \\"unionErrors\\": [
+            {
+              \\"issues\\": [
+                {
+                  \\"code\\": \\"invalid_literal\\",
+                  \\"expected\\": \\"validChannelId\\",
+                  \\"path\\": [
+                    \\"subAction\\"
+                  ],
+                  \\"message\\": \\"Invalid literal value, expected \\\\\\"validChannelId\\\\\\"\\"
+                },
+                {
+                  \\"code\\": \\"invalid_type\\",
+                  \\"expected\\": \\"object\\",
+                  \\"received\\": \\"undefined\\",
+                  \\"path\\": [
+                    \\"subActionParams\\"
+                  ],
+                  \\"message\\": \\"Required\\"
+                },
+                {
+                  \\"code\\": \\"unrecognized_keys\\",
+                  \\"keys\\": [
+                    \\"message\\"
+                  ],
+                  \\"path\\": [],
+                  \\"message\\": \\"Unrecognized key(s) in object: 'message'\\"
+                }
+              ],
+              \\"name\\": \\"ZodError\\"
+            },
+            {
+              \\"issues\\": [
+                {
+                  \\"code\\": \\"invalid_literal\\",
+                  \\"expected\\": \\"postMessage\\",
+                  \\"path\\": [
+                    \\"subAction\\"
+                  ],
+                  \\"message\\": \\"Invalid literal value, expected \\\\\\"postMessage\\\\\\"\\"
+                },
+                {
+                  \\"code\\": \\"invalid_type\\",
+                  \\"expected\\": \\"object\\",
+                  \\"received\\": \\"undefined\\",
+                  \\"path\\": [
+                    \\"subActionParams\\"
+                  ],
+                  \\"message\\": \\"Required\\"
+                },
+                {
+                  \\"code\\": \\"unrecognized_keys\\",
+                  \\"keys\\": [
+                    \\"message\\"
+                  ],
+                  \\"path\\": [],
+                  \\"message\\": \\"Unrecognized key(s) in object: 'message'\\"
+                }
+              ],
+              \\"name\\": \\"ZodError\\"
+            },
+            {
+              \\"issues\\": [
+                {
+                  \\"code\\": \\"invalid_literal\\",
+                  \\"expected\\": \\"postBlockkit\\",
+                  \\"path\\": [
+                    \\"subAction\\"
+                  ],
+                  \\"message\\": \\"Invalid literal value, expected \\\\\\"postBlockkit\\\\\\"\\"
+                },
+                {
+                  \\"code\\": \\"invalid_type\\",
+                  \\"expected\\": \\"object\\",
+                  \\"received\\": \\"undefined\\",
+                  \\"path\\": [
+                    \\"subActionParams\\"
+                  ],
+                  \\"message\\": \\"Required\\"
+                },
+                {
+                  \\"code\\": \\"unrecognized_keys\\",
+                  \\"keys\\": [
+                    \\"message\\"
+                  ],
+                  \\"path\\": [],
+                  \\"message\\": \\"Unrecognized key(s) in object: 'message'\\"
+                }
+              ],
+              \\"name\\": \\"ZodError\\"
+            }
+          ],
+          \\"path\\": [],
+          \\"message\\": \\"Invalid input\\"
+        }
+      ]"
     `);
   });
 
@@ -142,9 +317,19 @@ describe('validate secrets', () => {
   test('should validate and throw error when secrets is empty', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [token]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"token\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
   });
 
   test('should validate and pass when secrets is valid', () => {
@@ -160,9 +345,19 @@ describe('validate secrets', () => {
   test('should validate and throw error when secrets is invalid', () => {
     expect(() => {
       validateSecrets(connectorType, { token: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [token]: expected value of type [string] but got [number]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"number\\",
+          \\"path\\": [
+            \\"token\\"
+          ],
+          \\"message\\": \\"Expected string, received number\\"
+        }
+      ]"
+    `);
   });
 
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {

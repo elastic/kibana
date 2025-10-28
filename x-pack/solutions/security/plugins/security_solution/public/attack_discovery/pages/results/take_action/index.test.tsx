@@ -107,7 +107,7 @@ describe('TakeAction', () => {
     });
 
     mockUseAssistantAvailability.mockReturnValue({
-      hasSearchAILakeConfigurations: false, // AI for SOC is not configured
+      hasSearchAILakeConfigurations: false, // EASE is not configured
     });
   });
 
@@ -312,7 +312,7 @@ describe('TakeAction', () => {
     });
   });
 
-  describe('when AI for SOC is the configured project', () => {
+  describe('when EASE is the configured project', () => {
     let alert: ReturnType<typeof getMockAttackDiscoveryAlerts>[0];
     let setSelectedAttackDiscoveries: jest.Mock;
 
@@ -326,7 +326,7 @@ describe('TakeAction', () => {
       });
 
       mockUseAssistantAvailability.mockReturnValue({
-        hasSearchAILakeConfigurations: true, // AI for SOC IS configured
+        hasSearchAILakeConfigurations: true, // EASE IS configured
       });
     });
 

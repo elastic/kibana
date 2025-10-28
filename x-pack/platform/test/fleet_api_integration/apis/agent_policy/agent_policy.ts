@@ -2143,6 +2143,7 @@ export default function (providerContext: FtrProviderContext) {
         await generateAgent(providerContext, 'healhty', 'agent-2', policyWithAgents.id, '8.16.1', {
           state: 'UPG_FAILED',
           target_version: '8.16.3',
+          action_id: 'test-action-automatic',
         });
         await generateAgent(
           providerContext,
@@ -2151,6 +2152,20 @@ export default function (providerContext: FtrProviderContext) {
           policyWithAgents.id,
           '8.16.1'
         );
+        await es.index({
+          index: '.fleet-actions',
+          refresh: 'wait_for',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            expiration: new Date().toISOString(),
+            agents: ['agent-2'],
+            action_id: 'test-action-automatic',
+            data: {},
+            is_automatic: true,
+            type: 'UPGRADE',
+          },
+        });
+
         const { body } = await supertest
           .get(`/api/fleet/agent_policies/${policyWithAgents.id}/auto_upgrade_agents_status`)
           .set('kbn-xsrf', 'xxx')
@@ -2167,6 +2182,7 @@ export default function (providerContext: FtrProviderContext) {
               agents: 0,
               failedUpgradeAgents: 1,
               version: '8.16.3',
+              failedUpgradeActionIds: ['test-action-automatic'],
             },
           ],
           totalAgents: 2,

@@ -11,7 +11,7 @@ import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
+import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../common/constants';
 import { selectDataViewAsync } from '../actions';
 import type { CoreStart } from '@kbn/core/public';
@@ -67,13 +67,16 @@ describe('createInitListener', () => {
       kibanaDataViews: [],
     } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
 
-    listener = createInitListener({
-      dataViews: mockDataViewsService,
-      http,
-      application,
-      uiSettings,
-      spaces,
-    });
+    listener = createInitListener(
+      {
+        dataViews: mockDataViewsService,
+        http,
+        application,
+        uiSettings,
+        spaces,
+      },
+      false
+    );
   });
 
   it('should load the data views and dispatch further actions', async () => {

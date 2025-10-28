@@ -8,7 +8,6 @@
  */
 
 import type {
-  ChromeNavLink,
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
   RecentlyAccessedDefinition,
@@ -27,6 +26,8 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 import { isActiveFromUrl } from '@kbn/shared-ux-chrome-navigation/src/utils';
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 import type { PanelStateManager } from './panel_state_manager';
+
+const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
 
 export interface NavigationItems {
   logoItem: SideNavLogo;
@@ -59,9 +60,6 @@ export interface NavigationItems {
  */
 export const toNavigationItems = (
   navigationTree: NavigationTreeDefinitionUI,
-  // navLinks and activeNodes are not used yet, but are passed for future use
-  // they will be needed for isActive state management and possibly for rendering links
-  navLinks: Readonly<ChromeNavLink[]>,
   activeNodes: ChromeProjectNavigationNode[][],
   panelStateManager: PanelStateManager
 ): NavigationItems => {
@@ -322,8 +320,10 @@ export const toNavigationItems = (
     );
   }
 
-  // Check for duplicate icons
-  warnAboutDuplicateIcons(logoItem, primaryItems);
+  if (!SKIP_WARNINGS) {
+    warnAboutDuplicateIds(logoItem, primaryItems, footerItems);
+    warnAboutDuplicateIcons(logoItem, primaryItems, footerItems);
+  }
 
   return {
     logoItem,
@@ -376,6 +376,7 @@ function warnIfMissing<T extends { id: string }, K extends keyof T>(
 const warnedMessages = new Set<string>();
 let lastWarning = '';
 function warnOnce(message: string) {
+  if (SKIP_WARNINGS) return;
   if (!warnedMessages.has(message)) {
     warnedMessages.add(message);
   }
@@ -429,28 +430,82 @@ const isRecentlyAccessedDefinition = (
 const filterEmpty = <T,>(arr: Array<T | null | undefined>): T[] =>
   arr.filter((item) => item !== null && item !== undefined) as T[];
 
-function warnAboutDuplicateIcons(logoItem: SideNavLogo, primaryItems: MenuItem[]) {
-  // Collect all items with icons
-  const itemsWithIcons = [logoItem, ...primaryItems]
-    .filter((item) => item.iconType && item.iconType !== FALLBACK_ICON)
-    .map((item) => ({ id: item.id, icon: String(item.iconType) }));
-
-  // Group items by icon and warn about duplicates
-  const iconGroups = new Map<string, string[]>();
-  itemsWithIcons.forEach(({ id, icon }) => {
-    const items = iconGroups.get(icon) || [];
-    iconGroups.set(icon, [...items, id]);
+/**
+ * Generic function to detect and warn about duplicate values in navigation items.
+ * @param values - Array of values to check for duplicates
+ * @param formatWarning - Function to format the warning message for duplicates
+ */
+function warnAboutDuplicates(
+  values: string[],
+  formatWarning: (value: string, count: number) => string
+) {
+  const valueGroups = new Map<string, number>();
+  values.forEach((value) => {
+    valueGroups.set(value, (valueGroups.get(value) || 0) + 1);
   });
 
-  iconGroups.forEach((itemIds, iconType) => {
-    if (itemIds.length > 1) {
-      warnOnce(
-        `Icon "${iconType}" is used by multiple navigation items: ${itemIds.join(
-          ', '
-        )}. Consider using unique icons for better UX.`
-      );
+  valueGroups.forEach((count, value) => {
+    if (count > 1) {
+      warnOnce(formatWarning(value, count));
     }
   });
+}
+
+function warnAboutDuplicateIcons(
+  logoItem: SideNavLogo,
+  primaryItems: MenuItem[],
+  footerItems: MenuItem[]
+) {
+  if (SKIP_WARNINGS) return;
+  // Collect all items with icons (only logo + primary items, excluding fallback)
+  const icons = [logoItem, ...primaryItems, ...footerItems]
+    .filter(
+      (item) =>
+        item.iconType && item.iconType !== FALLBACK_ICON && typeof item.iconType === 'string'
+    )
+    .map((item) => String(item.iconType));
+
+  warnAboutDuplicates(
+    icons,
+    (icon) =>
+      `Icon "${icon}" is used by multiple navigation items. Consider using unique icons for better UX.`
+  );
+}
+
+function warnAboutDuplicateIds(
+  logoItem: SideNavLogo,
+  primaryItems: MenuItem[],
+  footerItems: MenuItem[]
+) {
+  if (SKIP_WARNINGS) return;
+  // Collect all IDs from all items, including secondary menu items
+  let allIds: string[] = [logoItem.id];
+
+  // Helper to extract IDs from menu items including their secondary sections
+  const collectIds = (items: MenuItem[]) => {
+    items.forEach((item) => {
+      allIds.push(item.id);
+      if (item.sections) {
+        item.sections.forEach((section) => {
+          allIds.push(section.id);
+          section.items.forEach((secondaryItem) => {
+            allIds.push(secondaryItem.id);
+          });
+        });
+      }
+    });
+  };
+
+  collectIds(primaryItems);
+  collectIds(footerItems);
+
+  allIds = allIds.filter((id) => !id?.startsWith('node-')); // Filter out auto-generated IDs
+
+  warnAboutDuplicates(
+    allIds,
+    (id, count) =>
+      `ID "${id}" is used ${count} times in navigation items. Each navigation item must have a unique ID.`
+  );
 }
 
 const FALLBACK_ICON = 'broom' as const;

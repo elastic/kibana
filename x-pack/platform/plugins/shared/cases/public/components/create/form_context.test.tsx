@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, within, screen, act } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { useKibana, KibanaServices } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
@@ -101,7 +101,6 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useLicenseMock = useLicense as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
 const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
-const getConfigMock = KibanaServices.getConfig as jest.Mock;
 
 const sampleId = 'case-id';
 
@@ -226,13 +225,6 @@ describe('Create case', () => {
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
     useGetCategoriesMock.mockReturnValue({ isLoading: false, data: categories });
     useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability', 'cases']);
-    getConfigMock.mockReturnValue({
-      resilient: {
-        additionalFields: {
-          enabled: true,
-        },
-      },
-    });
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,

@@ -65,7 +65,6 @@ export const SplitButton = ({
     size,
     isDisabled: areButtonsDisabled || isMainButtonDisabled,
     isLoading: isLoading || isMainButtonLoading,
-    'data-icon': iconType,
     ...mainButtonProps,
     'data-test-subj': mainButtonProps['data-test-subj'],
   };
@@ -83,7 +82,6 @@ export const SplitButton = ({
       <EuiButtonIcon
         css={styles.secondaryButton}
         data-test-subj={mainButtonProps['data-test-subj'] + `-secondary-button`}
-        data-icon={secondaryButtonIcon}
         aria-label={secondaryButtonAriaLabel}
         title={secondaryButtonTitle}
         display="base"

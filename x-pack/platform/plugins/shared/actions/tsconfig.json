@@ -53,6 +53,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",

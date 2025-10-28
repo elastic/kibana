@@ -31,7 +31,7 @@ export const RISK_SCORE_GENERAL_SECTION = i18n.translate(
 export const RISK_SCORE_RETAINMENT_CHECKBOX = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.generalSection.retainmentCheckbox',
   {
-    defaultMessage: 'Retain previously calculated risk scores',
+    defaultMessage: 'Retain last calculated risk scores',
   }
 );
 
@@ -39,7 +39,7 @@ export const RISK_SCORE_RETAINMENT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.generalSection.retainmentTooltip',
   {
     defaultMessage:
-      'When checked, entities will retain their most recently computed risk score indefinitely until a new input (e.g., alert) causes the score to be recalculated. If unchecked, risk scores are reset to zero when no inputs are found.',
+      'When selected, entities keep their last calculated risk score until a new input (for example, an alert) triggers recalculation. When deselected, risk scores reset to zero if no new inputs are found.',
   }
 );
 

@@ -11,6 +11,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { ComparisonControlsProps } from './comparison_controls';
 import { ComparisonControls } from './comparison_controls';
 import type { DocumentDiffMode } from './types';
@@ -33,24 +34,26 @@ const renderComparisonControls = ({
     return (
       <>
         {isCompareActive && <span>Comparison active</span>}
-        <IntlProvider locale="en">
-          <ComparisonControls
-            isPlainRecord={isPlainRecord}
-            selectedDocIds={selectedDocIds}
-            showDiff={showDiff}
-            diffMode={diffMode}
-            showDiffDecorations={showDiffDecorations}
-            showMatchingValues={showMatchingValues}
-            showAllFields={showAllFields}
-            forceShowAllFields={forceShowAllFields}
-            setIsCompareActive={setIsCompareActive}
-            setShowDiff={setShowDiff}
-            setDiffMode={setDiffMode}
-            setShowDiffDecorations={setShowDiffDecorations}
-            setShowMatchingValues={setShowMatchingValues}
-            setShowAllFields={setShowAllFields}
-          />
-        </IntlProvider>
+        <EuiThemeProvider>
+          <IntlProvider locale="en">
+            <ComparisonControls
+              isPlainRecord={isPlainRecord}
+              selectedDocIds={selectedDocIds}
+              showDiff={showDiff}
+              diffMode={diffMode}
+              showDiffDecorations={showDiffDecorations}
+              showMatchingValues={showMatchingValues}
+              showAllFields={showAllFields}
+              forceShowAllFields={forceShowAllFields}
+              setIsCompareActive={setIsCompareActive}
+              setShowDiff={setShowDiff}
+              setDiffMode={setDiffMode}
+              setShowDiffDecorations={setShowDiffDecorations}
+              setShowMatchingValues={setShowMatchingValues}
+              setShowAllFields={setShowAllFields}
+            />
+          </IntlProvider>
+        </EuiThemeProvider>
       </>
     );
   };

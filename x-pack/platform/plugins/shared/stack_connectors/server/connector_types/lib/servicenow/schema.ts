@@ -5,211 +5,270 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { Coerced } from '../../../../common/lib';
 import { MAX_ADDITIONAL_FIELDS_LENGTH } from '../../../../common/servicenow/constants';
 import { validateRecordMaxKeys } from '../validators';
 import { DEFAULT_ALERTS_GROUPING_KEY } from './config';
 import { validateOtherFieldsKeys } from './validators';
 
 export const ExternalIncidentServiceConfigurationBase = {
-  apiUrl: schema.string(),
-  isOAuth: schema.boolean({ defaultValue: false }),
-  userIdentifierValue: schema.nullable(schema.string()), // required if isOAuth = true
-  clientId: schema.nullable(schema.string()), // required if isOAuth = true
-  jwtKeyId: schema.nullable(schema.string()), // required if isOAuth = true
+  apiUrl: z.string(),
+  isOAuth: z.boolean().default(false),
+  userIdentifierValue: z.string().nullable().default(null), // required if isOAuth = true
+  clientId: z.string().nullable().default(null), // required if isOAuth = true
+  jwtKeyId: z.string().nullable().default(null), // required if isOAuth = true
 };
 
 export const ExternalIncidentServiceConfiguration = {
   ...ExternalIncidentServiceConfigurationBase,
-  usesTableApi: schema.boolean({ defaultValue: true }),
+  usesTableApi: z.boolean().default(true),
 };
 
-export const ExternalIncidentServiceConfigurationBaseSchema = schema.object(
-  ExternalIncidentServiceConfigurationBase
-);
+export const ExternalIncidentServiceConfigurationBaseSchema = z
+  .object(ExternalIncidentServiceConfigurationBase)
+  .strict();
 
-export const ExternalIncidentServiceConfigurationSchema = schema.object(
-  ExternalIncidentServiceConfiguration
-);
+export const ExternalIncidentServiceConfigurationSchema = z
+  .object(ExternalIncidentServiceConfiguration)
+  .strict();
 
 export const ExternalIncidentServiceSecretConfiguration = {
-  password: schema.nullable(schema.string()), // required if isOAuth = false
-  username: schema.nullable(schema.string()), // required if isOAuth = false
-  clientSecret: schema.nullable(schema.string()), // required if isOAuth = true
-  privateKey: schema.nullable(schema.string()), // required if isOAuth = true
-  privateKeyPassword: schema.nullable(schema.string()),
+  password: z.string().nullable().default(null), // required if isOAuth = false
+  username: z.string().nullable().default(null), // required if isOAuth = false
+  clientSecret: z.string().nullable().default(null), // required if isOAuth = true
+  privateKey: z.string().nullable().default(null), // required if isOAuth = true
+  privateKeyPassword: z.string().nullable().default(null),
 };
 
-export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
-  ExternalIncidentServiceSecretConfiguration
-);
+export const ExternalIncidentServiceSecretConfigurationSchema = z
+  .object(ExternalIncidentServiceSecretConfiguration)
+  .strict();
 
-const CommentsSchema = schema.nullable(
-  schema.arrayOf(
-    schema.object({
-      comment: schema.string(),
-      commentId: schema.string(),
-    })
+const CommentsSchema = z
+  .array(
+    z
+      .object({
+        comment: z.string(),
+        commentId: z.string(),
+      })
+      .strict()
   )
-);
+  .nullable()
+  .default(null);
 
 const CommonAttributes = {
-  short_description: schema.string(),
-  description: schema.nullable(schema.string()),
-  externalId: schema.nullable(schema.string()),
-  category: schema.nullable(schema.string()),
-  subcategory: schema.nullable(schema.string()),
-  correlation_id: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
-  correlation_display: schema.nullable(schema.string()),
-  additional_fields: schema.nullable(
-    schema.recordOf(
-      schema.string({
-        validate: (value) => validateOtherFieldsKeys(value),
-      }),
-      schema.any(),
-      {
-        validate: (value) =>
-          validateRecordMaxKeys({
-            record: value,
-            maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
-            fieldName: 'additional_fields',
-          }),
-      }
-    )
+  short_description: z.string(),
+  description: z.string().nullable().default(null),
+  externalId: z.string().nullable().default(null),
+  category: z.string().nullable().default(null),
+  subcategory: z.string().nullable().default(null),
+  correlation_id: z.string().nullable().default(DEFAULT_ALERTS_GROUPING_KEY),
+  correlation_display: z.string().nullable().default(null),
+  additional_fields: Coerced(
+    z
+      .record(
+        z.string().superRefine((value, ctx) => {
+          validateOtherFieldsKeys(value, ctx);
+        }),
+        z.any()
+      )
+      .superRefine((val, ctx) =>
+        validateRecordMaxKeys({
+          record: val,
+          ctx,
+          maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
+          fieldName: 'additional_fields',
+        })
+      )
+      .nullable()
+      .default(null)
   ),
 };
 
 export const commonIncidentSchemaObjectProperties = Object.keys(CommonAttributes);
 
 // Schema for ServiceNow Incident Management (ITSM)
-export const ExecutorSubActionPushParamsSchemaITSM = schema.object({
-  incident: schema.object({
-    ...CommonAttributes,
-    severity: schema.nullable(schema.string()),
-    urgency: schema.nullable(schema.string()),
-    impact: schema.nullable(schema.string()),
-  }),
-  comments: CommentsSchema,
-});
+export const ExecutorSubActionPushParamsSchemaITSM = z
+  .object({
+    incident: z
+      .object({
+        ...CommonAttributes,
+        severity: z.string().nullable().default(null),
+        urgency: z.string().nullable().default(null),
+        impact: z.string().nullable().default(null),
+      })
+      .strict(),
+    comments: CommentsSchema,
+  })
+  .strict();
 
 // Schema for ServiceNow Security Incident Response (SIR)
-export const ExecutorSubActionPushParamsSchemaSIR = schema.object({
-  incident: schema.object({
-    ...CommonAttributes,
-    dest_ip: schema.oneOf(
-      [schema.nullable(schema.string()), schema.nullable(schema.arrayOf(schema.string()))],
-      { defaultValue: null }
-    ),
-    malware_hash: schema.oneOf(
-      [schema.nullable(schema.string()), schema.nullable(schema.arrayOf(schema.string()))],
-      { defaultValue: null }
-    ),
-    malware_url: schema.oneOf(
-      [schema.nullable(schema.string()), schema.nullable(schema.arrayOf(schema.string()))],
-      { defaultValue: null }
-    ),
-    source_ip: schema.oneOf(
-      [schema.nullable(schema.string()), schema.nullable(schema.arrayOf(schema.string()))],
-      { defaultValue: null }
-    ),
-    priority: schema.nullable(schema.string()),
-  }),
-  comments: CommentsSchema,
-});
+export const ExecutorSubActionPushParamsSchemaSIR = z
+  .object({
+    incident: z
+      .object({
+        ...CommonAttributes,
+        dest_ip: z
+          .union([
+            z.string().nullable().default(null),
+            z.array(z.string()).nullable().default(null),
+          ])
+          .default(null),
+        malware_hash: z
+          .union([
+            z.string().nullable().default(null),
+            z.array(z.string()).nullable().default(null),
+          ])
+          .default(null),
+        malware_url: z
+          .union([
+            z.string().nullable().default(null),
+            z.array(z.string()).nullable().default(null),
+          ])
+          .default(null),
+        source_ip: z
+          .union([
+            z.string().nullable().default(null),
+            z.array(z.string()).nullable().default(null),
+          ])
+          .default(null),
+        priority: z.string().nullable().default(null),
+      })
+      .strict(),
+    comments: CommentsSchema,
+  })
+  .strict();
 
 // Schema for ServiceNow ITOM
-export const ExecutorSubActionAddEventParamsSchema = schema.object({
-  source: schema.nullable(schema.string()),
-  event_class: schema.nullable(schema.string()),
-  resource: schema.nullable(schema.string()),
-  node: schema.nullable(schema.string()),
-  metric_name: schema.nullable(schema.string()),
-  type: schema.nullable(schema.string()),
-  severity: schema.nullable(schema.string()),
-  description: schema.nullable(schema.string()),
-  additional_info: schema.nullable(schema.string()),
-  message_key: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
-  time_of_event: schema.nullable(schema.string()),
-});
+export const ExecutorSubActionAddEventParamsSchema = z
+  .object({
+    source: z.string().nullable().default(null),
+    event_class: z.string().nullable().default(null),
+    resource: z.string().nullable().default(null),
+    node: z.string().nullable().default(null),
+    metric_name: z.string().nullable().default(null),
+    type: z.string().nullable().default(null),
+    severity: z.string().nullable().default(null),
+    description: z.string().nullable().default(null),
+    additional_info: z.string().nullable().default(null),
+    message_key: z.string().nullable().default(DEFAULT_ALERTS_GROUPING_KEY),
+    time_of_event: z.string().nullable().default(null),
+  })
+  .strict();
 
-export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
-  externalId: schema.string(),
-});
+export const ExecutorSubActionGetIncidentParamsSchema = z
+  .object({
+    externalId: z.string(),
+  })
+  .strict();
 
-export const ExecutorSubActionCloseIncidentParamsSchema = schema.object({
-  incident: schema.object({
-    externalId: schema.nullable(schema.string()),
-    correlation_id: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
-  }),
-});
+export const ExecutorSubActionCloseIncidentParamsSchema = z
+  .object({
+    incident: z
+      .object({
+        externalId: z.string().nullable().default(null),
+        correlation_id: z.string().default(DEFAULT_ALERTS_GROUPING_KEY).nullable(),
+      })
+      .strict(),
+  })
+  .strict();
 
 // Reserved for future implementation
-export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
-export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
-export const ExecutorSubActionGetChoicesParamsSchema = schema.object({
-  fields: schema.arrayOf(schema.string()),
-});
+export const ExecutorSubActionHandshakeParamsSchema = z.object({}).strict();
+export const ExecutorSubActionCommonFieldsParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetChoicesParamsSchema = z
+  .object({
+    fields: z.array(z.string()),
+  })
+  .strict();
 
 // Executor parameters for ServiceNow Incident Management (ITSM)
-export const ExecutorParamsSchemaITSM = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('getFields'),
-    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('getIncident'),
-    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('handshake'),
-    subActionParams: ExecutorSubActionHandshakeParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('pushToService'),
-    subActionParams: ExecutorSubActionPushParamsSchemaITSM,
-  }),
-  schema.object({
-    subAction: schema.literal('getChoices'),
-    subActionParams: ExecutorSubActionGetChoicesParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('closeIncident'),
-    subActionParams: ExecutorSubActionCloseIncidentParamsSchema,
-  }),
+export const ExecutorParamsSchemaITSM = z.discriminatedUnion('subAction', [
+  z
+    .object({
+      subAction: z.literal('getFields'),
+      subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('getIncident'),
+      subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('handshake'),
+      subActionParams: ExecutorSubActionHandshakeParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('pushToService'),
+      subActionParams: ExecutorSubActionPushParamsSchemaITSM,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('getChoices'),
+      subActionParams: ExecutorSubActionGetChoicesParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('closeIncident'),
+      subActionParams: ExecutorSubActionCloseIncidentParamsSchema,
+    })
+    .strict(),
 ]);
 
 // Executor parameters for ServiceNow Security Incident Response (SIR)
-export const ExecutorParamsSchemaSIR = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('getFields'),
-    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('getIncident'),
-    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('handshake'),
-    subActionParams: ExecutorSubActionHandshakeParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('pushToService'),
-    subActionParams: ExecutorSubActionPushParamsSchemaSIR,
-  }),
-  schema.object({
-    subAction: schema.literal('getChoices'),
-    subActionParams: ExecutorSubActionGetChoicesParamsSchema,
-  }),
+export const ExecutorParamsSchemaSIR = z.discriminatedUnion('subAction', [
+  z
+    .object({
+      subAction: z.literal('getFields'),
+      subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('getIncident'),
+      subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('handshake'),
+      subActionParams: ExecutorSubActionHandshakeParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('pushToService'),
+      subActionParams: ExecutorSubActionPushParamsSchemaSIR,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('getChoices'),
+      subActionParams: ExecutorSubActionGetChoicesParamsSchema,
+    })
+    .strict(),
 ]);
 
 // Executor parameters for ITOM
-export const ExecutorParamsSchemaITOM = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('addEvent'),
-    subActionParams: ExecutorSubActionAddEventParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('getChoices'),
-    subActionParams: ExecutorSubActionGetChoicesParamsSchema,
-  }),
+export const ExecutorParamsSchemaITOM = z.discriminatedUnion('subAction', [
+  z
+    .object({
+      subAction: z.literal('addEvent'),
+      subActionParams: ExecutorSubActionAddEventParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('getChoices'),
+      subActionParams: ExecutorSubActionGetChoicesParamsSchema,
+    })
+    .strict(),
 ]);

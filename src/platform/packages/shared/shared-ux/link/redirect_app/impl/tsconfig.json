@@ -15,9 +15,6 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/shared-ux-utility",
-    "@kbn/shared-ux-link-redirect-app-types",
-    "@kbn/shared-ux-link-redirect-app-mocks",
   ],
   "exclude": [
     "target/**/*",

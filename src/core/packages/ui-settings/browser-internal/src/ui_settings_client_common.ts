@@ -114,7 +114,11 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   }
 
   isDefault(key: string) {
-    return !this.isDeclared(key) || this.cache[key].userValue == null;
+    return (
+      !this.isDeclared(key) ||
+      !this.cache[key].userValue ||
+      this.cache[key].userValue === this.cache[key].value
+    );
   }
 
   isCustom(key: string) {

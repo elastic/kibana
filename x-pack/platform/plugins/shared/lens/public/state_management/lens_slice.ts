@@ -13,27 +13,31 @@ import type { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import type { SeriesType } from '@kbn/visualizations-plugin/common';
-import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
-  VisualizeEditorContext,
-  Suggestion,
-  IndexPattern,
+  DateRange,
+  VisualizationState,
+  DataViewsState,
+  FramePublicAPI,
+  Datasource,
   VisualizationMap,
   DatasourceMap,
+  SeriesType,
+  VisualizeEditorContext,
+  LensAppState,
+  LensStoreDeps,
+  TableInspectorAdapter,
   DragDropOperation,
-} from '../types';
+  LensAppServices,
+  IndexPattern,
+  LensEditEvent,
+  LensEditContextMapping,
+} from '@kbn/lens-common';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
-import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
-import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
-import type { DateRange, LayerType } from '../../common/types';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
-import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
-import type { LensAppServices } from '../app_plugin/types';
-import type { LensSerializedState } from '../react_embeddable/types';
+import type { LensSerializedState, LayerType, Suggestion, Visualization } from '..';
 
 const getQueryFromContext = (
   context: VisualizeFieldContext | VisualizeEditorContext,

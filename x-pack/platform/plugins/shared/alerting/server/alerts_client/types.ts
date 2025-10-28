@@ -88,6 +88,7 @@ export interface IAlertsClient<
     alertIds: string[];
     maintenanceWindowIds: string[];
   } | null>;
+  updatePersistedAlerts(): Promise<void>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {
@@ -287,3 +288,11 @@ export type ScopedQueryAggregationResult = Record<
     };
   }
 >;
+
+export interface UpdatePersistedAlertsQueryParams {
+  [alertId: string]: {
+    group: string;
+    date: string;
+    throttled?: { [key: string]: { date: string } };
+  };
+}

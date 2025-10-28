@@ -7,6 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 import { useSendMessageMutation } from './use_send_message_mutation';
+import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
 
 interface SendMessageState {
   sendMessage: ({ message }: { message: string }) => void;
@@ -18,11 +19,18 @@ interface SendMessageState {
   canCancel: boolean;
   cancel: () => void;
   cleanConversation: () => void;
+  connectorSelection: {
+    selectedConnector: string | undefined;
+    selectConnector: (connectorId: string) => void;
+    defaultConnectorId?: string;
+  };
 }
 
 const SendMessageContext = createContext<SendMessageState | null>(null);
 
 export const SendMessageProvider = ({ children }: { children: React.ReactNode }) => {
+  const connectorSelection = useConnectorSelection();
+
   const {
     sendMessage,
     isResponseLoading,
@@ -33,7 +41,7 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
     canCancel,
     cancel,
     cleanConversation,
-  } = useSendMessageMutation();
+  } = useSendMessageMutation({ connectorId: connectorSelection.selectedConnector });
 
   return (
     <SendMessageContext.Provider
@@ -47,6 +55,11 @@ export const SendMessageProvider = ({ children }: { children: React.ReactNode })
         canCancel,
         cancel,
         cleanConversation,
+        connectorSelection: {
+          selectedConnector: connectorSelection.selectedConnector,
+          selectConnector: connectorSelection.selectConnector,
+          defaultConnectorId: connectorSelection.defaultConnectorId,
+        },
       }}
     >
       {children}

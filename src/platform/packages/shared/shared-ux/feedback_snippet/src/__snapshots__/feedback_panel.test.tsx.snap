@@ -93,10 +93,10 @@ exports[`FeedbackPanel renders with the expected inner components based on the f
     >
       <span
         color="success"
-        data-euiicon-type="faceHappy"
+        data-euiicon-type="thumbUp"
         data-test-subj="feedbackSnippetPanelPositiveIcon"
       >
-        Happy face
+        Thumb up
       </span>
     </div>
   </div>

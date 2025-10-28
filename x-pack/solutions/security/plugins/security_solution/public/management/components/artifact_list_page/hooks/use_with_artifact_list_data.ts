@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { ServerApiError } from '../../../../common/types';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';

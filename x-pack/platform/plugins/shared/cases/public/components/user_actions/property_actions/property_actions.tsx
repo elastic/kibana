@@ -14,12 +14,14 @@ interface Props {
   isLoading: boolean;
   propertyActions: AttachmentAction[];
   customDataTestSubj?: string;
+  buttonRef?: React.Ref<HTMLAnchorElement>;
 }
 
 const UserActionPropertyActionsComponent: React.FC<Props> = ({
   isLoading,
   propertyActions,
   customDataTestSubj = 'user-action',
+  buttonRef,
 }) => {
   if (propertyActions.length === 0) {
     return null;
@@ -33,6 +35,7 @@ const UserActionPropertyActionsComponent: React.FC<Props> = ({
         <PropertyActions
           propertyActions={propertyActions}
           customDataTestSubj={customDataTestSubj}
+          buttonRef={buttonRef}
         />
       )}
     </EuiFlexItem>

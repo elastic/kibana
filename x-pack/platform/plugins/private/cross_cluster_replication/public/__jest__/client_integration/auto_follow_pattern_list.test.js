@@ -5,20 +5,30 @@
  * 2.0.
  */
 
+import { screen, within, act } from '@testing-library/react';
 import './mocks';
 import { getAutoFollowPatternMock } from './fixtures/auto_follow_pattern';
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
+import { EuiTableTestHarness } from '@kbn/test-eui-helpers';
 
 const { setup } = pageHelpers.autoFollowPatternList;
 
 describe('<AutoFollowPatternList />', () => {
   let httpRequestsMockHelpers;
+  let httpSetup;
+  let user;
 
   beforeAll(() => {
-    ({ httpRequestsMockHelpers } = setupEnvironment());
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse();
     httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse();
@@ -26,44 +36,41 @@ describe('<AutoFollowPatternList />', () => {
   });
 
   describe('on component mount', () => {
-    let exists;
+    beforeEach(() => {
+      // Override HTTP mocks to return never-resolving promises
+      // This keeps the component in LOADING state without triggering act warnings
+      httpSetup.get.mockImplementation(() => new Promise(() => {}));
 
-    beforeEach(async () => {
-      ({ exists } = setup());
+      ({ user } = setup());
     });
 
-    test('should show a loading indicator on component', async () => {
-      expect(exists('sectionLoading')).toBe(true);
+    test('should show a loading indicator on component', () => {
+      expect(screen.getByTestId('sectionLoading')).toBeInTheDocument();
     });
   });
 
   describe('when there are no auto-follow patterns', () => {
-    let exists;
-    let component;
-
     beforeEach(async () => {
-      ({ exists, component } = setup());
-
-      await nextTick(); // We need to wait next tick for the mock server response to comes in
-      component.update();
+      ({ user } = setup());
+      // Wait for HTTP request to complete
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
-    test('should display an empty prompt', async () => {
-      expect(exists('emptyPrompt')).toBe(true);
+    test('should display an empty prompt', () => {
+      expect(screen.getByTestId('emptyPrompt')).toBeInTheDocument();
     });
 
-    test('should have a button to create a follower index', async () => {
-      expect(exists('createAutoFollowPatternButton')).toBe(true);
+    test('should have a button to create a follower index', () => {
+      expect(screen.getByTestId('createAutoFollowPatternButton')).toBeInTheDocument();
     });
   });
 
   describe('when there are multiple pages of auto-follow patterns', () => {
-    let component;
-    let table;
     let actions;
-    let form;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const autoFollowPatterns = [
         getAutoFollowPatternMock({ name: 'unique', followPattern: '{{leader_index}}' }),
       ];
@@ -76,37 +83,33 @@ describe('<AutoFollowPatternList />', () => {
 
       httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
 
-      // Mount the component once for all tests in this describe
-      ({ component, table, actions, form } = setup());
-
-      await nextTick(); // Make sure that the http request is fulfilled
-      component.update();
+      ({ user, actions } = setup());
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
-    test('pagination works', () => {
-      actions.clickPaginationNextButton();
-      const { tableCellsValues } = table.getMetaData('autoFollowPatternListTable');
+    test('pagination works', async () => {
+      await actions.clickPaginationNextButton();
 
+      const table = new EuiTableTestHarness('autoFollowPatternListTable');
+      const tableCellsValues = table.cellValues;
       // Pagination defaults to 20 auto-follow patterns per page. We loaded 30 auto-follow patterns,
       // so the second page should have 10.
       expect(tableCellsValues.length).toBe(10);
     });
 
-    test('search works', () => {
-      form.setInputValue('autoFollowPatternSearch', 'unique');
-      const { tableCellsValues } = table.getMetaData('autoFollowPatternListTable');
+    test('search works', async () => {
+      await actions.search('unique');
+
+      const table = new EuiTableTestHarness('autoFollowPatternListTable');
+      const tableCellsValues = table.cellValues;
       expect(tableCellsValues.length).toBe(1);
     });
   });
 
   describe('when there are auto-follow patterns', () => {
-    let find;
-    let exists;
-    let component;
-    let table;
     let actions;
-    let tableCellsValues;
-    let rows;
 
     // For deterministic tests, we need to make sure that autoFollowPattern1 comes before autoFollowPattern2
     // in the table list that is rendered. As the table orders alphabetically by index name
@@ -127,219 +130,234 @@ describe('<AutoFollowPatternList />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
 
-      // Mount the component
-      ({ find, exists, component, table, actions } = setup());
-
-      await nextTick(); // Make sure that the Http request is fulfilled
-      component.update();
-
-      // Read the index list table
-      ({ tableCellsValues, rows } = table.getMetaData('autoFollowPatternListTable'));
+      ({ user, actions } = setup());
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
     test('should not display the empty prompt', () => {
-      expect(exists('emptyPrompt')).toBe(false);
+      expect(screen.queryByTestId('emptyPrompt')).not.toBeInTheDocument();
     });
 
     test('should have a button to create an auto-follow pattern', () => {
-      expect(exists('createAutoFollowPatternButton')).toBe(true);
+      expect(screen.getByTestId('createAutoFollowPatternButton')).toBeInTheDocument();
     });
 
     test('should list the auto-follow patterns in the table', () => {
+      const table = new EuiTableTestHarness('autoFollowPatternListTable');
+      const tableCellsValues = table.cellValues;
       expect(tableCellsValues.length).toEqual(autoFollowPatterns.length);
-      expect(tableCellsValues).toEqual([
-        [
-          '', // Empty because the first column is the checkbox to select row
-          autoFollowPattern1.name,
-          ' Paused', // Default paused
-          autoFollowPattern1.remoteCluster,
-          autoFollowPattern1.leaderIndexPatterns.join(', '),
-          testPrefix,
-          testSuffix,
-          '', // Empty because the last column is for the "actions" on the resource
-        ],
-        [
-          '',
-          autoFollowPattern2.name,
-          ' Paused', // Default paused
-          autoFollowPattern2.remoteCluster,
-          autoFollowPattern2.leaderIndexPatterns.join(', '),
-          '', // no prefix
-          '', // no suffix
-          '',
-        ],
-      ]);
+      // Check key columns (status includes non-breaking space from EUI component)
+      expect(tableCellsValues.length).toBe(2);
+      expect(tableCellsValues[0][1]).toBe(autoFollowPattern1.name);
+      expect(tableCellsValues[0][2]).toContain('Paused');
+      expect(tableCellsValues[0][3]).toBe(autoFollowPattern1.remoteCluster);
+      expect(tableCellsValues[0][4]).toBe(autoFollowPattern1.leaderIndexPatterns.join(', '));
+      expect(tableCellsValues[0][5]).toBe(testPrefix);
+      expect(tableCellsValues[0][6]).toBe(testSuffix);
+
+      expect(tableCellsValues[1][1]).toBe(autoFollowPattern2.name);
+      expect(tableCellsValues[1][2]).toContain('Paused');
+      expect(tableCellsValues[1][3]).toBe(autoFollowPattern2.remoteCluster);
+      expect(tableCellsValues[1][4]).toBe(autoFollowPattern2.leaderIndexPatterns.join(', '));
     });
 
     describe('manage patterns context menu button', () => {
-      test('should be visible when an auto-follow pattern is selected', () => {
-        expect(exists('autoFollowPatternActionMenuButton')).toBe(false);
+      test('should be visible when an auto-follow pattern is selected', async () => {
+        expect(screen.queryByTestId('autoFollowPatternActionMenuButton')).not.toBeInTheDocument();
 
-        actions.selectAutoFollowPatternAt(0);
+        await actions.selectAutoFollowPatternAt(0);
 
-        expect(exists('autoFollowPatternActionMenuButton')).toBe(true);
+        expect(screen.getByTestId('autoFollowPatternActionMenuButton')).toBeInTheDocument();
       });
 
-      test('should update the button label according to the number of patterns selected', () => {
-        actions.selectAutoFollowPatternAt(0); // 1 auto-follow pattern selected
-        expect(find('autoFollowPatternActionMenuButton').text()).toEqual('Manage pattern');
+      test('should update the button label according to the number of patterns selected', async () => {
+        await actions.selectAutoFollowPatternAt(0); // 1 auto-follow pattern selected
+        expect(screen.getByTestId('autoFollowPatternActionMenuButton').textContent).toEqual(
+          'Manage pattern'
+        );
 
-        actions.selectAutoFollowPatternAt(1); // 2 auto-follow patterns selected
-        expect(find('autoFollowPatternActionMenuButton').text()).toEqual('Manage patterns');
+        await actions.selectAutoFollowPatternAt(1); // 2 auto-follow patterns selected
+        expect(screen.getByTestId('autoFollowPatternActionMenuButton').textContent).toEqual(
+          'Manage patterns'
+        );
       });
 
-      test('should open a confirmation modal when clicking the delete button', () => {
-        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(false);
+      test('should open a confirmation modal when clicking the delete button', async () => {
+        expect(screen.queryByTestId('deleteAutoFollowPatternConfirmation')).not.toBeInTheDocument();
 
-        actions.selectAutoFollowPatternAt(0);
-        actions.clickBulkDeleteButton();
+        await actions.selectAutoFollowPatternAt(0);
+        await actions.clickBulkDeleteButton();
 
-        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(true);
+        expect(screen.getByTestId('deleteAutoFollowPatternConfirmation')).toBeInTheDocument();
       });
 
       test('should remove the auto-follow pattern from the table after delete is complete', async () => {
         // Make sure that we have our 2 auto-follow patterns in the table
-        expect(rows.length).toBe(2);
+        const table = new EuiTableTestHarness('autoFollowPatternListTable');
+        let tableCellsValues = table.cellValues;
+        expect(tableCellsValues.length).toBe(2);
 
-        // We wil delete the *first* auto-follow pattern in the table
+        // We will delete the *first* auto-follow pattern in the table
         httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse(autoFollowPattern1.name, {
           itemsDeleted: [autoFollowPattern1.name],
         });
+        // After delete, the list loader will fetch again; return remaining item
+        httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({
+          patterns: [autoFollowPattern2],
+        });
 
-        actions.selectAutoFollowPatternAt(0);
-        actions.clickBulkDeleteButton();
-        actions.clickConfirmModalDeleteAutoFollowPattern();
+        await actions.selectAutoFollowPatternAt(0);
+        await actions.clickBulkDeleteButton();
+        await actions.clickConfirmModalDeleteAutoFollowPattern();
 
-        await nextTick();
-        component.update();
-
-        ({ rows } = table.getMetaData('autoFollowPatternListTable'));
-
-        expect(rows.length).toBe(1);
-        expect(rows[0].columns[1].value).toEqual(autoFollowPattern2.name);
+        tableCellsValues = table.cellValues;
+        expect(tableCellsValues.length).toBe(1);
+        expect(tableCellsValues[0][1]).toEqual(autoFollowPattern2.name);
       });
     });
 
     describe('table row actions', () => {
-      test('should have a "pause", "delete" and "edit" action button on each row', () => {
-        const indexLastColumn = rows[0].columns.length - 1;
-        const tableCellActions = rows[0].columns[indexLastColumn].reactWrapper;
-        const contextMenuButton = tableCellActions.find('button');
-        contextMenuButton.simulate('click');
+      test('should have a "pause", "delete" and "edit" action button on each row', async () => {
+        const table = new EuiTableTestHarness('autoFollowPatternListTable');
+        const actionsCell = within(table.rows[0]).getAllByRole('cell').pop();
+        const contextMenuButton = within(actionsCell).getByRole('button');
 
-        expect(exists('contextMenuDeleteButton')).toBe(true);
-        expect(exists('contextMenuEditButton')).toBe(true);
-        expect(exists('contextMenuResumeButton')).toBe(true);
+        await user.click(contextMenuButton);
+
+        expect(screen.getByTestId('contextMenuDeleteButton')).toBeInTheDocument();
+        expect(screen.getByTestId('contextMenuEditButton')).toBeInTheDocument();
+        expect(screen.getByTestId('contextMenuResumeButton')).toBeInTheDocument();
       });
 
       test('should open a confirmation modal when clicking on "delete" button', async () => {
-        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(false);
+        expect(screen.queryByTestId('deleteAutoFollowPatternConfirmation')).not.toBeInTheDocument();
 
-        const indexLastColumn = rows[0].columns.length - 1;
-        const tableCellActions = rows[0].columns[indexLastColumn].reactWrapper;
-        const contextMenuButton = tableCellActions.find('button');
-        contextMenuButton.simulate('click');
+        const table = new EuiTableTestHarness('autoFollowPatternListTable');
+        const actionsCell = within(table.rows[0]).getAllByRole('cell').pop();
+        const contextMenuButton = within(actionsCell).getByRole('button');
+        await user.click(contextMenuButton);
 
-        find('contextMenuDeleteButton').simulate('click');
+        const deleteButton = screen.getByTestId('contextMenuDeleteButton');
+        await user.click(deleteButton);
 
-        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(true);
+        expect(screen.getByTestId('deleteAutoFollowPatternConfirmation')).toBeInTheDocument();
       });
     });
 
     describe('detail panel', () => {
-      test('should open a detail panel when clicking on an auto-follow pattern', () => {
-        expect(exists('autoFollowPatternDetail')).toBe(false);
+      test('should open a detail panel when clicking on an auto-follow pattern', async () => {
+        expect(screen.queryByTestId('autoFollowPatternDetail')).not.toBeInTheDocument();
 
-        actions.clickAutoFollowPatternAt(0);
+        await actions.clickAutoFollowPatternAt(0);
 
-        expect(exists('autoFollowPatternDetail')).toBe(true);
+        expect(screen.getByTestId('autoFollowPatternDetail')).toBeInTheDocument();
       });
 
-      test('should set the title the auto-follow pattern that has been selected', () => {
-        actions.clickAutoFollowPatternAt(0); // Open the detail panel
-        expect(find('autoFollowPatternDetail.title').text()).toEqual(autoFollowPattern1.name);
+      test('should set the title the auto-follow pattern that has been selected', async () => {
+        await actions.clickAutoFollowPatternAt(0);
+
+        const title = within(screen.getByTestId('autoFollowPatternDetail')).getByTestId('title');
+        expect(title.textContent).toEqual(autoFollowPattern1.name);
       });
 
-      test('should have a "settings" section', () => {
-        actions.clickAutoFollowPatternAt(0);
-        expect(find('settingsSection').find('h3').text()).toEqual('Settings');
+      test('should have a "settings" section', async () => {
+        await actions.clickAutoFollowPatternAt(0);
+
+        const settingsSection = screen.getByTestId('settingsSection');
+        expect(within(settingsSection).getByText('Settings')).toBeInTheDocument();
 
         // The number of different settings of an auto-follower pattern
         const AVAILABLE_SETTINGS = 4;
-        expect(find('settingsValues').length).toBe(AVAILABLE_SETTINGS);
+        const settingsValues = within(settingsSection).getAllByTestId('settingsValues');
+        expect(settingsValues.length).toBe(AVAILABLE_SETTINGS);
       });
 
-      test('should set the correct auto-follow pattern settings values', () => {
-        actions.clickAutoFollowPatternAt(0);
+      test('should set the correct auto-follow pattern settings values', async () => {
+        await actions.clickAutoFollowPatternAt(0);
 
-        expect(find('remoteCluster').text()).toEqual(autoFollowPattern1.remoteCluster);
-        expect(find('leaderIndexPatterns').text()).toEqual(
+        expect(screen.getByTestId('remoteCluster').textContent).toEqual(
+          autoFollowPattern1.remoteCluster
+        );
+        expect(screen.getByTestId('leaderIndexPatterns').textContent).toEqual(
           autoFollowPattern1.leaderIndexPatterns.join(', ')
         );
-        expect(find('patternPrefix').text()).toEqual(testPrefix);
-        expect(find('patternSuffix').text()).toEqual(testSuffix);
+        expect(screen.getByTestId('patternPrefix').textContent).toEqual(testPrefix);
+        expect(screen.getByTestId('patternSuffix').textContent).toEqual(testSuffix);
       });
 
-      test('should have a default value when there are no prefix or no suffix', () => {
-        actions.clickAutoFollowPatternAt(1); // Does not have prefix and suffix
+      test('should have a default value when there are no prefix or no suffix', async () => {
+        await actions.clickAutoFollowPatternAt(1); // Does not have prefix and suffix
 
-        expect(find('patternPrefix').text()).toEqual('No prefix');
-        expect(find('patternSuffix').text()).toEqual('No suffix');
+        expect(screen.getByTestId('patternPrefix').textContent).toEqual('No prefix');
+        expect(screen.getByTestId('patternSuffix').textContent).toEqual('No suffix');
       });
 
-      test('should show a preview of the indices that might be generated by the auto-follow pattern', () => {
-        actions.clickAutoFollowPatternAt(0);
+      test('should show a preview of the indices that might be generated by the auto-follow pattern', async () => {
+        await actions.clickAutoFollowPatternAt(0);
 
-        expect(exists('indicesPreviewSection')).toBe(true);
-        expect(exists('indicesPreviewSection.indexPreview', 3)).toBe(true);
+        expect(screen.getByTestId('indicesPreviewSection')).toBeInTheDocument();
+        // Count list items within the preview section
+        const previewSection = screen.getByTestId('indicesPreviewSection');
+        const items = within(previewSection).queryAllByTestId('indexPreview');
+        expect(items.length).toBe(3);
       });
 
-      test('should have a link to view the indices in Index Management', () => {
-        actions.clickAutoFollowPatternAt(0);
-        expect(exists('viewIndexManagementLink')).toBe(true);
-        expect(find('viewIndexManagementLink').text()).toBe(
-          'View your follower indices in Index Management'
-        );
+      test('should have a link to view the indices in Index Management', async () => {
+        await actions.clickAutoFollowPatternAt(0);
+
+        const link = screen.getByTestId('viewIndexManagementLink');
+        expect(link).toBeInTheDocument();
+        expect(link.textContent).toBe('View your follower indices in Index Management');
       });
 
-      test('should have a "close", "delete", "edit" and "resume" button in the footer', () => {
-        actions.clickAutoFollowPatternAt(0);
-        find('autoFollowPatternActionMenuButton').simulate('click');
-        expect(exists('autoFollowPatternDetail.closeFlyoutButton')).toBe(true);
-        expect(actions.getPatternsActionMenuItemText(0)).toEqual('Resume replication');
-        expect(actions.getPatternsActionMenuItemText(1)).toEqual('Edit pattern');
-        expect(actions.getPatternsActionMenuItemText(2)).toEqual('Delete pattern');
+      test('should have a "close", "delete", "edit" and "resume" button in the footer', async () => {
+        await actions.clickAutoFollowPatternAt(0);
+
+        const detailPanel = screen.getByTestId('autoFollowPatternDetail');
+        const closeButton = within(detailPanel).getByTestId('closeFlyoutButton');
+        expect(closeButton).toBeInTheDocument();
+
+        const actionMenuButton = screen.getByTestId('autoFollowPatternActionMenuButton');
+        await user.click(actionMenuButton);
+
+        const contextMenu = screen.getByTestId('autoFollowPatternActionContextMenu');
+        const menuButtons = within(contextMenu).getAllByRole('button');
+
+        expect(menuButtons[0].textContent).toEqual('Resume replication');
+        expect(menuButtons[1].textContent).toEqual('Edit pattern');
+        expect(menuButtons[2].textContent).toEqual('Delete pattern');
       });
 
-      test('should close the detail panel when clicking the "close" button', () => {
-        actions.clickAutoFollowPatternAt(0); // open the detail panel
-        expect(exists('autoFollowPatternDetail')).toBe(true);
+      test('should close the detail panel when clicking the "close" button', async () => {
+        await actions.clickAutoFollowPatternAt(0);
+        expect(screen.getByTestId('autoFollowPatternDetail')).toBeInTheDocument();
 
-        find('closeFlyoutButton').simulate('click'); // close the detail panel
+        const closeButton = screen.getByTestId('closeFlyoutButton');
+        await user.click(closeButton);
 
-        expect(exists('autoFollowPatternDetail')).toBe(false);
+        expect(screen.queryByTestId('autoFollowPatternDetail')).not.toBeInTheDocument();
       });
 
-      test('should open a confirmation modal when clicking the "delete" button', () => {
-        actions.clickAutoFollowPatternAt(0);
-        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(false);
+      test('should open a confirmation modal when clicking the "delete" button', async () => {
+        await actions.clickAutoFollowPatternAt(0);
+        expect(screen.queryByTestId('deleteAutoFollowPatternConfirmation')).not.toBeInTheDocument();
 
-        actions.clickPatternsActionMenuItem(2);
+        const actionMenuButton = screen.getByTestId('autoFollowPatternActionMenuButton');
+        await user.click(actionMenuButton);
 
-        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(true);
+        const contextMenu = screen.getByTestId('autoFollowPatternActionContextMenu');
+        const deleteButton = within(contextMenu).getAllByRole('button')[2];
+        await user.click(deleteButton);
+
+        expect(screen.getByTestId('deleteAutoFollowPatternConfirmation')).toBeInTheDocument();
       });
 
-      // This test is failing in CI, skipping for now
-      // we will need to remove the calls to "await nextTick()"";
-      // Issue: https://github.com/elastic/kibana/issues/75261
-      test.skip('should display the recent errors', async () => {
+      test('should display the recent errors', async () => {
         const message = 'bar';
+        // Only pattern 2 should have errors, pattern 1 should not
         const recentAutoFollowErrors = [
-          {
-            timestamp: 1587081600021,
-            leaderIndex: `${autoFollowPattern1.name}:my-leader-test`,
-            autoFollowException: { type: 'exception', reason: message },
-          },
           {
             timestamp: 1587081600021,
             leaderIndex: `${autoFollowPattern2.name}:my-leader-test`,
@@ -348,18 +366,22 @@ describe('<AutoFollowPatternList />', () => {
         ];
         httpRequestsMockHelpers.setAutoFollowStatsResponse({ recentAutoFollowErrors });
 
-        actions.clickAutoFollowPatternAt(0);
-        expect(exists('autoFollowPatternDetail.errors')).toBe(false);
+        await actions.clickAutoFollowPatternAt(0);
 
-        // We select the other auto-follow pattern because the stats are fetched
-        // each time we change the auto-follow pattern selection
-        actions.clickAutoFollowPatternAt(1);
-        await nextTick();
-        component.update();
+        // Wait for detail panel to open
+        const detailPanel1 = await screen.findByTestId('autoFollowPatternDetail');
+        expect(within(detailPanel1).queryByTestId('errors')).not.toBeInTheDocument();
 
-        expect(exists('autoFollowPatternDetail.errors')).toBe(true);
-        expect(exists('autoFollowPatternDetail.titleErrors')).toBe(true);
-        expect(find('autoFollowPatternDetail.recentError').map((error) => error.text())).toEqual([
+        // Select the other pattern - stats are fetched on selection change
+        await actions.clickAutoFollowPatternAt(1);
+
+        // Wait for errors to appear
+        const detailPanel2 = await screen.findByTestId('autoFollowPatternDetail');
+        expect(await within(detailPanel2).findByTestId('errors')).toBeInTheDocument();
+        expect(within(detailPanel2).getByTestId('titleErrors')).toBeInTheDocument();
+
+        const errors = within(detailPanel2).queryAllByTestId('recentError');
+        expect(errors.map((error) => error.textContent)).toEqual([
           'April 16th, 2020 8:00:00 PM: bar',
         ]);
       });

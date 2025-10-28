@@ -146,5 +146,42 @@ describe('GROK', () => {
 
       expect(result).toEqual([{ name: 'count', type: 'integer', userDefined: false }]);
     });
+
+    it('adds columns from multiple grok patterns', () => {
+      const previousCommandFields: ESQLFieldWithMetadata[] = [
+        { name: 'message', type: 'keyword', userDefined: false },
+      ];
+
+      const result = columnsAfter(
+        synth.cmd`GROK message "%{IP:client_ip}", "%{WORD:method}", "%{NUMBER:status:int}"`,
+        previousCommandFields,
+        ''
+      );
+
+      expect(result).toEqual([
+        { name: 'message', type: 'keyword', userDefined: false },
+        { name: 'client_ip', type: 'keyword', userDefined: false },
+        { name: 'method', type: 'keyword', userDefined: false },
+        { name: 'status', type: 'integer', userDefined: false },
+      ]);
+    });
+
+    it('merges columns from multiple patterns without duplicates', () => {
+      const previousCommandFields: ESQLFieldWithMetadata[] = [
+        { name: 'field1', type: 'keyword', userDefined: false },
+      ];
+
+      // Same field extracted from multiple patterns
+      const result = columnsAfter(
+        synth.cmd`GROK message "%{IP:ip_address}", "%{IP:ip_address}"`,
+        previousCommandFields,
+        ''
+      );
+
+      expect(result).toEqual([
+        { name: 'field1', type: 'keyword', userDefined: false },
+        { name: 'ip_address', type: 'keyword', userDefined: false },
+      ]);
+    });
   });
 });

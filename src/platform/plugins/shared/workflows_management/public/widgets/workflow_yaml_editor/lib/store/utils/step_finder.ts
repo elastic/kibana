@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import type { WorkflowLookup } from './build_workflow_lookup';
 
 export function findStepByLine(

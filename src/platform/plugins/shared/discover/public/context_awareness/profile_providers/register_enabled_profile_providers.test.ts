@@ -8,7 +8,12 @@
  */
 
 import { createEsqlDataSource } from '../../../common/data_sources';
-import { FEATURE_ID_1, FEATURE_ID_2, createContextAwarenessMocks } from '../__mocks__';
+import {
+  FEATURE_ID_1,
+  FEATURE_ID_2,
+  createContextAwarenessMocks,
+  createProfileProviderSharedServicesMock,
+} from '../__mocks__';
 import { createExampleRootProfileProvider } from './example/example_root_profile';
 import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
 import type { CellRenderersExtensionParams } from '../types';
@@ -21,10 +26,10 @@ describe('registerEnabledProfileProviders', () => {
   });
 
   it('should register all profile providers', async () => {
-    const { rootProfileServiceMock, rootProfileProviderMock, profileProviderServices } =
-      createContextAwarenessMocks({
-        shouldRegisterProviders: false,
-      });
+    const profileProviderServices = createProfileProviderSharedServicesMock();
+    const { rootProfileServiceMock, rootProfileProviderMock } = createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
 
     registerEnabledProfileProviders({
       profileService: rootProfileServiceMock,
@@ -44,7 +49,8 @@ describe('registerEnabledProfileProviders', () => {
 
   it('should not register experimental profile providers by default', async () => {
     jest.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
-    const { rootProfileServiceMock, profileProviderServices } = createContextAwarenessMocks({
+    const profileProviderServices = createProfileProviderSharedServicesMock();
+    const { rootProfileServiceMock } = createContextAwarenessMocks({
       shouldRegisterProviders: false,
     });
     registerEnabledProfileProviders({
@@ -63,10 +69,10 @@ describe('registerEnabledProfileProviders', () => {
 
   it('should register experimental profile providers when enabled by config', async () => {
     jest.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
-    const { rootProfileServiceMock, rootProfileProviderMock, profileProviderServices } =
-      createContextAwarenessMocks({
-        shouldRegisterProviders: false,
-      });
+    const profileProviderServices = createProfileProviderSharedServicesMock();
+    const { rootProfileServiceMock, rootProfileProviderMock } = createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
     registerEnabledProfileProviders({
       profileService: rootProfileServiceMock,
       providers: [exampleRootProfileProvider],
@@ -85,14 +91,11 @@ describe('registerEnabledProfileProviders', () => {
   });
 
   it('should register restricted profile when product feature is available', async () => {
-    const {
-      rootProfileServiceMock,
-      dataSourceProfileServiceMock,
-      dataSourceProfileProviderMock,
-      profileProviderServices,
-    } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
+    const profileProviderServices = createProfileProviderSharedServicesMock();
+    const { rootProfileServiceMock, dataSourceProfileServiceMock, dataSourceProfileProviderMock } =
+      createContextAwarenessMocks({
+        shouldRegisterProviders: false,
+      });
 
     // Mock feature availability
     jest
@@ -130,14 +133,11 @@ describe('registerEnabledProfileProviders', () => {
   });
 
   it('should not register restricted profile when product feature is not available', async () => {
-    const {
-      rootProfileServiceMock,
-      dataSourceProfileServiceMock,
-      dataSourceProfileProviderMock,
-      profileProviderServices,
-    } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
+    const profileProviderServices = createProfileProviderSharedServicesMock();
+    const { rootProfileServiceMock, dataSourceProfileServiceMock, dataSourceProfileProviderMock } =
+      createContextAwarenessMocks({
+        shouldRegisterProviders: false,
+      });
 
     // Mock feature availability
     jest

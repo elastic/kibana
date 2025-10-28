@@ -17,6 +17,7 @@ import {
   EuiButtonIcon,
   useEuiTheme,
   EuiToolTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import type { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
@@ -52,14 +53,14 @@ export function IdleRoutingStreamEntry({
   availableStreams,
   draggableProvided,
   isEditingEnabled,
-  onEditIconClick,
+  onEditClick,
   routingRule,
   canReorder,
 }: {
   availableStreams: string[];
   draggableProvided: DraggableProvided;
   isEditingEnabled: boolean;
-  onEditIconClick: (id: string) => void;
+  onEditClick: (id: string) => void;
   routingRule: RoutingDefinitionWithUIAttributes;
   canReorder: boolean;
 }) {
@@ -169,7 +170,7 @@ export function IdleRoutingStreamEntry({
               data-test-subj={`routingRuleEditButton-${routingRule.destination}`}
               iconType="pencil"
               disabled={!isEditingEnabled}
-              onClick={() => onEditIconClick(routingRule.id)}
+              onClick={() => onEditClick(routingRule.id)}
               aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
                 defaultMessage: 'Edit',
               })}
@@ -183,7 +184,32 @@ export function IdleRoutingStreamEntry({
             padding: ${euiTheme.size.xs} 0px;
           `}
         >
-          <ConditionPanel condition={routingRule.where} />
+          <ConditionPanel
+            condition={routingRule.where}
+            keywordWrapper={(children) => (
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('xpack.streams.streamDetailRouting.editConditionTooltip', {
+                  defaultMessage: 'Edit routing condition',
+                })}
+              >
+                <EuiButtonEmpty
+                  onClick={() => onEditClick(routingRule.id)}
+                  color="text"
+                  size="xs"
+                  aria-label={i18n.translate(
+                    'xpack.streams.streamsDetailRouting.editConditionLabel',
+                    {
+                      defaultMessage: 'Edit routing condition',
+                    }
+                  )}
+                  data-test-subj="streamsAppRoutingConditionTitleEditButton"
+                >
+                  {children}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            )}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

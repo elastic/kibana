@@ -26,7 +26,7 @@ import { groupingFunctionDefinitions } from '../definitions/generated/grouping_f
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { parse } from '../parser';
-import type { ESQLCommand } from '../types';
+import type { ESQLAstAllCommands } from '../types';
 import type {
   FieldType,
   FunctionParameterType,
@@ -39,6 +39,24 @@ import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../definitions/utils/ast';
 
+export const DATE_DIFF_TIME_UNITS = (() => {
+  const dateDiffDefinition = scalarFunctionDefinitions.find(
+    ({ name }) => name.toLowerCase() === 'date_diff'
+  );
+  const suggestedValues = dateDiffDefinition?.signatures?.[0]?.params?.[0]?.suggestedValues ?? [];
+
+  return suggestedValues.map((unit) => `"${unit}", `);
+})();
+
+export const mockFieldsWithTypes = (
+  mockCallbacks: ICommandCallbacks,
+  fieldNames: string[]
+): void => {
+  (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    fieldNames.map((fieldName) => ({ label: fieldName, text: fieldName }))
+  );
+};
+
 export const suggest = (
   query: string,
   context = mockContext,
@@ -46,7 +64,7 @@ export const suggest = (
   mockCallbacks = getMockCallbacks(),
   autocomplete: (
     arg0: string,
-    arg1: ESQLCommand,
+    arg1: ESQLAstAllCommands,
     arg2: ICommandCallbacks,
     arg3: {
       columns: Map<string, ESQLColumnData>;
@@ -57,9 +75,13 @@ export const suggest = (
 ): Promise<ISuggestionItem[]> => {
   const innerText = query.substring(0, offset ?? query.length);
   const correctedQuery = correctQuerySyntax(innerText);
-  const { ast } = parse(correctedQuery, { withFormatting: true });
+  const { ast, root } = parse(correctedQuery, { withFormatting: true });
+  const headerConstruction = root?.header?.find((cmd) => cmd.name === commandName);
+
   const cursorPosition = offset ?? query.length;
-  const { command } = findAstPosition(ast, cursorPosition);
+
+  const command = headerConstruction ?? findAstPosition(ast, cursorPosition).command;
+
   if (!command) {
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
   }
@@ -75,7 +97,7 @@ export const expectSuggestions = async (
   mockCallbacks = getMockCallbacks(),
   autocomplete: (
     arg0: string,
-    arg1: ESQLCommand,
+    arg1: ESQLAstAllCommands,
     arg2: ICommandCallbacks,
     arg3: {
       columns: Map<string, ESQLColumnData>;

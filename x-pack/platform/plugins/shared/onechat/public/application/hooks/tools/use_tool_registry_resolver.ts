@@ -6,24 +6,21 @@
  */
 
 import { useCallback } from 'react';
-import type { ToolType } from '@kbn/onechat-common';
 import type { Resolver } from 'react-hook-form';
 import { getToolTypeConfig } from '../../components/tools/form/registry/tools_form_registry';
-import { useOnechatServices } from '../use_onechat_service';
 import type { ToolFormData } from '../../components/tools/form/types/tool_form_types';
+import { useOnechatServices } from '../use_onechat_service';
+import type { ToolTypeRegistryEntry } from '../../components/tools/form/registry/common';
 
-export function useToolRegistryResolver(toolType: ToolType): Resolver<ToolFormData> {
+export function useToolRegistryResolver(): Resolver<ToolFormData> {
   const services = useOnechatServices();
 
   return useCallback(
     async (data, context, options) => {
-      const toolTypeConfig = getToolTypeConfig(toolType);
-      if (!toolTypeConfig) throw new Error(`Unknown tool type: ${toolType}`);
-
-      const { getValidationResolver } = toolTypeConfig;
-      // @ts-expect-error TS2345 - Union type ToolFormData cannot be narrowed to specific resolver type at compile time
-      return getValidationResolver(services)(data, context, options);
+      const config = getToolTypeConfig(data.type) as ToolTypeRegistryEntry<ToolFormData>;
+      const resolver = config.getValidationResolver(services);
+      return resolver(data, context, options);
     },
-    [toolType, services]
+    [services]
   );
 }

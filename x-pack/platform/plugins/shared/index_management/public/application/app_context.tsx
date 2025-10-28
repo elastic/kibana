@@ -31,7 +31,7 @@ import type { ReindexServicePublicStart } from '@kbn/reindex-service-plugin/publ
 
 import type { EuiBreadcrumb } from '@elastic/eui';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ExtensionsService } from '../services';
 import type { HttpService, NotificationService, UiMetricService } from './services';
 import type { IndexManagementBreadcrumb } from './services/breadcrumbs';

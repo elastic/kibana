@@ -19,6 +19,8 @@ import {
 } from './fields';
 import type { ElasticsearchProcessorType } from './manual_ingest_pipeline_processors';
 import { elasticsearchProcessorTypes } from './manual_ingest_pipeline_processors';
+import type { ConvertType } from '../formats/convert_types';
+import { convertTypes } from '../formats/convert_types';
 
 /**
  * Base processor
@@ -194,6 +196,42 @@ export const appendProcessorSchema = processorBaseWithWhereSchema.extend({
   allow_duplicates: z.optional(z.boolean()),
 }) satisfies z.Schema<AppendProcessor>;
 
+/**
+ * Convert processor
+ */
+
+export interface BaseConvertProcessor extends ProcessorBase {
+  action: 'convert';
+  from: string;
+  type: ConvertType;
+  ignore_missing?: boolean;
+}
+
+export type ConvertProcessor = BaseConvertProcessor &
+  (
+    | {
+        to?: string;
+      }
+    | {
+        to: string;
+        where: Condition;
+      }
+  );
+
+export const convertProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('convert'),
+    from: StreamlangSourceField,
+    to: z.optional(StreamlangTargetField),
+    type: z.enum(convertTypes),
+    ignore_missing: z.optional(z.boolean()),
+  })
+  .refine((obj) => (obj.where && obj.to && obj.from !== obj.to) || !obj.where, {
+    message:
+      'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
+    path: ['to', 'where'],
+  }) satisfies z.Schema<ConvertProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -201,15 +239,17 @@ export type StreamlangProcessorDefinition =
   | RenameProcessor
   | SetProcessor
   | AppendProcessor
+  | ConvertProcessor
   | ManualIngestPipelineProcessor;
 
-export const streamlangProcessorSchema = z.discriminatedUnion('action', [
+export const streamlangProcessorSchema = z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
   renameProcessorSchema,
-  setProcessorSchema.innerType(),
+  setProcessorSchema,
   appendProcessorSchema,
+  convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -220,7 +260,12 @@ export const isProcessWithOverrideOption = createIsNarrowSchema(
 
 export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
   processorBaseSchema,
-  z.union([renameProcessorSchema, grokProcessorSchema, dissectProcessorSchema])
+  z.union([
+    renameProcessorSchema,
+    grokProcessorSchema,
+    dissectProcessorSchema,
+    convertProcessorSchema,
+  ])
 );
 
 export const isGrokProcessorDefinition = createIsNarrowSchema(
@@ -247,8 +292,14 @@ export type ProcessorType = StreamlangProcessorDefinition['action'];
  * Get all processor types as a string array (derived from the Zod schema)
  */
 export const processorTypes: ProcessorType[] = (
-  streamlangProcessorSchema._def.options as Array<z.ZodObject<any, any, any, any, any>>
-).map((schema) => schema.shape.action.value) as ProcessorType[];
+  streamlangProcessorSchema._def.options as Array<
+    z.ZodObject<any, any, any, any, any> | z.ZodEffects<any, any, any>
+  >
+).map((schema) => {
+  // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
+  const baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
+  return baseSchema.shape.action.value;
+}) as ProcessorType[];
 
 /**
  * Get the processor type (action) from a processor definition

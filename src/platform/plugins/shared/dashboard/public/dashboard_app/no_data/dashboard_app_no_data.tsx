@@ -96,22 +96,24 @@ export const DashboardAppNoDataPage = ({
 
           await embeddableService
             .getStateTransfer()
-            .navigateToWithEmbeddablePackage<LensSerializedState>('dashboards', {
-              state: {
-                type: 'lens',
-                serializedState: {
-                  rawState: {
-                    attributes: getLensAttributesFromSuggestion({
-                      filters: [],
-                      query: {
-                        esql: esqlQuery,
-                      },
-                      suggestion,
-                      dataView,
-                    }),
+            .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
+              state: [
+                {
+                  type: 'lens',
+                  serializedState: {
+                    rawState: {
+                      attributes: getLensAttributesFromSuggestion({
+                        filters: [],
+                        query: {
+                          esql: esqlQuery,
+                        },
+                        suggestion,
+                        dataView,
+                      }),
+                    },
                   },
                 },
-              },
+              ],
               path: '#/create',
             });
         }

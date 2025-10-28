@@ -14,7 +14,7 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/server/mocks';
 import type { BucketAggType, MetricAggType } from '../../../common';
 import { getAggTypes } from '../../../common';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
-import { createIndexPatternsStartMock } from '../../data_views/mocks';
+import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 
 import type { AggsSetupDependencies, AggsStartDependencies } from './aggs_service';
 import { AggsService } from './aggs_service';

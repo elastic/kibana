@@ -9,7 +9,7 @@ import { partition } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
-import type { LensApi, LensInternalApi } from '../types';
+import type { LensApi, LensInternalApi } from '@kbn/lens-common';
 
 /**
  * This hooks known how to extract message based on types for the UI

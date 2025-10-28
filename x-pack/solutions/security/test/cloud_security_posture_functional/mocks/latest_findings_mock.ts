@@ -148,7 +148,7 @@ export const k8sFindingsMock = [
       snapshot: false,
     },
     rule: {
-      references: '1. https://kubernetes.io/docs/admin/kubelet/',
+      reference: '1. https://kubernetes.io/docs/admin/kubelet/',
       impact:
         'Removal of the read-only port will require that any service which made use of it will need to be re-configured to use the main Kubelet API.',
       description: 'Disable the read-only port.',
@@ -336,7 +336,7 @@ export const k8sFindingsMock = [
       snapshot: false,
     },
     rule: {
-      references: '1. https://kubernetes.io/docs/admin/kube-apiserver/',
+      reference: '1. https://kubernetes.io/docs/admin/kube-apiserver/',
       impact: 'None',
       description:
         'Ensure that the API server pod specification file has permissions of `644` or more restrictive.',
@@ -569,7 +569,7 @@ export const k8sFindingsMock = [
       snapshot: false,
     },
     rule: {
-      references: '',
+      reference: '',
       impact: '',
       description: 'Setup TLS connection on the Kubelets.',
       section: 'Kubelet',

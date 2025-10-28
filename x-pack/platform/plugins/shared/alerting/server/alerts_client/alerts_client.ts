@@ -18,6 +18,9 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS_UNTRACKED,
   TIMESTAMP,
+  ALERT_SCHEDULED_ACTION_GROUP,
+  ALERT_SCHEDULED_ACTION_DATE,
+  ALERT_SCHEDULED_ACTION_THROTTLING,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import type {
@@ -44,7 +47,13 @@ import { LegacyAlertsClient } from './legacy_alerts_client';
 import type { IIndexPatternString } from '../alerts_service/resource_installer_utils';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, LogAlertsOpts, SearchResult, DetermineDelayedAlertsOpts } from './types';
+import type {
+  AlertRule,
+  LogAlertsOpts,
+  SearchResult,
+  DetermineDelayedAlertsOpts,
+  UpdatePersistedAlertsQueryParams,
+} from './types';
 import type {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -76,6 +85,7 @@ import {
 import { ErrorWithType } from '../lib/error_with_type';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
+import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -676,6 +686,68 @@ export class AlertsClient<
           ...(isUsingDataStreams ? {} : { require_alias: true }),
         },
       };
+    }
+  }
+
+  public async updatePersistedAlerts() {
+    const { rawActiveAlerts } = this.getRawAlertInstancesForState(true);
+
+    const updateByQueryParams = Object.values(rawActiveAlerts).reduce(
+      (acc: UpdatePersistedAlertsQueryParams, rawAlert) => {
+        const { meta } = rawAlert;
+        if (!!meta?.uuid && meta.lastScheduledActions) {
+          const { group, date, actions } = meta.lastScheduledActions;
+          acc[meta.uuid] = {
+            group,
+            date,
+            ...(actions ? { actions } : {}),
+          };
+        }
+
+        return acc;
+      },
+      {}
+    );
+
+    const idsToUpdate = Object.keys(updateByQueryParams);
+
+    if (idsToUpdate.length === 0) {
+      return;
+    }
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      await retryTransientEsErrors(
+        () =>
+          esClient.updateByQuery({
+            query: {
+              terms: {
+                _id: idsToUpdate,
+              },
+            },
+            conflicts: 'proceed',
+            index: this.indexTemplateAndPattern.alias,
+            script: {
+              source: `
+            if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
+              ctx._source['${ALERT_SCHEDULED_ACTION_GROUP}'] = params[ctx._source['${ALERT_UUID}']].group;
+              ctx._source['${ALERT_SCHEDULED_ACTION_DATE}'] = params[ctx._source['${ALERT_UUID}']].date;
+              if (params[ctx._source['${ALERT_UUID}']].containsKey('actions')) {
+                ctx._source['${ALERT_SCHEDULED_ACTION_THROTTLING}'] = params[ctx._source['${ALERT_UUID}']].actions;
+              }
+            }
+          `,
+              lang: 'painless',
+              params: updateByQueryParams,
+            },
+          }),
+        { logger: this.options.logger }
+      );
+    } catch (err) {
+      this.options.logger.error(
+        `Error updating alert last scheduled actions ${this.ruleInfoMessage}: ${err}`,
+        this.logTags
+      );
+      throw err;
     }
   }
 

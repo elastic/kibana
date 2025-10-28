@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, useQuery, useQueryClient } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';

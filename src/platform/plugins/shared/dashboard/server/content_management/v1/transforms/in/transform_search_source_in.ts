@@ -8,12 +8,12 @@
  */
 
 import { extractReferences } from '@kbn/data-plugin/common';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardState } from '../../types';
 import { logger } from '../../../../kibana_services';
 
 export function transformSearchSourceIn(
-  filters?: DashboardAttributes['filters'],
-  query?: DashboardAttributes['query']
+  filters?: DashboardState['filters'],
+  query?: DashboardState['query']
 ) {
   if (!filters && !query) {
     return { searchSourceJSON: '{}', references: [] };

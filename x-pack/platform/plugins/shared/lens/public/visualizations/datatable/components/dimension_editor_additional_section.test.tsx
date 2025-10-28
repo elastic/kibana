@@ -14,8 +14,8 @@ import type {
   DatasourcePublicAPI,
   FramePublicAPI,
   VisualizationDimensionEditorProps,
-} from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
+  DatatableVisualizationState,
+} from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { TableDimensionEditorAdditionalSection } from './dimension_editor_addtional_section';
 import type { ColumnState } from '../../../../common/expressions';

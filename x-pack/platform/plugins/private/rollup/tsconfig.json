@@ -35,6 +35,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/rollup",
     "@kbn/licensing-types",
+    "@kbn/data-view-validation",
 
   ],
   "exclude": [

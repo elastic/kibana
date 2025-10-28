@@ -121,6 +121,7 @@
     "@kbn/shared-ux-card-no-data-types",
     "@kbn/licensing-types",
     "@kbn/apm-types",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

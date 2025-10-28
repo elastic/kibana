@@ -31,6 +31,8 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import type { ESSearchRequest } from '@kbn/es-types';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -46,7 +48,10 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import { conversationsFieldMap } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
+import {
+  conversationsAssistantInterruptsFieldMap,
+  conversationsFieldMap,
+} from '../ai_assistant_data_clients/conversations/field_maps_configuration';
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
@@ -142,6 +147,9 @@ export class AIAssistantService {
   private productDocManager?: ProductDocBaseStartContract['management'];
   private isProductDocumentationInProgress: boolean = false;
   private isCheckpointSaverEnabled: boolean = false;
+  // Temporary 'feature flag' to determine if we should initialize the assistant interrupts mappings.
+  private assistantInterruptsEnabled: boolean = false;
+  private assistantInterruptsInitialized: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -399,6 +407,17 @@ export class AIAssistantService {
         });
       }
 
+      // If assistantInterruptsEnabled is true, re-install data stream resources for new mappings if it has not been done already
+      if (this.assistantInterruptsEnabled && !this.assistantInterruptsInitialized) {
+        this.options.logger.debug(`Creating conversation datastream with assistant interrupts`);
+        this.conversationsDataStream = this.createDataStream({
+          resource: 'conversations',
+          kibanaVersion: this.options.kibanaVersion,
+          fieldMap: conversationsAssistantInterruptsFieldMap,
+        });
+        this.assistantInterruptsInitialized = true;
+      }
+
       await this.conversationsDataStream.install({
         esClient,
         logger: this.options.logger,
@@ -630,6 +649,18 @@ export class AIAssistantService {
 
     if (res === null) {
       return null;
+    }
+
+    // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag her
+    if (opts.assistantInterruptsEnabled) {
+      this.assistantInterruptsEnabled = true;
+    }
+
+    /**
+     * Initialize the assistant interrupts mappings if they are not already initialized.
+     */
+    if (this.assistantInterruptsEnabled && !this.assistantInterruptsInitialized) {
+      await this.initializeResources();
     }
 
     return new AIAssistantConversationsDataClient({
@@ -883,7 +914,7 @@ export class AIAssistantService {
     }
   }
 
-  private async createDefaultAnonymizationFields(spaceId: string) {
+  public async createDefaultAnonymizationFields(spaceId: string): Promise<void> {
     const dataClient = new AIAssistantDataClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
@@ -893,17 +924,42 @@ export class AIAssistantService {
       currentUser: null,
     });
 
-    const existingAnonymizationFields = await (
+    const defaultAnonymizationFields = getDefaultAnonymizationFields(spaceId);
+    // ElasticSearch query to returns all default anonymization fields that exist in the environment
+    const defaultAnonymizationFieldsQuery = {
+      terms: { field: defaultAnonymizationFields.map((field) => field.field) },
+    };
+
+    // It only contains default anonymization fields that are stored in the environment.
+    // It does not contain fields created by the user that are not present in defaultAnonymizationFields array.
+    // If a user created a field with the same name as a default anonymization field, it will be returned in the response.
+    const existingAnonymizationFieldsResponse = await (
       await dataClient?.getReader()
-    ).search({
-      size: 1,
+    ).search<ESSearchRequest, AnonymizationFieldResponse>({
+      size: defaultAnonymizationFields.length,
       allow_no_indices: true,
+      query: defaultAnonymizationFieldsQuery,
     });
-    if (existingAnonymizationFields.hits.total.value === 0) {
+
+    // Verify if the stored default anonymization fields in the environment count is equal to DefaultAnonymizationFields array length.
+    if (
+      existingAnonymizationFieldsResponse.hits.total.value !== defaultAnonymizationFields.length
+    ) {
+      const existingAnonymizationFields = new Set(
+        existingAnonymizationFieldsResponse.hits.hits.map((doc) => doc._source.field)
+      );
+
+      // Only create fields that are not present in the environment, we don't want to update any fields that the users might have already created with the same name.
+      const documentsToCreate = defaultAnonymizationFields.filter(
+        (field) => !existingAnonymizationFields.has(field.field)
+      );
+
       const writer = await dataClient?.getWriter();
+
       const res = await writer?.bulk({
-        documentsToCreate: getDefaultAnonymizationFields(spaceId),
+        documentsToCreate,
       });
+
       this.options.logger.info(`Created default anonymization fields: ${res?.docs_created.length}`);
     }
   }

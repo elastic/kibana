@@ -107,7 +107,6 @@ export const simulationMachine = setup({
     }),
     resetSimulationOutcome: assign({
       detectedSchemaFields: [],
-      detectedSchemaFieldsCache: new Map(),
       explicitlyEnabledPreviewColumns: [],
       explicitlyDisabledPreviewColumns: [],
       previewColumnsOrder: [],

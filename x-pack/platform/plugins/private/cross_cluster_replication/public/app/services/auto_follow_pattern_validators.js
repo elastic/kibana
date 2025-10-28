@@ -8,8 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { indexPatterns } from '@kbn/data-plugin/public';
+import {
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  validateDataView,
+} from '@kbn/data-views-plugin/public';
 import { indices } from '../../shared_imports';
 
 const { indexNameBeginsWithPeriod, findIllegalCharactersInIndexName, indexNameContainsSpaces } =
@@ -52,9 +55,9 @@ export const validateName = (name = '') => {
 
 export const validateLeaderIndexPattern = (indexPattern) => {
   if (indexPattern) {
-    const errors = indexPatterns.validate(indexPattern);
+    const errors = validateDataView(indexPattern);
 
-    if (errors[indexPatterns.ILLEGAL_CHARACTERS_KEY]) {
+    if (errors[ILLEGAL_CHARACTERS_KEY]) {
       return {
         message: (
           <FormattedMessage
@@ -62,17 +65,15 @@ export const validateLeaderIndexPattern = (indexPattern) => {
             defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
           {characterList} from the index pattern."
             values={{
-              characterList: (
-                <strong>{errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].join(' ')}</strong>
-              ),
-              characterListLength: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].length,
+              characterList: <strong>{errors[ILLEGAL_CHARACTERS_KEY].join(' ')}</strong>,
+              characterListLength: errors[ILLEGAL_CHARACTERS_KEY].length,
             }}
           />
         ),
       };
     }
 
-    if (errors[indexPatterns.CONTAINS_SPACES_KEY]) {
+    if (errors[CONTAINS_SPACES_KEY]) {
       return {
         message: (
           <FormattedMessage

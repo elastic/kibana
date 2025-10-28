@@ -85,7 +85,7 @@ export const getRegistryStreamWithDataStreamForInputType = (
 };
 
 // Reduces registry var def into config object entry
-const varsReducer = (
+export const varsReducer = (
   configObject: PackagePolicyConfigRecord,
   registryVar: RegistryVarsEntry
 ): PackagePolicyConfigRecord => {

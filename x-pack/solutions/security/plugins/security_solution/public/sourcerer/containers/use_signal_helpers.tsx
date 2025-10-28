@@ -8,7 +8,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { sourcererSelectors, sourcererActions } from '../store';
+import { sourcererActions, sourcererSelectors } from '../store';
 import { useSourcererDataView } from '.';
 import { SourcererScopeName } from '../store/model';
 import { useDataView as useOldDataView } from '../../common/containers/source/use_data_view';
@@ -77,10 +77,12 @@ export const useSignalHelpers = (): {
       abortCtrl.current = new AbortController();
       try {
         const sourcererDataView = await createSourcererDataView({
-          body: { patternList: defaultDataViewPattern.split(',') },
-          signal: abortCtrl.current.signal,
-          dataViewId,
           dataViewService: dataViews,
+          defaultDetails: {
+            dataViewId,
+            patternList: defaultDataViewPattern.split(','),
+          },
+          alertDetails: {},
         });
 
         if (

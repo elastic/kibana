@@ -13,7 +13,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import styled from '@emotion/styled';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -117,7 +117,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataViewSpec } =
       useSourcererDataView(SourcererScopeName.timeline);
 
-    const { newDataViewPickerEnabled } = useEnableExperimental();
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
     const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
 
     const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);

@@ -15,25 +15,28 @@ export const GLOBAL_ARTIFACT_TAG = `${BY_POLICY_ARTIFACT_TAG_PREFIX}all`;
 
 export const ADVANCED_MODE_TAG = 'form_mode:advanced';
 
+/** The tag name for process descendants in event filters */
 export const FILTER_PROCESS_DESCENDANTS_TAG = 'filter_process_descendants';
+
+/** The tag name for process descendants in trusted apps */
+export const TRUSTED_PROCESS_DESCENDANTS_TAG = 'trust_process_descendants';
 
 /** The tag prefix that tracks the space(s) that is considered the "owner" of the artifact.  */
 export const OWNER_SPACE_ID_TAG_PREFIX = 'ownerSpaceId:';
 
-export const PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY: EntryMatch = Object.freeze({
+export const PROCESS_DESCENDANT_EXTRA_ENTRY: EntryMatch = Object.freeze({
   field: 'event.category',
   operator: 'included',
   type: 'match',
   value: 'process',
 });
 
-export const PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT: string = `${
-  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.field
+export const PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT: string = `${
+  PROCESS_DESCENDANT_EXTRA_ENTRY.field
 } ${
-  ENDPOINT_ARTIFACT_OPERATORS.find(
-    ({ type }) => type === PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.type
-  )?.message
-} ${PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.value}`;
+  ENDPOINT_ARTIFACT_OPERATORS.find(({ type }) => type === PROCESS_DESCENDANT_EXTRA_ENTRY.type)
+    ?.message
+} ${PROCESS_DESCENDANT_EXTRA_ENTRY.value}`;
 
 // TODO: refact all uses of `ALL_ENDPOINT_ARTIFACTS_LIST_IDS to sue new const from shared package
 export const ALL_ENDPOINT_ARTIFACT_LIST_IDS = ENDPOINT_ARTIFACT_LIST_IDS;

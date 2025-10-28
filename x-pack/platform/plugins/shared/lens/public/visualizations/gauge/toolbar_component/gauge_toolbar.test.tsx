@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
+import type { FramePublicAPI, VisualizationToolbarProps } from '@kbn/lens-common';
 import { GaugeToolbar } from '.';
 import type { GaugeVisualizationState } from '../constants';
 import { fireEvent, render, screen } from '@testing-library/react';

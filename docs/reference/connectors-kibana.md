@@ -27,6 +27,7 @@ Actions are instantiations of a connector that are linked to rules and run as ba
 * [Observability AI Assistant](/reference/connectors-kibana/obs-ai-assistant-action-type.md): Add AI-driven insights and custom actions to your workflow.
 * [OpenAI](/reference/connectors-kibana/openai-action-type.md): Send a request to OpenAI.
 * [{{opsgenie}}](/reference/connectors-kibana/opsgenie-action-type.md): Create or close an alert in {{opsgenie}}.
+* [{{jsm}}](/reference/connectors-kibana/jsm-action-type.md): Create or close an alert in {{jsm}}.
 * [PagerDuty](/reference/connectors-kibana/pagerduty-action-type.md): Send an event in PagerDuty.
 * [SentinelOne](/reference/connectors-kibana/sentinelone-action-type.md): Send a request to SentinelOne.
 * [ServerLog](/reference/connectors-kibana/server-log-action-type.md): Add a message to a Kibana log.

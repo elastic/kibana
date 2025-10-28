@@ -61,6 +61,7 @@ export const getActionsColumn = ({
   return {
     id: COLUMN_ID,
     width: columnWidth,
+    headerCellProps: { className: 'unifiedDataTable__headerCell' },
     rowCellRender: (props: EuiDataGridCellValueElementProps) => (
       <EuiFlexGroup
         data-test-subj="unifiedDataTable_actionsColumnCell"

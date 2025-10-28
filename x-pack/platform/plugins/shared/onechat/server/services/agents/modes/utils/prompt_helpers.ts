@@ -12,14 +12,16 @@ export const customInstructionsBlock = (instructions: string | undefined): strin
     return '';
   }
 
-  return `### User instructions
+  return `## CUSTOM INSTRUCTIONS
 
-  Below are specific instructions provided by the end user, that you should follow when relevant, as
-  long as they don't conflict with your defined task or contradict your primary instructions.
+- Apply the organization-specific custom instructions below. If they conflict with the NON-NEGOTIABLE RULES, the NON-NEGOTIABLE RULES take precedence.
 
-  Instruction: "${instructions}"`;
+Custom Instruction:
+"""
+${instructions}
+"""`;
 };
 
 export const formatDate = (date: Date = new Date()): string => {
-  return moment(date).format('YYYY/MM/DD HH:mm');
+  return moment(date).format('YYYY/MM/DD');
 };

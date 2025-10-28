@@ -215,7 +215,7 @@ export class CsvESQLGenerator {
       }
 
       if (!builder.tryAppend(rowDefinition.join(settings.separator) + '\n')) {
-        this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
+        this.logger.warn(`ES|QL CSV report: Max Size Reached after ${this.csvRowCount} rows.`);
         this.maxSizeReached = true;
         if (this.cancellationToken) {
           this.cancellationToken.cancel();

@@ -12,7 +12,8 @@ import { login, ROLE } from '../../../../tasks/login';
 
 const { insightsComponentExists, addConnectorButtonExists } = workflowInsightsSelectors;
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/239216
+describe.skip(
   'Endpoint details',
   {
     tags: [

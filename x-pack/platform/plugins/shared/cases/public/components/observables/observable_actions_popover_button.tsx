@@ -28,6 +28,7 @@ export const ObservableActionsPopoverButton: React.FC<{
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { permissions } = useCasesContext();
   const [showEditModal, setShowEditModal] = useState(false);
+  const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const { isLoading: isDeleteLoading, mutateAsync: deleteObservable } = useDeleteObservable(
     caseData.id,
@@ -102,6 +103,7 @@ export const ObservableActionsPopoverButton: React.FC<{
             color="text"
             key={`cases-observables-actions-popover-button-${observable.id}`}
             data-test-subj={`cases-observables-actions-popover-button-${observable.id}`}
+            buttonRef={buttonRef}
           />
         }
         isOpen={isPopoverOpen}
@@ -121,6 +123,7 @@ export const ObservableActionsPopoverButton: React.FC<{
           confirmButtonText={i18n.DELETE_OBSERVABLE}
           onCancel={onCancel}
           onConfirm={onConfirm}
+          focusButtonRef={buttonRef}
         />
       )}
       {showEditModal && (

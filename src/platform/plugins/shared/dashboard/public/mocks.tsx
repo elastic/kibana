@@ -69,6 +69,7 @@ export function setupIntersectionObserverMock({
 
 export const mockControlGroupApi = {
   untilInitialized: async () => {},
+  untilFiltersPublished: async () => {},
   filters$: new BehaviorSubject(undefined),
   query$: new BehaviorSubject(undefined),
   timeslice$: new BehaviorSubject(undefined),
@@ -107,11 +108,13 @@ export function buildMockDashboardApi({
 export function getSampleDashboardState(overrides?: Partial<DashboardState>): DashboardState {
   return {
     // options
-    useMargins: true,
-    syncColors: false,
-    syncCursor: true,
-    syncTooltips: false,
-    hidePanelTitles: false,
+    options: {
+      useMargins: true,
+      syncColors: false,
+      syncCursor: true,
+      syncTooltips: false,
+      hidePanelTitles: false,
+    },
 
     tags: [],
     filters: [],

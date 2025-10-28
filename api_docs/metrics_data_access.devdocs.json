@@ -951,7 +951,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeMemoryCapacity: { title: string; dataset?: ",
           {
@@ -1017,7 +1025,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeDiskCapacity: { title: string; dataset?: ",
           {
@@ -1083,7 +1099,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodePodCapacity: { title: string; dataset?: ",
           {
@@ -1149,7 +1173,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; } | undefined; cpu: { xy: { cpuUsageBreakdown: { title: string; dataset?: ",
           {
@@ -1215,7 +1247,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; loadBreakdown: { title: string; dataset?: ",
           {
@@ -1281,7 +1321,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; cpuUsage: { title: string; dataset?: ",
           {
@@ -1347,7 +1395,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; normalizedLoad1m: { title: string; dataset?: ",
           {
@@ -1413,7 +1469,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { cpuUsage: { title: string; dataset?: ",
           {
@@ -1511,7 +1575,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskUsageByMountPoint: { title: string; dataset?: ",
           {
@@ -1577,7 +1649,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOReadWrite: { title: string; dataset?: ",
           {
@@ -1643,7 +1723,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskSpaceAvailable: { title: string; dataset?: ",
           {
@@ -1709,7 +1797,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIORead: { title: string; dataset?: ",
           {
@@ -1775,7 +1871,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOWrite: { title: string; dataset?: ",
           {
@@ -1841,7 +1945,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskReadThroughput: { title: string; dataset?: ",
           {
@@ -1907,7 +2019,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskWriteThroughput: { title: string; dataset?: ",
           {
@@ -1973,7 +2093,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { diskUsage: { title: string; dataset?: ",
           {
@@ -2055,7 +2183,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryUsage: { title: string; dataset?: ",
           {
@@ -2121,7 +2257,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryFree: { title: string; dataset?: ",
           {
@@ -2187,7 +2331,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
           {
@@ -2269,7 +2421,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly rx: { title: string; dataset?: ",
           {
@@ -2335,7 +2495,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly tx: { title: string; dataset?: ",
           {
@@ -2401,7 +2569,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; logs: { xy: { logRate: { title: string; dataset?: ",
           {
@@ -2467,7 +2643,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }>; readonly pod: ",
           "InventoryModel",
@@ -2665,7 +2849,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
           {
@@ -2731,7 +2923,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
           {
@@ -2829,7 +3029,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
           {
@@ -2895,7 +3103,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
           {
@@ -2993,7 +3209,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; readonly diskIO: { xy: { dockerContainerDiskIOReadWrite: { title: string; dataset?: ",
           {
@@ -3059,7 +3283,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }>; readonly awsEC2: ",
           "InventoryModel",
@@ -3881,7 +4113,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeMemoryCapacity: { title: string; dataset?: ",
           {
@@ -3947,7 +4187,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeDiskCapacity: { title: string; dataset?: ",
           {
@@ -4013,7 +4261,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodePodCapacity: { title: string; dataset?: ",
           {
@@ -4079,7 +4335,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; } | undefined; cpu: { xy: { cpuUsageBreakdown: { title: string; dataset?: ",
           {
@@ -4145,7 +4409,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; loadBreakdown: { title: string; dataset?: ",
           {
@@ -4211,7 +4483,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; cpuUsage: { title: string; dataset?: ",
           {
@@ -4277,7 +4557,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; normalizedLoad1m: { title: string; dataset?: ",
           {
@@ -4343,7 +4631,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { cpuUsage: { title: string; dataset?: ",
           {
@@ -4441,7 +4737,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskUsageByMountPoint: { title: string; dataset?: ",
           {
@@ -4507,7 +4811,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOReadWrite: { title: string; dataset?: ",
           {
@@ -4573,7 +4885,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskSpaceAvailable: { title: string; dataset?: ",
           {
@@ -4639,7 +4959,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIORead: { title: string; dataset?: ",
           {
@@ -4705,7 +5033,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOWrite: { title: string; dataset?: ",
           {
@@ -4771,7 +5107,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskReadThroughput: { title: string; dataset?: ",
           {
@@ -4837,7 +5181,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskWriteThroughput: { title: string; dataset?: ",
           {
@@ -4903,7 +5255,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { diskUsage: { title: string; dataset?: ",
           {
@@ -4985,7 +5345,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryUsage: { title: string; dataset?: ",
           {
@@ -5051,7 +5419,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryFree: { title: string; dataset?: ",
           {
@@ -5117,7 +5493,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
           {
@@ -5199,7 +5583,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly rx: { title: string; dataset?: ",
           {
@@ -5265,7 +5657,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly tx: { title: string; dataset?: ",
           {
@@ -5331,7 +5731,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; logs: { xy: { logRate: { title: string; dataset?: ",
           {
@@ -5397,7 +5805,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }> | ",
           "InventoryModel",
@@ -5595,7 +6011,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
           {
@@ -5661,7 +6085,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
           {
@@ -5759,7 +6191,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
           {
@@ -5825,7 +6265,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
           {
@@ -5923,7 +6371,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; readonly diskIO: { xy: { dockerContainerDiskIOReadWrite: { title: string; dataset?: ",
           {
@@ -5989,7 +6445,15 @@
             "section": "def-common.LensReferenceLineLayer",
             "text": "LensReferenceLineLayer"
           },
-          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
+          ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.XYLegendValue",
+            "text": "XYLegendValue"
+          },
+          "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
           " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }> | ",
           "InventoryModel",

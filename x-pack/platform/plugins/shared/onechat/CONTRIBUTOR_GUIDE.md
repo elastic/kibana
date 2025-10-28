@@ -273,7 +273,34 @@ onechat.agents.register({
 });
 ```
 
-At the moment, the `configuration` object is only composed of two attributes:
 
-- `instructions`: The custom text instructions which will be provided to the agent (in addition to the default set of instructions present for all our agents)
-- `tools`: the list of tools which will be available to the agent, following a specific format (see the example above)
+### Specific research and answer instructions
+
+It is possible to specify specific research and answer instructions for an agent, to avoid
+mixing instructions, which can sometimes be confusing for the agent. It also allows to specify
+different instructions for each step of the agent's flow..
+
+```ts
+onechat.agents.register({
+  id: 'platform.core.dashboard',
+  name: 'Dashboard agent',
+  description: 'Agent specialized in dashboard related tasks',
+  avatar_icon: 'dashboardApp',
+  configuration: {
+    research: {
+      instructions: 'You are a dashboard builder specialist assistant. Always uses the XXX tool when the user wants to YYY...'
+    },
+    answer: {
+      instructions: 'When answering, if a dashboard configuration is present in the results, always render it using [...]',
+    },
+    tools: [
+      {
+        tool_ids: [someListOfToolIds],
+      },
+    ],
+  },
+});
+```
+
+Refer to [`AgentConfiguration`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts)
+for the full list of available configuration options.

@@ -327,6 +327,9 @@ export const agentRouteService = {
   postMigrateSingleAgent: (agentId: string) =>
     AGENT_API_ROUTES.MIGRATE_PATTERN.replace('{agentId}', agentId),
   postBulkMigrateAgents: () => AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
+  postChangeAgentPrivilegeLevel: (agentId: string) =>
+    AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN.replace('{agentId}', agentId),
+  postBulkChangeAgentPrivilegeLevel: () => AGENT_API_ROUTES.BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN,
 };
 
 export const outputRoutesService = {

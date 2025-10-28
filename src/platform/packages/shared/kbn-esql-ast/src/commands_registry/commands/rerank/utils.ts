@@ -6,8 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLAstRerankCommand, ESQLMap, ESQLSingleAstItem } from '../../../types';
-import { isAssignment } from '../../../ast/is';
+import type {
+  ESQLAstRerankCommand,
+  ESQLMap,
+  ESQLSingleAstItem,
+  ESQLAstAllCommands,
+} from '../../../types';
+import { isAssignment, isFunctionExpression } from '../../../ast/is';
+import { within } from '../../../ast/location';
 import {
   extractValidExpressionRoot,
   getBinaryExpressionOperand,
@@ -17,6 +23,7 @@ export interface RerankPosition {
   position: CaretPosition;
   context?: {
     expressionRoot?: ESQLSingleAstItem;
+    insideFunction?: boolean;
   };
 }
 
@@ -35,7 +42,11 @@ export enum CaretPosition {
 /**
  * Determines caret position in RERANK command
  */
-export function getPosition(query: string, command: ESQLCommand): RerankPosition {
+export function getPosition(
+  query: string,
+  command: ESQLAstAllCommands,
+  cursorPosition: number
+): RerankPosition {
   const rerankCommand = command as ESQLAstRerankCommand;
   const innerText = query.substring(rerankCommand.location.min);
   const onMap = rerankCommand.args[1];
@@ -56,10 +67,18 @@ export function getPosition(query: string, command: ESQLCommand): RerankPosition
 
     if (lastField && isAssignment(lastField)) {
       const rhs = getBinaryExpressionOperand(lastField, 'right');
+      const rhsExpression = Array.isArray(rhs) ? rhs[0] : rhs;
+      const insideFunction =
+        rhsExpression &&
+        isFunctionExpression(rhsExpression) &&
+        within(cursorPosition, rhsExpression);
 
       return {
         position: CaretPosition.ON_EXPRESSION,
-        context: { expressionRoot: extractValidExpressionRoot(rhs) },
+        context: {
+          expressionRoot: extractValidExpressionRoot(rhs),
+          insideFunction,
+        },
       };
     }
 

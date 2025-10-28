@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { Client } from '@elastic/elasticsearch';
-import type { KibanaRequest } from '@kbn/core/server';
-import type { CoreStart } from '@kbn/core/server';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import type { NodesFactory } from '../step/nodes_factory';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { NodesFactory } from '../step/nodes_factory';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
+import type { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 
 export interface WorkflowExecutionLoopParams {
   workflowExecutionGraph: WorkflowGraph;
@@ -26,7 +24,8 @@ export interface WorkflowExecutionLoopParams {
   workflowLogger: WorkflowEventLogger;
   workflowExecutionRepository: WorkflowExecutionRepository;
   nodesFactory: NodesFactory;
-  esClient: Client;
+  esClient: ElasticsearchClient;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fakeRequest: KibanaRequest<unknown, unknown, unknown, any>;
   coreStart: CoreStart;
   taskAbortController: AbortController;

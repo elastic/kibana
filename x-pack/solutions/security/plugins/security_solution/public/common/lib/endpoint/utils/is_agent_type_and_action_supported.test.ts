@@ -21,17 +21,9 @@ describe('isAgentTypeAndActionSupported() util', () => {
   const enableFeatures = (overrides: Partial<ExperimentalFeatures> = {}): void => {
     (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
       ...allowedExperimentalValues,
-      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-      responseActionsMSDefenderEndpointEnabled: true,
       responseActionsSentinelOneRunScriptEnabled: true,
       ...overrides,
     });
-  };
-  const disableCSIsolateFeature = () => {
-    enableFeatures({ responseActionsCrowdstrikeManualHostIsolationEnabled: false });
-  };
-  const disableMicrosoftIsolationFeature = () => {
-    enableFeatures({ responseActionsMSDefenderEndpointEnabled: false });
   };
   const disableS1RunScript = () => {
     enableFeatures({ responseActionsSentinelOneRunScriptEnabled: false });
@@ -64,11 +56,9 @@ describe('isAgentTypeAndActionSupported() util', () => {
     ${'sentinel_one'}                | ${'runscript'} | ${undefined}   | ${false}      | ${disableS1RunScript}
     ${'crowdstrike'}                 | ${undefined}   | ${undefined}   | ${true}       | ${undefined}
     ${'crowdstrike'}                 | ${'isolate'}   | ${'manual'}    | ${true}       | ${undefined}
-    ${'crowdstrike'}                 | ${'isolate'}   | ${undefined}   | ${false}      | ${disableCSIsolateFeature}
     ${'microsoft_defender_endpoint'} | ${undefined}   | ${undefined}   | ${true}       | ${undefined}
     ${'microsoft_defender_endpoint'} | ${'isolate'}   | ${'manual'}    | ${true}       | ${undefined}
     ${'microsoft_defender_endpoint'} | ${'isolate'}   | ${'automated'} | ${false}      | ${undefined}
-    ${'microsoft_defender_endpoint'} | ${'isolate'}   | ${undefined}   | ${false}      | ${disableMicrosoftIsolationFeature}
   `(
     'should return `$expectedValue` for $agentType $actionName ($actionType)',
     ({

@@ -177,4 +177,47 @@ describe('SelectInferenceId', () => {
     );
     expect(endpoint2.prop('aria-checked')).toEqual(false);
   });
+
+  describe('when ELSER endpoint is available', () => {
+    const endpointsMock = [
+      { inference_id: '.preconfigured-e5', task_type: 'text_embedding' },
+      { inference_id: '.elser-2-elasticsearch', task_type: 'sparse_embedding' },
+      { inference_id: 'endpoint-1', task_type: 'text_embedding' },
+    ] as InferenceAPIConfigResponse[];
+
+    beforeEach(() => {
+      const mockUseLoadInferenceEndpoints = jest.requireMock(
+        '../../../public/application/services/api'
+      ).useLoadInferenceEndpoints;
+      mockUseLoadInferenceEndpoints.mockReturnValue({
+        data: endpointsMock,
+        isLoading: false,
+        error: null,
+      });
+
+      find('inferenceIdButton').simulate('click');
+    });
+
+    it('should prioritize ELSER endpoint as selected by default', () => {
+      const elserOption = findTestSubject(
+        find('data-inference-endpoint-list'),
+        'custom-inference_.elser-2-elasticsearch'
+      );
+      expect(elserOption.prop('aria-checked')).toEqual(true);
+    });
+
+    it('should not select other endpoints by default', () => {
+      const e5Option = findTestSubject(
+        find('data-inference-endpoint-list'),
+        'custom-inference_.preconfigured-e5'
+      );
+      expect(e5Option.prop('aria-checked')).toEqual(false);
+
+      const endpoint1Option = findTestSubject(
+        find('data-inference-endpoint-list'),
+        'custom-inference_endpoint-1'
+      );
+      expect(endpoint1Option.prop('aria-checked')).toEqual(false);
+    });
+  });
 });

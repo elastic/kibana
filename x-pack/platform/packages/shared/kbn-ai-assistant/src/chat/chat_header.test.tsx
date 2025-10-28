@@ -13,6 +13,7 @@ import {
   ElasticLlmTourCallout,
   useObservabilityAIAssistantFlyoutStateContext,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
   ElasticLlmTourCallout: jest.fn(({ children }) => (
@@ -38,7 +39,7 @@ jest.mock('./chat_context_menu', () => ({
   ChatContextMenu: () => <div data-test-subj="chat-context-menu" />,
 }));
 
-const elasticManagedConnector = {
+const elasticManagedConnector = createMockConnectorFindResult({
   id: 'elastic-llm',
   actionTypeId: '.inference',
   name: 'Elastic LLM',
@@ -54,7 +55,7 @@ const elasticManagedConnector = {
     },
   },
   referencedByCount: 0,
-};
+});
 
 describe('ChatHeader', () => {
   const baseProps = {

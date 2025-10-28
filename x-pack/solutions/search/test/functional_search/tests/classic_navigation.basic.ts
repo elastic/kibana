@@ -15,7 +15,9 @@ export default function searchClassicNavigationTests({
   const searchSpace = getService('searchSpace');
   const testSubjects = getService('testSubjects');
 
-  describe('Search Classic Navigation', () => {
+  describe('Search Classic Navigation', function () {
+    this.tags('skipFIPS');
+
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 

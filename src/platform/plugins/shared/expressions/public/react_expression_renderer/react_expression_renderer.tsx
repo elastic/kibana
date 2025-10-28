@@ -44,7 +44,6 @@ export function ReactExpressionRenderer({
   const { error, isEmpty, isLoading } = useExpressionRenderer(nodeRef, {
     ...expressionRendererOptions,
     hasCustomErrorRenderer: !!renderError,
-    abortController,
   });
 
   return (

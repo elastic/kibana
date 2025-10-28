@@ -119,7 +119,7 @@ export function runTelemetryCheck() {
             title: 'Updating telemetry mapping files',
             task: (context, task) => task.newListr(writeToFileTask(context), { exitOnError: true }),
           },
-          ...(baselineSha
+          ...(baselineSha && false // temporarily disable (see https://github.com/elastic/kibana/issues/240390)
             ? [
                 {
                   title: 'Automated PR review checks',

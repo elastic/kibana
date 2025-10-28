@@ -7,21 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: remove eslint exception and use i18n for strings
+/* eslint-disable @typescript-eslint/no-explicit-any, react/jsx-no-literals */
+
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBasicTable,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
-  EuiBasicTable,
 } from '@elastic/eui';
-import React, { useEffect, useState, useCallback } from 'react';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { Query, TimeRange } from '@kbn/data-plugin/common';
+import React, { useCallback, useEffect, useState } from 'react';
 import { take } from 'rxjs';
+import type { Query, TimeRange } from '@kbn/data-plugin/common';
 import { buildEsQuery } from '@kbn/es-query';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Alert {
@@ -34,7 +37,7 @@ interface Alert {
     'kibana.alert.severity': string;
     'kibana.alert.status': string;
     'kibana.alert.reason': string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

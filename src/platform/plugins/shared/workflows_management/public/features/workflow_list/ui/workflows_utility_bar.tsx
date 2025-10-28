@@ -17,9 +17,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import React, { useCallback, useState } from 'react';
 import { useWorkflowBulkActions } from './use_workflow_bulk_actions';
 
 interface WorkflowsUtilityBarProps {
@@ -53,6 +53,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
     selectedWorkflows,
     onAction: closePopover,
     onActionSuccess,
+    deselectWorkflows,
   });
 
   const showBulkActions = selectedWorkflows.length > 0;

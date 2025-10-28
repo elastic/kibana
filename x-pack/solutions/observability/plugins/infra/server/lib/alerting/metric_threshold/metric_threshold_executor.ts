@@ -11,6 +11,7 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
   ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { castArray, isEqual } from 'lodash';
@@ -69,6 +70,7 @@ export type MetricThresholdAlert = Omit<
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
   [ALERT_GROUP]?: Group[];
+  [ALERT_INDEX_PATTERN]?: string;
 };
 
 export type MetricThresholdRuleParams = Record<string, any>;
@@ -105,6 +107,7 @@ type MetricThresholdAlertReporter = (params: {
   groups?: Group[];
   grouping?: { flatten?: Record<string, unknown>; unflatten?: Record<string, unknown> };
   thresholds?: Array<number | null>;
+  metricAlias: string;
 }) => void;
 
 // TODO: Refactor the executor code to have better flow-control with better
@@ -148,7 +151,7 @@ export const createMetricThresholdExecutor =
       throw new AlertsClientError();
     }
 
-    const alertReporter: MetricThresholdAlertReporter = async ({
+    const alertReporter: MetricThresholdAlertReporter = ({
       id,
       reason,
       actionGroup,
@@ -158,6 +161,7 @@ export const createMetricThresholdExecutor =
       groups,
       thresholds,
       grouping,
+      metricAlias,
     }) => {
       const { uuid } = alertsClient.report({
         id,
@@ -172,6 +176,7 @@ export const createMetricThresholdExecutor =
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
           [ALERT_GROUP]: groups,
           [ALERT_GROUPING]: grouping?.unflatten,
+          [ALERT_INDEX_PATTERN]: metricAlias,
           ...flattenAdditionalContext(additionalContext),
           ...getEcsGroupsFromFlattenGrouping(grouping?.flatten),
         },
@@ -191,6 +196,11 @@ export const createMetricThresholdExecutor =
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
     };
+
+    const source = await libs.sources.getSourceConfiguration(
+      savedObjectsClient,
+      sourceId || 'default'
+    );
 
     if (!params.filterQuery && params.filterQueryText) {
       try {
@@ -221,6 +231,7 @@ export const createMetricThresholdExecutor =
           reason,
           actionGroup: actionGroupId,
           context: alertContext,
+          metricAlias: source.configuration.metricAlias,
         });
 
         return {
@@ -237,10 +248,6 @@ export const createMetricThresholdExecutor =
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
 
-    const source = await libs.sources.getSourceConfiguration(
-      savedObjectsClient,
-      sourceId || 'default'
-    );
     const config = source.configuration;
     const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
 
@@ -444,6 +451,7 @@ export const createMetricThresholdExecutor =
           groups,
           thresholds,
           grouping: { flatten: flattenGroupings[group], unflatten: grouping },
+          metricAlias: source.configuration.metricAlias,
         });
         scheduledActionsCount++;
       }

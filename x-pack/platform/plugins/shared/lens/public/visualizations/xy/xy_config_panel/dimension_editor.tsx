@@ -17,7 +17,7 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { ValuesType } from 'utility-types';
 import type { KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
-import type { VisualizationDimensionEditorProps } from '../../../types';
+import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
 import type { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import type { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';

@@ -6,14 +6,14 @@
  */
 
 import { createBadRequestError } from '@kbn/onechat-common';
-import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 export const validateWorkflowId = async ({
   workflows,
   workflowId,
   spaceId,
 }: {
-  workflows: WorkflowsPluginSetup;
+  workflows: WorkflowsServerPluginSetup;
   workflowId: string;
   spaceId: string;
 }) => {

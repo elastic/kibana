@@ -71,6 +71,12 @@ export interface ScoutTestRunInfo {
   };
   status?: string;
   duration?: number;
+  tests?: {
+    passes?: number;
+    pending?: number;
+    failures?: number;
+    total?: number;
+  };
 }
 
 /**
@@ -116,4 +122,7 @@ export interface ScoutReportEvent {
   test_run: ScoutTestRunInfo;
   suite?: ScoutSuiteInfo;
   test?: ScoutTestInfo;
+  process?: {
+    uptime?: number;
+  };
 }

@@ -19,8 +19,8 @@ const assertMarkerRemoved = (_query: string) => {
     throw new Error(`Query does not contain marker: ${query}`);
   }
 
-  const { ast } = Parser.parse(query);
-  const result = getAstContext(query, ast, _query.length);
+  const { root } = Parser.parse(query);
+  const result = getAstContext(query, root, _query.length);
 
   if (!result.command) {
     throw new Error(`No command found in AST for query: ${query}`);

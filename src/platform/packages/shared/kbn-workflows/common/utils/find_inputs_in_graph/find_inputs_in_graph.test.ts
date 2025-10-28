@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { findInputsInGraph } from './find_inputs_in_graph';
 import { WorkflowGraph } from '../../../graph';
 
-import type { ForEachStep, ConnectorStep, WorkflowYaml, IfStep } from '../../../spec/schema';
 import type { EnterForeachNode } from '../../../graph';
-
-import { findInputsInGraph } from './find_inputs_in_graph';
+import type { ConnectorStep, ForEachStep, IfStep, WorkflowYaml } from '../../../spec/schema';
 
 describe('findInputsInGraph', () => {
   describe('foreach step', () => {

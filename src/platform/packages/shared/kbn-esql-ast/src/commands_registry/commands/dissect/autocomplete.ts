@@ -8,13 +8,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../../complete_items';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
+import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
+import { Parser } from '../../../parser';
 
 const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-ast.esql.definitions.appendSeparatorDoc', {
@@ -29,23 +30,23 @@ const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
-    cursorPosition,
-    callbacks,
-    context
-  );
-  if (functionsSpecificSuggestions) {
-    return functionsSpecificSuggestions;
+  // If cursor is inside a string literal, don't suggest anything
+  const correctedQuery = correctQuerySyntax(innerText);
+  const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+  const { node } = findAstPosition(root.commands, innerText.length);
+
+  if (node?.type === 'literal' && node.literalType === 'keyword') {
+    return [];
   }
+
   // DISSECT field/
   if (commandArgs.length === 1 && /\s$/.test(innerText)) {
     return buildConstantsDefinitions(
@@ -74,10 +75,12 @@ export async function autocomplete(
 
   // DISSECT /
   const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) ?? [];
-  return fieldSuggestions.map((sug) =>
-    withAutoSuggest({
+  return fieldSuggestions.map((sug) => {
+    const withSpace = {
       ...sug,
       text: `${sug.text} `,
-    })
-  );
+    };
+
+    return withAutoSuggest(withSpace);
+  });
 }

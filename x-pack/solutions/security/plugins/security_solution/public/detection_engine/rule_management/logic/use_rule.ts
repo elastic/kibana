@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseQueryOptions } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useFetchRuleByIdQuery } from '../api/hooks/use_fetch_rule_by_id_query';

@@ -63,7 +63,7 @@ interface SearchSessionsExampleAppDeps {
 
 /**
  * This example is an app with a step by step guide
- * walking through search session lifecycle
+ * walking through background searches lifecycle
  * These enum represents all important steps in this demo
  */
 enum DemoStep {
@@ -134,7 +134,7 @@ export const SearchSessionsExampleApp = ({
 
   const enableSessionStorage = useCallback(() => {
     data.search.session.enableStorage({
-      getName: async () => 'Search sessions example',
+      getName: async () => 'Background searches example',
       getLocatorData: async () => ({
         initialState: {
           time: data.query.timefilter.timefilter.getTime(),
@@ -230,7 +230,7 @@ export const SearchSessionsExampleApp = ({
 
   return (
     <>
-      <EuiPageTemplate.Header pageTitle="Search session example" />
+      <EuiPageTemplate.Header pageTitle="Background search example" />
       <EuiPageTemplate.Section grow={false}>
         {!isShardDelayEnabled(data) && (
           <>
@@ -247,18 +247,18 @@ export const SearchSessionsExampleApp = ({
         <EuiText>
           <p>
             This example shows how you can use <EuiCode>data.search.session</EuiCode> service to
-            group your searches into a search session and allow user to save search results for
+            group your searches into a background search and allow user to save search results for
             later. <br />
             Start a long-running search, save the session and then restore it. See how fast search
             is completed when restoring the session comparing to when doing initial search. <br />
             <br />
             Follow this demo step-by-step:{' '}
             <b>configure the query, start the search and then save your session.</b> You can save
-            your session both when search is still in progress or when it is completed. After you
-            save the session and when initial search is completed you can <b>restore the session</b>
-            : the search will re-run reusing previous results. It will finish a lot faster then the
-            initial search. You can also <b>go to search sessions management</b> and{' '}
-            <b>get back to the stored results</b> from there.
+            your session both when search is still in progress. After you save the session and when
+            initial search is completed you can <b>restore the session</b>: the search will re-run
+            reusing previous results. It will finish a lot faster then the initial search. You can
+            also <b>go to background search management</b> and <b>get back to the stored results</b>{' '}
+            from there.
           </p>
         </EuiText>
       </EuiPageTemplate.Section>
@@ -275,6 +275,9 @@ export const SearchSessionsExampleApp = ({
                 useDefaultBehaviors={true}
                 indexPatterns={dataView ? [dataView] : undefined}
                 onQuerySubmit={reset}
+                onCancel={reset}
+                isLoading={isSearching}
+                useBackgroundSearchButton
               />
               <EuiFlexGroup justifyContent={'flexStart'}>
                 <EuiFlexItem grow={false}>
@@ -366,7 +369,7 @@ export const SearchSessionsExampleApp = ({
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText>
-                  Use the search session indicator in the Kibana header to save the search session.
+                  Use the secondary button in the search button to save the background search.
                   <div>
                     <EuiButtonEmpty
                       flush="both"
@@ -383,7 +386,7 @@ export const SearchSessionsExampleApp = ({
                         demoStep === DemoStep.SaveSession
                       }
                     >
-                      Try saving the session using the search session indicator in the header.
+                      Try saving the session using the secondary button in the search button.
                     </EuiButtonEmpty>
                   </div>
                 </EuiText>
@@ -410,7 +413,7 @@ export const SearchSessionsExampleApp = ({
                         }}
                         data-test-subj={'restoreSearch'}
                       >
-                        Restore the search session
+                        Restore the background search
                       </EuiButtonEmpty>
                     )}
 
@@ -444,7 +447,7 @@ export const SearchSessionsExampleApp = ({
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText>
-                  You can also get back to your session from the Search Session Management.
+                  You can also get back to your session from the Background Search Management.
                   <div>
                     <EuiButtonEmpty
                       flush="both"
@@ -457,7 +460,7 @@ export const SearchSessionsExampleApp = ({
                           ?.click();
                       }}
                     >
-                      Use Search Session indicator to navigate to management
+                      Use Background Search indicator to navigate to management
                     </EuiButtonEmpty>
                   </div>
                 </EuiText>
@@ -469,7 +472,7 @@ export const SearchSessionsExampleApp = ({
         {isRestoring && (
           <EuiPageTemplate.Section grow={false}>
             <EuiTitle size="s">
-              <h2>You restored the search session!</h2>
+              <h2>You restored the background search!</h2>
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiText>

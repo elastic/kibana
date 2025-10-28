@@ -67,6 +67,7 @@ describe('initializeESQLControlSelections', () => {
           "selectedOptions": Array [
             "option1",
           ],
+          "singleSelect": true,
           "title": "",
           "variableName": "variable1",
           "variableType": "values",
@@ -105,11 +106,62 @@ describe('initializeESQLControlSelections', () => {
           "selectedOptions": Array [
             "option1",
           ],
+          "singleSelect": true,
           "title": "",
           "variableName": "variable1",
           "variableType": "values",
         }
       `);
+    });
+  });
+
+  describe('esqlVariable$', () => {
+    test('should emit single value for single-select mode', async () => {
+      const initialState = {
+        selectedOptions: ['option1'],
+        availableOptions: ['option1', 'option2'],
+        variableName: 'myVariable',
+        variableType: 'values',
+        controlType: EsqlControlType.STATIC_VALUES,
+        singleSelect: true,
+        title: 'Test Control',
+        esqlQuery: '',
+      } as ESQLControlState;
+
+      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
+
+      await waitFor(() => {
+        const variable = selections.api.esqlVariable$.getValue();
+        expect(variable).toEqual({
+          key: 'myVariable',
+          value: 'option1',
+          type: 'values',
+        });
+      });
+    });
+
+    test('should emit array for multi-select mode', async () => {
+      const initialState = {
+        selectedOptions: ['option1', 'option2'],
+        availableOptions: ['option1', 'option2', 'option3'],
+        variableName: 'myVariable',
+        variableType: 'values',
+        controlType: EsqlControlType.STATIC_VALUES,
+        singleSelect: false,
+        title: 'Test Control',
+        esqlQuery: '',
+      } as ESQLControlState;
+
+      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
+
+      await waitFor(() => {
+        const variable = selections.api.esqlVariable$.getValue();
+        expect(variable).toEqual({
+          key: 'myVariable',
+          value: ['option1', 'option2'],
+          type: 'values',
+        });
+      });
     });
   });
 });

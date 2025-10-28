@@ -425,6 +425,11 @@ export class TaskRunner<
         }
       })
     );
+    await withAlertingSpan('alerting:update-alerts', () =>
+      this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
+        await alertsClient.updatePersistedAlerts();
+      })
+    );
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};

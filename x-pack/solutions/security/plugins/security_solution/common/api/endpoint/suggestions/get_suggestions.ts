@@ -20,6 +20,7 @@ export const EndpointSuggestionsSchema = {
       schema.literal('eventFilters'),
       schema.literal('endpoints'),
       schema.literal('trustedApps'),
+      schema.literal('trustedDevices'),
     ]),
   }),
 };

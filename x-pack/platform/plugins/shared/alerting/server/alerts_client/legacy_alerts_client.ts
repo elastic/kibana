@@ -292,6 +292,7 @@ export class LegacyAlertsClient<
   public async updatePersistedAlertsWithMaintenanceWindowIds() {
     return null;
   }
+  public async updatePersistedAlerts() {}
 
   public async setAlertStatusToUntracked() {
     return;

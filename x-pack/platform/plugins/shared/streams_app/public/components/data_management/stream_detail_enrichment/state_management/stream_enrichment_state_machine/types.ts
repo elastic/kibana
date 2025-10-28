@@ -75,6 +75,10 @@ export type StreamEnrichmentEvent =
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | {
+      type: 'step.duplicateProcessor';
+      processorStepId: string;
+    }
+  | {
       type: 'step.addCondition';
       step?: StreamlangWhereBlock;
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };

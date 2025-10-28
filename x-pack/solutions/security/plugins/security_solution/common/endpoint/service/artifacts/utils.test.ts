@@ -22,7 +22,7 @@ import {
   hasArtifactOwnerSpaceId,
   isArtifactByPolicy,
   isArtifactGlobal,
-  isFilterProcessDescendantsEnabled,
+  isProcessDescendantsEnabled,
   isFilterProcessDescendantsTag,
   isPolicySelectionTag,
   setArtifactOwnerSpaceId,
@@ -150,18 +150,18 @@ describe('Endpoint artifact utilities', () => {
     });
   });
 
-  describe('when using `isFilterProcessDescendantsEnabled()`', () => {
+  describe('when using `isProcessDescendantsEnabled()`', () => {
     it('should return false when `tags` is undefined', () => {
-      expect(isFilterProcessDescendantsEnabled({})).toBe(false);
+      expect(isProcessDescendantsEnabled({})).toBe(false);
     });
 
     it('should return false when `tags` does not contain the relevant tag', () => {
-      expect(isFilterProcessDescendantsEnabled({ tags: ['aaa', 'bbb', 'ccc'] })).toBe(false);
+      expect(isProcessDescendantsEnabled({ tags: ['aaa', 'bbb', 'ccc'] })).toBe(false);
     });
 
     it('should return true when `tags` contain the relevant tag', () => {
       expect(
-        isFilterProcessDescendantsEnabled({
+        isProcessDescendantsEnabled({
           tags: ['aaa', 'bbb', FILTER_PROCESS_DESCENDANTS_TAG, 'ccc'],
         })
       ).toBe(true);

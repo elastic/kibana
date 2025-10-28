@@ -17,6 +17,7 @@ export const scheduleRuleRunMock: ScheduleBackfillResponseBody = [
     status: 'pending',
     created_at: '2024-05-28T14:53:14.193Z',
     space_id: 'default',
+    initiator: 'user',
     rule: {
       name: 'Rule 2',
       tags: [],

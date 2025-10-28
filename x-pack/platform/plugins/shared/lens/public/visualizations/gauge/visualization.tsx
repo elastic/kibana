@@ -26,19 +26,19 @@ import {
 } from '@kbn/expression-gauge-plugin/public';
 import { IconChartGauge } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
+  FormBasedPersistedState,
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
   Suggestion,
   UserMessage,
   Visualization,
-} from '../../types';
+} from '@kbn/lens-common';
 import { getSuggestions } from './suggestions';
 import type { GaugeVisualizationState } from './constants';
 import { GROUP_ID, LENS_GAUGE_ID } from './constants';
-import { GaugeToolbar } from './toolbar_component';
+import { GaugeToolbar, GaugeFlyoutToolbar } from './toolbar_component';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
@@ -414,6 +414,10 @@ export const getGaugeVisualization = ({
 
   ToolbarComponent(props) {
     return <GaugeToolbar {...props} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <GaugeFlyoutToolbar {...props} />;
   },
 
   getSupportedLayers(state, frame) {

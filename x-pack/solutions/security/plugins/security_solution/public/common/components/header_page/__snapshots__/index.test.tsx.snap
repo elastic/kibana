@@ -66,6 +66,7 @@ exports[`HeaderPage it renders 1`] = `
               <span
                 class="euiBetaBadge emotion-euiBetaBadge-hollow-m-baseline"
                 data-test-subj="header-page-title-beta-badge"
+                role="button"
                 tabindex="0"
               >
                 Beta

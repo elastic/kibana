@@ -9,7 +9,6 @@
 
 import expect from '@kbn/expect';
 import type { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server/usage_counters';
-import { serializeCounterKey } from '@kbn/usage-collection-plugin/server/usage_counters';
 import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -34,19 +33,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/238107
-  describe.skip('Usage Counters service', () => {
-    before(async () => {
-      const key = serializeCounterKey({
-        domainId: 'usageCollectionTestPlugin',
-        counterName: 'routeAccessed',
-        counterType: 'count',
-        source: 'server',
-      });
-
-      await supertest.delete(`/api/saved_objects/counter/${key}`).set('kbn-xsrf', 'true');
-    });
-
+  describe('Usage Counters service', () => {
     it('stores usage counters sent during start and setup', async () => {
       await retry.try(async () => {
         const { duringSetup, duringStart, routeAccessed } = await getSavedObjectCounters();
@@ -58,16 +45,21 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('stores usage counters triggered by runtime activities', async () => {
+      // Pull initial values
+      const initialCounters = await getSavedObjectCounters();
+      const initialRouteAccessed = initialCounters.routeAccessed || 0;
+      expect(initialRouteAccessed).to.be(0);
+
+      // Send the request
       await supertest.get('/api/usage_collection_test_plugin').set('kbn-xsrf', 'true').expect(200);
 
+      // Check routeAccessed counter was updated
       let routeAccessed: number | undefined;
-
-      await retry.waitFor('routeAccessed counter is initialized', async () => {
+      await retry.waitFor('routeAccessed counter is incremented', async () => {
         ({ routeAccessed } = await getSavedObjectCounters());
-        return Boolean(routeAccessed);
+        return routeAccessed !== undefined && routeAccessed > initialRouteAccessed;
       });
-
-      expect(routeAccessed).to.be(1);
+      expect(routeAccessed).to.be(initialRouteAccessed + 1);
     });
   });
 }

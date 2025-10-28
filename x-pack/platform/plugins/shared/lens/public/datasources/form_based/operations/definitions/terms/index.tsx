@@ -26,11 +26,17 @@ import { uniq } from 'lodash';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { css } from '@emotion/react';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
+import type {
+  OperationMetadata,
+  DataType,
+  GenericIndexPatternColumn,
+  IncompleteColumn,
+  TermsIndexPatternColumn,
+  IndexPatternField,
+} from '@kbn/lens-common';
+import { LENS_DOCUMENT_FIELD_NAME } from '@kbn/lens-common';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
-import type { DataType, OperationMetadata } from '../../../../../types';
 import type { OperationDefinition } from '..';
-import type { GenericIndexPatternColumn, IncompleteColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage, isColumn } from '../helpers';
 import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
@@ -38,8 +44,6 @@ import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
-import type { TermsIndexPatternColumn } from './types';
-import type { IndexPatternField } from '../../../../../types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
@@ -70,7 +74,6 @@ export function supportsSignificantRanking(field?: IndexPatternField) {
 function isRareOrSignificant(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
   return orderBy.type === 'rare' || orderBy.type === 'significant';
 }
-export type { TermsIndexPatternColumn } from './types';
 
 const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
   defaultMessage: 'Missing field',
@@ -802,7 +805,7 @@ The top values of a specified field ranked by the chosen metric.
                 ).buildColumn({
                   layer,
                   indexPattern,
-                  field: indexPattern.getFieldByName(DOCUMENT_FIELD_NAME)!,
+                  field: indexPattern.getFieldByName(LENS_DOCUMENT_FIELD_NAME)!,
                 });
                 updatedLayer = updateColumnParam({
                   layer: updatedLayer,

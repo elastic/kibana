@@ -5,33 +5,36 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 
-export const ConfigSchema = schema.object({
-  apiUrl: schema.string(),
-});
+export const ConfigSchema = z
+  .object({
+    apiUrl: z.string(),
+  })
+  .strict();
 
-export const SecretsSchema = schema.object({
-  apiKey: schema.string(),
-});
+export const SecretsSchema = z
+  .object({
+    apiKey: z.string(),
+  })
+  .strict();
 
-const SuccessfulResponse = schema.object(
-  {
-    took: schema.number(),
-    requestId: schema.string(),
-    result: schema.string(),
-  },
-  { unknowns: 'allow' }
-);
+const SuccessfulResponse = z
+  .object({
+    took: z.coerce.number(),
+    requestId: z.string(),
+    result: z.string(),
+  })
+  .passthrough();
 
-export const FailureResponse = schema.object(
-  {
-    took: schema.number(),
-    requestId: schema.string(),
-    message: schema.maybe(schema.string()),
-    result: schema.maybe(schema.string()),
+export const FailureResponse = z
+  .object({
+    took: z.coerce.number(),
+    requestId: z.string(),
+    message: z.string().optional(),
+    result: z.string().optional(),
     /**
      * When testing invalid requests with Opsgenie the response seems to take the form:
      * {
@@ -45,102 +48,109 @@ export const FailureResponse = schema.object(
      *   "username": "must be a well-formed email address"
      * }
      */
-    errors: schema.maybe(schema.any()),
-  },
-  { unknowns: 'allow' }
-);
+    errors: z.any().optional(),
+  })
+  .passthrough();
 
-export const Response = schema.oneOf([SuccessfulResponse, FailureResponse]);
+export const Response = z.union([SuccessfulResponse, FailureResponse]);
 
-export const CloseAlertParamsSchema = schema.object({
-  alias: schema.string(),
-  user: schema.maybe(schema.string({ maxLength: 100 })),
-  source: schema.maybe(schema.string({ maxLength: 100 })),
-  note: schema.maybe(schema.string({ maxLength: 25000 })),
-});
+export const CloseAlertParamsSchema = z
+  .object({
+    alias: z.string(),
+    user: z.string().max(100).optional(),
+    source: z.string().max(100).optional(),
+    note: z.string().max(25000).optional(),
+  })
+  .strict();
 
-const responderTypes = schema.oneOf([
-  schema.literal('team'),
-  schema.literal('user'),
-  schema.literal('escalation'),
-  schema.literal('schedule'),
-]);
+const responderTypes = z.enum(['team', 'user', 'escalation', 'schedule']);
 
 /**
  * For more information on the Opsgenie create alert schema see: https://docs.opsgenie.com/docs/alert-api#create-alert
  */
-export const CreateAlertParamsSchema = schema.object({
-  message: schema.string({
-    maxLength: 130,
-    minLength: 1,
-    validate: (message) => (isEmpty(message.trim()) ? i18n.MESSAGE_NON_EMPTY : undefined),
-  }),
-  /**
-   * The max length here should be 512 according to Opsgenie's docs but we will sha256 hash the alias if it is longer than 512
-   * so we'll not impose a limit on the schema otherwise it'll get rejected prematurely.
-   */
-  alias: schema.maybe(schema.string()),
-  description: schema.maybe(schema.string({ maxLength: 15000 })),
-  responders: schema.maybe(
-    schema.arrayOf(
-      schema.oneOf([
-        schema.object({
-          name: schema.string(),
-          type: responderTypes,
-        }),
-        schema.object({ id: schema.string(), type: responderTypes }),
-        /**
-         * This field is not explicitly called out in the description of responders within Opsgenie's API docs but it is
-         * shown in an example and when I tested it, it seems to work as they throw an error if you try to specify a username
-         * without a valid email
-         */
-        schema.object({ username: schema.string(), type: schema.literal('user') }),
-      ]),
-      { maxSize: 50 }
-    )
-  ),
-  visibleTo: schema.maybe(
-    schema.arrayOf(
-      schema.oneOf([
-        schema.object({
-          name: schema.string(),
-          type: schema.literal('team'),
-        }),
-        schema.object({
-          id: schema.string(),
-          type: schema.literal('team'),
-        }),
-        schema.object({
-          id: schema.string(),
-          type: schema.literal('user'),
-        }),
-        schema.object({
-          username: schema.string(),
-          type: schema.literal('user'),
-        }),
-      ]),
-      { maxSize: 50 }
-    )
-  ),
-  actions: schema.maybe(schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 10 })),
-  tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 50 }), { maxSize: 20 })),
-  /**
-   * The validation requirement here is that the total characters between the key and value do not exceed 8000. Opsgenie
-   * will truncate the value if it would exceed the 8000 but it doesn't throw an error. Because of this I'm intentionally
-   * not validating the length of the keys and values here.
-   */
-  details: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-  entity: schema.maybe(schema.string({ maxLength: 512 })),
-  source: schema.maybe(schema.string({ maxLength: 100 })),
-  priority: schema.maybe(
-    schema.oneOf([
-      schema.literal('P1'),
-      schema.literal('P2'),
-      schema.literal('P3'),
-      schema.literal('P4'),
-      schema.literal('P5'),
-    ])
-  ),
-  user: schema.maybe(schema.string({ maxLength: 100 })),
-  note: schema.maybe(schema.string({ maxLength: 25000 })),
-});
+export const CreateAlertParamsSchema = z
+  .object({
+    message: z
+      .string()
+      .min(1)
+      .max(130)
+      .superRefine((message, ctx) => {
+        if (isEmpty(message.trim())) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: i18n.MESSAGE_NON_EMPTY,
+          });
+        }
+      }),
+    /**
+     * The max length here should be 512 according to Opsgenie's docs but we will sha256 hash the alias if it is longer than 512
+     * so we'll not impose a limit on the schema otherwise it'll get rejected prematurely.
+     */
+    alias: z.string().optional(),
+    description: z.string().max(15000).optional(),
+    responders: z
+      .array(
+        z.union([
+          z
+            .object({
+              name: z.string(),
+              type: responderTypes,
+            })
+            .strict(),
+          z.object({ id: z.string(), type: responderTypes }).strict(),
+          /**
+           * This field is not explicitly called out in the description of responders within Opsgenie's API docs but it is
+           * shown in an example and when I tested it, it seems to work as they throw an error if you try to specify a username
+           * without a valid email
+           */
+          z.object({ username: z.string(), type: z.literal('user') }).strict(),
+        ])
+      )
+      .max(50)
+      .optional(),
+    visibleTo: z
+      .array(
+        z.union([
+          z
+            .object({
+              name: z.string(),
+              type: z.literal('team'),
+            })
+            .strict(),
+          z
+            .object({
+              id: z.string(),
+              type: z.literal('team'),
+            })
+            .strict(),
+          z
+            .object({
+              id: z.string(),
+              type: z.literal('user'),
+            })
+            .strict(),
+          z
+            .object({
+              username: z.string(),
+              type: z.literal('user'),
+            })
+            .strict(),
+        ])
+      )
+      .max(50)
+      .optional(),
+    actions: z.array(z.string().max(50)).max(10).optional(),
+    tags: z.array(z.string().max(50)).max(20).optional(),
+    /**
+     * The validation requirement here is that the total characters between the key and value do not exceed 8000. Opsgenie
+     * will truncate the value if it would exceed the 8000 but it doesn't throw an error. Because of this I'm intentionally
+     * not validating the length of the keys and values here.
+     */
+    details: z.record(z.string(), z.string()).optional(),
+    entity: z.string().max(512).optional(),
+    source: z.string().max(100).optional(),
+    priority: z.enum(['P1', 'P2', 'P3', 'P4', 'P5']).optional(),
+    user: z.string().max(100).optional(),
+    note: z.string().max(25000).optional(),
+  })
+  .strict();

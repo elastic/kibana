@@ -5,13 +5,7 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "if_primary_term": "",
-      "if_seq_no": "",
       "include_source_on_error": "__flag__",
-      "op_type": [
-        "index",
-        "create"
-      ],
       "pipeline": "",
       "refresh": [
         "true",

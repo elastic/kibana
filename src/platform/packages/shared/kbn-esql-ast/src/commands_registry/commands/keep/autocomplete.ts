@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
@@ -20,7 +20,7 @@ import { isColumn } from '../../../ast/is';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
@@ -34,7 +34,9 @@ export async function autocomplete(
     return [pipeCompleteItem, commaCompleteItem];
   }
 
-  const alreadyDeclaredFields = command.args.filter(isColumn).map((arg) => arg.parts.join('.'));
+  const alreadyDeclaredFields = (command as ESQLCommand).args
+    .filter(isColumn)
+    .map((arg) => arg.parts.join('.'));
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
 
   return handleFragment(

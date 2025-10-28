@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
 import { SortDirection } from '@kbn/data-plugin/common';

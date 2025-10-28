@@ -10,6 +10,7 @@
 export { DataViewsList } from './dataview_picker/dataview_list';
 export { DataViewPicker } from './dataview_picker/data_view_picker';
 export { DataViewSelector } from './dataview_picker/data_view_selector';
+export { ProjectPicker } from './project_picker/project_picker';
 export { FilterBadge } from './filter_badge/filter_badge';
 export { FilterBadgeGroup } from './filter_badge/filter_badge_group';
 export { FilterBar } from './filter_bar/filter_bar';

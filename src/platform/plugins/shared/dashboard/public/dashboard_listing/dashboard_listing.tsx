@@ -14,7 +14,7 @@ import { TableListView } from '@kbn/content-management-table-list-view';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';

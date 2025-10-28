@@ -48,7 +48,7 @@ export const allConnectorsResponseSchema = connectorResponseSchema.extends({
   }),
 });
 
-export const connectorTypesResponseSchema = schema.object({
+export const connectorTypeResponseSchema = schema.object({
   id: schema.string({
     meta: {
       description: 'The identifier for the connector.',

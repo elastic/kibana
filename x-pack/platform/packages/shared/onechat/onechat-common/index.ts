@@ -82,6 +82,8 @@ export {
   type AgentConfiguration,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
+  type AgentAnswerStepConfiguration,
+  type AgentResearchStepConfiguration,
   agentIdRegexp,
 } from './agents';
 export {

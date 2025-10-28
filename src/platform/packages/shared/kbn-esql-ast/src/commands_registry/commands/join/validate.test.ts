@@ -21,26 +21,26 @@ describe('JOIN Validation', () => {
   describe('<LEFT | RIGHT | LOOKUP> JOIN <index> [ AS <alias> ] ON <condition> [, <condition> [, ...]]', () => {
     describe('... <index> ...', () => {
       test('validates the most basic query', () => {
-        joinExpectErrors('FROM index | LEFT JOIN join_index ON stringField', []);
+        joinExpectErrors('FROM index | LEFT JOIN join_index ON keywordField', []);
       });
 
       test('raises error, when index is not suitable for JOIN command', () => {
-        joinExpectErrors('FROM index | LEFT JOIN index ON stringField', [
+        joinExpectErrors('FROM index | LEFT JOIN index ON keywordField', [
           '"index" is not a valid JOIN index. Please use a "lookup" mode index.',
         ]);
-        joinExpectErrors('FROM index | LEFT JOIN non_existing_index_123 ON stringField', [
+        joinExpectErrors('FROM index | LEFT JOIN non_existing_index_123 ON keywordField', [
           '"non_existing_index_123" is not a valid JOIN index. Please use a "lookup" mode index.',
         ]);
       });
 
       test('allows lookup index', () => {
-        joinExpectErrors('FROM index | LEFT JOIN join_index ON stringField', []);
-        joinExpectErrors('FROM index | LEFT JOIN join_index_with_alias ON stringField', []);
+        joinExpectErrors('FROM index | LEFT JOIN join_index ON keywordField', []);
+        joinExpectErrors('FROM index | LEFT JOIN join_index_with_alias ON keywordField', []);
       });
 
       test('allows lookup index alias', () => {
-        joinExpectErrors('FROM index | LEFT JOIN join_index_alias_1 ON stringField', []);
-        joinExpectErrors('FROM index | LEFT JOIN join_index_alias_2 ON stringField', []);
+        joinExpectErrors('FROM index | LEFT JOIN join_index_alias_1 ON keywordField', []);
+        joinExpectErrors('FROM index | LEFT JOIN join_index_alias_2 ON keywordField', []);
       });
 
       test('handles correctly conflicts', () => {

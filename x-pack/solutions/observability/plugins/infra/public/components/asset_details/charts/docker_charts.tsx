@@ -103,6 +103,7 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
               lensAttributes={chart}
               entityId={entityId}
               dateRange={dateRange}
+              dataView={dataView}
               queryField={findInventoryFields('container').id}
             />
           ))}

@@ -16,9 +16,9 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart, FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { EditorFrameSetup } from '../../types';
+import type { EditorFrameSetup } from '@kbn/lens-common';
 
-export type { PersistedIndexPatternLayer, FormulaPublicApi } from './types';
+export type { PersistedIndexPatternLayer, FormulaPublicApi } from '@kbn/lens-common';
 
 export interface FormBasedDatasourceSetupPlugins {
   expressions: ExpressionsSetup;

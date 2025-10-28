@@ -20,10 +20,11 @@ import {
 import { esqlFormValidationSchema } from '../../validation/esql_tool_form_validation';
 import { zodResolver } from '../../../../../utils/zod_resolver';
 import { i18nMessages } from '../../i18n';
-import type { EsqlToolTypeRegistryEntry } from '../common';
+import type { ToolTypeRegistryEntry } from '../common';
+import type { EsqlToolFormData } from '../../types/tool_form_types';
 import { commonToolFormDefaultValues } from '../common';
 
-export const esqlToolFormRegistryEntry: EsqlToolTypeRegistryEntry = {
+export const esqlToolFormRegistryEntry: ToolTypeRegistryEntry<EsqlToolFormData> = {
   label: i18nMessages.configuration.form.type.esqlOption,
   getConfigurationComponent: () => EsqlConfiguration,
   defaultValues: {

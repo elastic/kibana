@@ -46,6 +46,7 @@
     "@kbn/react-field",
     "@kbn/storage-adapter",
     "@kbn/core-i18n-browser-mocks",
+    "@kbn/stack-connectors-plugin",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/serverless",
     "@kbn/field-types",
@@ -57,7 +58,11 @@
     "@kbn/rrule",
     "@kbn/resizable-layout",
     "@kbn/es-types",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/utility-types",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

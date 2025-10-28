@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowValidationError, isWorkflowValidationError } from '../../common/lib/errors';
+import { isWorkflowValidationError, WorkflowValidationError } from '../../common/lib/errors';
 
 describe('WorkflowValidationError', () => {
   it('should create a validation error with proper properties', () => {
@@ -26,8 +26,8 @@ describe('WorkflowValidationError', () => {
     );
     expect(error.statusCode).toBe(400);
     expect(error.validationErrors).toEqual(validationErrors);
-    expect(error.isWorkflowValidationError).toBe(true);
     expect(error.name).toBe('WorkflowValidationError');
+    expect(isWorkflowValidationError(error)).toBe(true);
   });
 
   it('should create a validation error without specific validation errors', () => {
@@ -36,7 +36,7 @@ describe('WorkflowValidationError', () => {
     expect(error.message).toBe('General validation failure');
     expect(error.statusCode).toBe(400);
     expect(error.validationErrors).toBeUndefined();
-    expect(error.isWorkflowValidationError).toBe(true);
+    expect(isWorkflowValidationError(error)).toBe(true);
   });
 
   it('should serialize to JSON properly', () => {
@@ -60,9 +60,9 @@ describe('WorkflowValidationError', () => {
 
     expect(isWorkflowValidationError(validationError)).toBe(true);
     expect(isWorkflowValidationError(regularError)).toBe(false);
-    expect(isWorkflowValidationError(objectWithFlag)).toBe(true);
-    expect(isWorkflowValidationError(null)).toBe(false);
-    expect(isWorkflowValidationError(undefined)).toBe(false);
-    expect(isWorkflowValidationError({})).toBe(false);
+    expect(isWorkflowValidationError(objectWithFlag as unknown as Error)).toBe(false);
+    expect(isWorkflowValidationError(null as unknown as Error)).toBe(false);
+    expect(isWorkflowValidationError(undefined as unknown as Error)).toBe(false);
+    expect(isWorkflowValidationError({} as unknown as Error)).toBe(false);
   });
 });

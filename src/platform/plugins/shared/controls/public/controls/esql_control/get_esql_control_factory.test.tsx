@@ -85,6 +85,7 @@ describe('ESQLControlApi', () => {
         title: '',
         variableName: 'variable1',
         variableType: 'values',
+        singleSelect: true,
         width: 'medium',
       },
       references: [],

@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLMessage } from '../../../types';
 import type { ICommandContext } from '../../types';
 import { buildMissingMetadataMessage } from './utils';
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext
 ): ESQLMessage[] => {

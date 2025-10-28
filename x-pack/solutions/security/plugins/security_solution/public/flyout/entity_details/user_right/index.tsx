@@ -41,7 +41,7 @@ export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   userName: string;
-  isPreviewMode?: boolean;
+  isPreviewMode: boolean;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -56,7 +56,12 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserPanelProps) => {
+export const UserPanel = ({
+  contextID,
+  scopeId,
+  userName,
+  isPreviewMode = false,
+}: UserPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
@@ -77,7 +82,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
 
   const observedUser = useObservedUser(userName, scopeId);
   const email = observedUser.details.user?.email;
-  const managedUser = useManagedUser(userName, email, observedUser.isLoading);
+  const managedUser = useManagedUser();
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
@@ -114,7 +119,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
     setQuery,
   });
 
-  const { openDetailsPanel, isLinkEnabled } = useNavigateToUserDetails({
+  const openDetailsPanel = useNavigateToUserDetails({
     userName,
     email,
     scopeId,
@@ -140,7 +145,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
-  if (observedUser.isLoading || managedUser.isLoading) {
+  if (observedUser.isLoading) {
     return <FlyoutLoading />;
   }
 
@@ -177,7 +182,6 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
             />
             <UserPanelContent
               userName={userName}
-              managedUser={managedUser}
               observedUser={observedUserWithAnomalies}
               riskScoreState={riskScoreState}
               recalculatingScore={recalculatingScore}
@@ -186,7 +190,6 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
               scopeId={scopeId}
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
-              isLinkEnabled={isLinkEnabled}
             />
             {!isPreviewMode && assetInventoryEnabled && <UserPanelFooter userName={userName} />}
             {isPreviewMode && (

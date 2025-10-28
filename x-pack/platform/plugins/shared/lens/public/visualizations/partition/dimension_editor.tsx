@@ -16,8 +16,10 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
 
-import type { PieVisualizationState } from '../../../common/types';
-import type { VisualizationDimensionEditorProps } from '../../types';
+import type {
+  LensPartitionVisualizationState,
+  VisualizationDimensionEditorProps,
+} from '@kbn/lens-common';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 import { getSortedAccessorsForGroup } from './to_expression';
@@ -28,16 +30,17 @@ import {
   isCollapsed,
 } from './visualization';
 
-export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
-  formatFactory: FormatFactory;
-  paletteService: PaletteRegistry;
-  palettes: KbnPalettes;
-  isDarkMode: boolean;
-};
+export type DimensionEditorProps =
+  VisualizationDimensionEditorProps<LensPartitionVisualizationState> & {
+    formatFactory: FormatFactory;
+    paletteService: PaletteRegistry;
+    palettes: KbnPalettes;
+    isDarkMode: boolean;
+  };
 
 export function DimensionEditor(props: DimensionEditorProps) {
   const { inputValue: localState, handleInputChange: setLocalState } =
-    useDebouncedValue<PieVisualizationState>({
+    useDebouncedValue<LensPartitionVisualizationState>({
       value: props.state,
       onChange: props.setState,
     });
@@ -164,7 +167,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 }
 
 export function DimensionDataExtraEditor(
-  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
+  props: VisualizationDimensionEditorProps<LensPartitionVisualizationState> & {
     paletteService: PaletteRegistry;
   }
 ) {

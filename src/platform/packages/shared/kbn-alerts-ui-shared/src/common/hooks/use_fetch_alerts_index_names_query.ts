@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { FetchAlertsIndexNamesParams } from '../apis/fetch_alerts_index_names';
 import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MovingAverageIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { MovingAverageIndexPatternColumn } from '@kbn/lens-common';
 import type {
   LensApiMovingAverageOperation,
   LensApiFieldMetricOperations,

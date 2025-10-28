@@ -32,24 +32,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Saves and restores a session', async () => {
         await common.navigateToApp('dashboard', { basePath: 's/another-space' });
-        await dashboard.loadSavedDashboard('A Dashboard in another space');
+        await dashboard.loadSavedDashboard('A Dashboard in another space + Delay 5s');
 
         await dashboard.waitForRenderComplete();
 
-        await searchSessions.expectState('completed');
-        await searchSessions.save();
-        await searchSessions.expectState('backgroundCompleted');
+        await searchSessions.save({ withRefresh: true, isSubmitButton: true });
         const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-          'A Pie in another space'
+          'A Pie in another space '
         );
-
-        await searchSessions.openPopover();
-        await searchSessions.viewSearchSessions();
 
         // purge client side search cache
         // https://github.com/elastic/kibana/issues/106074#issuecomment-920462094
         await browser.refresh();
 
+        await searchSessions.openFlyout();
         const searchSessionList = await searchSessionsManagement.getList();
         const searchSessionItem = searchSessionList.find(
           (session) => session.id === savedSessionId
@@ -64,7 +60,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
 
         // Check that session is restored
-        await searchSessions.expectState('restored');
         await dashboardExpect.noErrorEmbeddablesPresent();
         expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
       });
@@ -78,8 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.waitForRenderComplete();
 
-        await searchSessions.expectState('completed');
-        await searchSessions.disabledOrFail();
+        await searchSessions.missingOrFail();
       });
     });
   });

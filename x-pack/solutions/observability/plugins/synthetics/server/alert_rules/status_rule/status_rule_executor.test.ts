@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -576,6 +577,84 @@ describe('StatusRuleExecutor', () => {
         },
       });
       expect(spy).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('getRange', () => {
+    const maxPeriod = 60000; // 1 minute
+
+    it('should return the correct range for a default rule', () => {
+      const defaultStatusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
+        params: {},
+        services: {
+          uiSettingsClient,
+          savedObjectsClient: soClient,
+          scopedClusterClient: { asCurrentUser: mockEsClient },
+        },
+        rule: {
+          name: 'test',
+        },
+      } as any);
+      const range = defaultStatusRule.getRange(maxPeriod);
+      const expectedFrom = moment()
+        .subtract(maxPeriod * 1, 'milliseconds')
+        .subtract(5, 'minutes')
+        .toISOString();
+      expect(range.from).toEqual(expectedFrom);
+    });
+
+    it('should return the correct range for a custom rule with numberOfChecks', () => {
+      const customStatusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
+        params: {
+          condition: {
+            window: {
+              numberOfChecks: 5,
+            },
+          },
+        },
+        services: {
+          uiSettingsClient,
+          savedObjectsClient: soClient,
+          scopedClusterClient: { asCurrentUser: mockEsClient },
+        },
+        rule: {
+          name: 'test',
+        },
+      } as any);
+
+      const range = customStatusRule.getRange(maxPeriod);
+      const expectedFrom = moment()
+        .subtract(maxPeriod * 5, 'milliseconds')
+        .subtract(5, 'minutes')
+        .toISOString();
+      expect(range.from).toEqual(expectedFrom);
+    });
+
+    it('should return the correct range for a custom rule with a time window', () => {
+      const timeWindowStatusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
+        params: {
+          condition: {
+            window: {
+              time: {
+                size: 10,
+                unit: 'm',
+              },
+            },
+          },
+        },
+        services: {
+          uiSettingsClient,
+          savedObjectsClient: soClient,
+          scopedClusterClient: { asCurrentUser: mockEsClient },
+        },
+        rule: {
+          name: 'test',
+        },
+      } as any);
+
+      const range = timeWindowStatusRule.getRange(maxPeriod);
+      const expectedFrom = moment().subtract(10, 'minutes').toISOString();
+      expect(range.from).toEqual(expectedFrom);
     });
   });
 

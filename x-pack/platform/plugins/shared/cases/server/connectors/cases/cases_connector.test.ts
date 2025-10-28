@@ -18,6 +18,7 @@ import { CasesService } from './cases_service';
 import { CasesConnectorError } from './cases_connector_error';
 import { CaseError } from '../../common/error';
 import { fullJitterBackoffFactory } from '../../common/retry_service/full_jitter_backoff';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('./cases_connector_executor');
 jest.mock('../../common/retry_service/full_jitter_backoff');
@@ -69,6 +70,8 @@ describe('CasesConnector', () => {
   };
 
   let connector: CasesConnector;
+
+  let caughtError: CasesConnectorError;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -158,9 +161,8 @@ describe('CasesConnector', () => {
 
   it('throws the same error if the executor throws a CasesConnectorError error', async () => {
     mockExecute.mockRejectedValue(new CasesConnectorError('Bad request', 400));
-
-    await expect(() =>
-      connector.run({
+    try {
+      await connector.run({
         alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupedAlerts,
         groupingBy,
@@ -171,9 +173,13 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad request"`);
+      });
+    } catch (error) {
+      caughtError = error;
+    }
+    expect(caughtError.message).toBe('Bad request');
 
+    expect(getErrorSource(caughtError)).toBe('user');
     expect(logger.error.mock.calls[0][0]).toBe(
       '[CasesConnector][run] Execution of case connector failed. Message: Bad request. Status code: 400'
     );
@@ -182,8 +188,8 @@ describe('CasesConnector', () => {
   it('throws a CasesConnectorError when the executor throws an CaseError error', async () => {
     mockExecute.mockRejectedValue(new CaseError('Forbidden'));
 
-    await expect(() =>
-      connector.run({
+    try {
+      await connector.run({
         alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupedAlerts,
         groupingBy,
@@ -194,9 +200,13 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden"`);
+      });
+    } catch (error) {
+      caughtError = error;
+    }
 
+    expect(caughtError.message).toBe('Forbidden');
+    expect(getErrorSource(caughtError)).not.toBe('user');
     expect(logger.error.mock.calls[0][0]).toBe(
       '[CasesConnector][run] Execution of case connector failed. Message: Forbidden. Status code: 500'
     );
@@ -230,8 +240,8 @@ describe('CasesConnector', () => {
       new Boom.Boom('Server error', { statusCode: 403, message: 'my error message' })
     );
 
-    await expect(() =>
-      connector.run({
+    try {
+      await connector.run({
         alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupedAlerts,
         groupingBy,
@@ -242,8 +252,13 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden: Server error"`);
+      });
+    } catch (err) {
+      caughtError = err;
+    }
+
+    expect(caughtError.message).toBe('Forbidden: Server error');
+    expect(getErrorSource(caughtError)).toBe('user');
 
     expect(logger.error.mock.calls[0][0]).toBe(
       '[CasesConnector][run] Execution of case connector failed. Message: Forbidden: Server error. Status code: 403'
@@ -278,9 +293,8 @@ describe('CasesConnector', () => {
       casesParams,
       connectorParams: { ...connectorParams, request: undefined },
     });
-
-    await expect(() =>
-      connector.run({
+    try {
+      await connector.run({
         alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupedAlerts,
         groupingBy,
@@ -291,8 +305,13 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Kibana request is not defined"`);
+      });
+    } catch (err) {
+      caughtError = err;
+    }
+
+    expect(caughtError.message).toBe('Kibana request is not defined');
+    expect(getErrorSource(caughtError)).toBe('user');
 
     expect(logger.error.mock.calls[0][0]).toBe(
       '[CasesConnector][run] Execution of case connector failed. Message: Kibana request is not defined. Status code: 400'

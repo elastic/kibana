@@ -71,6 +71,12 @@ const CODES = Object.freeze({
     { defaultMessage: 'Endpoint timed out while attempting to connect to upload API' }
   ),
 
+  /** not enough free disk space to complete the action as per endpoint advanced policy */
+  'ra_get-file_error_not-enough-free-space': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.notEnoughFreeSpace',
+    { defaultMessage: 'Not enough free disk space to process the action' }
+  ),
+
   // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------
@@ -84,8 +90,8 @@ const CODES = Object.freeze({
   ),
 
   /**
-   * Code will be used when the provided process can not be killed (for stability reasons).
-   * Example: This occurs if you try to kill Endpoint Security
+   * Code will be used when the provided process can not be suspended (for stability reasons).
+   * Example: This occurs if you try to suspend Endpoint Security
    */
   'ra_suspend-process_error_not-permitted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.notPermittedSuccess',
@@ -228,7 +234,7 @@ const CODES = Object.freeze({
 
   // Dev:
   // File with the given name already exists and overwrite was not allowed.
-  'ra_upload_already-exists': i18n.translate(
+  'ra_upload_error_already-exists': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.upload.fileAlreadyExists',
     {
       defaultMessage:
@@ -270,6 +276,18 @@ const CODES = Object.freeze({
     { defaultMessage: 'Failed to save file to disk or validate its integrity' }
   ),
 
+  // Dev:
+  // Fleet upload API was unreachable or misconfigured
+  'ra_upload_error_upload-api-unreachable': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.uploadApiUnreachable',
+    { defaultMessage: 'Failed to retrieve the file. File upload api (fleet-server) is unreachable' }
+  ),
+
+  /** not enough free disk space to complete the action as per endpoint advanced policy */
+  'ra_upload_error_not-enough-free-space': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.upload.notEnoughFreeSpace',
+    { defaultMessage: 'Not enough free disk space to process the action' }
+  ),
   // -----------------------------------------------------------------
   // SCAN CODES
   // -----------------------------------------------------------------
@@ -280,10 +298,10 @@ const CODES = Object.freeze({
   ),
 
   // Dev:
-  // file path not found failure (404)
+  // local disk path not found failure
   'ra_scan_error_not-found': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.notFound',
-    { defaultMessage: 'File path or folder was not found (404)' }
+    { defaultMessage: 'File path or folder was not found' }
   ),
 
   // Dev:
@@ -291,6 +309,21 @@ const CODES = Object.freeze({
   'ra_scan_error_queue-quota': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.queueQuota',
     { defaultMessage: 'Too many scans are queued' }
+  ),
+
+  // Dev:
+  // an error happened while scanning files, scan was not completed
+  ra_scan_error_processing: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.processingError',
+    { defaultMessage: 'An error occurred while processing the scan' }
+  ),
+
+  // Dev:
+  // scan was interrupted, for example: system shutdown, endpoint service stop/restart.
+  // Endpoint does not track yet scan progress, that's why it can't resume
+  'ra_scan_error_processing-interrupted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.scan.processingInterrupted',
+    { defaultMessage: 'The scan was interrupted' }
   ),
 
   // Dev:

@@ -98,8 +98,7 @@ describe('Service Overview', () => {
 
     it('renders all components on the page', () => {
       cy.contains('opbeans-node');
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
       cy.getByTestSubj('latencyChart');
       cy.getByTestSubj('throughput');
       cy.getByTestSubj('transactionsGroupTable');
@@ -107,6 +106,8 @@ describe('Service Overview', () => {
       cy.getByTestSubj('dependenciesTable');
       cy.getByTestSubj('instancesLatencyDistribution');
       cy.getByTestSubj('serviceOverviewInstancesTable');
+
+      checkA11y();
     });
   });
 

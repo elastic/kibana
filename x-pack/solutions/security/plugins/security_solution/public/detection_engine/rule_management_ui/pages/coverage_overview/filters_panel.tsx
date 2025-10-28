@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiSearchBar,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/css';
@@ -36,8 +36,8 @@ const CoverageOverviewFiltersPanelComponent = () => {
   const handleCollapseCellsFilterClick = () => setShowExpandedCells(false);
 
   const handleRuleSearchOnChange = useCallback(
-    ({ queryText }: { queryText: string }) => {
-      setRuleSearchFilter(queryText);
+    (queryText: string) => {
+      setRuleSearchFilter(queryText?.trim());
     },
     [setRuleSearchFilter]
   );
@@ -64,12 +64,12 @@ const CoverageOverviewFiltersPanelComponent = () => {
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
-              <EuiSearchBar
-                box={{
-                  placeholder: i18n.CoverageOverviewSearchBarPlaceholder,
-                  'data-test-subj': 'coverageOverviewFilterSearchBar',
-                }}
-                onChange={handleRuleSearchOnChange}
+              <EuiFieldSearch
+                fullWidth
+                incremental={false}
+                data-test-subj="coverageOverviewFilterSearchBar"
+                placeholder={i18n.CoverageOverviewSearchBarPlaceholder}
+                onSearch={handleRuleSearchOnChange}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

@@ -536,6 +536,36 @@
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.EntityNodeViewModel.ipClickHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "ipClickHandler",
+            "description": [],
+            "signature": [
+              "IpClickCallback",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.EntityNodeViewModel.countryClickHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "countryClickHandler",
+            "description": [],
+            "signature": [
+              "CountryClickCallback",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -874,6 +904,51 @@
             "description": [],
             "signature": [
               "NodeClickCallback",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.LabelNodeViewModel.ipClickHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "ipClickHandler",
+            "description": [],
+            "signature": [
+              "IpClickCallback",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.LabelNodeViewModel.countryClickHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "countryClickHandler",
+            "description": [],
+            "signature": [
+              "CountryClickCallback",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.LabelNodeViewModel.eventClickHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "eventClickHandler",
+            "description": [],
+            "signature": [
+              "EventClickCallback",
               " | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",

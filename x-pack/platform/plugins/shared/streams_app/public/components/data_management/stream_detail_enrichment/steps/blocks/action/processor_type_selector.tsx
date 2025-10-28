@@ -145,6 +145,37 @@ const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors
       />
     ),
   },
+  convert: {
+    type: 'convert' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertInputDisplay',
+      {
+        defaultMessage: 'Convert',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setHelpText"
+          defaultMessage="{convertLink}. For example, you can convert a string to an long."
+          values={{
+            convertLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsConvertLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.convert}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.setLinkLabel', {
+                  defaultMessage: 'Converts a field to a different data type',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   set: {
     type: 'set' as const,
     inputDisplay: i18n.translate(

@@ -100,7 +100,7 @@ async function fetchExitSpanIdsFromTraceIds({
 }) {
   const sampleExitSpans = await apmEventClient.search('get_service_map_exit_span_samples', {
     apm: {
-      events: [ProcessorEvent.span],
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
 
     track_total_hits: false,

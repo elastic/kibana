@@ -145,7 +145,8 @@
     "@kbn/licensing-types",
     "@kbn/esql-composer",
     "@kbn/discover-shared-plugin",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

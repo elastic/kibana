@@ -14,11 +14,13 @@ import type { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
 import { closeDataStream, rolloverDataStream } from './utils';
+import { customRoles } from './custom_roles';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
   const samlAuth = getService('samlAuth');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const customRoleScopedSupertest = getService('customRoleScopedSupertest');
   const synthtrace = getService('synthtrace');
   const from = '2024-09-20T11:00:00.000Z';
   const to = '2024-09-20T11:01:00.000Z';
@@ -274,6 +276,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             count: 1,
           });
         });
+      });
+    });
+
+    describe('No access user', () => {
+      let supertestNoAccessWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
+
+      before(async () => {
+        await samlAuth.setCustomRole(customRoles.noAccessUserRole);
+        supertestNoAccessWithCookieCredentials =
+          await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
+        roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+      });
+
+      after(async () => {
+        await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await samlAuth.deleteCustomRole();
+      });
+
+      it('should return a 403 when the user does not have sufficient privileges', async () => {
+        const res = await callApiAs({
+          roleScopedSupertestWithCookieCredentials: supertestNoAccessWithCookieCredentials,
+          apiParams: {
+            type: dataStreamType,
+            start: from,
+            end: to,
+          },
+        });
+        expect(res.statusCode).to.be(403);
       });
     });
   });

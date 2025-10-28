@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useMemo, useState } from 'react';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
-import React, { useMemo, useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
 interface WorkflowDetailLayoutProps {
   editor: React.ReactNode;

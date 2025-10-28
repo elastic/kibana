@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { transformListTypesResponse } from './v1';
+export { transformListTypesResponse } from './v2';

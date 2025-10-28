@@ -26,6 +26,13 @@ export const RECURRING_SCHEDULE_FORM_REPEAT = i18n.translate(
   }
 );
 
+export const RECURRING_SCHEDULE_FORM_FREQUENCY_HOURLY = i18n.translate(
+  'responseOpsRecurringScheduleForm.frequency.hourly',
+  {
+    defaultMessage: 'Hourly',
+  }
+);
+
 export const RECURRING_SCHEDULE_FORM_FREQUENCY_DAILY = i18n.translate(
   'responseOpsRecurringScheduleForm.frequency.daily',
   {
@@ -175,6 +182,12 @@ export const RECURRING_SCHEDULE_FORM_INTERVAL_EVERY = i18n.translate(
   }
 );
 
+export const RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY_HOURLY = (interval: number) =>
+  i18n.translate('responseOpsRecurringScheduleForm.customFrequency.hourly', {
+    defaultMessage: '{interval, plural, one {hour} other {hours}}',
+    values: { interval },
+  });
+
 export const RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY_DAILY = (interval: number) =>
   i18n.translate('responseOpsRecurringScheduleForm.customFrequency.daily', {
     defaultMessage: '{interval, plural, one {day} other {days}}',
@@ -242,6 +255,10 @@ export const RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY_PREFIX = (summary: string
   });
 
 export const RECURRING_SCHEDULE_FORM_FREQUENCY_SUMMARY = (interval: number) => ({
+  [Frequency.HOURLY]: i18n.translate('responseOpsRecurringScheduleForm.hourSummary', {
+    defaultMessage: '{interval, plural, one {hour} other {# hours}}',
+    values: { interval },
+  }),
   [Frequency.DAILY]: i18n.translate('responseOpsRecurringScheduleForm.daySummary', {
     defaultMessage: '{interval, plural, one {day} other {# days}}',
     values: { interval },
@@ -308,6 +325,12 @@ export const RECURRING_SCHEDULE_FORM_YEARLY_BY_MONTH_SUMMARY = (date: string) =>
   i18n.translate('responseOpsRecurringScheduleForm.yearlyBymonthSummary', {
     defaultMessage: 'on {date}',
     values: { date },
+  });
+
+export const RECURRING_SCHEDULE_FORM_HOURLY_SUMMARY = (time: string) =>
+  i18n.translate('responseOpsRecurringScheduleForm.hourlySummary', {
+    defaultMessage: 'starting from {time}',
+    values: { time },
   });
 
 export const RECURRING_SCHEDULE_FORM_TIME_SUMMARY = (time: string) =>

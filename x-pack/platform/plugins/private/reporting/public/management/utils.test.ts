@@ -59,6 +59,20 @@ describe('transformScheduledReport', () => {
     );
   });
 
+  it('marks as custom when freq=HOURLY and interval > 1', () => {
+    const report = {
+      ...baseReport,
+      schedule: { rrule: { freq: Frequency.HOURLY, tzid: 'UTC', interval: 2 } },
+    } as ScheduledReportApiJSON;
+    expect(transformScheduledReport(report).recurringSchedule).toEqual(
+      expect.objectContaining({
+        frequency: 'CUSTOM',
+        customFrequency: Frequency.HOURLY,
+        interval: 2,
+      })
+    );
+  });
+
   it('marks as custom when freq=DAILY and no weekdays', () => {
     const report = {
       ...baseReport,

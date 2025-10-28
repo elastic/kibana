@@ -36,19 +36,11 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   let getLastFormComponentProps: ReturnType<
     typeof getFormComponentMock
   >['getLastFormComponentProps'];
-  let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
 
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({
-      history,
-      coreStart,
-      mockedApi,
-      FormComponentMock,
-      getLastFormComponentProps,
-      setExperimentalFlag,
-    } = renderSetup);
+    ({ history, coreStart, mockedApi, FormComponentMock, getLastFormComponentProps } = renderSetup);
 
     history.push('somepage?show=create');
 
@@ -122,8 +114,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     );
   });
 
-  it('should initialize form with a per-policy artifact when user does not have global artifact privilege and spaces is enabeld', async () => {
-    setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+  it('should initialize form with a per-policy artifact when user does not have global artifact privilege', async () => {
     useUserPrivileges.mockReturnValue({
       ...useUserPrivileges(),
       endpointPrivileges: getEndpointPrivilegesInitialStateMock({

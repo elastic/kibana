@@ -8,10 +8,13 @@
  */
 
 import React from 'react';
+import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
 import { useTraceMetricsContext } from '../../context/trace_metrics_context';
 import { Chart } from '../chart';
 import { useChartLayersFromEsql } from '../chart/hooks/use_chart_layers_from_esql';
 import { getErrorRateChart } from './trace_charts_definition';
+
+const ERROR_RATE_Y_BOUNDS: LensYBoundsConfig = { mode: 'custom', lowerBound: 0, upperBound: 1 };
 
 export const ErrorRateChart = () => {
   const {
@@ -59,6 +62,7 @@ export const ErrorRateChart = () => {
       chartLayers={chartLayers}
       syncCursor
       syncTooltips
+      yBounds={ERROR_RATE_Y_BOUNDS}
     />
   );
 };

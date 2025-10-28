@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { ToolSelection, ToolSelectionRelevantFields } from '@kbn/onechat-common';
+import type {
+  ToolDefinition,
+  ToolSelection,
+  ToolSelectionRelevantFields,
+} from '@kbn/onechat-common';
 import { allToolsSelectionWildcard, toolMatchSelection } from '@kbn/onechat-common';
+import type { AgentEditState } from '../hooks/agents/use_agent_edit';
 
 /**
  * Check if a specific tool is selected based on the current tool selections.
@@ -87,3 +92,29 @@ export const toggleToolSelection = (
     }
   }
 };
+
+/**
+ * Removes invalid tool references from the agent configuration.
+ * Filters out tool IDs that don't exist in the available tools list,
+ * while preserving wildcard selections and removing empty selections.
+ */
+export function cleanInvalidToolReferences(
+  data: AgentEditState,
+  availableTools: ToolDefinition[]
+): AgentEditState {
+  const validToolIds = new Set(availableTools.map((tool) => tool.id));
+  const cleanedTools = data.configuration.tools
+    .map((selection) => ({
+      ...selection,
+      tool_ids: selection.tool_ids.filter((id) => id === '*' || validToolIds.has(id)),
+    }))
+    .filter((selection) => selection.tool_ids.length > 0);
+
+  return {
+    ...data,
+    configuration: {
+      ...data.configuration,
+      tools: cleanedTools,
+    },
+  };
+}

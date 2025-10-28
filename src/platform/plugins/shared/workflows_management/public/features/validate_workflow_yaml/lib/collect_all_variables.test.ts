@@ -8,9 +8,9 @@
  */
 
 import { parseDocument } from 'yaml';
-import { WorkflowGraph } from '@kbn/workflows/graph';
-import type { WorkflowYaml } from '@kbn/workflows';
 import type { monaco } from '@kbn/monaco';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import { collectAllVariables } from './collect_all_variables';
 
 // Mock Monaco model
@@ -57,7 +57,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',
@@ -95,7 +95,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Foreach Step',
@@ -134,7 +134,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',
@@ -167,7 +167,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',
@@ -201,7 +201,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',
@@ -242,7 +242,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',
@@ -284,7 +284,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Conditional Step',
@@ -325,7 +325,7 @@ steps:
       name: 'Test Workflow',
       version: '1',
       enabled: true,
-      triggers: [{ type: 'manual', enabled: true }],
+      triggers: [{ type: 'manual' }],
       steps: [
         {
           name: 'Test Step',

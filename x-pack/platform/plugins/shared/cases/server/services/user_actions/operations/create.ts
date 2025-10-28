@@ -11,9 +11,11 @@ import type {
   CaseAssignees,
   CaseCustomField,
   CaseCustomFields,
+  CaseSettings,
   CaseUserProfile,
   UserActionAction,
   UserActionType,
+  SettingsUserActionPayload,
 } from '../../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
@@ -39,8 +41,14 @@ import type {
   UserActionsDict,
   CreateUserActionArgs,
   BulkCreateUserActionArgs,
+  TypedUserActionItem,
 } from '../types';
-import { isAssigneesArray, isCustomFieldsArray, isStringArray } from '../type_guards';
+import {
+  isAssigneesArray,
+  isCaseSettings,
+  isCustomFieldsArray,
+  isStringArray,
+} from '../type_guards';
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
 
@@ -129,6 +137,16 @@ export class UserActionPersister {
       isCustomFieldsArray(newValue)
     ) {
       return this.buildCustomFieldsUserActions({ ...params, originalValue, newValue });
+    } else if (
+      field === UserActionTypes.settings &&
+      isCaseSettings(newValue) &&
+      isCaseSettings(originalValue)
+    ) {
+      return this.buildSettingsUserActions({
+        ...params,
+        originalValue,
+        newValue,
+      });
     } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
@@ -161,6 +179,34 @@ export class UserActionPersister {
     });
 
     return this.buildAddDeleteUserActions(params, createPayload, UserActionTypes.tags);
+  }
+
+  private buildSettingsUserActions(params: TypedUserActionItem<CaseSettings>) {
+    const { newValue, originalValue, caseId, owner, user } = params;
+    const settingKeys = ['syncAlerts', 'extractObservables'] as const;
+    const payload: SettingsUserActionPayload = {
+      settings: {},
+    };
+    for (const key of settingKeys) {
+      const addedNewValue = originalValue[key] === undefined && newValue[key] !== undefined;
+      const valueChanged =
+        newValue[key] !== undefined &&
+        originalValue[key] !== undefined &&
+        newValue[key] !== originalValue[key];
+      if (addedNewValue || valueChanged) {
+        payload.settings[key] = newValue[key];
+      }
+    }
+
+    const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.settings);
+    const fieldUserAction = userActionBuilder?.build({
+      caseId,
+      owner,
+      user,
+      payload,
+    });
+
+    return fieldUserAction ? [fieldUserAction] : [];
   }
 
   private buildCustomFieldsUserActions(params: TypedUserActionDiffedItems<CaseCustomField>) {

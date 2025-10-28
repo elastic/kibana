@@ -130,7 +130,7 @@ export async function getSourceSpanIds({
   const optionalFields = asMutableArray([SPAN_DESTINATION_SERVICE_RESOURCE] as const);
   const response = await apmEventClient.search('diagnostics_get_source_node_span_samples', {
     apm: {
-      events: [ProcessorEvent.span],
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     track_total_hits: false,
     size: 0,

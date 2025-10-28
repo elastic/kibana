@@ -14,22 +14,24 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldStatsResponse } from '@kbn/unified-field-list/src/types';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
-import { operationDefinitionMap } from '..';
-import { defaultLabel } from '../filters';
-import { isReferenced } from '../../layer_helpers';
-
-import type { FramePublicAPI, IndexPattern, IndexPatternField } from '../../../../../types';
 import type {
   FiltersIndexPatternColumn,
-  FieldBasedOperationErrorMessage,
+  FormBasedLayer,
   GenericIndexPatternColumn,
-} from '..';
-import type { TermsIndexPatternColumn } from './types';
-import type { LastValueIndexPatternColumn } from '../last_value';
-import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
-import type { PercentileIndexPatternColumn } from '../percentile';
+  IndexPattern,
+  IndexPatternField,
+  LastValueIndexPatternColumn,
+  PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
+  TermsIndexPatternColumn,
+  FramePublicAPI,
+} from '@kbn/lens-common';
+import { operationDefinitionMap } from '..';
+import { filtersDefaultLabel } from '../filters/filters';
+import { isReferenced } from '../../layer_helpers';
 
-import type { FormBasedLayer } from '../../../types';
+import type { FieldBasedOperationErrorMessage } from '..';
+
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes, MAX_TERMS_OTHER_ENABLED } from './constants';
 import { isColumnOfType } from '../helpers';
 import {
@@ -229,7 +231,7 @@ export function getDisallowedTermsMessage(
                               query: '*',
                               language: 'kuery',
                             },
-                            label: defaultLabel,
+                            label: filtersDefaultLabel,
                           },
                         ],
                 },

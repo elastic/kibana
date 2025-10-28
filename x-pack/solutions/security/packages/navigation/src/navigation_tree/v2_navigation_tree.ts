@@ -12,12 +12,18 @@ import { defaultNavigationTree } from '../../navigation_tree';
 import { SecurityPageName } from '../..';
 import { i18nStrings, securityLink } from '../../links';
 
-const LazyIconBulb = lazy(() =>
-  import('./v2_icons/bulb').then(({ iconBulb }) => ({ default: iconBulb }))
-);
-
 const LazyIconWorkflow = lazy(() =>
   import('./v2_icons/workflow').then(({ iconWorkflow }) => ({ default: iconWorkflow }))
+);
+
+// TODO delete when the `bullseye` EUI icon has been updated
+const LazyIconFindings = lazy(() =>
+  import('./v2_icons/findings').then(({ iconFindings }) => ({ default: iconFindings }))
+);
+
+// TODO delete when the EUI icon has been updated
+const LazyIconIntelligence = lazy(() =>
+  import('./v2_icons/intelligence').then(({ iconIntelligence }) => ({ default: iconIntelligence }))
 );
 
 export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
@@ -52,15 +58,22 @@ export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
     link: securityLink(SecurityPageName.attackDiscovery),
     sideNavVersion: 'v2',
   },
-  defaultNavigationTree.assets(core, { sideNavVersion: 'v2' }),
+  {
+    id: SecurityPageName.cloudSecurityPostureFindings,
+    // TODO change this to the `bullseye` EUI icon when available
+    iconV2: LazyIconFindings,
+    link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
+    sideNavVersion: 'v2',
+  },
   defaultNavigationTree.cases({ sideNavVersion: 'v2' }),
   defaultNavigationTree.entityAnalytics({ sideNavVersion: 'v2' }),
   defaultNavigationTree.explore({ sideNavVersion: 'v2' }),
   defaultNavigationTree.investigations({ sideNavVersion: 'v2' }),
   {
-    id: SecurityPageName.cloudSecurityPostureFindings,
-    iconV2: 'bug',
-    link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
+    id: SecurityPageName.threatIntelligence,
+    // TODO change this to the `compute` EUI icon when available
+    iconV2: LazyIconIntelligence,
+    link: securityLink(SecurityPageName.threatIntelligence),
     sideNavVersion: 'v2',
   },
   {
@@ -69,12 +82,6 @@ export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
     link: securityLink(SecurityPageName.assetInventory),
     sideNavVersion: 'v2',
   },
-  {
-    id: SecurityPageName.threatIntelligence,
-    // TODO: update icon from EUI
-    iconV2: LazyIconBulb,
-    link: securityLink(SecurityPageName.threatIntelligence),
-    sideNavVersion: 'v2',
-  },
+  defaultNavigationTree.assets(core, { sideNavVersion: 'v2' }),
   defaultNavigationTree.ml({ sideNavVersion: 'v2' }),
 ];

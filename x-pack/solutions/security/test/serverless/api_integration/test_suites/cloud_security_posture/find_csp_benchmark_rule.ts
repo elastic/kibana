@@ -10,8 +10,7 @@ import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-
-import { createPackagePolicy } from './helper';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
 

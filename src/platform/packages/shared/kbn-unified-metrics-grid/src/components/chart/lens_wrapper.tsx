@@ -13,10 +13,10 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { ChartTitle } from './chart_title';
-import { useMetricsGridState } from '../../hooks';
 
 export type LensWrapperProps = {
   lensProps: LensProps;
+  titleHighlight?: string;
   onViewDetails?: () => void;
   onCopyToDashboard?: () => void;
   syncTooltips?: boolean;
@@ -31,14 +31,13 @@ export function LensWrapper({
   onBrushEnd,
   onFilter,
   abortController,
+  titleHighlight,
   onViewDetails,
   onCopyToDashboard,
   syncTooltips,
   syncCursor,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
-
-  const { searchTerm } = useMetricsGridState();
 
   const { EmbeddableComponent } = services.lens;
 
@@ -81,7 +80,7 @@ export function LensWrapper({
 
   return (
     <div css={chartCss}>
-      <ChartTitle searchTerm={searchTerm} title={lensProps.attributes.title} />
+      <ChartTitle highlight={titleHighlight} title={lensProps.attributes.title} />
       <EmbeddableComponent
         {...lensProps}
         title={lensProps.attributes.title}

@@ -2297,6 +2297,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.failureStoreRetention",
+            "type": "Object",
+            "tags": [],
+            "label": "failureStoreRetention",
+            "description": [],
+            "signature": [
+              "{ customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.DataStream.lifecycle",
             "type": "CompoundType",
             "tags": [],
@@ -3283,7 +3297,9 @@
               },
               " | undefined; data_stream_options?: ",
               "DataStreamOptions",
-              " | undefined; } | undefined"
+              " | undefined; lifecycle?: (",
+              "IndicesDataStreamLifecycleWithRollover",
+              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; globalMaxRetention?: string | undefined; }) | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
@@ -4001,7 +4017,7 @@
         "label": "TemplateType",
         "description": [],
         "signature": [
-          "\"default\" | \"managed\" | \"system\" | \"cloudManaged\""
+          "\"system\" | \"default\" | \"managed\" | \"cloudManaged\""
         ],
         "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,

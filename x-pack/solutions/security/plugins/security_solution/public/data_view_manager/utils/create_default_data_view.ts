@@ -8,12 +8,14 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import type { KibanaDataView, SourcererModel } from '../../sourcerer/store/model';
 import { initDataView } from '../../sourcerer/store/model';
 import { createSourcererDataView } from '../../sourcerer/containers/create_sourcerer_data_view';
 import {
-  DEFAULT_DATA_VIEW_ID,
   DEFAULT_ALERT_DATA_VIEW_ID,
+  DEFAULT_ATTACK_DATA_VIEW_ID,
+  DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
 } from '../../../common/constants';
@@ -26,19 +28,25 @@ export interface CreateDefaultDataViewDependencies {
   dataViewService: DataViewsServicePublic;
   spaces: SpacesPluginStart;
   skip?: boolean;
+  /**
+   * If true, will create the attack data view along with the default and alert data views.
+   */
+  attacksAlertsAlignmentEnabled?: boolean;
 }
 
 export const createDefaultDataView = async ({
   uiSettings,
   dataViewService,
   spaces,
-  skip,
+  skip = false,
   http,
   application,
+  attacksAlertsAlignmentEnabled = false,
 }: CreateDefaultDataViewDependencies) => {
   const configPatternList = uiSettings.get(DEFAULT_INDEX_KEY);
   let defaultDataView: SourcererModel['defaultDataView'];
   let alertDataView: SourcererModel['alertDataView'];
+  let attackDataView: SourcererModel['attackDataView'];
   let kibanaDataViews: SourcererModel['kibanaDataViews'];
 
   let signal: { name: string | null; index_mapping_outdated: null | boolean } = {
@@ -51,6 +59,7 @@ export const createDefaultDataView = async ({
       kibanaDataViews: [],
       defaultDataView: { ...initDataView },
       alertDataView: { ...initDataView },
+      attackDataView: { ...initDataView },
       signal,
     };
   }
@@ -63,15 +72,28 @@ export const createDefaultDataView = async ({
       });
     }
 
+    const currentSpaceId = (await spaces?.getActiveSpace())?.id;
+
     // check for/generate default Security Solution Kibana data view
     const sourcererDataView = await createSourcererDataView({
-      body: {
+      dataViewService,
+      defaultDetails: {
+        dataViewId: `${DEFAULT_DATA_VIEW_ID}-${currentSpaceId}`,
         patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
       },
-      dataViewService,
-      dataViewId: `${DEFAULT_DATA_VIEW_ID}-${(await spaces?.getActiveSpace())?.id}`,
-      alertDataViewId: `${DEFAULT_ALERT_DATA_VIEW_ID}-${(await spaces?.getActiveSpace())?.id}`,
-      signalIndexName: signal.name ?? undefined,
+      alertDetails: {
+        dataViewId: `${DEFAULT_ALERT_DATA_VIEW_ID}-${currentSpaceId}`,
+        indexName: signal.name ?? undefined,
+      },
+      ...(attacksAlertsAlignmentEnabled && {
+        attackDetails: {
+          dataViewId: `${DEFAULT_ATTACK_DATA_VIEW_ID}-${currentSpaceId}`,
+          patternList: [
+            `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${currentSpaceId}`,
+            ...(signal.name != null ? [signal.name] : []),
+          ],
+        },
+      }),
     });
 
     if (sourcererDataView === undefined) {
@@ -79,6 +101,7 @@ export const createDefaultDataView = async ({
     }
     defaultDataView = { ...initDataView, ...sourcererDataView.defaultDataView };
     alertDataView = { ...initDataView, ...sourcererDataView.alertDataView };
+    attackDataView = { ...initDataView, ...sourcererDataView.attackDataView };
     kibanaDataViews = sourcererDataView.kibanaDataViews.map((dataView: KibanaDataView) => ({
       ...initDataView,
       ...dataView,
@@ -86,8 +109,9 @@ export const createDefaultDataView = async ({
   } catch (error) {
     defaultDataView = { ...initDataView, error };
     alertDataView = { ...initDataView, error };
+    attackDataView = { ...initDataView, error };
     kibanaDataViews = [];
   }
 
-  return { kibanaDataViews, defaultDataView, alertDataView, signal };
+  return { kibanaDataViews, defaultDataView, alertDataView, attackDataView, signal };
 };

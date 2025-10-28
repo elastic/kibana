@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { AgentGrouper } from './agent_grouper';
+import type { FleetServerAgentComponentStatus, AgentStatus } from '@kbn/fleet-plugin/common';
+import type { FleetServerAgentComponent } from '@kbn/fleet-plugin/common/types/models/agent';
+import { AgentGrouper, generateAgentOption } from './agent_grouper';
 import type { Group, GroupedAgent, GroupOptionValue } from './types';
-import { AGENT_GROUP_KEY } from './types';
+import { AGENT_GROUP_KEY, AGENT_STATUS_COLORS } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { ALL_AGENTS_LABEL } from './translations';
+import { ALL_AGENTS_LABEL, AGENT_SELECTION_LABEL } from './translations';
 
 type GroupData = {
   [key in Exclude<AGENT_GROUP_KEY, AGENT_GROUP_KEY.All | AGENT_GROUP_KEY.Agent>]: Group[];
@@ -22,10 +24,17 @@ export function genGroup(name: string) {
   };
 }
 
-export function genAgent(policyId: string, hostname: string, id: string): GroupedAgent {
+export function genAgent(
+  policyId: string,
+  hostname: string,
+  id: string,
+  status: AgentStatus = 'online',
+  components?: FleetServerAgentComponent[]
+): GroupedAgent {
   return {
-    status: 'online',
+    status,
     policy_id: policyId,
+    components,
     local_metadata: {
       elastic: {
         agent: {
@@ -39,6 +48,19 @@ export function genAgent(policyId: string, hostname: string, id: string): Groupe
         hostname,
       },
     },
+  };
+}
+
+// Helper to create component with proper typing
+function createComponent(
+  type: string,
+  status: FleetServerAgentComponentStatus
+): FleetServerAgentComponent {
+  return {
+    id: uuidv4(),
+    type,
+    status,
+    message: 'Test component',
   };
 }
 
@@ -135,6 +157,169 @@ describe('AgentGrouper', () => {
         expect(opt.key).toEqual(ag.local_metadata.elastic.agent.id);
         expect(opt.value?.id).toEqual(ag.local_metadata.elastic.agent.id);
       });
+    });
+  });
+
+  describe('generateAgentOption - agent availability', () => {
+    const policyId = uuidv4();
+
+    it('should mark online agents with healthy Osquery as enabled with normal color', () => {
+      const agentData: GroupedAgent[] = [
+        genAgent(policyId, 'online-agent', uuidv4(), 'online', [
+          createComponent('osquery', 'HEALTHY'),
+        ]),
+      ];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      const option = result.options[0];
+
+      expect(option.disabled).toBe(false);
+      expect(option.color).not.toBe(AGENT_STATUS_COLORS.DEGRADED);
+      expect(option.color).not.toBe(AGENT_STATUS_COLORS.UNAVAILABLE);
+    });
+
+    it('should mark degraded agents with healthy Osquery as enabled with warning color', () => {
+      const agentData: GroupedAgent[] = [
+        genAgent(policyId, 'degraded-agent', uuidv4(), 'degraded', [
+          createComponent('osquery', 'HEALTHY'),
+        ]),
+      ];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      const option = result.options[0];
+
+      expect(option.disabled).toBe(false); // Still selectable
+      expect(option.color).toBe(AGENT_STATUS_COLORS.DEGRADED); // Orange
+    });
+
+    it('should mark offline agents as disabled with danger color', () => {
+      const agentData: GroupedAgent[] = [
+        genAgent(policyId, 'offline-agent', uuidv4(), 'offline', [
+          createComponent('osquery', 'HEALTHY'),
+        ]),
+      ];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      const option = result.options[0];
+
+      expect(option.disabled).toBe(true); // Not selectable
+      expect(option.color).toBe(AGENT_STATUS_COLORS.UNAVAILABLE); // Red
+    });
+
+    it('should mark agents with failed Osquery as disabled with danger color', () => {
+      const agentData: GroupedAgent[] = [
+        genAgent(policyId, 'osquery-failed-agent', uuidv4(), 'online', [
+          createComponent('osquery', 'FAILED'),
+        ]),
+      ];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      const option = result.options[0];
+
+      expect(option.disabled).toBe(true); // Not selectable - Osquery won't work
+      expect(option.color).toBe(AGENT_STATUS_COLORS.UNAVAILABLE); // Red
+    });
+
+    it('should mark agents without Osquery component as disabled', () => {
+      const agentData: GroupedAgent[] = [
+        genAgent(policyId, 'no-osquery-agent', uuidv4(), 'online', [
+          createComponent('filebeat', 'HEALTHY'),
+        ]),
+      ];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      const option = result.options[0];
+
+      expect(option.disabled).toBe(true); // Not selectable - no Osquery
+      expect(option.color).toBe(AGENT_STATUS_COLORS.UNAVAILABLE); // Red
+    });
+
+    it('should mark agents without components as disabled', () => {
+      const agentData: GroupedAgent[] = [genAgent(policyId, 'no-components-agent', uuidv4())];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      const option = result.options[0];
+
+      expect(option.disabled).toBe(true); // Not selectable - no components
+      expect(option.color).toBe(AGENT_STATUS_COLORS.UNAVAILABLE); // Red
+    });
+
+    it('should mark agents with BOTH agent AND Osquery DEGRADED as disabled (double degradation)', () => {
+      const agentData: GroupedAgent[] = [
+        genAgent(policyId, 'degraded-both', uuidv4(), 'degraded', [
+          createComponent('osquery', 'DEGRADED'),
+        ]),
+      ];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      const option = result.options[0];
+
+      expect(option.disabled).toBe(true); // Not selectable - both degraded is too unreliable
+      expect(option.color).toBe(AGENT_STATUS_COLORS.UNAVAILABLE); // Red
+    });
+
+    it('should mark online agent with DEGRADED Osquery as enabled with warning color', () => {
+      const agentData: GroupedAgent[] = [
+        genAgent(policyId, 'osquery-degraded', uuidv4(), 'online', [
+          createComponent('osquery', 'DEGRADED'),
+        ]),
+      ];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      const option = result.options[0];
+
+      expect(option.disabled).toBe(false); // Still selectable - only Osquery degraded
+      expect(option.color).toBe(AGENT_STATUS_COLORS.DEGRADED); // Orange
+    });
+
+    it('should handle multiple agents with different statuses correctly', () => {
+      const agentData: GroupedAgent[] = [
+        genAgent(policyId, 'online-agent', uuidv4(), 'online', [
+          createComponent('osquery', 'HEALTHY'),
+        ]),
+        genAgent(policyId, 'degraded-agent', uuidv4(), 'degraded', [
+          createComponent('osquery', 'HEALTHY'),
+        ]),
+        genAgent(policyId, 'offline-agent', uuidv4(), 'offline', [
+          createComponent('osquery', 'HEALTHY'),
+        ]),
+        genAgent(policyId, 'failed-osquery', uuidv4(), 'online', [
+          createComponent('osquery', 'FAILED'),
+        ]),
+        genAgent(policyId, 'double-degraded', uuidv4(), 'degraded', [
+          createComponent('osquery', 'DEGRADED'),
+        ]),
+        genAgent(policyId, 'online-osquery-degraded', uuidv4(), 'online', [
+          createComponent('osquery', 'DEGRADED'),
+        ]),
+      ];
+
+      const result = generateAgentOption(AGENT_SELECTION_LABEL, AGENT_GROUP_KEY.Agent, agentData);
+      const options = result.options;
+
+      // Online with healthy Osquery - enabled
+      expect(options[0].disabled).toBe(false);
+      expect(options[0].color).not.toBe(AGENT_STATUS_COLORS.UNAVAILABLE);
+
+      // Degraded agent with healthy Osquery - enabled, warning color
+      expect(options[1].disabled).toBe(false);
+      expect(options[1].color).toBe(AGENT_STATUS_COLORS.DEGRADED);
+
+      // Offline - disabled, danger color
+      expect(options[2].disabled).toBe(true);
+      expect(options[2].color).toBe(AGENT_STATUS_COLORS.UNAVAILABLE);
+
+      // Failed Osquery - disabled, danger color
+      expect(options[3].disabled).toBe(true);
+      expect(options[3].color).toBe(AGENT_STATUS_COLORS.UNAVAILABLE);
+
+      // Both degraded - disabled, danger color
+      expect(options[4].disabled).toBe(true);
+      expect(options[4].color).toBe(AGENT_STATUS_COLORS.UNAVAILABLE);
+
+      // Online agent with degraded Osquery - enabled, warning color
+      expect(options[5].disabled).toBe(false);
+      expect(options[5].color).toBe(AGENT_STATUS_COLORS.DEGRADED);
     });
   });
 });

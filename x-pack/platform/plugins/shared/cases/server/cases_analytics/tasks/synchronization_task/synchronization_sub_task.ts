@@ -17,8 +17,8 @@ import type {
   IndicesGetMappingResponse,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import type { Owner } from '../../../../common/constants/types';
-import { isRetryableEsClientError } from '../../utils';
 import { type CAISyncType, SYNCHRONIZATION_QUERIES_DICTIONARY } from '../../constants';
 
 const LOOKBACK_WINDOW = 5 * 60 * 1000;

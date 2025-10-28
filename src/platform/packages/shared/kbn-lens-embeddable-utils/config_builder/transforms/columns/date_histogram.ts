@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiDateHistogramOperation } from '../../schema/bucket_ops';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 

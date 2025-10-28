@@ -62,7 +62,7 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
     return from(search()).pipe(
       expand(() => {
         const elapsedTime = Date.now() - startTime;
-        return timer(getPollInterval(elapsedTime)).pipe(switchMap(search));
+        return timer(getPollInterval(elapsedTime)).pipe(switchMap(() => search()));
       }),
       tap((response) => {
         if (isAbortResponse(response)) {

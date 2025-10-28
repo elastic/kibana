@@ -7,24 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  euiFontSize,
   EuiModal,
+  EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiButton,
-  EuiFlexItem,
-  EuiFlexGroup,
   useGeneratedHtmlId,
-  euiFontSize,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor, monaco } from '@kbn/code-editor';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { CodeEditor, monaco } from '@kbn/code-editor';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 export function TestStepModal({

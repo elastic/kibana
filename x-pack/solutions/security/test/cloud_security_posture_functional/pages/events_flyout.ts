@@ -193,6 +193,38 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('event');
     });
 
+    it('expanded flyout - test IP popover functionality', async () => {
+      await networkEventsPage.navigateToNetworkEventsPage(
+        `${networkEventsPage.getAbsoluteTimerangeFilter(
+          '2024-09-01T00:00:00.000Z',
+          '2024-09-02T00:00:00.000Z'
+        )}&${networkEventsPage.getFlyoutFilter('1')}`
+      );
+      await networkEventsPage.waitForListToHaveEvents();
+
+      await networkEventsPage.flyout.expandVisualizations();
+      await networkEventsPage.flyout.assertGraphPreviewVisible();
+      await networkEventsPage.flyout.assertGraphNodesNumber(3);
+
+      await expandedFlyoutGraph.expandGraph();
+      await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertGraphNodesNumber(3);
+
+      await expandedFlyoutGraph.addFilter({
+        field: 'event.action',
+        operation: 'is',
+        value: 'google.iam.admin.v1.CreateRole',
+      });
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+      await expandedFlyoutGraph.clickOnIpsPlusButton();
+      await expandedFlyoutGraph.assertIpsPopoverIsOpen();
+      await expandedFlyoutGraph.assertIpsPopoverContainsIps(['10.0.0.1', '10.0.0.3']);
+      await expandedFlyoutGraph.clickOnFirstIpInPopover();
+      await expandedFlyoutGraph.assertPreviewPopoverIsOpen();
+    });
+
     it('show related alerts', async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await networkEventsPage.navigateToNetworkEventsPage(

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { extractNunjucksVariables } from './extract_nunjucks_variables/extract_nunjucks_variables';
+export { extractTemplateVariables } from './extract_template_variables/extract_template_variables';
 export { findInputsInGraph } from './find_inputs_in_graph/find_inputs_in_graph';
 export { extractSchemaPropertyPaths } from './extract_schema_property_paths/extract_schema_property_paths';
 export { parseJsPropertyAccess } from './parse_js_property_access/parse_js_property_access';
 export { extractPropertyPathsFromKql } from './extract_property_paths_from_kql/extract_property_paths_from_kql';
+export { isPropertyAccess } from './is_property_access/is_property_access';

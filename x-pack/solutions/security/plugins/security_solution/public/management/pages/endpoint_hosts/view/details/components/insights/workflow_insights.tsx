@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Moment } from 'moment';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
@@ -26,11 +27,20 @@ interface WorkflowInsightsProps {
 }
 
 export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProps) => {
-  const [isScanButtonDisabled, setIsScanButtonDisabled] = useState(true);
-  const [scanCompleted, setIsScanCompleted] = useState(false);
+  const [isScanRunning, setIsScanRunning] = useState(true);
   const [userTriggeredScan, setUserTriggeredScan] = useState(false);
   const [insightGenerationFailures, setInsightGenerationFailures] = useState(false);
   const [expectedCount, setExpectedCount] = useState<number | null>(null);
+  const [expectedTimestamp, setExpectedTimestamp] = useState<Moment | null>(null);
+
+  const onLatestScanSuccess = useCallback((count: number, timestamp: Moment | null) => {
+    if (count === 0) {
+      setIsScanRunning(false);
+    }
+
+    setExpectedCount(count);
+    setExpectedTimestamp(timestamp);
+  }, []);
 
   const defendInsightsPolicyResponseFailureEnabled = useIsExperimentalFeatureEnabled(
     'defendInsightsPolicyResponseFailure'
@@ -46,11 +56,6 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     setInsightGenerationFailures(true);
   };
 
-  const [setScanOngoing, setScanCompleted] = [
-    () => setIsScanCompleted(false),
-    () => setIsScanCompleted(true),
-  ];
-
   const insightTypes = useMemo<DefendInsightType[]>(() => {
     const typesToQuery: DefendInsightType[] = [DefendInsightType.Enum.incompatible_antivirus];
     if (
@@ -64,53 +69,33 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   }, [defendInsightsPolicyResponseFailureEnabled, kbStatus]);
 
   // refetch is automatically triggered when expectedCount changes
-  const { data: insights, isFetching: isFetchingInsights } = useFetchInsights({
+  const { data: insights } = useFetchInsights({
     endpointId,
-    onSuccess: setScanCompleted,
-    scanCompleted,
+    onSuccess: () => setIsScanRunning(false),
+    scanCompleted: !isScanRunning,
     expectedCount,
+    expectedTimestamp,
     insightTypes,
   });
 
-  const {
-    data: latestScan,
-    isLoading: isLoadingLatestScan,
-    refetch: refetchLatestScan,
-  } = useFetchLatestScan({
+  const { refetch: refetchLatestScan } = useFetchLatestScan({
     endpointId,
     insightTypes,
-    isPolling: isScanButtonDisabled,
-    onSuccess: setExpectedCount,
+    isPolling: isScanRunning,
+    onSuccess: onLatestScanSuccess,
     onInsightGenerationFailure,
   });
 
-  const { mutate: triggerScan, isLoading: isPostDefendInsightsLoading } = useTriggerScan({
+  const { mutate: triggerScan } = useTriggerScan({
     onSuccess: refetchLatestScan,
   });
 
   useEffect(() => {
     setExpectedCount(null);
-    setIsScanCompleted(false);
-  }, [endpointId, setExpectedCount, setIsScanCompleted]);
-
-  useEffect(() => {
-    const isInsightRunning = latestScan?.hasRunning ?? false;
-    const initialFetchNotStarted = expectedCount === null;
-    setIsScanButtonDisabled(
-      isPostDefendInsightsLoading ||
-        isLoadingLatestScan ||
-        isInsightRunning ||
-        isFetchingInsights ||
-        initialFetchNotStarted // hold off until we know `expectedCount` (even 0)
-    );
-  }, [
-    endpointId,
-    isPostDefendInsightsLoading,
-    isLoadingLatestScan,
-    latestScan,
-    expectedCount,
-    isFetchingInsights,
-  ]);
+    setExpectedTimestamp(null);
+    setIsScanRunning(true);
+    setUserTriggeredScan(false);
+  }, [endpointId]);
 
   const lastResultCaption = useMemo(() => {
     if (!insights?.length) {
@@ -129,7 +114,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   }, [insights]);
 
   const activeInsights = useMemo(() => {
-    if (isScanButtonDisabled) {
+    if (isScanRunning) {
       return [];
     }
 
@@ -137,7 +122,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     return (insights ?? []).filter(
       (insight) => insightTypesSet.has(insight.type) && insight.action.type === ActionType.Refreshed
     );
-  }, [isScanButtonDisabled, insights, insightTypes]);
+  }, [isScanRunning, insights, insightTypes]);
 
   const onScanButtonClick = useCallback(
     ({ actionTypeId, connectorId }: { actionTypeId: string; connectorId: string }) => {
@@ -145,8 +130,9 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
         setInsightGenerationFailures(false);
       }
 
-      setScanOngoing();
+      setIsScanRunning(true);
       setExpectedCount(null);
+      setExpectedTimestamp(moment());
       if (!userTriggeredScan) {
         setUserTriggeredScan(true);
       }
@@ -157,15 +143,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
         insightTypes,
       });
     },
-    [
-      insightGenerationFailures,
-      setScanOngoing,
-      userTriggeredScan,
-      triggerScan,
-      endpointId,
-      setExpectedCount,
-      insightTypes,
-    ]
+    [insightGenerationFailures, userTriggeredScan, triggerScan, endpointId, insightTypes]
   );
 
   return (
@@ -187,7 +165,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
       </EuiFlexGroup>
       <EuiSpacer size={'m'} />
       <WorkflowInsightsScanSection
-        isScanButtonDisabled={isScanButtonDisabled}
+        isScanButtonDisabled={isScanRunning}
         onScanButtonClick={onScanButtonClick}
         inferenceEnabled={inferenceEnabled}
         kbStatus={kbStatus}
@@ -196,9 +174,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
       <EuiSpacer size={'m'} />
       <WorkflowInsightsResults
         results={activeInsights}
-        scanCompleted={
-          !isScanButtonDisabled && !insightGenerationFailures && scanCompleted && userTriggeredScan
-        }
+        scanCompleted={!isScanRunning && !insightGenerationFailures && userTriggeredScan}
         endpointId={endpointId}
       />
     </>

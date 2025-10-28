@@ -17,6 +17,7 @@ export const transformRequest = ({
   start,
   sort_field,
   sort_order,
+  initiator,
 }: FindBackfillRequestQueryV1): FindBackfillParams => ({
   end,
   page,
@@ -25,4 +26,5 @@ export const transformRequest = ({
   start,
   sortField: sort_field,
   sortOrder: sort_order,
+  initiator,
 });

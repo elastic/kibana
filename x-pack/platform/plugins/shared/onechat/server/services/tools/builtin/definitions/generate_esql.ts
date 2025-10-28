@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import { indexExplorer, generateEsql } from '@kbn/onechat-genai-utils';
+import { generateEsql } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -38,22 +38,9 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
     ) => {
       const model = await modelProvider.getDefaultModel();
 
-      let selectedTarget = index;
-      if (!selectedTarget) {
-        const {
-          resources: [selectedResource],
-        } = await indexExplorer({
-          nlQuery,
-          esClient: esClient.asCurrentUser,
-          limit: 1,
-          model,
-        });
-        selectedTarget = selectedResource.name;
-      }
-
       const esqlResponse = await generateEsql({
         nlQuery,
-        index: selectedTarget,
+        index,
         additionalContext: context,
         model,
         esClient: esClient.asCurrentUser,

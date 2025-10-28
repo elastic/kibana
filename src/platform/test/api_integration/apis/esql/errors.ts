@@ -62,6 +62,9 @@ function createIndexRequest(
           if (type === 'cartesian_shape') {
             esType = 'shape';
           }
+          if (type === 'aggregate_metric_double') {
+            esType = 'double';
+          }
           if (type === 'unsupported' || type === 'function_named_parameters') {
             esType = 'integer_range';
           }
