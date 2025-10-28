@@ -260,7 +260,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     // plugins.onechat.tools.register(securityLabsKnowledgeInternalTool(core.getStartServices));
     // plugins.onechat.tools.register(createFetchSiemPromptsTool(core.getStartServices));
     plugins.onechat.tools.register(entityRiskScoreToolInternal());
-
     plugins.onechat.agents.register(entityAnalyticsAgentCreator());
 
     registerDeprecations({ core, config: this.config, logger: this.logger });

@@ -41,22 +41,10 @@ Risk score: Entity risk scoring is an advanced Elastic Security analytics featur
 Asset criticality: Allows you to classify your organization’s entities based on various operational factors that are important to your organization.
 Privileged user monitoring: Allows you to track the activity of users with elevated permissions, such as system administrators or users with access to sensitive data.
 Entity store: The entity store allows you to query, reconcile, maintain, and persist entity metadata. The entity store can hold any entity type observed by Elastic Security. It allows you to view and query select entities represented in your indices without needing to perform real-time searches of observable data. 
-Metadata includes:
-* Ingested log data
-* Data from integrated identity providers (such as Active Directory, EntraID, and Okta)
-* Data from internal and external alerts
-* External asset repository data
-* Asset criticality data
-* Entity risk score data
 
 If you need information about several type of entities or information to retrieve, you must call this tool multiple times.
 This tool provider crucial information about the entity analytics domain and kibana security solution but it does not query data. You must call other tools after this tool to query data from the environment.
 `;
-
-// the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or
-// when answering questions about how critical or risky an entity is
-//
-// . When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.`;
 
 const getRiskScoreInformation = (entityType: EntityType, spaceId: string) => {
   const riskScoreIndexPattern = getRiskScoreLatestIndex(spaceId);
@@ -65,7 +53,7 @@ const getRiskScoreInformation = (entityType: EntityType, spaceId: string) => {
   return `This is a set of rules that you must follow strictly:
   * Use the latest risk score index pattern: ${riskScoreIndexPattern} when answering questions about the current risk score of entities.
   * Use the risk score time series patterns: ${riskScoreTimeSeriesIndexPattern} when answering questions about how the risk score changes over time.
-  * When querying the risk score for a entity you must **ALWAYS** use the normalized field  '${EntityTypeToScoreField[entityType]}'.
+  * When querying the risk score for a entity you must **ALWAYS** use the normalized field '${EntityTypeToScoreField[entityType]}'.
   * The field '${EntityTypeToLevelField[entityType]}' contains a textual description of the risk level.
   * The inputs field inside the risk score document contains the 10 highest-risk documents (sorted by 'kibana.alert.risk_score') that contributed to the risk score of an entity.
   * When searching the risk score of an entity of type '${entityType}' you must **ALWAYS** filter by: 'where ${EntityTypeToIdentifierField[entityType]} IS NOT NULL'
@@ -113,7 +101,6 @@ const MAP_DOMAIN_TO_INFO_BUILDER = {
   privileged_user_monitoring: getPrivilegedUserMonitoringInformation,
 } as const;
 
-// TODO general security solution information, like the dataview
 export const entityRiskScoreToolInternal = (): BuiltinToolDefinition<
   typeof entityRiskScoreInternalSchema
 > => {
@@ -126,15 +113,11 @@ export const entityRiskScoreToolInternal = (): BuiltinToolDefinition<
       { entityType, informationToRetrieve },
       { esClient, logger, request, toolProvider }
     ) => {
-      //   logger.debug(
-      //     `Entity risk score tool called with identifier: ${identifier}, type: ${identifierType}`
-      //   );
-
       try {
         // Undefined for now:
-        // timerange? Should we use the timerange from security solution timepicker?
-        // Get space ID from request context - use default space for now
-        // what happen when an engine is disabled? Can we return a message saying the engine is disabled and what to do to enable it?
+        // * timerange? Should we use the timerange from security solution timepicker?
+        // * Get space ID from request context - use default space for now
+        // * what happen when an engine is disabled? Can we return a message saying the engine is disabled and what to do to enable it?
         const spaceId = 'default';
 
         return {
