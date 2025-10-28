@@ -308,7 +308,7 @@ describe('fetchGraph', () => {
   });
 
   describe('non-enriched entities', () => {
-    it('should include "Entities" as fallback for actorEntityGroup and targetEntityGroup in query', async () => {
+    it('should use NonEnriched placeholder for entity groups before STATS, then update after', async () => {
       (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
         .fn()
         .mockResolvedValueOnce({
@@ -334,15 +334,35 @@ describe('fetchGraph', () => {
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
-      // Verify query contains the Entities fallback logic for entity groups
-      expect(query).toContain('EVAL actorEntityGroup = CASE(');
-      expect(query).toContain('EVAL targetEntityGroup = CASE(');
-      expect(query).toContain('"Entities"');
+      // Verify query uses NonEnriched placeholder before STATS
+      const statsIndex = query.indexOf('| STATS');
+      const actorGroupBeforeStats = query.indexOf('EVAL actorEntityGroup = CASE(', 0);
+      expect(actorGroupBeforeStats).toBeLessThan(statsIndex);
+      expect(query).toContain('"NonEnriched"');
+
+      // Verify query updates entity groups after STATS based on count
+      const actorGroupAfterStats = query.indexOf(
+        'EVAL actorEntityGroup = CASE(\n    actorEntityGroup == "NonEnriched"',
+        statsIndex
+      );
+      const targetGroupAfterStats = query.indexOf(
+        'EVAL targetEntityGroup = CASE(\n    targetEntityGroup == "NonEnriched"',
+        statsIndex
+      );
+
+      expect(actorGroupAfterStats).toBeGreaterThan(statsIndex);
+      expect(targetGroupAfterStats).toBeGreaterThan(statsIndex);
+
+      // Verify singular and plural entity types
+      expect(query).toContain('"Entity"'); // Singular
+      expect(query).toContain('"Entities"'); // Plural
+      expect(query).toContain('actorIdsCount == 1');
+      expect(query).toContain('targetIdsCount == 1');
 
       expect(result).toEqual([{ id: 'dummy' }]);
     });
 
-    it('should include "Entities" as fallback for actorEntityType and targetEntityType in query', async () => {
+    it('should set entity type to "Entity" (singular) for single non-enriched entity', async () => {
       (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
         .fn()
         .mockResolvedValueOnce({
@@ -368,10 +388,47 @@ describe('fetchGraph', () => {
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
-      // Verify query contains the Entities fallback logic for entity types
+      // Verify query contains logic for singular entity type
+      const statsIndex = query.indexOf('| STATS');
+      const actorTypeIndex = query.indexOf('| EVAL actorEntityType = CASE(', statsIndex);
+      expect(actorTypeIndex).toBeGreaterThan(statsIndex);
+
+      expect(query).toContain('actorIdsCount == 1');
+      expect(query).toContain('"Entity"'); // Singular
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should set entity type to "Entities" (plural) for multiple non-enriched entities', async () => {
+      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+        .fn()
+        .mockResolvedValueOnce({
+          policies: [],
+        });
+
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify query contains logic for plural entity type
       expect(query).toContain('EVAL actorEntityType = CASE(');
       expect(query).toContain('EVAL targetEntityType = CASE(');
-      expect(query).toContain('"Entities"');
+      expect(query).toContain('"Entities"'); // Plural
 
       expect(result).toEqual([{ id: 'dummy' }]);
     });
