@@ -23,13 +23,14 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.externalDetections,
       ProductFeatureKey.externalRuleActions,
       ProductFeatureKey.casesConnectors,
+      ProductFeatureKey.aiValueReport,
     ],
     // neither of these tiers are available in ai_soc product line
     essentials: [],
     complete: [],
   },
   [ProductLine.security]: {
-    search_ai_lake: [],
+    search_ai_lake: [ProductFeatureKey.aiValueReport],
     essentials: [
       ProductFeatureKey.detections,
       ProductFeatureKey.timeline,
@@ -56,6 +57,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.automaticImport,
       ProductFeatureKey.prebuiltRuleCustomization,
       ProductFeatureKey.siemMigrations,
+      ProductFeatureKey.aiValueReport,
     ],
   },
   [ProductLine.endpoint]: {

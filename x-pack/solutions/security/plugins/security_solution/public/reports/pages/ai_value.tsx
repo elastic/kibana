@@ -26,7 +26,7 @@ import { NoPrivileges } from '../../common/components/no_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 import { inputsSelectors } from '../../common/store';
-import { useAiValueRoleCheck } from '../hooks/use_ai_value_role_check';
+import { useHasSecurityCapability } from '../../helper_hooks';
 
 /**
  * The dashboard includes key performance metrics such as:
@@ -56,7 +56,7 @@ const AIValueComponent = () => {
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
-  const { hasRequiredRole, isLoading: isRoleCheckLoading } = useAiValueRoleCheck();
+  const hasSocManagementCapability = useHasSecurityCapability('socManagement');
 
   const [hasAttackDiscoveries, setHasAttackDiscoveries] = useState(false);
   const exportPDFRef = useRef<(() => void) | null>(null);
@@ -64,11 +64,7 @@ const AIValueComponent = () => {
   // since we do not have a search bar in the AI Value page, we need to sync the timerange
   useSyncTimerangeUrlParam();
 
-  if (isRoleCheckLoading) {
-    return <PageLoader />;
-  }
-
-  if (!hasRequiredRole || !canReadAlerts) {
+  if (!hasSocManagementCapability || !canReadAlerts) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
 

@@ -580,6 +580,7 @@ soc_manager:
         - feature_siemV3.execute_operations_all
         - feature_siemV3.scan_operations_all
         - feature_siemV3.workflow_insights_all
+        - feature_siemV3.soc_management_all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
