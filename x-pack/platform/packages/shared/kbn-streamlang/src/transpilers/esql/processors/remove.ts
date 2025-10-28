@@ -90,13 +90,6 @@ export function convertRemoveProcessorToESQL(processor: RemoveProcessor): ESQLAs
 
   const commands: ESQLAstCommand[] = [];
 
-  // Add missing field filter if needed (ignore_missing = false)
-  // This applies to both conditional and unconditional removal
-  const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
-  if (missingFieldFilter) {
-    commands.push(missingFieldFilter);
-  }
-
   // Check if this is conditional or unconditional removal
 
   if ('where' in processor && processor.where && !('always' in processor.where)) {
@@ -120,11 +113,15 @@ export function convertRemoveProcessorToESQL(processor: RemoveProcessor): ESQLAs
     commands.push(evalCommand);
   } else {
     // Unconditional removal: use DROP command
+    // Add missing field filter if needed (ignore_missing = false)
+    const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+    if (missingFieldFilter) {
+      commands.push(missingFieldFilter);
+    }
+
     // When by_prefix is true, also drop all nested fields (field.*)
-    // TODO: Once ESQL supports access to unmapped fields, we can make sure that "from" itself exists as well as column,
-    // so we can drop <field>,<field>.* . Right now however, that would always almost fail if "from" doesn't exist, only subobject fields.
     const dropArgs = by_prefix
-      ? [Builder.expression.column(`${from}.*`)]
+      ? [Builder.expression.column(from), Builder.expression.column(`${from}.*`)]
       : [Builder.expression.column(from)];
 
     const dropCommand = Builder.command({
