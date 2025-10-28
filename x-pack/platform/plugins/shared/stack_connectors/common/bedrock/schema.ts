@@ -21,6 +21,7 @@ export const ConfigSchema = z
     apiUrl: z.string(),
     defaultModel: z.string().default(DEFAULT_BEDROCK_MODEL),
     contextWindowLength: z.coerce.number().optional(),
+    temperature: z.coerce.number().optional(),
   })
   .strict();
 

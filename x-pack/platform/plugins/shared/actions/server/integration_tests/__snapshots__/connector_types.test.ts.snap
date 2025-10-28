@@ -18,6 +18,9 @@ Object {
           "default": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
           "type": "string",
         },
+        "temperature": Object {
+          "type": "number",
+        },
       },
       "required": Array [
         "apiUrl",
@@ -880,6 +883,9 @@ Object {
         "gcpRegion": Object {
           "type": "string",
         },
+        "temperature": Object {
+          "type": "number",
+        },
       },
       "required": Array [
         "apiUrl",
@@ -968,6 +974,9 @@ Object {
               },
               "type": "object",
             },
+            "temperature": Object {
+              "type": "number",
+            },
           },
           "required": Array [
             "apiProvider",
@@ -1006,6 +1015,9 @@ Object {
             "projectId": Object {
               "type": "string",
             },
+            "temperature": Object {
+              "type": "number",
+            },
           },
           "required": Array [
             "apiProvider",
@@ -1039,6 +1051,9 @@ Object {
                 "type": "string",
               },
               "type": "object",
+            },
+            "temperature": Object {
+              "type": "number",
             },
             "verificationMode": Object {
               "default": "full",
@@ -1253,6 +1268,9 @@ Object {
           "default": Object {},
           "properties": Object {},
           "type": "object",
+        },
+        "temperature": Object {
+          "type": "number",
         },
       },
       "required": Array [
