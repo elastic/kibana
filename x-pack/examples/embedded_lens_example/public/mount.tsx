@@ -19,7 +19,7 @@ export const mount =
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
 
-    const defaultDataView = await plugins.data.indexPatterns.getDefault();
+    const defaultDataView = await plugins.data.dataViews.getDefault();
 
     const reactElement = (
       <KibanaRenderContextProvider {...core}>

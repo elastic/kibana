@@ -10,8 +10,8 @@ jest.mock('../../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }
 jest.mock('../../../../../../detections/components/alerts_table', () => ({
   AlertsTable: () => <div data-test-subj="detection-engine-alerts-table" />,
 }));
-jest.mock('./ai_for_soc/wrapper', () => ({
-  AiForSOCAlertsTab: () => <div data-test-subj="ai4dsoc-alerts-table" />,
+jest.mock('./ease/wrapper', () => ({
+  EaseAlertsTab: () => <div data-test-subj="ease-alerts-table" />,
 }));
 
 import { render, screen } from '@testing-library/react';
@@ -52,7 +52,7 @@ describe('AlertsTab', () => {
     expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
   });
 
-  it('renders the alerts tab with AI4DSOC alerts table', () => {
+  it('renders the alerts tab with EASE alerts table', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -74,7 +74,7 @@ describe('AlertsTab', () => {
     expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
   });
 
-  it('renders DetectionEngineAlertsTable when AIForSOC is false', () => {
+  it('renders DetectionEngineAlertsTable when EASE is false', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -96,7 +96,7 @@ describe('AlertsTab', () => {
     expect(screen.getAllByTestId('detection-engine-alerts-table').length).toBe(2);
   });
 
-  it('renders AiForSOCAlertsTab when AIForSOC is true', () => {
+  it('renders EaseAlertsTab when EASE is true', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -115,7 +115,7 @@ describe('AlertsTab', () => {
       </TestProviders>
     );
 
-    expect(screen.getAllByTestId('ai4dsoc-alerts-table').length).toBe(2);
+    expect(screen.getAllByTestId('ease-alerts-table').length).toBe(2);
   });
 
   it('renders with replacements mapping alertIds', () => {

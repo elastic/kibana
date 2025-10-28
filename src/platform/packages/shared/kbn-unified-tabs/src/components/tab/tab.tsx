@@ -45,12 +45,15 @@ export interface TabProps {
   tabsSizeConfig: TabsSizeConfig;
   getTabMenuItems?: GetTabMenuItems;
   getPreviewData: (item: TabItem) => TabPreviewData;
-
   services: TabsServices;
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;
   onClose: ((item: TabItem) => Promise<void>) | undefined;
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
+  disableCloseButton?: boolean;
+  disableInlineLabelEditing?: boolean;
+  disablePreview?: boolean;
+  disableDragAndDrop?: boolean;
 }
 
 const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -77,6 +80,10 @@ export const Tab: React.FC<TabProps> = (props) => {
     onSelect,
     onClose,
     onSelectedTabKeyDown,
+    disableCloseButton = false,
+    disableInlineLabelEditing = false,
+    disablePreview = false,
+    disableDragAndDrop = false,
   } = props;
   const { euiTheme } = useEuiTheme();
   const tabLabelId = useGeneratedHtmlId({ prefix: 'tabLabel' });
@@ -129,11 +136,13 @@ export const Tab: React.FC<TabProps> = (props) => {
   const onDoubleClick = useCallback(
     (event?: MouseEvent<HTMLDivElement>) => {
       event?.stopPropagation();
-      hidePreview();
-      setActionPopover(false);
-      setIsInlineEditActive(true);
+      if (!disableInlineLabelEditing) {
+        hidePreview();
+        setActionPopover(false);
+        setIsInlineEditActive(true);
+      }
     },
-    [setIsInlineEditActive, hidePreview, setActionPopover]
+    [setIsInlineEditActive, hidePreview, setActionPopover, disableInlineLabelEditing]
   );
 
   const onEnterRenaming = useCallback(async () => {
@@ -185,7 +194,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
       <div
         ref={tabInteractiveElementRef}
-        {...dragHandleProps}
+        {...(!disableDragAndDrop ? dragHandleProps : {})}
         {...getTabAttributes(item, tabContentId)}
         data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
         aria-labelledby={tabLabelId}
@@ -252,16 +261,19 @@ export const Tab: React.FC<TabProps> = (props) => {
           <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
             {!!getTabMenuItems && (
               <EuiFlexItem grow={false} className="unifiedTabs__tabMenuBtn">
-                <TabMenu
-                  item={item}
-                  getTabMenuItems={getTabMenuItems}
-                  isPopoverOpen={isActionPopoverOpen}
-                  setPopover={onToggleActionsMenu}
-                  onEnterRenaming={onEnterRenaming}
-                />
+                {!item.customMenuButton && (
+                  <TabMenu
+                    item={item}
+                    getTabMenuItems={getTabMenuItems}
+                    isPopoverOpen={isActionPopoverOpen}
+                    setPopover={onToggleActionsMenu}
+                    onEnterRenaming={onEnterRenaming}
+                  />
+                )}
+                {item.customMenuButton ?? null}
               </EuiFlexItem>
             )}
-            {!!onClose && (
+            {!disableCloseButton && !!onClose && (
               <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
                 <EuiToolTip content={closeButtonLabel}>
                   <EuiButtonIcon
@@ -284,7 +296,7 @@ export const Tab: React.FC<TabProps> = (props) => {
 
   return (
     <TabPreview
-      showPreview={showPreview}
+      showPreview={!disablePreview && showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
       tabItem={item}

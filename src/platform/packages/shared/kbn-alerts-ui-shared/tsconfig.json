@@ -35,5 +35,6 @@
     "@kbn/presentation-publishing",
     "@kbn/response-ops-rules-apis",
     "@kbn/controls-constants",
+    "@kbn/react-query",
   ]
 }

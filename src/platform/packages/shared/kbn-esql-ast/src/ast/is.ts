@@ -24,6 +24,9 @@ export const isQuery = (node: unknown): node is types.ESQLAstQueryExpression =>
 export const isCommand = (node: unknown): node is types.ESQLCommand =>
   isProperNode(node) && node.type === 'command';
 
+export const isHeaderCommand = (node: unknown): node is types.ESQLAstHeaderCommand =>
+  isProperNode(node) && node.type === 'header-command';
+
 export const isFunctionExpression = (node: unknown): node is types.ESQLFunction =>
   isProperNode(node) && node.type === 'function';
 
@@ -72,7 +75,7 @@ export const isIntegerLiteral = (node: unknown): node is types.ESQLIntegerLitera
 export const isDoubleLiteral = (node: unknown): node is types.ESQLIntegerLiteral =>
   isLiteral(node) && node.literalType === 'double';
 
-export const isBooleanLiteral = (node: unknown): node is types.ESQLStringLiteral =>
+export const isBooleanLiteral = (node: unknown): node is types.ESQLBooleanLiteral =>
   isLiteral(node) && node.literalType === 'boolean';
 
 export const isTimeDurationLiteral = (node: unknown): node is types.ESQLTimeDurationLiteral =>
@@ -102,6 +105,9 @@ export const isList = (node: unknown): node is types.ESQLList =>
 export const isOptionNode = (node: types.ESQLAstNode): node is types.ESQLCommandOption => {
   return !!node && typeof node === 'object' && !Array.isArray(node) && node.type === 'option';
 };
+
+export const isUnknownNode = (node: unknown): node is types.ESQLUnknownItem =>
+  isProperNode(node) && node.type === 'unknown';
 
 export const isInlineCast = (node: unknown): node is ESQLInlineCast =>
   isProperNode(node) && node.type === 'inlineCast';
