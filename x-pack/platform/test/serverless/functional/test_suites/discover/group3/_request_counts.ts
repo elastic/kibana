@@ -173,44 +173,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should send expected requests for saved search changes', async () => {
-        /**
-         * This became flaky in ES|QL mode, but we can't reproduce it manually, skipping for now
-         * We will re-enable once we can investigate and fix the root cause
-         */
-        if (type !== 'esql') {
-          await setQuery(query1);
-          await queryBar.clickQuerySubmitButton();
-          await timePicker.setAbsoluteRange(
-            'Sep 21, 2015 @ 06:31:44.000',
-            'Sep 23, 2015 @ 00:00:00.000'
-          );
+        await setQuery(query1);
+        await queryBar.clickQuerySubmitButton();
+        await timePicker.setAbsoluteRange(
+          'Sep 21, 2015 @ 06:31:44.000',
+          'Sep 23, 2015 @ 00:00:00.000'
+        );
+        await waitForLoadingToFinish();
+        log.debug('Creating saved search');
+        await expectSearches(type, 0, async () => {
+          await discover.saveSearch(savedSearch);
+        });
+        log.debug('Resetting saved search');
+        await setQuery(query2);
+        await queryBar.clickQuerySubmitButton();
+        await waitForLoadingToFinish();
+        await expectSearches(type, 2, async () => {
+          await discover.revertUnsavedChanges();
+        });
+        log.debug('Clearing saved search');
+        await expectSearches(type, 2, async () => {
+          await testSubjects.click('discoverNewButton');
+          if (type === 'esql') {
+            await queryBar.clickQuerySubmitButton();
+          }
           await waitForLoadingToFinish();
-          log.debug('Creating saved search');
-          await expectSearches(type, 0, async () => {
-            await discover.saveSearch(savedSearch);
-          });
-          log.debug('Resetting saved search');
-          await setQuery(query2);
-          await queryBar.clickQuerySubmitButton();
-          await waitForLoadingToFinish();
-          await expectSearches(type, 2, async () => {
-            await discover.revertUnsavedChanges();
-          });
-          log.debug('Clearing saved search');
-          await expectSearches(type, 2, async () => {
-            await testSubjects.click('discoverNewButton');
-
-            // ToDo: Uncomment the following lines when ES|QL is more stable
-            // if (type === 'esql') {
-            //   await queryBar.clickQuerySubmitButton();
-            // }
-            await waitForLoadingToFinish();
-          });
-          log.debug('Loading saved search');
-          await expectSearches(type, 2, async () => {
-            await discover.loadSavedSearch(savedSearch);
-          });
-        }
+        });
+        log.debug('Loading saved search');
+        await expectSearches(type, 2, async () => {
+          await discover.loadSavedSearch(savedSearch);
+        });
       });
     };
 

@@ -41,8 +41,6 @@ export class PolicyWatcher {
   }
 
   public async watch(license: ILicense) {
-    const isSpacesEnabled =
-      this.endpointServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
     const fleetServices = this.endpointServices.getInternalFleetServices();
     const esClient = this.endpointServices.getInternalEsClient();
 
@@ -62,17 +60,14 @@ export class PolicyWatcher {
       try {
         await pRetry(
           async () => {
-            const soClient = isSpacesEnabled
-              ? this.endpointServices.savedObjects.createInternalUnscopedSoClient(false)
-              : this.endpointServices.savedObjects.createInternalScopedSoClient({
-                  readonly: false,
-                });
+            const soClient =
+              this.endpointServices.savedObjects.createInternalUnscopedSoClient(false);
 
             response = await fleetServices.packagePolicy.list(soClient, {
               page: page++,
               perPage: 100,
               kuery: fleetServices.endpointPolicyKuery,
-              spaceId: isSpacesEnabled ? '*' : undefined,
+              spaceId: '*',
             });
           },
           {
@@ -115,14 +110,11 @@ export class PolicyWatcher {
               license
             );
 
-            const soClientForPolicyUpdate = isSpacesEnabled
-              ? this.endpointServices.savedObjects.createInternalScopedSoClient({
-                  spaceId: policy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID,
-                  readonly: false,
-                })
-              : this.endpointServices.savedObjects.createInternalScopedSoClient({
-                  readonly: false,
-                });
+            const soClientForPolicyUpdate =
+              this.endpointServices.savedObjects.createInternalScopedSoClient({
+                spaceId: policy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID,
+                readonly: false,
+              });
 
             await pRetry(
               async () => {
