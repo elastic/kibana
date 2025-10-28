@@ -23,4 +23,5 @@ export default createTestConfig('security_and_spaces', {
     'microsoftDefenderEndpointOn',
   ],
   emailMaximumBodyLength: EmailMaximumBodyLength,
+  indexRefreshInterval: '1s',
 });

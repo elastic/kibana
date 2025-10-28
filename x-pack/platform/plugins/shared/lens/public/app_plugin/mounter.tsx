@@ -29,26 +29,28 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
-import { App } from './app';
 import type {
+  LensSerializedState,
+  MainHistoryLocationState,
+  LensAppLocator,
+  VisualizeEditorContext,
+  LensAppServices,
   EditorFrameStart,
   LensTopNavMenuEntryGenerator,
-  VisualizeEditorContext,
-} from '../types';
+  LensAttributesService,
+} from '@kbn/lens-common';
+import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
+import { App } from './app';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
-import type { LensPluginStartDependencies } from '../plugin';
 import { extract } from '../../common/embeddable_factory';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
-import type { LensAttributesService } from '../lens_attribute_service';
-import type { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
+import type { RedirectToOriginProps, HistoryLocationState } from './types';
 import type { LensRootStore } from '../state_management';
 import { makeConfigureStore, navigateAway, loadInitial, setState } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
-import type { LensAppLocator, MainHistoryLocationState } from '../../common/locator/locator';
-import { LENS_SHARE_STATE_ACTION } from '../../common/locator/locator';
 import { LensDocumentService } from '../persistence';
-import type { LensSerializedState } from '../react_embeddable/types';
+import type { LensPluginStartDependencies } from '../plugin';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
 function getInitialContext(history: AppMountParameters['history']) {
