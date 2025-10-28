@@ -30,6 +30,7 @@ export type MetricsGridProps = Pick<
 > & {
   filters?: Array<{ field: string; value: string }>;
   dimensions: string[];
+  searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
 } & (
@@ -55,6 +56,7 @@ export const MetricsGrid = ({
   abortController,
   requestParams,
   discoverFetch$,
+  searchTerm,
   filters = [],
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
@@ -110,13 +112,17 @@ export const MetricsGrid = ({
   );
 
   const handleCloseFlyout = useCallback(() => {
-    if (expandedMetric) {
-      // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
-      requestAnimationFrame(() => {
-        focusCell(expandedMetric.rowIndex, expandedMetric.colIndex);
-      });
+    if (!expandedMetric) {
+      return;
     }
+
+    const rowIndex = expandedMetric.rowIndex;
+    const colIndex = expandedMetric.colIndex;
     setExpandedMetric(undefined);
+    // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
+    requestAnimationFrame(() => {
+      focusCell(rowIndex, colIndex);
+    });
   }, [expandedMetric, focusCell]);
 
   const getChartRefForFocus = useCallback(() => {
@@ -184,6 +190,7 @@ export const MetricsGrid = ({
                   size={chartSize}
                   setChartRef={setChartRef}
                   handleFocusCell={handleFocusCell}
+                  searchTerm={searchTerm}
                 />
               </EuiFlexItem>
             );
@@ -221,6 +228,7 @@ function ChartItem({
   size,
   setChartRef,
   handleFocusCell,
+  searchTerm,
 }: {
   chartId: string;
   metric: MetricField;
@@ -230,6 +238,7 @@ function ChartItem({
   filters: Array<{ field: string; value: string }>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
   size: ChartSize;
+  searchTerm?: string;
   getRowColFromIndex: (index: number) => { rowIndex: number; colIndex: number };
   handleViewDetails: (esqlQuery: string, metric: MetricField, chartId: string) => void;
   setChartRef: (chartId: string, element: HTMLDivElement | null) => void;
@@ -280,6 +289,7 @@ function ChartItem({
         onFilter={onFilter}
         onViewDetails={() => handleViewDetails(esqlQuery, metric, chartId)}
         title={metric.name}
+        titleHighlight={searchTerm}
         chartLayers={chartLayers}
       />
     </A11yGridCell>

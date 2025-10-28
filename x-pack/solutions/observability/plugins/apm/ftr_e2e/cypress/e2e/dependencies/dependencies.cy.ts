@@ -17,7 +17,8 @@ const timeRange = {
   rangeTo: end,
 };
 
-describe('Dependencies', () => {
+// Failing: See https://github.com/elastic/kibana/issues/240813
+describe.skip('Dependencies', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -52,8 +53,8 @@ describe('Dependencies', () => {
         `/app/apm/services/opbeans-java/dependencies?${new URLSearchParams(timeRange)}`
       );
       cy.contains('a[role="tab"]', 'Dependencies');
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
+      checkA11y();
     });
   });
 
@@ -83,8 +84,8 @@ describe('Dependencies', () => {
         })}`
       );
       cy.contains('h1', 'postgresql');
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
+      checkA11y();
     });
   });
 

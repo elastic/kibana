@@ -18,6 +18,8 @@ import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
 // Import connector schemas from the organized structure
+import { mergeEnhancedConnectors } from './enhanced_es_connectors';
+/* eslint-disable sort-imports */
 import {
   // Inference connector schemas
   InferenceUnifiedCompletionParamsSchema,
@@ -146,7 +148,6 @@ import {
   TorqParamsSchema,
   TorqResponseSchema,
 } from './stack_connectors_schema';
-import { mergeEnhancedConnectors } from './enhanced_es_connectors';
 
 /**
  * Get parameter schema for a specific sub-action
@@ -936,6 +937,7 @@ export const getWorkflowZodSchema = (dynamicConnectorTypes: Record<string, Conne
   const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors);
 };
+export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 
 export const getWorkflowZodSchemaLoose = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
@@ -943,6 +945,7 @@ export const getWorkflowZodSchemaLoose = (
   const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, true);
 };
+export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
 
 // Legacy exports for backward compatibility - these will be deprecated
 // TODO: Remove these once all consumers are updated to use the lazy-loaded versions
