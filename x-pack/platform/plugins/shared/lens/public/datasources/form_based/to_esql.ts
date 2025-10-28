@@ -11,15 +11,19 @@ import { getCalculateAutoTimeExpression, getUserTimeZone } from '@kbn/data-plugi
 import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { partition } from 'lodash';
+import type {
+  DateHistogramIndexPatternColumn,
+  DateRange,
+  FormBasedLayer,
+  IndexPattern,
+  ValueFormatConfig,
+  GenericIndexPatternColumn,
+} from '@kbn/lens-common';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
-import type { DateRange, OriginalColumn, ValueFormatConfig } from '../../../common/types';
-import type { GenericIndexPatternColumn } from './form_based';
+import type { OriginalColumn } from '../../../common/types';
 import { operationDefinitionMap } from './operations';
-import type { DateHistogramIndexPatternColumn } from './operations/definitions';
-import type { IndexPattern } from '../../types';
 import { resolveTimeShift } from './time_shift_utils';
-import type { FormBasedLayer } from '../..';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];

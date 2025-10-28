@@ -12,8 +12,8 @@ import type {
   FormBasedPersistedState,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+  TextBasedLayer,
+} from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAttributes } from '../../types';
