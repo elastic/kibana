@@ -34,8 +34,10 @@ const CommandInputContainer = styled.div`
   padding: ${({ theme: { eui } }) => eui.euiSizeS};
   outline: ${({ theme: { eui } }) => eui.euiBorderThin};
 
+  border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
+  border-bottom-color: transparent;
+
   &:focus-within {
-    border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
     border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
   }
 
