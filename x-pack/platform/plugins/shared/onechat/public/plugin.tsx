@@ -12,11 +12,14 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp, registerManagementSection } from './register';
+import { OnechatNavControlInitiator } from './components/nav_control/lazy_onechat_nav_control';
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -129,6 +132,35 @@ export class OnechatPlugin
     };
 
     this.internalServices = internalServices;
+
+    // TODO: Render this conditionally based on the UI setting
+    // Register onechat nav control
+    core.chrome.navControls.registerRight({
+      mount: (element) => {
+        ReactDOM.render(
+          <OnechatNavControlInitiator
+            coreStart={core}
+            pluginsStart={startDependencies}
+            onechatService={{
+              tools: createPublicToolContract({ toolsService }),
+              openConversationFlyout: (options) =>
+                openConversationFlyout(options, {
+                  coreStart: core,
+                  services: internalServices,
+                }),
+            }}
+          />,
+          element,
+          () => {}
+        );
+
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
+      // right before the user profile
+      order: 1001,
+    });
 
     return {
       tools: createPublicToolContract({ toolsService }),
