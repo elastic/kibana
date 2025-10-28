@@ -399,11 +399,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly requestHeadersWhitelist: string[];
 
   /**
-   * Timeout after which PING HTTP request will be aborted and retried.
-   */
-  public readonly pingTimeout: Duration;
-
-  /**
    * Timeout after which HTTP request will be aborted and retried.
    */
   public readonly requestTimeout: Duration;
@@ -484,7 +479,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
       ? rawConfig.requestHeadersWhitelist
       : [rawConfig.requestHeadersWhitelist];
-    this.pingTimeout = rawConfig.pingTimeout;
     this.requestTimeout = rawConfig.requestTimeout;
     this.shardTimeout = rawConfig.shardTimeout;
     this.sniffOnStart = rawConfig.sniffOnStart;
