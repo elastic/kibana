@@ -27,8 +27,7 @@ const setExpectSuggestions = (
     'set',
     mockCallbacks,
     autocomplete,
-    offset,
-    true
+    offset
   );
 };
 

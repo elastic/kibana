@@ -71,22 +71,16 @@ export const suggest = (
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
-  offset?: number,
-  // Set to true if the command to autocomplete is a header command
-  isHeaderCommand: boolean = false
+  offset?: number
 ): Promise<ISuggestionItem[]> => {
   const innerText = query.substring(0, offset ?? query.length);
   const correctedQuery = correctQuerySyntax(innerText);
   const { ast, root } = parse(correctedQuery, { withFormatting: true });
+  const isHeaderInstruction = root?.header?.find((cmd) => cmd.name === commandName);
 
-  if (isHeaderCommand && !root.header) {
-    throw new Error('No header commands found in the parsed query');
-  }
   const cursorPosition = offset ?? query.length;
 
-  const command = isHeaderCommand
-    ? root.header!.find((cmd) => cmd.name === commandName)
-    : findAstPosition(ast, cursorPosition).command;
+  const command = isHeaderInstruction ?? findAstPosition(ast, cursorPosition).command;
 
   if (!command) {
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
@@ -110,18 +104,9 @@ export const expectSuggestions = async (
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
-  offset?: number,
-  isHeaderCommand: boolean = false
+  offset?: number
 ) => {
-  const result = await suggest(
-    query,
-    context,
-    commandName,
-    mockCallbacks,
-    autocomplete,
-    offset,
-    isHeaderCommand
-  );
+  const result = await suggest(query, context, commandName, mockCallbacks, autocomplete, offset);
 
   const suggestions: string[] = [];
   result.forEach((suggestion) => {
