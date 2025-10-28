@@ -20,6 +20,7 @@ import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { Required, ValuesType } from 'utility-types';
 import type { DedotObject } from '@kbn/utility-types';
 import { unflattenObject } from '@kbn/task-manager-plugin/server/metrics/lib';
+import type { KibanaRequest } from '@kbn/core/server';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 
 type SearchRequest = ESSearchRequest & {
@@ -111,25 +112,46 @@ export interface TracedElasticsearchClient {
   client: ElasticsearchClient;
 }
 
+const cancelEsRequestOnAbort = <T extends Promise<any>>(
+  promise: T,
+  request: KibanaRequest,
+  controller: AbortController
+): T => {
+  const subscription = request.events.aborted$.subscribe(() => {
+    controller.abort();
+  });
+
+  return promise.finally(() => subscription.unsubscribe()) as T;
+};
+
+const unwrapEsResponse = <T extends Promise<{ body: any }>>(
+  responsePromise: T
+): Promise<Awaited<T>['body']> => {
+  return responsePromise.then((res) => res.body);
+};
+
 export function createTracedEsClient({
   client,
+  request,
   logger,
   plugin,
   labels,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
+  request: KibanaRequest;
   plugin?: string;
   labels?: Record<string, string>;
 }): TracedElasticsearchClient {
   // wraps the ES calls in a named APM span for better analysis
   // (otherwise it would just eg be a _search span)
-  const callWithLogger = <T>(
+  const callWithLogger = <T extends { body: any }>(
     operationName: string,
-    request: Record<string, any>,
-    callback: () => Promise<T>
-  ) => {
-    logger.debug(() => `Request (${operationName}):\n${JSON.stringify(request)}`);
+    params: Record<string, any>,
+    callback: (requestOpts: { signal: AbortSignal; meta: true }) => Promise<T>
+  ): Promise<T['body']> => {
+    logger.debug(() => `Request (${operationName}):\n${JSON.stringify(params)}`);
+    const controller = new AbortController();
     return withSpan(
       {
         name: operationName,
@@ -138,7 +160,15 @@ export function createTracedEsClient({
           ...(plugin ? { plugin } : {}),
         },
       },
-      callback,
+      () => {
+        const promise = cancelEsRequestOnAbort(
+          callback({ signal: controller.signal, meta: true }),
+          request,
+          controller
+        );
+
+        return unwrapEsResponse(promise);
+      },
       logger
     ).then((response) => {
       logger.trace(() => `Response (${operationName}):\n${JSON.stringify(response, null, 2)}`);
@@ -149,10 +179,8 @@ export function createTracedEsClient({
   return {
     client,
     fieldCaps(operationName, parameters) {
-      return callWithLogger(operationName, parameters, () => {
-        return client.fieldCaps({
-          ...parameters,
-        });
+      return callWithLogger(operationName, parameters, (requestOpts) => {
+        return client.fieldCaps(parameters, requestOpts);
       });
     },
     esql(
@@ -160,7 +188,7 @@ export function createTracedEsClient({
       parameters: ObservabilityEsQueryRequest,
       options?: EsqlOptions
     ): Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>> {
-      return callWithLogger(operationName, parameters, () => {
+      return callWithLogger(operationName, parameters, (requestOpts) => {
         return client.esql
           .query(
             { ...parameters },
@@ -168,6 +196,7 @@ export function createTracedEsClient({
               querystring: {
                 drop_null_columns: true,
               },
+              ...requestOpts,
             }
           )
           .then((response) => {
@@ -188,28 +217,30 @@ export function createTracedEsClient({
             return {
               hits: parsedResponse.hits.map((hit) => unflattenObject(hit)),
             };
-          }) as Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>>;
+          }) as Promise<{ body: InferEsqlResponseOf<EsqlOutput, EsqlOptions> }>;
       });
     },
     search<TDocument = unknown, TSearchRequest extends SearchRequest = SearchRequest>(
       operationName: string,
       parameters: SearchRequest
     ) {
-      return callWithLogger(operationName, parameters, () => {
-        return client.search<TDocument>(parameters) as unknown as Promise<
-          InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
-        >;
+      return callWithLogger(operationName, parameters, (requestOpts) => {
+        return client.search<TDocument>(parameters, requestOpts) as unknown as Promise<{
+          body: InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>;
+        }>;
       });
     },
     msearch<TDocument = unknown, TSearchRequest extends MsearchRequest = MsearchRequest>(
       operationName: string,
       parameters: TSearchRequest
     ) {
-      return callWithLogger(operationName, parameters, () => {
-        return client.msearch<TDocument>(parameters) as unknown as Promise<{
-          responses: Array<
-            InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
-          >;
+      return callWithLogger(operationName, parameters, (requestOpts) => {
+        return client.msearch<TDocument>(parameters, requestOpts) as unknown as Promise<{
+          body: {
+            responses: Array<
+              InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
+            >;
+          };
         }>;
       });
     },

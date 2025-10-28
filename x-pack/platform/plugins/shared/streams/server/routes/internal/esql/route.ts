@@ -36,6 +36,7 @@ export const executeEsqlRoute = createServerRoute({
   handler: async ({ params, request, logger, getScopedClients }): Promise<UnparsedEsqlResponse> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const tracedEsClient = createTracedEsClient({
+      request,
       client: scopedClusterClient.asCurrentUser,
       logger,
       plugin: 'streams',

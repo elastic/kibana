@@ -43,7 +43,7 @@ export const getDimensionsRoute = createRoute({
         .transform(isoToEpoch),
     }),
   }),
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ context, params, logger, request }) => {
     const { elasticsearch, featureFlags } = await context.core;
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
@@ -52,6 +52,7 @@ export const getDimensionsRoute = createRoute({
 
     const values = await getDimensions({
       esClient: createTracedEsClient({
+        request,
         logger,
         client: esClient,
         plugin: 'metrics_experience',
