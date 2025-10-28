@@ -13,16 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { coreServices, uiActionsService } from '../services/kibana_services';
 import type { DashboardApi } from '../dashboard_api/types';
 
-export async function executeCreateESQLControlPanelAction(
-  dashboardApi: DashboardApi,
-  isPinned?: boolean
-) {
+export async function executeCreateESQLControlPanelAction(dashboardApi: DashboardApi) {
   try {
     const createControlPanelAction = await uiActionsService.getAction('createESQLControl');
     createControlPanelAction.execute({
       embeddable: dashboardApi,
       trigger: addPanelMenuTrigger,
-      isPinned,
+      isPinned: true,
     } as ActionExecutionContext);
   } catch (error) {
     coreServices.notifications.toasts.addWarning(

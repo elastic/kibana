@@ -172,7 +172,7 @@ export const AddMenu = ({ dashboardApi, anchorElement }: AddMenuProps) => {
           icon: 'empty',
           'data-test-subj': 'controls-create-button',
           onClick: async () => {
-            await executeCreateControlPanelAction(dashboardApi, true);
+            await executeCreateControlPanelAction(dashboardApi);
             closePopover();
           },
         },
@@ -181,7 +181,7 @@ export const AddMenu = ({ dashboardApi, anchorElement }: AddMenuProps) => {
           icon: 'empty',
           'data-test-subj': 'esql-control-create-button',
           onClick: async () => {
-            await executeCreateESQLControlPanelAction(dashboardApi, true);
+            await executeCreateESQLControlPanelAction(dashboardApi);
             closePopover();
           },
         },
