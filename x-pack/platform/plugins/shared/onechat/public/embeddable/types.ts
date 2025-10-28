@@ -20,3 +20,6 @@ export interface EmbeddableConversationProps {
    */
   conversationId?: string;
 }
+
+export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
+  EmbeddableConversationProps;
