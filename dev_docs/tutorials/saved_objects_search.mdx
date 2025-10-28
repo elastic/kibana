@@ -13,12 +13,12 @@ It is an alternative to the safer but more limited `SavedObjectsClientContract.f
 
 ## See it in code
 
-Consider this request to search for and sort Saved Objects by fields that are the same type, but named differently:
+Consider example. It demonstrates a request to search across multiple types of Saved Objects and sort by fields that are the same type, but named differently:
 
 ```ts
 import { isResponseError } from '@kbn/es-errors';
 import { TYPE_A, TYPE_B } from './saved_objects';
-  /** ...some lines down we have a route hanlder like this: */
+  /** ...some lines down we have a route handler like this: */
   async (ctx, req, res) => {
     log.info('Searching for saved objects');
     const core = await ctx.core;
@@ -41,6 +41,10 @@ import { TYPE_A, TYPE_B } from './saved_objects';
           merged_date: {
             type: 'date',
             script: {
+              // Note 1: the query is in Painless, but written against the "raw" Saved object document,
+              //         you are responsible for ensuring that the fields are scoped to the correct type
+              // Note 2: Painless is powerful, but is executed at runtime, so be mindful of performance and handling
+              //         edge cases in your data like when null values may be present.
               source: `
                 if (doc.containsKey('${TYPE_A}.myDateField') && !doc['${TYPE_A}.myDateField'].empty) {
                   emit(doc['${TYPE_A}.myDateField'].value.toInstant().toEpochMilli());
@@ -77,12 +81,12 @@ import { TYPE_A, TYPE_B } from './saved_objects';
 See the full example in the Kibana repository at `examples/saved_objects`.
 
 
-## When to use the `search` method
+### When to use the `search` method
 
 - You are trying to search across multiple types of Saved Objects while sorting by a field that is not present in all types
 - You are trying to aggregate over multiple Saved Objects
 
-## When to not to use the`search` method
+### When not to use the`search` method
 
 - You just want a simple way to filter your Saved Object type, use `SavedObjectsClientContract.find` instead
 
