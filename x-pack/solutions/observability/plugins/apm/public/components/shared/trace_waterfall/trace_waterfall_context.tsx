@@ -70,6 +70,7 @@ interface Props {
   isEmbeddable: boolean;
   showLegend: boolean;
   serviceName?: string;
+  isFiltered?: boolean;
 }
 
 export function TraceWaterfallContextProvider({
@@ -84,10 +85,12 @@ export function TraceWaterfallContextProvider({
   isEmbeddable,
   showLegend,
   serviceName,
+  isFiltered,
 }: Props) {
   const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState } =
     useTraceWaterfall({
       traceItems,
+      isFiltered,
     });
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
