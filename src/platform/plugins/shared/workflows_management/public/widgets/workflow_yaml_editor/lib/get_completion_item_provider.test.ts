@@ -11,7 +11,8 @@ import { monaco } from '@kbn/monaco';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
-import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
+import { parseLineForCompletion } from './autocomplete/parse_line_for_completion';
+import { getCompletionItemProvider } from './get_completion_item_provider';
 import { performComputation } from './store/utils/computation';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 
@@ -691,15 +692,12 @@ triggers:
     describe('no match scenarios', () => {
       it('should return null for plain text', () => {
         const result = parseLineForCompletion('message: "hello world"');
-        expect(result.matchType).toBeNull();
-        expect(result.fullKey).toBe('');
-        expect(result.match).toBeNull();
+        expect(result).toBeNull();
       });
 
       it('should return null for incomplete brackets', () => {
         const result = parseLineForCompletion('message: "{ consts.api }');
-        expect(result.matchType).toBeNull();
-        expect(result.fullKey).toBe('');
+        expect(result).toBeNull();
       });
     });
 
