@@ -12,7 +12,7 @@ import type { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { ExecutionStatusValues, ExecutionTypeValues } from '@kbn/workflows';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { SecurityReadExecution } from './route_security';
+import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
 import { MAX_PAGE_SIZE, parseExecutionStatuses } from './types';
 import type { RouteDependencies } from './types';
 import type { SearchWorkflowExecutionsParams } from '../workflows_management_service';
@@ -27,7 +27,7 @@ export function registerGetWorkflowExecutionsRoute({
     {
       path: '/api/workflowExecutions',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: SecurityReadExecution,
+      security: WORKFLOW_EXECUTION_READ_SECURITY,
       validate: {
         // todo use shared params schema based on SearchWorkflowExecutionsParams type
         query: schema.object({

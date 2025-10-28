@@ -10,7 +10,7 @@
 import { SearchWorkflowCommandSchema } from '@kbn/workflows';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { SecurityRead } from './route_security';
+import { WORKFLOW_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 import type { GetWorkflowsParams } from '../workflows_management_api';
 
@@ -24,7 +24,7 @@ export function registerPostSearchWorkflowsRoute({
     {
       path: '/api/workflows/search',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: SecurityRead,
+      security: WORKFLOW_READ_SECURITY,
       validate: {
         body: SearchWorkflowCommandSchema,
       },

@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { SecurityRead } from './route_security';
+import { WORKFLOW_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerGetWorkflowAggsRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -18,7 +18,7 @@ export function registerGetWorkflowAggsRoute({ router, api, logger, spaces }: Ro
     {
       path: '/api/workflows/aggs',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: SecurityRead,
+      security: WORKFLOW_READ_SECURITY,
       validate: { query: schema.object({ fields: schema.arrayOf(schema.string()) }) },
     },
     async (context, request, response) => {

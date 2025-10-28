@@ -13,24 +13,24 @@ import { WorkflowsManagementApiActions } from '@kbn/workflows';
 /**
  * Security configuration objects ready to be used in route definitions
  */
-export const SecurityRead: RouteSecurity = {
+export const WORKFLOW_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.read] },
 };
-export const SecurityCreate: RouteSecurity = {
+export const WORKFLOW_CREATE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.create] },
 };
-export const SecurityUpdate: RouteSecurity = {
+export const WORKFLOW_UPDATE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.update] },
 };
-export const SecurityDelete: RouteSecurity = {
+export const WORKFLOW_DELETE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.delete] },
 };
-export const SecurityExecute: RouteSecurity = {
+export const WORKFLOW_EXECUTE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.execute] },
 };
-export const SecurityReadExecution: RouteSecurity = {
+export const WORKFLOW_EXECUTION_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.readExecution] },
 };
-export const SecurityCancelExecution: RouteSecurity = {
+export const WORKFLOW_EXECUTION_CANCEL_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.cancelExecution] },
 };

@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { SecurityCreate } from './route_security';
+import { WORKFLOW_CREATE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerPostCloneWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -18,7 +18,7 @@ export function registerPostCloneWorkflowRoute({ router, api, logger, spaces }: 
     {
       path: '/api/workflows/{id}/clone',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: SecurityCreate,
+      security: WORKFLOW_CREATE_SECURITY,
       validate: {
         params: schema.object({
           id: schema.string(),

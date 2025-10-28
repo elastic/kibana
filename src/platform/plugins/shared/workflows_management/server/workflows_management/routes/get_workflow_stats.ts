@@ -9,7 +9,7 @@
 
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { SecurityRead } from './route_security';
+import { WORKFLOW_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerGetWorkflowStatsRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -17,7 +17,7 @@ export function registerGetWorkflowStatsRoute({ router, api, logger, spaces }: R
     {
       path: '/api/workflows/stats',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: SecurityRead,
+      security: WORKFLOW_READ_SECURITY,
       validate: false,
     },
     async (context, request, response) => {

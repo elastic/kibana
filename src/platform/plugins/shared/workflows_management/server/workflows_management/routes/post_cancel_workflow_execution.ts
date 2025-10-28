@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { SecurityCancelExecution } from './route_security';
+import { WORKFLOW_EXECUTION_CANCEL_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerPostCancelWorkflowExecutionRoute({
@@ -23,7 +23,7 @@ export function registerPostCancelWorkflowExecutionRoute({
     {
       path: '/api/workflowExecutions/{workflowExecutionId}/cancel',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: SecurityCancelExecution,
+      security: WORKFLOW_EXECUTION_CANCEL_SECURITY,
       validate: {
         params: schema.object({
           workflowExecutionId: schema.string(),
