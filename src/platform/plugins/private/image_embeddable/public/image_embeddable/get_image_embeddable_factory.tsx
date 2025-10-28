@@ -17,22 +17,20 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
+import type { ImageEmbeddableState } from '../../server';
 import { IMAGE_CLICK_TRIGGER } from '../actions';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
 import type { FileImageMetadata } from '../imports';
 import { coreServices, filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
-import type { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from '../types';
+import type { ImageConfig, ImageEmbeddableApi } from '../types';
 
 export const getImageEmbeddableFactory = ({
   embeddableEnhanced,
 }: {
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }) => {
-  const imageEmbeddableFactory: EmbeddableFactory<
-    ImageEmbeddableSerializedState,
-    ImageEmbeddableApi
-  > = {
+  const imageEmbeddableFactory: EmbeddableFactory<ImageEmbeddableState, ImageEmbeddableApi> = {
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
@@ -60,7 +58,7 @@ export const getImageEmbeddableFactory = ({
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<ImageEmbeddableSerializedState>({
+      const unsavedChangesApi = initializeUnsavedChanges<ImageEmbeddableState>({
         uuid,
         parentApi,
         serializeState,
