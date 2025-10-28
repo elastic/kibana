@@ -319,7 +319,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     });
   }, [state, maxItemsCount, onDuplicate, onCloseOtherTabs, onCloseTabsToTheRight]);
 
-  const tabsTar = (
+  const tabsBar = (
     <TabsBar
       ref={tabsBarApi}
       items={items}
@@ -348,7 +348,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   );
 
   if (!renderContent) {
-    return tabsTar;
+    return tabsBar;
   }
 
   return (
@@ -358,7 +358,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       gutterSize="none"
       className="eui-fullHeight"
     >
-      {!hideTabsBar && <EuiFlexItem grow={false}>{tabsTar}</EuiFlexItem>}
+      {!hideTabsBar && <EuiFlexItem grow={false}>{tabsBar}</EuiFlexItem>}
       {selectedItem ? (
         <EuiFlexItem
           data-test-subj="unifiedTabs_selectedTabContent"

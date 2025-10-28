@@ -10,7 +10,8 @@
 import React, { useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { TabbedContent, type TabbedContentProps } from './tabbed_content';
+import type { TabbedContentProps } from './tabbed_content';
+import { TabbedContent } from './tabbed_content';
 import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';
 import { servicesMock } from '../../../__mocks__/services';
 
@@ -27,11 +28,13 @@ describe('TabbedContent', () => {
     initialSelectedItemId,
     onChanged,
     onEBTEvent,
+    disableRenderContent = false,
   }: {
     initialItems: TabbedContentProps['items'];
     initialSelectedItemId?: TabbedContentProps['selectedItemId'];
     onChanged: TabbedContentProps['onChanged'];
     onEBTEvent: TabbedContentProps['onEBTEvent'];
+    disableRenderContent?: boolean;
   }) => {
     const [{ managedItems, managedSelectedItemId }, setState] = useState<{
       managedItems: TabbedContentProps['items'];
@@ -57,9 +60,11 @@ describe('TabbedContent', () => {
         }}
         onEBTEvent={onEBTEvent}
         onClearRecentlyClosed={jest.fn()}
-        renderContent={(item) => (
-          <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
-        )}
+        renderContent={
+          !disableRenderContent
+            ? (item) => <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
+            : undefined
+        }
       />
     );
   };
@@ -386,5 +391,53 @@ describe('TabbedContent', () => {
         remainingTabsCount: 2,
       });
     });
+  });
+
+  it('renders tab content when renderContent is provided', () => {
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+    ];
+    const onChanged = jest.fn();
+    const onEBTEvent = jest.fn();
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={initialItems[0].id}
+        onChanged={onChanged}
+        onEBTEvent={onEBTEvent}
+      />
+    );
+
+    // The tabs bar should be rendered
+    expect(screen.queryByTestId('unifiedTabs_tabsBar')).toBeInTheDocument();
+    // When renderContent is provided, the tab content area should be rendered
+    expect(screen.getByTestId('unifiedTabs_selectedTabContent')).toBeInTheDocument();
+    expect(screen.getByText('Content for tab: Tab 1')).toBeInTheDocument();
+  });
+
+  it('does not render tab content when renderContent is not provided', () => {
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+    ];
+    const onChanged = jest.fn();
+    const onEBTEvent = jest.fn();
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={initialItems[0].id}
+        onChanged={onChanged}
+        onEBTEvent={onEBTEvent}
+        disableRenderContent={true}
+      />
+    );
+
+    // The tabs bar should still be rendered
+    expect(screen.queryByTestId('unifiedTabs_tabsBar')).toBeInTheDocument();
+    // When renderContent is not provided, the tab content area should NOT be rendered
+    expect(screen.queryByTestId('unifiedTabs_selectedTabContent')).not.toBeInTheDocument();
   });
 });
