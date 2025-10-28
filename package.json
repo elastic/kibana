@@ -1842,7 +1842,7 @@
     "@typescript-eslint/typescript-estree": "^8.16.0",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
     "@yarnpkg/lockfile": "^1.1.0",
-    "aggregate-error": "^3.1.0",
+    "aggregate-error": "^5.0.0",
     "ajv-draft-04": "^1.0.0",
     "ajv-formats": "^3.0.1",
     "argsplit": "^1.0.5",
