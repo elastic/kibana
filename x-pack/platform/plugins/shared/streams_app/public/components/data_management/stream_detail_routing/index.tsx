@@ -22,7 +22,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { useStreamRoutingScreenContext } from '../../../hooks/use_stream_routing_screen_context';
 import { ChildStreamList } from './child_stream_list';
 import {
   StreamRoutingContextProvider,
@@ -73,7 +72,7 @@ export function StreamDetailRoutingImpl() {
   const { appParams, core } = useKibana();
 
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { cancelChanges, saveChanges, createNewRule } = useStreamRoutingEvents();
+  const { cancelChanges, saveChanges } = useStreamRoutingEvents();
 
   const definition = routingSnapshot.context.definition;
 
@@ -108,14 +107,6 @@ export function StreamDetailRoutingImpl() {
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
-
-  // Extract child stream names from routing rules
-  const childStreamNames = routingSnapshot.context.routing
-    .map((rule) => rule.destination)
-    .filter((destination) => destination !== definition.stream.name);
-
-  // Set screen context for AI Assistant
-  useStreamRoutingScreenContext(definition, childStreamNames, createNewRule);
 
   const isVerticalLayout = useIsWithinBreakpoints(['xs', 's']);
 

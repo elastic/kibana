@@ -32,13 +32,16 @@ import { EditRoutingStreamEntry } from './edit_routing_stream_entry';
 import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
+  useStreamSamplesSelector,
 } from './state_management/stream_routing_state_machine';
+import { selectPreviewDocuments } from './state_management/stream_routing_state_machine/selectors';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
 import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
+import { useStreamRoutingScreenContext } from '../../../hooks/use_stream_routing_screen_context';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
@@ -68,9 +71,36 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     previewSuggestion,
     acceptSuggestion,
     rejectSuggestion,
+    updateSuggestions,
   } = useReviewSuggestionsForm();
 
+  // Get preview documents for AI context
+  const documents = useStreamSamplesSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
+
   const { currentRuleId, definition, routing } = routingSnapshot.context;
+
+  // Extract child stream names from routing rules
+  const childStreamNames = routing
+    .map((rule) => rule.destination)
+    .filter((destination) => destination !== definition.stream.name);
+
+  // Extract columns from documents (if any)
+  const previewColumns = documents.length > 0 ? Object.keys(documents[0]) : [];
+  const previewDocuments = documents.slice(0, 5); // First 5 documents
+
+  // Set screen context for AI Assistant
+  useStreamRoutingScreenContext({
+    definition,
+    childStreamNames,
+    createNewRule,
+    suggestions,
+    previewColumns,
+    previewDocuments,
+    setSuggestions: updateSuggestions,
+  });
+
   const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
   const canReorderRoutingRules = routingSnapshot.can({ type: 'routingRule.reorder', routing });
   const canManageRoutingRules = definition.privileges.manage;

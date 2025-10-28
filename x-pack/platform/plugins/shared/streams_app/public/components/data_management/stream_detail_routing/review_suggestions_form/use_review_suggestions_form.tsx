@@ -114,10 +114,24 @@ export function useReviewSuggestionsForm() {
 
   return {
     suggestions,
+    setSuggestions,
     removeSuggestion,
     isLoadingSuggestions,
     fetchSuggestions,
     resetForm,
+    updateSuggestions: (newSuggestions: PartitionSuggestion[]) => {
+      setSuggestions(newSuggestions);
+      // Automatically preview the first suggestion
+      if (newSuggestions.length > 0) {
+        streamsRoutingActorRef.send({
+          type: 'suggestion.preview',
+          condition: newSuggestions[0].condition,
+          name: newSuggestions[0].name,
+          index: 0,
+          toggle: false,
+        });
+      }
+    },
     previewSuggestion: (index: number, toggle?: boolean) => {
       if (suggestions) {
         const partition = suggestions[index];
