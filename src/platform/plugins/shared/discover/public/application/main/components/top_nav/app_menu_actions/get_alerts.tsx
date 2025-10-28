@@ -100,7 +100,7 @@ const CreateAlertFlyout: React.FC<{
         actionTypeRegistry,
       }}
       initialMetadata={discoverMetadata}
-      consumer={'alerts'}
+      consumer={AlertConsumers.ALERT}
       onCancel={onFinishAction}
       onSubmit={onFinishAction}
       onChangeMetaData={(metadata: EsQueryAlertMetaData) =>

@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../application/contexts/kibana';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
@@ -73,6 +74,7 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
         consumer={PLUGIN_ID}
         ruleTypeId={ML_ALERT_TYPES.ANOMALY_DETECTION}
         initialMetadata={{}}
+        multiConsumerSelection={AlertConsumers.ALERTS}
         initialValues={{
           params: {
             jobSelection: {
