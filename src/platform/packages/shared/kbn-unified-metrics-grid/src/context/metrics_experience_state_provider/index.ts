@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContext } from 'react';
-import type { MetricsExperienceService } from '../types';
+export {
+  MetricsExperienceStateProvider,
+  MetricsExperienceStateContext,
+} from './metrics_experience_state_context';
 
-export const MetricsExperienceContext = createContext<MetricsExperienceService | undefined>(
-  undefined
-);
-
-export const MetricsExperienceProvider = MetricsExperienceContext.Provider;
+export { useMetricsExperienceState } from './use_metrics_experience_state';
