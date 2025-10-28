@@ -24,6 +24,7 @@ import type {
 import type { StreamlangStep } from '../../../types/streamlang';
 import type { Condition } from '../../../types/conditions';
 import { esqlAstExpressionToCondition } from './esql_ast_to_condition';
+import { literalToJs } from './literals';
 
 function isName(command: ESQLCommand, name: string) {
   return command.name?.toLowerCase() === name.toLowerCase();
@@ -34,15 +35,18 @@ function asColumn(arg: ESQLAstItem): ESQLColumn | undefined {
   return arg.type === 'column' ? arg : undefined;
 }
 
+function colName(col: ESQLColumn): string {
+  return col.parts && col.parts.length ? col.parts.join('.') : col.text;
+}
+
 function asStringLiteral(arg: ESQLAstItem): string | undefined {
   if (Array.isArray(arg)) return undefined;
   const lit = arg.type === 'literal' ? arg : undefined;
   if (!lit) return undefined;
-  // Prefer the AST's unquoted value when available (ESQLStringLiteral)
+
   const unquoted = (lit as any).valueUnquoted ?? (lit as any).value;
   if (typeof unquoted === 'string') return unquoted;
 
-  // Fallback: strip surrounding quotes and minimally unescape quotes/backslashes
   const raw = String(lit.text ?? '');
   const startsWithQuote = raw.startsWith('"') || raw.startsWith("'");
   const endsWithQuote = raw.endsWith('"') || raw.endsWith("'");
@@ -61,7 +65,8 @@ function unwrapAst(arg: ESQLAstItem | ESQLAstItem[] | undefined): ESQLAstItem | 
 export function esqlToStreamlangProcessors(
   query: string
 ): StreamlangProcessorDefinition[] {
-  const { root } = Parser.parse(query);
+  if (!query?.trim()) return [];
+  const { root } = Parser.parse(/^[\s\t\n\r]*from\b/i.test(query) ? query : `FROM a | ${query}`);
   const processors: StreamlangProcessorDefinition[] = [];
 
   let activeCondition: Condition | undefined;
@@ -85,7 +90,7 @@ export function esqlToStreamlangProcessors(
       const field = asColumn(command.args[0]);
       const pattern = asStringLiteral(command.args[1]);
       if (field && pattern) {
-        const grok: GrokProcessor = { action: 'grok', from: field.text, patterns: [pattern] };
+        const grok: GrokProcessor = { action: 'grok', from: colName(field), patterns: [pattern] };
         processors.push(withWhere(grok));
       }
       continue;
@@ -95,7 +100,7 @@ export function esqlToStreamlangProcessors(
       const field = asColumn(command.args[0]);
       const pattern = asStringLiteral(command.args[1]);
       if (field && pattern) {
-        const dissect: DissectProcessor = { action: 'dissect', from: field.text, pattern };
+        const dissect: DissectProcessor = { action: 'dissect', from: colName(field), pattern };
         processors.push(withWhere(dissect));
       }
       continue;
@@ -113,7 +118,7 @@ export function esqlToStreamlangProcessors(
         if (!target) continue;
         const rightCol = right ? asColumn(right) : undefined;
         if (rightCol) {
-          const setCopy: SetProcessor = { action: 'set', to: target.text, copy_from: rightCol.text };
+          const setCopy: SetProcessor = { action: 'set', to: colName(target), copy_from: colName(rightCol) };
           processors.push(withWhere(setCopy));
           continue;
         }
@@ -126,8 +131,8 @@ export function esqlToStreamlangProcessors(
           if (srcCol && pattern) {
             const dateProc: DateProcessor = {
               action: 'date',
-              from: srcCol.text,
-              to: target.text,
+              from: colName(srcCol),
+              to: colName(target),
               formats: [pattern],
             };
             processors.push(withWhere(dateProc));
@@ -136,8 +141,8 @@ export function esqlToStreamlangProcessors(
         }
         
         if (right && isLiteral(right)) {
-          const value = right.value ?? asStringLiteral(right);
-          const setVal: SetProcessor = { action: 'set', to: target.text, value };
+          const value = literalToJs(right);
+          const setVal: SetProcessor = { action: 'set', to: colName(target), value };
           processors.push(withWhere(setVal));
         }
       }
@@ -150,9 +155,9 @@ export function esqlToStreamlangProcessors(
         if (!asCall) continue;
         const [oldRef, newRef] = asCall.args || [];
         const oldCol = asColumn(oldRef);
-        const newName = asStringLiteral(newRef) || (asColumn(newRef)?.text);
+        const newName = asStringLiteral(newRef) || (asColumn(newRef) ? colName(asColumn(newRef)!) : undefined);
         if (oldCol && newName) {
-          const rename: RenameProcessor = { action: 'rename', from: oldCol.text, to: newName };
+          const rename: RenameProcessor = { action: 'rename', from: colName(oldCol), to: newName };
           processors.push(withWhere(rename));
         }
       }
@@ -191,7 +196,8 @@ function asFunction(item: ESQLAstItem, name?: string): ESQLFunction | undefined 
 export function esqlToStreamlangSteps(
   query: string
 ): StreamlangStep[] {
-  const { root } = Parser.parse(query);
+  if (!query?.trim()) return [];
+  const { root } = Parser.parse(/^[\s\t\n\r]*from\b/i.test(query) ? query : `FROM a | ${query}`);
   const steps: StreamlangStep[] = [];
 
   let activeCondition: Condition | undefined;
@@ -216,7 +222,7 @@ export function esqlToStreamlangSteps(
       const field = asColumn(command.args[0]);
       const pattern = asStringLiteral(command.args[1]);
       if (field && pattern) {
-        const grok: GrokProcessor = { action: 'grok', from: field.text, patterns: [pattern] };
+        const grok: GrokProcessor = { action: 'grok', from: colName(field), patterns: [pattern] };
         steps.push(withWhere(grok));
       }
       continue;
@@ -226,7 +232,7 @@ export function esqlToStreamlangSteps(
       const field = asColumn(command.args[0]);
       const pattern = asStringLiteral(command.args[1]);
       if (field && pattern) {
-        const dissect: DissectProcessor = { action: 'dissect', from: field.text, pattern };
+        const dissect: DissectProcessor = { action: 'dissect', from: colName(field), pattern };
         steps.push(withWhere(dissect));
       }
       continue;
@@ -243,7 +249,7 @@ export function esqlToStreamlangSteps(
         if (!target) continue;
         const rightCol = right ? asColumn(right) : undefined;
         if (rightCol) {
-          const setCopy: SetProcessor = { action: 'set', to: target.text, copy_from: rightCol.text };
+          const setCopy: SetProcessor = { action: 'set', to: colName(target), copy_from: colName(rightCol) };
           steps.push(withWhere(setCopy));
           continue;
         }
@@ -256,8 +262,8 @@ export function esqlToStreamlangSteps(
           if (srcCol && pattern) {
             const dateProc: DateProcessor = {
               action: 'date',
-              from: srcCol.text,
-              to: target.text,
+              from: colName(srcCol),
+              to: colName(target),
               formats: [pattern],
             };
             steps.push(withWhere(dateProc));
@@ -266,8 +272,8 @@ export function esqlToStreamlangSteps(
         }
         
         if (right && isLiteral(right)) {
-          const value = right.value ?? asStringLiteral(right);
-          const setVal: SetProcessor = { action: 'set', to: target.text, value };
+          const value = literalToJs(right);
+          const setVal: SetProcessor = { action: 'set', to: colName(target), value };
           steps.push(withWhere(setVal));
         }
       }
@@ -280,9 +286,9 @@ export function esqlToStreamlangSteps(
         if (!asCall) continue;
         const [oldRef, newRef] = asCall.args || [];
         const oldCol = asColumn(oldRef);
-        const newName = asStringLiteral(newRef) || (asColumn(newRef)?.text);
+        const newName = asStringLiteral(newRef) || (asColumn(newRef) ? colName(asColumn(newRef)!) : undefined);
         if (oldCol && newName) {
-          const rename: RenameProcessor = { action: 'rename', from: oldCol.text, to: newName };
+          const rename: RenameProcessor = { action: 'rename', from: colName(oldCol), to: newName };
           steps.push(withWhere(rename));
         }
       }

@@ -9,14 +9,18 @@ import type {
   ESQLColumn,
   ESQLLiteral,
   ESQLFunction,
-  ESQLStringLiteral,
 } from '@kbn/esql-ast/src/types';
 import type { Condition, FilterCondition, StringOrNumberOrBoolean } from '../../../types/conditions';
+import { literalToJs } from './literals';
 import { isFilterCondition } from '../../../types/conditions';
 
 function isColumn(item: ESQLAstItem): item is ESQLColumn {
   if (Array.isArray(item)) return false;
   return item.type === 'column';
+}
+
+function colName(col: ESQLColumn): string {
+  return col.parts && col.parts.length ? col.parts.join('.') : col.text;
 }
 
 function isSingleAstItem(item: ESQLAstItem): item is ESQLSingleAstItem {
@@ -44,18 +48,6 @@ function getArgs(f: ESQLFunction): ESQLAstItem[] {
   return f.args ?? [];
 }
 
-const stripWrappingQuotes = (value: string): string | undefined => {
-  if (value.length < 2) return undefined;
-  const first = value[0];
-  const last = value[value.length - 1];
-  if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
-    return value.slice(1, -1);
-  }
-  return undefined;
-};
-
-const hasUnquotedValue = (literal: ESQLLiteral): literal is ESQLStringLiteral =>
-  'valueUnquoted' in literal && typeof literal.valueUnquoted === 'string';
 
 const flattenAstItems = (items: ESQLAstItem[]): ESQLAstItem[] =>
   items.flatMap((item) => {
@@ -64,30 +56,6 @@ const flattenAstItems = (items: ESQLAstItem[]): ESQLAstItem[] =>
     return [item];
   });
 
-function literalToJs(lit: ESQLLiteral) {
-  if (hasUnquotedValue(lit)) return lit.valueUnquoted;
-
-  if ('value' in lit && lit.value !== undefined) {
-    const value = lit.value;
-    if (typeof value === 'string') {
-      return stripWrappingQuotes(value) ?? value;
-    }
-    return value;
-  }
-
-  const text = (lit.text ?? '').trim();
-  const unquoted = stripWrappingQuotes(text);
-  if (unquoted !== undefined) {
-    return unquoted;
-  }
-
-  if (/^(true|false)$/i.test(text)) return text.toLowerCase() === 'true';
-
-  const num = Number(text);
-  if (!Number.isNaN(num)) return num;
-
-  return text;
-}
 
 function asComparable(value: unknown): StringOrNumberOrBoolean | undefined {
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
@@ -157,12 +125,12 @@ function tryBinary(expr: ESQLFunction): Condition | undefined {
 
   if (isColumn(first) && isLiteral(second)) {
     const value = asComparable(literalToJs(second));
-    return value !== undefined ? makeBinary(first.text, operator, value) : undefined;
+    return value !== undefined ? makeBinary(colName(first), operator, value) : undefined;
   }
 
   if (isLiteral(first) && isColumn(second)) {
     const value = asComparable(literalToJs(first));
-    return value !== undefined ? makeBinary(second.text, operator, value) : undefined;
+    return value !== undefined ? makeBinary(colName(second), operator, value) : undefined;
   }
 
   return undefined;
@@ -173,7 +141,7 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
     const args = getArgs(expr);
     const col = args && isColumn(args[0]) ? args[0] : undefined;
     const lit = args && isLiteral(args[1]) ? args[1] : undefined;
-    if (col && lit) return likeToFilter(col.text, String(literalToJs(lit)));
+    if (col && lit) return likeToFilter(colName(col), String(literalToJs(lit)));
     return undefined;
   }
 
@@ -198,8 +166,8 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
           typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
         );
       if (values.length === 0) return undefined;
-      if (values.length === 1) return { field: col.text, neq: values[0] };
-      return { and: values.map((v) => ({ field: col.text, neq: v })) };
+      if (values.length === 1) return { field: colName(col), neq: values[0] };
+      return { and: values.map((v) => ({ field: colName(col), neq: v })) };
     }
   }
 
@@ -222,8 +190,8 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
         typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
       );
     if (values.length === 0) return undefined;
-    if (values.length === 1) return { field: col.text, eq: values[0] };
-    return { or: values.map((v) => ({ field: col.text, eq: v })) };
+    if (values.length === 1) return { field: colName(col), eq: values[0] };
+    return { or: values.map((v) => ({ field: colName(col), eq: v })) };
   }
 
   // NOT(...) -> negate condition
@@ -246,11 +214,11 @@ export function esqlAstExpressionToCondition(expr: ESQLSingleAstItem): Condition
     const name = getFuncName(expr).toUpperCase();
     if (name === 'IS NULL') {
       const col = getArgs(expr)?.[0];
-      if (col && isColumn(col)) return { field: col.text, exists: false };
+      if (col && isColumn(col)) return { field: colName(col), exists: false };
     }
     if (name === 'IS NOT NULL') {
       const col = getArgs(expr)?.[0];
-      if (col && isColumn(col)) return { field: col.text, exists: true };
+      if (col && isColumn(col)) return { field: colName(col), exists: true };
     }
   }
 
