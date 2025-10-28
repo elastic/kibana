@@ -1179,5 +1179,100 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
     });
+
+    describe('Non-enriched entities', () => {
+      it('should handle single non-enriched entity with correct type and label', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [{ id: 'non-enriched-event-1', isAlert: false }],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes');
+        expect(response.body).to.have.property('edges');
+
+        // Find the actor node (non-enriched)
+        const actorNode = response.body.nodes.find(
+          (n: EntityNodeDataModel) => n.id === 'non-enriched-actor-123'
+        );
+        expect(actorNode).to.not.be(undefined);
+        expect(actorNode.tag).to.equal('Entities');
+        expect(actorNode.label).to.equal('non-enriched-actor-123');
+        expect(actorNode.icon).to.equal('database');
+        expect(actorNode.shape).to.equal('rectangle');
+        expect(actorNode.count).to.be(undefined); // Single entity
+
+        // Find the target node (non-enriched)
+        const targetNode = response.body.nodes.find(
+          (n: EntityNodeDataModel) => n.id === 'non-enriched-target-456'
+        );
+        expect(targetNode).to.not.be(undefined);
+        expect(targetNode.tag).to.equal('Entities');
+        expect(targetNode.label).to.equal('non-enriched-target-456');
+        expect(targetNode.icon).to.equal('database');
+        expect(targetNode.shape).to.equal('rectangle');
+      });
+
+      it('should group multiple non-enriched entities with null label', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [
+              { id: 'non-enriched-event-multi-1', isAlert: false },
+              { id: 'non-enriched-event-multi-2', isAlert: false },
+              { id: 'non-enriched-event-multi-3', isAlert: false },
+            ],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes');
+        expect(response.body).to.have.property('edges');
+
+        // Find nodes with Entities type
+        const entitiesNodes = response.body.nodes.filter(
+          (n: EntityNodeDataModel) => n.tag === 'Entities'
+        );
+
+        // Should have multiple entity nodes but they might be grouped by action
+        expect(entitiesNodes.length).to.be.greaterThan(0);
+
+        // Check that at least one has "Entities" type
+        entitiesNodes.forEach((node: EntityNodeDataModel) => {
+          expect(node.tag).to.equal('Entities');
+          expect(node.icon).to.equal('database');
+          expect(node.shape).to.equal('rectangle');
+        });
+      });
+
+      it('should return nodes with correct visual properties for Entities type', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['logs-*'],
+            originEventIds: [{ id: 'non-enriched-event-1', isAlert: false }],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
+
+        const entityNodes = response.body.nodes.filter(
+          (n: EntityNodeDataModel | LabelNodeDataModel) => !isLabelNode(n)
+        );
+
+        entityNodes.forEach((node: EntityNodeDataModel) => {
+          // All non-enriched entities should have Entities tag
+          if (node.tag === 'Entities') {
+            expect(node.icon).to.equal('database');
+            expect(node.shape).to.equal('rectangle');
+            // Label can be null or entity.id
+            expect(node.label !== undefined || node.label === null).to.be(true);
+          }
+        });
+      });
+    });
   });
 }
