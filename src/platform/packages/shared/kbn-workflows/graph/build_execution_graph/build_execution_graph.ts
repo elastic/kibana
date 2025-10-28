@@ -756,9 +756,7 @@ export function convertToWorkflowGraph(
   workflowSchema: WorkflowYaml,
   defaultSettings?: WorkflowSettings
 ): graphlib.Graph<GraphNodeUnion> {
-  const resolvedSettings = workflowSchema.settings
-    ? resolveWorklfowSettings(workflowSchema.settings, defaultSettings)
-    : undefined;
+  const resolvedSettings = resolveWorklfowSettings(workflowSchema.settings, defaultSettings);
   const context: GraphBuildContext = {
     settings: resolvedSettings,
     stack: [],
@@ -781,16 +779,22 @@ export function convertToWorkflowGraph(
 }
 
 function resolveWorklfowSettings(
-  workflowSettings: WorkflowSettings,
+  workflowSettings?: WorkflowSettings,
   defaultSettings?: WorkflowSettings
-): WorkflowSettings {
+): WorkflowSettings | undefined {
   if (!defaultSettings) {
     return workflowSettings;
+  }
+
+  if (!workflowSettings) {
+    return defaultSettings;
   }
 
   return {
     ...workflowSettings,
     timeout: workflowSettings.timeout ?? defaultSettings.timeout,
+    'on-failure': workflowSettings['on-failure'] ?? defaultSettings['on-failure'],
+    timezone: workflowSettings.timeout ?? defaultSettings.timezone,
   };
 }
 
