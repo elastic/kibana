@@ -16,15 +16,15 @@ import useLatest from 'react-use/lib/useLatest';
 import { useStableCallback } from '@kbn/unified-histogram';
 import {
   filter,
-  startWith,
   Observable,
   distinctUntilChanged,
-  withLatestFrom,
   from,
   merge,
   shareReplay,
   BehaviorSubject,
   switchMap,
+  combineLatest,
+  map,
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
@@ -118,7 +118,7 @@ export const useLensProps = ({
       }
 
       return () => observer.disconnect();
-    }).pipe(startWith(!!chartRefCurrent), distinctUntilChanged(), shareReplay(1));
+    }).pipe(distinctUntilChanged(), shareReplay(1));
 
     // load lens props when any trigger emits;
     const triggers$ = merge(
@@ -131,13 +131,14 @@ export const useLensProps = ({
       switchMap(() => from(buildAttributesFn.current()))
     );
 
-    // Update Lens props only when chart is visible
-    const subscription = triggers$
+    // Update Lens props when new attributes load AND chart is visible
+    // OR when chart becomes visible (using latest attributes)
+    const subscription = combineLatest([triggers$, intersecting$])
       .pipe(
-        withLatestFrom(intersecting$),
-        filter(([, isIntersecting]) => isIntersecting)
+        filter(([, isIntersecting]) => isIntersecting),
+        map(([attributes]) => attributes)
       )
-      .subscribe(([attributes]) => {
+      .subscribe((attributes) => {
         updateLensPropsContext(attributes);
       });
 
