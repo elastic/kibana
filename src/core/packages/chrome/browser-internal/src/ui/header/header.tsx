@@ -198,17 +198,12 @@ export function Header({
 
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>
-            <div
-              css={css`
-                min-width: 0; // enable text truncation for long breadcrumb titles
-              `}
+
+            <BreadcrumbsWithExtensionsWrapper
+              breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
             >
-              <BreadcrumbsWithExtensionsWrapper
-                breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-              >
-                {Breadcrumbs}
-              </BreadcrumbsWithExtensionsWrapper>
-            </div>
+              {Breadcrumbs}
+            </BreadcrumbsWithExtensionsWrapper>
 
             <HeaderBadge badge$={observables.badge$} />
 

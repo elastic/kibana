@@ -73,9 +73,6 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   breadcrumbsSectionItem: css`
     min-width: 0; // needed to enable breadcrumbs truncation
   `,
-  redirectAppLinksContainer: css`
-    min-width: 0; // needed to enable breadcrumbs truncation
-  `,
   leftNavcontrols: css`
     .navcontrols__separator {
       display: flex;
@@ -275,13 +272,11 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
-                <div css={headerCss.redirectAppLinksContainer}>
-                  <BreadcrumbsWithExtensionsWrapper
-                    breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-                  >
-                    <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
-                  </BreadcrumbsWithExtensionsWrapper>
-                </div>
+                <BreadcrumbsWithExtensionsWrapper
+                  breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
+                >
+                  <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                </BreadcrumbsWithExtensionsWrapper>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
 
