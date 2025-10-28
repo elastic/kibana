@@ -306,4 +306,159 @@ describe('fetchGraph', () => {
     expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()}`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });
+
+  describe('non-enriched entities', () => {
+    it('should include "Entities" as fallback for actorEntityGroup and targetEntityGroup in query', async () => {
+      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+        .fn()
+        .mockResolvedValueOnce({
+          policies: [],
+        });
+
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify query contains the Entities fallback logic for entity groups
+      expect(query).toContain('EVAL actorEntityGroup = CASE(');
+      expect(query).toContain('EVAL targetEntityGroup = CASE(');
+      expect(query).toContain('"Entities"');
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should include "Entities" as fallback for actorEntityType and targetEntityType in query', async () => {
+      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+        .fn()
+        .mockResolvedValueOnce({
+          policies: [],
+        });
+
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify query contains the Entities fallback logic for entity types
+      expect(query).toContain('EVAL actorEntityType = CASE(');
+      expect(query).toContain('EVAL targetEntityType = CASE(');
+      expect(query).toContain('"Entities"');
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should include label logic after STATS based on entity count', async () => {
+      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+        .fn()
+        .mockResolvedValueOnce({
+          policies: [],
+        });
+
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify label logic is after STATS
+      const statsIndex = query.indexOf('| STATS');
+      const actorLabelIndex = query.indexOf('| EVAL actorLabel = CASE(', statsIndex);
+      const targetLabelIndex = query.indexOf('| EVAL targetLabel = CASE(', statsIndex);
+
+      expect(statsIndex).toBeGreaterThan(-1);
+      expect(actorLabelIndex).toBeGreaterThan(statsIndex);
+      expect(targetLabelIndex).toBeGreaterThan(statsIndex);
+
+      // Verify label logic checks for actorIdsCount == 1 and targetIdsCount == 1
+      expect(query).toContain('actorIdsCount == 1');
+      expect(query).toContain('targetIdsCount == 1');
+      expect(query).toContain('MV_FIRST(actorIds)');
+      expect(query).toContain('MV_FIRST(targetIds)');
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+
+    it('should aggregate actorEntitySubType and targetEntitySubType in STATS', async () => {
+      (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+        .fn()
+        .mockResolvedValueOnce({
+          policies: [
+            {
+              config: {
+                match: {
+                  name: getEnrichPolicyId(),
+                },
+              },
+            },
+          ],
+        });
+
+      const validIndexPatterns = ['valid_index'];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: validIndexPatterns,
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      const result = await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      // Verify actorEntitySubType and targetEntitySubType are aggregated in STATS
+      expect(query).toContain('actorEntitySubType = VALUES(actorEntitySubType)');
+      expect(query).toContain('targetEntitySubType = VALUES(targetEntitySubType)');
+
+      expect(result).toEqual([{ id: 'dummy' }]);
+    });
+  });
 });
