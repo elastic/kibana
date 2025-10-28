@@ -33,7 +33,6 @@ import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks
 import { setKibanaServices } from './kibana_services';
 import { setLogger } from './logger';
 import type { DashboardCapabilities } from '../../common';
-import type { LoadDashboardReturn } from './dashboard_content_management_service/types';
 import type { SearchDashboardsResponse } from './dashboard_content_management_service/lib/find_dashboards';
 
 const defaultDashboardCapabilities: DashboardCapabilities = {
@@ -78,11 +77,6 @@ export const setStubLogger = () => {
 };
 
 export const mockDashboardContentManagementService = {
-  loadDashboardState: jest.fn().mockImplementation(() =>
-    Promise.resolve({
-      dashboardInput: {},
-    } as LoadDashboardReturn)
-  ),
   saveDashboardState: jest.fn(),
   findDashboards: {
     search: jest.fn().mockImplementation(({ search, size }) => {
