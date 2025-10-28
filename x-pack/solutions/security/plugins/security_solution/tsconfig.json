@@ -265,5 +265,6 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
     "@kbn/core-ui-settings-common",
+    "@kbn/react-query"
   ]
 }

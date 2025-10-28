@@ -61,16 +61,6 @@ export const allowedExperimentalValues = Object.freeze({
   newUserDetailsFlyoutManagedUser: false,
 
   /**
-   * Enable risk engine client and initialisation of datastream, component templates and mappings
-   */
-  riskScoringPersistence: true,
-
-  /**
-   * Enables experimental Entity Analytics HTTP endpoints
-   */
-  riskScoringRoutesEnabled: true,
-
-  /**
    * Disables ESQL-based risk scoring
    */
   disableESQLRiskScoring: false,
@@ -84,6 +74,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
+
+  /**
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   */
+  entityDetailsHighlightsEnabled: false,
 
   /**
    * disables ES|QL rules

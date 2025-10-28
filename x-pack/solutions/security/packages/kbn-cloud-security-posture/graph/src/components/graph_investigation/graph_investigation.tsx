@@ -17,6 +17,7 @@ import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { Graph, isEntityNode, type NodeProps } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
@@ -33,7 +34,8 @@ import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
 import { isLabelNode, showErrorToast } from '../utils';
-import { GRAPH_SCOPE_ID } from '../constants';
+import { FlowTargetSourceDest } from '../node/utils';
+import { GRAPH_SCOPE_ID, NETWORK_PREVIEW_BANNER } from '../constants';
 
 const useGraphPopovers = ({
   dataViewId,
@@ -52,6 +54,7 @@ const useGraphPopovers = ({
     null
   );
   const [currentEventText, setCurrentEventText] = useState<string>('');
+  const { openPreviewPanel } = useExpandableFlyoutApi();
   const nodeExpandPopover = useEntityNodeExpandPopover(
     setSearchFilters,
     dataViewId,
@@ -82,10 +85,25 @@ const useGraphPopovers = ({
 
   const createIpClickHandler = useCallback(
     (ips: string[]) => (e: React.MouseEvent<HTMLElement>) => {
-      setCurrentIps(ips);
-      openPopoverCallback(ipPopover.onIpClick, e);
+      // For single IP, open preview panel directly
+      if (ips.length === 1) {
+        openPreviewPanel({
+          id: 'network-preview',
+          params: {
+            ip: ips[0],
+            scopeId: GRAPH_SCOPE_ID,
+            flowTarget: FlowTargetSourceDest.source,
+            banner: NETWORK_PREVIEW_BANNER,
+            isPreviewMode: true,
+          },
+        });
+      } else {
+        // For multiple IPs, show popover
+        setCurrentIps(ips);
+        openPopoverCallback(ipPopover.onIpClick, e);
+      }
     },
-    [setCurrentIps, openPopoverCallback, ipPopover.onIpClick]
+    [setCurrentIps, openPopoverCallback, ipPopover.onIpClick, openPreviewPanel]
   );
 
   const createCountryClickHandler = useCallback(

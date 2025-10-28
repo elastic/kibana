@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 import {
   validateParams,
@@ -22,6 +22,7 @@ import type {
   ValidatorServices,
 } from '../types';
 import { actionsConfigMock } from '../actions_config.mock';
+import { getConnectorType } from '../fixtures';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
@@ -30,18 +31,15 @@ const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
 const configurationUtilities = actionsConfigMock.create();
 
 test('should validate when there are no validators', () => {
-  const actionType: ActionType = {
+  const actionType = getConnectorType({
     id: 'foo',
     name: 'bar',
-    minimumLicenseRequired: 'basic',
-    supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: schema.object({ any: schema.arrayOf(schema.string()) }) },
-      secrets: { schema: schema.object({}) },
-      params: { schema: schema.object({}) },
+      config: { schema: z.object({ any: z.array(z.string()) }).strict() },
+      secrets: { schema: z.object({}).strict() },
+      params: { schema: z.object({}).strict() },
     },
-    executor,
-  };
+  });
   const testValue = { any: ['old', 'thing'] };
 
   const result = validateConfig(actionType, testValue, { configurationUtilities });
@@ -49,7 +47,7 @@ test('should validate when there are no validators', () => {
 });
 
 test('should validate when validators return incoming value', () => {
-  const selfValidator = { validate: (value: Record<string, unknown>) => value };
+  const selfValidator = { parse: (value: Record<string, unknown>) => value };
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
@@ -88,7 +86,7 @@ test('should validate when validators return incoming value', () => {
 
 test('should validate when validators return different values', () => {
   const returnedValue = { something: { shaped: 'differently' } };
-  const selfValidator = { validate: () => returnedValue };
+  const selfValidator = { parse: () => returnedValue };
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
@@ -127,7 +125,7 @@ test('should validate when validators return different values', () => {
 
 test('should throw with expected error when validators fail', () => {
   const erroringValidator = {
-    validate: () => {
+    parse: () => {
       throw new Error('test error');
     },
   };
@@ -170,8 +168,8 @@ test('should throw with expected error when validators fail', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"error validating action type connector: test error"`);
 });
 
-test('should work with @kbn/config-schema', () => {
-  const testSchema = schema.object({ foo: schema.string() });
+test('should work with @kbn/zod', () => {
+  const testSchema = z.object({ foo: z.string() }).strict();
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
@@ -195,16 +193,33 @@ test('should work with @kbn/config-schema', () => {
   const result = validateParams(actionType, { foo: 'bar' }, { configurationUtilities });
   expect(result).toEqual({ foo: 'bar' });
 
-  expect(() =>
-    validateParams(actionType, { bar: 2 }, { configurationUtilities })
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"error validating action params: [foo]: expected value of type [string] but got [undefined]"`
-  );
+  expect(() => validateParams(actionType, { bar: 2 }, { configurationUtilities }))
+    .toThrowErrorMatchingInlineSnapshot(`
+    "error validating action params: [
+      {
+        \\"code\\": \\"invalid_type\\",
+        \\"expected\\": \\"string\\",
+        \\"received\\": \\"undefined\\",
+        \\"path\\": [
+          \\"foo\\"
+        ],
+        \\"message\\": \\"Required\\"
+      },
+      {
+        \\"code\\": \\"unrecognized_keys\\",
+        \\"keys\\": [
+          \\"bar\\"
+        ],
+        \\"path\\": [],
+        \\"message\\": \\"Unrecognized key(s) in object: 'bar'\\"
+      }
+    ]"
+  `);
 });
 
 test('should validate when custom validator is defined', () => {
   const schemaValidator = {
-    validate: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
+    parse: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
   };
   const customValidator = jest.fn();
 
@@ -247,7 +262,7 @@ test('should validate when custom validator is defined', () => {
 
 test('should throw an error when custom validators fail', () => {
   const schemaValidator = {
-    validate: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
+    parse: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
   };
   const customValidator = (
     value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets,
@@ -295,7 +310,7 @@ test('should throw an error when custom validators fail', () => {
 
 describe('validateConnectors', () => {
   const testValue = { any: ['old', 'thing'] };
-  const selfValidator = { validate: (value: Record<string, unknown>) => value };
+  const selfValidator = { parse: (value: Record<string, unknown>) => value };
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
