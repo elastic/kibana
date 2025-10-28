@@ -1938,6 +1938,9 @@ describe('Package policy service', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      mockAgentPolicyGet();
+    });
     it('should fail to update on version conflict', async () => {
       const savedObjectsClient = createSavedObjectClientMock();
 
