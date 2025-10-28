@@ -76,7 +76,6 @@ describe('AuthenticationFormItems', () => {
   const defaultProps = {
     isLoading: false,
     setConfigEntry: jest.fn(),
-    reenterSecretsOnEdit: true,
   };
 
   it('should render all required auth fields without auth type selector', () => {
