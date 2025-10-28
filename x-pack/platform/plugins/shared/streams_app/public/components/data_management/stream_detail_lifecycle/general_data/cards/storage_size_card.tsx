@@ -33,7 +33,6 @@ export const StorageSizeCard = ({
             { defaultMessage: 'storageSize' }
           )}
         >
-          {stats?.sizeBytes}
           {statsError || !stats || stats.sizeBytes === undefined
             ? '-'
             : formatBytes(stats.sizeBytes)}
