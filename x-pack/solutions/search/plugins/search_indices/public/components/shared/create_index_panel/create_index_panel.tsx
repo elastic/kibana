@@ -28,7 +28,7 @@ import { CreateIndexViewMode } from '../../../types';
 import { CreateIndexCalloutBrowseIntegrationBtn } from './callout_browse_integration_stack';
 import { CreateIndexPanelCreateO11ySpaceBtn } from './callout_create_o11y_space_stack';
 
-const WIDTH = '980px';
+const MAX_WIDTH = '980px';
 
 export interface CreateIndexPanelProps {
   children: React.ReactNode | React.ReactNode[];
@@ -67,7 +67,7 @@ export const CreateIndexPanel = ({
         hasShadow={false}
         hasBorder
         style={{
-          width: WIDTH,
+          maxWidth: MAX_WIDTH,
           margin: '0 auto',
           padding: euiTheme.size.l,
           paddingTop: euiTheme.size.m,
