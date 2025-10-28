@@ -66,9 +66,7 @@ describe('index_threshold getDescriptionFields', () => {
   it('should call prebuildField with index wrapped in array', () => {
     const mockRule = {
       params: {
-        searchConfiguration: {
-          index: 'logs-*',
-        },
+        index: 'logs-*',
         threshold: [10],
         timeWindowSize: 5,
         timeWindowUnit: 'm',

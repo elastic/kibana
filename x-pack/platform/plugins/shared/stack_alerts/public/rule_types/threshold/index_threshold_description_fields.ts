@@ -6,7 +6,6 @@
  */
 
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import { indexParamToArray } from './expression';
 import type { IndexThresholdRuleParams } from './types';
 
@@ -17,5 +16,5 @@ export const getDescriptionFields: GetDescriptionFieldsFn<IndexThresholdRulePara
   if (!rule || !prebuildFields) return [];
 
   const normalizedIndex = indexParamToArray(rule.params.index);
-  return [prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN](normalizedIndex)];
+  return [prebuildFields.indexPattern(normalizedIndex)];
 };

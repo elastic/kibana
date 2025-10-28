@@ -7,10 +7,7 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  RULE_PREBUILD_DESCRIPTION_FIELDS,
-  type RuleTypeModel,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { type RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -22,11 +19,7 @@ export const getDescriptionFields: GetDescriptionFieldsFn<DegradedDocsRuleParams
 }) => {
   if (!rule || !prebuildFields) return [];
 
-  return [
-    prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]([
-      rule.params.searchConfiguration.index,
-    ]),
-  ];
+  return [prebuildFields.indexPattern([rule.params.searchConfiguration.index])];
 };
 
 export function getRuleType(): RuleTypeModel<DegradedDocsRuleParams> {
