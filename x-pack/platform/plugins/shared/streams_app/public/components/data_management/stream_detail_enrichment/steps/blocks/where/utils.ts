@@ -32,55 +32,50 @@ export const getNestedMessage = (
   statusCounts: Record<string, number>,
   stepsCount: number,
   conditionsCount: number
-) => {
+): string => {
   const hasSteps = stepsCount > 0;
   const hasConditions = conditionsCount > 0;
 
-  let message = '';
+  // Build strings conditionally (only what's needed)
+  const statusSummary = hasSteps
+    ? Object.entries(statusCounts)
+        .map(([status, count]) => `${count} ${statusLabels[status] || status}`)
+        .join(', ')
+    : '';
 
+  const stepsLabel = hasSteps
+    ? i18n.translate('xpack.streams.nestedChildrenProcessingSummary.stepsLabel', {
+        defaultMessage: '{count, plural, one {step} other {steps}}',
+        values: { count: stepsCount },
+      })
+    : '';
+
+  const conditionLabel = hasConditions
+    ? i18n.translate('xpack.streams.nestedChildrenProcessingSummary.conditionStepsLabel', {
+        defaultMessage: '{count, plural, one {nested condition} other {nested conditions}}',
+        values: { count: conditionsCount },
+      })
+    : '';
+
+  const andLabel =
+    hasSteps && hasConditions
+      ? i18n.translate('xpack.streams.nestedChildrenProcessingSummary.and', {
+          defaultMessage: 'and',
+        })
+      : '';
+
+  // Compose and return based on what's present
   if (hasSteps && !hasConditions) {
-    const statusSummary = Object.entries(statusCounts)
-      .map(([status, count]) => `${count} ${statusLabels[status] || status}`)
-      .join(', ');
-
-    const stepsLabel = i18n.translate('xpack.streams.nestedChildrenProcessingSummary.stepsLabel', {
-      defaultMessage: '{count, plural, one {step} other {steps}}',
-      values: { count: stepsCount },
-    });
-    message = `${statusSummary} ${stepsLabel}`;
-  } else if (!hasSteps && hasConditions) {
-    const conditionLabel = i18n.translate(
-      'xpack.streams.nestedChildrenProcessingSummary.conditionStepsLabel',
-      {
-        defaultMessage: '{count, plural, one {nested condition} other {nested conditions}}',
-        values: { count: conditionsCount },
-      }
-    );
-    message = `${conditionsCount} ${conditionLabel}`;
-  } else if (hasSteps && hasConditions) {
-    const statusSummary = Object.entries(statusCounts)
-      .map(([status, count]) => `${count} ${statusLabels[status] || status}`)
-      .join(', ');
-
-    const stepsLabel = i18n.translate('xpack.streams.nestedChildrenProcessingSummary.stepsLabel', {
-      defaultMessage: '{count, plural, one {step} other {steps}}',
-      values: { count: stepsCount },
-    });
-
-    const andLabel = i18n.translate('xpack.streams.nestedChildrenProcessingSummary.and', {
-      defaultMessage: 'and',
-    });
-
-    const conditionLabel = i18n.translate(
-      'xpack.streams.nestedChildrenProcessingSummary.conditionStepsLabel',
-      {
-        defaultMessage: '{count, plural, one {nested condition} other {nested conditions}}',
-        values: { count: conditionsCount },
-      }
-    );
-
-    message = `${statusSummary} ${stepsLabel} ${andLabel} ${conditionsCount} ${conditionLabel}`;
+    return `${statusSummary} ${stepsLabel}`;
   }
 
-  return message;
+  if (!hasSteps && hasConditions) {
+    return `${conditionsCount} ${conditionLabel}`;
+  }
+
+  if (hasSteps && hasConditions) {
+    return `${statusSummary} ${stepsLabel} ${andLabel} ${conditionsCount} ${conditionLabel}`;
+  }
+
+  return '';
 };
