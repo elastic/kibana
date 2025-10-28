@@ -131,7 +131,7 @@ export interface PreventableEvent {
 }
 
 export interface LensByValueBase {
-  savedObjectId?: string;
+  savedObjectId?: string; // really should be never but creates type issues
   attributes?: LensSavedObjectAttributes;
 }
 
@@ -155,7 +155,7 @@ export interface LensOverrides {
  * Lens embeddable props broken down by type
  */
 interface LensByReferenceBase {
-  savedObjectId?: string; // really should be never
+  savedObjectId?: string;
   attributes?: never;
 }
 
