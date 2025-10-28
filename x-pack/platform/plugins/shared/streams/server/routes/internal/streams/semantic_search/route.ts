@@ -10,7 +10,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { getSearchQuery, getSemanticSearchStreamDocument } from './semantic_search_params';
 
-const META_LAYER_INDEX = 'kibana-meta-layer';
+const META_LAYER_INDEX = 'semantic-meta-layer';
 
 const indexStreamsForSemanticSearchRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/index',
