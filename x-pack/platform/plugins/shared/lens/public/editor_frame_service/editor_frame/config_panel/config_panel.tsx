@@ -281,7 +281,7 @@ export function ConfigPanel(
 
   const euiOverflowScroll = useEuiOverflowScroll('y');
 
-  if (!selectedLayerId || !layerConfig) return null;
+  if (layerConfig?.config.hidden || !selectedLayerId || !layerConfig) return null;
 
   return (
     <EuiForm
