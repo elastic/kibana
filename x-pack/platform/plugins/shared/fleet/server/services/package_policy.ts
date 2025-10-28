@@ -3981,7 +3981,9 @@ async function requireUniqueName(
   const policiesToCheck = id
     ? // Check that the name does not exist already but exclude the current package policy
       (existingPoliciesWithName?.items || []).filter(
-        (p) => p.id !== id && (p.spaceIds ?? []).some((spaceId) => spaceIds.includes(spaceId))
+        (p) =>
+          p.id !== id &&
+          (isMultiSpace ? (p.spaceIds ?? []).some((spaceId) => spaceIds.includes(spaceId)) : true)
       )
     : existingPoliciesWithName?.items;
 
