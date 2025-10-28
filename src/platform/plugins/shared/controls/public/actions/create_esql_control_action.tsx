@@ -38,26 +38,18 @@ export const createESQLControlAction = (): ActionDefinition<
         controlType: EsqlControlType.VALUES_FROM_QUERY,
         esqlVariables: variablesInParent,
         onSaveControl: async (controlState: ESQLControlState) => {
-          if (isPinned && apiCanPinPanel(embeddable)) {
-            embeddable.addPinnedPanel({
-              panelType: 'esqlControl',
-              serializedState: {
-                rawState: {
-                  ...controlState,
-                },
-              },
-            });
-            return;
-          }
-
-          embeddable.addNewPanel({
+          const newControl = {
             panelType: 'esqlControl',
             serializedState: {
               rawState: {
                 ...controlState,
               },
             },
-          });
+          };
+
+          (isPinned && apiCanPinPanel(embeddable)
+            ? embeddable.addPinnedPanel
+            : embeddable.addNewPanel)(newControl);
         },
       });
     } catch (e) {

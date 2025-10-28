@@ -80,37 +80,19 @@ export const createDataControlOfType = <State extends DataControlState = DataCon
     );
   }
 
+  const newControl = {
+    panelType: type,
+    serializedState: {
+      rawState: state,
+    },
+  };
+
   if (controlId) {
     // the control exists but changed type - so, replace the old control
-    embeddable.replacePanel(controlId, {
-      panelType: type,
-      serializedState: {
-        rawState: state,
-      },
-    });
-    return;
+    embeddable.replacePanel(controlId, newControl);
+  } else if (isPinned && apiCanPinPanel(embeddable)) {
+    embeddable.addPinnedPanel(newControl);
+  } else {
+    embeddable.addNewPanel(newControl);
   }
-
-  if (isPinned && apiCanPinPanel(embeddable)) {
-    embeddable.addPinnedPanel({
-      panelType: type,
-      serializedState: {
-        rawState: state,
-      },
-    });
-    return;
-  }
-
-  // otherwise, add a new control
-  embeddable.addNewPanel(
-    {
-      panelType: type,
-      serializedState: {
-        rawState: state,
-      },
-    },
-    {
-      displaySuccessMessage: true,
-    }
-  );
 };
