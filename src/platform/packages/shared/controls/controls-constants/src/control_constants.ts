@@ -14,3 +14,11 @@ export const ESQL_CONTROL = 'esqlControl';
 
 export const CONTROL_HOVER_TRIGGER_ID = 'CONTROL_HOVER_TRIGGER';
 export const CONTROL_MENU_TRIGGER = 'CONTROL_MENU_TRIGGER';
+
+const CONTROL_TYPES = [
+  TIME_SLIDER_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  OPTIONS_LIST_CONTROL,
+  ESQL_CONTROL,
+];
+export const isControlType = (type: string) => CONTROL_TYPES.includes(type);

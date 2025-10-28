@@ -18,6 +18,7 @@ import {
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { isControlType } from '@kbn/controls-constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { presentationUtilService } from '../../services/kibana_services';
@@ -75,7 +76,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
     const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
-    const blurPanel = focusedPanelId !== undefined && focusedPanelId !== id;
+    const blurPanel = focusedPanelId !== undefined && focusedPanelId !== id && !isControlType(type);
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
