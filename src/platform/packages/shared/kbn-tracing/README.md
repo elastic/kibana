@@ -29,10 +29,16 @@ telemetry.tracing.exporters:
       secret_key: '${LANGFUSE_SECRET_KEY}'
       scheduled_delay: 2000
 
-  # OTLP exporter (for APM Server, OpenTelemetry Collector, or other OTLP backends)
-  - otlp:
-      url: 'http://localhost:4318/v1/traces' # OTLP receiver endpoint
-      protocol: 'http' # or 'grpc'
+  # OTLP HTTP exporter (for APM Server, OpenTelemetry Collector, etc.)
+  - http:
+      url: 'http://localhost:4318/v1/traces' # OTLP HTTP receiver endpoint
+      headers:
+        Authorization: 'Bearer ${SECRET_TOKEN}' # optional
+      scheduled_delay: 2000
+
+  # OTLP gRPC exporter
+  - grpc:
+      url: 'http://localhost:4317' # OTLP gRPC receiver endpoint
       headers:
         Authorization: 'Bearer ${SECRET_TOKEN}' # optional
       scheduled_delay: 2000
@@ -42,7 +48,7 @@ The YAML follows the schema exported from `@kbn/inference-tracing-config`:
 
 - `InferenceTracingPhoenixExportConfig`
 - `InferenceTracingLangfuseExportConfig`
-- `InferenceTracingOTLPExportConfig`
+- `InferenceTracingOtlpExportConfig` (used for both `grpc` and `http` keys)
 
 See those types for a full list of allowed fields.
 
@@ -52,8 +58,8 @@ The OTLP exporter works with any OTLP-compatible receiver, including:
 
 - **OpenTelemetry Collector** (recommended for flexibility and fan-out capabilities)
 - APM Server (for viewing in Kibana APM UI)
+- EDOT Collector
 - Jaeger with OTLP receiver
-- Grafana Tempo
 - Any other OTLP-compatible observability backend
 
 Using an OpenTelemetry Collector as an intermediary is recommended as it allows you to forward traces to multiple backends, apply processing/filtering, and handle backpressure.

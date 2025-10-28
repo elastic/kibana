@@ -9,7 +9,7 @@ export type {
   InferenceTracingExportConfig,
   InferenceTracingLangfuseExportConfig,
   InferenceTracingPhoenixExportConfig,
-  InferenceTracingOTLPExportConfig,
+  InferenceTracingOtlpExportConfig,
 } from './types';
 
 export { inferenceTracingExportConfigSchema } from './config';
