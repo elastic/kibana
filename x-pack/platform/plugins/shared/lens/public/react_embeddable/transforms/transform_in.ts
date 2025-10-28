@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import type { LensApiSchemaType, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import type {
   LensByRefTransformInResult,
@@ -31,7 +31,7 @@ export const getTransformIn = (builder: LensConfigBuilder): LensTransformIn => {
 
     const chartType = builder.getType(config.attributes);
 
-    if (!builder.isSupported(config.attributes)) {
+    if (!builder.isSupported(chartType)) {
       // TODO: remove this once all formats are supported
       // when not supported, no transform is needed
       return {
@@ -40,7 +40,7 @@ export const getTransformIn = (builder: LensConfigBuilder): LensTransformIn => {
       } as unknown as LensByValueTransformInResult;
     }
 
-    const serializedState = builder.fromAPIFormat(config.attributes);
+    const serializedState = builder.fromAPIFormat(config.attributes as LensApiSchemaType);
 
     return {
       state: {
