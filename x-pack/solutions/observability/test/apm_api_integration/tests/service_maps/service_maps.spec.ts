@@ -74,25 +74,8 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
       it('returns the correct data', () => {
         const { spans, servicesData } = response.body;
-
-        const serviceNames = uniq(
-          servicesData
-            .filter((element) => element['service.name'] !== undefined)
-            .map((element) => element['service.name'])
-        ).sort();
-
-        expectSnapshot(serviceNames).toMatchInline(`
-              Array [
-                "auditbeat",
-                "opbeans-dotnet",
-                "opbeans-go",
-                "opbeans-java",
-                "opbeans-node",
-                "opbeans-python",
-                "opbeans-ruby",
-                "opbeans-rum",
-              ]
-            `);
+        // When the services have no traces, the servicesData is empty
+        expect(servicesData.length).to.be.equal(0);
 
         const externalDestinations = uniq(
           spans
