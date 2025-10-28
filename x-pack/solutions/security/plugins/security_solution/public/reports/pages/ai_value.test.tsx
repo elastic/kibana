@@ -165,7 +165,7 @@ describe('AIValue', () => {
     mockUseHasSecurityCapability.mockReturnValue(true);
   });
 
-  describe('Loading States', () => {
+  describe('Access states', () => {
     it('shows no privileges when user lacks soc management capability', () => {
       mockUseHasSecurityCapability.mockReturnValue(false);
 
@@ -175,7 +175,7 @@ describe('AIValue', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('page-loader')).toBeInTheDocument();
+      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
     });
 
     it('shows page loader when new data view picker is enabled and status is pristine', () => {
