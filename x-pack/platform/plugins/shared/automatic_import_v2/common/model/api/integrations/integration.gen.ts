@@ -16,6 +16,7 @@
 
 import { z } from '@kbn/zod';
 
+import { InputType, Integration } from '../../common_attributes.gen';
 import { NonEmptyString } from '../../primitive.gen';
 
 export type CreateAutoImportIntegrationRequestBody = z.infer<
@@ -24,17 +25,44 @@ export type CreateAutoImportIntegrationRequestBody = z.infer<
 export const CreateAutoImportIntegrationRequestBody = z
   .object({
     /**
-     * The integration title
+     * The title of the integration
      */
-    title: NonEmptyString,
+    title: z.string(),
     /**
-     * The integration description
+     * The description of the integration
      */
-    description: z.string().optional(),
+    description: z.string(),
     /**
-     * The integration logo
+     * The logo of the integration
      */
     logo: z.string().optional(),
+    /**
+     * The data streams of the integration
+     */
+    dataStreams: z
+      .array(
+        z
+          .object({
+            /**
+             * The title of the data stream
+             */
+            title: z.string(),
+            /**
+             * The description of the data stream
+             */
+            description: z.string(),
+            /**
+             * The input types of the data stream
+             */
+            inputTypes: z.array(InputType).min(1),
+            /**
+             * The raw samples of the data stream
+             */
+            rawSamples: z.array(z.string()),
+          })
+          .strict()
+      )
+      .min(1),
   })
   .strict();
 export type CreateAutoImportIntegrationRequestBodyInput = z.input<
@@ -44,12 +72,48 @@ export type CreateAutoImportIntegrationRequestBodyInput = z.input<
 export type CreateAutoImportIntegrationResponse = z.infer<
   typeof CreateAutoImportIntegrationResponse
 >;
-export const CreateAutoImportIntegrationResponse = z.object({
+export const CreateAutoImportIntegrationResponse = z
+  .object({
+    /**
+     * The integration id created in state.
+     */
+    integration_id: NonEmptyString.optional(),
+  })
+  .strict();
+
+export type DeleteAutoImportIntegrationRequestParams = z.infer<
+  typeof DeleteAutoImportIntegrationRequestParams
+>;
+export const DeleteAutoImportIntegrationRequestParams = z.object({
   /**
-   * The integration id created in state.
+   * The integration identifier
    */
   integration_id: NonEmptyString,
 });
+export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
+  typeof DeleteAutoImportIntegrationRequestParams
+>;
+
+export type GetAutoImportIntegrationRequestParams = z.infer<
+  typeof GetAutoImportIntegrationRequestParams
+>;
+export const GetAutoImportIntegrationRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+});
+export type GetAutoImportIntegrationRequestParamsInput = z.input<
+  typeof GetAutoImportIntegrationRequestParams
+>;
+
+export type GetAutoImportIntegrationResponse = z.infer<typeof GetAutoImportIntegrationResponse>;
+export const GetAutoImportIntegrationResponse = z.object({
+  integration: Integration,
+});
+
+export type GetAutoImportIntegrationsResponse = z.infer<typeof GetAutoImportIntegrationsResponse>;
+export const GetAutoImportIntegrationsResponse = z.array(Integration);
 
 export type UpdateAutoImportIntegrationRequestParams = z.infer<
   typeof UpdateAutoImportIntegrationRequestParams
@@ -77,6 +141,29 @@ export const UpdateAutoImportIntegrationRequestBody = z
      * Integration logo image blob
      */
     logo: z.string().optional(),
+    /**
+     * The data streams of the integration
+     */
+    dataStreams: z
+      .array(
+        z
+          .object({
+            /**
+             * The description of the data stream
+             */
+            description: z.string().optional(),
+            /**
+             * The input types of the data stream
+             */
+            inputTypes: z.array(InputType).optional(),
+            /**
+             * The raw samples of the data stream
+             */
+            rawSamples: z.array(z.string()).optional(),
+          })
+          .strict()
+      )
+      .optional(),
   })
   .strict();
 export type UpdateAutoImportIntegrationRequestBodyInput = z.input<
