@@ -94,9 +94,7 @@ export function buildMockDashboardApi({
     savedObjectResult: savedObjectId
       ? ({
           item: {
-            attributes: {
-              ...getSampleDashboardState(overrides),
-            },
+            attributes: initialState,
             id: savedObjectId,
             managed: false,
           },
