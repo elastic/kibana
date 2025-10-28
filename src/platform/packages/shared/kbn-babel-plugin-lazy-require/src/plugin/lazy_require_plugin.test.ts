@@ -287,8 +287,8 @@ describe('@kbn/babel-plugin-lazy-require', () => {
 
       expect(code).toContain('_interopRequireDefault');
       expect(code).toContain('get foo()');
-      expect(code).toContain('_interopRequireDefault(require("./bar"))');
-      expect(code).toContain('return _module.value.default');
+      expect(code).toContain('_module.value = require("./bar")');
+      expect(code).toContain('return _interopRequireDefault(_module.value).default');
     });
 
     it('transforms named imports', () => {

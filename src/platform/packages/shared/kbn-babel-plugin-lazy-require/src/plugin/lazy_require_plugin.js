@@ -280,8 +280,48 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // 2. Module-level function calls (even if the import is used deep in the call chain)
         const importsUsedInModuleLevelCode = new Set();
 
-        // Check top-level variable declarations that might use imports
+        // Check code that runs at module initialization time
         programPath.traverse({
+          // Check TypeScript import equals (export import alias = Module)
+          // These create module-level aliases that must be eagerly evaluated
+          TSImportEqualsDeclaration(tsImportPath) {
+            // Can be at top level or inside a namespace
+            // Possible paths:
+            //   Program > TSImportEqualsDeclaration
+            //   Program > TSModuleDeclaration > TSModuleBlock > TSImportEqualsDeclaration
+            //   Program > ExportNamedDeclaration > TSModuleDeclaration > TSModuleBlock > TSImportEqualsDeclaration
+            const isTopLevel = tsImportPath.parent === programPath.node;
+
+            let isInTopLevelNamespace = false;
+            if (t.isTSModuleBlock(tsImportPath.parent)) {
+              const moduleDecl = tsImportPath.parentPath.parent;
+              if (t.isTSModuleDeclaration(moduleDecl)) {
+                // Check if namespace is at top level
+                const moduleDeclPath = tsImportPath.parentPath.parentPath;
+                const namespaceParent = moduleDeclPath.parent;
+                isInTopLevelNamespace =
+                  namespaceParent === programPath.node ||
+                  (t.isExportNamedDeclaration(namespaceParent) &&
+                    moduleDeclPath.parentPath.parent === programPath.node);
+              }
+            }
+
+            if (!isTopLevel && !isInTopLevelNamespace) {
+              return;
+            }
+
+            // Check if the moduleReference uses any of our imports
+            tsImportPath.traverse({
+              Identifier(idPath) {
+                const name = idPath.node.name;
+                if (properties.has(name) && idPath.isReferencedIdentifier()) {
+                  importsUsedInModuleLevelCode.add(name);
+                }
+              },
+            });
+          },
+
+          // Check top-level variable declarations
           VariableDeclaration(varDeclPath) {
             // Only check top-level declarations
             if (varDeclPath.parent !== programPath.node) {
@@ -313,6 +353,61 @@ module.exports = function lazyRequirePlugin({ types: t }) {
                 }
               },
             });
+          },
+
+          // Check class static properties (they initialize when the class is defined)
+          ClassProperty(classPropPath) {
+            // Only check static properties in top-level classes
+            // Path structure:
+            //   Program > ClassDeclaration > ClassBody > ClassProperty
+            //   OR Program > ExportDefaultDeclaration > ClassDeclaration > ClassBody > ClassProperty
+            if (!classPropPath.node.static) {
+              return;
+            }
+
+            // Walk up to find if this is a top-level class
+            const classBody = classPropPath.parent;
+            if (!t.isClassBody(classBody)) {
+              return;
+            }
+
+            const classDecl = classPropPath.parentPath.parent;
+            if (!t.isClassDeclaration(classDecl)) {
+              return;
+            }
+
+            const classDeclPath = classPropPath.parentPath.parentPath;
+            const classParent = classDeclPath.parent;
+
+            // Check if class is at top level (direct) or exported (wrapped in export)
+            const isTopLevel =
+              classParent === programPath.node ||
+              (t.isExportDefaultDeclaration(classParent) &&
+                classDeclPath.parentPath.parent === programPath.node) ||
+              (t.isExportNamedDeclaration(classParent) &&
+                classDeclPath.parentPath.parent === programPath.node);
+
+            if (!isTopLevel) {
+              return;
+            }
+
+            // Check if the property initializer uses imports
+            if (classPropPath.node.value) {
+              classPropPath.traverse({
+                Identifier(idPath) {
+                  const name = idPath.node.name;
+                  if (properties.has(name) && idPath.isReferencedIdentifier()) {
+                    importsUsedInModuleLevelCode.add(name);
+                  }
+                },
+                JSXIdentifier(jsxIdPath) {
+                  const name = jsxIdPath.node.name;
+                  if (properties.has(name)) {
+                    importsUsedInModuleLevelCode.add(name);
+                  }
+                },
+              });
+            }
           },
         });
 
@@ -448,7 +543,8 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               t.isExportSpecifier(path.parent) ||
               t.isImportSpecifier(path.parent) ||
               t.isImportDefaultSpecifier(path.parent) ||
-              t.isImportNamespaceSpecifier(path.parent)
+              t.isImportNamespaceSpecifier(path.parent) ||
+              t.isTSImportEqualsDeclaration(path.parent)
             ) {
               return;
             }
@@ -560,18 +656,14 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           const cacheId = moduleInfo.cacheId;
 
           // Build the require expression: require('path')
+          // IMPORTANT: Always store the RAW require() result in the cache
+          // We'll apply _interopRequireDefault only when returning for default imports
           let requireExpression = t.callExpression(t.identifier('require'), [
             t.stringLiteral(propInfo.moduleRequirePath),
           ]);
 
-          // Wrap with _interopRequireDefault if this is a default import
-          if (propInfo.needsInterop) {
-            requireExpression = t.callExpression(t.identifier('_interopRequireDefault'), [
-              requireExpression,
-            ]);
-          }
           // Wrap with outer function if present (e.g., from already-transformed code)
-          else if (moduleInfo.outerFunc) {
+          if (moduleInfo.outerFunc) {
             requireExpression = t.callExpression(moduleInfo.outerFunc, [requireExpression]);
           }
 
@@ -581,11 +673,18 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
           // Determine what to return from getter
           let returnExpression;
-          if (propInfo.propertyKey === null) {
-            // Full module: return _module_foo.value
+          if (propInfo.needsInterop) {
+            // Default import: apply _interopRequireDefault and access .default
+            // return _interopRequireDefault(_module.value).default
+            returnExpression = t.memberExpression(
+              t.callExpression(t.identifier('_interopRequireDefault'), [cacheValue]),
+              t.identifier('default')
+            );
+          } else if (propInfo.propertyKey === null) {
+            // Full module (namespace import): return _module.value
             returnExpression = cacheValue;
           } else {
-            // Destructured property: return _module_foo.value.propertyKey
+            // Named import: return _module.value.propertyKey
             returnExpression = t.memberExpression(cacheValue, t.identifier(propInfo.propertyKey));
           }
 
