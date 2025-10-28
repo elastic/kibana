@@ -19,7 +19,7 @@ export class ImageEmbeddablePlugin implements Plugin<void, void, SetupDeps, Star
       ...getTransforms(
         plugins.embeddable.transformEnhancementsIn,
         plugins.embeddable.transformEnhancementsOut
-      ), 
+      ),
       schema: imageEmbeddableSchema,
     });
   }
