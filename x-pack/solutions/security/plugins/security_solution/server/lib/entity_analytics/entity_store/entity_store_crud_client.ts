@@ -26,6 +26,7 @@ import {
   EngineNotRunningError,
   CapabilityNotEnabledError,
   DocumentVersionConflictError,
+  EntityNotFoundError,
 } from './errors';
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
@@ -39,6 +40,10 @@ interface CustomEntityFieldsAttributesHolder {
   lifecycle?: Record<string, unknown>;
   behaviors?: Record<string, unknown>;
   relationships?: Record<string, unknown>;
+}
+
+interface DeleteRequestBody {
+  id: string;
 }
 
 type CustomECSEntityField = EntityField & CustomEntityFieldsAttributesHolder;
@@ -151,6 +156,39 @@ export class EntityStoreCrudClient {
       index: getEntityUpdatesDataStreamName(type, this.namespace),
       document: buildDocumentToUpdate(type, normalizedDocToECS),
     });
+  }
+
+  public async deleteEntity(type: APIEntityType, body: DeleteRequestBody) {
+    await this.assertEngineIsRunning(type);
+    await this.assertCRUDApiIsEnabled(type);
+
+    if (body.id === '') {
+      throw new BadCRUDRequestError(`The entity ID cannot be blank`);
+    }
+
+    const deleteByQueryResp = await this.esClient.deleteByQuery({
+      index: getEntitiesIndexName(type, this.namespace),
+      query: {
+        term: {
+          'entity.id': body.id,
+        },
+      },
+      conflicts: 'proceed',
+    });
+
+    if (deleteByQueryResp.failures !== undefined && deleteByQueryResp.failures.length > 0) {
+      throw new Error(`Failed to delete entity of type '${type}' and ID '${body.id}'`);
+    }
+
+    if (deleteByQueryResp.version_conflicts) {
+      throw new DocumentVersionConflictError();
+    }
+
+    if (!deleteByQueryResp.deleted) {
+      throw new EntityNotFoundError(type, body.id);
+    }
+
+    return { deleted: true };
   }
 
   private async assertEngineIsRunning(type: APIEntityType) {

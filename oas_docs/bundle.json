@@ -16266,6 +16266,12 @@
                           "agents": {
                             "type": "number"
                           },
+                          "failedUpgradeActionIds": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
                           "failedUpgradeAgents": {
                             "type": "number"
                           },
