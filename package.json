@@ -128,7 +128,7 @@
     "@elastic/datemath": "5.0.3",
     "@elastic/ebt": "^1.4.0",
     "@elastic/ecs": "^9.0.0",
-    "@elastic/elasticsearch": "9.1.1",
+    "@elastic/elasticsearch": "9.2.0",
     "@elastic/ems-client": "8.6.3",
     "@elastic/eui": "107.0.1",
     "@elastic/eui-theme-borealis": "3.6.0",

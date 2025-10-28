@@ -69,19 +69,15 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
     getIndexPatternMetadata(
       {
         indexPattern,
-        from,
-        to,
-      }: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}'>['params']['path'] &
-        MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}'>['params']['query'],
+      }: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}'>['params']['path'],
       signal?: AbortSignal | null
     ) {
       return request('GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}', {
         params: {
           path: { indexPattern },
-          query: {
-            from,
-            to,
-          },
+        },
+        headers: {
+          'Cache-Control': 'no-cache',
         },
         signal,
       });

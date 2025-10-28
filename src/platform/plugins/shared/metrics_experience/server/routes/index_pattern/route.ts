@@ -9,7 +9,6 @@
 
 import { z } from '@kbn/zod';
 import { createTracedEsClient } from '@kbn/traced-es-client';
-import { isoToEpoch } from '@kbn/zod-helpers';
 import { createRoute } from '../create_route';
 import { getIndexPatternMetadata } from './get_index_pattern_metadata';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
@@ -21,10 +20,6 @@ export const getIndexPatternMetadataRoute = createRoute({
     path: z.object({
       indexPattern: z.string(),
     }),
-    query: z.object({
-      to: z.string().datetime().transform(isoToEpoch),
-      from: z.string().datetime().transform(isoToEpoch),
-    }),
   }),
   handler: async ({ context, params, logger }) => {
     const { elasticsearch, featureFlags } = await context.core;
@@ -33,7 +28,6 @@ export const getIndexPatternMetadataRoute = createRoute({
     const esClient = elasticsearch.client.asCurrentUser;
 
     const { indexPattern } = params.path;
-    const { from, to } = params.query;
 
     const indexPatternMetadata = await getIndexPatternMetadata({
       esClient: createTracedEsClient({
@@ -42,13 +36,9 @@ export const getIndexPatternMetadataRoute = createRoute({
         plugin: 'metrics_experience',
       }),
       indexPattern,
-      from,
-      to,
     });
 
-    return {
-      indexPatternMetadata,
-    };
+    return indexPatternMetadata;
   },
 });
 

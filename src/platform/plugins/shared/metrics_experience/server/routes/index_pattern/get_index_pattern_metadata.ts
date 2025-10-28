@@ -8,40 +8,21 @@
  */
 
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { retrieveFieldCaps } from '../../lib/fields/retrieve_fieldcaps';
-import { getTimeSeriesFieldCapsGenerator } from '../../lib/fields/iterate_field_caps_generator';
 
 export const getIndexPatternMetadata = async ({
   esClient,
   indexPattern,
-  from,
-  to,
 }: {
   esClient: TracedElasticsearchClient;
   indexPattern: string;
-  from: number;
-  to: number;
 }) => {
-  const fieldCapsMap = await retrieveFieldCaps({
-    esClient: esClient.client,
-    indexPattern,
-    fields: ['*'],
-    timerange: { from, to },
+  const { data_streams: dataStreams } = await esClient.client.indices.resolveIndex({
+    name: indexPattern,
+    expand_wildcards: 'open',
+    mode: 'time_series',
   });
 
-  const indexPatternMetadata = new Map<string, { hasTimeSeriesFields: boolean }>();
-  for (const [index, fields] of fieldCapsMap.entries()) {
-    indexPatternMetadata.set(index, { hasTimeSeriesFields: false });
-
-    for (const timeSeriesField of getTimeSeriesFieldCapsGenerator(fields!, {
-      batchSize: 500,
-    })) {
-      if (timeSeriesField.length > 0) {
-        indexPatternMetadata.set(index, { hasTimeSeriesFields: true });
-        continue;
-      }
-    }
-  }
-
-  return Object.fromEntries(indexPatternMetadata);
+  return {
+    hasTimeSeriesDataStreams: dataStreams.length > 0,
+  };
 };

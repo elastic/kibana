@@ -43,27 +43,18 @@ export const createMetricsDataSourceProfileProvider = (
       return { isMatch: false };
     }
 
-    const timeRange = getTimeRange();
-    const { indexPatternMetadata } = await metricsClient.getIndexPatternMetadata({
+    const indexPatternMetadata = await metricsClient.getIndexPatternMetadata({
       indexPattern,
-      from: timeRange.from.toISOString(),
-      to: timeRange.to.toISOString(),
     });
 
     return {
-      isMatch: Object.values(indexPatternMetadata).some((meta) => meta.hasTimeSeriesFields),
+      isMatch: indexPatternMetadata.hasTimeSeriesDataStreams,
       context: {
         category: DataSourceCategory.Metrics,
       },
     };
   },
 });
-
-function getTimeRange() {
-  const to = new Date();
-  const from = new Date(to.getTime() - 15 * 60 * 1000); // 15 minutes
-  return { from, to };
-}
 
 function isSolutionValid(solutionType: SolutionType) {
   return [
