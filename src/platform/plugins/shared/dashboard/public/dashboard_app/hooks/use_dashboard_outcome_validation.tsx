@@ -13,7 +13,7 @@ import type { DashboardCreationOptions } from '../..';
 import { createDashboardEditUrl } from '../../utils/urls';
 import { screenshotModeService, spacesService } from '../../services/kibana_services';
 import { useDashboardMountContext } from './dashboard_mount_context';
-import type { DashboardGetOut } from '../../../server/content_management';
+import type { DashboardAPIGetOut } from '../../../server/content_management';
 
 export const useDashboardOutcomeValidation = () => {
   const [aliasId, setAliasId] = useState<string>();
@@ -24,9 +24,9 @@ export const useDashboardOutcomeValidation = () => {
   const scopedHistory = getScopedHistory?.();
 
   const validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'] = useCallback(
-    (result: DashboardGetOut) => {
+    (result: DashboardAPIGetOut) => {
       if (result.meta.outcome === 'aliasMatch' && result.meta.aliasTargetId) {
-        const path = scopedHistory.location.hash.replace(result.item.id, result.meta.aliasTargetId);
+        const path = scopedHistory.location.hash.replace(result.id, result.meta.aliasTargetId);
         if (screenshotModeService.isScreenshotMode()) {
           scopedHistory.replace(path); // redirect without the toast when in screenshot mode.
         } else {
@@ -36,7 +36,7 @@ export const useDashboardOutcomeValidation = () => {
       }
       setAliasId(result.meta.aliasTargetId);
       setOutcome(result.meta.outcome);
-      setSavedObjectId(result.item.id);
+      setSavedObjectId(result.id);
       return 'valid';
     },
     [scopedHistory]

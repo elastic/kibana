@@ -37,7 +37,7 @@ import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mergeControlGroupStates } from './merge_control_group_states';
-import type { DashboardGetOut } from '../../server/content_management';
+import type { DashboardAPIGetOut } from '../../server/content_management';
 
 export function getDashboardApi({
   creationOptions,
@@ -49,11 +49,11 @@ export function getDashboardApi({
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddables?: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
-  savedObjectResult?: DashboardGetOut;
+  savedObjectResult?: DashboardAPIGetOut;
   savedObjectId?: string;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
-  const isManaged = savedObjectResult?.item.managed ?? false;
+  const isManaged = savedObjectResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
 
@@ -112,7 +112,7 @@ export function getDashboardApi({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     controlGroupManager,
-    lastSavedState: savedObjectResult?.item.attributes ?? DEFAULT_DASHBOARD_STATE,
+    lastSavedState: savedObjectResult?.data ?? DEFAULT_DASHBOARD_STATE,
     layoutManager,
     savedObjectId$,
     settingsManager,

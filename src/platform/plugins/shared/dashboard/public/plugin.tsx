@@ -156,7 +156,7 @@ export class DashboardPlugin
               untilPluginStartServicesReady(),
             ]);
             const result = await dashboardClient.get(dashboardId);
-            return result.item.attributes.filters ?? [];
+            return result.data.filters ?? [];
           },
         })
       );

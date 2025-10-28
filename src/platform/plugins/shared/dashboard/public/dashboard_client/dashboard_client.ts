@@ -9,31 +9,35 @@
 
 import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { CONTENT_ID } from '../../common/content_management/constants';
-import type { DashboardGetOut } from '../../server/content_management';
+import { CONTENT_ID, DASHBOARD_API_VERSION } from '../../common/content_management/constants';
+import type { DashboardAPIGetOut } from '../../server/content_management';
 import { coreServices } from '../services/kibana_services';
 
 const CACHE_SIZE = 20; // only store a max of 20 dashboards
 const CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 
-const cache = new LRUCache<string, DashboardGetOut>({
+const cache = new LRUCache<string, DashboardAPIGetOut>({
   max: CACHE_SIZE,
   ttl: CACHE_TTL,
 });
 
 export const dashboardClient = {
-  get: async (id: string): Promise<DashboardGetOut> => {
+  get: async (id: string): Promise<DashboardAPIGetOut> => {
     if (cache.has(id)) {
       return cache.get(id)!;
     }
 
-    const result = (await coreServices.http.get(`/api/dashboards/dashboard/${id}`).catch((e) => {
-      if (e.response?.status === 404) {
-        throw new SavedObjectNotFound({ type: CONTENT_ID, id });
-      }
-      const message = (e.body as { message?: string })?.message ?? e.message;
-      throw new Error(message);
-    })) as DashboardGetOut;
+    const result = await coreServices.http
+      .get<DashboardAPIGetOut>(`/api/dashboards/dashboard/${id}`, {
+        version: DASHBOARD_API_VERSION,
+      })
+      .catch((e) => {
+        if (e.response?.status === 404) {
+          throw new SavedObjectNotFound({ type: CONTENT_ID, id });
+        }
+        const message = (e.body as { message?: string })?.message ?? e.message;
+        throw new Error(message);
+      });
 
     if (result.meta.outcome !== 'aliasMatch') {
       /**

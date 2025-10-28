@@ -61,7 +61,7 @@ export async function loadDashboardApi({
     incomingEmbeddables,
     initialState: {
       ...DEFAULT_DASHBOARD_STATE,
-      ...savedObjectResult?.item.attributes,
+      ...savedObjectResult?.data,
       ...unsavedChanges,
       ...overrideState,
     },
