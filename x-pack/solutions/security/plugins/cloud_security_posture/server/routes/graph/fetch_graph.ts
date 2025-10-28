@@ -305,20 +305,6 @@ ${
       targetEntitySubType,
       isOrigin,
       isOriginAlert
-| EVAL actorEntityGroup = CASE(
-    actorEntityGroup == "${NON_ENRICHED_PLACEHOLDER}" AND actorIdsCount == 1,
-    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    actorEntityGroup == "${NON_ENRICHED_PLACEHOLDER}",
-    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}",
-    actorEntityGroup
-  )
-| EVAL targetEntityGroup = CASE(
-    targetEntityGroup == "${NON_ENRICHED_PLACEHOLDER}" AND targetIdsCount == 1,
-    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    targetEntityGroup == "${NON_ENRICHED_PLACEHOLDER}",
-    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}",
-    targetEntityGroup
-  )
 | EVAL actorEntityType = CASE(
     actorEntityType IS NOT NULL,
     actorEntityType,
