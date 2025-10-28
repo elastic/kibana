@@ -846,9 +846,44 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await common.sleep(1000); // give time for debounced components to rerender
     },
+    async hasStyleButton() {
+      return find.existsByCssSelector('button[data-test-subj="style"][title="Style"]');
+    },
+    async hasLegendButton() {
+      return find.existsByCssSelector('button[data-test-subj="legend"][title="Legend"]');
+    },
+    async openStyleSettingsFlyout() {
+      if (await this.isDimensionEditorOpen()) {
+        await this.closeDimensionEditor();
+      }
+
+      if (await this.hasStyleButton()) {
+        const styleButton = await find.byCssSelector(
+          'button[data-test-subj="style"][title="Style"]'
+        );
+        await styleButton.click();
+      }
+    },
+    async openLegendSettingsFlyout() {
+      if (await this.hasStyleButton()) {
+        const legendButton = await find.byCssSelector(
+          'button[data-test-subj="legend"][title="Legend"]'
+        );
+        await legendButton.click();
+      }
+    },
+    async closeFlyout() {
+      await retry.try(async () => {
+        await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+      });
+    },
+
+    // Remove
     hasVisualOptionsButton() {
       return testSubjects.exists('lnsVisualOptionsButton');
     },
+    // Remove
     async openVisualOptions() {
       if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
         return;
@@ -858,11 +893,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.exists('lnsVisualOptionsPopover_title');
       });
     },
-    async closeVisualOptionsPopover() {
-      if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
-        await testSubjects.click('lnsVisualOptionsButton');
-      }
-    },
+    // Remove
     async openTextOptions() {
       if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
         return;
@@ -981,14 +1012,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDonutHoleSize() {
-      await this.openVisualOptions();
+      // await this.openVisualOptions();
+      await this.openStyleSettingsFlyout();
+
       const comboboxOptions = await comboBox.getComboBoxSelectedOptions('lnsEmptySizeRatioOption');
       return comboboxOptions[0];
     },
 
     async setDonutHoleSize(value: string) {
       await retry.waitFor('visual options toolbar is open', async () => {
-        await this.openVisualOptions();
+        // await this.openVisualOptions();
+        await this.openStyleSettingsFlyout();
+
         return await testSubjects.exists('lnsEmptySizeRatioOption');
       });
       await comboBox.set('lnsEmptySizeRatioOption', value);
@@ -996,7 +1031,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async setGaugeShape(value: string) {
       await retry.waitFor('visual options toolbar is open', async () => {
-        await this.openVisualOptions();
+        // await this.openVisualOptions();
+        await this.openStyleSettingsFlyout();
+
         return await testSubjects.exists('lnsToolbarGaugeAngleType');
       });
       await comboBox.set('lnsToolbarGaugeAngleType > comboBoxInput', value);
@@ -1004,7 +1041,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getSelectedBarOrientationSetting() {
       await retry.waitFor('visual options are displayed', async () => {
-        await this.openVisualOptions();
+        // await this.openVisualOptions();
+        await this.openStyleSettingsFlyout();
+
         return await testSubjects.exists('lns_barOrientation');
       });
       const orientationButtons = await find.allByCssSelector(

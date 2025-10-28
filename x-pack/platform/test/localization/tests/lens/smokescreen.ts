@@ -407,16 +407,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.editDimensionLabel('Test of label');
       await lens.editDimensionFormat(termTranslator('Percent'));
       await lens.editDimensionColor('#ff0000');
+<<<<<<< HEAD
       await lens.closeDimensionEditor();
 
       await lens.openVisualOptions();
+=======
+
+      await lens.openStyleSettingsFlyout();
+>>>>>>> 0713954b64c7 (Fix functional tests)
 
       await lens.setCurvedLines('CURVE_MONOTONE_X');
       await lens.editMissingValues('Linear');
 
       await lens.assertMissingValues(termTranslator('Linear'));
 
+<<<<<<< HEAD
       await lens.closeVisualOptionsPopover();
+=======
+      await lens.closeFlyout();
+>>>>>>> 0713954b64c7 (Fix functional tests)
 
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await lens.assertColor('#ff0000');
@@ -932,10 +941,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.clickVisType('lens');
       await lens.switchToVisualization('pie', termTranslator('pie'));
 
-      const hasVisualOptionsButton = await lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(true);
+      await lens.openStyleSettingsFlyout();
 
-      await lens.openVisualOptions();
       await retry.try(async () => {
         expect(await lens.hasEmptySizeRatioButtonGroup()).to.be(true);
       });

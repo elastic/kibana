@@ -207,9 +207,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.editDimensionLabel('Test of label');
       await lens.editDimensionFormat('Percent');
       await lens.editDimensionColor('#ff0000');
-      await lens.closeDimensionEditor();
 
-      await lens.openVisualOptions();
+      await lens.openStyleSettingsFlyout();
 
       await lens.setCurvedLines('CURVE_MONOTONE_X');
       await lens.editMissingValues('Linear');
@@ -773,10 +772,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.clickVisType('lens');
       await lens.switchToVisualization('pie');
 
-      const hasVisualOptionsButton = await lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(true);
+      await lens.openStyleSettingsFlyout();
 
-      await lens.openVisualOptions();
       await retry.try(async () => {
         expect(await lens.hasEmptySizeRatioButtonGroup()).to.be(true);
       });
@@ -882,7 +879,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await lens.closeVisualOptionsPopover();
           await lens.switchToVisualization('line');
           await lens.waitForVisualization('xyVisChart');
-          await lens.openVisualOptions();
+
+          await lens.openStyleSettingsFlyout();
         });
         it(`points should be visible when Point visibility is 'Auto'`, async () => {
           await testSubjects.click('xy_point_visibility_auto');
@@ -907,7 +905,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await lens.closeVisualOptionsPopover();
           await lens.switchToVisualization('area');
           await lens.waitForVisualization('xyVisChart');
-          await lens.openVisualOptions();
+
+          await lens.openStyleSettingsFlyout();
         });
         it(`points should be visible when Point visibility is 'Auto'`, async () => {
           await testSubjects.click('xy_point_visibility_auto');
