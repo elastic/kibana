@@ -74,7 +74,7 @@ export interface TextareaInputArgumentProps<
 
 export const OPEN_INPUT = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.openInputButton',
-  { defaultMessage: 'Open input area' }
+  { defaultMessage: 'Edit values' }
 );
 
 export const TEXTAREA_PLACEHOLDER_TEXT = i18n.translate(
@@ -84,7 +84,7 @@ export const TEXTAREA_PLACEHOLDER_TEXT = i18n.translate(
 
 export const NO_INPUT_ENTERED_MESSAGE = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.noInputEnteredMessage',
-  { defaultMessage: 'No input entered' }
+  { defaultMessage: 'Click to enter values' }
 );
 
 export const HELP_ICON_LABEL = i18n.translate(
