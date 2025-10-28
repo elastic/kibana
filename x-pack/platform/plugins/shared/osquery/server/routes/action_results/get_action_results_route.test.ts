@@ -363,6 +363,166 @@ describe('getActionResultsRoute', () => {
         expectedSearchOptions
       );
     });
+
+    it('should create placeholders ONLY for non-responded agents on current page (not all agents)', async () => {
+      const totalAgents = 1000;
+      const allAgentIds = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      // Page 2, pageSize 20: agents 40-59
+      const page = 2;
+      const pageSize = 20;
+      const startIndex = page * pageSize;
+      const currentPageAgentIds = allAgentIds.slice(startIndex, startIndex + pageSize);
+
+      const respondedAgentIds = ['agent-40', 'agent-42', 'agent-45', 'agent-50', 'agent-55'];
+      const mockActionResults = createMockActionResultsResponse(respondedAgentIds, {
+        totalResponded: 5,
+        totalRowCount: 0,
+        successCount: 5,
+        errorCount: 0,
+      });
+
+      const mockSearchFn = createMockSearchStrategy(mockActionResults);
+      const mockContext = createMockContext(mockSearchFn);
+
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: currentPageAgentIds.join(','),
+          page,
+          pageSize,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      expect(responseBody.edges).toHaveLength(20);
+
+      const placeholders = responseBody.edges.filter((edge: any) =>
+        edge._id.startsWith('placeholder-')
+      );
+      expect(placeholders).toHaveLength(15);
+
+      const realResponses = responseBody.edges.filter(
+        (edge: any) => !edge._id.startsWith('placeholder-')
+      );
+      expect(realResponses).toHaveLength(5);
+
+      const placeholderAgentIds = placeholders.map((edge: any) => edge.fields.agent_id[0]).sort();
+
+      const expectedPlaceholderAgents = currentPageAgentIds
+        .filter((id) => !respondedAgentIds.includes(id))
+        .sort();
+
+      expect(placeholderAgentIds).toEqual(expectedPlaceholderAgents);
+
+      // Critical: Verify NOT creating placeholders for all 1000 agents
+      // If the bug existed, we'd see 995 placeholders (1000 - 5 responded)
+      expect(placeholders.length).toBe(15);
+      expect(placeholders.length).not.toBe(995);
+
+      expect(responseBody.aggregations).toEqual({
+        totalRowCount: 0,
+        totalResponded: 5,
+        successful: 5,
+        failed: 0,
+        pending: 15,
+      });
+
+      expect(responseBody.totalPages).toBe(Math.ceil(currentPageAgentIds.length / pageSize));
+    });
+
+    it('should handle page 1 with large agent set efficiently', async () => {
+      const totalAgents = 100;
+      const allAgentIds = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      const page = 1;
+      const pageSize = 20;
+      const startIndex = page * pageSize; // 20
+      const currentPageAgentIds = allAgentIds.slice(startIndex, startIndex + pageSize); // agent-20 to agent-39
+
+      const respondedAgentIds = currentPageAgentIds.slice(0, 10); // agent-20 to agent-29
+
+      const mockActionResults = createMockActionResultsResponse(respondedAgentIds, {
+        totalResponded: 10,
+        totalRowCount: 0,
+        successCount: 10,
+        errorCount: 0,
+      });
+
+      const mockSearchFn = createMockSearchStrategy(mockActionResults);
+      const mockContext = createMockContext(mockSearchFn);
+
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: currentPageAgentIds.join(','),
+          page,
+          pageSize,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      expect(responseBody.edges).toHaveLength(20);
+
+      const placeholders = responseBody.edges.filter((edge: any) =>
+        edge._id.startsWith('placeholder-')
+      );
+      expect(placeholders).toHaveLength(10);
+
+      expect(placeholders.length).not.toBe(90); // Bug would create 90 placeholders
+    });
+
+    it('should handle empty page (all agents responded) without creating placeholders', async () => {
+      const totalAgents = 50;
+      const allAgentIds = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
+
+      const page = 0;
+      const pageSize = 20;
+      const currentPageAgentIds = allAgentIds.slice(0, pageSize);
+
+      const mockActionResults = createMockActionResultsResponse(currentPageAgentIds, {
+        totalResponded: 20,
+        totalRowCount: 0,
+        successCount: 20,
+        errorCount: 0,
+      });
+
+      const mockSearchFn = createMockSearchStrategy(mockActionResults);
+      const mockContext = createMockContext(mockSearchFn);
+
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: currentPageAgentIds.join(','),
+          page,
+          pageSize,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      expect(responseBody.edges).toHaveLength(20);
+
+      const placeholders = responseBody.edges.filter((edge: any) =>
+        edge._id.startsWith('placeholder-')
+      );
+      expect(placeholders).toHaveLength(0);
+
+      expect(responseBody.edges.every((edge: any) => !edge._id.startsWith('placeholder-'))).toBe(
+        true
+      );
+    });
   });
 
   describe('Error Handling', () => {
