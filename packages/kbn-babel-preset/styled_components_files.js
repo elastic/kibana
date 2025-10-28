@@ -176,7 +176,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]and_or_badge[\/\\]rounded_badge_antenna.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]auto_download[\/\\]auto_download.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]conditions_table[\/\\]index.stories.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]drag_and_drop[\/\\]draggable_wrapper.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]drag_and_drop[\/\\]droppable_wrapper.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]drag_and_drop[\/\\]provider_container.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]empty_value[\/\\]empty_value.test.tsx/,

@@ -19,25 +19,33 @@ import {
   constructDroppedValue,
   TotalVirusLinkSha,
   Link,
-  DraggableZeekElement,
+  ZeekElement,
   sha1StringRenderer,
   md5StringRenderer,
   droppedStringRenderer,
   moduleStringRenderer,
   defaultStringRenderer,
 } from './zeek_signature';
-import { CellActionsWrapper } from '../../../../../../common/components/drag_and_drop/cell_actions_wrapper';
+import { SecurityCellActions } from '../../../../../../common/components/cell_actions';
 
 jest.mock('../../../../../../common/lib/kibana');
 
-jest.mock('../../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+jest.mock('../../../../../../common/components/cell_actions', () => {
   return {
-    CellActionsWrapper: jest.fn(),
+    SecurityCellActions: jest.fn(),
+    CellActionsMode: {
+      HOVER_DOWN: 'hover-down',
+      HOVER_RIGHT: 'hover-right',
+      INLINE: 'inline',
+    },
+    SecurityCellActionsTrigger: {
+      DEFAULT: 'default',
+    },
   };
 });
 
-const MockedCellActionsWrapper = jest.fn(({ children }) => {
-  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+const MockedSecurityCellActions = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-security-cell-actions">{children}</div>;
 });
 
 jest.mock('@elastic/eui', () => {
@@ -58,7 +66,7 @@ describe('ZeekSignature', () => {
 
   describe('rendering', () => {
     test('it renders the default Zeek', () => {
-      const wrapper = shallow(<ZeekSignature data={zeek} timelineId="test" />);
+      const wrapper = shallow(<ZeekSignature data={zeek} scopeId="test" />);
       expect(wrapper).toMatchSnapshot();
     });
   });
@@ -126,29 +134,24 @@ describe('ZeekSignature', () => {
     });
   });
 
-  describe('DraggableZeekElement', () => {
+  describe('ZeekElement', () => {
     beforeEach(() => {
-      (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+      (SecurityCellActions as unknown as jest.Mock).mockImplementation(MockedSecurityCellActions);
     });
 
     test('it returns null if value is null', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement scopeId="some_scope" id="id-123" field="zeek.notice" value={null} />
+          <ZeekElement scopeId="some_scope" field="zeek.notice" value={null} />
         </TestProviders>
       );
-      expect(wrapper.find('DraggableZeekElement').children().exists()).toBeFalsy();
+      expect(wrapper.find('ZeekElement').children().exists()).toBeFalsy();
     });
 
     test('it renders the default ZeekSignature', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement
-            scopeId="some_scope"
-            id="id-123"
-            field="zeek.notice"
-            value={'mynote'}
-          />
+          <ZeekElement field="zeek.notice" value={'mynote'} scopeId="test" />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('mynote');
@@ -157,9 +160,8 @@ describe('ZeekSignature', () => {
     test('it renders with a custom string renderer', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement
+          <ZeekElement
             scopeId="some_scope"
-            id="id-123"
             field="zeek.notice"
             value={'mynote'}
             stringRenderer={(value) => `->${value}<-`}
@@ -172,19 +174,15 @@ describe('ZeekSignature', () => {
     test('should passing correct scopeId to cell actions', () => {
       mount(
         <TestProviders>
-          <DraggableZeekElement
-            scopeId="some_scope"
-            id="id-123"
-            field="zeek.notice"
-            value={'mynote'}
-            stringRenderer={(value) => `->${value}<-`}
-          />
+          <ZeekElement scopeId="some_scope" field="zeek.notice" value={'mynote'} />
         </TestProviders>
       );
 
-      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect(MockedSecurityCellActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          scopeId: 'some_scope',
+          metadata: expect.objectContaining({
+            scopeId: 'some_scope',
+          }),
         }),
         {}
       );
@@ -195,18 +193,13 @@ describe('ZeekSignature', () => {
         const field = 'zeek.notice';
         const wrapper = mount(
           <TestProviders>
-            <DraggableZeekElement
-              scopeId="some_scope"
-              id="id-123"
-              field={field}
-              value={'the people you love'}
-            />
+            <ZeekElement scopeId="some_scope" field={field} value={'the people you love'} />
           </TestProviders>
         );
 
-        expect(wrapper.find('[data-test-subj="badge-tooltip"]').first().props().content).toEqual(
-          field
-        );
+        expect(
+          wrapper.find('[data-test-subj="zeek.notice-tooltip"]').first().props().content
+        ).toEqual(field);
       });
     });
   });
