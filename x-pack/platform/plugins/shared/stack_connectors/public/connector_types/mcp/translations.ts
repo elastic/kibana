@@ -199,13 +199,6 @@ export const TEST_CONNECTION_LOADING = i18n.translate(
   }
 );
 
-export const TOOLS_FOUND_MESSAGE = i18n.translate(
-  'xpack.stackConnectors.components.mcp.toolsFoundMessage',
-  {
-    defaultMessage: '{count, plural, one {# tool} other {# tools}} available',
-  }
-);
-
 // OneChat integration
 export const ONECHAT_COMPATIBLE_BADGE = i18n.translate(
   'xpack.stackConnectors.components.mcp.oneChatCompatibleBadge',

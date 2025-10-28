@@ -25,6 +25,7 @@ import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
 import type { MCPConnectorAuthType } from '@kbn/mcp-connector-common';
+import { i18n } from '@kbn/i18n';
 import {
   AUTH_PRESET_LABEL,
   PRESET_NONE_LABEL,
@@ -43,7 +44,6 @@ import {
   TEST_CONNECTION_SUCCESS,
   TEST_CONNECTION_FAILURE,
   TEST_CONNECTION_LOADING,
-  TOOLS_FOUND_MESSAGE,
   ONECHAT_COMPATIBLE_BADGE,
   ONECHAT_INFO_TITLE,
   ONECHAT_INFO_TEXT,
@@ -280,7 +280,12 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
               size="s"
             >
               {testResult.toolCount && (
-                <p>{TOOLS_FOUND_MESSAGE.replace('{count}', String(testResult.toolCount))}</p>
+                <p>
+                  {i18n.translate('xpack.stackConnectors.components.mcp.toolsFoundMessage', {
+                    defaultMessage: '{count, plural, one {# tool} other {# tools}} available',
+                    values: { count: testResult.toolCount },
+                  })}
+                </p>
               )}
             </EuiCallOut>
           </EuiFlexItem>
