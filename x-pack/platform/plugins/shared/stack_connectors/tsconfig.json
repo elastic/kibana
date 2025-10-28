@@ -49,6 +49,8 @@
     "@kbn/core-http-server-mocks",
     "@kbn/usage-collection-plugin",
     "@kbn/mcp-connector-common",
+    "@kbn/react-query",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*",

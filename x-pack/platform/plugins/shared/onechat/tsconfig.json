@@ -89,6 +89,7 @@
     "@kbn/elastic-assistant",
     "@kbn/react-kibana-mount",
     "@kbn/actions-plugin",
-    "@kbn/mcp-connector-common"
+    "@kbn/mcp-connector-common",
+    "@kbn/react-query"
   ]
 }
