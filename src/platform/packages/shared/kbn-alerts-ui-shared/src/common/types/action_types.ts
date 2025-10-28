@@ -153,7 +153,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   /**
    * Connector form config
    */
-  connectorForm: {
+  connectorForm?: {
     /**
      * Form hook lib deserializer used in the connector form
      * Use this to transform the connector object to an intermediate state used in the form
