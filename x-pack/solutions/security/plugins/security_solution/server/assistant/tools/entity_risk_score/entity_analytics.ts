@@ -9,7 +9,8 @@ import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
-
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import {
   getPrivilegedMonitorUsersIndex,
   getPrivilegedMonitorUsersJoin,
@@ -101,9 +102,9 @@ const MAP_DOMAIN_TO_INFO_BUILDER = {
   privileged_user_monitoring: getPrivilegedUserMonitoringInformation,
 } as const;
 
-export const entityRiskScoreToolInternal = (): BuiltinToolDefinition<
-  typeof entityRiskScoreInternalSchema
-> => {
+export const entityRiskScoreToolInternal = (
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
+): BuiltinToolDefinition<typeof entityRiskScoreInternalSchema> => {
   return {
     id: ENTITY_ANALYTICS_TOOL_INTERNAL_ID,
     description: ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION,
@@ -114,11 +115,8 @@ export const entityRiskScoreToolInternal = (): BuiltinToolDefinition<
       { esClient, logger, request, toolProvider }
     ) => {
       try {
-        // Undefined for now:
-        // * timerange? Should we use the timerange from security solution timepicker?
-        // * Get space ID from request context - use default space for now
-        // * what happen when an engine is disabled? Can we return a message saying the engine is disabled and what to do to enable it?
-        const spaceId = 'default';
+        const [, startPlugins] = await getStartServices();
+        const spaceId = startPlugins.spaces?.spacesService.getSpaceId(request) || 'default';
 
         return {
           results: [
