@@ -1847,7 +1847,7 @@ describe('Agent policy', () => {
             },
             references: [],
             id: 'test-agentless-policy',
-            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
           },
         ],
       });
