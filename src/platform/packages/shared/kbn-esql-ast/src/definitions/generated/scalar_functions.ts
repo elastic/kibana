@@ -4436,7 +4436,7 @@ const kqlDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: [
     'FROM books\n| WHERE KQL("author: Faulkner")',
     'FROM employees\n| WHERE KQL("mary", {"case_insensitive": true, "default_field": "first_name", "boost": 1.5})',
@@ -6127,7 +6127,7 @@ const matchDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: [
     'FROM books\n| WHERE MATCH(author, "Faulkner")',
     'FROM books\n| WHERE MATCH(title, "Hobbit Back Again", {"operator": "AND"})\n| KEEP title;',
@@ -7070,7 +7070,7 @@ const multiMatchDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: [
     'FROM books\n| WHERE MULTI_MATCH("Faulkner", author, description)\n| KEEP book_no, author\n| SORT book_no\n| LIMIT 5',
     'FROM books\n| WHERE MULTI_MATCH("Hobbit Back Again", title, description, {"operator": "AND"})\n| KEEP title;',
@@ -10739,7 +10739,7 @@ const qstrDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: [
     'FROM books\n| WHERE QSTR("author: Faulkner")',
     'FROM books\n| WHERE QSTR("title: Hobbjt~", {"fuzziness": 2})',
