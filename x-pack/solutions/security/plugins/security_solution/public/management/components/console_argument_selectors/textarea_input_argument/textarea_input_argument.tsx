@@ -49,7 +49,7 @@ export interface TextareaInputArgumentProps<
   > {
   width?: string;
   /**
-   * Any help content to be made avaible in the popup. If defined, a help icon will
+   * Any help content to be made available in the popup. If defined, a help icon will
    * be shown that allows user to open and display the help content
    */
   helpContent?: React.ReactNode;
@@ -224,6 +224,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
         closePopover={handleClosePopover}
         initialFocus={`textarea.${textAreaHtmlId}`}
         panelProps={{ 'data-test-subj': testId('popoverPanel') }}
+        panelPaddingSize="s"
         button={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
@@ -244,6 +245,10 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                   title={openLabel}
                   aria-label={openLabel}
                   data-test-subj={testId('openInputButton')}
+                  css={css`
+                    inline-size: auto;
+                    block-size: auto;
+                  `}
                 />
               </EuiFlexItem>
             )}
@@ -252,8 +257,8 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       >
         {state.isPopoverOpen && (
           <div css={textareaContainerCss}>
-            <EuiPanel paddingSize="xs" hasShadow={false} hasBorder={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiPanel paddingSize="none" hasShadow={false} hasBorder={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem>
                   <EuiTitle size="xxxs" data-test-subj={testId('title')}>
                     <h5>{textareaLabel ?? argName}</h5>
@@ -316,7 +321,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                 )}
               </EuiFlexGroup>
             </div>
-            <EuiPanel paddingSize="xs" hasShadow={false} hasBorder={false}>
+            <EuiPanel paddingSize="none" hasShadow={false} hasBorder={false}>
               <EuiSpacer size="s" />
               <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd" gutterSize="none">
                 <EuiFlexItem grow={false}>

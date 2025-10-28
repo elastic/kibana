@@ -7,8 +7,9 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import { EuiDescriptionList } from '@elastic/eui';
+import { EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 export interface ScriptHelpContentProps {
   description?: React.ReactNode;
@@ -26,7 +27,13 @@ export const ScriptHelpContent = memo<ScriptHelpContentProps>(
           title: i18n.translate('xpack.securitySolution.scriptHelpContent.descriptionLabel', {
             defaultMessage: 'Description',
           }),
-          description,
+          description: (
+            <>
+              <EuiSpacer size="xs" />
+              {description}
+              <EuiSpacer size="m" />
+            </>
+          ),
         });
       }
 
@@ -35,7 +42,13 @@ export const ScriptHelpContent = memo<ScriptHelpContentProps>(
           title: i18n.translate('xpack.securitySolution.scriptHelpContent.instructionsLabel', {
             defaultMessage: 'Instructions',
           }),
-          description: instructions,
+          description: (
+            <>
+              <EuiSpacer size="xs" />
+              {instructions}
+              <EuiSpacer size="m" />
+            </>
+          ),
         });
       }
 
@@ -44,7 +57,13 @@ export const ScriptHelpContent = memo<ScriptHelpContentProps>(
           title: i18n.translate('xpack.securitySolution.scriptHelpContent.exampleLabel', {
             defaultMessage: 'Example',
           }),
-          description: example,
+          description: (
+            <>
+              <EuiSpacer size="xs" />
+              {example}
+              <EuiSpacer size="m" />
+            </>
+          ),
         });
       }
 
@@ -53,7 +72,15 @@ export const ScriptHelpContent = memo<ScriptHelpContentProps>(
 
     return (
       <div>
-        <EuiDescriptionList listItems={content} />
+        <EuiDescriptionList
+          listItems={content}
+          titleProps={{
+            css: css`
+              font-weight: unset !important;
+              text-decoration: underline !important;
+            `,
+          }}
+        />
       </div>
     );
   }
