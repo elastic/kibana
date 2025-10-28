@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-
-export const redirectAppLinksStyles = css({
-  display: 'inherit',
-  height: 'inherit',
-  width: 'inherit',
-  flex: '1',
-  flexFlow: 'column nowrap',
-});
+export {
+  GlobalRedirectAppLink,
+  type GlobalRedirectAppLinkProps,
+} from './global_redirect_app_links';
