@@ -15,9 +15,11 @@ import {
   mergeMap,
   ReplaySubject,
   share,
+  skipWhile,
   Subject,
   switchMap,
   tap,
+  withLatestFrom,
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -135,6 +137,8 @@ export interface DiscoverDataStateContainer {
   getInitialFetchStatus: () => FetchStatus;
 }
 
+const fallBacklastReloadRequestTime$ = new BehaviorSubject(0);
+
 /**
  * Container responsible for fetching of data in Discover Main
  * Either by triggering requests to Elasticsearch directly, or by
@@ -223,6 +227,9 @@ export function getDataStateContainer({
   const setAutoRefreshDone = (fn: AutoRefreshDoneFn | undefined) => {
     autoRefreshDone = fn;
   };
+
+  const lastReloadRequestTime$ = new BehaviorSubject<number | undefined>(undefined);
+
   const fetch$ = getFetch$({
     setAutoRefreshDone,
     data,
@@ -230,6 +237,7 @@ export function getDataStateContainer({
     refetch$,
     searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
+    lastReloadRequestTime$,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
     tap(() => inspectorAdapters.requests.reset()),
@@ -247,7 +255,8 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
-        mergeMap(async ({ options }) => {
+        withLatestFrom(lastReloadRequestTime$.pipe(skipWhile((time) => time !== undefined))),
+        mergeMap(async ([{ options }, lastReloadRequestTime]) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
@@ -309,6 +318,7 @@ export function getDataStateContainer({
                 timeRangeRelative: timefilter.getTime(),
                 searchSessionId,
                 isSearchSessionRestored,
+                lastReloadRequestTime,
               },
             })
           );

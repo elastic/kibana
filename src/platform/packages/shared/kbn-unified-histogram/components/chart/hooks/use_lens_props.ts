@@ -29,6 +29,7 @@ export type LensProps = Pick<
   | 'searchSessionId'
   | 'executionContext'
   | 'onLoad'
+  | 'lastReloadRequestTime'
 >;
 
 export const useLensProps = ({
@@ -37,12 +38,14 @@ export const useLensProps = ({
   fetch$,
   visContext,
   onLoad,
+  lastReloadRequestTime,
 }: {
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
   fetch$: Observable<UnifiedHistogramInputMessage>;
   visContext?: UnifiedHistogramVisContext;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+  lastReloadRequestTime?: number;
 }) => {
   const buildLensProps = useCallback(() => {
     if (!visContext) {
@@ -58,9 +61,10 @@ export const useLensProps = ({
         getTimeRange,
         attributes,
         onLoad,
+        lastReloadRequestTime,
       }),
     };
-  }, [visContext, getTimeRange, onLoad, request?.searchSessionId]);
+  }, [visContext, getTimeRange, onLoad, request?.searchSessionId, lastReloadRequestTime]);
 
   // Initialize with undefined to avoid rendering Lens until a fetch has been triggered
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
@@ -79,11 +83,13 @@ export const getLensProps = ({
   getTimeRange,
   attributes,
   onLoad,
+  lastReloadRequestTime,
 }: {
   searchSessionId?: string;
   getTimeRange: () => TimeRange;
   attributes: TypedLensByValueInput['attributes'];
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+  lastReloadRequestTime?: number;
 }): LensProps => ({
   id: 'unifiedHistogramLensComponent',
   viewMode: 'view',
@@ -95,4 +101,5 @@ export const getLensProps = ({
     description: 'fetch chart data and total hits',
   },
   onLoad,
+  lastReloadRequestTime,
 });

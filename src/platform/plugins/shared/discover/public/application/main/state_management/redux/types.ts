@@ -28,6 +28,7 @@ export interface InternalStateDataRequestParams {
   timeRangeRelative: TimeRange | undefined;
   searchSessionId: string | undefined;
   isSearchSessionRestored: boolean;
+  lastReloadRequestTime?: number;
 }
 
 export interface TabStateGlobalState {

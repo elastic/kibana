@@ -72,6 +72,7 @@ export interface UnifiedHistogramChartProps {
   isPlainRecord?: boolean;
   lensVisService: LensVisService;
   relativeTimeRange?: TimeRange;
+  lastReloadRequestTime?: number;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
@@ -105,6 +106,7 @@ export function UnifiedHistogramChart({
   dataView,
   requestParams,
   relativeTimeRange: originalRelativeTimeRange,
+  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -222,6 +224,7 @@ export function UnifiedHistogramChart({
     fetch$,
     visContext,
     onLoad,
+    lastReloadRequestTime,
   });
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
