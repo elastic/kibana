@@ -5,24 +5,7 @@
  * 2.0.
  */
 
-import type { TextArtifact } from './artifacts';
-import { ArtifactType } from './artifacts';
-
-// TODO: fix all of this - we need strong typed for internal + loose typed for external...
-
-export enum AttachmentType {
-  screenContext = 'screen_context',
-  text = ArtifactType.text,
-  dashboard = ArtifactType.dashboard,
-}
-
-interface AttachmentDataMap {
-  [AttachmentType.text]: TextArtifact;
-  [AttachmentType.dashboard]: {};
-  [AttachmentType.screenContext]: {};
-}
-
-type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
+import type { AttachmentType, AttachmentDataOf } from './attachment_types';
 
 export interface AttachmentMixin<Type extends AttachmentType> {
   /** The id of the attachment */
@@ -42,12 +25,10 @@ export interface AttachmentMixin<Type extends AttachmentType> {
 
 export type TextAttachment = AttachmentMixin<AttachmentType.text>;
 
-export type DashboardAttachment = AttachmentMixin<AttachmentType.dashboard>;
-
 /**
  * Composite type representing all possible conversation attachments.
  */
-export type Attachment = TextAttachment | DashboardAttachment;
+export type Attachment = TextAttachment;
 
 // AttachmentInput
 

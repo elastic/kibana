@@ -6,10 +6,14 @@
  */
 
 export type {
-  AttachmentType,
   Attachment,
   TextAttachment,
   DashboardAttachment,
   AttachmentInput,
   UnvalidatedAttachment,
 } from './attachments';
+export {
+  AttachmentType,
+  type TextAttachmentData,
+  type ScreenContextAttachmentData,
+} from './attachment_types';
