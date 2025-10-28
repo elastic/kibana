@@ -7,7 +7,6 @@
 
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
-
 import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold/latest';
 
 export const getDescriptionFields: GetDescriptionFieldsFn<CustomThresholdParams> = ({
@@ -27,11 +26,9 @@ export const getDescriptionFields: GetDescriptionFieldsFn<CustomThresholdParams>
     );
   }
 
-  if (typeof searchConfig.query.query === 'string') {
-    fields.push(
-      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](searchConfig.query.query)
-    );
-  }
+  fields.push(
+    prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](searchConfig.query.query)
+  );
 
   return fields;
 };
