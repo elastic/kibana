@@ -5,50 +5,89 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { createMemoryHistory } from 'history';
-import { Router } from '@kbn/shared-ux-router';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SendMessageProvider } from '../application/context/send_message/send_message_context';
-import { OnechatServicesContext } from '../application/context/onechat_services_context';
-import type { EmbeddableConversationDependencies, EmbeddableConversationProps } from './types';
+import React, { useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import type { EmbeddableConversationInternalProps } from './types';
+import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
+import { Conversation } from '../application/components/conversations/conversation';
+import { ConversationHeader } from '../application/components/conversations/conversation_header';
+import { ConversationSidebar } from '../application/components/conversations/conversation_sidebar/conversation_sidebar';
 
-const queryClient = new QueryClient();
-const history = createMemoryHistory();
+export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
+  props
+) => {
+  const { euiTheme } = useEuiTheme();
 
-type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &
-  EmbeddableConversationProps;
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = ({
-  coreStart,
-  services,
-  ...contextProps
-}) => {
-  const kibanaServices = useMemo(
-    () => ({
-      ...coreStart,
-      plugins: services.startDependencies,
+  const backgroundStyles = css`
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+  `;
+  const sidebarStyles = css`
+    ${backgroundStyles}
+    max-block-size: calc(var(--kbn-application--content-height));
+    padding: 0;
+  `;
+  const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
+  const headerStyles = css`
+    ${backgroundStyles}
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border: none;
+    block-size: ${headerHeight};
+  `;
+  const contentStyles = css`
+    ${backgroundStyles}
+    width: 100%;
+    height: 100%;
+    max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
+  `;
+
+  const labels = {
+    header: i18n.translate('xpack.onechat.conversationsView.header', {
+      defaultMessage: 'Conversation header',
     }),
-    [coreStart, services.startDependencies]
-  );
+    content: i18n.translate('xpack.onechat.conversationsView.content', {
+      defaultMessage: 'Conversation content',
+    }),
+  };
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
-      <KibanaContextProvider services={kibanaServices}>
-        <I18nProvider>
-          <QueryClientProvider client={queryClient}>
-            <OnechatServicesContext.Provider value={services}>
-              <Router history={history}>
-                <SendMessageProvider>
-                  <div>{JSON.stringify(contextProps)}</div>
-                </SendMessageProvider>
-              </Router>
-            </OnechatServicesContext.Provider>
-          </QueryClientProvider>
-        </I18nProvider>
-      </KibanaContextProvider>
-    </div>
+    <EmbeddableConversationsProvider {...props}>
+      <KibanaPageTemplate>
+        {isSidebarOpen && (
+          <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
+            <ConversationSidebar />
+          </KibanaPageTemplate.Sidebar>
+        )}
+        <KibanaPageTemplate.Header
+          css={headerStyles}
+          bottomBorder={false}
+          aria-label={labels.header}
+          paddingSize="m"
+        >
+          <ConversationHeader
+            isSidebarOpen={isSidebarOpen}
+            onToggleSidebar={() => {
+              setIsSidebarOpen((open) => !open);
+            }}
+          />
+        </KibanaPageTemplate.Header>
+        <KibanaPageTemplate.Section
+          paddingSize="none"
+          grow
+          contentProps={{
+            css: contentStyles,
+          }}
+          aria-label={labels.content}
+        >
+          <Conversation />
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    </EmbeddableConversationsProvider>
   );
 };

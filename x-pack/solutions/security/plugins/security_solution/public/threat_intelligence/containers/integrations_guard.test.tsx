@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { IntegrationsGuard } from './integrations_guard';

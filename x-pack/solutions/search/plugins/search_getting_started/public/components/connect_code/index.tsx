@@ -5,13 +5,14 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
   type AvailableLanguages,
   LanguageOptions,
+  Languages,
 } from '@kbn/search-code-examples/src/getting-started-tutorials';
 
 import { LanguageSelector } from './language_selector';
@@ -20,31 +21,28 @@ import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { CodeBox } from './code_box';
 
 export const SearchGettingStartedConnectCode = () => {
+  const { euiTheme } = useEuiTheme();
   const [selectedLanguage, setSelectedLanguage] = useState<AvailableLanguages>('python');
+
+  const codeBlockLanguage = Languages[selectedLanguage].codeBlockLanguage;
 
   return (
     <>
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <SearchGettingStartedSectionHeading
-            icon="plugs"
-            title={i18n.translate('xpack.search.gettingStarted.page.codeExample.title', {
-              defaultMessage: 'Connect to your application',
-            })}
-          />
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued" grow={false}>
-            <p>
-              {i18n.translate('xpack.search.gettingStarted.page.codeExample.description', {
-                defaultMessage: 'Choose a language client and connect your application.',
-              })}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
+        <SearchGettingStartedSectionHeading
+          icon="plugs"
+          title={i18n.translate('xpack.search.gettingStarted.page.codeExample.title', {
+            defaultMessage: 'Connect to your application',
+          })}
+          description={i18n.translate('xpack.search.gettingStarted.page.codeExample.description', {
+            defaultMessage: 'Choose a language client and connect your application.',
+          })}
+        />
+
         <EuiFlexItem
           grow={false}
           css={css`
-            width: 360px;
+            width: calc(${euiTheme.size.xxxxl} * 6);
           `}
         >
           <LanguageSelector
@@ -57,7 +55,7 @@ export const SearchGettingStartedConnectCode = () => {
       <EuiSpacer size="l" />
       <InstallCommandCodeBox selectedLanguage={selectedLanguage} />
       <EuiSpacer size="m" />
-      <CodeBox selectedLanguage={selectedLanguage} />
+      <CodeBox selectedLanguage={selectedLanguage} codeBlockLanguage={codeBlockLanguage} />
     </>
   );
 };
