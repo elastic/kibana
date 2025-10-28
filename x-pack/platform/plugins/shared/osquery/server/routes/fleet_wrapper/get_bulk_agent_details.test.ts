@@ -95,64 +95,20 @@ describe('getBulkAgentDetailsRoute', () => {
   });
 
   describe('Successful bulk agent fetch', () => {
-    it('should fetch multiple agents and return their details', async () => {
-      const mockAgents = [
-        {
-          id: 'agent-1',
-          local_metadata: {
-            host: { name: 'host-1' },
-          },
-        },
-        {
-          id: 'agent-2',
-          local_metadata: {
-            host: { name: 'host-2' },
-          },
-        },
-      ];
-
-      mockGetByIds.mockResolvedValue(mockAgents);
-
-      const mockRequest = createMockRequest(['agent-1', 'agent-2']);
-      const mockResponse = createMockResponse();
-
-      await routeHandler(mockContext as never, mockRequest as never, mockResponse);
-
-      expect(mockGetByIds).toHaveBeenCalledWith(['agent-1', 'agent-2'], { ignoreMissing: true });
-      expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: {
-          agents: mockAgents,
-        },
-      });
-    });
-
-    it('should handle single agent ID', async () => {
-      const mockAgents = [
-        {
-          id: 'agent-1',
-          local_metadata: {
-            host: { name: 'host-1' },
-          },
-        },
-      ];
-
-      mockGetByIds.mockResolvedValue(mockAgents);
-
-      const mockRequest = createMockRequest(['agent-1']);
-      const mockResponse = createMockResponse();
-
-      await routeHandler(mockContext as never, mockRequest as never, mockResponse);
-
-      expect(mockGetByIds).toHaveBeenCalledWith(['agent-1'], { ignoreMissing: true });
-      expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: {
-          agents: mockAgents,
-        },
-      });
-    });
-
-    it('should handle exactly 1000 agents (maximum allowed)', async () => {
-      const agentIds = Array.from({ length: 1000 }, (_, i) => `agent-${i}`);
+    it.each([
+      {
+        agentIds: ['agent-1', 'agent-2'],
+        description: 'multiple agents',
+      },
+      {
+        agentIds: ['agent-1'],
+        description: 'single agent',
+      },
+      {
+        agentIds: Array.from({ length: 1000 }, (_, i) => `agent-${i}`),
+        description: '1000 agents (maximum allowed)',
+      },
+    ])('should fetch $description and return their details', async ({ agentIds }) => {
       const mockAgents = agentIds.map((id) => ({
         id,
         local_metadata: { host: { name: `host-${id}` } },
@@ -182,7 +138,13 @@ describe('getBulkAgentDetailsRoute', () => {
 
       mockGetByIds.mockResolvedValue(mockAgents);
 
-      const mockRequest = createMockRequest(['agent-1', 'agent-2', 'agent-3', 'agent-4', 'agent-5']);
+      const mockRequest = createMockRequest([
+        'agent-1',
+        'agent-2',
+        'agent-3',
+        'agent-4',
+        'agent-5',
+      ]);
       const mockResponse = createMockResponse();
 
       await routeHandler(mockContext as never, mockRequest as never, mockResponse);
