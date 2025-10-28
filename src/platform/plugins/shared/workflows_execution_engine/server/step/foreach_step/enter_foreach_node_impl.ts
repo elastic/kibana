@@ -98,7 +98,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
   private getItems(): unknown[] {
     const expression = this.node.configuration.foreach;
-    let resolvedValue = this.resolveForeach();
+    let resolvedValue = this.processForeachConfiguration();
 
     if (typeof resolvedValue === 'string') {
       try {
@@ -126,7 +126,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     return resolvedValue;
   }
 
-  private resolveForeach(): unknown {
+  private processForeachConfiguration(): unknown {
     const expression = this.node.configuration.foreach;
 
     if (!expression) {
