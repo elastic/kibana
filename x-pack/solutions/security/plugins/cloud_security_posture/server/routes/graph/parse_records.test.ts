@@ -1052,7 +1052,7 @@ describe('parseRecords', () => {
     });
 
     describe('multiple non-enriched entities', () => {
-      it('should create grouped node with "Entities" type and null label', () => {
+      it('should create grouped node with "Entities" type and no label', () => {
         const records: GraphEdge[] = [
           {
             action: 'test.action.multiple',
@@ -1062,8 +1062,8 @@ describe('parseRecords', () => {
             targetEntityGroup: 'Entities',
             actorEntityType: 'Entities',
             targetEntityType: 'Entities',
-            actorLabel: null as any,
-            targetLabel: null as any,
+            actorLabel: '', // Empty string for multiple entities without subType
+            targetLabel: '', // Empty string for multiple entities without subType
             actorIdsCount: 3,
             targetIdsCount: 2,
             badge: 5,
@@ -1088,19 +1088,19 @@ describe('parseRecords', () => {
 
         const result = parseRecords(mockLogger, records);
 
-        // Actor node should use first ID and have null label
+        // Actor node should use first ID and have no label (undefined)
         const actorNode = result.nodes.find((n) => n.id === 'entity-1') as EntityNodeDataModel;
         expect(actorNode).toBeDefined();
-        expect(actorNode.label).toBeNull();
+        expect(actorNode.label).toBeUndefined(); // Label not included for empty strings
         expect(actorNode.tag).toBe('Entities');
         expect(actorNode.icon).toBe('database');
         expect(actorNode.shape).toBe('rectangle');
         expect(actorNode.count).toBe(3);
 
-        // Target node should use first ID and have null label
+        // Target node should use first ID and have no label (undefined)
         const targetNode = result.nodes.find((n) => n.id === 'target-1') as EntityNodeDataModel;
         expect(targetNode).toBeDefined();
-        expect(targetNode.label).toBeNull();
+        expect(targetNode.label).toBeUndefined(); // Label not included for empty strings
         expect(targetNode.tag).toBe('Entities');
         expect(targetNode.icon).toBe('database');
         expect(targetNode.shape).toBe('rectangle');

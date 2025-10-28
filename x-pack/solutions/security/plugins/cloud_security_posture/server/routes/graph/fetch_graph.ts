@@ -316,22 +316,18 @@ ${
       isOrigin,
       isOriginAlert
 | EVAL actorLabel = CASE(
-    actorEntityType == "${NON_ENRICHED_ENTITY_TYPE}" AND actorIdsCount == 1,
-    MV_FIRST(actorIds),
-    actorEntityType == "${NON_ENRICHED_ENTITY_TYPE}",
-    null,
     actorEntitySubType IS NOT NULL,
     actorEntitySubType,
-    MV_FIRST(actorIds)
+    actorIdsCount == 1,
+    MV_FIRST(actorIds),
+    ""
   )
 | EVAL targetLabel = CASE(
-    targetEntityType == "${NON_ENRICHED_ENTITY_TYPE}" AND targetIdsCount == 1,
-    MV_FIRST(targetIds),
-    targetEntityType == "${NON_ENRICHED_ENTITY_TYPE}",
-    null,
     targetEntitySubType IS NOT NULL,
     targetEntitySubType,
-    MV_FIRST(targetIds)
+    targetIdsCount == 1,
+    MV_FIRST(targetIds),
+    ""
   )
 | LIMIT 1000
 | SORT action DESC, actorEntityGroup, targetEntityGroup, isOrigin`;
