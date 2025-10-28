@@ -82,6 +82,7 @@
     "@kbn/response-ops-rule-form",
     "@kbn/fields-metadata-plugin",
     "@kbn/licensing-types",
+    "@kbn/connector-schemas",
   ],
   "exclude": ["target/**/*"]
 }

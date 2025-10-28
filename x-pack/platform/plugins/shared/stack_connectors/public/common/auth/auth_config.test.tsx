@@ -10,7 +10,7 @@ import { AuthConfig } from './auth_config';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { AuthType, SSLCertType } from '../../../common/auth/constants';
+import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth/constants';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 import { useSecretHeaders } from './use_secret_headers';
 

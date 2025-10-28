@@ -6,29 +6,16 @@
  */
 
 import type { ActionType as ConnectorType } from '@kbn/actions-plugin/server/types';
-import type { z } from '@kbn/zod';
 import type { ActionTypeExecutorOptions as ConnectorTypeExecutorOptions } from '@kbn/actions-plugin/server/types';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import type {
-  PostMessageParamsSchema,
-  PostMessageSubActionParamsSchema,
-  PostBlockkitSubActionParamsSchema,
-  PostBlockkitParamsSchema,
-  SlackApiSecretsSchema,
-  SlackApiParamsSchema,
-  SlackApiConfigSchema,
-  ValidChannelIdSubActionParamsSchema,
-} from './schema';
+  PostBlockkitSubActionParams,
+  PostMessageSubActionParams,
+  SlackApiConfig,
+  SlackApiParams,
+  SlackApiSecrets,
+} from '@kbn/connector-schemas/slack_api';
 
-export type SlackApiSecrets = z.infer<typeof SlackApiSecretsSchema>;
-export type SlackApiConfig = z.infer<typeof SlackApiConfigSchema>;
-
-export type PostMessageParams = z.infer<typeof PostMessageParamsSchema>;
-export type PostMessageSubActionParams = z.infer<typeof PostMessageSubActionParamsSchema>;
-export type PostBlockkitSubActionParams = z.infer<typeof PostBlockkitSubActionParamsSchema>;
-export type PostBlockkitParams = z.infer<typeof PostBlockkitParamsSchema>;
-export type ValidChannelIdSubActionParams = z.infer<typeof ValidChannelIdSubActionParamsSchema>;
-export type SlackApiParams = z.infer<typeof SlackApiParamsSchema>;
 export type SlackApiConnectorType = ConnectorType<
   SlackApiConfig,
   SlackApiSecrets,
@@ -47,8 +34,6 @@ export type SlackExecutorOptions = ConnectorTypeExecutorOptions<
   SlackApiSecrets,
   SlackApiParams
 >;
-
-export type SlackApiActionParams = z.infer<typeof SlackApiParamsSchema>;
 
 export interface SlackAPiResponse {
   ok: boolean;

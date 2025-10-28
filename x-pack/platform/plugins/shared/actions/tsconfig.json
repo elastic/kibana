@@ -54,6 +54,7 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/zod",
+    "@kbn/connector-schemas",
   ],
   "exclude": [
     "target/**/*",

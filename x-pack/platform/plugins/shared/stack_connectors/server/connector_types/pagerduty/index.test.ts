@@ -13,11 +13,8 @@ import { postPagerduty } from './post_pagerduty';
 import type { Logger } from '@kbn/core/server';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type {
-  ActionParamsType,
-  PagerDutyConnectorType,
-  PagerDutyConnectorTypeExecutorOptions,
-} from '.';
+import type { PagerDutyConnectorType, PagerDutyConnectorTypeExecutorOptions } from '.';
+import type { ActionParamsType } from '@kbn/connector-schemas/pagerduty';
 import { getConnectorType } from '.';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
