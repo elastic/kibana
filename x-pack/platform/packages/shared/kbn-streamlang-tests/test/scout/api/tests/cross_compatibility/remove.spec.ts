@@ -69,11 +69,11 @@ apiTest.describe('Cross-compatibility - Remove Processor', { tag: ['@ess', '@svl
 
     // First doc should have temp_data removed (where condition matched)
     expect(ingestResult[0]).not.toHaveProperty('temp_data');
-    expect(ingestResult[0]['event.kind']).toBe('test');
+    expect(ingestResult[0]).toHaveProperty('event.kind', 'test');
 
     // Second doc should keep temp_data (where condition not matched)
     expect(ingestResult[1]).toHaveProperty('temp_data', 'keep-me');
-    expect(ingestResult[1]['event.kind']).toBe('production');
+    expect(ingestResult[1]).toHaveProperty('event.kind', 'production');
 
     // ES|QL results should match (though null vs missing may differ)
     expect(esqlResult.documentsOrdered[0]).toHaveProperty('event.kind', 'test');
