@@ -15,6 +15,8 @@ import {
 } from '@kbn/evals';
 import type { ExperimentTask } from '@kbn/evals/src/types';
 import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
+import { context, ROOT_CONTEXT } from '@opentelemetry/api';
 import type { OnechatEvaluationChatClient } from './chat_client';
 
 interface DatasetExample extends Example {
@@ -65,9 +67,21 @@ export function createEvaluateDataset({
       output,
       metadata,
     }) => {
-      const response = await chatClient.converse({
-        messages: [{ message: input.question }],
-      });
+      const response = await context.with(ROOT_CONTEXT, () =>
+        withActiveInferenceSpan(
+          'EvaluateExample',
+          {
+            attributes: {
+              'inscrumentationScope.name': '@kbn/evals',
+            },
+          },
+          async () => {
+            return await chatClient.converse({
+              messages: [{ message: input.question }],
+            });
+          }
+        )
+      );
 
       // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
       const [correctnessResult, groundednessResult] = await Promise.all([
