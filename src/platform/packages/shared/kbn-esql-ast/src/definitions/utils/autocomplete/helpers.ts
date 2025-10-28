@@ -507,18 +507,6 @@ export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionIte
   };
 }
 
-export function withSignatureHelp(suggestionItem: ISuggestionItem): ISuggestionItem {
-  return {
-    ...suggestionItem,
-    command: suggestionItem.command
-      ? suggestionItem.command
-      : {
-          title: 'Trigger Parameter Hints',
-          id: 'editor.action.triggerParameterHints',
-        },
-  };
-}
-
 export function getLookupIndexCreateSuggestion(
   innerText: string,
   indexName?: string
