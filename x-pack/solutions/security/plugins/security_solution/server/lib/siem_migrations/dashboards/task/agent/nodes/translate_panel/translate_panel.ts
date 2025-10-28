@@ -28,7 +28,7 @@ export type TranslatePanelNode = ((
 };
 
 /** Number of panels to be processed concurrently per dashboard */
-const DEFAULT_PANELS_CONCURRENCY = 4;
+const DEFAULT_PANELS_CONCURRENCY = 1;
 
 export interface TranslatePanel {
   node: TranslatePanelNode;
