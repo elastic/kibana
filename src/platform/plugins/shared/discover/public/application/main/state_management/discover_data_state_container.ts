@@ -15,7 +15,6 @@ import {
   mergeMap,
   ReplaySubject,
   share,
-  skipWhile,
   Subject,
   switchMap,
   tap,
@@ -226,7 +225,7 @@ export function getDataStateContainer({
     autoRefreshDone = fn;
   };
 
-  const lastReloadRequestTime$ = new BehaviorSubject<number | undefined>(undefined);
+  const lastReloadRequestTime$ = new Subject<number | undefined>();
 
   const fetch$ = getFetch$({
     setAutoRefreshDone,
@@ -253,7 +252,7 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
-        withLatestFrom(lastReloadRequestTime$.pipe(skipWhile((time) => time !== undefined))),
+        withLatestFrom(lastReloadRequestTime$),
         mergeMap(async ([{ options }, lastReloadRequestTime]) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =

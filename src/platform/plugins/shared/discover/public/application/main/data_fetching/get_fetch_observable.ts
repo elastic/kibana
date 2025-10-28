@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type BehaviorSubject, debounceTime, filter, tap, defer, merge } from 'rxjs';
+import { type Subject, debounceTime, filter, tap, defer, merge } from 'rxjs';
 
 import type {
   AutoRefreshDoneFn,
@@ -35,7 +35,7 @@ export function getFetch$({
   refetch$: DataRefetch$;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
-  lastReloadRequestTime$: BehaviorSubject<number | undefined>;
+  lastReloadRequestTime$: Subject<number | undefined>;
 }) {
   const { timefilter } = data.query.timefilter;
   return merge(
