@@ -168,7 +168,7 @@ exports[`View policy flyout shows all phases 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
-                    class="css-eh4oc2-deleteIconContainer"
+                    class="css-o7z0yz-deleteIconContainer"
                     data-test-subj="ilmTimelinePhase-delete"
                   >
                     <span
@@ -873,7 +873,7 @@ exports[`View policy flyout shows all phases 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="css-1w2gcyy-PhaseIndicator"
+              class="css-va4xia-PhaseIndicator"
             />
           </div>
           <div
