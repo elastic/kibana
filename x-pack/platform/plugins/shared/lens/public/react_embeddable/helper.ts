@@ -70,6 +70,8 @@ export async function deserializeState(
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
   { savedObjectId, ...state }: LensSerializedState
 ): Promise<LensRuntimeState> {
+  const fallbackAttributes = createEmptyLensState().attributes;
+
   if (savedObjectId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
@@ -83,7 +85,7 @@ export async function deserializeState(
       } satisfies LensRuntimeState;
     } catch (e) {
       // return an empty Lens document if no saved object is found
-      return { ...state, attributes: createEmptyLensState().attributes };
+      return { ...state, attributes: fallbackAttributes };
     }
   }
 
@@ -95,11 +97,11 @@ export async function deserializeState(
       // provide a fallback
       return {
         ...newState,
-        attributes: newAttributes ?? newState.attributes ?? createEmptyLensState().attributes,
+        attributes: newAttributes ?? newState.attributes ?? fallbackAttributes,
       };
     } catch (e) {
       // return an empty Lens document if no saved object is found
-      return { ...newState, attributes: createEmptyLensState().attributes };
+      return { ...newState, attributes: fallbackAttributes };
     }
   }
 
