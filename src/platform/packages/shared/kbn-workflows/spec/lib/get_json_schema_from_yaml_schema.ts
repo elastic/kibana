@@ -11,7 +11,15 @@ import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { z } from '@kbn/zod';
 
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type {
+type WorkflowJsonSchema = JsonSchema7Type & {
+  $ref: '#/definitions/WorkflowSchema';
+  $schema: 'http://json-schema.org/draft-07/schema#';
+  definitions: {
+    WorkflowSchema: JsonSchema7Type;
+  };
+};
+
+export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): WorkflowJsonSchema {
   // Generate the json schema from zod schema
   const jsonSchema = zodToJsonSchema(yamlSchema, {
     name: 'WorkflowSchema',
@@ -170,24 +178,11 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
   // Enforce strict validation: ensure all objects have additionalProperties: false
   // This fixes the main issue where Kibana connectors were too permissive
   try {
-    const tempSchema = JSON.parse(fixedSchemaString);
-    fixAdditionalPropertiesInSchema(tempSchema);
-    fixedSchemaString = JSON.stringify(tempSchema);
+    const fixedSchema = JSON.parse(fixedSchemaString);
+    fixAdditionalPropertiesInSchema(fixedSchema);
+    return fixedSchema;
   } catch (parseError) {
     // If parsing fails, throw an error, since replacing with regexp isn't safe
     throw new Error('Failed to fix additionalProperties in json schema');
-  }
-
-  try {
-    const fixedSchema = JSON.parse(fixedSchemaString);
-    /*
-      console.log(
-        `Fixed schema size: ${Math.round((fixedSchemaString.length / 1024 / 1024) * 100) / 100}MB`
-      );
-      */
-    return fixedSchema;
-  } catch (parseError) {
-    // console.warn('Failed to parse fixed schema, using original');
-    return schema;
   }
 }

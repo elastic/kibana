@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
+import type { AuthenticatedUser, SecurityServiceStart, IBasePath } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { truncate } from 'lodash';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
@@ -125,11 +125,14 @@ export const createApiKey = async (
 export const getApiKeyAndUserScope = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
-  security: SecurityServiceStart
+  security: SecurityServiceStart,
+  basePath: IBasePath
 ): Promise<Map<string, ApiKeyAndUserScope>> => {
   const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security);
-  const space = getSpaceIdFromPath(request.url.pathname);
   const user = security.authc.getCurrentUser(request);
+
+  const requestBasePath = basePath.get(request);
+  const space = getSpaceIdFromPath(requestBasePath, basePath.serverBasePath);
 
   const apiKeyAndUserScopeByTaskId = new Map<string, ApiKeyAndUserScope>();
 

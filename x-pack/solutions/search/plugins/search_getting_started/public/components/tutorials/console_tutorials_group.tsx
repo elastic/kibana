@@ -87,24 +87,16 @@ export const ConsoleTutorialsGroup = () => {
 
   return (
     <EuiFlexGroup gutterSize="l" direction={'column'} justifyContent="spaceBetween">
-      <EuiFlexGroup gutterSize="xs" direction={'column'} justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <SearchGettingStartedSectionHeading
-            title={i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
-              defaultMessage: 'Explore the API',
-            })}
-            icon={commandLineIllustration}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="s">
-            <FormattedMessage
-              id="xpack.searchGettingStarted.consoleTutorials.description"
-              defaultMessage="Choose a tutorial and use Console to quickly start interacting with the elasticsearch API."
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SearchGettingStartedSectionHeading
+        title={i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
+          defaultMessage: 'Explore the API',
+        })}
+        icon={commandLineIllustration} // TODO: Replace with EUI icon when it's available
+        description={i18n.translate('xpack.searchGettingStarted.consoleTutorials.description', {
+          defaultMessage:
+            'Choose a tutorial and use Console to quickly start interacting with the Elasticsearch API.',
+        })}
+      />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween">
           {tutorials.map((tutorial) => (
@@ -120,7 +112,7 @@ export const ConsoleTutorialsGroup = () => {
                 footer={
                   <TryInConsoleButton
                     type="button"
-                    iconType={commandLineIllustration}
+                    iconType={commandLineIllustration} // TODO: Replace with EUI icon when it's available
                     color="text"
                     request={tutorial.request}
                     application={application}
