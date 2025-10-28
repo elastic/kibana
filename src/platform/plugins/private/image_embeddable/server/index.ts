@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ImageConfigState, ImageEmbeddableState } from './schemas';
+export type { ImageConfig, ImageConfigState, ImageEmbeddableState } from './schemas';
 
 export const plugin = async () => {
   const { ImageEmbeddablePlugin } = await import('./plugin');

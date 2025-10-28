@@ -70,5 +70,6 @@ export const imageEmbeddableSchema = schema.allOf(
   }
 );
 
+export type ImageConfig = TypeOf<typeof imageConfigSchema>;
 export type ImageConfigState = TypeOf<typeof imageConfigSchema>;
 export type ImageEmbeddableState = TypeOf<typeof imageEmbeddableSchema>;

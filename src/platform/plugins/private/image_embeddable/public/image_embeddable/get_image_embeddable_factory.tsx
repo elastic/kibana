@@ -22,7 +22,7 @@ import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image
 import type { FileImageMetadata } from '../imports';
 import { coreServices, filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
-import type { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
+import type { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from '../types';
 
 export const getImageEmbeddableFactory = ({
   embeddableEnhanced,

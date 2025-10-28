@@ -15,7 +15,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { ADD_IMAGE_EMBEDDABLE_ACTION_ID, IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
-import type { ImageConfig, ImageEmbeddableSerializedState } from '../image_embeddable/types';
+import type { ImageConfig, ImageEmbeddableSerializedState } from '../types';
 import { coreServices } from '../services/kibana_services';
 
 export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
