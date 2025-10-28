@@ -15,13 +15,13 @@ import type {
   RootContext,
 } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import { RESOLUTION_MATCH } from './__mocks__';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('logDocumentProfileProvider', () => {
   const logDocumentProfileProvider = createObservabilityLogDocumentProfileProvider(mockServices);
