@@ -18,6 +18,16 @@ tasks:
       cache: false
   bootstrap:
     script: yarn kbn bootstrap
+  generateAllTypecheckConfigs:
+    command: node
+    args:
+     - 'scripts/type_check.js'
+     - '--config-only'
+     - '--verbose'
+    options:
+      runFromWorkspaceRoot: true
+      cache: false
+
 
 workspace:
   inheritedTasks:
