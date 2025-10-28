@@ -114,9 +114,13 @@ export interface TracedElasticsearchClient {
 
 const cancelEsRequestOnAbort = <T extends Promise<any>>(
   promise: T,
-  request: KibanaRequest,
-  controller: AbortController
+  controller: AbortController,
+  request?: KibanaRequest
 ): T => {
+  if (!request) {
+    return promise as T;
+  }
+
   const subscription = request.events.aborted$.subscribe(() => {
     controller.abort();
   });
@@ -139,7 +143,7 @@ export function createTracedEsClient({
 }: {
   client: ElasticsearchClient;
   logger: Logger;
-  request: KibanaRequest;
+  request?: KibanaRequest;
   plugin?: string;
   labels?: Record<string, string>;
 }): TracedElasticsearchClient {
@@ -163,8 +167,8 @@ export function createTracedEsClient({
       () => {
         const promise = cancelEsRequestOnAbort(
           callback({ signal: controller.signal, meta: true }),
-          request,
-          controller
+          controller,
+          request
         );
 
         return unwrapEsResponse(promise);

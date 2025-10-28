@@ -5,11 +5,16 @@
  * 2.0.
  */
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  httpServerMock,
+} from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { Streams } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { verifyQueries } from './verify_queries';
+import type { KibanaRequest } from '@kbn/core/server';
 
 const logsStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
@@ -28,10 +33,12 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
 describe('verifyQueries', () => {
   let esClientMock: ElasticsearchClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
+  let requestMock: jest.Mocked<KibanaRequest>;
 
   beforeEach(() => {
     loggerMock = loggingSystemMock.createLogger();
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    requestMock = httpServerMock.createKibanaRequest();
   });
 
   it('filters out the invalid queries', async () => {
@@ -41,7 +48,11 @@ describe('verifyQueries', () => {
       _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       hits: { total: { value: 42, relation: 'eq' }, hits: [] },
     });
-    const esClient = createTracedEsClient({ client: esClientMock, logger: loggerMock });
+    const esClient = createTracedEsClient({
+      client: esClientMock,
+      logger: loggerMock,
+      request: requestMock,
+    });
 
     const result = await verifyQueries(
       {
@@ -64,7 +75,11 @@ describe('verifyQueries', () => {
 
   it('handles any search error gracefully', async () => {
     esClientMock.search.mockRejectedValue(new Error('timeout error'));
-    const esClient = createTracedEsClient({ client: esClientMock, logger: loggerMock });
+    const esClient = createTracedEsClient({
+      client: esClientMock,
+      logger: loggerMock,
+      request: requestMock,
+    });
 
     const result = await verifyQueries(
       {
