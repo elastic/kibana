@@ -288,7 +288,6 @@ ${
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
   // actor attributes
-  actorEntityGroup = VALUES(actorEntityGroup),
   actorIds = VALUES(actor.entity.id),
   actorIdsCount = COUNT_DISTINCT(actor.entity.id),
   actorEntityType = VALUES(actorEntityType),
@@ -296,7 +295,6 @@ ${
   actorsDocData = VALUES(actorDocData),
   actorHostIp = VALUES(actorHostIp),
   // target attributes
-  targetEntityGroup = VALUES(targetEntityGroup),
   targetIds = VALUES(target.entity.id),
   targetIdsCount = COUNT_DISTINCT(target.entity.id),
   targetEntityType = VALUES(targetEntityType),
@@ -307,20 +305,6 @@ ${
       targetEntityGroup,
       isOrigin,
       isOriginAlert
-| EVAL actorEntityGroup = CASE(
-    actorEntityGroup == "${NON_ENRICHED_PLACEHOLDER}" AND actorIdsCount == 1,
-    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    actorEntityGroup == "${NON_ENRICHED_PLACEHOLDER}",
-    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}",
-    actorEntityGroup
-  )
-| EVAL targetEntityGroup = CASE(
-    targetEntityGroup == "${NON_ENRICHED_PLACEHOLDER}" AND targetIdsCount == 1,
-    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    targetEntityGroup == "${NON_ENRICHED_PLACEHOLDER}",
-    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}",
-    targetEntityGroup
-  )
 | EVAL actorEntityType = CASE(
     actorEntityType IS NOT NULL,
     actorEntityType,
