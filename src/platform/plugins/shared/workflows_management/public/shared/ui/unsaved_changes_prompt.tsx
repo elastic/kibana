@@ -11,64 +11,56 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Prompt, useLocation } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   hasUnsavedChanges: boolean;
   shouldPromptOnNavigation?: boolean;
 }
 
-export const UnsavedChangesPrompt: React.FC<Props> = ({
-  hasUnsavedChanges,
-  shouldPromptOnNavigation = true,
-}) => {
-  const location = useLocation();
-  const currentPathRef = useRef(location.pathname);
+export const UnsavedChangesPrompt = React.memo<Props>(
+  ({ hasUnsavedChanges, shouldPromptOnNavigation = true }) => {
+    const location = useLocation();
+    const currentPathRef = useRef(location.pathname);
 
-  // Keep ref up to date with current path
-  useEffect(() => {
-    currentPathRef.current = location.pathname;
-  }, [location.pathname]);
+    // Keep ref up to date with current path
+    useEffect(() => {
+      currentPathRef.current = location.pathname;
+    }, [location.pathname]);
 
-  useEffect(() => {
-    const handler = (event: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        // These 2 lines of code are the recommendation from MDN for triggering a browser prompt for confirming
-        // whether or not a user wants to leave the current site.
-        event.preventDefault();
-        event.returnValue = '';
+    useEffect(() => {
+      const handler = (event: BeforeUnloadEvent) => {
+        if (hasUnsavedChanges) {
+          // These 2 lines of code are the recommendation from MDN for triggering a browser prompt for confirming
+          // whether or not a user wants to leave the current site.
+          event.preventDefault();
+          event.returnValue = '';
+        }
+      };
+      // Adding this handler will prompt users if they are navigating to a new page, outside of the Kibana SPA
+      window.addEventListener('beforeunload', handler);
+      return () => window.removeEventListener('beforeunload', handler);
+    }, [hasUnsavedChanges]);
+
+    const message = (nextLocation: any) => {
+      // Current path uses workflow base path, so only contains only the last part of the path (the "/workflow-123"" or "/create")
+      const currentPath = currentPathRef.current;
+      // nextLocation uses full path, so contains the entire path (the "/app/workflows/workflow-123" or "/app/workflows/create")
+      const nextPath: string | undefined = nextLocation?.pathname;
+
+      const cleanNextPath = nextPath?.replace('/app/workflows', '');
+      // Check if navigating within the same workflow
+      if (currentPath === cleanNextPath) {
+        return true; // Allow navigation within same workflow
       }
-    };
-    // Adding this handler will prompt users if they are navigating to a new page, outside of the Kibana SPA
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [hasUnsavedChanges]);
 
-  const message = (nextLocation: any) => {
-    const nextPath: string | undefined = nextLocation?.pathname;
-    const currentPath = currentPathRef.current;
-
-    // Check if navigation is within the same workflow (tab navigation)
-    // Look for workflow ID in the path (could be /app/workflows/workflow-123 or /workflow-123)
-    const getWorkflowId = (path: string) => {
-      const parts = path.split('/');
-      const workflowIndex = parts.findIndex((part) => part.startsWith('workflow-'));
-      return workflowIndex !== -1 ? parts[workflowIndex] : null;
+      // Show browser's native confirmation dialog
+      return i18n.translate('workflows.unsavedChangesPrompt.message', {
+        defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
+      });
     };
 
-    const currentWorkflowId = getWorkflowId(currentPath);
-    const nextWorkflowId = getWorkflowId(nextPath || '');
-
-    const isSameWorkflow =
-      currentWorkflowId && nextWorkflowId && currentWorkflowId === nextWorkflowId;
-
-    // Only show prompt if leaving the workflow
-    if (isSameWorkflow) {
-      return true; // Allow navigation within same workflow
-    }
-
-    // Show browser's native confirmation dialog
-    return 'Your changes have not been saved. Are you sure you want to leave?';
-  };
-
-  return <Prompt when={hasUnsavedChanges && shouldPromptOnNavigation} message={message} />;
-};
+    return <Prompt when={hasUnsavedChanges && shouldPromptOnNavigation} message={message} />;
+  }
+);
+UnsavedChangesPrompt.displayName = 'UnsavedChangesPrompt';
