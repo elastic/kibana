@@ -308,6 +308,147 @@ describe('integration schemas', () => {
         expectParseSuccess(result);
       });
     });
+
+    it('rejects empty string for title', () => {
+      const payload = {
+        title: '   ',
+        description: 'Integration for testing purposes',
+        dataStreams: [
+          {
+            title: 'logs',
+            description: 'Log data stream',
+            inputTypes: [{ name: 'filestream' as const }],
+            rawSamples: ['sample log 1'],
+          },
+        ],
+      };
+
+      const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('title: No empty strings allowed');
+    });
+
+    it('rejects empty string for description', () => {
+      const payload = {
+        title: 'Test Integration',
+        description: '   ',
+        dataStreams: [
+          {
+            title: 'logs',
+            description: 'Log data stream',
+            inputTypes: [{ name: 'filestream' as const }],
+            rawSamples: ['sample log 1'],
+          },
+        ],
+      };
+
+      const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('description: No empty strings allowed');
+    });
+
+    it('rejects empty string for logo when provided', () => {
+      const payload = {
+        title: 'Test Integration',
+        description: 'Integration for testing purposes',
+        logo: '   ',
+        dataStreams: [
+          {
+            title: 'logs',
+            description: 'Log data stream',
+            inputTypes: [{ name: 'filestream' as const }],
+            rawSamples: ['sample log 1'],
+          },
+        ],
+      };
+
+      const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('logo: No empty strings allowed');
+    });
+
+    it('rejects empty string for data stream title', () => {
+      const payload = {
+        title: 'Test Integration',
+        description: 'Integration for testing purposes',
+        dataStreams: [
+          {
+            title: '   ',
+            description: 'Log data stream',
+            inputTypes: [{ name: 'filestream' as const }],
+            rawSamples: ['sample log 1'],
+          },
+        ],
+      };
+
+      const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('title: No empty strings allowed');
+    });
+
+    it('rejects empty string for data stream description', () => {
+      const payload = {
+        title: 'Test Integration',
+        description: 'Integration for testing purposes',
+        dataStreams: [
+          {
+            title: 'logs',
+            description: '   ',
+            inputTypes: [{ name: 'filestream' as const }],
+            rawSamples: ['sample log 1'],
+          },
+        ],
+      };
+
+      const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('description: No empty strings allowed');
+    });
+
+    it('requires at least one raw sample', () => {
+      const payload = {
+        title: 'Test Integration',
+        description: 'Integration for testing purposes',
+        dataStreams: [
+          {
+            title: 'logs',
+            description: 'Log data stream',
+            inputTypes: [{ name: 'filestream' as const }],
+            rawSamples: [],
+          },
+        ],
+      };
+
+      const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('Array must contain at least 1 element(s)');
+    });
+
+    it('rejects empty string in raw samples', () => {
+      const payload = {
+        title: 'Test Integration',
+        description: 'Integration for testing purposes',
+        dataStreams: [
+          {
+            title: 'logs',
+            description: 'Log data stream',
+            inputTypes: [{ name: 'filestream' as const }],
+            rawSamples: ['sample log 1', '   ', 'sample log 3'],
+          },
+        ],
+      };
+
+      const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('No empty strings allowed');
+    });
   });
 
   describe('CreateAutoImportIntegrationResponse', () => {
@@ -635,26 +776,56 @@ describe('integration schemas', () => {
       expectParseError(result);
     });
 
-    it('accepts empty string for description', () => {
+    it('rejects empty string for description when provided', () => {
       const payload = {
-        description: '',
+        description: '   ',
       };
 
       const result = UpdateAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseSuccess(result);
+      expectParseError(result);
 
-      expect(result.data).toEqual(payload);
+      expect(stringifyZodError(result.error)).toContain('description: No empty strings allowed');
     });
 
-    it('accepts empty string for logo', () => {
+    it('rejects empty string for logo when provided', () => {
       const payload = {
-        logo: '',
+        logo: '   ',
       };
 
       const result = UpdateAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseSuccess(result);
+      expectParseError(result);
 
-      expect(result.data).toEqual(payload);
+      expect(stringifyZodError(result.error)).toContain('logo: No empty strings allowed');
+    });
+
+    it('rejects empty string for data stream description when provided', () => {
+      const payload = {
+        dataStreams: [
+          {
+            description: '   ',
+          },
+        ],
+      };
+
+      const result = UpdateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('description: No empty strings allowed');
+    });
+
+    it('rejects empty string in raw samples', () => {
+      const payload = {
+        dataStreams: [
+          {
+            rawSamples: ['valid sample', '   ', 'another valid sample'],
+          },
+        ],
+      };
+
+      const result = UpdateAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('No empty strings allowed');
     });
   });
 

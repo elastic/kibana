@@ -27,13 +27,13 @@ paths:
               properties:
                 title:
                   description: The title of the integration
-                  type: string
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                 description:
                   description: The description of the integration
-                  type: string
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                 logo:
                   description: The logo of the integration
-                  type: string
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                   format: binary
                 dataStreams:
                   description: The data streams of the integration
@@ -50,10 +50,10 @@ paths:
                     properties:
                       title:
                         description: The title of the data stream
-                        type: string
+                        $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                       description:
                         description: The description of the data stream
-                        type: string
+                        $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                       inputTypes:
                         description: The input types of the data stream
                         type: array
@@ -63,8 +63,9 @@ paths:
                       rawSamples:
                         description: The raw samples of the data stream
                         type: array
+                        minItems: 1
                         items:
-                          type: string
+                          $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
       responses:
         200:
           description: >-
@@ -89,7 +90,7 @@ paths:
                 properties:
                   error:
                     description: The error message
-                    type: string
+                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
     get:
       summary: Retrieves all integrations.
       operationId: GetAutoImportIntegrations
@@ -137,10 +138,10 @@ paths:
               properties:
                 description:
                   description: Integration description
-                  type: string
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                 logo:
                   description: Integration logo image blob
-                  type: string
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                   format: binary
                 dataStreams:
                   description: The data streams of the integration
@@ -151,7 +152,7 @@ paths:
                     properties:
                       description:
                         description: The description of the data stream
-                        type: string
+                        $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                       inputTypes:
                         description: The input types of the data stream
                         type: array
@@ -161,7 +162,7 @@ paths:
                         description: The raw samples of the data stream
                         type: array
                         items:
-                          type: string
+                          $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
       responses:
         200:
           description: Indicates integration has been updated correctly.

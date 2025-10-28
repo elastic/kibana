@@ -16,8 +16,8 @@
 
 import { z } from '@kbn/zod';
 
-import { InputType, Integration } from '../../common_attributes.gen';
 import { NonEmptyString } from '../../primitive.gen';
+import { InputType, Integration } from '../../common_attributes.gen';
 
 export type CreateAutoImportIntegrationRequestBody = z.infer<
   typeof CreateAutoImportIntegrationRequestBody
@@ -27,15 +27,15 @@ export const CreateAutoImportIntegrationRequestBody = z
     /**
      * The title of the integration
      */
-    title: z.string(),
+    title: NonEmptyString,
     /**
      * The description of the integration
      */
-    description: z.string(),
+    description: NonEmptyString,
     /**
      * The logo of the integration
      */
-    logo: z.string().optional(),
+    logo: NonEmptyString.optional(),
     /**
      * The data streams of the integration
      */
@@ -46,11 +46,11 @@ export const CreateAutoImportIntegrationRequestBody = z
             /**
              * The title of the data stream
              */
-            title: z.string(),
+            title: NonEmptyString,
             /**
              * The description of the data stream
              */
-            description: z.string(),
+            description: NonEmptyString,
             /**
              * The input types of the data stream
              */
@@ -58,7 +58,7 @@ export const CreateAutoImportIntegrationRequestBody = z
             /**
              * The raw samples of the data stream
              */
-            rawSamples: z.array(z.string()),
+            rawSamples: z.array(NonEmptyString).min(1),
           })
           .strict()
       )
@@ -136,11 +136,11 @@ export const UpdateAutoImportIntegrationRequestBody = z
     /**
      * Integration description
      */
-    description: z.string().optional(),
+    description: NonEmptyString.optional(),
     /**
      * Integration logo image blob
      */
-    logo: z.string().optional(),
+    logo: NonEmptyString.optional(),
     /**
      * The data streams of the integration
      */
@@ -151,7 +151,7 @@ export const UpdateAutoImportIntegrationRequestBody = z
             /**
              * The description of the data stream
              */
-            description: z.string().optional(),
+            description: NonEmptyString.optional(),
             /**
              * The input types of the data stream
              */
@@ -159,7 +159,7 @@ export const UpdateAutoImportIntegrationRequestBody = z
             /**
              * The raw samples of the data stream
              */
-            rawSamples: z.array(z.string()).optional(),
+            rawSamples: z.array(NonEmptyString).optional(),
           })
           .strict()
       )
