@@ -205,6 +205,64 @@ describe('search', () => {
     expect(request).toHaveProperty('index', ['.kibana-test_8.0.0-testing']);
   });
 
+  it('should combine with user-provided boolean queries as expected', async () => {
+    await expect(
+      repository.search({
+        ...options,
+        query: { bool: { should: [{ term: { type: 'SOME-USER-PROVIDED-VALUE' } }] } },
+      })
+    ).resolves.toEqual(EMPTY_SEARCH_RESPONSE);
+    expect(client.search).toHaveBeenCalledTimes(1);
+    const [[request]] = client.search.mock.calls;
+    expect(request).toMatchInlineSnapshot(`
+      Object {
+        "index": Array [
+          ".kibana-test_8.0.0-testing",
+        ],
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "type": "index-pattern",
+                      },
+                    },
+                  ],
+                  "must_not": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "namespaces",
+                      },
+                    },
+                  ],
+                  "should": Array [
+                    Object {
+                      "terms": Object {
+                        "namespace": Array [
+                          "foo-namespace",
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "SOME-USER-PROVIDED-VALUE",
+                },
+              },
+            ],
+          },
+        },
+      }
+    `);
+  });
+
   it('should accept pit', async () => {
     const pit = { id: 'abc123', keepAlive: '2m' };
     await expect(repository.search({ ...options, pit })).resolves.toEqual(EMPTY_SEARCH_RESPONSE);
