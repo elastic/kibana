@@ -216,6 +216,19 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       }
     }, [helpContent, showHelpContent]);
 
+    useEffect(() => {
+      // If the argument selector should not be rendered, then at least set the `value` to a string
+      // so that the normal console argument validations can be invoked if the user still ENTERs
+      // the command
+      if (!shouldRender) {
+        onChange({
+          value: '',
+          valueText: '',
+          store: state,
+        });
+      }
+    }, [onChange, shouldRender, state, value]);
+
     return shouldRender ? (
       <EuiPopover
         isOpen={state.isPopoverOpen}
