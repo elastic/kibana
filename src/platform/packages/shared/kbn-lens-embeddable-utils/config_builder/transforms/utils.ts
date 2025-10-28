@@ -13,12 +13,10 @@ import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type {
   TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPersistedState,
-} from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
@@ -513,3 +511,7 @@ export type DeepPartial<T> = T extends (...args: never[]) => unknown
       [P in keyof T]?: DeepPartial<T[P]>;
     }
   : T;
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}

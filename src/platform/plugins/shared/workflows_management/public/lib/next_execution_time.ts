@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RRule, Frequency, Weekday } from '@kbn/rrule';
+/* eslint-disable @typescript-eslint/no-explicit-any, complexity */
+
+import { Frequency, RRule, Weekday } from '@kbn/rrule';
+import type { WorkflowExecutionHistoryModel } from '@kbn/workflows';
 import { parseIntervalString, type WorkflowTrigger } from '../../server/lib/schedule_utils';
 
 /**
  * Calculates the next execution time for a scheduled trigger
  */
-export function calculateNextExecutionTime(trigger: WorkflowTrigger): Date | null {
-  if (trigger.type !== 'scheduled' || !trigger.enabled) {
+export function calculateNextExecutionTime(
+  trigger: WorkflowTrigger,
+  lastRun: Date | null
+): Date | null {
+  if (trigger.type !== 'scheduled') {
     return null;
   }
 
@@ -22,20 +28,15 @@ export function calculateNextExecutionTime(trigger: WorkflowTrigger): Date | nul
 
   // Handle RRule-based scheduling
   if (config.rrule) {
-    return calculateRRuleNextExecution(config.rrule);
+    return calculateRRuleNextExecution(config.rrule, lastRun);
   }
 
-  // Handle new interval-based scheduling format (e.g., every: "5m")
-  if (config.every && typeof config.every === 'string' && !config.unit) {
+  // Handle interval-based scheduling format (e.g., every: "5m")
+  if (config.every && typeof config.every === 'string') {
     const parsed = parseIntervalString(config.every);
     if (parsed) {
-      return calculateIntervalNextExecution(parsed.value, parsed.unit);
+      return calculateIntervalNextExecution(parsed.value, parsed.unit, lastRun);
     }
-  }
-
-  // Handle legacy interval-based scheduling
-  if (config.every && config.unit) {
-    return calculateIntervalNextExecution(config.every, config.unit);
   }
 
   return null;
@@ -44,7 +45,7 @@ export function calculateNextExecutionTime(trigger: WorkflowTrigger): Date | nul
 /**
  * Calculates next execution time for RRule-based schedules
  */
-function calculateRRuleNextExecution(rruleConfig: any): Date | null {
+function calculateRRuleNextExecution(rruleConfig: any, lastRun: Date | null): Date | null {
   try {
     // Validate required fields
     if (!rruleConfig.freq || !rruleConfig.interval || !rruleConfig.tzid) {
@@ -79,6 +80,8 @@ function calculateRRuleNextExecution(rruleConfig: any): Date | null {
         // Use current time as fallback if dtstart is invalid
         rruleOptions.dtstart = new Date();
       }
+    } else if (lastRun) {
+      rruleOptions.dtstart = lastRun;
     } else {
       // Use current time as default dtstart
       rruleOptions.dtstart = new Date();
@@ -143,14 +146,18 @@ function calculateRRuleNextExecution(rruleConfig: any): Date | null {
 /**
  * Calculates next execution time for interval-based schedules
  */
-function calculateIntervalNextExecution(every: string | number, unit: string): Date | null {
+function calculateIntervalNextExecution(
+  every: string | number,
+  unit: string,
+  lastRun: Date | null
+): Date | null {
   try {
     const interval = parseInt(String(every), 10);
     if (isNaN(interval) || interval < 1) {
       return null;
     }
 
-    const now = new Date();
+    const now = lastRun || new Date();
     const unitMap: Record<string, number> = {
       s: 1000,
       m: 60 * 1000,
@@ -173,18 +180,21 @@ function calculateIntervalNextExecution(every: string | number, unit: string): D
 /**
  * Gets the next execution time for all scheduled triggers in a workflow
  */
-export function getWorkflowNextExecutionTime(triggers: WorkflowTrigger[]): Date | null {
-  const scheduledTriggers = triggers.filter(
-    (trigger) => trigger.type === 'scheduled' && trigger.enabled
-  );
+export function getWorkflowNextExecutionTime(
+  triggers: WorkflowTrigger[],
+  history: WorkflowExecutionHistoryModel[]
+): Date | null {
+  const scheduledTriggers = triggers.filter((trigger) => trigger.type === 'scheduled');
 
   if (scheduledTriggers.length === 0) {
     return null;
   }
 
+  const lastRun = history[0]?.finishedAt ? new Date(history[0]?.finishedAt) : null;
+
   // Calculate next execution times for all scheduled triggers
   const nextExecutionTimes = scheduledTriggers
-    .map((trigger) => calculateNextExecutionTime(trigger))
+    .map((trigger) => calculateNextExecutionTime(trigger, lastRun))
     .filter((time): time is Date => time !== null);
 
   if (nextExecutionTimes.length === 0) {

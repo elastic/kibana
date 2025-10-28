@@ -5,8 +5,8 @@
  * 2.0.
  */
 import {
-  INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
   INTERNAL_ALERTING_BACKFILL_API_PATH,
+  INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
 } from '@kbn/alerting-plugin/common';
 
 const BACKFILL_RULE_URL_SCHEDULE = `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_schedule`;
@@ -30,18 +30,6 @@ export const manualRuleRun = ({
         ranges: [{ start, end }],
       },
     ],
-  });
-};
-
-export const interceptFindBackfillsNoData = () => {
-  cy.intercept('POST', INTERNAL_ALERTING_BACKFILL_FIND_API_PATH, {
-    statusCode: 200,
-    body: {
-      page: 1,
-      per_page: 10,
-      total: 0,
-      data: [],
-    },
   });
 };
 

@@ -8,7 +8,7 @@
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import { siemMigrationEventNames } from '../../../common/lib/telemetry/events/siem_migrations';
-import { SiemMigrationsEventTypes } from '../../../common/lib/telemetry/events/siem_migrations/types';
+import { SiemMigrationsRuleEventTypes } from '../../../common/lib/telemetry/events/siem_migrations/types';
 import { migrationRules } from '../__mocks__/migration_rules';
 import { SiemRulesMigrationsTelemetry } from './telemetry';
 import { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
@@ -28,9 +28,9 @@ describe('SiemRulesMigrationsTelemetry', () => {
     const connector = { id: '123', actionTypeId: 'test' };
     telemetry.reportConnectorSelected({ connector: connector as ActionConnector });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.SetupConnectorSelected,
+      SiemMigrationsRuleEventTypes.SetupConnectorSelected,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupConnectorSelected],
+        eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupConnectorSelected],
         connectorId: '123',
         connectorType: 'test',
       }
@@ -40,9 +40,9 @@ describe('SiemRulesMigrationsTelemetry', () => {
   it('reports setup migration open', () => {
     telemetry.reportSetupMigrationOpen({ isFirstMigration: true });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.SetupMigrationOpenNew,
+      SiemMigrationsRuleEventTypes.SetupMigrationOpenNew,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupMigrationOpenNew],
+        eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupMigrationOpenNew],
         isFirstMigration: true,
       }
     );
@@ -54,9 +54,10 @@ describe('SiemRulesMigrationsTelemetry', () => {
       missingResourcesCount: 5,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.SetupMigrationOpenResources,
+      SiemMigrationsRuleEventTypes.SetupMigrationOpenResources,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupMigrationOpenResources],
+        eventName:
+          siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupMigrationOpenResources],
         migrationId: 'abc',
         missingResourcesCount: 5,
       }
@@ -66,9 +67,9 @@ describe('SiemRulesMigrationsTelemetry', () => {
   it('reports setup migration created', () => {
     telemetry.reportSetupMigrationCreated({ migrationId: 'def', rulesCount: 10 });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.SetupMigrationCreated,
+      SiemMigrationsRuleEventTypes.SetupMigrationCreated,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupMigrationCreated],
+        eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupMigrationCreated],
         migrationId: 'def',
         rulesCount: 10,
         result: 'success',
@@ -84,9 +85,9 @@ describe('SiemRulesMigrationsTelemetry', () => {
       error,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.SetupMigrationCreated,
+      SiemMigrationsRuleEventTypes.SetupMigrationCreated,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupMigrationCreated],
+        eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupMigrationCreated],
         migrationId: 'def',
         rulesCount: 10,
         result: 'failed',
@@ -98,9 +99,9 @@ describe('SiemRulesMigrationsTelemetry', () => {
   it('reports setup migration deleted', () => {
     telemetry.reportSetupMigrationDeleted({ migrationId: 'ghi' });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.SetupMigrationDeleted,
+      SiemMigrationsRuleEventTypes.SetupMigrationDeleted,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupMigrationDeleted],
+        eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupMigrationDeleted],
         migrationId: 'ghi',
         result: 'success',
       }
@@ -114,9 +115,9 @@ describe('SiemRulesMigrationsTelemetry', () => {
       count: 3,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.SetupResourcesUploaded,
+      SiemMigrationsRuleEventTypes.SetupResourcesUploaded,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupResourcesUploaded],
+        eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupResourcesUploaded],
         migrationId: 'jkl',
         type: 'macro',
         count: 3,
@@ -126,11 +127,11 @@ describe('SiemRulesMigrationsTelemetry', () => {
   });
 
   it('reports setup rules query copied', () => {
-    telemetry.reportSetupRulesQueryCopied({ migrationId: 'mno' });
+    telemetry.reportSetupQueryCopied({ migrationId: 'mno' });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.SetupRulesQueryCopied,
+      SiemMigrationsRuleEventTypes.SetupQueryCopied,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupRulesQueryCopied],
+        eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupQueryCopied],
         migrationId: 'mno',
       }
     );
@@ -145,9 +146,9 @@ describe('SiemRulesMigrationsTelemetry', () => {
       },
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.StartMigration,
+      SiemMigrationsRuleEventTypes.StartMigration,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.StartMigration],
+        eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.StartMigration],
         migrationId: 'pqr',
         connectorId: 'test-connector',
         isRetry: false,
@@ -167,9 +168,9 @@ describe('SiemRulesMigrationsTelemetry', () => {
       retry: SiemMigrationRetryFilter.FAILED,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.StartMigration,
+      SiemMigrationsRuleEventTypes.StartMigration,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.StartMigration],
+        eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.StartMigration],
         migrationId: 'stu',
         connectorId: 'test-connector',
         isRetry: true,
@@ -182,14 +183,14 @@ describe('SiemRulesMigrationsTelemetry', () => {
 
   it('reports translated rule install', () => {
     const migrationRule = migrationRules[0];
-    telemetry.reportTranslatedRuleInstall({
-      migrationRule,
+    telemetry.reportTranslatedItemInstall({
+      migrationItem: migrationRule,
       enabled: true,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.TranslatedRuleInstall,
+      SiemMigrationsRuleEventTypes.TranslatedItemInstall,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslatedRuleInstall],
+        eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.TranslatedItemInstall],
         migrationId: 'test-migration-1',
         ruleMigrationId: '1',
         author: 'elastic',

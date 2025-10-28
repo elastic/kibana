@@ -20,10 +20,11 @@ import { createWorkflowFormValidationSchema } from '../../validation/workflow_to
 
 import { zodResolver } from '../../../../../utils/zod_resolver';
 import { i18nMessages } from '../../i18n';
-import type { WorkflowToolTypeRegistryEntry } from '../common';
+import type { ToolTypeRegistryEntry } from '../common';
+import type { WorkflowToolFormData } from '../../types/tool_form_types';
 import { commonToolFormDefaultValues } from '../common';
 
-export const workflowToolRegistryEntry: WorkflowToolTypeRegistryEntry = {
+export const workflowToolRegistryEntry: ToolTypeRegistryEntry<WorkflowToolFormData> = {
   label: i18nMessages.configuration.form.type.workflowOption,
   getConfigurationComponent: () => WorkflowConfiguration,
   defaultValues: {

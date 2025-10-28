@@ -37,7 +37,7 @@ const mockError = new Error('API error');
 const mockAddError = jest.fn();
 const invalidateRules = jest.fn();
 const invalidateStats = jest.fn();
-const mockReportTranslatedRuleUpdate = jest.fn();
+const mockReportTranslatedItemUpdate = jest.fn();
 
 describe('useUpdateMigrationRule', () => {
   beforeEach(() => {
@@ -52,7 +52,7 @@ describe('useUpdateMigrationRule', () => {
         siemMigrations: {
           rules: {
             telemetry: {
-              reportTranslatedRuleUpdate: mockReportTranslatedRuleUpdate,
+              reportTranslatedItemUpdate: mockReportTranslatedItemUpdate,
             },
           },
         },

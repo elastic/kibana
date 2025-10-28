@@ -11,17 +11,16 @@ import { last } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { QueryResult, TabularDataResult } from '@kbn/onechat-common';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { setupAgentCallSearchToolWithEsqlThenAnswer } from '../../utils/proxy_scenario';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
 import { createOneChatApiClient } from '../../utils/one_chat_client';
-import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
-import { toolCallMock } from '../../utils/llm_proxy/mocks';
+import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
 
-export default function ({ getService }: OneChatFtrProviderContext) {
+export default function ({ getService }: OneChatApiFtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
   const synthtrace = getService('synthtrace');
@@ -48,10 +47,12 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
       await generateApmData(apmSynthtraceEsClient);
 
-      void setupInterceptors(llmProxy, log, {
-        userPrompt: USER_PROMPT,
+      await setupAgentCallSearchToolWithEsqlThenAnswer({
+        proxy: llmProxy,
         title: MOCKED_LLM_TITLE,
-        finalLlmResponse: MOCKED_LLM_RESPONSE,
+        resourceName: 'traces-apm-default',
+        resourceType: 'data_stream',
+        response: MOCKED_LLM_RESPONSE,
         esqlQuery: MOCKED_ESQL_QUERY,
       });
 
@@ -115,95 +116,4 @@ async function generateApmData(apmSynthtraceEsClient: ApmSynthtraceEsClient) {
     });
 
   return apmSynthtraceEsClient.index(events);
-}
-
-async function setupInterceptors(
-  llmProxy: LlmProxy,
-  log: ToolingLog,
-  options: {
-    userPrompt: string;
-    title: string;
-    finalLlmResponse: string;
-    esqlQuery: string;
-  }
-) {
-  try {
-    return await Promise.all([
-      // title generation
-      llmProxy.interceptors.toolChoice({
-        name: 'set_title',
-        response: toolCallMock('set_title', { title: options.title }),
-      }),
-
-      // agent - first call -> make it call the `platform_core_search` tool
-      llmProxy.interceptors.userMessage({
-        name: 'agent:tool_call',
-        when: ({ messages }) => {
-          const lastMessage = last(messages)?.content as string;
-          return lastMessage.includes(options.userPrompt);
-        },
-        response: toolCallMock('platform_core_search', {
-          query: 'service.name:java-backend',
-        }),
-      }),
-
-      // search tool - index explorer call
-      llmProxy.interceptors.toolChoice({
-        name: 'select_resources',
-        response: toolCallMock('select_resources', {
-          targets: [
-            {
-              reason: "The query 'service.name:java-backend' suggests a search related to APM data",
-              type: 'data_stream',
-              name: 'traces-apm-default',
-            },
-          ],
-        }),
-      }),
-
-      // search tool - tool selection call
-      llmProxy.interceptors.userMessage({
-        name: 'search_tool:tool_selection',
-        when: ({ messages }) => {
-          const lastMessage = last(messages)?.content as string;
-          return lastMessage.startsWith('Execute the following user query:');
-        },
-        response: toolCallMock('natural_language_search', {
-          query: 'service.name:java-backend',
-          index: 'metrics-apm.transaction.1m-default',
-        }),
-      }),
-
-      // generate esql - request documentation call
-      llmProxy.interceptors.toolChoice({
-        name: 'request_documentation',
-        response: toolCallMock('request_documentation', { commands: ['WHERE'], functions: [] }),
-      }),
-
-      llmProxy.interceptors.toolMessage({
-        name: 'generate_esql:generate_query',
-        when: ({ messages }) => {
-          const systemMessage = messages.find((message) => message.role === 'system');
-          return (systemMessage?.content as string).includes(
-            `respond to the user's question by providing a valid ES|QL query`
-          );
-        },
-        response: `Here's the ES|QL query:\`\`\`esql${options.esqlQuery}\`\`\``,
-      }),
-
-      // agent - second call -> make it actually answer
-      void llmProxy.interceptors.toolMessage({
-        name: 'agent:final_response',
-        when: ({ messages }) => {
-          const lastMessage = last(messages);
-          const contentParsed = JSON.parse(lastMessage?.content as string);
-          return contentParsed?.results;
-        },
-        response: options.finalLlmResponse,
-      }),
-    ]);
-  } catch (e) {
-    log.error(`One or more interceptors encountered an error in the ESQL scenario: ${e.message}`);
-    throw e;
-  }
 }

@@ -21,7 +21,7 @@ describe('convertFilterOptions', () => {
 
   it('filters by `partially translated` status', () => {
     const filters = convertFilterOptions({ status: StatusFilterBase.PARTIALLY_TRANSLATED });
-    expect(filters).toEqual({ partiallyTranslated: true });
+    expect(filters).toEqual({ installed: false, partiallyTranslated: true });
   });
 
   it('filters by `untranslatable` status', () => {

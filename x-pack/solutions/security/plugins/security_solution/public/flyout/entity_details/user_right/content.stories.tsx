@@ -11,7 +11,7 @@ import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../shared/mocks';
-import { mockManagedUserData, mockObservedUser } from './mocks';
+import { mockObservedUser } from './mocks';
 import { UserPanelContent } from './content';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
@@ -35,7 +35,6 @@ export default {
 export const Default = {
   render: () => (
     <UserPanelContent
-      managedUser={mockManagedUserData}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
@@ -54,11 +53,6 @@ export const Default = {
 export const IntegrationDisabled = {
   render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: false,
-        isIntegrationEnabled: false,
-      }}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
@@ -77,11 +71,6 @@ export const IntegrationDisabled = {
 export const NoManagedData = {
   render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: false,
-        isIntegrationEnabled: true,
-      }}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
@@ -100,7 +89,6 @@ export const NoManagedData = {
 export const NoObservedData = {
   render: () => (
     <UserPanelContent
-      managedUser={mockManagedUserData}
       observedUser={{
         details: {
           user: {
@@ -143,11 +131,6 @@ export const NoObservedData = {
 export const Loading = {
   render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: true,
-        isIntegrationEnabled: true,
-      }}
       observedUser={{
         details: {
           user: {

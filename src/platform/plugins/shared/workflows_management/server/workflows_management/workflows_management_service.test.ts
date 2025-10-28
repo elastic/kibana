@@ -8,10 +8,13 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, SecurityServiceStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { WorkflowsService } from './workflows_management_service';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 describe('WorkflowsService', () => {
   let service: WorkflowsService;
@@ -83,15 +86,22 @@ describe('WorkflowsService', () => {
     mockLogger.error = jest.fn();
 
     const mockEsClientPromise = Promise.resolve(mockEsClient);
+    const mockGetActionsClient = jest.fn().mockResolvedValue({
+      getAll: jest.fn().mockResolvedValue([]),
+      execute: jest.fn(),
+      bulkEnqueueExecution: jest.fn(),
+    } as unknown as IUnsecuredActionsClient);
+    const mockGetActionsClientWithRequest = jest.fn().mockResolvedValue({
+      listTypes: jest.fn().mockResolvedValue([]),
+      getAll: jest.fn().mockResolvedValue({ data: [] }),
+    } as unknown as PublicMethodsOf<ActionsClient>);
 
-    service = new WorkflowsService(
-      mockEsClientPromise,
-      mockLogger,
-      'workflows-executions',
-      'workflows-steps',
-      'workflows-logs',
-      false
-    );
+    const mockGetActionsStart = jest.fn().mockResolvedValue({
+      getUnsecuredActionsClient: mockGetActionsClient,
+      getActionsClientWithRequest: mockGetActionsClientWithRequest,
+    });
+
+    service = new WorkflowsService(mockEsClientPromise, mockLogger, false, mockGetActionsStart);
 
     mockSecurity = {
       authc: {
@@ -127,8 +137,8 @@ describe('WorkflowsService', () => {
         createdBy: 'test-user',
         lastUpdatedBy: 'test-user',
         valid: true,
-        createdAt: new Date('2023-01-01T00:00:00.000Z'),
-        lastUpdatedAt: new Date('2023-01-01T00:00:00.000Z'),
+        createdAt: '2023-01-01T00:00:00.000Z',
+        lastUpdatedAt: '2023-01-01T00:00:00.000Z',
       });
 
       // The storage adapter uses search internally, not get directly
@@ -187,8 +197,8 @@ describe('WorkflowsService', () => {
             createdBy: 'test-user',
             lastUpdatedBy: 'test-user',
             valid: true,
-            createdAt: new Date('2023-01-01T00:00:00.000Z'),
-            lastUpdatedAt: new Date('2023-01-01T00:00:00.000Z'),
+            createdAt: '2023-01-01T00:00:00.000Z',
+            lastUpdatedAt: '2023-01-01T00:00:00.000Z',
             history: [],
           },
         ],
@@ -417,7 +427,7 @@ describe('WorkflowsService', () => {
         // Verify execution history query
         expect(mockEsClient.search).toHaveBeenCalledTimes(2);
         expect(mockEsClient.search).toHaveBeenNthCalledWith(2, {
-          index: 'workflows-executions',
+          index: WORKFLOWS_EXECUTIONS_INDEX,
           size: 0,
           query: {
             bool: {
@@ -991,7 +1001,7 @@ describe('WorkflowsService', () => {
       expect(mockEsClient.search).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          index: 'workflows-executions',
+          index: WORKFLOWS_EXECUTIONS_INDEX,
           size: 0,
         })
       );
@@ -1096,14 +1106,14 @@ describe('WorkflowsService', () => {
           },
         ],
         _pagination: {
-          limit: 1,
+          limit: 20,
           page: 1,
           total: 1,
         },
       });
 
       expect(mockEsClient.search).toHaveBeenCalledWith({
-        index: 'workflows-executions',
+        index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
             must: expect.arrayContaining([
@@ -1121,7 +1131,10 @@ describe('WorkflowsService', () => {
             ]),
           },
         },
+        size: 20,
+        from: 0,
         sort: [{ createdAt: 'desc' }],
+        track_total_hits: true,
       });
     });
 
@@ -1241,7 +1254,7 @@ describe('WorkflowsService', () => {
       expect(result).toEqual({
         results: [],
         _pagination: {
-          limit: 0,
+          limit: 20,
           page: 1,
           total: 0,
         },
@@ -1293,7 +1306,7 @@ describe('WorkflowsService', () => {
 
       expect(result).toEqual(stepExecution);
       expect(mockEsClient.search).toHaveBeenCalledWith({
-        index: 'workflows-steps',
+        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
           bool: {
             must: [
@@ -1383,7 +1396,7 @@ describe('WorkflowsService', () => {
 
       // Verify the execution search call
       expect(mockEsClient.search).toHaveBeenNthCalledWith(1, {
-        index: 'workflows-executions',
+        index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
             must: [{ ids: { values: ['execution-1'] } }, { term: { spaceId: 'default' } }],
@@ -1393,7 +1406,7 @@ describe('WorkflowsService', () => {
 
       // Verify the step executions search call
       expect(mockEsClient.search).toHaveBeenNthCalledWith(2, {
-        index: 'workflows-steps',
+        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
           bool: {
             must: [{ match: { workflowRunId: 'execution-1' } }, { term: { spaceId: 'default' } }],

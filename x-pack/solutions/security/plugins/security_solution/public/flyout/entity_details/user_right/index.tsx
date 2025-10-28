@@ -77,7 +77,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
 
   const observedUser = useObservedUser(userName, scopeId);
   const email = observedUser.details.user?.email;
-  const managedUser = useManagedUser(userName, email, observedUser.isLoading);
+  const managedUser = useManagedUser();
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
@@ -140,7 +140,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
     !!managedUser.data?.[ManagedUserDatasetKey.ENTRA];
 
-  if (observedUser.isLoading || managedUser.isLoading) {
+  if (observedUser.isLoading) {
     return <FlyoutLoading />;
   }
 
@@ -177,7 +177,6 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
             />
             <UserPanelContent
               userName={userName}
-              managedUser={managedUser}
               observedUser={observedUserWithAnomalies}
               riskScoreState={riskScoreState}
               recalculatingScore={recalculatingScore}

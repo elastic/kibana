@@ -7,18 +7,18 @@
 
 import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
-import { StreamSystemConfiguration } from './stream_system_configuration';
+import { StreamFeatureConfiguration } from './stream_feature_configuration';
 
 const stories: Meta<{}> = {
-  title: 'Streams/StreamSystemConfiguration',
-  component: StreamSystemConfiguration,
+  title: 'Streams/StreamFeatureConfiguration',
+  component: StreamFeatureConfiguration,
 };
 
 export default stories;
 
 export const StreamConfigurationStory: StoryFn<{}> = () => {
   return (
-    <StreamSystemConfiguration
+    <StreamFeatureConfiguration
       definition={{
         name: 'synthetics-http-default',
         description: '',
