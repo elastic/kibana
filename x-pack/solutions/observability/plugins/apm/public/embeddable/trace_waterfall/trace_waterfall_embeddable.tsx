@@ -19,17 +19,24 @@ export function TraceWaterfallEmbeddable({
   onNodeClick,
   getRelatedErrorsHref,
   onErrorClick,
-}: Omit<ApmTraceWaterfallEmbeddableEntryProps, 'mode'>) {
+  mode,
+}: ApmTraceWaterfallEmbeddableEntryProps) {
+  const isFiltered = mode === 'filtered';
+
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
         params: {
           path: { traceId },
-          query: { start: rangeFrom, end: rangeTo },
+          query: {
+            start: rangeFrom,
+            end: rangeTo,
+            serviceName: isFiltered ? serviceName : undefined,
+          },
         },
       });
     },
-    [rangeFrom, rangeTo, traceId]
+    [rangeFrom, rangeTo, traceId, isFiltered, serviceName]
   );
 
   if (isPending(status)) {
@@ -46,6 +53,7 @@ export function TraceWaterfallEmbeddable({
       showLegend
       serviceName={serviceName}
       onErrorClick={onErrorClick}
+      isFiltered={isFiltered}
     />
   );
 }

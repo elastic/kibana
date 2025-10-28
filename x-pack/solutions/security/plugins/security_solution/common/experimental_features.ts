@@ -56,11 +56,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables the Managed User section inside the new user details flyout.
-   */
-  newUserDetailsFlyoutManagedUser: false,
-
-  /**
    * Disables ESQL-based risk scoring
    */
   disableESQLRiskScoring: false,
@@ -145,11 +140,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
    */
   endpointExceptionsMovedUnderManagement: false,
-
-  /**
-   * Disables flyout history and new preview navigation
-   */
-  newExpandableFlyoutNavigationDisabled: false,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
