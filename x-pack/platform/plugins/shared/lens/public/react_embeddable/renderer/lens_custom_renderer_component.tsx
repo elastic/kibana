@@ -10,10 +10,14 @@ import { useSearchApi } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import type { LensApi, LensRendererProps, LensSerializedState } from '@kbn/lens-common';
+import type {
+  LensApi,
+  LensParentApi,
+  LensRendererProps,
+  LensSerializedState,
+} from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { createEmptyLensState, transformOutputState } from '../helper';
-import type { LensParentApi } from './types';
 
 // This little utility uses the same pattern of the useSearchApi hook:
 // create the Subject once and then update its value on change

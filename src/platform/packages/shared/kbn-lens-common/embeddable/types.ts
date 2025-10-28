@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BehaviorSubject } from 'rxjs';
+
+import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import type {
   AggregateQuery,
   ExecutionContextSearch,
@@ -44,6 +47,7 @@ import type {
   PublishingSubject,
   SerializedTitles,
   ViewMode,
+  useSearchApi,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type {
@@ -531,3 +535,26 @@ export interface ESQLVariablesCompatibleDashboardApi {
   controlGroupApi$: PublishingSubject<Partial<CanAddNewPanel> | undefined>;
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }
+
+type SearchApi = ReturnType<typeof useSearchApi>;
+
+interface GeneralLensApi {
+  searchSessionId$: BehaviorSubject<string | undefined>;
+  disabledActionIds$: BehaviorSubject<string[] | undefined>;
+  setDisabledActionIds: (ids: string[] | undefined) => void;
+  viewMode$: BehaviorSubject<ViewMode | undefined>;
+  settings: {
+    syncColors$: BehaviorSubject<boolean>;
+    syncCursor$: BehaviorSubject<boolean>;
+    syncTooltips$: BehaviorSubject<boolean>;
+  };
+  forceDSL?: boolean;
+  esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
+  hideTitle$: BehaviorSubject<boolean | undefined>;
+  reload$: BehaviorSubject<void>;
+}
+
+export type LensParentApi = SearchApi &
+  LensRuntimeState &
+  GeneralLensApi &
+  HasSerializedChildState<LensSerializedState>;
