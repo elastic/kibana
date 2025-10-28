@@ -72,9 +72,9 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         expect(response.body.spans.length).to.be.greaterThan(0);
       });
 
-      it('returns the correct data', () => {
+      it('returns servicesData equal empty array if services have no traces', () => {
         const { spans, servicesData } = response.body;
-        // When the services have no traces, the servicesData is empty
+
         expect(servicesData.length).to.be.equal(0);
 
         const externalDestinations = uniq(
