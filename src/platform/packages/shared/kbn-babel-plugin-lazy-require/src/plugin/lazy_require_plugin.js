@@ -8,46 +8,11 @@
  */
 
 /**
- * Babel plugin that transforms top-level require() calls into lazy-loaded getters.
- *
- *
- * @example
- * Input:
- *   const foo = require('./foo');
- *   const { bar, baz } = require('./utils');
- *   foo.doSomething();
- *
- * Output:
- *   const _module_foo = { initialized: false, value: undefined };
- *   const _module_utils = { initialized: false, value: undefined };
- *   const _imports = {
- *     get foo() {
- *       if (!_module_foo.initialized) {
- *         _module_foo.value = require('./foo');
- *         _module_foo.initialized = true;
- *       }
- *       return _module_foo.value;
- *     },
- *     get bar() {
- *       if (!_module_utils.initialized) {
- *         _module_utils.value = require('./utils');
- *         _module_utils.initialized = true;
- *       }
- *       return _module_utils.value.bar;
- *     },
- *     get baz() {
- *       if (!_module_utils.initialized) {
- *         _module_utils.value = require('./utils');
- *         _module_utils.initialized = true;
- *       }
- *       return _module_utils.value.baz;
- *     }
- *   };
- *   _imports.foo.doSomething();
- *
- * Note: require('./utils') is only called once even though both bar and baz
- * share the same module cache (_module_utils).
+ * Babel plugin that transforms top-level require() and import statements into lazy-loaded getters.
+ * See README.md for detailed examples and documentation.
  */
+
+const { shouldSkipIdentifier, detectModuleLevelUsage } = require('./helpers');
 
 module.exports = function lazyRequirePlugin({ types: t }) {
   /**
@@ -293,151 +258,14 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         }
 
         // ============================================================
-        // PHASE 1.5: Detect module-level code that uses imports (skip lazy loading)
+        // PHASE 1.5: Detect module-level code that uses imports
         // ============================================================
-        // Module-level code runs during initialization, so lazy loading doesn't help
-        // and can cause errors. We need to detect imports used in:
-        // 1. Module-level variable initializers (including JSX)
-        // 2. Module-level function calls (even if the import is used deep in the call chain)
-        const importsUsedInModuleLevelCode = new Set();
-
-        // Check code that runs at module initialization time
-        programPath.traverse({
-          // Check TypeScript import equals (export import alias = Module)
-          // These create module-level aliases that must be eagerly evaluated
-          TSImportEqualsDeclaration(tsImportPath) {
-            // Can be at top level or inside a namespace
-            // Possible paths:
-            //   Program > TSImportEqualsDeclaration
-            //   Program > TSModuleDeclaration > TSModuleBlock > TSImportEqualsDeclaration
-            //   Program > ExportNamedDeclaration > TSModuleDeclaration > TSModuleBlock > TSImportEqualsDeclaration
-            const isTopLevel = tsImportPath.parent === programPath.node;
-
-            let isInTopLevelNamespace = false;
-            if (t.isTSModuleBlock(tsImportPath.parent)) {
-              const moduleDecl = tsImportPath.parentPath.parent;
-              if (t.isTSModuleDeclaration(moduleDecl)) {
-                // Check if namespace is at top level
-                const moduleDeclPath = tsImportPath.parentPath.parentPath;
-                const namespaceParent = moduleDeclPath.parent;
-                isInTopLevelNamespace =
-                  namespaceParent === programPath.node ||
-                  (t.isExportNamedDeclaration(namespaceParent) &&
-                    moduleDeclPath.parentPath.parent === programPath.node);
-              }
-            }
-
-            if (!isTopLevel && !isInTopLevelNamespace) {
-              return;
-            }
-
-            // Check if the moduleReference uses any of our imports
-            tsImportPath.traverse({
-              Identifier(idPath) {
-                const name = idPath.node.name;
-                if (properties.has(name) && idPath.isReferencedIdentifier()) {
-                  importsUsedInModuleLevelCode.add(name);
-                }
-              },
-            });
-          },
-
-          // Check top-level variable declarations
-          VariableDeclaration(varDeclPath) {
-            // Check if this is a top-level declaration (direct or exported)
-            // Paths: Program > VariableDeclaration
-            //        Program > ExportNamedDeclaration > VariableDeclaration
-            const isTopLevel =
-              varDeclPath.parent === programPath.node ||
-              (t.isExportNamedDeclaration(varDeclPath.parent) &&
-                varDeclPath.parentPath.parent === programPath.node);
-
-            if (!isTopLevel) {
-              return;
-            }
-
-            // Skip our own import transformations
-            if (
-              varDeclPath.node.declarations.some(
-                (decl) => decl.init && isSimpleRequireCall(decl.init)
-              )
-            ) {
-              return;
-            }
-
-            // Check if any declarations' initializers use imports
-            varDeclPath.traverse({
-              Identifier(idPath) {
-                const name = idPath.node.name;
-                if (properties.has(name) && idPath.isReferencedIdentifier()) {
-                  importsUsedInModuleLevelCode.add(name);
-                }
-              },
-              // Also check JSXIdentifier for JSX element names
-              JSXIdentifier(jsxIdPath) {
-                const name = jsxIdPath.node.name;
-                if (properties.has(name)) {
-                  importsUsedInModuleLevelCode.add(name);
-                }
-              },
-            });
-          },
-
-          // Check class static properties (they initialize when the class is defined)
-          ClassProperty(classPropPath) {
-            // Only check static properties in top-level classes
-            // Path structure:
-            //   Program > ClassDeclaration > ClassBody > ClassProperty
-            //   OR Program > ExportDefaultDeclaration > ClassDeclaration > ClassBody > ClassProperty
-            if (!classPropPath.node.static) {
-              return;
-            }
-
-            // Walk up to find if this is a top-level class
-            const classBody = classPropPath.parent;
-            if (!t.isClassBody(classBody)) {
-              return;
-            }
-
-            const classDecl = classPropPath.parentPath.parent;
-            if (!t.isClassDeclaration(classDecl)) {
-              return;
-            }
-
-            const classDeclPath = classPropPath.parentPath.parentPath;
-            const classParent = classDeclPath.parent;
-
-            // Check if class is at top level (direct) or exported (wrapped in export)
-            const isTopLevel =
-              classParent === programPath.node ||
-              (t.isExportDefaultDeclaration(classParent) &&
-                classDeclPath.parentPath.parent === programPath.node) ||
-              (t.isExportNamedDeclaration(classParent) &&
-                classDeclPath.parentPath.parent === programPath.node);
-
-            if (!isTopLevel) {
-              return;
-            }
-
-            // Check if the property initializer uses imports
-            if (classPropPath.node.value) {
-              classPropPath.traverse({
-                Identifier(idPath) {
-                  const name = idPath.node.name;
-                  if (properties.has(name) && idPath.isReferencedIdentifier()) {
-                    importsUsedInModuleLevelCode.add(name);
-                  }
-                },
-                JSXIdentifier(jsxIdPath) {
-                  const name = jsxIdPath.node.name;
-                  if (properties.has(name)) {
-                    importsUsedInModuleLevelCode.add(name);
-                  }
-                },
-              });
-            }
-          },
-        });
+        const importsUsedInModuleLevelCode = detectModuleLevelUsage(
+          programPath,
+          properties,
+          isSimpleRequireCall,
+          t
+        );
 
         // Remove imports/requires that are used in module-level code from transformation
         for (const varName of importsUsedInModuleLevelCode) {
@@ -551,96 +379,12 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         // ============================================================
         programPath.traverse({
           Identifier(path) {
-            const varName = path.node.name;
-
-            // Skip if this identifier is not one of our tracked properties
-            if (!properties.has(varName)) {
-              return;
-            }
-
-            // Skip variable/function declarations
-            if (
-              (t.isVariableDeclarator(path.parent) && path.parent.id === path.node) ||
-              (t.isFunctionDeclaration(path.parent) && path.parent.id === path.node)
-            ) {
-              return;
-            }
-
-            // Skip export/import specifiers (e.g., 'foo' in 'export { foo }' or 'import { foo }')
-            if (
-              t.isExportSpecifier(path.parent) ||
-              t.isImportSpecifier(path.parent) ||
-              t.isImportDefaultSpecifier(path.parent) ||
-              t.isImportNamespaceSpecifier(path.parent) ||
-              t.isTSImportEqualsDeclaration(path.parent)
-            ) {
-              return;
-            }
-
-            // Skip object property keys (non-computed)
-            if (
-              (t.isObjectProperty(path.parent) || t.isObjectMethod(path.parent)) &&
-              path.parent.key === path.node &&
-              !path.parent.computed
-            ) {
-              return;
-            }
-
-            // Skip member expression properties (e.g., 'bar' in 'foo.bar' or 'foo?.bar')
-            if (
-              (t.isMemberExpression(path.parent) || t.isOptionalMemberExpression(path.parent)) &&
-              path.parent.property === path.node &&
-              !path.parent.computed
-            ) {
-              return;
-            }
-
-            // Skip class method/property keys
-            if (
-              (t.isClassMethod(path.parent) || t.isClassProperty(path.parent)) &&
-              path.parent.key === path.node &&
-              !path.parent.computed
-            ) {
-              return;
-            }
-
-            // Skip TypeScript type annotations (types are not runtime code)
-            // But allow type assertions (as Type) and other runtime TS features
-            let currentPath = path;
-            while (currentPath) {
-              const parentNode = currentPath.parent;
-              if (!parentNode) break;
-
-              // Skip only pure type contexts, not runtime contexts with type info
-              if (
-                parentNode.type &&
-                (t.isTSTypeAnnotation(parentNode) ||
-                  t.isTSTypeReference(parentNode) ||
-                  t.isTSTypeParameterDeclaration(parentNode) ||
-                  t.isTSTypeParameter(parentNode) ||
-                  t.isTSInterfaceDeclaration(parentNode) ||
-                  t.isTSTypeAliasDeclaration(parentNode) ||
-                  t.isTSTypeQuery(parentNode) ||
-                  t.isTSTypeLiteral(parentNode) ||
-                  t.isTSIndexedAccessType(parentNode) ||
-                  t.isTSMappedType(parentNode) ||
-                  t.isTSConditionalType(parentNode) ||
-                  t.isTSExpressionWithTypeArguments(parentNode))
-              ) {
-                return;
-              }
-
-              currentPath = currentPath.parentPath;
-            }
-
-            // Check scope: only replace if binding is from program scope
-            const binding = path.scope.getBinding(varName);
-            if (binding && binding.scope !== programPath.scope) {
-              // This is a local variable shadowing our import, don't replace
+            if (shouldSkipIdentifier(path, properties, programPath, t)) {
               return;
             }
 
             // Replace: foo → _imports.foo
+            const varName = path.node.name;
             path.replaceWith(t.memberExpression(importsVar, t.identifier(varName)));
           },
         });
