@@ -289,7 +289,7 @@ ${
     ""
   )
 | STATS badge = COUNT(*),
-  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, event.id, null)),
+  totalEventsCount = COUNT_DISTINCT(event.id),
   uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, event.id, null)),
   isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
@@ -315,6 +315,7 @@ ${
       targetEntityGroup,
       isOrigin,
       isOriginAlert
+| EVAL uniqueEventsCount = totalEventsCount - uniqueAlertsCount
 | LIMIT 1000
 | SORT action DESC, actorEntityGroup, targetEntityGroup, isOrigin`;
 
