@@ -190,7 +190,7 @@ const buildEntityTypeMappings = (): EntityTypeMappings => {
     {
       icon: 'database',
       shape: 'rectangle',
-      values: ['Entities'],
+      values: ['Entities', 'Entity'],
     },
   ];
 

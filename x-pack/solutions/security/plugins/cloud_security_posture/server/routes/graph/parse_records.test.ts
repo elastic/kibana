@@ -999,16 +999,16 @@ describe('parseRecords', () => {
 
   describe('non-enriched entities', () => {
     describe('single non-enriched entity', () => {
-      it('should create node with "Entities" type and entity.id as label', () => {
+      it('should create node with "Entity" (singular) type and entity.id as label', () => {
         const records: GraphEdge[] = [
           {
             action: 'test.action',
             actorIds: ['non-enriched-actor-123'],
             targetIds: ['non-enriched-target-456'],
-            actorEntityGroup: 'Entities',
-            targetEntityGroup: 'Entities',
-            actorEntityType: 'Entities',
-            targetEntityType: 'Entities',
+            actorEntityGroup: 'Entity',
+            targetEntityGroup: 'Entity',
+            actorEntityType: 'Entity',
+            targetEntityType: 'Entity',
             actorLabel: 'non-enriched-actor-123',
             targetLabel: 'non-enriched-target-456',
             actorIdsCount: 1,
@@ -1035,7 +1035,7 @@ describe('parseRecords', () => {
         ) as EntityNodeDataModel;
         expect(actorNode).toBeDefined();
         expect(actorNode.label).toBe('non-enriched-actor-123');
-        expect(actorNode.tag).toBe('Entities');
+        expect(actorNode.tag).toBe('Entity');
         expect(actorNode.icon).toBe('database');
         expect(actorNode.shape).toBe('rectangle');
 
@@ -1045,14 +1045,14 @@ describe('parseRecords', () => {
         ) as EntityNodeDataModel;
         expect(targetNode).toBeDefined();
         expect(targetNode.label).toBe('non-enriched-target-456');
-        expect(targetNode.tag).toBe('Entities');
+        expect(targetNode.tag).toBe('Entity');
         expect(targetNode.icon).toBe('database');
         expect(targetNode.shape).toBe('rectangle');
       });
     });
 
     describe('multiple non-enriched entities', () => {
-      it('should create grouped node with "Entities" type and no label', () => {
+      it('should create grouped node with "Entities" (plural) type and no label', () => {
         const records: GraphEdge[] = [
           {
             action: 'test.action.multiple',

@@ -18,7 +18,9 @@ import {
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
-const NON_ENRICHED_ENTITY_TYPE = 'Entities';
+const NON_ENRICHED_ENTITY_TYPE_PLURAL = 'Entities';
+const NON_ENRICHED_ENTITY_TYPE_SINGULAR = 'Entity';
+const NON_ENRICHED_PLACEHOLDER = 'NonEnriched';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -262,32 +264,22 @@ ${
     }
   "}")
 
-// Construct actor and target entity groups
+// Construct actor and target entity groups (using placeholder for non-enriched)
 | EVAL actorEntityGroup = CASE(
     actorEntityType IS NOT NULL AND actorEntitySubType IS NOT NULL,
     CONCAT(actorEntityType, ":", actorEntitySubType),
     actorEntityType IS NOT NULL,
     actorEntityType,
-    "${NON_ENRICHED_ENTITY_TYPE}"
+    "${NON_ENRICHED_PLACEHOLDER}"
   )
 | EVAL targetEntityGroup = CASE(
     targetEntityType IS NOT NULL AND targetEntitySubType IS NOT NULL,
     CONCAT(targetEntityType, ":", targetEntitySubType),
     targetEntityType IS NOT NULL,
     targetEntityType,
-    "${NON_ENRICHED_ENTITY_TYPE}"
+    "${NON_ENRICHED_PLACEHOLDER}"
   )
 
-| EVAL actorEntityType = CASE(
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    "${NON_ENRICHED_ENTITY_TYPE}"
-  )
-| EVAL targetEntityType = CASE(
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    "${NON_ENRICHED_ENTITY_TYPE}"
-  )
 | STATS badge = COUNT(*),
   uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, event.id, null)),
   uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, event.id, null)),
@@ -315,6 +307,34 @@ ${
       targetEntityGroup,
       isOrigin,
       isOriginAlert
+| EVAL actorEntityGroup = CASE(
+    actorEntityGroup == "${NON_ENRICHED_PLACEHOLDER}" AND actorIdsCount == 1,
+    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    actorEntityGroup == "${NON_ENRICHED_PLACEHOLDER}",
+    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}",
+    actorEntityGroup
+  )
+| EVAL targetEntityGroup = CASE(
+    targetEntityGroup == "${NON_ENRICHED_PLACEHOLDER}" AND targetIdsCount == 1,
+    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    targetEntityGroup == "${NON_ENRICHED_PLACEHOLDER}",
+    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}",
+    targetEntityGroup
+  )
+| EVAL actorEntityType = CASE(
+    actorEntityType IS NOT NULL,
+    actorEntityType,
+    actorIdsCount == 1,
+    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
+  )
+| EVAL targetEntityType = CASE(
+    targetEntityType IS NOT NULL,
+    targetEntityType,
+    targetIdsCount == 1,
+    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
+  )
 | EVAL actorLabel = CASE(
     actorEntitySubType IS NOT NULL,
     actorEntitySubType,
