@@ -130,14 +130,13 @@ round (
   describe('columns', () => {
     test('column name type is displayed on hover', async () => {
       await assertGetHoverItem(`from a | eval newField = doubleField + 10`, 'doubleField', [
-        'doubleField: **double**',
+        '**doubleField**: double',
       ]);
     });
 
-    test('olumn name type is displayed on hover for columns inside functions', async () => {
+    test('column name type is displayed on hover for columns inside functions', async () => {
       await assertGetHoverItem(`from a | eval newField = max(doubleField)`, 'doubleField', [
-        expect.any(String),
-        'doubleField: **double**',
+        '**doubleField**: double',
       ]);
     });
 
