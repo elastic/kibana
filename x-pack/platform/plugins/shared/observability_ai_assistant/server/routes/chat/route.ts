@@ -323,10 +323,9 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
   params: chatCompleteInternalRt,
   handler: async (resources) => {
     const { params } = resources;
-
     const { response$: chatResponse$, conversationPromise } = await chatComplete(resources);
+    const { isStream = true } = params.body;
 
-    const isStream = params.body.isStream ?? true;
     if (!isStream) {
       return waitForBufferedResponse(chatResponse$, conversationPromise);
     }
@@ -348,16 +347,13 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   },
   handler: async (resources) => {
     const { params, logger } = resources;
-
-    const {
-      body: { actions, ...restOfBody },
-    } = params;
+    const { actions, isStream = true, ...bodyParams } = params.body;
 
     const { response$: chatResponse$, conversationPromise } = await chatComplete({
       ...resources,
       params: {
         body: {
-          ...restOfBody,
+          ...bodyParams,
           scopes: ['observability'],
           screenContexts: [
             {
@@ -368,9 +364,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       },
     });
 
-    const shouldStream = restOfBody.isStream ?? true;
-
-    if (!shouldStream) {
+    if (!isStream) {
       return waitForBufferedResponse(chatResponse$, conversationPromise);
     }
 
