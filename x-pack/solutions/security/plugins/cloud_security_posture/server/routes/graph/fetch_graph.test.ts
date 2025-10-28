@@ -331,18 +331,17 @@ describe('fetchGraph', () => {
       expect(actorGroupBeforeStats).toBeLessThan(statsIndex);
       expect(query).toContain('"NonEnriched"');
 
-      // Verify query updates entity groups after STATS based on count
-      const actorGroupAfterStats = query.indexOf(
-        'EVAL actorEntityGroup = CASE(\n    actorEntityGroup == "NonEnriched"',
-        statsIndex
-      );
-      const targetGroupAfterStats = query.indexOf(
-        'EVAL targetEntityGroup = CASE(\n    targetEntityGroup == "NonEnriched"',
-        statsIndex
-      );
+      // Verify entity groups are used in BY clause for grouping
+      expect(query).toContain('BY action = event.action,');
+      expect(query).toContain('actorEntityGroup,');
+      expect(query).toContain('targetEntityGroup,');
 
-      expect(actorGroupAfterStats).toBeGreaterThan(statsIndex);
-      expect(targetGroupAfterStats).toBeGreaterThan(statsIndex);
+      // Verify entity types (not entity groups) are updated after STATS based on count
+      const actorTypeAfterStats = query.indexOf('EVAL actorEntityType = CASE(', statsIndex);
+      const targetTypeAfterStats = query.indexOf('EVAL targetEntityType = CASE(', statsIndex);
+
+      expect(actorTypeAfterStats).toBeGreaterThan(statsIndex);
+      expect(targetTypeAfterStats).toBeGreaterThan(statsIndex);
 
       // Verify singular and plural entity types
       expect(query).toContain('"Entity"'); // Singular
