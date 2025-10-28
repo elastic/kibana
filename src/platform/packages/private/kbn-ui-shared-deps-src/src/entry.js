@@ -20,7 +20,6 @@ if (window.__kbnHardenPrototypes__) {
 
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
-export const KbnD3 = require('d3');
 export const kbnJoi = require('joi');
 
 // stateful deps
@@ -118,3 +117,5 @@ export const KbnReactKibanaContextRender = require('@kbn/react-kibana-context-re
 export const KbnReactKibanaContextTheme = require('@kbn/react-kibana-context-theme');
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
 export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');
+export const KbnChalk = require('chalk');
+export const KbnJestDiff = require('jest-diff');
