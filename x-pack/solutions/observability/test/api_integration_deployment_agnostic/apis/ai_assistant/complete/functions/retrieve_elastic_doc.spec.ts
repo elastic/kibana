@@ -78,9 +78,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('contains the original user message', () => {
         const everyRequestHasUserMessage = llmProxy.interceptedRequests.every(({ requestBody }) =>
-          requestBody.messages.some(
-            (message) => message.role === 'user' && (message.content as string) === USER_PROMPT
-          )
+          requestBody.messages.some((message) => {
+            if (message.role !== 'user') return false;
+            const content = message.content as string;
+            const stripped = content.replace(/<steps>[\s\S]*?<\/steps>/, '').trim();
+            return stripped === USER_PROMPT;
+          })
         );
         expect(everyRequestHasUserMessage).to.be(true);
       });
@@ -156,18 +159,22 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       describe('The second request - Sending the user prompt', () => {
         let lastMessage: ChatCompletionMessageParam;
         let parsedContent: { documents: Array<{ title: string; content: string; url: string }> };
+        let assistantMessageIndex: number;
 
         before(() => {
           lastMessage = last(userPromptRequestBody.messages) as ChatCompletionMessageParam;
           parsedContent = JSON.parse(lastMessage.content as string);
+          assistantMessageIndex = userPromptRequestBody.messages.findIndex(
+            (m) => m.role === MessageRole.Assistant
+          );
         });
 
         it('includes the retrieve_elastic_doc function call', () => {
-          expect(userPromptRequestBody.messages[4].role).to.be(MessageRole.Assistant);
-          // @ts-expect-error
-          expect(userPromptRequestBody.messages[4].tool_calls[0].function.name).to.be(
-            'retrieve_elastic_doc'
-          );
+          expect(assistantMessageIndex).to.be.greaterThan(-1);
+          expect(
+            // @ts-expect-error
+            userPromptRequestBody.messages[assistantMessageIndex].tool_calls[0].function.name
+          ).to.be('retrieve_elastic_doc');
         });
 
         it('responds with the correct tool message', () => {
@@ -175,7 +182,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           // @ts-expect-error
           expect(lastMessage?.tool_call_id).to.equal(
             // @ts-expect-error
-            userPromptRequestBody.messages[4].tool_calls[0].id
+            userPromptRequestBody.messages[assistantMessageIndex].tool_calls[0].id
           );
         });
 
