@@ -136,7 +136,6 @@ describe('Gap Auto Fill Scheduler Task', () => {
     // Setup rules client find mock - the implementation filters for alert.id: ("alert:rule-id")
     rulesClient.find.mockImplementation((params: Parameters<typeof rulesClient.find>[0]) => {
       const filter = (params as unknown as { options?: { filter?: string } }).options?.filter ?? '';
-      // Extract rule IDs by scanning for rule-<i> tokens without regex
       const ruleIds: string[] = [];
       for (let i = 1; i <= 25; i++) {
         if (filter.includes(`rule-${i}`)) {
@@ -325,24 +324,26 @@ describe('Gap Auto Fill Scheduler Task', () => {
       }
     };
 
-    const stubOverlaps = (overlapCounts: number[]) => {
+    const stubOverlaps = (...overlaps: boolean[]) => {
       mockBackfillClient.findOverlappingBackfills.mockReset();
-      let callIndex = 0;
-      for (const count of overlapCounts) {
-        let res: Array<{ id: string; start?: string; end?: string }> = [];
-        if (count > 0) {
-          // Return a single overlapping backfill covering the first hour window used in tests
-          res = [
-            {
-              id: `bf-${callIndex + 1}`,
-              start: '2024-01-01T00:00:00.000Z',
-              end: '2024-01-01T01:00:00.000Z',
-            },
-          ];
-        }
-        mockBackfillClient.findOverlappingBackfills.mockResolvedValueOnce(res);
-        callIndex += 1;
-      }
+      overlaps.forEach((isOverlap, idx) => {
+        const res = isOverlap
+          ? [
+              {
+                id: `bf-${idx + 1}`,
+                start: '2024-01-01T00:00:00.000Z',
+                end: '2024-01-01T01:00:00.000Z',
+              },
+            ]
+          : [];
+        mockBackfillClient.findOverlappingBackfills.mockResolvedValueOnce(
+          res as Array<{
+            id: string;
+            start?: string;
+            end?: string;
+          }>
+        );
+      });
     };
 
     const expectProcessCalledWithGaps = (gaps: Gap[]) => {
@@ -741,7 +742,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         );
 
         stubFindGapsPageOnce([gapSuccess, gapError]);
-        stubOverlaps([0, 0]);
+        stubOverlaps(false, false);
 
         mockedProcessGapsBatch.processGapsBatch.mockResolvedValue({
           processedGapsCount: 1,
@@ -766,15 +767,15 @@ describe('Gap Auto Fill Scheduler Task', () => {
         it.each([
           {
             name: 'filters overlapped and processes only non-overlapped gaps',
-            overlapCounts: [1, 0],
+            overlaps: [true, false],
             expectedProcessed: 1,
           },
           {
             name: 'filters all gaps when all are overlapped',
-            overlapCounts: [1],
+            overlaps: [true],
             expectedProcessed: 0,
           },
-        ])('$name', async ({ overlapCounts, expectedProcessed }) => {
+        ])('$name', async ({ overlaps, expectedProcessed }) => {
           rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
           (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-2'] });
           stubRulesFindOnce(['rule-2']);
@@ -792,10 +793,10 @@ describe('Gap Auto Fill Scheduler Task', () => {
               '2024-01-01T02:00:00.000Z',
               gapStatus.UNFILLED
             ),
-          ].slice(0, overlapCounts.length);
+          ].slice(0, overlaps.length);
 
           stubFindGapsPageOnce(gaps);
-          stubOverlaps(overlapCounts);
+          stubOverlaps(...overlaps);
 
           mockedProcessGapsBatch.processGapsBatch.mockResolvedValue({
             processedGapsCount: expectedProcessed,
@@ -812,7 +813,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           const result = await taskRunner.run();
           expect(result).toEqual({ state: {} });
 
-          const expectedToProcess = gaps.filter((_, idx) => overlapCounts[idx] === 0);
+          const expectedToProcess = gaps.filter((_, idx) => overlaps[idx] === false);
           if (expectedProcessed > 0) {
             expectProcessCalledWithGaps(expectedToProcess);
           } else {
