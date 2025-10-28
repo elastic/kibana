@@ -91,8 +91,9 @@ export const createDataControlOfType = <State extends DataControlState = DataCon
     // the control exists but changed type - so, replace the old control
     embeddable.replacePanel(controlId, newControl);
   } else if (isPinned && apiCanPinPanel(embeddable)) {
+    // otherwise, add a new control as either pinned or not depending on provided context
     embeddable.addPinnedPanel(newControl);
   } else {
-    embeddable.addNewPanel(newControl);
+    embeddable.addNewPanel(newControl, { displaySuccessMessage: true });
   }
 };

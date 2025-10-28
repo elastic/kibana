@@ -47,9 +47,10 @@ export const createESQLControlAction = (): ActionDefinition<
             },
           };
 
+          // add a new control as either pinned or not depending on provided context
           (isPinned && apiCanPinPanel(embeddable)
             ? embeddable.addPinnedPanel
-            : embeddable.addNewPanel)(newControl);
+            : embeddable.addNewPanel)(newControl, { displaySuccessMessage: true });
         },
       });
     } catch (e) {
