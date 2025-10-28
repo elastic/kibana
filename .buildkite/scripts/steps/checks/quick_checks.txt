@@ -3,6 +3,7 @@
 .buildkite/scripts/steps/checks/verify_notice.sh
 .buildkite/scripts/steps/checks/plugin_list_docs.sh
 .buildkite/scripts/steps/checks/event_log.sh
+.buildkite/scripts/steps/checks/telemetry.sh
 .buildkite/scripts/steps/checks/jest_configs.sh
 .buildkite/scripts/steps/checks/bundle_limits.sh
 .buildkite/scripts/steps/checks/i18n.sh
