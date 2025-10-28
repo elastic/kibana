@@ -6,9 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { EsVersionMismatchParams } from '@kbn/response-ops-rule-params/es_version_mismatch';
+import type { KibanaVersionMismatchParams } from '@kbn/response-ops-rule-params/kibana_version_mismatch';
+import type { LogstashVersionMismatchParams } from '@kbn/response-ops-rule-params/logstash_version_mismatch';
+import type { LicenseExpirationParams } from '@kbn/response-ops-rule-params/license_expiration';
+import type { NodesChangedParams } from '@kbn/response-ops-rule-params/nodes_changed';
+import type { ThreadPoolSearchRejectionsParams } from '@kbn/response-ops-rule-params/thread_pool_search_rejections';
+import type { ThreadPoolWriteRejectionsParams } from '@kbn/response-ops-rule-params/thread_pool_write_rejections';
 import type { CommonAlertParamDetail, ExpressionConfig } from './types/alerts';
 import { AlertParamType } from './enums';
 import { validateDuration } from './validate_duration';
+import { getDescriptionFields } from './get_description_fields';
 
 export const USAGE_COLLECTION_APP_NAME = 'stack_monitoring';
 
@@ -263,6 +272,15 @@ interface LegacyRuleDetails {
   defaults?: Record<string, unknown>;
   expressionConfig?: ExpressionConfig;
   validate?: (input: any) => { errors: {} };
+  getDescriptionFields?: GetDescriptionFieldsFn<
+    | EsVersionMismatchParams
+    | KibanaVersionMismatchParams
+    | LogstashVersionMismatchParams
+    | LicenseExpirationParams
+    | NodesChangedParams
+    | ThreadPoolSearchRejectionsParams
+    | ThreadPoolWriteRejectionsParams
+  >;
 }
 
 /**
@@ -294,6 +312,7 @@ export const LEGACY_RULE_DETAILS: Record<string, LegacyRuleDetails> = {
         defaultMessage: 'Alert when the cluster has multiple versions of Elasticsearch.',
       }
     ),
+    getDescriptionFields,
   },
   [RULE_KIBANA_VERSION_MISMATCH]: {
     label: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.label', {
@@ -302,6 +321,7 @@ export const LEGACY_RULE_DETAILS: Record<string, LegacyRuleDetails> = {
     description: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.description', {
       defaultMessage: 'Alert when the cluser has multiple versions of Kibana.',
     }),
+    getDescriptionFields,
   },
   [RULE_LICENSE_EXPIRATION]: {
     label: i18n.translate('xpack.monitoring.alerts.licenseExpiration.label', {
@@ -310,6 +330,7 @@ export const LEGACY_RULE_DETAILS: Record<string, LegacyRuleDetails> = {
     description: i18n.translate('xpack.monitoring.alerts.licenseExpiration.description', {
       defaultMessage: 'Alert when the cluster license is about to expire.',
     }),
+    getDescriptionFields,
   },
   [RULE_LOGSTASH_VERSION_MISMATCH]: {
     label: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.label', {
@@ -318,6 +339,7 @@ export const LEGACY_RULE_DETAILS: Record<string, LegacyRuleDetails> = {
     description: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.description', {
       defaultMessage: 'Alert when the cluster has multiple versions of Logstash.',
     }),
+    getDescriptionFields,
   },
   [RULE_NODES_CHANGED]: {
     label: i18n.translate('xpack.monitoring.alerts.nodesChanged.label', {
@@ -326,6 +348,7 @@ export const LEGACY_RULE_DETAILS: Record<string, LegacyRuleDetails> = {
     description: i18n.translate('xpack.monitoring.alerts.nodesChanged.description', {
       defaultMessage: 'Alert when adding, removing, or restarting a node.',
     }),
+    getDescriptionFields,
   },
 };
 
@@ -445,6 +468,7 @@ export const RULE_DETAILS = {
       defaultMessage:
         'Alert when the number of rejections in the search thread pool exceeds the threshold.',
     }),
+    getDescriptionFields,
   },
   [RULE_THREAD_POOL_WRITE_REJECTIONS]: {
     paramDetails: {
@@ -470,6 +494,7 @@ export const RULE_DETAILS = {
       defaultMessage:
         'Alert when the number of rejections in the write thread pool exceeds the threshold.',
     }),
+    getDescriptionFields,
   },
   [RULE_CCR_READ_EXCEPTIONS]: {
     paramDetails: {

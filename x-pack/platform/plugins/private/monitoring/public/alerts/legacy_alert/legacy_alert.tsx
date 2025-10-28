@@ -21,6 +21,7 @@ const DEFAULT_VALIDATE = () => ({ errors: {} });
 export function createLegacyAlertTypes(config: MonitoringConfig): RuleTypeModel[] {
   return LEGACY_RULES.map((legacyAlert) => {
     const validate = LEGACY_RULE_DETAILS[legacyAlert].validate ?? DEFAULT_VALIDATE;
+    const getDescriptionFields = LEGACY_RULE_DETAILS[legacyAlert].getDescriptionFields ?? undefined;
     return {
       id: legacyAlert,
       description: LEGACY_RULE_DETAILS[legacyAlert].description,
@@ -39,6 +40,7 @@ export function createLegacyAlertTypes(config: MonitoringConfig): RuleTypeModel[
       defaultActionMessage: '{{context.internalFullMessage}}',
       validate,
       requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
+      getDescriptionFields,
     };
   });
 }
