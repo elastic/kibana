@@ -276,17 +276,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should work fine with a large content', async () => {
-      await retry.try(async () => {
-        await PageObjects.console.enterText(LARGE_INPUT);
+      await PageObjects.console.clearEditorText();
 
-        // The autocomplete should still show up without causing stack overflow
-        await PageObjects.console.enterText(`GET _search\n`);
-        await PageObjects.console.enterText(`{\n\t"query": {`);
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.sleepForDebouncePeriod();
-        await PageObjects.console.promptAutocomplete();
-        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
-      });
+      // We input the large content via file import since enterText() is slow and times out
+      const filePath = resolve(
+        REPO_ROOT,
+        `target/functional-tests/downloads/console_import_large_input`
+      );
+      writeFileSync(filePath, LARGE_INPUT, 'utf8');
+
+      // Set file to upload and wait for the editor to be updated
+      await PageObjects.console.setFileToUpload(filePath);
+      await PageObjects.console.acceptFileImport();
+      await PageObjects.common.sleep(1000);
+
+      // The autocomplete should still show up without causing stack overflow
+      await PageObjects.console.enterText(`GET _search\n`);
+      await PageObjects.console.enterText(`{\n\t"query": {`);
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.sleepForDebouncePeriod();
+      await PageObjects.console.promptAutocomplete();
+      expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
   });
 }
