@@ -128,10 +128,10 @@ const cancelEsRequestOnAbort = <T extends Promise<any>>(
   return promise.finally(() => subscription.unsubscribe()) as T;
 };
 
-const unwrapEsResponse = <T extends Promise<{ body: any }>>(
+const unwrapEsResponse = <T extends Promise<{ body?: any }>>(
   responsePromise: T
-): Promise<Awaited<T>['body']> => {
-  return responsePromise.then((res) => res.body);
+): Promise<Awaited<T> extends { body: infer TBody } ? TBody : Awaited<T>> => {
+  return responsePromise.then((res) => ('body' in res ? res.body : res));
 };
 
 export function createTracedEsClient({
@@ -149,11 +149,11 @@ export function createTracedEsClient({
 }): TracedElasticsearchClient {
   // wraps the ES calls in a named APM span for better analysis
   // (otherwise it would just eg be a _search span)
-  const callWithLogger = <T extends { body: any }>(
+  const callWithLogger = <T extends { body?: any }>(
     operationName: string,
     params: Record<string, any>,
     callback: (requestOpts: { signal: AbortSignal; meta: true }) => Promise<T>
-  ): Promise<T['body']> => {
+  ): Promise<T extends { body: infer TBody } ? TBody : T> => {
     logger.debug(() => `Request (${operationName}):\n${JSON.stringify(params)}`);
     const controller = new AbortController();
     return withSpan(
