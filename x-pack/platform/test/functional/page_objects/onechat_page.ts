@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { ToolType } from '@kbn/onechat-common';
 import { subj } from '@kbn/test-subj-selector';
 import { AGENT_BUILDER_APP_ID } from '../../onechat/common/constants';
