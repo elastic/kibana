@@ -75,24 +75,19 @@ describe('Slack Api Schema validation', () => {
     });
 
     test('should add nothing for valid channel names starting with #', () => {
-      // expect(validateChannelName('#general')).toBeUndefined();
-      // expect(validateChannelName('#channel-123')).toBeUndefined();
       validateChannelName('#general', ctx);
-      // validateChannelName('#channel-123', ctx);
+      validateChannelName('#channel-123', ctx);
 
       expect(ctx.addIssue).not.toHaveBeenCalled();
     });
 
     test('should add nothing for channel names with special characters', () => {
-      // expect(validateChannelName('#test-team')).toBeUndefined();
-      // expect(validateChannelName('#incident-*')).toBeUndefined();
       validateChannelName('#test-team', ctx);
       validateChannelName('#incident-*', ctx);
 
       expect(ctx.addIssue).not.toHaveBeenCalled();
     });
     test('should add error for empty strings', () => {
-      // expect(validateChannelName('')).toBe('Channel name cannot be empty');
       validateChannelName('', ctx);
       expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
         code: 'custom',
@@ -100,7 +95,6 @@ describe('Slack Api Schema validation', () => {
       });
     });
     test('should add error for undefined values', () => {
-      // expect(validateChannelName(undefined)).toBe('Channel name cannot be empty');
       validateChannelName(undefined, ctx);
       expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
         code: 'custom',

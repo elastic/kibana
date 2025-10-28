@@ -50,7 +50,7 @@ export const PostMessageSubActionParamsSchema = z
      */
     channels: z.array(z.string()).max(1).optional(),
     channelIds: z.array(z.string()).max(1).optional(),
-    channelNames: z.array(z.string()).max(1),
+    channelNames: z.array(z.string().superRefine(validateChannelName)).max(1).optional(),
     text: z.string().min(1),
   })
   .strict();
@@ -91,9 +91,13 @@ export function validateChannelName(value: string | undefined, ctx: z.Refinement
 
 export const PostBlockkitSubActionParamsSchema = z
   .object({
+    /**
+     * @deprecated Use `channelNames` or `channelIds` instead
+     * `channelNames` takes priority over `channelIds` and `channels`
+     */
     channels: z.array(z.string()).max(1).optional(),
     channelIds: z.array(z.string()).max(1).optional(),
-    channelNames: z.array(z.string().superRefine(validateChannelName)).max(1),
+    channelNames: z.array(z.string().superRefine(validateChannelName)).max(1).optional(),
     text: z.string().superRefine(validateBlockkit),
   })
   .strict();
