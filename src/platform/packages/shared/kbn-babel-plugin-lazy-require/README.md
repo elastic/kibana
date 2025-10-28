@@ -1,330 +1,71 @@
 # @kbn/babel-plugin-lazy-require
 
-Babel plugin that transforms top-level `require()` calls into lazy-loaded getters to reduce memory usage and improve startup time in Jest tests.
+Babel plugin that transforms top-level `require()` and `import` statements into lazy-loaded getters, reducing memory usage and improving Jest test startup time.
 
-## Problem Statement
+## Problem
 
-Barrel files (files that aggregate and re-export modules) cause performance issues on the server side:
-- **CPU consumption**: Importing one module triggers cascading imports of many unused modules
-- **Memory usage**: Large require cache and file-level objects stay in memory
-- **Babel overhead**: Every required file needs transformation (in dev)
-- **Slow tests**: Jest tests become slower as they import more barrel files
+Barrel files cause cascading imports of unused modules, increasing:
+- Memory usage (large require cache)
+- Test startup time (loading unnecessary code)
+- CPU overhead (Babel transformations)
 
-This plugin addresses these issues by deferring module loading until actually needed.
+**Solution**: Defer module loading until first access.
 
-## How it Works
+## How It Works
 
-The plugin transforms top-level `require()` calls and ES6 `import` statements into getter-based lazy loading. The actual module is only loaded when its exports are first accessed.
+Transforms imports into getters that load on first access:
 
-**Note**: The plugin runs before Babel's preset transformations, so it directly handles ES6 `import` statements. TypeScript and modern JavaScript are automatically supported.
-
-### Simple Import (CommonJS)
+### Example
 
 **Before:**
 ```javascript
 const foo = require('./foo');
 const bar = require('./bar');
-
-console.log('Starting...');
-foo.doSomething(); // Both foo and bar already loaded
+foo.doSomething(); // Both modules already loaded
 ```
 
 **After:**
 ```javascript
-const _module = { initialized: false, value: undefined };
-const _module2 = { initialized: false, value: undefined };
 const _imports = {
-  get foo() {
-    if (!_module.initialized) {
-      _module.value = require('./foo');
-      _module.initialized = true;
-    }
-    return _module.value;
-  },
-  get bar() {
-    if (!_module2.initialized) {
-      _module2.value = require('./bar');
-      _module2.initialized = true;
-    }
-    return _module2.value;
-  }
+  get foo() { /* load ./foo on first access */ },
+  get bar() { /* load ./bar on first access */ },
 };
-
-console.log('Starting...'); // Neither module loaded yet
-_imports.foo.doSomething(); // Only foo loads here, bar never loads
+_imports.foo.doSomething(); // Only foo loads, bar never loads
 ```
 
-### ES6 Import
-
-**Before:**
-```javascript
-import React from 'react';
-import { useState } from 'react';
-
-console.log('Starting...');
-const [state] = useState(); // React already loaded
-```
-
-**After:**
-```javascript
-const _module = { initialized: false, value: undefined };
-const _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-const _imports = {
-  get React() {
-    if (!_module.initialized) {
-      _module.value = _interopRequireDefault(require('react'));
-      _module.initialized = true;
-    }
-    return _module.value.default;
-  },
-  get useState() {
-    if (!_module.initialized) {
-      _module.value = _interopRequireDefault(require('react'));
-      _module.initialized = true;
-    }
-    return _module.value.useState;
-  }
-};
-
-console.log('Starting...'); // React not loaded yet
-const [state] = _imports.useState(); // Only loads React when useState is accessed
-```
-
-**Note**: Default and named imports from the same module share the same cache.
-
-### Destructured Import
-
-**Before:**
-```javascript
-const { helper, utils } = require('./barrel');
-
-helper(); // Entire barrel file loaded
-```
-
-**After:**
-```javascript
-const _module = { initialized: false, value: undefined };
-const _imports = {
-  get helper() {
-    if (!_module.initialized) {
-      _module.value = require('./barrel');
-      _module.initialized = true;
-    }
-    return _module.value.helper;
-  },
-  get utils() {
-    if (!_module.initialized) {
-      _module.value = require('./barrel');
-      _module.initialized = true;
-    }
-    return _module.value.utils;
-  }
-};
-
-_imports.helper(); // Barrel loads once, shared cache for both properties
-_imports.utils();  // Uses cached module
-```
-
-**Key feature**: Multiple destructured properties from the same module share a single cache, so the module only loads once.
+**Key benefits**:
+- Modules load only when accessed
+- Shared cache for destructured imports: `const { a, b } = require('./m')` loads once
+- ES6 imports supported: `import React, { useState } from 'react'` shares one cache
 
 ## Usage
 
-This plugin is automatically applied to all Jest tests via the Jest Babel transformer configuration.
+Automatically applied to Jest tests via `src/platform/packages/shared/kbn-test/src/jest/transforms/babel/transformer_config.js`. No code changes needed.
 
-### Integration
+## Supported Patterns
 
-The plugin is configured in:
-```
-src/platform/packages/shared/kbn-test/src/jest/transforms/babel/transformer_config.js
-```
+**Transforms**:
+- `const/let/var foo = require('./foo')`
+- `import foo from './foo'` (default)
+- `import { foo } from './foo'` (named)
+- `import * as foo from './foo'` (namespace)
+- `const { foo, bar } = require('./foo')` (destructuring)
 
-No code changes are required - all top-level `require()` calls and ES6 `import` statements in Jest tests are automatically transformed.
-
-## What Gets Transformed
-
-✅ **Top-level const/let/var with simple require:**
-```javascript
-const foo = require('./foo');
-let bar = require('./bar');
-var baz = require('./baz');
-```
-
-✅ **ES6 import statements:**
-```javascript
-import React from 'react';                    // Default import
-import { useState, useEffect } from 'react';  // Named imports
-import * as utils from './utils';             // Namespace import
-```
-
-✅ **Destructured requires:**
-```javascript
-const { helper, utils } = require('./module');
-const { foo: renamed } = require('./other');
-```
-
-✅ **All module path types:**
-```javascript
-const relative = require('./relative');
-const parent = require('../parent');
-const pkg = require('package-name');
-const scoped = require('@scope/package');
-const deep = require('package/dist/submodule');
-```
-
-## What Does NOT Get Transformed
-
-These patterns are intentionally skipped because they either cannot be safely deferred or are already optimized:
-
-❌ **Dynamic requires:**
-```javascript
-const path = './dynamic';
-const mod = require(path); // Not transformed
-```
-
-❌ **Side-effect requires:**
-```javascript
-require('./setup'); // Not transformed - needs to run immediately
-```
-
-❌ **Requires inside functions/blocks:**
-```javascript
-function load() {
-  const foo = require('./foo'); // Not transformed - conditional loading
-  return foo;
-}
-```
-
-❌ **Complex destructuring:**
-```javascript
-const { foo: { nested } } = require('./mod'); // Not transformed
-const [first] = require('./array'); // Not transformed
-const { foo, ...rest } = require('./mod'); // Not transformed
-const { [key]: value } = require('./mod'); // Not transformed
-```
+**Does NOT transform**:
+- Dynamic requires: `require(variable)`
+- Side effects: `require('./setup')`
+- Function-scoped: `function f() { require('./m') }`
+- Complex destructuring: `const { a: { b } } = require('./m')`
+- Module-level usage: `const x = <Component />`
 
 ## Benefits
 
-1. **Reduced memory usage**: Only loads modules that are actually used in each test
-2. **Faster test startup**: Avoids loading barrel files and their transitive dependencies
-3. **Improved test isolation**: Tests only load what they need
-4. **Better cache efficiency**: Node's require cache contains fewer unused modules
+- Reduced memory (only load what's used)
+- Faster test startup (avoid cascading imports)
+- Better isolation (tests load only their dependencies)
 
-## Limitations
-
-- **Only works in Jest tests**: Not applied to production code (intentionally)
-- **Module-level caching only**: Cannot prevent transitive requires inside the loaded module
-- **Small runtime overhead**: Getter calls add minimal overhead (typically negligible)
-- **Destructuring loads full module**: `const { foo } = require('./barrel')` still loads the entire barrel, but only when `foo` is accessed
-
-## Examples
-
-### Example 1: Unused Import
-```javascript
-const utils = require('./expensive-barrel');
-const simple = require('./simple');
-
-// Test only uses simple
-expect(simple.value).toBe(42);
-
-// Result: 'expensive-barrel' never loads, test runs faster
-```
-
-### Example 2: Conditional Usage
-```javascript
-const heavy = require('./heavy-processing');
-const light = require('./light');
-
-if (condition) {
-  heavy.process(); // Only loads heavy module if condition is true
-} else {
-  light.handle(); // Only loads light module otherwise
-}
-```
-
-### Example 3: Shared Cache
-```javascript
-const utils = require('./utils');
-const { helper } = require('./utils');
-
-// Both share the same module cache
-utils.method1(); // Loads './utils' once
-helper();        // Uses cached './utils'
-```
-
-## Technical Details
-
-### Module Cache Structure
-
-Each unique `require()` path gets one cache object:
-```javascript
-const _module_xxx = {
-  initialized: false,  // Has the module been loaded?
-  value: undefined     // The loaded module (once initialized)
-};
-```
-
-### Imports Object
-
-All transformed imports are accessed through a single `_imports` object with getters:
-```javascript
-const _imports = {
-  get moduleName() {
-    if (!_module_xxx.initialized) {
-      _module_xxx.value = require('./path');
-      _module_xxx.initialized = true;
-    }
-    return _module_xxx.value;
-  }
-};
-```
-
-### Scope Safety
-
-The plugin correctly handles variable shadowing:
-```javascript
-const foo = require('./foo');
-
-function test(foo) {
-  return foo; // This 'foo' is the parameter, not the import
-}
-```
-
-## Development
-
-### Running Tests
+## How To Test
 
 ```bash
-yarn jest packages/kbn-babel-plugin-lazy-require
+node scripts/jest --config src/platform/packages/shared/kbn-babel-plugin-lazy-require/jest.config.js
 ```
-
-### Testing the Plugin
-
-The test suite includes comprehensive coverage of:
-- Basic lazy loading behavior
-- Destructuring support
-- Scope handling
-- Edge cases
-- Generated code structure
-
-See `src/plugin/lazy_require_plugin.test.ts` for detailed examples.
-
-## Performance Impact
-
-The plugin is designed for Jest tests where:
-- Test files import many modules but use only a subset
-- Barrel files cause cascading imports
-- Startup time matters for test speed
-
-Expected improvements:
-- **Memory**: 10-30% reduction in tests with many unused imports
-- **Startup**: 20-50% faster for tests importing large barrel files
-- **Overhead**: <1% runtime overhead from getter calls (negligible)
-
-## Future Considerations
-
-This is currently a proof-of-concept for Jest tests only. If successful, it could be:
-- Extended to other contexts (scripts, dev server)
-- Applied per-package for gradual rollout
-- Fully enabled for all server-side code
-
-However, careful evaluation of the impact is required before expanding scope.
