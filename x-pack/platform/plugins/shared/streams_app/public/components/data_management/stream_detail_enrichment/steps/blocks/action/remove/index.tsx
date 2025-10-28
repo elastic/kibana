@@ -43,15 +43,14 @@ export const RemoveProcessorForm = () => {
       {!isWithinWhereBlock && <ByPrefixToggle />}
       <EuiSpacer size="m" />
       <FieldsAccordion>
-        {!byPrefix ? (
-          <ProcessorConditionEditor />
-        ) : (
+        {!byPrefix && <ProcessorConditionEditor />}
+        {byPrefix && (
           <p>
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeByPrefixNoConditionMessage',
               {
                 defaultMessage:
-                  'Conditional removal is not available when "Remove by prefix" is enabled. Disable "Remove by prefix" to add a condition.',
+                  'Conditional removal is not available when "Remove by prefix" is enabled.',
               }
             )}
           </p>

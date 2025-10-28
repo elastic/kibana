@@ -138,13 +138,6 @@ function validateSteps(steps: StreamlangStep[], isWithinWhereBlock = false) {
       // Nested steps are within a where block
       validateSteps(step.where.steps, true);
     } else if (isActionBlock(step)) {
-      // Check if remove with by_prefix is being used within a where block
-      if (step.action === 'remove' && step.by_prefix && isWithinWhereBlock) {
-        throw new MalformedStreamError(
-          'remove processor with by_prefix enabled cannot be used within a where block. Use it at the root level or disable by_prefix.'
-        );
-      }
-
       // Check if remove with by_prefix has a condition (where clause)
       if (
         step.action === 'remove' &&

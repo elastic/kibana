@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useController, useWatch } from 'react-hook-form';
-import { EuiFormRow, EuiSwitch, EuiToolTip, htmlIdGenerator } from '@elastic/eui';
+import { useController, useFormContext, useWatch } from 'react-hook-form';
+import { EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import type { RemoveFormState } from '../../../../types';
 
 export const ByPrefixToggle = () => {
@@ -16,25 +17,17 @@ export const ByPrefixToggle = () => {
     name: 'by_prefix',
   });
 
+  const { setValue } = useFormContext<RemoveFormState>();
   const where = useWatch<RemoveFormState, 'where'>({ name: 'where' });
   const hasCondition = where && !('always' in where);
-  const isDisabled = hasCondition && !field.value;
 
-  const switchComponent = (
-    <EuiSwitch
-      id={createId()}
-      label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeByPrefixLabel',
-        {
-          defaultMessage: 'Remove by prefix',
-        }
-      )}
-      checked={field.value ?? false}
-      onChange={(e) => field.onChange(e.target.checked)}
-      disabled={isDisabled}
-      compressed
-    />
-  );
+  const handleChange = (checked: boolean) => {
+    field.onChange(checked);
+    // If enabling by_prefix and there's a condition, clear it
+    if (checked && hasCondition) {
+      setValue('where', ALWAYS_CONDITION);
+    }
+  };
 
   return (
     <EuiFormRow
@@ -48,22 +41,18 @@ export const ByPrefixToggle = () => {
       fullWidth
       describedByIds={[createId()]}
     >
-      {isDisabled ? (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeByPrefixDisabledTooltip',
-            {
-              defaultMessage:
-                'Remove by prefix cannot be used with conditional removal. Clear the condition first to enable this option.',
-            }
-          )}
-        >
-          {switchComponent}
-        </EuiToolTip>
-      ) : (
-        switchComponent
-      )}
+      <EuiSwitch
+        id={createId()}
+        label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeByPrefixLabel',
+          {
+            defaultMessage: 'Remove by prefix',
+          }
+        )}
+        checked={field.value ?? false}
+        onChange={(e) => handleChange(e.target.checked)}
+        compressed
+      />
     </EuiFormRow>
   );
 };
