@@ -308,7 +308,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('when sync:true and persist:true', () => {
+    describe('when isStream:false and persist:true', () => {
       let createConversationResponse: ConversationCreateRequest;
       let persistedConversation: Conversation;
 
@@ -327,7 +327,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               persist: true,
               screenContexts: [],
               scopes: ['observability'],
-              sync: true,
+              isStream: false,
             },
           },
         });
@@ -369,7 +369,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('when sync:true and persist:false', () => {
+    describe('when isStream:false and persist:false', () => {
       let syncResponse: ConversationCreateRequest;
 
       before(async () => {
@@ -384,7 +384,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               persist: false,
               screenContexts: [],
               scopes: ['observability'],
-              sync: true,
+              isStream: false,
             },
           },
         });

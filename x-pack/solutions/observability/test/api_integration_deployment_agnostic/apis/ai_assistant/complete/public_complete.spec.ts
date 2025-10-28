@@ -34,14 +34,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       actions,
       instructions,
       persist = true,
-      sync,
+      isStream,
       conversationId,
       messages,
     }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       instructions?: Array<string | Instruction>;
       persist?: boolean;
-      sync?: boolean;
+      isStream?: boolean;
       conversationId?: string;
       messages?: Message[];
     }): Promise<string | ConversationCreateRequest> {
@@ -64,13 +64,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             persist,
             actions,
             instructions,
-            sync,
+            isStream,
             conversationId,
           },
         },
       });
 
-      return sync ? (body as ConversationCreateRequest) : String(body);
+      const shouldStream = isStream ?? true;
+
+      return shouldStream ? String(body) : (body as ConversationCreateRequest);
     }
 
     before(async () => {
@@ -198,14 +200,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('when sync:true and persist:false', () => {
+    describe('when isStream:false and persist:false', () => {
       let conversationResponseBody: ConversationCreateRequest;
 
       before(async () => {
         void llmProxy.interceptWithResponse('Hello sync');
 
         conversationResponseBody = (await callPublicChatComplete({
-          sync: true,
+          isStream: false,
           persist: false,
         })) as ConversationCreateRequest;
 
@@ -218,7 +220,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('when sync:true for existing conversation', () => {
+    describe('when isStream:false for existing conversation', () => {
       const followUpQuestion = 'Can you give me more details?';
       const followUpAnswer = 'Yes John. Here are some more details: yadadada.';
       let createdConversationResponse: ConversationCreateRequest;
@@ -232,7 +234,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         createdConversationResponse = (await callPublicChatComplete({
           persist: true,
-          sync: true,
+          isStream: false,
         })) as ConversationCreateRequest;
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
@@ -251,7 +253,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           ],
           persist: true,
-          sync: true,
+          isStream: false,
           conversationId: createdConversationResponse.conversation.id,
         })) as ConversationCreateRequest;
 

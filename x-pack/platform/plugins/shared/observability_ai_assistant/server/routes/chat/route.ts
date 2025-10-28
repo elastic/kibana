@@ -44,7 +44,7 @@ const chatCompleteBaseRt = (apiType: 'public' | 'internal') =>
         persist: toBooleanRt,
       }),
       t.partial({
-        sync: toBooleanRt,
+        isStream: t.union([t.undefined, toBooleanRt]), // accept undefined in order to default to true
         conversationId: t.string,
         title: t.string,
         disableFunctions: toBooleanRt,
@@ -326,7 +326,9 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
 
     const { response$: chatResponse$, conversationPromise } = await chatComplete(resources);
 
-    if (params.body.sync) {
+    const isStream = params.body.isStream ?? true;
+    console.log('isStream:', isStream, params.body.isStream);
+    if (!isStream) {
       return waitForBufferedResponse(chatResponse$, conversationPromise);
     }
 
@@ -367,7 +369,9 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       },
     });
 
-    if (restOfBody.sync) {
+    const shouldStream = restOfBody.isStream ?? true;
+
+    if (!shouldStream) {
       return waitForBufferedResponse(chatResponse$, conversationPromise);
     }
 
