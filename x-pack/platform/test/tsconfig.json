@@ -174,5 +174,7 @@
     "@kbn/alerting-types",
     "@kbn/es-types",
     "@kbn/visualizations-common",
+    "@kbn/test-subj-selector",
+    "@kbn/onechat-server",
   ]
 }
