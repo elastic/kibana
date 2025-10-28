@@ -22,6 +22,7 @@ type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
   secondaryButtonIcon: IconType;
   secondaryButtonAriaLabel?: string;
   secondaryButtonTitle?: string;
+  secondaryButtonFill?: boolean;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
@@ -39,6 +40,7 @@ export const SplitButton = ({
   secondaryButtonIcon,
   secondaryButtonAriaLabel,
   secondaryButtonTitle,
+  secondaryButtonFill,
   onSecondaryButtonClick,
 
   // Primary button props
@@ -83,8 +85,8 @@ export const SplitButton = ({
         css={styles.secondaryButton}
         data-test-subj={mainButtonProps['data-test-subj'] + `-secondary-button`}
         aria-label={secondaryButtonAriaLabel}
+        display={secondaryButtonFill ? 'fill' : 'base'}
         title={secondaryButtonTitle}
-        display="base"
         color={color}
         size={size}
         iconType={secondaryButtonIcon}

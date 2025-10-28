@@ -166,10 +166,11 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: disableTopNav || !hasUnsavedChanges,
+        disableButton: disableTopNav || !hasUnsavedChanges || isResetting,
         run: () => quickSaveDashboard(),
         secondaryButton: {
-          run:  (anchorElement: HTMLElement) =>
+          run: (anchorElement: HTMLElement) => {
+            console.log('save menu');
             showSaveMenu({
               dashboardApi,
               anchorElement,
@@ -180,11 +181,14 @@ export const useDashboardMenuItems = ({
               isSaveInProgress,
               setIsSaveInProgress,
               dashboardInteractiveSave,
-            }),
+            });
+          },
           ariaLabel: topNavStrings.saveMenu.label,
           label: topNavStrings.saveMenu.label,
           iconType: 'arrowDown',
-       },
+          fill: true,
+          isDisabled: disableTopNav || isResetting || isSaveInProgress,
+        },
       } as TopNavMenuData,
 
       interactiveSave: {
@@ -379,11 +383,7 @@ export const useDashboardMenuItems = ({
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
-      editModeItems.push(menuItems.interactiveSave, menuItems.switchToViewMode);
-
-      if (showResetChange) {
-        editModeItems.push(resetChangesMenuItem);
-      }
+      editModeItems.push(menuItems.switchToViewMode);
 
       editModeItems.push(menuItems.add, menuItems.quickSave);
     } else {
@@ -413,8 +413,6 @@ export const useDashboardMenuItems = ({
     menuItems.quickSave,
     hasExportIntegration,
     lastSavedId,
-    showResetChange,
-    resetChangesMenuItem,
   ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

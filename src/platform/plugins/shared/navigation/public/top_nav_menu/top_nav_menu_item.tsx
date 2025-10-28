@@ -23,8 +23,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import type { TopNavMenuData } from './top_nav_menu_data';
 import { SplitButton } from '@kbn/split-button';
+import type { TopNavMenuData } from './top_nav_menu_data';
 
 export interface TopNavMenuItemProps extends TopNavMenuData {
   closePopover: () => void;
@@ -81,7 +81,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
   }
 
   function handleSecondaryButtonClick(event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
-    if (isDisabled()) return;
+    if (props.secondaryButton?.isDisabled) return;
 
     props.secondaryButton?.run(event.currentTarget);
     if (props.isMobileMenu) {
@@ -95,7 +95,6 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
 
   const commonButtonProps = {
     id: props.htmlId,
-    isDisabled: isDisabled(),
     isLoading: props.isLoading,
     iconType: props.iconType,
     iconSide: props.iconSide,
@@ -111,6 +110,8 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     props.target && props.href
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
+
+  console.log(props.secondaryButton);
 
   const btn =
     props.iconOnly && props.iconType && !props.isMobileMenu ? (
@@ -133,8 +134,24 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
           iconType={props.iconType}
           display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
           aria-label={upperFirst(props.label || props.id!)}
+          isDisabled={isDisabled()}
         />
       )
+    ) : props.secondaryButton ? (
+      <SplitButton
+        {...commonButtonProps}
+        isMainButtonDisabled={isDisabled()}
+        fill={props.emphasize ?? false}
+        onSecondaryButtonClick={handleSecondaryButtonClick}
+        secondaryButtonAriaLabel={props.secondaryButton.ariaLabel}
+        secondaryButtonIcon={props.secondaryButton.iconType ?? 'arrowDown'}
+        secondaryButtonTitle={props.secondaryButton.label}
+        secondaryButtonFill={props.secondaryButton.fill ?? false}
+        isSecondaryButtonDisabled={false}
+        size="s"
+      >
+        <ButtonContainer />
+      </SplitButton>
     ) : props.emphasize ? (
       // fill is not compatible with EuiHeaderLink
       <EuiButton
@@ -142,21 +159,12 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
         fullWidth={props.isMobileMenu}
         {...commonButtonProps}
         fill={props.fill ?? true}
+        isDisabled={isDisabled()}
       >
         <ButtonContainer />
       </EuiButton>
-    ) : props.secondaryButton?(
-    <SplitButton
-      {...commonButtonProps}
-      onSecondaryButtonClick={handleSecondaryButtonClick}
-      secondaryButtonAriaLabel={props.secondaryButton.ariaLabel}
-      secondaryButtonIcon={props.secondaryButton.iconType ?? undefined}
-      secondaryButtonTitle={props.secondaryButton.label}
-      size="s"
-    >
-      <ButtonContainer />
-    </SplitButton>):(
-      <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
+    ) : (
+      <EuiHeaderLink size="s" {...commonButtonProps} isDisabled={isDisabled()} {...overrideProps}>
         <ButtonContainer />
       </EuiHeaderLink>
     );

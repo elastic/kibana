@@ -7,39 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 
-import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiIcon, EuiWrappingPopover } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { DefaultControlApi } from '@kbn/controls-plugin/public';
-import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
-import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  apiHasType,
-  useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 import type { DashboardApi } from '../../../dashboard_api/types';
-import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_library';
-import { uiActionsService } from '../../../services/kibana_services';
-import {
-  getAddControlButtonTitle,
-  getControlButtonTitle,
-  getAddESQLControlButtonTitle,
-  getAddTimeSliderControlButtonTitle,
-  getCreateVisualizationButtonTitle,
-} from '../../_dashboard_app_strings';
-import { AddPanelFlyout } from '../add_panel_button/components/add_panel_flyout';
 import { topNavStrings } from '../../_dashboard_app_strings';
-import { confirmDiscardUnsavedChanges } from '../../../dashboard_listing/confirm_overlays';
 
 interface SaveMenuProps {
   anchorElement: HTMLElement;
@@ -68,7 +45,6 @@ function cleanup() {
 export const SaveMenu = ({
   dashboardApi,
   anchorElement,
-  coreServices,
   isResetting,
   resetChanges,
   setIsResetting,
@@ -95,7 +71,7 @@ export const SaveMenu = ({
       items: [
         {
           name: topNavStrings.editModeInteractiveSave.label,
-          icon: 'empty',
+          icon: 'save',
           'data-test-subj': 'dashboardInteractiveSaveMenuItem',
           iconType: lastSavedId ? undefined : 'save',
           onClick: () => {
@@ -104,14 +80,11 @@ export const SaveMenu = ({
         },
         {
           name: topNavStrings.resetChanges.label,
-          icon: 'empty',
+          icon: 'editorUndo',
           'data-test-subj': 'dashboardDiscardChangesMenuItem',
           isLoading: isResetting,
-          disable:
-            isResetting ||
-            !hasUnsavedChanges ||
-            hasOverlays ||
-            (viewMode === 'edit' && (isSaveInProgress || !lastSavedId)),
+          disabled:
+            isResetting || !hasUnsavedChanges || hasOverlays || isSaveInProgress || !lastSavedId,
           onClick: () => {
             resetChanges();
             closePopover();
@@ -127,6 +100,9 @@ export const SaveMenu = ({
       closePopover={closePopover}
       button={anchorElement}
       panelPaddingSize="none"
+      anchorPosition="downRight"
+      attachToAnchor
+      panelStyle={{ maxWidth: 100 }}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiWrappingPopover>

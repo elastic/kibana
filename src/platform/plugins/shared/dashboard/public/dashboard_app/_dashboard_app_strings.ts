@@ -192,7 +192,7 @@ export const topNavStrings = {
   },
   editModeInteractiveSave: {
     label: i18n.translate('dashboard.topNave.editModeInteractiveSaveButtonAriaLabel', {
-      defaultMessage: 'save as',
+      defaultMessage: 'Save as',
     }),
     description: i18n.translate('dashboard.topNave.editModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Save as a new dashboard',
@@ -268,7 +268,8 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.backgroundSearchConfigDescription', {
       defaultMessage: 'Open background searches',
-    })},
+    }),
+  },
   saveMenu: {
     label: i18n.translate('dashboard.topNave.saveMenuButtonAriaLabel', {
       defaultMessage: 'Save options',
