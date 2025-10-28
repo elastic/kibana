@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
+import type { FC } from 'react';
+import React from 'react';
 import type { Observable } from 'rxjs';
 import type { DetailedHTMLProps, HTMLAttributes } from 'react';
 
@@ -14,6 +17,7 @@ export type NavigateToUrl = (url: string) => Promise<void> | void;
 
 /**
  * Contextual services for this component.
+ * @deprecated
  */
 export interface RedirectAppLinksServices {
   navigateToUrl: NavigateToUrl;
@@ -22,6 +26,7 @@ export interface RedirectAppLinksServices {
 
 /**
  * Kibana-specific contextual services to be adapted for this component.
+ * @deprecated
  */
 export interface RedirectAppLinksKibanaDependencies {
   coreStart: {
@@ -32,16 +37,38 @@ export interface RedirectAppLinksKibanaDependencies {
   };
 }
 
-/** Props for the `RedirectAppLinks` component. */
-export type RedirectAppLinksProps = (
-  | RedirectAppLinksServices
-  | RedirectAppLinksKibanaDependencies
-) &
+/**
+ * Props for the `RedirectAppLinks` component.
+ * @deprecated
+ */
+export type RedirectAppLinksProps = Partial<
+  RedirectAppLinksServices & RedirectAppLinksKibanaDependencies
+> &
   DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
 
-/** Props for the `RedirectAppLinksComponent`. */
-export interface RedirectAppLinksComponentProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
-  navigateToUrl: NavigateToUrl;
-  currentAppId?: string | undefined;
-}
+export const redirectAppLinksStyles = css({
+  display: 'inherit',
+  height: 'inherit',
+  width: 'inherit',
+  flex: '1',
+  flexFlow: 'column nowrap',
+});
+
+/**
+ * @deprecated - This component is deprecated and usages of it can be safely removed from your codebase.
+ * The link navigation is handled by GlobalRedirectAppLinks component at the root of Kibana.
+ * When removing the usages of this component, make sure to check that your app layout hasn't been affected since this adds additional div with styles
+ */
+export const RedirectAppLinks: FC<React.PropsWithChildren<RedirectAppLinksProps>> = ({
+  children,
+  coreStart,
+  navigateToUrl,
+  currentAppId,
+  ...restDivProps
+}) => {
+  return (
+    <div css={redirectAppLinksStyles} data-test-subj="kbnRedirectAppLink" {...restDivProps}>
+      {children}
+    </div>
+  );
+};
