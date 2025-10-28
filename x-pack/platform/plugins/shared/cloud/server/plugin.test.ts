@@ -247,6 +247,13 @@ describe('Cloud Plugin', () => {
 
           expect(start.isInTrial()).toBe(false);
         });
+        it('is `false` when `trial_end_date` is not a valid date', () => {
+          const { start } = setupPlugin({
+            trial_end_date: 'invalid-date',
+          });
+
+          expect(start.isInTrial()).toBe(false);
+        });
         it('is `false` when `serverless.in_trial` & `trial_end_date` are not set', () => {
           const { start } = setupPlugin({});
           expect(start.isInTrial()).toBe(false);

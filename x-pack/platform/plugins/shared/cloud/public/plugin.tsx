@@ -60,7 +60,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly logger: Logger;
   private elasticsearchConfig?: PublicElasticsearchConfigType;
   private readonly cloudUrls = new CloudUrlsService();
-  private readonly trialEndDate: Date | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -68,9 +67,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     this.isServerlessEnabled = !!this.config.serverless?.project_id;
     this.logger = initializerContext.logger.get();
     this.elasticsearchConfig = undefined;
-    this.trialEndDate = this.config.trial_end_date
-      ? new Date(this.config.trial_end_date)
-      : undefined;
   }
 
   public setup(core: CoreSetup): CloudSetup {
@@ -94,7 +90,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       csp,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
-      trialEndDate: this.trialEndDate,
+      trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
       onboarding: {
@@ -199,8 +195,13 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   private isInTrial(): boolean {
     if (this.config.serverless?.in_trial) return true;
-    if (this.trialEndDate !== undefined) {
-      return Date.now() <= this.trialEndDate.getTime();
+    if (this.config.trial_end_date) {
+      const endDateMs = new Date(this.config.trial_end_date).getTime();
+      if (!Number.isNaN(endDateMs)) {
+        return Date.now() <= endDateMs;
+      } else {
+        this.logger.error('cloud.trial_end_date config value could not be parsed.');
+      }
     }
     return false;
   }

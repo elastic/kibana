@@ -421,7 +421,14 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private isInTrial(): boolean {
     if (this.config.serverless?.in_trial) return true;
     if (this.trialEndDate !== undefined) {
-      return Date.now() <= this.trialEndDate.getTime();
+      if (this.config.trial_end_date) {
+        const endDateMs = this.trialEndDate.getTime();
+        if (!Number.isNaN(endDateMs)) {
+          return Date.now() <= endDateMs;
+        } else {
+          this.logger.error('cloud.trial_end_date config value could not be parsed.');
+        }
+      }
     }
     return false;
   }
