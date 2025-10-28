@@ -411,11 +411,17 @@ describe('fetchGraph', () => {
       expect(actorLabelIndex).toBeGreaterThan(statsIndex);
       expect(targetLabelIndex).toBeGreaterThan(statsIndex);
 
-      // Verify label logic checks for actorIdsCount == 1 and targetIdsCount == 1
+      // Verify simplified label logic:
+      // 1. If subType exists -> use subType
+      // 2. Else if single entity (count == 1) -> use entity ID
+      // 3. Else -> empty string
+      expect(query).toContain('actorEntitySubType IS NOT NULL');
+      expect(query).toContain('targetEntitySubType IS NOT NULL');
       expect(query).toContain('actorIdsCount == 1');
       expect(query).toContain('targetIdsCount == 1');
       expect(query).toContain('MV_FIRST(actorIds)');
       expect(query).toContain('MV_FIRST(targetIds)');
+      expect(query).toContain('""'); // Empty string for multiple entities without subType
 
       expect(result).toEqual([{ id: 'dummy' }]);
     });

@@ -146,24 +146,38 @@ const createGroupedActorAndTargetNodes = (
   const actorIdsArray = castArray(actorIds);
   const targetIdsArray = castArray(targetIds);
 
-  const actorGroup = {
+  const actorGroup: {
+    id: string;
+    type: string;
+    count: number;
+    docData: NodeDocumentDataModel[];
+    hostIps: string[];
+    label?: string;
+  } = {
     id: actorIdsArray[0],
     type: actorEntityType,
-    label: actorLabel,
     count: actorIdsCount,
     docData: actorsDocDataArray,
     hostIps: actorHostIpsArray,
+    ...(actorLabel && actorLabel !== '' ? { label: actorLabel } : {}),
   };
 
-  const targetGroup =
+  const targetGroup: {
+    id: string;
+    type: string;
+    count: number;
+    docData: NodeDocumentDataModel[];
+    hostIps: string[];
+    label?: string;
+  } =
     targetIdsCount > 0
       ? {
           id: targetIdsArray[0]!,
           type: targetEntityType,
-          label: targetLabel,
           count: targetIdsCount,
           docData: targetsDocDataArray,
           hostIps: targetHostIpsArray,
+          ...(targetLabel && targetLabel !== '' ? { label: targetLabel } : {}),
         }
       : {
           // Unknown target
