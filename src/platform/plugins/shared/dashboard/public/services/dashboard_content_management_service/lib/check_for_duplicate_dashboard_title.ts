@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CONTENT_ID } from '../../../../common/content_management';
 import type { DashboardSearchIn, DashboardSearchOut } from '../../../../server/content_management';
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../../utils/extract_title_and_count';
 import { contentManagementService } from '../../kibana_services';
 
@@ -57,7 +57,7 @@ export async function checkForDuplicateDashboardTitle({
     DashboardSearchIn,
     DashboardSearchOut
   >({
-    contentTypeId: DASHBOARD_CONTENT_ID,
+    contentTypeId: CONTENT_ID,
     query: {
       text: `${baseDashboardName}*`,
       limit: 20,

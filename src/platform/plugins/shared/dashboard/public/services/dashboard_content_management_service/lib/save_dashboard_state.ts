@@ -15,11 +15,11 @@ import type {
   DashboardUpdateIn,
   DashboardUpdateOut,
 } from '../../../../server/content_management';
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { getDashboardBackupService } from '../../dashboard_backup_service';
 import { contentManagementService, coreServices } from '../../kibana_services';
 import type { SaveDashboardProps, SaveDashboardReturn } from '../types';
 import { getSerializedState } from '../../../dashboard_api/get_serialized_state';
+import { CONTENT_ID } from '../../../../common/content_management';
 
 export const saveDashboardState = async ({
   controlGroupReferences,
@@ -45,7 +45,7 @@ export const saveDashboardState = async ({
     const result = idToSaveTo
       ? await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
           id: idToSaveTo,
-          contentTypeId: DASHBOARD_CONTENT_ID,
+          contentTypeId: CONTENT_ID,
           data: attributes,
           options: {
             references,
@@ -54,7 +54,7 @@ export const saveDashboardState = async ({
           },
         })
       : await contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
-          contentTypeId: DASHBOARD_CONTENT_ID,
+          contentTypeId: CONTENT_ID,
           data: attributes,
           options: {
             references,

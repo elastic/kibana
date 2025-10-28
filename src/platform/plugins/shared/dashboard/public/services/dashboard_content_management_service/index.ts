@@ -16,7 +16,6 @@ import {
   findDashboardsByIds,
   searchDashboards,
 } from './lib/find_dashboards';
-import { loadDashboardState } from './lib/load_dashboard_state';
 import { saveDashboardState } from './lib/save_dashboard_state';
 import { updateDashboardMeta } from './lib/update_dashboard_meta';
 
@@ -30,7 +29,6 @@ export const getDashboardContentManagementCache = () => {
 
 export const getDashboardContentManagementService = () => {
   return {
-    loadDashboardState,
     saveDashboardState,
     findDashboards: {
       search: searchDashboards,

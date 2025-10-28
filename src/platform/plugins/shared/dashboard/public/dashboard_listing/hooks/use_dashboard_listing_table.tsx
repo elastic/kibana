@@ -18,7 +18,6 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 
 import type { DashboardSearchAPIResult } from '../../../server/content_management';
 import {
-  DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../utils/telemetry_constants';
@@ -36,6 +35,7 @@ import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import type { DashboardSavedObjectUserContent } from '../types';
 import type { UpdateDashboardMetaProps } from '../../services/dashboard_content_management_service/lib/update_dashboard_meta';
+import { CONTENT_ID } from '../../../common/content_management';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -227,7 +227,7 @@ export const useDashboardListingTable = ({
             eventName: SAVED_OBJECT_LOADED_TIME,
             duration: searchDuration,
             meta: {
-              saved_object_type: DASHBOARD_CONTENT_ID,
+              saved_object_type: CONTENT_ID,
             },
           });
           return {
@@ -256,7 +256,7 @@ export const useDashboardListingTable = ({
           eventName: SAVED_OBJECT_DELETE_TIME,
           duration: deleteDuration,
           meta: {
-            saved_object_type: DASHBOARD_CONTENT_ID,
+            saved_object_type: CONTENT_ID,
             total: dashboardsToDelete.length,
           },
         });

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import type {
   DashboardState,
   DashboardUpdateIn,
@@ -16,6 +15,7 @@ import type {
 import { findDashboardsByIds } from './find_dashboards';
 import { contentManagementService } from '../../kibana_services';
 import { getDashboardContentManagementCache } from '..';
+import { CONTENT_ID } from '../../../../common/content_management';
 
 export interface UpdateDashboardMetaProps {
   id: DashboardUpdateIn['id'];
@@ -36,7 +36,7 @@ export const updateDashboardMeta = async ({
   }
 
   await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
-    contentTypeId: DASHBOARD_CONTENT_ID,
+    contentTypeId: CONTENT_ID,
     id,
     data: { title, description, tags },
     options: { references: [] },

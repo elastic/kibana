@@ -17,7 +17,6 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 
 import { DASHBOARD_APP_ID } from '../../common/constants';
-import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
 import {
   coreServices,
   savedObjectsTaggingService,
@@ -28,6 +27,7 @@ import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
 import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import { CONTENT_ID } from '../../common/content_management';
 
 export const DashboardListing = ({
   children,
@@ -54,7 +54,7 @@ export const DashboardListing = ({
   });
 
   const dashboardFavoritesClient = useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+    return new FavoritesClient(DASHBOARD_APP_ID, CONTENT_ID, {
       http: coreServices.http,
       usageCollection: usageCollectionService,
       userProfile: coreServices.userProfile,

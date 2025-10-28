@@ -20,8 +20,8 @@ import type {
   DashboardSearchOut,
 } from '../../../../server/content_management';
 import { getDashboardContentManagementCache } from '..';
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { contentManagementService } from '../../kibana_services';
+import { CONTENT_ID } from '../../../../common/content_management';
 
 export interface SearchDashboardsArgs {
   options?: DashboardSearchOptions;
@@ -50,7 +50,7 @@ export async function searchDashboards({
     hits,
     pagination: { total },
   } = await contentManagementService.client.search<DashboardSearchIn, DashboardSearchAPIResult>({
-    contentTypeId: DASHBOARD_CONTENT_ID,
+    contentTypeId: CONTENT_ID,
     query: {
       text: search ? `${search}*` : undefined,
       limit: size,
@@ -89,7 +89,7 @@ export async function findDashboardById(id: string): Promise<FindDashboardsByIdR
   /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   try {
     const response = await contentManagementService.client.get<DashboardGetIn, DashboardGetOut>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
+      contentTypeId: CONTENT_ID,
       id,
     });
 
@@ -124,7 +124,7 @@ export async function findDashboardIdByTitle(title: string): Promise<{ id: strin
     DashboardSearchIn,
     DashboardSearchOut
   >({
-    contentTypeId: DASHBOARD_CONTENT_ID,
+    contentTypeId: CONTENT_ID,
     query: {
       text: title ? `${title}*` : undefined,
       limit: 10,

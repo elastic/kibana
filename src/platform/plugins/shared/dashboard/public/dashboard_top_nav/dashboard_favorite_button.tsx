@@ -15,13 +15,13 @@ import {
 } from '@kbn/content-management-favorites-public';
 import { QueryClientProvider } from '@kbn/react-query';
 import { DASHBOARD_APP_ID } from '../../common/constants';
-import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
+import { CONTENT_ID } from '../../common/content_management';
 
 export const DashboardFavoriteButton = ({ dashboardId }: { dashboardId?: string }) => {
   const dashboardFavoritesClient = useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+    return new FavoritesClient(DASHBOARD_APP_ID, CONTENT_ID, {
       http: coreServices.http,
       userProfile: coreServices.userProfile,
       usageCollection: usageCollectionService,

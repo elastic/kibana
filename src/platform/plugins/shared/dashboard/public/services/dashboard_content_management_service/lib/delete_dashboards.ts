@@ -8,15 +8,15 @@
  */
 
 import type { DeleteIn, DeleteResult } from '@kbn/content-management-plugin/common';
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { getDashboardContentManagementCache } from '..';
 import { contentManagementService } from '../../kibana_services';
+import { CONTENT_ID } from '../../../../common/content_management';
 
 export const deleteDashboards = async (ids: string[]) => {
   const deletePromises = ids.map((id) => {
     getDashboardContentManagementCache().deleteDashboard(id);
     return contentManagementService.client.delete<DeleteIn, DeleteResult>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
+      contentTypeId: CONTENT_ID,
       id,
     });
   });

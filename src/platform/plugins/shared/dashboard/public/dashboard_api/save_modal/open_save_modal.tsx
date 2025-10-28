@@ -22,9 +22,10 @@ import {
 } from '../../services/kibana_services';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import type { DashboardState } from '../../../common';
-import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
+import { SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../utils/extract_title_and_count';
 import { DashboardSaveModal } from './save_modal';
+import { CONTENT_ID } from '../../../common/content_management';
 
 /**
  * @description exclusively for user directed dashboard save actions, also
@@ -117,7 +118,7 @@ export async function openSaveModal({
               eventName: SAVED_OBJECT_POST_TIME,
               duration: addDuration,
               meta: {
-                saved_object_type: DASHBOARD_CONTENT_ID,
+                saved_object_type: CONTENT_ID,
               },
             });
 
