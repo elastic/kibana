@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable complexity, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
@@ -225,7 +225,7 @@ export class WorkflowsService {
     // Schedule the workflow if it has triggers
     if (this.taskScheduler && workflowToCreate.definition.triggers) {
       for (const trigger of workflowToCreate.definition.triggers) {
-        if (trigger.type === 'scheduled' && trigger.enabled) {
+        if (trigger.type === 'scheduled') {
           await this.taskScheduler.scheduleWorkflowTask(id, spaceId, trigger, request);
         }
       }
@@ -396,6 +396,8 @@ export class WorkflowsService {
                   definition: updatedWorkflow.definition, // We already checked it's not null
                   tags: [], // TODO: Add tags support to WorkflowDetailDto
                   deleted_at: null,
+                  createdAt: new Date(updatedWorkflow.createdAt),
+                  lastUpdatedAt: new Date(updatedWorkflow.lastUpdatedAt),
                 };
 
                 await this.taskScheduler.updateWorkflowTasks(
@@ -427,7 +429,7 @@ export class WorkflowsService {
 
       return {
         id,
-        lastUpdatedAt: new Date(finalData.updated_at),
+        lastUpdatedAt: finalData.updated_at,
         lastUpdatedBy: finalData.lastUpdatedBy,
         enabled: finalData.enabled,
         validationErrors,
@@ -1059,8 +1061,8 @@ export class WorkflowsService {
       createdBy: source.createdBy,
       lastUpdatedBy: source.lastUpdatedBy,
       valid: source.valid,
-      createdAt: new Date(source.created_at),
-      lastUpdatedAt: new Date(source.updated_at),
+      createdAt: source.created_at,
+      lastUpdatedAt: source.updated_at,
     };
   }
 
