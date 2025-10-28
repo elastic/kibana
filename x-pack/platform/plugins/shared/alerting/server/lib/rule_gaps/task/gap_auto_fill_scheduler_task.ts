@@ -14,6 +14,7 @@ import { withSpan } from '@kbn/apm-utils';
 import dateMath from '@kbn/datemath';
 import { findGapsSearchAfter } from '../find_gaps';
 import { processGapsBatch } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
+import { GapFillSchedulePerRuleStatus } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
 
 import type { RulesClientApi } from '../../../types';
 import { gapStatus } from '../../../../common/constants';
@@ -27,16 +28,14 @@ import {
   DEFAULT_GAPS_PER_PAGE,
   GAP_AUTO_FILL_STATUS,
 } from '../types/scheduler';
-import type { GapAutoFillStatus } from '../types/scheduler';
 import { backfillInitiator } from '../../../../common/constants';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
 import type { RulesClientContext } from '../../../rules_client/types';
+import type { ScheduleBackfillResult } from '../../../application/backfill/methods/schedule/types';
+import { getOverlap } from '../gap/interval_utils';
 
-interface RuleInfo {
-  id: string;
-  enabled: boolean;
-}
+type LogMessageFunction = (message: string) => void;
 interface AggregatedByRuleEntry {
   ruleId: string;
   processedGaps: number;
@@ -44,18 +43,31 @@ interface AggregatedByRuleEntry {
   error?: string;
 }
 
-function overallStatusFromResults(
-  results: AggregatedByRuleEntry[]
-): typeof GAP_AUTO_FILL_STATUS.ERROR | typeof GAP_AUTO_FILL_STATUS.SUCCESS {
-  return results.some((r) => r.status === 'error')
-    ? GAP_AUTO_FILL_STATUS.ERROR
-    : GAP_AUTO_FILL_STATUS.SUCCESS;
-}
-
 function resultsFromMap(
   aggregatedByRule: Map<string, AggregatedByRuleEntry>
 ): AggregatedByRuleEntry[] {
   return Array.from(aggregatedByRule.values());
+}
+
+function formatConsolidatedSummary(consolidated: AggregatedByRuleEntry[]): string {
+  const rulesCount = consolidated.length;
+  const gapsProcessed = consolidated.reduce((sum, r) => sum + (r.processedGaps ?? 0), 0);
+  const errorEntries = consolidated.filter((r) => r.status === GapFillSchedulePerRuleStatus.ERROR);
+  const errorCount = errorEntries.length;
+  const errorsList = errorEntries
+    .map((r) => (r.error ? `${r.ruleId} (${r.error})` : r.ruleId))
+    .join('\n ');
+
+  const parts: string[] = [];
+  parts.push(
+    `processed ${gapsProcessed} gap${gapsProcessed === 1 ? '' : 's'} across ${rulesCount} rule${
+      rulesCount === 1 ? '' : 's'
+    }`
+  );
+  if (errorCount > 0) {
+    parts.push(`${errorCount} error${errorCount === 1 ? '' : 's'}: ${errorsList}`);
+  }
+  return `\n${parts.join(' |\n')}`;
 }
 
 async function handleCancellation({
@@ -82,57 +94,68 @@ async function handleCancellation({
   return true;
 }
 
-function resolveStartDate(gapFillRange: string, logger: Logger): Date {
-  try {
-    const parsedStart = dateMath.parse(gapFillRange);
-    if (!parsedStart) {
-      throw new Error(`Invalid gapFillRange: ${gapFillRange}`);
-    }
-    return parsedStart.toDate();
-  } catch (error) {
-    logger.warn(`Invalid gapFillRange "${gapFillRange}", using default "now-7d"`);
-    return dateMath.parse('now-7d')!.toDate();
+function resolveStartDate(gapFillRange: string): Date {
+  const parsedStart = dateMath.parse(gapFillRange);
+  if (!parsedStart) {
+    throw new Error(`Invalid gapFillRange: ${gapFillRange}`);
   }
+  return parsedStart.toDate();
 }
 
 async function filterGapsWithOverlappingBackfills(
   gaps: Gap[],
   rulesClientContext: RulesClientContext,
-  logger: Logger
+  logMessage: LogMessageFunction
 ): Promise<Gap[]> {
   const filteredGaps: Gap[] = [];
-  const gapsWithOverlappingBackfills: Array<{ gap: Gap; overlappingBackfills: number }> = [];
 
   const actionsClient = await rulesClientContext.getActionsClient();
   const backfillClient = rulesClientContext.backfillClient;
-
+  const gapsByRuleId = new Map<string, Gap[]>();
   for (const gap of gaps) {
-    try {
-      const overlappingBackfills = await backfillClient.findOverlappingBackfills({
-        ruleId: gap.ruleId,
-        start: gap.range.gte,
-        end: gap.range.lte,
-        savedObjectsRepository: rulesClientContext.internalSavedObjectsRepository,
-        actionsClient,
-      });
+    const gapsForRule = gapsByRuleId.get(gap.ruleId) ?? [];
+    gapsForRule.push(gap);
+    gapsByRuleId.set(gap.ruleId, gapsForRule);
+  }
 
-      if (overlappingBackfills.length === 0) {
+  for (const [ruleId, ruleGaps] of gapsByRuleId.entries()) {
+    const overlappingBackfills = await backfillClient.findOverlappingBackfills({
+      ruleId,
+      ranges: ruleGaps.map((gap) => ({ start: gap.range.gte, end: gap.range.lte })),
+      savedObjectsRepository: rulesClientContext.internalSavedObjectsRepository,
+      actionsClient,
+    });
+    if (overlappingBackfills.length === 0) {
+      filteredGaps.push(...ruleGaps);
+    } else {
+      ruleGaps.forEach((gap) => {
+        const isGapOverlappingWithBackfills = overlappingBackfills.some(
+          (backfill: ScheduleBackfillResult) => {
+            if ('error' in backfill) {
+              return false;
+            }
+            if (!backfill.start || !backfill.end) {
+              return false;
+            }
+            return (
+              getOverlap(
+                { gte: new Date(backfill.start), lte: new Date(backfill.end) },
+                gap.range
+              ) !== null
+            );
+          }
+        );
+        if (isGapOverlappingWithBackfills) {
+          return;
+        }
         filteredGaps.push(gap);
-      } else {
-        gapsWithOverlappingBackfills.push({
-          gap,
-          overlappingBackfills: overlappingBackfills.length,
-        });
-      }
-    } catch (error: unknown) {
-      const errMsg = error instanceof Error ? error.message : String(error);
-      logger.warn(`Failed to check overlapping backfills for gap in rule ${gap.ruleId}: ${errMsg}`);
+      });
     }
   }
 
-  if (gapsWithOverlappingBackfills.length > 0) {
-    logger.info(
-      `Filtered out ${gapsWithOverlappingBackfills.length} gaps that have overlapping backfills`
+  if (filteredGaps.length < gaps.length) {
+    logMessage(
+      `Filtered out ${gaps.length - filteredGaps.length} gaps that have overlapping backfills`
     );
   }
 
@@ -211,12 +234,12 @@ async function initRun({
 async function checkBackfillCapacity({
   rulesClient,
   maxBackfills,
-  logger,
+  logMessage,
   initiatorId,
 }: {
   rulesClient: RulesClientApi;
   maxBackfills: number;
-  logger: Logger;
+  logMessage: (message: string) => void;
   initiatorId: string;
 }): Promise<{
   canSchedule: boolean;
@@ -236,7 +259,7 @@ async function checkBackfillCapacity({
     const canSchedule = remainingCapacity > 0;
     return { canSchedule, currentCount, maxBackfills, remainingCapacity };
   } catch (e) {
-    logger.warn(`Failed to check system backfills count: ${e && (e as Error).message}`);
+    logMessage(`Failed to check system backfills count: ${e && (e as Error).message}`);
     return { canSchedule: false, currentCount: 0, maxBackfills, remainingCapacity: maxBackfills };
   }
 }
@@ -246,7 +269,7 @@ function addChunkResultsToAggregation(
   chunkResults: Array<{
     ruleId: string;
     processedGaps: number;
-    status: 'success' | 'error';
+    status: GapFillSchedulePerRuleStatus;
     error?: string;
   }>
 ): void {
@@ -260,31 +283,19 @@ function addChunkResultsToAggregation(
         error: r.error,
       });
     } else {
-      const combinedStatus =
-        existing.status === 'error' || r.status === 'error' ? 'error' : 'success';
+      let combinedStatus = existing.status;
+      if (r.status === GapFillSchedulePerRuleStatus.ERROR) {
+        combinedStatus = GapFillSchedulePerRuleStatus.ERROR;
+      }
+
       aggregatedByRule.set(r.ruleId, {
         ruleId: r.ruleId,
-        processedGaps: existing.processedGaps + (r.processedGaps || 0),
+        processedGaps: existing.processedGaps + (r.processedGaps ?? 0),
         status: combinedStatus,
-        error: existing.error || r.error,
+        error: existing.error ?? r.error,
       });
     }
   }
-}
-
-async function finalizeRun({
-  logEvent,
-  status,
-  results,
-  message,
-}: {
-  logEvent: ReturnType<typeof createGapAutoFillSchedulerEventLogger>;
-  status: GapAutoFillStatus;
-  results?: AggregatedByRuleEntry[];
-  message: string;
-}) {
-  const consolidated = results ?? [];
-  await logEvent({ status, results: consolidated, message });
 }
 
 /**
@@ -329,11 +340,10 @@ export function registerGapAutoFillSchedulerTask({
         return {
           async cancel() {
             wasCancelled = true;
-            logger.info(
-              `[gap-fill-auto-scheduler-task][${taskInstance.id}] cancel() called (timeout or shutdown)`
-            );
           },
           async run() {
+            const loggerMesage = (message: string) =>
+              `[gap-fill-auto-scheduler-task][${taskInstance.id}] ${message}`;
             const startTime = new Date();
             // Step 1: Initialization
             let rulesClient: RulesClientApi;
@@ -360,7 +370,7 @@ export function registerGapAutoFillSchedulerTask({
               logEvent = initResult.logEvent;
             } catch (e) {
               const errMsg = e instanceof Error ? e.message : String(e);
-              logger.warn(`gap-auto-fill-scheduler: init failed: ${errMsg}`);
+              logger.warn(loggerMesage(`initialization failed: ${errMsg}`));
               return { state: {} };
             }
 
@@ -370,22 +380,21 @@ export function registerGapAutoFillSchedulerTask({
               const capacityCheckInitial = await checkBackfillCapacity({
                 rulesClient,
                 maxBackfills: config.maxBackfills,
-                logger,
+                logMessage: (message) => logger.warn(loggerMesage(message)),
                 initiatorId: taskInstance.id,
               });
               if (!capacityCheckInitial.canSchedule) {
-                await finalizeRun({
-                  logEvent,
-                  status: 'skipped',
+                await logEvent({
+                  status: GAP_AUTO_FILL_STATUS.SKIPPED,
                   results: [],
-                  message: `Gap fill execution skipped - no backfill capacity (${capacityCheckInitial.currentCount}/${capacityCheckInitial.maxBackfills})`,
+                  message: `Skipped execution: no capacity remaining to schedule gap fills (${capacityCheckInitial.currentCount}/${capacityCheckInitial.maxBackfills})`,
                 });
                 return { state: {} };
               }
 
-              let remainingBackfills = capacityCheckInitial.remainingCapacity;
               // Step 3: Fetch rule IDs with gaps
-              const startDate: Date = resolveStartDate(config.gapFillRange, logger);
+              let remainingBackfills = capacityCheckInitial.remainingCapacity;
+              const startDate: Date = resolveStartDate(config.gapFillRange);
               const sortOrder = schedulerConfig?.sortOrder ?? 'asc';
               const { ruleIds } = await rulesClient.getRuleIdsWithGaps({
                 start: startDate.toISOString(),
@@ -394,11 +403,10 @@ export function registerGapAutoFillSchedulerTask({
               });
 
               if (!ruleIds.length) {
-                await finalizeRun({
-                  logEvent,
+                await logEvent({
                   status: GAP_AUTO_FILL_STATUS.SKIPPED,
                   results: [],
-                  message: 'skipped: no rules with gaps',
+                  message: 'Skipped execution: no rules with gaps',
                 });
                 return { state: {} };
               }
@@ -408,7 +416,7 @@ export function registerGapAutoFillSchedulerTask({
                 {
                   ruleId: string;
                   processedGaps: number;
-                  status: 'success' | 'error';
+                  status: GapFillSchedulePerRuleStatus;
                   error?: string;
                 }
               >();
@@ -422,11 +430,12 @@ export function registerGapAutoFillSchedulerTask({
                 // Stop early if we've reached capacity
                 if (remainingBackfills <= 0) {
                   const consolidated = resultsFromMap(aggregatedByRule);
-                  await finalizeRun({
-                    logEvent,
+                  await logEvent({
                     status: GAP_AUTO_FILL_STATUS.SUCCESS,
                     results: consolidated,
-                    message: 'stopped: no backfill capacity remaining',
+                    message: `Stopped early: no backfill capacity remaining | ${formatConsolidatedSummary(
+                      consolidated
+                    )}`,
                   });
                   return { state: {} };
                 }
@@ -453,9 +462,7 @@ export function registerGapAutoFillSchedulerTask({
                   },
                 });
 
-                const toProcessRuleIds = rules
-                  .map((rule: RuleInfo) => rule.id)
-                  .slice(0, remainingBackfills);
+                const toProcessRuleIds = rules.map((rule) => rule.id).slice(0, remainingBackfills);
 
                 if (!toProcessRuleIds.length) {
                   continue;
@@ -518,7 +525,7 @@ export function registerGapAutoFillSchedulerTask({
                       const filteredGaps = await filterGapsWithOverlappingBackfills(
                         gapsPage,
                         rulesClientContext,
-                        logger
+                        (message) => logger.warn(loggerMesage(message))
                       );
 
                       if (!filteredGaps.length) {
@@ -546,16 +553,19 @@ export function registerGapAutoFillSchedulerTask({
                     const capacityCheckPostBatch = await checkBackfillCapacity({
                       rulesClient,
                       maxBackfills: config.maxBackfills,
-                      logger,
+                      logMessage: (message) => logger.warn(loggerMesage(message)),
                       initiatorId: taskInstance.id,
                     });
                     if (!capacityCheckPostBatch.canSchedule) {
                       const consolidated = resultsFromMap(aggregatedByRule);
-                      await finalizeRun({
-                        logEvent,
+                      await logEvent({
                         status: GAP_AUTO_FILL_STATUS.SUCCESS,
                         results: consolidated,
-                        message: `stopped: no backfill capacity (${capacityCheckPostBatch.currentCount}/${capacityCheckPostBatch.maxBackfills})`,
+                        message: `Stopped early: no backfill capacity (${
+                          capacityCheckPostBatch.currentCount
+                        }/${capacityCheckPostBatch.maxBackfills}) | ${formatConsolidatedSummary(
+                          consolidated
+                        )}`,
                       });
                       return { state: {} };
                     }
@@ -568,33 +578,35 @@ export function registerGapAutoFillSchedulerTask({
               // Step 5: Finalize and log results
               const consolidated = Array.from(aggregatedByRule.values());
               if (consolidated.length === 0) {
-                await finalizeRun({
-                  logEvent,
+                await logEvent({
                   status: GAP_AUTO_FILL_STATUS.SKIPPED,
                   results: [],
-                  message: 'skipped: no gaps',
+                  message: "Skipped execution: can't schedule gap fills for any enabled rule",
                 });
                 return { state: {} };
               }
+              const overallStatus = consolidated.every(
+                (r) => r.status === GapFillSchedulePerRuleStatus.ERROR
+              )
+                ? GAP_AUTO_FILL_STATUS.ERROR
+                : GAP_AUTO_FILL_STATUS.SUCCESS;
 
-              const overallStatus = overallStatusFromResults(consolidated);
-
-              await finalizeRun({
-                logEvent,
+              // Build summary message with counts and error details
+              await logEvent({
                 status: overallStatus,
                 results: consolidated,
-                message: `completed`,
+                message: `completed | ${formatConsolidatedSummary(consolidated)}`,
               });
 
               return { state: {} };
             } catch (error) {
-              logEvent({
+              await logEvent({
                 status: GAP_AUTO_FILL_STATUS.ERROR,
                 results: [],
-                message: `error: ${error && error.message}`,
+                message: `Error during execution: ${error && error.message}`,
               });
 
-              logger.error(`gap-fill-auto-scheduler error: ${error && error.message}`);
+              logger.error(loggerMesage(`error: ${error && error.message}`));
               return { state: {} };
             }
           },

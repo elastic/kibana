@@ -2646,8 +2646,7 @@ describe('BackfillClient', () => {
 
       const result = await backfillClient.findOverlappingBackfills({
         ruleId: '1',
-        start: mockStart,
-        end: mockEnd,
+        ranges: [{ start: mockStart, end: mockEnd }],
         savedObjectsRepository: mockSavedObjectsRepository,
         actionsClient,
       });
@@ -2682,8 +2681,7 @@ describe('BackfillClient', () => {
       await expect(
         backfillClient.findOverlappingBackfills({
           ruleId: '1',
-          start: mockStart,
-          end: mockEnd,
+          ranges: [{ start: mockStart, end: mockEnd }],
           savedObjectsRepository: mockSavedObjectsRepository,
           actionsClient,
         })

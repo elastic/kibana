@@ -11,6 +11,7 @@ import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { logProcessedAsAuditEvent } from './utils';
 import type { RulesClientContext } from '../../../../rules_client';
 import type { BackfillInitiator } from '../../../../../common/constants';
+import { GapFillSchedulePerRuleStatus } from './types';
 
 interface ProcessGapsBatchParams {
   range: BulkFillGapsByRuleIdsParams['range'];
@@ -26,7 +27,7 @@ interface ProcessGapsBatchResult {
   results: Array<{
     ruleId: string;
     processedGaps: number;
-    status: 'success' | 'error';
+    status: GapFillSchedulePerRuleStatus;
     error?: string;
   }>;
 }
@@ -59,12 +60,7 @@ export const processGapsBatch = async (
 
   let totalProcessedGapsCount = 0;
   const gapsForScheduling: Gap[] = [];
-  const results: Array<{
-    ruleId: string;
-    processedGaps: number;
-    status: 'success' | 'error';
-    error?: string;
-  }> = [];
+  const results = [];
   const processedGapsByRuleId = new Map<string, number>();
 
   // Prepare all scheduling payloads from all rules
@@ -139,7 +135,7 @@ export const processGapsBatch = async (
       results.push({
         ruleId,
         processedGaps,
-        status: 'error',
+        status: GapFillSchedulePerRuleStatus.ERROR,
         error: result.error?.message || 'Unknown error',
       });
     } else {
@@ -147,7 +143,7 @@ export const processGapsBatch = async (
       results.push({
         ruleId,
         processedGaps,
-        status: 'success',
+        status: GapFillSchedulePerRuleStatus.SUCCESS,
       });
     }
   }

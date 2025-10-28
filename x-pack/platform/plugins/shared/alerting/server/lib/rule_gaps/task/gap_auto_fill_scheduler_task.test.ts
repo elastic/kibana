@@ -25,15 +25,19 @@ import { rulesClientMock } from '../../../rules_client.mock';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import * as findGapsModule from '../find_gaps';
+import * as processGapsBatchModule from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
+import { Gap } from '../gap';
+import { GapFillSchedulePerRuleStatus } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
 
-// Mock the dependencies
 jest.mock('../find_gaps');
 jest.mock('../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch');
 jest.mock('./gap_auto_fill_scheduler_event_log');
 
-const mockFindGapsSearchAfter = jest.requireMock('../find_gaps');
-const mockProcessGapsBatch = jest.requireMock(
-  '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch'
+const mockedFindGaps = jest.mocked(findGapsModule);
+const mockedProcessGapsBatch = jest.mocked(processGapsBatchModule);
+const mockedCreateGapAutoFillSchedulerEventLogger = jest.mocked(
+  createGapAutoFillSchedulerEventLogger
 );
 
 describe('Gap Auto Fill Scheduler Task', () => {
@@ -107,9 +111,8 @@ describe('Gap Auto Fill Scheduler Task', () => {
     mockActionsClient = actionsClientMock.create();
     mockEventLogClient = eventLogClientMock.create();
     logEventMock = jest.fn();
-    (createGapAutoFillSchedulerEventLogger as unknown as jest.Mock).mockReturnValue(logEventMock);
+    mockedCreateGapAutoFillSchedulerEventLogger.mockReturnValue(logEventMock);
 
-    // Setup rules client context mock
     (rulesClient as unknown as { getContext: jest.Mock }).getContext = jest.fn().mockReturnValue({
       unsecuredSavedObjectsClient: mockSavedObjectsRepository,
       internalSavedObjectsRepository: mockSavedObjectsRepository,
@@ -131,9 +134,8 @@ describe('Gap Auto Fill Scheduler Task', () => {
     });
 
     // Setup rules client find mock - the implementation filters for alert.id: ("alert:rule-id")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rulesClient.find.mockImplementation((params: any) => {
-      const filter = params?.options?.filter || '';
+    rulesClient.find.mockImplementation((params: Parameters<typeof rulesClient.find>[0]) => {
+      const filter = (params as unknown as { options?: { filter?: string } }).options?.filter ?? '';
       // Extract rule IDs by scanning for rule-<i> tokens without regex
       const ruleIds: string[] = [];
       for (let i = 1; i <= 25; i++) {
@@ -176,7 +178,6 @@ describe('Gap Auto Fill Scheduler Task', () => {
       });
     });
 
-    // Setup backfill capacity check mock
     rulesClient.findBackfill.mockResolvedValue({
       data: [],
       total: 0,
@@ -199,7 +200,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
       expect(taskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         [GAP_AUTO_FILL_SCHEDULER_TASK_TYPE]: {
           title: 'Gap Auto Fill Scheduler',
-          timeout: '1m',
+          timeout: '40s',
           createTaskRunner: expect.any(Function),
         },
       });
@@ -207,10 +208,13 @@ describe('Gap Auto Fill Scheduler Task', () => {
   });
 
   describe('Task Runner Execution', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let taskRunner: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let getRulesClientWithRequest: jest.MockedFunction<(request: KibanaRequest) => Promise<any>>;
+    let taskRunner: {
+      run: () => Promise<unknown>;
+      cancel?: (...args: unknown[]) => Promise<unknown>;
+    };
+    let getRulesClientWithRequest: (
+      request: KibanaRequest
+    ) => Promise<import('../../../types').RulesClientApi>;
 
     beforeAll(() => {
       jest.useFakeTimers();
@@ -282,19 +286,38 @@ describe('Gap Auto Fill Scheduler Task', () => {
         | typeof gapStatus.UNFILLED
         | typeof gapStatus.PARTIALLY_FILLED
         | typeof gapStatus.FILLED
-    ) => ({ ruleId, range: { gte, lte }, status });
+    ): Gap => {
+      if (status === gapStatus.FILLED) {
+        return new Gap({
+          ruleId,
+          range: { gte, lte },
+          filledIntervals: [{ gte, lte }],
+          inProgressIntervals: [],
+        });
+      }
+      if (status === gapStatus.PARTIALLY_FILLED) {
+        const midStart = new Date(gte).toISOString();
+        return new Gap({
+          ruleId,
+          range: { gte, lte },
+          filledIntervals: [],
+          inProgressIntervals: [{ gte: midStart, lte }],
+        });
+      }
+      // UNFILLED
+      return new Gap({ ruleId, range: { gte, lte } });
+    };
 
-    const stubFindGapsPageOnce = (
-      gaps: Array<{ ruleId: string; range: { gte: string; lte: string }; status: string }>,
-      nextEmpty = true
-    ) => {
-      mockFindGapsSearchAfter.findGapsSearchAfter.mockResolvedValueOnce({
+    const stubFindGapsPageOnce = (gaps: Gap[], nextEmpty = true) => {
+      mockedFindGaps.findGapsSearchAfter.mockResolvedValueOnce({
+        total: gaps.length,
         data: gaps,
         searchAfter: undefined,
         pitId: 'pit-1',
       });
       if (nextEmpty) {
-        mockFindGapsSearchAfter.findGapsSearchAfter.mockResolvedValueOnce({
+        mockedFindGaps.findGapsSearchAfter.mockResolvedValueOnce({
+          total: 0,
           data: [],
           searchAfter: undefined,
           pitId: 'pit-1',
@@ -304,19 +327,26 @@ describe('Gap Auto Fill Scheduler Task', () => {
 
     const stubOverlaps = (overlapCounts: number[]) => {
       mockBackfillClient.findOverlappingBackfills.mockReset();
+      let callIndex = 0;
       for (const count of overlapCounts) {
-        const res =
-          count > 0 ? new Array(count).fill(null).map((_, i) => ({ id: `bf-${i + 1}` })) : [];
-        mockBackfillClient.findOverlappingBackfills.mockResolvedValueOnce(
-          res as Array<{ id: string }>
-        );
+        let res: Array<{ id: string; start?: string; end?: string }> = [];
+        if (count > 0) {
+          // Return a single overlapping backfill covering the first hour window used in tests
+          res = [
+            {
+              id: `bf-${callIndex + 1}`,
+              start: '2024-01-01T00:00:00.000Z',
+              end: '2024-01-01T01:00:00.000Z',
+            },
+          ];
+        }
+        mockBackfillClient.findOverlappingBackfills.mockResolvedValueOnce(res);
+        callIndex += 1;
       }
     };
 
-    const expectProcessCalledWithGaps = (
-      gaps: Array<{ ruleId: string; range: { gte: string; lte: string }; status: string }>
-    ) => {
-      expect(mockProcessGapsBatch.processGapsBatch).toHaveBeenCalledWith(
+    const expectProcessCalledWithGaps = (gaps: Gap[]) => {
+      expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledWith(
         expect.any(Object),
         expect.objectContaining({ gapsBatch: gaps })
       );
@@ -332,173 +362,469 @@ describe('Gap Auto Fill Scheduler Task', () => {
       }
     };
 
-    it('should successfully execute when no rules have gaps', async () => {
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: [] });
+    const expectProcessNotCalled = () => {
+      expect(mockedProcessGapsBatch.processGapsBatch).not.toHaveBeenCalled();
+    };
 
-      const result = await taskRunner.run();
+    const expectFindGapsCalledTimes = (times: number) => {
+      expect(mockedFindGaps.findGapsSearchAfter).toHaveBeenCalledTimes(times);
+    };
 
-      expect(result).toEqual({ state: {} });
-      expect(logEventMock).toHaveBeenCalledWith({
-        status: 'skipped',
-        results: [],
-        message: 'skipped: no rules with gaps',
+    describe('Happy', () => {
+      it('should successfully execute when no rules have gaps', async () => {
+        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: [] });
+
+        const result = await taskRunner.run();
+
+        expect(result).toEqual({ state: {} });
+        expectFinalLog('skipped', 'no rules with gaps');
+        expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledWith(
+          expect.objectContaining({
+            start: expect.any(String),
+            end: expect.any(String),
+          })
+        );
       });
-      expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalledWith(
-        expect.objectContaining({
-          start: expect.any(String),
-          end: expect.any(String),
-        })
-      );
+
+      it('should successfully process rules with gaps', async () => {
+        const mockRuleIds = ['rule-1', 'rule-2'];
+        const mockGaps: Gap[] = [
+          buildGap(
+            'rule-1',
+            '2024-01-01T00:00:00.000Z',
+            '2024-01-01T01:00:00.000Z',
+            gapStatus.UNFILLED
+          ),
+          buildGap(
+            'rule-2',
+            '2024-01-01T01:00:00.000Z',
+            '2024-01-01T02:00:00.000Z',
+            gapStatus.PARTIALLY_FILLED
+          ),
+        ];
+
+        rulesClient.findBackfill.mockResolvedValue({
+          data: [],
+          total: 50, // Below max capacity
+          page: 1,
+          perPage: 1,
+        });
+
+        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: mockRuleIds });
+        // Ensure both rules are selected in this batch
+        rulesClient.find.mockResolvedValueOnce({
+          data: [
+            {
+              id: 'rule-1',
+              enabled: true,
+              name: 'Test Rule rule-1',
+              tags: [],
+              schedule: { interval: '1m' },
+              params: {},
+              alertTypeId: 'test-rule-type',
+              consumer: 'test-consumer',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              createdBy: 'elastic',
+              updatedBy: 'elastic',
+              muteAll: false,
+              mutedInstanceIds: [],
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              executionStatus: { status: 'ok', lastExecutionDate: new Date() },
+              actions: [],
+              scheduledTaskId: 'task-rule-1',
+              apiKeyOwner: 'elastic',
+              apiKeyCreatedByUser: false,
+              revision: 0,
+            },
+            {
+              id: 'rule-2',
+              enabled: true,
+              name: 'Test Rule rule-2',
+              tags: [],
+              schedule: { interval: '1m' },
+              params: {},
+              alertTypeId: 'test-rule-type',
+              consumer: 'test-consumer',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              createdBy: 'elastic',
+              updatedBy: 'elastic',
+              muteAll: false,
+              mutedInstanceIds: [],
+              notifyWhen: 'onActiveAlert',
+              throttle: null,
+              executionStatus: { status: 'ok', lastExecutionDate: new Date() },
+              actions: [],
+              scheduledTaskId: 'task-rule-2',
+              apiKeyOwner: 'elastic',
+              apiKeyCreatedByUser: false,
+              revision: 0,
+            },
+          ],
+          total: 2,
+          page: 1,
+          perPage: 2,
+        });
+        mockedFindGaps.findGapsSearchAfter
+          .mockResolvedValueOnce({
+            total: mockGaps.length,
+            data: mockGaps,
+            searchAfter: undefined,
+            pitId: 'test-pit-id',
+          })
+          .mockResolvedValue({
+            total: 0,
+            data: [],
+            searchAfter: undefined,
+            pitId: 'test-pit-id',
+          });
+        mockedProcessGapsBatch.processGapsBatch.mockResolvedValue({
+          processedGapsCount: 2,
+          hasErrors: false,
+          results: [
+            { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
+            { ruleId: 'rule-2', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
+          ],
+        });
+
+        const result = await taskRunner.run();
+
+        expect(result).toEqual({ state: {} });
+        expect(logEventMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: 'success',
+            message: expect.stringContaining('completed'),
+          })
+        );
+        expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalled();
+        expect(mockedFindGaps.findGapsSearchAfter).toHaveBeenCalled();
+        expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            gapsBatch: mockGaps,
+            initiator: backfillInitiator.SYSTEM,
+          })
+        );
+      });
     });
 
-    it('should successfully process rules with gaps', async () => {
-      const mockRuleIds = ['rule-1', 'rule-2'];
-      const mockGaps = [
+    describe('Capacity', () => {
+      it.each([
         {
-          ruleId: 'rule-1',
-          range: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' },
-          status: gapStatus.UNFILLED,
+          name: 'skips when capacity is reached initially',
+          capacityTotals: [100],
+          setupGaps: false,
+          expectedProcessCalls: 0,
+          expectMessage: 'no capacity remaining to schedule gap fills',
         },
         {
-          ruleId: 'rule-2',
-          range: { gte: '2024-01-01T01:00:00.000Z', lte: '2024-01-01T02:00:00.000Z' },
-          status: gapStatus.PARTIALLY_FILLED,
+          name: 'stops when capacity is reached mid-execution',
+          capacityTotals: [50, 100],
+          setupGaps: true,
+          expectedProcessCalls: 1,
+          expectMessage: 'no backfill capacity',
         },
-      ];
+      ])(
+        'capacity handling: $name',
+        async ({ capacityTotals, setupGaps, expectedProcessCalls, expectMessage }) => {
+          // Set capacity sequence
+          rulesClient.findBackfill.mockReset();
+          for (const total of capacityTotals) {
+            rulesClient.findBackfill.mockResolvedValueOnce({
+              data: [],
+              total,
+              page: 1,
+              perPage: 1,
+            });
+          }
 
-      rulesClient.findBackfill.mockResolvedValue({
-        data: [],
-        total: 50, // Below max capacity
-        page: 1,
-        perPage: 1,
-      });
+          if (setupGaps) {
+            (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({
+              ruleIds: ['rule-1', 'rule-2'],
+            });
+            const mockGaps: Gap[] = [
+              buildGap(
+                'rule-1',
+                '2024-01-01T00:00:00.000Z',
+                '2024-01-01T01:00:00.000Z',
+                gapStatus.UNFILLED
+              ),
+            ];
+            mockedFindGaps.findGapsSearchAfter.mockResolvedValue({
+              total: mockGaps.length,
+              data: mockGaps,
+              searchAfter: undefined,
+              pitId: 'test-pit-id',
+            });
+            mockedProcessGapsBatch.processGapsBatch.mockResolvedValue({
+              processedGapsCount: 1,
+              hasErrors: false,
+              results: [
+                {
+                  ruleId: 'rule-1',
+                  processedGaps: 1,
+                  status: GapFillSchedulePerRuleStatus.SUCCESS,
+                },
+              ],
+            });
+          }
 
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: mockRuleIds });
-      // Ensure both rules are selected in this batch
-      rulesClient.find.mockResolvedValueOnce({
-        data: [
-          {
-            id: 'rule-1',
-            enabled: true,
-            name: 'Test Rule rule-1',
-            tags: [],
-            schedule: { interval: '1m' },
-            params: {},
-            alertTypeId: 'test-rule-type',
-            consumer: 'test-consumer',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            createdBy: 'elastic',
-            updatedBy: 'elastic',
-            muteAll: false,
-            mutedInstanceIds: [],
-            notifyWhen: 'onActiveAlert',
-            throttle: null,
-            executionStatus: { status: 'ok', lastExecutionDate: new Date() },
-            actions: [],
-            scheduledTaskId: 'task-rule-1',
-            apiKeyOwner: 'elastic',
-            apiKeyCreatedByUser: false,
-            revision: 0,
-          },
-          {
-            id: 'rule-2',
-            enabled: true,
-            name: 'Test Rule rule-2',
-            tags: [],
-            schedule: { interval: '1m' },
-            params: {},
-            alertTypeId: 'test-rule-type',
-            consumer: 'test-consumer',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            createdBy: 'elastic',
-            updatedBy: 'elastic',
-            muteAll: false,
-            mutedInstanceIds: [],
-            notifyWhen: 'onActiveAlert',
-            throttle: null,
-            executionStatus: { status: 'ok', lastExecutionDate: new Date() },
-            actions: [],
-            scheduledTaskId: 'task-rule-2',
-            apiKeyOwner: 'elastic',
-            apiKeyCreatedByUser: false,
-            revision: 0,
-          },
-        ],
-        total: 2,
-        page: 1,
-        perPage: 2,
-      });
-      mockFindGapsSearchAfter.findGapsSearchAfter
-        .mockResolvedValueOnce({
-          data: mockGaps,
-          searchAfter: undefined,
-          pitId: 'test-pit-id',
-        })
-        .mockResolvedValue({
+          const result = await taskRunner.run();
+          expect(result).toEqual({ state: {} });
+          expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledTimes(
+            expectedProcessCalls
+          );
+          expectFinalLog(expectedProcessCalls === 0 ? 'skipped' : 'success', expectMessage);
+          if (expectedProcessCalls === 0) {
+            expect(rulesClient.getRuleIdsWithGaps).not.toHaveBeenCalled();
+          }
+        }
+      );
+      it('respects remaining backfill capacity across rule batches based on capacity checks (e.g., max 100, total 80 -> 20 remaining)', async () => {
+        // Capacity pre-check: total=80 (remaining=20). After first batch, capacity reaches max (100)
+        rulesClient.findBackfill
+          .mockResolvedValueOnce({ data: [], total: 80, page: 1, perPage: 1 })
+          .mockResolvedValueOnce({ data: [], total: 100, page: 1, perPage: 1 });
+
+        const ruleIds = Array.from({ length: 200 }, (_, i) => `rule-${i + 1}`);
+        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds });
+
+        mockedFindGaps.findGapsSearchAfter.mockResolvedValue({
+          total: 0,
           data: [],
           searchAfter: undefined,
-          pitId: 'test-pit-id',
+          pitId: 'pit-1',
         });
-      mockProcessGapsBatch.processGapsBatch.mockResolvedValue({
-        results: [
-          { ruleId: 'rule-1', processedGaps: 1, status: 'success' },
-          { ruleId: 'rule-2', processedGaps: 1, status: 'success' },
-        ],
+
+        const result = await taskRunner.run();
+        expect(result).toEqual({ state: {} });
+
+        const firstCallArgs = mockedFindGaps.findGapsSearchAfter.mock.calls[0][0];
+        const expectedFirstBatchSize = Math.min(DEFAULT_RULES_BATCH_SIZE, 20);
+        expect(firstCallArgs.params.ruleIds.length).toBe(expectedFirstBatchSize);
+
+        expectFinalLog('success', 'no backfill capacity (100/100)');
       });
-
-      const result = await taskRunner.run();
-
-      expect(result).toEqual({ state: {} });
-      expect(logEventMock).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'success', message: 'completed' })
-      );
-      expect(rulesClient.getRuleIdsWithGaps).toHaveBeenCalled();
-      expect(mockFindGapsSearchAfter.findGapsSearchAfter).toHaveBeenCalled();
-      expect(mockProcessGapsBatch.processGapsBatch).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({
-          gapsBatch: mockGaps,
-          initiator: backfillInitiator.SYSTEM,
-        })
-      );
     });
 
-    it.each([
-      {
-        name: 'skips when capacity is reached initially',
-        capacityTotals: [100],
-        setupGaps: false,
-        expectedProcessCalls: 0,
-        expectMessage: 'no backfill capacity',
-      },
-      {
-        name: 'stops when capacity is reached mid-execution',
-        capacityTotals: [50, 100],
-        setupGaps: true,
-        expectedProcessCalls: 1,
-        expectMessage: 'no backfill capacity',
-      },
-    ])(
-      'capacity handling: $name',
-      async ({ capacityTotals, setupGaps, expectedProcessCalls, expectMessage }) => {
-        // Set capacity sequence
-        rulesClient.findBackfill.mockReset();
-        for (const total of capacityTotals) {
-          rulesClient.findBackfill.mockResolvedValueOnce({
-            data: [],
-            total,
-            page: 1,
-            perPage: 1,
-          });
-        }
+    describe('Errors', () => {
+      it('should handle errors during initialization', async () => {
+        mockSavedObjectsRepository.get.mockRejectedValue(new Error('Config not found'));
 
-        if (setupGaps) {
-          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({
-            ruleIds: ['rule-1', 'rule-2'],
+        const result = await taskRunner.run();
+
+        expect(result).toEqual({ state: {} });
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('initialization failed'));
+        expect(typeof logEventMock).toBe('function');
+      });
+
+      it('should handle errors during execution', async () => {
+        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockRejectedValue(
+          new Error('Failed to get rule IDs')
+        );
+
+        const result = await taskRunner.run();
+
+        expect(result).toEqual({ state: {} });
+        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('error:'));
+        expect(logEventMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: 'error',
+            message: expect.stringContaining('Error during execution:'),
+          })
+        );
+      });
+
+      describe('Cancellation & Metadata', () => {
+        it('should handle cancellation', async () => {
+          const abortController = new AbortController();
+
+          registerGapAutoFillSchedulerTask({
+            taskManager,
+            logger,
+            getRulesClientWithRequest,
+            eventLogger,
           });
-          const mockGaps = [
+
+          const registeredTask =
+            taskManager.registerTaskDefinitions.mock.calls[0][0][GAP_AUTO_FILL_SCHEDULER_TASK_TYPE];
+          const taskRunnerWithAbort = registeredTask.createTaskRunner({
+            taskInstance: mockTaskInstance,
+            fakeRequest: mockRequest,
+            abortController,
+          });
+
+          rulesClient.findBackfill.mockResolvedValue({ data: [], total: 50, page: 1, perPage: 1 });
+          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
+
+          abortController.abort();
+          if (taskRunnerWithAbort.cancel) {
+            await taskRunnerWithAbort.cancel();
+          }
+
+          const result = await taskRunnerWithAbort.run();
+
+          expect(result).toEqual({ state: {} });
+          expect(logEventMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              status: 'success',
+              message: 'cancelled',
+            })
+          );
+        });
+
+        it('passes task id as initiatorId and SYSTEM initiator to processGapsBatch', async () => {
+          rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
+
+          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
+
+          const gap: Gap = buildGap(
+            'rule-1',
+            '2024-01-01T00:00:00.000Z',
+            '2024-01-01T01:00:00.000Z',
+            gapStatus.UNFILLED
+          );
+
+          mockedFindGaps.findGapsSearchAfter
+            .mockResolvedValueOnce({
+              total: 1,
+              data: [gap],
+              searchAfter: undefined,
+              pitId: 'pit-1',
+            })
+            .mockResolvedValueOnce({ total: 0, data: [], searchAfter: undefined, pitId: 'pit-1' });
+
+          mockBackfillClient.findOverlappingBackfills.mockResolvedValue([]);
+
+          mockedProcessGapsBatch.processGapsBatch.mockResolvedValue({
+            processedGapsCount: 1,
+            hasErrors: false,
+            results: [
+              { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
+            ],
+          });
+
+          const result = await taskRunner.run();
+          expect(result).toEqual({ state: {} });
+
+          expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledWith(
+            expect.any(Object),
+            expect.objectContaining({
+              gapsBatch: [gap],
+              initiator: backfillInitiator.SYSTEM,
+              initiatorId: mockTaskInstance.id,
+            })
+          );
+        });
+      });
+
+      it('logs error when some rules fail to schedule backfills (partial failures)', async () => {
+        rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
+
+        const mockRuleIds = ['rule-1', 'rule-2'];
+        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: mockRuleIds });
+        stubRulesFindOnce(mockRuleIds);
+
+        const gapSuccess: Gap = buildGap(
+          'rule-1',
+          '2024-01-01T00:00:00.000Z',
+          '2024-01-01T01:00:00.000Z',
+          gapStatus.UNFILLED
+        );
+        const gapError: Gap = buildGap(
+          'rule-2',
+          '2024-01-01T01:00:00.000Z',
+          '2024-01-01T02:00:00.000Z',
+          gapStatus.UNFILLED
+        );
+
+        stubFindGapsPageOnce([gapSuccess, gapError]);
+        stubOverlaps([0, 0]);
+
+        mockedProcessGapsBatch.processGapsBatch.mockResolvedValue({
+          processedGapsCount: 1,
+          hasErrors: true,
+          results: [
+            { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
+            {
+              ruleId: 'rule-2',
+              processedGaps: 0,
+              status: GapFillSchedulePerRuleStatus.ERROR,
+              error: 'Failed to schedule',
+            },
+          ],
+        });
+
+        const result = await taskRunner.run();
+        expect(result).toEqual({ state: {} });
+        expect(mockedFindGaps.findGapsSearchAfter).toHaveBeenCalled();
+      });
+
+      describe('Overlap', () => {
+        it.each([
+          {
+            name: 'filters overlapped and processes only non-overlapped gaps',
+            overlapCounts: [1, 0],
+            expectedProcessed: 1,
+          },
+          {
+            name: 'filters all gaps when all are overlapped',
+            overlapCounts: [1],
+            expectedProcessed: 0,
+          },
+        ])('$name', async ({ overlapCounts, expectedProcessed }) => {
+          rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
+          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-2'] });
+          stubRulesFindOnce(['rule-2']);
+
+          const gaps: Gap[] = [
+            buildGap(
+              'rule-2',
+              '2024-01-01T00:00:00.000Z',
+              '2024-01-01T01:00:00.000Z',
+              gapStatus.UNFILLED
+            ),
+            buildGap(
+              'rule-2',
+              '2024-01-01T01:00:00.000Z',
+              '2024-01-01T02:00:00.000Z',
+              gapStatus.UNFILLED
+            ),
+          ].slice(0, overlapCounts.length);
+
+          stubFindGapsPageOnce(gaps);
+          stubOverlaps(overlapCounts);
+
+          mockedProcessGapsBatch.processGapsBatch.mockResolvedValue({
+            processedGapsCount: expectedProcessed,
+            hasErrors: false,
+            results: [
+              {
+                ruleId: 'rule-2',
+                processedGaps: expectedProcessed,
+                status: GapFillSchedulePerRuleStatus.SUCCESS,
+              },
+            ],
+          });
+
+          const result = await taskRunner.run();
+          expect(result).toEqual({ state: {} });
+
+          const expectedToProcess = gaps.filter((_, idx) => overlapCounts[idx] === 0);
+          if (expectedProcessed > 0) {
+            expectProcessCalledWithGaps(expectedToProcess);
+          } else {
+            expect(mockedProcessGapsBatch.processGapsBatch).not.toHaveBeenCalled();
+          }
+        });
+      });
+
+      describe('Pagination', () => {
+        it('should process rules in batches', async () => {
+          const mockRuleIds = Array.from({ length: 250 }, (_, i) => `rule-${i + 1}`);
+          const mockGaps: Gap[] = [
             buildGap(
               'rule-1',
               '2024-01-01T00:00:00.000Z',
@@ -506,374 +832,181 @@ describe('Gap Auto Fill Scheduler Task', () => {
               gapStatus.UNFILLED
             ),
           ];
-          mockFindGapsSearchAfter.findGapsSearchAfter.mockResolvedValue({
-            data: mockGaps,
+
+          rulesClient.findBackfill.mockResolvedValue({
+            data: [],
+            total: 50, // Below max capacity
+            page: 1,
+            perPage: 1,
+          });
+
+          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: mockRuleIds });
+          mockedFindGaps.findGapsSearchAfter
+            .mockResolvedValueOnce({
+              total: mockGaps.length,
+              data: mockGaps,
+              searchAfter: undefined,
+              pitId: 'test-pit-id',
+            })
+            .mockResolvedValue({
+              total: 0,
+              data: [],
+              searchAfter: undefined,
+              pitId: 'test-pit-id',
+            });
+          mockedProcessGapsBatch.processGapsBatch.mockResolvedValue({
+            processedGapsCount: 1,
+            hasErrors: false,
+            results: [
+              { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
+            ],
+          });
+
+          const result = await taskRunner.run();
+
+          expect(result).toEqual({ state: {} });
+          expect(rulesClient.find).toHaveBeenCalledTimes(
+            Math.ceil(mockRuleIds.length / DEFAULT_RULES_BATCH_SIZE)
+          );
+          expect(logEventMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              status: 'success',
+              message: expect.stringContaining('completed'),
+            })
+          );
+        });
+
+        // Covered by capacity handling parametrized test above
+
+        it('[Capacity] respects remaining backfill capacity across rule batches based on capacity checks (e.g., max 100, total 80 -> 20 remaining)', async () => {
+          // Capacity pre-check: total=80 (remaining=20). After first batch, capacity reaches max (100)
+          rulesClient.findBackfill
+            .mockResolvedValueOnce({ data: [], total: 80, page: 1, perPage: 1 })
+            .mockResolvedValueOnce({ data: [], total: 100, page: 1, perPage: 1 });
+
+          const ruleIds = Array.from({ length: 200 }, (_, i) => `rule-${i + 1}`);
+          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds });
+
+          mockedFindGaps.findGapsSearchAfter.mockResolvedValue({
+            total: 0,
+            data: [],
             searchAfter: undefined,
-            pitId: 'test-pit-id',
+            pitId: 'pit-1',
           });
-          mockProcessGapsBatch.processGapsBatch.mockResolvedValue({
-            results: [{ ruleId: 'rule-1', processedGaps: 1, status: 'success' }],
+
+          const result = await taskRunner.run();
+          expect(result).toEqual({ state: {} });
+
+          const firstCallArgs = mockedFindGaps.findGapsSearchAfter.mock.calls[0][0];
+          const expectedFirstBatchSize = Math.min(DEFAULT_RULES_BATCH_SIZE, 20);
+          expect(firstCallArgs.params.ruleIds.length).toBe(expectedFirstBatchSize);
+
+          expect(logEventMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              status: 'success',
+              message: expect.stringContaining('no backfill capacity (100/100)'),
+            })
+          );
+        });
+
+        it('continues pagination when a full page is entirely filtered by overlap, then stops on empty page', async () => {
+          rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
+
+          (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
+
+          const fullPage: Gap[] = Array.from({ length: DEFAULT_GAPS_PER_PAGE }, (_, i) => {
+            const minute = String(i % 60).padStart(2, '0');
+            return buildGap(
+              'rule-1',
+              `2024-01-01T00:${minute}:00.000Z`,
+              `2024-01-01T00:${minute}:59.000Z`,
+              gapStatus.UNFILLED
+            );
           });
-        }
+
+          mockedFindGaps.findGapsSearchAfter
+            .mockResolvedValueOnce({
+              total: fullPage.length,
+              data: fullPage,
+              searchAfter: undefined,
+              pitId: 'pit-1',
+            })
+            .mockResolvedValueOnce({ total: 0, data: [], searchAfter: undefined, pitId: 'pit-1' });
+
+          mockBackfillClient.findOverlappingBackfills.mockResolvedValue([
+            {
+              id: 'bf-1',
+              start: '2024-01-01T00:00:00.000Z',
+              end: '2024-01-01T00:59:59.000Z',
+            },
+          ]);
+
+          const result = await taskRunner.run();
+          expect(result).toEqual({ state: {} });
+
+          expectFindGapsCalledTimes(2);
+          expectProcessNotCalled();
+          expectFinalLog('skipped', "can't schedule gap fills for any enabled rule");
+        });
+      });
+
+      it('should handle invalid gapFillRange and fallback to default', async () => {
+        const invalidConfig = {
+          ...mockSchedulerConfig,
+          gapFillRange: 'invalid-date-range',
+        };
+
+        mockSavedObjectsRepository.get.mockResolvedValue({
+          id: mockConfigId,
+          type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+          attributes: invalidConfig,
+          references: [],
+        });
+
+        rulesClient.findBackfill.mockResolvedValue({
+          data: [],
+          total: 50, // Below max capacity
+          page: 1,
+          perPage: 1,
+        });
+
+        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: [] });
 
         const result = await taskRunner.run();
+
         expect(result).toEqual({ state: {} });
-        expect(mockProcessGapsBatch.processGapsBatch).toHaveBeenCalledTimes(expectedProcessCalls);
-        expectFinalLog(expectedProcessCalls === 0 ? 'skipped' : 'success', expectMessage);
-        if (expectedProcessCalls === 0) {
-          expect(rulesClient.getRuleIdsWithGaps).not.toHaveBeenCalled();
-        }
-      }
-    );
-
-    it('should handle errors during initialization', async () => {
-      mockSavedObjectsRepository.get.mockRejectedValue(new Error('Config not found'));
-
-      const result = await taskRunner.run();
-
-      expect(result).toEqual({ state: {} });
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('gap-auto-fill-scheduler: init failed')
-      );
-      expect(typeof logEventMock).toBe('function');
-    });
-
-    it('should handle errors during execution', async () => {
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockRejectedValue(
-        new Error('Failed to get rule IDs')
-      );
-
-      const result = await taskRunner.run();
-
-      expect(result).toEqual({ state: {} });
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('gap-fill-auto-scheduler error')
-      );
-      expect(logEventMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: 'error',
-          message: expect.stringContaining('error:'),
-        })
-      );
-    });
-
-    it('should handle cancellation', async () => {
-      const abortController = new AbortController();
-
-      registerGapAutoFillSchedulerTask({
-        taskManager,
-        logger,
-        getRulesClientWithRequest,
-        eventLogger,
+        expect(logEventMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: 'error',
+            message: expect.stringContaining('Error during execution:'),
+          })
+        );
       });
 
-      const registeredTask =
-        taskManager.registerTaskDefinitions.mock.calls[0][0][GAP_AUTO_FILL_SCHEDULER_TASK_TYPE];
-      const taskRunnerWithAbort = registeredTask.createTaskRunner({
-        taskInstance: mockTaskInstance,
-        fakeRequest: mockRequest,
-        abortController,
-      });
-
-      rulesClient.findBackfill.mockResolvedValue({ data: [], total: 50, page: 1, perPage: 1 });
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
-
-      abortController.abort();
-      if (taskRunnerWithAbort.cancel) {
-        await taskRunnerWithAbort.cancel();
-      }
-
-      const result = await taskRunnerWithAbort.run();
-
-      expect(result).toEqual({ state: {} });
-      expect(logEventMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: 'success',
-          message: 'cancelled',
-        })
-      );
-    });
-
-    it('passes task id as initiatorId and SYSTEM initiator to processGapsBatch', async () => {
-      rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
-
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
-
-      const gap = {
-        ruleId: 'rule-1',
-        range: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' },
-        status: gapStatus.UNFILLED,
-      };
-
-      mockFindGapsSearchAfter.findGapsSearchAfter
-        .mockResolvedValueOnce({ data: [gap], searchAfter: undefined, pitId: 'pit-1' })
-        .mockResolvedValueOnce({ data: [], searchAfter: undefined, pitId: 'pit-1' });
-
-      mockBackfillClient.findOverlappingBackfills.mockResolvedValue([]);
-
-      mockProcessGapsBatch.processGapsBatch.mockResolvedValue({
-        results: [{ ruleId: 'rule-1', processedGaps: 1, status: 'success' }],
-      });
-
-      const result = await taskRunner.run();
-      expect(result).toEqual({ state: {} });
-
-      expect(mockProcessGapsBatch.processGapsBatch).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({
-          gapsBatch: [gap],
-          initiator: backfillInitiator.SYSTEM,
-          initiatorId: mockTaskInstance.id,
-        })
-      );
-    });
-
-    it('logs error when some rules fail to schedule backfills (partial failures)', async () => {
-      rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
-
-      const mockRuleIds = ['rule-1', 'rule-2'];
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: mockRuleIds });
-      stubRulesFindOnce(mockRuleIds);
-
-      const gapSuccess = buildGap(
-        'rule-1',
-        '2024-01-01T00:00:00.000Z',
-        '2024-01-01T01:00:00.000Z',
-        gapStatus.UNFILLED
-      );
-      const gapError = buildGap(
-        'rule-2',
-        '2024-01-01T01:00:00.000Z',
-        '2024-01-01T02:00:00.000Z',
-        gapStatus.UNFILLED
-      );
-
-      stubFindGapsPageOnce([gapSuccess, gapError]);
-      stubOverlaps([0, 0]);
-
-      mockProcessGapsBatch.processGapsBatch.mockResolvedValue({
-        results: [
-          { ruleId: 'rule-1', processedGaps: 1, status: 'success' },
-          { ruleId: 'rule-2', processedGaps: 0, status: 'error', error: 'Failed to schedule' },
-        ],
-      });
-
-      const result = await taskRunner.run();
-      expect(result).toEqual({ state: {} });
-      expect(mockFindGapsSearchAfter.findGapsSearchAfter).toHaveBeenCalled();
-    });
-
-    it.each([
-      {
-        name: 'filters overlapped and processes only non-overlapped gaps',
-        overlapCounts: [1, 0],
-        expectedProcessed: 1,
-      },
-      {
-        name: 'filters all gaps when all are overlapped',
-        overlapCounts: [1],
-        expectedProcessed: 0,
-      },
-    ])('$name', async ({ overlapCounts, expectedProcessed }) => {
-      rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-2'] });
-      stubRulesFindOnce(['rule-2']);
-
-      const gaps = [
-        buildGap(
-          'rule-2',
-          '2024-01-01T00:00:00.000Z',
-          '2024-01-01T01:00:00.000Z',
-          gapStatus.UNFILLED
-        ),
-        buildGap(
-          'rule-2',
-          '2024-01-01T01:00:00.000Z',
-          '2024-01-01T02:00:00.000Z',
-          gapStatus.UNFILLED
-        ),
-      ].slice(0, overlapCounts.length);
-
-      stubFindGapsPageOnce(gaps);
-      stubOverlaps(overlapCounts);
-
-      mockProcessGapsBatch.processGapsBatch.mockResolvedValue({
-        results: [{ ruleId: 'rule-2', processedGaps: expectedProcessed, status: 'success' }],
-      });
-
-      const result = await taskRunner.run();
-      expect(result).toEqual({ state: {} });
-
-      const expectedToProcess = gaps.filter((_, idx) => overlapCounts[idx] === 0);
-      if (expectedProcessed > 0) {
-        expectProcessCalledWithGaps(expectedToProcess);
-      } else {
-        expect(mockProcessGapsBatch.processGapsBatch).not.toHaveBeenCalled();
-      }
-    });
-
-    it('should process rules in batches', async () => {
-      const mockRuleIds = Array.from({ length: 250 }, (_, i) => `rule-${i + 1}`);
-      const mockGaps = [
-        {
-          ruleId: 'rule-1',
-          range: { gte: '2024-01-01T00:00:00.000Z', lte: '2024-01-01T01:00:00.000Z' },
-          status: gapStatus.UNFILLED,
-        },
-      ];
-
-      rulesClient.findBackfill.mockResolvedValue({
-        data: [],
-        total: 50, // Below max capacity
-        page: 1,
-        perPage: 1,
-      });
-
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: mockRuleIds });
-      mockFindGapsSearchAfter.findGapsSearchAfter
-        .mockResolvedValueOnce({
-          data: mockGaps,
-          searchAfter: undefined,
-          pitId: 'test-pit-id',
-        })
-        .mockResolvedValue({
-          data: [],
-          searchAfter: undefined,
-          pitId: 'test-pit-id',
+      it('should handle missing request or rules client factory', async () => {
+        registerGapAutoFillSchedulerTask({
+          taskManager,
+          logger,
+          // Intentionally undefined to simulate missing factory
+          getRulesClientWithRequest: undefined as unknown as (
+            request: KibanaRequest
+          ) => Promise<import('../../../types').RulesClientApi>,
+          eventLogger,
         });
-      mockProcessGapsBatch.processGapsBatch.mockResolvedValue({
-        results: [{ ruleId: 'rule-1', processedGaps: 1, status: 'success' }],
+
+        const registeredTask =
+          taskManager.registerTaskDefinitions.mock.calls[0][0][GAP_AUTO_FILL_SCHEDULER_TASK_TYPE];
+        const taskRunnerWithoutRequest = registeredTask.createTaskRunner({
+          taskInstance: mockTaskInstance,
+          fakeRequest: undefined,
+          abortController: new AbortController(),
+        });
+
+        const result = await taskRunnerWithoutRequest.run();
+
+        expect(result).toEqual({ state: {} });
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('initialization failed'));
       });
-
-      const result = await taskRunner.run();
-
-      expect(result).toEqual({ state: {} });
-      expect(rulesClient.find).toHaveBeenCalledTimes(
-        Math.ceil(mockRuleIds.length / DEFAULT_RULES_BATCH_SIZE)
-      );
-      expect(logEventMock).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'success', message: 'completed' })
-      );
-    });
-
-    // Covered by capacity handling parametrized test above
-
-    it('respects remaining backfill capacity across rule batches based on capacity checks (e.g., max 100, total 80 -> 20 remaining)', async () => {
-      // Capacity pre-check: total=80 (remaining=20). After first batch, capacity reaches max (100)
-      rulesClient.findBackfill
-        .mockResolvedValueOnce({ data: [], total: 80, page: 1, perPage: 1 })
-        .mockResolvedValueOnce({ data: [], total: 100, page: 1, perPage: 1 });
-
-      const ruleIds = Array.from({ length: 200 }, (_, i) => `rule-${i + 1}`);
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds });
-
-      mockFindGapsSearchAfter.findGapsSearchAfter.mockResolvedValue({
-        data: [],
-        searchAfter: undefined,
-        pitId: 'pit-1',
-      });
-
-      const result = await taskRunner.run();
-      expect(result).toEqual({ state: {} });
-
-      const firstCallArgs = mockFindGapsSearchAfter.findGapsSearchAfter.mock.calls[0][0];
-      const expectedFirstBatchSize = Math.min(DEFAULT_RULES_BATCH_SIZE, 20);
-      expect(firstCallArgs.params.ruleIds.length).toBe(expectedFirstBatchSize);
-
-      expect(logEventMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: 'success',
-          message: expect.stringContaining('no backfill capacity (100/100)'),
-        })
-      );
-    });
-
-    it('continues pagination when a full page is entirely filtered by overlap, then stops on empty page', async () => {
-      rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
-
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
-
-      const fullPage = Array.from({ length: DEFAULT_GAPS_PER_PAGE }, (_, i) => ({
-        ruleId: 'rule-1',
-        range: {
-          gte: `2024-01-01T00:${String(i).padStart(2, '0')}:00.000Z`,
-          lte: `2024-01-01T00:${String(i).padStart(2, '0')}:59.000Z`,
-        },
-        status: gapStatus.UNFILLED,
-      }));
-
-      mockFindGapsSearchAfter.findGapsSearchAfter
-        .mockResolvedValueOnce({ data: fullPage, searchAfter: undefined, pitId: 'pit-1' })
-        .mockResolvedValueOnce({ data: [], searchAfter: undefined, pitId: 'pit-1' });
-
-      mockBackfillClient.findOverlappingBackfills.mockResolvedValue([{ id: 'bf-1' }]);
-
-      const result = await taskRunner.run();
-      expect(result).toEqual({ state: {} });
-
-      expect(mockFindGapsSearchAfter.findGapsSearchAfter).toHaveBeenCalledTimes(2);
-      expect(mockProcessGapsBatch.processGapsBatch).not.toHaveBeenCalled();
-      expect(logEventMock).toHaveBeenCalledWith(
-        expect.objectContaining({ status: 'skipped', message: 'skipped: no gaps' })
-      );
-    });
-
-    it('should handle invalid gapFillRange and fallback to default', async () => {
-      const invalidConfig = {
-        ...mockSchedulerConfig,
-        gapFillRange: 'invalid-date-range',
-      };
-
-      mockSavedObjectsRepository.get.mockResolvedValue({
-        id: mockConfigId,
-        type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-        attributes: invalidConfig,
-        references: [],
-      });
-
-      rulesClient.findBackfill.mockResolvedValue({
-        data: [],
-        total: 50, // Below max capacity
-        page: 1,
-        perPage: 1,
-      });
-
-      (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: [] });
-
-      const result = await taskRunner.run();
-
-      expect(result).toEqual({ state: {} });
-      expect(logEventMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: 'error',
-          message: expect.stringContaining('error:'),
-        })
-      );
-    });
-
-    it('should handle missing request or rules client factory', async () => {
-      registerGapAutoFillSchedulerTask({
-        taskManager,
-        logger,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        getRulesClientWithRequest: undefined as unknown as (request: KibanaRequest) => Promise<any>,
-        eventLogger,
-      });
-
-      const registeredTask =
-        taskManager.registerTaskDefinitions.mock.calls[0][0][GAP_AUTO_FILL_SCHEDULER_TASK_TYPE];
-      const taskRunnerWithoutRequest = registeredTask.createTaskRunner({
-        taskInstance: mockTaskInstance,
-        fakeRequest: undefined,
-        abortController: new AbortController(),
-      });
-
-      const result = await taskRunnerWithoutRequest.run();
-
-      expect(result).toEqual({ state: {} });
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('gap-auto-fill-scheduler: init failed')
-      );
     });
   });
 });

@@ -388,17 +388,15 @@ export class BackfillClient {
 
   public async findOverlappingBackfills({
     ruleId,
-    start,
-    end,
+    ranges,
     savedObjectsRepository,
     actionsClient,
   }: {
     ruleId: string;
-    start: Date;
-    end: Date;
+    ranges: { start: Date; end: Date }[];
     savedObjectsRepository: ISavedObjectsRepository;
     actionsClient: ActionsClient;
-  }) {
+  }): Promise<ScheduleBackfillResult[]> {
     const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
 
     // Create a point in time finder for efficient pagination
@@ -406,10 +404,14 @@ export class BackfillClient {
       type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
       perPage: 100,
       hasReference: [{ id: ruleId, type: RULE_SAVED_OBJECT_TYPE }],
-      filter: `
-        ad_hoc_run_params.attributes.start <= "${end.toISOString()}" and
-        ad_hoc_run_params.attributes.end >= "${start.toISOString()}"
-      `,
+      filter: ranges
+        .map(
+          (range) => `
+        (ad_hoc_run_params.attributes.start <= "${range.end.toISOString()}" and
+        ad_hoc_run_params.attributes.end >= "${range.start.toISOString()}")
+      `
+        )
+        .join(' OR '),
     });
 
     try {
