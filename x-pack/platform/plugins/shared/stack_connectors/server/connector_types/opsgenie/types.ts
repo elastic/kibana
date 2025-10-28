@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   CreateAlertParamsSchema,
   CloseAlertParamsSchema,
@@ -14,11 +14,11 @@ import type {
 } from './schema';
 import type { OpsgenieSubActions } from '../../../common';
 
-export type Config = TypeOf<typeof ConfigSchema>;
-export type Secrets = TypeOf<typeof SecretsSchema>;
+export type Config = z.infer<typeof ConfigSchema>;
+export type Secrets = z.infer<typeof SecretsSchema>;
 
-export type CreateAlertParams = TypeOf<typeof CreateAlertParamsSchema>;
-export type CloseAlertParams = TypeOf<typeof CloseAlertParamsSchema>;
+export type CreateAlertParams = z.infer<typeof CreateAlertParamsSchema>;
+export type CloseAlertParams = z.infer<typeof CloseAlertParamsSchema>;
 
 export interface CreateAlertSubActionParams {
   subAction: OpsgenieSubActions.CreateAlert;
@@ -32,4 +32,4 @@ export interface CloseAlertSubActionParams {
 
 export type Params = CreateAlertSubActionParams | CloseAlertSubActionParams;
 
-export type FailureResponseType = TypeOf<typeof FailureResponse>;
+export type FailureResponseType = z.infer<typeof FailureResponse>;

@@ -137,7 +137,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
             (coreStart.chrome as InternalChromeStart)?.project?.setKibanaName(deploymentName);
           }
         })
-        .catch();
+        .catch(() => {});
     }
 
     // Nest all the registered context providers under the Cloud Services Provider.

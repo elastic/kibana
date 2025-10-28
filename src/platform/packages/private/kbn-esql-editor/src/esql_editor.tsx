@@ -336,56 +336,27 @@ const ESQLEditorInternal = function ESQLEditor({
     openTimePickerPopover();
   });
 
-  monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
-    const position = editor1.current?.getPosition();
-    await triggerControl(
-      fixedQuery,
-      ESQLVariableType.TIME_LITERAL,
-      position,
-      uiActions,
-      esqlVariables,
-      controlsContext?.onSaveControl,
-      controlsContext?.onCancelControl
-    );
-  });
+  const controlCommands = [
+    { command: 'esql.control.multi_values.create', variableType: ESQLVariableType.MULTI_VALUES },
+    { command: 'esql.control.time_literal.create', variableType: ESQLVariableType.TIME_LITERAL },
+    { command: 'esql.control.fields.create', variableType: ESQLVariableType.FIELDS },
+    { command: 'esql.control.values.create', variableType: ESQLVariableType.VALUES },
+    { command: 'esql.control.functions.create', variableType: ESQLVariableType.FUNCTIONS },
+  ];
 
-  monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
-    const position = editor1.current?.getPosition();
-    await triggerControl(
-      fixedQuery,
-      ESQLVariableType.FIELDS,
-      position,
-      uiActions,
-      esqlVariables,
-      controlsContext?.onSaveControl,
-      controlsContext?.onCancelControl
-    );
-  });
-
-  monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
-    const position = editor1.current?.getPosition();
-    await triggerControl(
-      fixedQuery,
-      ESQLVariableType.VALUES,
-      position,
-      uiActions,
-      esqlVariables,
-      controlsContext?.onSaveControl,
-      controlsContext?.onCancelControl
-    );
-  });
-
-  monaco.editor.registerCommand('esql.control.functions.create', async (...args) => {
-    const position = editor1.current?.getPosition();
-    await triggerControl(
-      fixedQuery,
-      ESQLVariableType.FUNCTIONS,
-      position,
-      uiActions,
-      esqlVariables,
-      controlsContext?.onSaveControl,
-      controlsContext?.onCancelControl
-    );
+  controlCommands.forEach(({ command, variableType }) => {
+    monaco.editor.registerCommand(command, async (...args) => {
+      const position = editor1.current?.getPosition();
+      await triggerControl(
+        fixedQuery,
+        variableType,
+        position,
+        uiActions,
+        esqlVariables,
+        controlsContext?.onSaveControl,
+        controlsContext?.onCancelControl
+      );
+    });
   });
 
   editor1.current?.addCommand(

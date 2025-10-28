@@ -49,6 +49,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/usage-collection-plugin",
     "@kbn/react-query",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*",

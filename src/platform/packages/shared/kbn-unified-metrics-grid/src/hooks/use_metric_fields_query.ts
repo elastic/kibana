@@ -11,14 +11,14 @@ import type { QueryFunctionContext } from '@kbn/react-query';
 import { useInfiniteQuery } from '@kbn/react-query';
 import { useEffect, useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { useMetricsExperience } from './use_metrics_experience';
+import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider/use_metrics_experience_client';
 
 export const useMetricFieldsQuery = (params?: {
   fields?: string[];
   index: string;
   timeRange: TimeRange | undefined;
 }) => {
-  const { client } = useMetricsExperience();
+  const { client } = useMetricsExperienceClient();
 
   const { hasNextPage, data, status, fetchNextPage, isFetchingNextPage, isFetching } =
     useInfiniteQuery({

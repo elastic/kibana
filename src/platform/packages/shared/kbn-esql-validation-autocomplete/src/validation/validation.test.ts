@@ -353,6 +353,11 @@ describe('validation logic', () => {
       testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', [
         '"t" is not a valid JOIN index. Please use a "lookup" mode index.',
       ]);
+
+      testErrorsAndWarnings(
+        'FROM a_index | LEFT JOIN join_index ON textField == keywordField, booleanField',
+        ['JOIN ON clause must be a comma separated list of fields or a single expression']
+      );
     });
 
     describe('drop', () => {

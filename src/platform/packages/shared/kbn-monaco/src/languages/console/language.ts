@@ -17,7 +17,7 @@ import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from '../esql';
 import { wrapAsMonacoSuggestions } from '../esql/lib/converters/suggestions';
 import { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';
 import { buildConsoleTheme } from './theme';
-import { checkForTripleQuotesAndQueries, unescapeInvalidChars } from './utils';
+import { checkForTripleQuotesAndEsqlQuery, unescapeInvalidChars } from './utils';
 import type { LangModuleType } from '../../types';
 
 const workerProxyService = new ConsoleWorkerProxyService();
@@ -60,22 +60,17 @@ export const ConsoleLang: LangModuleType = {
         const fullText = model.getValue();
         const cursorOffset = model.getOffsetAt(position);
         const textBeforeCursor = fullText.slice(0, cursorOffset);
-        const { insideSingleQuotesQuery, insideTripleQuotesQuery, queryIndex } =
-          checkForTripleQuotesAndQueries(textBeforeCursor);
-        if (esqlCallbacks && (insideSingleQuotesQuery || insideTripleQuotesQuery)) {
-          const queryText = textBeforeCursor.slice(queryIndex, cursorOffset);
+        const { insideTripleQuotes, insideEsqlQuery, esqlQueryIndex } =
+          checkForTripleQuotesAndEsqlQuery(textBeforeCursor);
+        if (esqlCallbacks && insideEsqlQuery) {
+          const queryText = textBeforeCursor.slice(esqlQueryIndex, cursorOffset);
           const unescapedQuery = unescapeInvalidChars(queryText);
           const esqlSuggestions = await suggest(
             unescapedQuery,
             unescapedQuery.length,
             esqlCallbacks
           );
-          return wrapAsMonacoSuggestions(
-            esqlSuggestions,
-            queryText,
-            false,
-            insideSingleQuotesQuery
-          );
+          return wrapAsMonacoSuggestions(esqlSuggestions, queryText, false, !insideTripleQuotes);
         } else if (actionsProvider.current) {
           return actionsProvider.current?.provideCompletionItems(model, position, context);
         }

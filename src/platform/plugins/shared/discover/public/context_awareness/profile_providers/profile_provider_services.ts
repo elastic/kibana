@@ -24,42 +24,41 @@ import type { DiscoverServices } from '../../build_services';
 /**
  * Dependencies required by profile provider implementations
  */
-export interface ProfileProviderDeps extends DiscoverServices {
+export interface ProfileProviderSharedServicesDeps {
   logsDataAccess?: LogsDataAccessPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
   metricsExperience?: MetricsExperiencePluginStart;
 }
 
 /**
- * Services provided to profile provider implementations
+ * Shared services provided to profile provider implementations
  */
-export interface ProfileProviderServices extends DiscoverServices {
-  /**
-   * A service containing methods used for logs profiles
-   */
+export interface ProfileProviderSharedServices {
   logsContextService: LogsContextService;
   apmContextService: ApmContextService;
   metricsContextService: MetricsContextService;
 }
 
 /**
+ * Services provided to profile provider implementations
+ */
+export type ProfileProviderServices = ProfileProviderSharedServices & DiscoverServices;
+
+/**
  * Creates the profile provider services
  * @param _deps Profile provider dependencies
  * @returns Profile provider services
  */
-export const createProfileProviderServices = async (
-  discoverServices: ProfileProviderDeps
-): Promise<ProfileProviderServices> => {
-  return {
-    ...discoverServices,
-    logsContextService: await createLogsContextService({
-      logsDataAccess: discoverServices.logsDataAccess,
-    }),
-    apmContextService: await createApmContextService({
-      apmSourcesAccess: discoverServices.apmSourcesAccess,
-    }),
-    metricsContextService: await createMetricsContextService({
-      metricsExperience: discoverServices.metricsExperience,
-    }),
-  };
+export const createProfileProviderSharedServices = async ({
+  logsDataAccess,
+  apmSourcesAccess,
+  metricsExperience,
+}: ProfileProviderSharedServicesDeps): Promise<ProfileProviderSharedServices> => {
+  const [logsContextService, apmContextService, metricsContextService] = await Promise.all([
+    createLogsContextService({ logsDataAccess }),
+    createApmContextService({ apmSourcesAccess }),
+    createMetricsContextService({ metricsExperience }),
+  ]);
+
+  return { logsContextService, apmContextService, metricsContextService };
 };

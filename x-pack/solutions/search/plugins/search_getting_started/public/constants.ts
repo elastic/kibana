@@ -6,3 +6,7 @@
  */
 
 export const API_KEY_PLACEHOLDER = 'YOUR_API_KEY';
+
+export enum QueryKeys {
+  ApiKey = 'apiKey',
+}

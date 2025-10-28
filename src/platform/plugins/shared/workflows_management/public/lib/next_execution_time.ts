@@ -20,7 +20,7 @@ export function calculateNextExecutionTime(
   trigger: WorkflowTrigger,
   lastRun: Date | null
 ): Date | null {
-  if (trigger.type !== 'scheduled' || !trigger.enabled) {
+  if (trigger.type !== 'scheduled') {
     return null;
   }
 
@@ -184,9 +184,7 @@ export function getWorkflowNextExecutionTime(
   triggers: WorkflowTrigger[],
   history: WorkflowExecutionHistoryModel[]
 ): Date | null {
-  const scheduledTriggers = triggers.filter(
-    (trigger) => trigger.type === 'scheduled' && trigger.enabled
-  );
+  const scheduledTriggers = triggers.filter((trigger) => trigger.type === 'scheduled');
 
   if (scheduledTriggers.length === 0) {
     return null;

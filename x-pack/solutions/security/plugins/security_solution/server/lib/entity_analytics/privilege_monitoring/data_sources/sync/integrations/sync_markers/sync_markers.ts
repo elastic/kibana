@@ -58,17 +58,9 @@ export const createSyncMarkersService = (
   const getLastFullSyncMarker = async (
     source: MonitoringEntitySource
   ): Promise<string | undefined> => {
-    // Try from the SO first
     const fromSO = await monitoringIndexSourceClient.getLastFullSyncMarker(source);
     if (fromSO) return fromSO;
-
-    // Fallback: search index
-    const fromIndex = await findLastEventMarkerInIndex(source, 'completed');
-    if (!fromIndex) return undefined;
-
-    // Update the SO for next time
-    await updateLastFullSyncMarker(source, fromIndex);
-    return fromIndex;
+    return undefined;
   };
 
   const findLastEventMarkerInIndex = async (
@@ -100,7 +92,6 @@ export const createSyncMarkersService = (
     const shouldUpdate = !lastFullSync || latestCompletedEvent > lastFullSync;
 
     if (!shouldUpdate) return false;
-
     await updateLastFullSyncMarker(source, latestCompletedEvent);
     return true;
   };

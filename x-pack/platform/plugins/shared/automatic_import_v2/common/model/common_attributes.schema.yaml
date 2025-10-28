@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Automatic Import Common Attributes Model
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    Integration:
+      description: The integration object with its settings.
+      allOf:
+        - type: object
+          additionalProperties: false
+          required:
+            - integration_id
+          properties:
+            integration_id:
+              description: The integration id
+              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+            dataStreams:
+              type: array
+              description: The data streams of the integration
+              items:
+                $ref: '#/components/schemas/DataStream'
+            logo:
+              description: The logo of the integration
+              type: string
+              format: binary
+            description:
+              description: The description of the integration
+              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+            title:
+              description: The title of the integration
+              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+    DataStream:
+      description: The data stream object with its settings.
+      allOf:
+        - type: object
+          properties:
+            title:
+              description: The title of the data stream
+              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+            description:
+              description: The description of the data stream
+              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+            inputTypes:
+              type: array
+              description: The input types of the data stream
+              items:
+                $ref: '#/components/schemas/InputType'
+            rawSamples:
+              type: array
+              description: The raw samples of the data stream
+              items:
+                type: string
+    InputType:
+      description: The input type object with its settings.
+      allOf:
+        - type: object
+          required:
+            - name
+          properties:
+            name:
+              description: The name of the input type
+              type: string
+              enum:
+                - aws-cloudwatch
+                - aws-s3
+                - azure-blob-storage
+                - azure-eventhub
+                - cloudfoundry
+                - filestream
+                - gcp-pubsub
+                - gcs
+                - http_endpoint
+                - journald
+                - kafka
+                - tcp
+                - udp

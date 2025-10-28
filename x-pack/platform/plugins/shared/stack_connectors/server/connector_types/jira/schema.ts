@@ -5,123 +5,150 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { Coerced } from '../../../common/lib';
 import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
 import { validateRecordMaxKeys } from '../lib/validators';
 import { validateOtherFieldsKeys } from './validators';
 
 export const ExternalIncidentServiceConfiguration = {
-  apiUrl: schema.string(),
-  projectKey: schema.string(),
+  apiUrl: z.string(),
+  projectKey: z.string(),
 };
 
-export const ExternalIncidentServiceConfigurationSchema = schema.object(
-  ExternalIncidentServiceConfiguration
-);
+export const ExternalIncidentServiceConfigurationSchema = z
+  .object(ExternalIncidentServiceConfiguration)
+  .strict();
 
 export const ExternalIncidentServiceSecretConfiguration = {
-  email: schema.string(),
-  apiToken: schema.string(),
+  email: z.string(),
+  apiToken: z.string(),
 };
 
-export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
-  ExternalIncidentServiceSecretConfiguration
-);
+export const ExternalIncidentServiceSecretConfigurationSchema = z
+  .object(ExternalIncidentServiceSecretConfiguration)
+  .strict();
 
 const incidentSchemaObject = {
-  summary: schema.string(),
-  description: schema.nullable(schema.string()),
-  externalId: schema.nullable(schema.string()),
-  issueType: schema.nullable(schema.string()),
-  priority: schema.nullable(schema.string()),
-  labels: schema.nullable(
-    schema.arrayOf(
-      schema.string({
-        validate: (label) =>
-          // Matches any space, tab or newline character.
-          label.match(/\s/g) ? `The label ${label} cannot contain spaces` : undefined,
-      })
+  summary: z.string(),
+  description: z.string().nullable().default(null),
+  externalId: z.string().nullable().default(null),
+  issueType: z.string().nullable().default(null),
+  priority: z.string().nullable().default(null),
+  labels: z
+    .array(
+      z.string().refine(
+        (val) => !val.match(/\s/g),
+        (val) => ({ message: `The label ${val} cannot contain spaces` })
+      )
     )
-  ),
-  parent: schema.nullable(schema.string()),
-  otherFields: schema.nullable(
-    schema.recordOf(
-      schema.string({
-        validate: (value) => validateOtherFieldsKeys(value),
-      }),
-      schema.any(),
-      {
-        validate: (value) =>
-          validateRecordMaxKeys({
-            record: value,
-            maxNumberOfFields: MAX_OTHER_FIELDS_LENGTH,
-            fieldName: 'otherFields',
-          }),
-      }
-    )
+    .nullable()
+    .default(null),
+  parent: z.string().nullable().default(null),
+  otherFields: Coerced(
+    z
+      .record(
+        z.string().superRefine((value, ctx) => {
+          validateOtherFieldsKeys(value, ctx);
+        }),
+        z.any()
+      )
+      .superRefine((val, ctx) =>
+        validateRecordMaxKeys({
+          record: val,
+          ctx,
+          maxNumberOfFields: MAX_OTHER_FIELDS_LENGTH,
+          fieldName: 'otherFields',
+        })
+      )
+      .nullable()
+      .default(null)
   ),
 };
 
 export const incidentSchemaObjectProperties = Object.keys(incidentSchemaObject);
 
-export const ExecutorSubActionPushParamsSchema = schema.object({
-  incident: schema.object(incidentSchemaObject),
-  comments: schema.nullable(
-    schema.arrayOf(
-      schema.object({
-        comment: schema.string(),
-        commentId: schema.string(),
-      })
+export const ExecutorSubActionPushParamsSchema = z.object({
+  incident: z.object(incidentSchemaObject).strict(),
+  comments: z
+    .array(
+      z
+        .object({
+          comment: z.string(),
+          commentId: z.string(),
+        })
+        .strict()
     )
-  ),
+    .nullable()
+    .default(null),
 });
 
-export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
-  externalId: schema.string(),
-});
+export const ExecutorSubActionGetIncidentParamsSchema = z
+  .object({
+    externalId: z.string(),
+  })
+  .strict();
 
 // Reserved for future implementation
-export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
-export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
-export const ExecutorSubActionGetCapabilitiesParamsSchema = schema.object({});
-export const ExecutorSubActionGetIssueTypesParamsSchema = schema.object({});
-export const ExecutorSubActionGetFieldsByIssueTypeParamsSchema = schema.object({
-  id: schema.string(),
-});
-export const ExecutorSubActionGetIssuesParamsSchema = schema.object({ title: schema.string() });
-export const ExecutorSubActionGetIssueParamsSchema = schema.object({ id: schema.string() });
+export const ExecutorSubActionCommonFieldsParamsSchema = z.object({}).strict();
+export const ExecutorSubActionHandshakeParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetCapabilitiesParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetIssueTypesParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetFieldsByIssueTypeParamsSchema = z
+  .object({
+    id: z.string(),
+  })
+  .strict();
+export const ExecutorSubActionGetIssuesParamsSchema = z.object({ title: z.string() }).strict();
+export const ExecutorSubActionGetIssueParamsSchema = z.object({ id: z.string() }).strict();
 
-export const ExecutorParamsSchema = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('getFields'),
-    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('getIncident'),
-    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('handshake'),
-    subActionParams: ExecutorSubActionHandshakeParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('pushToService'),
-    subActionParams: ExecutorSubActionPushParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('issueTypes'),
-    subActionParams: ExecutorSubActionGetIssueTypesParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('fieldsByIssueType'),
-    subActionParams: ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('issues'),
-    subActionParams: ExecutorSubActionGetIssuesParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('issue'),
-    subActionParams: ExecutorSubActionGetIssueParamsSchema,
-  }),
+export const ExecutorParamsSchema = z.discriminatedUnion('subAction', [
+  z
+    .object({
+      subAction: z.literal('getFields'),
+      subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('getIncident'),
+      subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('handshake'),
+      subActionParams: ExecutorSubActionHandshakeParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('pushToService'),
+      subActionParams: ExecutorSubActionPushParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('issueTypes'),
+      subActionParams: ExecutorSubActionGetIssueTypesParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('fieldsByIssueType'),
+      subActionParams: ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('issues'),
+      subActionParams: ExecutorSubActionGetIssuesParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('issue'),
+      subActionParams: ExecutorSubActionGetIssueParamsSchema,
+    })
+    .strict(),
 ]);

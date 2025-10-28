@@ -14,8 +14,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React from 'react';
+import { useConversationList } from '../../../hooks/use_conversation_list';
 import { ConversationSections } from './conversation_sections';
 import { ConversationSidebarNav } from './conversation_sidebar_nav';
 
@@ -27,15 +27,8 @@ const loadingStyles = css`
   justify-content: center;
 `;
 
-interface ConversationsSidebarProps {
-  conversations: ConversationWithoutRounds[];
-  isLoading: boolean;
-}
-
-export const ConversationSidebar: React.FC<ConversationsSidebarProps> = ({
-  conversations,
-  isLoading,
-}) => {
+export const ConversationSidebar: React.FC = () => {
+  const { conversations = [], isLoading } = useConversationList();
   const { euiTheme } = useEuiTheme();
   const scrollStyles = css`
     ${useEuiOverflowScroll('y')}

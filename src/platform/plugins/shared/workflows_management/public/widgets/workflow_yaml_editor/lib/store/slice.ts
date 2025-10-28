@@ -8,60 +8,45 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import type { WorkflowEditorState } from './types';
+import type { EsWorkflow, WorkflowDetailDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { ComputedData, WorkflowDetailState } from './types';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
 
 // Initial state
-const initialState: WorkflowEditorState = {
-  isInitialized: false,
-  yamlString: undefined,
+const initialState: WorkflowDetailState = {
+  yamlString: '',
+  workflow: undefined,
   computed: undefined,
   connectors: undefined,
   schemaLoose: getWorkflowZodSchemaLoose({}),
   focusedStepId: undefined,
   stepExecutions: undefined,
   highlightedStepId: undefined,
+  isTestModalOpen: false,
 };
 
 // Slice
-const workflowEditorSlice = createSlice({
-  name: 'workflow',
+const workflowDetailSlice = createSlice({
+  name: 'detail',
   initialState,
   reducers: {
+    setWorkflow: (state, action: { payload: WorkflowDetailDto }) => {
+      state.workflow = action.payload;
+    },
+    updateWorkflow: (state, action: { payload: Partial<EsWorkflow> }) => {
+      if (state.workflow) {
+        Object.assign(state.workflow, action.payload);
+      }
+    },
     setYamlString: (state, action: { payload: string }) => {
       state.yamlString = action.payload;
-    },
-    // Internal action - not for external use
-    _setComputedDataInternal: (
-      state,
-      action: {
-        payload: WorkflowEditorState['computed'];
-      }
-    ) => {
-      state.isInitialized = true;
-      state.computed = action.payload;
-    },
-    _setGeneratedSchemaInternal: (
-      state,
-      action: { payload: WorkflowEditorState['schemaLoose'] }
-    ) => {
-      state.schemaLoose = action.payload;
-    },
-    setConnectors: (state, action: { payload: WorkflowEditorState['connectors'] }) => {
-      state.connectors = action.payload;
-    },
-    // Clear computed data (used when YAML changes)
-    clearComputedData: (state) => {
-      state.computed = undefined;
     },
     setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {
       if (!state.computed?.workflowLookup) {
         state.focusedStepId = undefined;
         return;
       }
-
       state.focusedStepId = findStepByLine(
         action.payload.lineNumber,
         state.computed.workflowLookup
@@ -76,22 +61,57 @@ const workflowEditorSlice = createSlice({
     setHighlightedStepId: (state, action: { payload: { stepId: string } }) => {
       state.highlightedStepId = action.payload.stepId;
     },
+    setIsTestModalOpen: (state, action: { payload: boolean }) => {
+      state.isTestModalOpen = action.payload;
+    },
+    setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
+      state.connectors = action.payload;
+    },
+
+    // Internal actions - these are not for components usage
+    _setComputedDataInternal: (state, action: { payload: ComputedData }) => {
+      state.computed = action.payload;
+    },
+    _clearComputedData: (state) => {
+      state.computed = {};
+    },
+    _setGeneratedSchemaInternal: (
+      state,
+      action: { payload: WorkflowDetailState['schemaLoose'] }
+    ) => {
+      state.schemaLoose = action.payload;
+    },
   },
 });
 
-// Export public action creators from the slice
+// Export the reducer
+export const workflowDetailReducer = workflowDetailSlice.reducer;
+
 export const {
+  // Public action creators
+  setWorkflow,
+  updateWorkflow,
   setYamlString,
-  clearComputedData,
   setCursorPosition,
   setStepExecutions,
   setHighlightedStepId,
+  setIsTestModalOpen,
   setConnectors,
-} = workflowEditorSlice.actions;
 
-// Internal action for middleware use only
-export const { _setComputedDataInternal, _setGeneratedSchemaInternal } =
-  workflowEditorSlice.actions;
+  // Internal action creators for middleware use only
+  _setComputedDataInternal,
+  _clearComputedData,
+  _setGeneratedSchemaInternal,
+} = workflowDetailSlice.actions;
 
-// Export the reducer
-export const workflowEditorReducer = workflowEditorSlice.reducer;
+// Ignore these non-serializable fields in the state
+export const ignoredPaths: Array<string | RegExp> = [
+  /detail\.computed\.*/, // All computed data is not serializable
+  'detail.schemaLoose', // Zod schema loose is not serializable
+  'detail.workflow.definition', // WorkflowYaml definition schema is not serializable
+];
+// Ignore these specific action types that contain non-serializable data
+export const ignoredActions: Array<string> = [
+  'detail/_setComputedDataInternal',
+  'detail/_setGeneratedSchemaInternal',
+];

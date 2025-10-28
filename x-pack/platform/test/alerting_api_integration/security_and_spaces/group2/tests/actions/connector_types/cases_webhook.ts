@@ -206,7 +206,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 expect(resp.body).to.eql({
                   statusCode: 400,
                   error: 'Bad Request',
-                  message: `error validating action type config: [${field}]: expected value of type [string] but got [undefined]`,
+                  message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"${field}\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
                 });
               });
           });
@@ -322,8 +322,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subAction]: expected value to equal [pushToService]',
+                message: `error validating action params: [\n  {\n    \"code\": \"invalid_union_discriminator\",\n    \"options\": [\n      \"pushToService\"\n    ],\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'pushToService'\"\n  }\n]`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -341,8 +340,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
+                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"object\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -368,8 +366,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
+                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"incident\",\n      \"title\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -397,8 +394,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"comments\",\n      0,\n      \"commentId\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -425,8 +421,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"comments\",\n      0,\n      \"comment\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
                 errorSource: TaskErrorSource.USER,
               });
             });

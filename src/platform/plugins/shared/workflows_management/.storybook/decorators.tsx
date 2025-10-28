@@ -42,6 +42,17 @@ export const kibanaReactDecorator: Decorator = (story: Function) => {
       <KibanaContextProvider
         services={
           {
+            application: {
+              capabilities: {
+                workflowsManagement: {
+                  readWorkflow: true,
+                  deleteWorkflow: true,
+                  createWorkflow: true,
+                  updateWorkflow: true,
+                  executeWorkflow: true,
+                },
+              },
+            },
             settings: {
               client: mockUiSettingsService(),
             },

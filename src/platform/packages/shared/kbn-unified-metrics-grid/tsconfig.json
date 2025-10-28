@@ -30,6 +30,7 @@
     "@kbn/apm-types",
     "@kbn/esql-utils",
     "@kbn/field-utils",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/restorable-state"
   ]
 }
