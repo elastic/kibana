@@ -15,7 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useBrowserFields, useDataView } from '../../../data_view_manager';
 import type { GroupTakeActionItems } from './types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
@@ -34,7 +34,6 @@ import * as i18n from './translations';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import { getAlertsGroupingQuery } from './grouping_settings';
-import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 const DEFAULT_FILTERS: Filter[] = [];

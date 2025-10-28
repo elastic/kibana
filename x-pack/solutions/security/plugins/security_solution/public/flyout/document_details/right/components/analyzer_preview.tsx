@@ -19,7 +19,7 @@ import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_
 import { isActiveTimeline } from '../../../../helpers';
 import { getField } from '../../shared/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 
 const CHILD_COUNT_LIMIT = 3;

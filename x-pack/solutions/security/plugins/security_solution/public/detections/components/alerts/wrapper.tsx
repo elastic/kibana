@@ -21,7 +21,7 @@ import { HeaderPage } from '../../../common/components/header_page';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../data_view_manager';
 import { AlertsPageContent } from './content';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 

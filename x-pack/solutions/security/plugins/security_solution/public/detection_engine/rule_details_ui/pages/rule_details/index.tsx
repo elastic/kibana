@@ -40,7 +40,7 @@ import {
 } from '@kbn/securitysolution-data-table';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../data_view_manager';
 import {
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,

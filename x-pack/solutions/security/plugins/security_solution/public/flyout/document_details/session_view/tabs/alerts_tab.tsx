@@ -22,7 +22,7 @@ import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useSessionViewPanelContext } from '../context';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../../../data_view_manager';
 
 /**
  * Tab displayed in the SessionView preview panel, shows alerts related to the session.

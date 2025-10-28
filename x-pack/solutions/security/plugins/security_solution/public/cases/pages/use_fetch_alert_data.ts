@@ -14,7 +14,7 @@ import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine
 import type { SignalHit } from '../../common/utils/alerts';
 import { buildAlertsQuery, formatAlertToEcsSignal } from '../../common/utils/alerts';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import { useSelectedPatterns } from '../../data_view_manager';
 
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(

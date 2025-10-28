@@ -48,8 +48,7 @@ import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
 import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView, useSelectedPatterns } from '../../../../../data_view_manager';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 

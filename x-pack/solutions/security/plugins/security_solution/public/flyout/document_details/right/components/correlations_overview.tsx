@@ -28,7 +28,7 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 

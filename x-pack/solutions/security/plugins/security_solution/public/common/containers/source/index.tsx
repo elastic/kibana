@@ -12,7 +12,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { FieldSpec, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { buildBrowserFields } from '../../../data_view_manager/utils/build_browser_fields';
+import { buildBrowserFields } from '../../../data_view_manager';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';

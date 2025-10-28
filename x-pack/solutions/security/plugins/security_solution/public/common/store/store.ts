@@ -8,12 +8,12 @@
 import thunk from 'redux-thunk';
 import type {
   Action,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
   AnyAction,
+  Dispatch,
+  Middleware,
+  PreloadedState,
   Reducer,
+  Store,
 } from 'redux';
 import { applyMiddleware, createStore as createReduxStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
@@ -44,7 +44,7 @@ import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
-import { createDefaultDataView } from '../../data_view_manager/utils/create_default_data_view';
+import { createDefaultDataView } from '../../data_view_manager';
 
 let store: Store<State, Action> | null = null;
 
