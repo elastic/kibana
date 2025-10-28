@@ -75,9 +75,13 @@ export const suggest = (
 ): Promise<ISuggestionItem[]> => {
   const innerText = query.substring(0, offset ?? query.length);
   const correctedQuery = correctQuerySyntax(innerText);
-  const { ast } = parse(correctedQuery, { withFormatting: true });
+  const { ast, root } = parse(correctedQuery, { withFormatting: true });
+  const headerConstruction = root?.header?.find((cmd) => cmd.name === commandName);
+
   const cursorPosition = offset ?? query.length;
-  const { command } = findAstPosition(ast, cursorPosition);
+
+  const command = headerConstruction ?? findAstPosition(ast, cursorPosition).command;
+
   if (!command) {
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
   }
