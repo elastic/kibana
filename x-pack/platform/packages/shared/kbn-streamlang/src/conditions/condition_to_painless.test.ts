@@ -99,6 +99,53 @@ describe('conditionToPainless', () => {
           "($('message', null) !== null && (($('message', null) instanceof Number && $('message', null).toString().toLowerCase().contains(\"500\")) || $('message', null).toLowerCase().contains(\"500\")))"
         );
       });
+
+      test('boolean eq operator should compare against boolean values directly', () => {
+        const condition = {
+          field: 'should_process',
+          eq: true,
+        };
+        // This test expects the field to be compared against boolean literal `true`
+        expect(conditionToStatement(condition)).toEqual(
+          "($('should_process', null) !== null && (($('should_process', null) instanceof Number && $('should_process', null).toString() == \"true\") || $('should_process', null) == true))"
+        );
+      });
+
+      test('boolean neq operator should compare against boolean values directly', () => {
+        const condition = {
+          field: 'is_active',
+          neq: false,
+        };
+
+        // This test expects the field to be compared against boolean literal `false`
+        expect(conditionToStatement(condition)).toEqual(
+          "($('is_active', null) !== null && (($('is_active', null) instanceof Number && $('is_active', null).toString() != \"false\") || $('is_active', null) != false))"
+        );
+      });
+
+      test('boolean eq with false should work correctly', () => {
+        const condition = {
+          field: 'is_disabled',
+          eq: false,
+        };
+
+        // This test expects the field to be compared against boolean literal `false`
+        expect(conditionToStatement(condition)).toEqual(
+          "($('is_disabled', null) !== null && (($('is_disabled', null) instanceof Number && $('is_disabled', null).toString() == \"false\") || $('is_disabled', null) == false))"
+        );
+      });
+
+      test('boolean neq with true should work correctly', () => {
+        const condition = {
+          field: 'should_skip',
+          neq: true,
+        };
+
+        // This test expects the field to be compared against boolean literal `true`
+        expect(conditionToStatement(condition)).toEqual(
+          "($('should_skip', null) !== null && (($('should_skip', null) instanceof Number && $('should_skip', null).toString() != \"true\") || $('should_skip', null) != true))"
+        );
+      });
     });
 
     describe('and', () => {

@@ -40,8 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/235447
-  describe.skip('For each artifact list under management', function () {
+  describe('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
     this.timeout(60_000 * 5);
 

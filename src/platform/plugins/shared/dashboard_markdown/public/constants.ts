@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MARKDOWN_ID = 'DASHBOARD_MARKDOWN';
 export const ADD_MARKDOWN_ACTION_ID = 'CREATE_DASHBOARD_MARKDOWN';
 export const CONVERT_LEGACY_MARKDOWN_ACTION_ID = 'CONVERT_LEGACY_MARKDOWN';

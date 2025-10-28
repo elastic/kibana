@@ -154,13 +154,16 @@ export class ESQLService extends FtrService {
     await this.monacoEditor.setCodeEditorValue(query);
   }
 
+  public async submitEsqlEditorQuery() {
+    await this.testSubjects.click('querySubmitButton');
+  }
+
   public async typeEsqlEditorQuery(query: string, editorSubjId = 'ESQLEditor') {
     await this.setEsqlEditorQuery(''); // clear the default query
     await this.monacoEditor.typeCodeEditorValue(query, editorSubjId);
   }
 
-  public async createEsqlControl(query: string) {
-    await this.waitESQLEditorLoaded();
+  public async openEsqlControlFlyout(query: string) {
     await this.retry.waitFor('control flyout to open', async () => {
       await this.typeEsqlEditorQuery(query);
       // Wait until suggestions are loaded
@@ -170,6 +173,11 @@ export class ESQLService extends FtrService {
 
       return await this.testSubjects.exists('create_esql_control_flyout');
     });
+  }
+
+  public async createEsqlControl(query: string) {
+    await this.waitESQLEditorLoaded();
+    await this.openEsqlControlFlyout(query);
 
     // create the control
     await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');

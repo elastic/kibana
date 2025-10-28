@@ -38,11 +38,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const openRulesSection = async () => {
     await svlSearchNavigation.navigateToLandingPage();
-    await svlCommonNavigation.sidenav.openSection(
-      'search_project_nav_footer.project_settings_project_nav'
-    );
 
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+    await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActions');
   };
 
@@ -51,7 +48,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await svlCommonNavigation.sidenav.openSection(
       'search_project_nav_footer.project_settings_project_nav'
     );
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+    await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActionsConnectors');
     // await testSubjects.click('app-card-triggersActionsConnectors');
   };

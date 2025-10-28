@@ -7,6 +7,7 @@
 
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { RiskScoresPreviewResponse } from '../../../common/api/entity_analytics';
 import type { EntityType } from '../../../common/search_strategy';
 import type {
   AfterKeys,
@@ -15,7 +16,7 @@ import type {
 } from '../../../common/api/entity_analytics/common';
 import type { Range } from '../../../common/entity_analytics/risk_engine';
 import type { ConfigType } from '../../config';
-import type { StartPlugins } from '../../plugin';
+import type { SetupPlugins, StartPlugins } from '../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../types';
 export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
 export interface EntityAnalyticsRoutesDeps {
@@ -23,6 +24,7 @@ export interface EntityAnalyticsRoutesDeps {
   logger: Logger;
   config: ConfigType;
   getStartServices: StartServicesAccessor<StartPlugins>;
+  ml: SetupPlugins['ml'];
 }
 
 export interface CalculateRiskScoreAggregations {
@@ -82,6 +84,7 @@ export interface RiskEngineConfiguration {
   };
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
+  enableResetToZero: boolean;
 }
 
 export interface CalculateScoresParams {
@@ -115,6 +118,10 @@ export interface CalculateAndPersistScoresParams {
   returnScores?: boolean;
   refresh?: 'wait_for';
 }
+
+export type CalculateResults = RiskScoresPreviewResponse & {
+  entities: Record<EntityType, string[]>;
+};
 
 export interface RiskScoreCompositeBuckets {
   user: {

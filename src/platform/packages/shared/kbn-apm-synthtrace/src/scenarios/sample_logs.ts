@@ -26,6 +26,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
   const generators = await client.getLogGenerators({
     rpm,
+    systems: {
+      loghub: true,
+    },
   });
 
   return {

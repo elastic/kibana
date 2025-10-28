@@ -6,7 +6,7 @@
  */
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -134,7 +134,6 @@ describe('ObservabilityActions component', () => {
       | 'cveProps'
       | 'clearSelection'
       | 'observabilityRuleTypeRegistry'
-      | 'openAlertInFlyout'
       | 'refresh'
     > = {
       tableId: pageId,
@@ -146,7 +145,6 @@ describe('ObservabilityActions component', () => {
       cveProps: {} as unknown as EuiDataGridCellValueElementProps,
       clearSelection: noop,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      openAlertInFlyout: jest.fn(),
       refresh,
     };
 

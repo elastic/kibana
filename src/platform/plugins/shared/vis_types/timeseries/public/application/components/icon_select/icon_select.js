@@ -102,6 +102,9 @@ export function IconSelect({ value, onChange }) {
       onChange={onChange}
       singleSelection={{ asPlainText: true }}
       renderOption={IconView}
+      aria-label={i18n.translate('visTypeTimeseries.iconSelect.comboBoxAriaLabel', {
+        defaultMessage: 'Icon selection',
+      })}
     />
   );
 }

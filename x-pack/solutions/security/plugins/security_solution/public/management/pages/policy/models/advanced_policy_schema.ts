@@ -448,6 +448,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.device_control.filter_images',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.device_control.filter_images',
+      {
+        defaultMessage:
+          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.events.populate_file_data',
     first_supported_version: '9.2.0',
     documentation: i18n.translate(
@@ -927,6 +938,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.canary',
       {
         defaultMessage: "A value of 'false' disables Ransomware canary protection. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.device_control.filter_images',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.device_control.filter_images',
+      {
+        defaultMessage:
+          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
       }
     ),
   },
@@ -2518,6 +2540,105 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Allow Memory Protection to perform memory scans in response to image loads. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.utilization_limits.free_disk_space_gb',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.free_disk_space_gb',
+      {
+        defaultMessage:
+          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.utilization_limits.free_disk_space_gb',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.utilization_limits.free_disk_space_gb',
+      {
+        defaultMessage:
+          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.utilization_limits.free_disk_space_gb',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.free_disk_space_gb',
+      {
+        defaultMessage:
+          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.utilization_limits.free_disk_space_percent',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.free_disk_space_percent',
+      {
+        defaultMessage:
+          'Maintain a minimum percentage of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.utilization_limits.free_disk_space_percent',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.utilization_limits.free_disk_space_percent',
+      {
+        defaultMessage:
+          'Maintain a minimum percentage of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional space, will no longer function. Default: no limit.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.utilization_limits.free_disk_space_percent',
+    first_supported_version: '9.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.free_disk_space_percent',
+      {
+        defaultMessage:
+          'Maintain a minimum percentage of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional space, will no longer function. Default: no limit.',
       }
     ),
   },

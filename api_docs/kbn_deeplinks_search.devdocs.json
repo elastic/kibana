@@ -30,7 +30,7 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchStart\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"elasticsearchIndices:createIndex\""
+          "\"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"elasticsearchIndices:createIndex\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
@@ -213,6 +213,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_GETTING_STARTED",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_GETTING_STARTED",
+        "description": [],
+        "signature": [
+          "\"searchGettingStarted\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
         "id": "def-common.SEARCH_HOMEPAGE",
         "type": "string",
         "tags": [],
@@ -258,21 +273,6 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.SEARCH_INDICES_START",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_INDICES_START",
-        "description": [],
-        "signature": [
-          "\"elasticsearchStart\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/deeplinks-search",
         "id": "def-common.SEARCH_QUERY_RULES_ID",
         "type": "string",
         "tags": [],
@@ -280,21 +280,6 @@
         "description": [],
         "signature": [
           "\"searchQueryRules\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.SERVERLESS_ES_APP_ID",
-        "type": "string",
-        "tags": [],
-        "label": "SERVERLESS_ES_APP_ID",
-        "description": [],
-        "signature": [
-          "\"serverlessElasticsearch\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
@@ -342,21 +327,6 @@
           "\"serverlessWebCrawlers\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.ServerlessSearchApp",
-        "type": "Type",
-        "tags": [],
-        "label": "ServerlessSearchApp",
-        "description": [],
-        "signature": [
-          "\"serverlessElasticsearch\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

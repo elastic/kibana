@@ -8,10 +8,12 @@
  */
 
 import fs from 'node:fs';
+import { Readable } from 'node:stream';
 
 import type { EventUploadOptions } from './upload_events';
 import { uploadAllEventsFromPath, nonThrowingUploadAllEventsFromPath } from './upload_events';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { ScoutReportDataStream } from '../reporting';
 
 jest.mock('node:fs');
 
@@ -209,14 +211,76 @@ describe('uploadAllEventsFromPath', () => {
       log,
     });
 
-    expect(mockAddEventsFromFile).toHaveBeenCalledWith('mocked_directory/file1.ndjson');
-    expect(mockAddEventsFromFile).toHaveBeenCalledWith('mocked_directory/file2.ndjson');
-    expect(mockAddEventsFromFile).not.toHaveBeenCalledWith('mocked_directory/not_events.txt');
+    // addEventsFromFile should be called once with all .ndjson files, in order
+    expect(mockAddEventsFromFile).toHaveBeenCalledTimes(1);
+    expect(mockAddEventsFromFile).toHaveBeenCalledWith(
+      'mocked_directory/file1.ndjson',
+      'mocked_directory/file2.ndjson'
+    );
 
     expect(log.info.mock.calls).toEqual([
       ['Connecting to Elasticsearch at esURL'],
       ["Recursively found 2 .ndjson event log files in directory 'mocked_directory'."],
     ]);
+  });
+
+  it('addEventsFromFile should concatenate lines from multiple files in order and pass a single datasource to bulk helper', async () => {
+    // Use the real implementation of ScoutReportDataStream for this test
+    const { ScoutReportDataStream: RealScoutReportDataStream } = jest.requireActual(
+      '../reporting/report/events'
+    ) as { ScoutReportDataStream: typeof ScoutReportDataStream };
+
+    // Mock file contents for two .ndjson files
+    const fileContents: Record<string, string> = {
+      'file1.ndjson': 'a1\na2\n',
+      'file2.ndjson': 'b1\n',
+    };
+
+    const createReadStreamMock = jest
+      .spyOn(fs, 'createReadStream')
+      .mockImplementation((filePath) => {
+        const filePathStr = String(filePath);
+        const key = filePathStr.endsWith('file1.ndjson')
+          ? 'file1.ndjson'
+          : filePathStr.endsWith('file2.ndjson')
+          ? 'file2.ndjson'
+          : '';
+        const content = fileContents[key] ?? '';
+        return Readable.from([content]) as fs.ReadStream;
+      });
+
+    // Mock ES client bulk helper and assert datasource yields concatenated lines in order
+    const bulkMock = jest.fn(async (opts: any) => {
+      const lines: string[] = [];
+      for await (const line of opts.datasource as AsyncIterable<string>) {
+        lines.push(line);
+      }
+
+      expect(lines).toEqual(['a1', 'a2', 'b1']);
+      // Return minimal stats object expected by the implementation
+      return { total: lines.length, time: 1000, failed: 0 };
+    });
+
+    const es: any = { helpers: { bulk: bulkMock } };
+    const localLog = {
+      info: jest.fn(),
+      warning: jest.fn(),
+      error: jest.fn(),
+    } as Partial<jest.Mock<ToolingLog>> as ToolingLog;
+
+    const dataStream = new RealScoutReportDataStream(es, localLog);
+
+    await dataStream.addEventsFromFile('file1.ndjson', 'file2.ndjson');
+
+    expect(bulkMock).toHaveBeenCalledTimes(1);
+
+    expect(bulkMock.mock.results[0].value).resolves.toEqual({
+      total: 3,
+      time: 1000,
+      failed: 0,
+    });
+
+    createReadStreamMock.mockRestore();
   });
 });
 

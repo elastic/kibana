@@ -9,11 +9,12 @@
 
 import { z } from '@kbn/zod';
 import {
-  getDetailedTypeDescription,
-  getTypeScriptLikeDescription,
   getCompactTypeDescription,
+  getDetailedTypeDescription,
   getJsonSchemaDescription,
+  getTypeScriptLikeDescription,
 } from './zod_type_description';
+import { getZodTypeName } from './zod_utils';
 
 describe('zod_type_description', () => {
   describe('getDetailedTypeDescription', () => {
@@ -442,6 +443,88 @@ describe('zod_type_description', () => {
       // Record types should be handled gracefully, even if not explicitly supported
       expect(result).toContain('metadata:');
       expect(result).toContain('config:');
+    });
+  });
+
+  describe('ZodDefault handling', () => {
+    it('should handle ZodDefault with string schema', () => {
+      const schema = z.string().default('default value');
+      const result = getDetailedTypeDescription(schema);
+      expect(result).toBe('string');
+    });
+
+    it('should handle ZodDefault with array schema', () => {
+      const schema = z.array(z.string()).default(['monday', 'tuesday']);
+      const result = getDetailedTypeDescription(schema);
+      expect(result).toBe('string[]');
+    });
+
+    it('should handle ZodDefault with object schema', () => {
+      const schema = z
+        .object({
+          name: z.string(),
+          age: z.number(),
+        })
+        .default({ name: 'John', age: 30 });
+      const result = getDetailedTypeDescription(schema);
+      expect(result).toBe('{\n  name: string;\n  age: number\n}');
+    });
+
+    it('should handle nested ZodDefault with ZodOptional', () => {
+      const schema = z.string().optional().default('default value');
+      const result = getDetailedTypeDescription(schema);
+      expect(result).toBe('string?');
+    });
+
+    it('should handle ZodDefault with union schema', () => {
+      const schema = z.union([z.string(), z.number()]).default('default');
+      const result = getDetailedTypeDescription(schema);
+      expect(result).toBe('(string | number)');
+    });
+
+    it('should handle ZodDefault with array of objects', () => {
+      const schema = z
+        .array(
+          z.object({
+            id: z.string(),
+            value: z.number(),
+          })
+        )
+        .default([{ id: '1', value: 10 }]);
+      const result = getDetailedTypeDescription(schema);
+      expect(result).toBe('{\n  id: string;\n  value: number\n}[]');
+    });
+  });
+
+  describe('Union array types', () => {
+    it('should show union of array types', () => {
+      const schema = z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]);
+      const result = getDetailedTypeDescription(schema);
+      expect(result).toBe('(string[] | number[] | boolean[])');
+    });
+
+    it('should show union of array types with constraints', () => {
+      const schema = z.union([
+        z.array(z.string()).min(1).max(5),
+        z.array(z.number()).min(1).max(5),
+        z.array(z.boolean()).min(1).max(5),
+      ]);
+      const result = getDetailedTypeDescription(schema);
+      expect(result).toBe('(string[] | number[] | boolean[])');
+    });
+  });
+
+  describe('Union array type detection', () => {
+    it('should detect union of arrays as array type', () => {
+      const schema = z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]);
+      const result = getZodTypeName(schema);
+      expect(result).toBe('array');
+    });
+
+    it('should detect mixed union as union type', () => {
+      const schema = z.union([z.string(), z.number(), z.boolean()]);
+      const result = getZodTypeName(schema);
+      expect(result).toBe('union');
     });
   });
 });

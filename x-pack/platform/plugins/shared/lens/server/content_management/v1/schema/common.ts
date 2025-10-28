@@ -15,7 +15,7 @@ export const lensItemAttributesSchema = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.string()),
-    visualizationType: schema.maybe(schema.nullable(schema.string())),
+    visualizationType: schema.string(),
     state: schema.maybe(schema.any()),
     // TODO make version required
     version: schema.maybe(schema.literal(LENS_ITEM_VERSION)), // pin version explicitly

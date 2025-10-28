@@ -7,24 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 import type {
   FormBasedPersistedState,
-  XYState,
-  XYReferenceLineLayerConfig,
-  XYDataLayerConfig,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
-import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+  TextBasedLayerColumn,
+  XYByValueAnnotationLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYState,
+} from '@kbn/lens-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
-import {
-  addLayerColumn,
-  buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
-  mapToFormula,
-} from '../utils';
+import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import type {
   BuildDependencies,
   LensAnnotationLayer,
@@ -47,10 +42,11 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     legend: {
       isVisible: config.legend?.show ?? true,
       position: config.legend?.position ?? 'left',
+      ...(config.legend?.legendStats ? { legendStats: config.legend.legendStats } : {}),
     },
     hideEndzones: true,
     preferredSeriesType: 'line',
-    valueLabels: 'hide',
+    valueLabels: config.valueLabels ?? 'hide',
     emphasizeFitting: config?.emphasizeFitting ?? true,
     fittingFunction: config?.fittingFunction ?? 'Linear',
     yLeftExtent: {
@@ -122,8 +118,10 @@ function buildVisualizationState(config: LensXYConfig): XYState {
               forAccessor: `${ACCESSOR}${i}_${index}`,
               axisMode: 'left',
               color: yAxis.seriesColor,
+              ...(yAxis.fill ? { fill: yAxis.fill } : {}),
+              ...(yAxis.lineThickness ? { lineWidth: yAxis.lineThickness } : {}),
             })),
-          } as XYReferenceLineLayerConfig;
+          } satisfies XYReferenceLineLayerConfig;
         case 'series':
           return {
             layerId: `layer_${i}`,
@@ -162,7 +160,7 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
     ...(layer.breakdown
       ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
       : []),
-    getXValueColumn(layer.xAxis, i),
+    ...getXValueColumn(layer.xAxis, i),
     ...layer.yAxis.map((yAxis, index) => {
       const params = hasFormatParams(yAxis)
         ? {
@@ -182,19 +180,25 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
   ];
 }
 
-function getXValueColumn(xConfig: LensBreakdownConfig, index: number) {
+function getXValueColumn(
+  xConfig: LensBreakdownConfig | undefined,
+  index: number
+): TextBasedLayerColumn[] {
+  if (!xConfig) {
+    return [];
+  }
   const accessor = `x_${ACCESSOR}${index}`;
   if (typeof xConfig === 'string') {
-    return getValueColumn(accessor, xConfig);
+    return [getValueColumn(accessor, xConfig)];
   }
 
   switch (xConfig.type) {
     case 'dateHistogram':
-      return getValueColumn(accessor, xConfig.field, 'date');
+      return [getValueColumn(accessor, xConfig.field, 'date')];
     case 'intervals':
-      return getValueColumn(accessor, xConfig.field, 'number');
+      return [getValueColumn(accessor, xConfig.field, 'number')];
     case 'topValues':
-      return getValueColumn(accessor, xConfig.field);
+      return [getValueColumn(accessor, xConfig.field)];
     case 'filters':
       throw new Error('Not implemented yet');
   }
@@ -269,7 +273,7 @@ export async function buildXY(
     getValueColumns,
     dataViewsAPI
   );
-  const references = buildReferences(dataviews);
+  const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
 
   return {
     title: config.title,
@@ -277,12 +281,11 @@ export async function buildXY(
     references,
     state: {
       datasourceStates,
-      internalReferences: [],
+      internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization: buildVisualizationState(config),
-      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-      adHocDataViews: getAdhocDataviews(dataviews),
+      adHocDataViews,
     },
   };
 }

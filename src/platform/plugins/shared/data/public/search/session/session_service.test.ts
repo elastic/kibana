@@ -526,7 +526,7 @@ describe('Session service', () => {
     expect(toastService.addError).toHaveBeenCalledWith(
       renameError,
       expect.objectContaining({
-        title: expect.stringContaining('Failed to edit name of the search session'),
+        title: expect.stringContaining('Failed to edit name of the background search'),
       })
     );
   });
@@ -620,6 +620,62 @@ describe('Session service', () => {
       sessionService.start();
 
       expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('can continue an old session', () => {
+    const firstSessionId = sessionService.start();
+
+    for (let i = 0; i < 30; i++) {
+      sessionService.start();
+    }
+
+    sessionService.continue(firstSessionId!);
+    expect(sessionService.getSessionId()).toBe(firstSessionId);
+  });
+
+  it('holds a maximum of 30 sessions', () => {
+    const firstSessionId = sessionService.start();
+
+    for (let i = 0; i <= 30; i++) {
+      sessionService.start();
+    }
+
+    sessionService.continue(firstSessionId!);
+    expect(sessionService.getSessionId()).not.toBe(firstSessionId);
+  });
+
+  describe('when a search session in stored', () => {
+    describe('when a search gets updated', () => {
+      it('should update the stored search session', async () => {
+        // Given
+        sessionService.enableStorage({
+          getName: async () => 'Name',
+          getLocatorData: async () => ({
+            id: 'id',
+            initialState: {},
+            restoreState: {},
+          }),
+        });
+
+        const firstSessionId = sessionService.start();
+        // We need to store the search so poll gets called when the search is completed and we can assert on it
+        await sessionService.save();
+
+        const poll = jest.fn().mockResolvedValue(undefined);
+        const { complete } = sessionService.trackSearch({
+          abort: jest.fn(),
+          poll,
+        });
+        sessionService.start();
+
+        // When
+        complete();
+
+        // Then
+        expect(sessionService.isCurrentSession(firstSessionId)).toBe(false);
+        expect(poll).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

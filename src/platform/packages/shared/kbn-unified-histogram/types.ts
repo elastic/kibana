@@ -8,7 +8,7 @@
  */
 
 import type React from 'react';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -29,6 +29,8 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { UseRequestParamsResult } from './hooks/use_request_params';
 
 /**
@@ -55,6 +57,7 @@ export interface UnifiedHistogramServices {
   expressions: ExpressionsStart;
   capabilities: Capabilities;
   dataViews: DataViewsPublicPluginStart;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 /**
@@ -214,7 +217,6 @@ export interface ChartSectionProps {
    * The current query
    */
   query?: Query | AggregateQuery;
-
   /**
    * Callback to pass to the Lens embeddable to handle filter changes
    */
@@ -236,31 +238,36 @@ export interface ChartSectionProps {
    * @returns The toggle action elements
    */
   renderToggleActions: () => React.ReactElement | undefined;
-
   /**
    * The request parameters for the chart
    */
   requestParams: UseRequestParamsResult;
-
   /**
    * Observable for fetching the histogram data
    */
   input$: UnifiedHistogramInput$;
-
   /**
    * Flag indicating that the chart is currently loading
    */
   isChartLoading?: boolean;
+  /**
+   * Controls whether or not the chart is visible (used for Show and Hide toggle)
+   */
+  isComponentVisible: boolean;
+  /**
+   * The current time range
+   */
+  timeRange?: TimeRange;
 }
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover
  */
-export type ChartSectionConfiguration =
+export type ChartSectionConfiguration<T extends object = object> =
   | {
       /**
        * The component to render for the chart section
        */
-      Component: React.ComponentType<ChartSectionProps>;
+      Component: React.ComponentType<ChartSectionProps & RestorableStateProviderProps<T>>;
       /**
        * Controls whether or not to replace the default histogram and activate the custom chart
        */

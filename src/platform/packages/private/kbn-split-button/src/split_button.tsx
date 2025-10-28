@@ -8,7 +8,7 @@
  */
 
 import { EuiButton, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
+import type { IconType, UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import React from 'react';
 
@@ -19,7 +19,7 @@ type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
 
   isSecondaryButtonLoading?: boolean;
   isSecondaryButtonDisabled?: boolean;
-  secondaryButtonIcon: string;
+  secondaryButtonIcon: IconType;
   secondaryButtonAriaLabel?: string;
   secondaryButtonTitle?: string;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
@@ -65,7 +65,6 @@ export const SplitButton = ({
     size,
     isDisabled: areButtonsDisabled || isMainButtonDisabled,
     isLoading: isLoading || isMainButtonLoading,
-    'data-icon': iconType,
     ...mainButtonProps,
     'data-test-subj': mainButtonProps['data-test-subj'],
   };
@@ -83,7 +82,6 @@ export const SplitButton = ({
       <EuiButtonIcon
         css={styles.secondaryButton}
         data-test-subj={mainButtonProps['data-test-subj'] + `-secondary-button`}
-        data-icon={secondaryButtonIcon}
         aria-label={secondaryButtonAriaLabel}
         title={secondaryButtonTitle}
         display="base"

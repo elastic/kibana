@@ -22,11 +22,11 @@ import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-util
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { ContentFrameworkSection } from '../..';
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
-import { ContentFrameworkSection } from '../content_framework/lazy_content_framework_section';
 
 export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.content', {
   defaultMessage: 'Content breakdown',
@@ -68,7 +68,7 @@ export function LogsOverviewHeader({
   });
 
   const badges = hasBadges && (
-    <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
+    <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center" wrap={true}>
       {hasMessageField &&
         renderFlyoutStreamProcessingLink &&
         renderFlyoutStreamProcessingLink({ doc: hit })}

@@ -351,8 +351,8 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
       value: 'info',
     });
 
-    // Verify filter controls are present
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeHidden();
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeHidden();
+    // Verify filter controls are present and disabled
+    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
+    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeDisabled();
   });
 });

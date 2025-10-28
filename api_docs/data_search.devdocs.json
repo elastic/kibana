@@ -159,7 +159,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; save: () => Promise<",
+              "{ start: () => string; clear: () => void; reset: () => void; save: () => Promise<",
               "SearchSessionSavedObject",
               ">; destroy: () => void; readonly state$: ",
               "Observable",
@@ -179,7 +179,13 @@
               "Observable",
               "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
-              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<string | undefined>; isSaving: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isStored: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => void; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -709,7 +715,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; save: () => Promise<",
+              "{ start: () => string; clear: () => void; reset: () => void; save: () => Promise<",
               "SearchSessionSavedObject",
               ">; destroy: () => void; readonly state$: ",
               "Observable",
@@ -729,7 +735,13 @@
               "Observable",
               "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
-              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<string | undefined>; isSaving: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isStored: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => void; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -1213,7 +1225,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; clear: () => void; save: () => Promise<",
+          "{ start: () => string; clear: () => void; reset: () => void; save: () => Promise<",
           "SearchSessionSavedObject",
           ">; destroy: () => void; readonly state$: ",
           "Observable",
@@ -1233,7 +1245,13 @@
           "Observable",
           "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
           "Observable",
-          "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+          "<string | undefined>; isSaving: (state?: ",
+          "SessionStateContainer",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isStored: (state?: ",
+          "SessionStateContainer",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
+          "SessionStateContainer",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => void; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
           {
             "pluginId": "@kbn/search-types",
             "scope": "common",

@@ -7,134 +7,98 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
-import { useChartLayers } from './use_chart_layers';
-import * as esqlModule from '@kbn/esql-utils';
-import * as esqlHook from '../../../hooks';
-import type { ChartSectionProps, UnifiedHistogramServices } from '@kbn/unified-histogram/types';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { TimeRange } from '@kbn/data-plugin/common';
+import { renderHook } from '@testing-library/react';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DIMENSIONS_COLUMN } from '../../../common/utils';
+import { useChartLayers } from './use_chart_layers';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLQueryColumns: jest.fn(),
+jest.mock('../../../common/utils', () => ({
+  ...jest.requireActual('../../../common/utils'),
+  createMetricAggregation: jest.fn(({ metricName }) => `AVG(${metricName})`),
+  createTimeBucketAggregation: jest.fn(() => 'time_bucket_agg'),
 }));
-jest.mock('../../../hooks', () => ({
-  useEsqlQueryInfo: jest.fn(),
-}));
-
-const getESQLQueryColumnsMock = esqlModule.getESQLQueryColumns as jest.MockedFunction<
-  typeof esqlModule.getESQLQueryColumns
->;
-const useEsqlQueryInfoMock = esqlHook.useEsqlQueryInfo as jest.MockedFunction<
-  typeof esqlHook.useEsqlQueryInfo
->;
-
-const servicesMock: Partial<UnifiedHistogramServices> = {
-  data: dataPluginMock.createStartContract(),
-};
 
 describe('useChartLayers', () => {
-  const mockServices: Pick<ChartSectionProps, 'services'> = {
-    services: servicesMock as UnifiedHistogramServices,
+  const mockMetric: MetricField = {
+    name: 'system.cpu.total.norm.pct',
+    type: 'gauge',
+    instrument: 'gauge',
+    unit: 'percent',
+    index: 'metrics-*',
+    dimensions: [],
   };
 
-  const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns empty yAxis if no columns', async () => {
-    getESQLQueryColumnsMock.mockResolvedValue([]);
-    useEsqlQueryInfoMock.mockReturnValue({
-      dimensions: [],
-      columns: [],
-      metricField: '',
-      indices: [],
-    });
-
+  it('should return an area chart configuration when no dimensions are provided', () => {
     const { result } = renderHook(() =>
       useChartLayers({
-        query: 'FROM metrics-*',
-        getTimeRange,
-        seriesType: 'line',
-        color: 'red',
-        services: mockServices.services,
+        metric: mockMetric,
+        dimensions: [],
+        color: '#000',
       })
     );
 
-    await waitFor(() => {
-      expect(result.current).toHaveLength(0);
-    });
-  });
-
-  it('maps columns correctly to yAxis and uses dimensions for breakdown', async () => {
-    getESQLQueryColumnsMock.mockResolvedValue([
-      { name: '@timestamp', meta: { type: 'date' }, id: '@timestamp' },
-      { name: 'value', meta: { type: 'number' }, id: 'value' },
-      { name: DIMENSIONS_COLUMN, meta: { type: 'number' }, id: DIMENSIONS_COLUMN },
-    ]);
-    useEsqlQueryInfoMock.mockReturnValue({
-      dimensions: [DIMENSIONS_COLUMN],
-      columns: [],
-      metricField: '',
-      indices: [],
-    });
-
-    const { result } = renderHook(() =>
-      useChartLayers({
-        query: 'FROM metrics-*',
-        getTimeRange,
-        seriesType: 'area',
-        color: 'blue',
-        services: mockServices.services,
-      })
-    );
-
-    await waitFor(() => {
-      expect(result.current).toHaveLength(1);
-    });
-
-    const layer = result.current[0];
-    expect(layer.xAxis).toStrictEqual({ field: '@timestamp', type: 'dateHistogram' });
-    expect(layer.yAxis).toHaveLength(1);
-    expect(layer.yAxis[0].label).toBe('value');
-    expect(layer.yAxis[0].seriesColor).toBe('blue');
+    const [layer] = result.current;
     expect(layer.seriesType).toBe('area');
-    expect(layer.breakdown).toBe(DIMENSIONS_COLUMN);
+    expect(layer.breakdown).toBeUndefined();
+    expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
+    expect(layer.yAxis[0].seriesColor).toBe('#000');
   });
 
-  it('uses first date column as xAxis', async () => {
-    getESQLQueryColumnsMock.mockResolvedValue([
-      { name: 'timestamp_field', meta: { type: 'date' }, id: 'timestamp_field' },
-      { name: 'metric', meta: { type: 'number' }, id: 'metric' },
-    ]);
-
-    useEsqlQueryInfoMock.mockReturnValue({
-      dimensions: [],
-      columns: [],
-      metricField: '',
-      indices: [],
-    });
-
+  it('should return a line chart configuration with a breakdown when single dimension is provided', () => {
     const { result } = renderHook(() =>
       useChartLayers({
-        query: 'FROM metrics-*',
-        getTimeRange,
-        seriesType: 'bar',
-        services: mockServices.services,
+        metric: mockMetric,
+        dimensions: ['service.name'],
+        color: '#FFF',
       })
     );
 
-    await waitFor(() => {
-      expect(result.current).toHaveLength(1);
-    });
+    const [layer] = result.current;
+    expect(layer.seriesType).toBe('line');
+    expect(layer.breakdown).toBe('service.name'); // Single dimension uses actual dimension name
+    expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
+    expect(layer.yAxis[0].seriesColor).toBe('#FFF');
+  });
 
-    expect(result.current[0].xAxis).toStrictEqual({
-      field: 'timestamp_field',
-      type: 'dateHistogram',
-    });
+  it('should return a line chart configuration with DIMENSIONS_COLUMN when multiple dimensions are provided', () => {
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metric: mockMetric,
+        dimensions: ['service.name', 'host.name'],
+        color: '#FFF',
+      })
+    );
+
+    const [layer] = result.current;
+    expect(layer.seriesType).toBe('line');
+    expect(layer.breakdown).toBe(DIMENSIONS_COLUMN); // Multiple dimensions use DIMENSIONS_COLUMN
+    expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
+    expect(layer.yAxis[0].seriesColor).toBe('#FFF');
+  });
+
+  it('should include format options if the metric has a unit', () => {
+    const metricWithUnit: MetricField = { ...mockMetric, unit: 'bytes' };
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metric: metricWithUnit,
+        dimensions: [],
+      })
+    );
+    const [layer] = result.current;
+    expect(layer.yAxis[0]).toHaveProperty('format');
+    expect(layer.yAxis[0]).toHaveProperty('format');
+  });
+
+  it('should not include format options if the metric has no unit', () => {
+    const metricWithoutUnit: MetricField = { ...mockMetric, unit: undefined };
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metric: metricWithoutUnit,
+        dimensions: [],
+      })
+    );
+    const [layer] = result.current;
+    expect(layer.yAxis[0]).not.toHaveProperty('format');
+    expect(layer.yAxis[0]).not.toHaveProperty('formatString');
   });
 });

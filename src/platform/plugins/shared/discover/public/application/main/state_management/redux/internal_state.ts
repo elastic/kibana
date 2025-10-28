@@ -26,6 +26,7 @@ import {
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import {
@@ -39,9 +40,10 @@ import {
   type TabState,
   type RecentlyClosedTabState,
 } from './types';
-import { loadDataViewList, initializeTabs, saveDiscoverSession } from './actions';
+import { loadDataViewList, initializeTabs } from './actions';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
+import type { DiscoverSearchSessionManager } from '../discover_search_session';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -62,6 +64,7 @@ const initialState: DiscoverInternalState = {
     byId: {},
     allIds: [],
     unsavedIds: [],
+    recentlyClosedTabsById: {},
     recentlyClosedTabIds: [],
     unsafeCurrentId: '',
   },
@@ -100,11 +103,10 @@ export const internalStateSlice = createSlice({
         allTabs: TabState[];
         selectedTabId: string;
         recentlyClosedTabs: RecentlyClosedTabState[];
+        updatedDiscoverSession?: DiscoverSession;
       }>
     ) => {
-      state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
-        Record<string, TabState | RecentlyClosedTabState>
-      >(
+      state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
         (acc, tab) => ({
           ...acc,
           [tab.id]:
@@ -113,8 +115,19 @@ export const internalStateSlice = createSlice({
         {}
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
-      state.tabs.unsafeCurrentId = action.payload.selectedTabId;
+      state.tabs.recentlyClosedTabsById = action.payload.recentlyClosedTabs.reduce<
+        Record<string, RecentlyClosedTabState>
+      >(
+        (acc, tab) => ({
+          ...acc,
+          [tab.id]: tab,
+        }),
+        {}
+      );
       state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
+      state.tabs.unsafeCurrentId = action.payload.selectedTabId;
+      state.persistedDiscoverSession =
+        action.payload.updatedDiscoverSession ?? state.persistedDiscoverSession;
     },
 
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
@@ -263,6 +276,13 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.uiState.searchDraft = action.payload.searchDraftUiState;
       }),
+    setMetricsGridState: (
+      state,
+      action: TabAction<{ metricsGridState: Partial<TabState['uiState']['metricsGrid']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.metricsGrid = action.payload.metricsGridState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
@@ -277,12 +297,6 @@ export const internalStateSlice = createSlice({
       state.userId = action.payload.userId;
       state.spaceId = action.payload.spaceId;
       state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
-    });
-
-    builder.addCase(saveDiscoverSession.fulfilled, (state, action) => {
-      if (action.payload.discoverSession) {
-        state.persistedDiscoverSession = action.payload.discoverSession;
-      }
     });
 
     builder.addMatcher(isAnyOf(initializeTabs.fulfilled, initializeTabs.rejected), (state) => {
@@ -317,12 +331,19 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: internalStateSlice.actions.setTabs,
     effect: throttle<InternalStateListenerEffect<typeof internalStateSlice.actions.setTabs>>(
       (action, listenerApi) => {
+        const discoverSession =
+          action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
         const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
         const getTabAppState = (tabId: string) =>
           selectTabRuntimeAppState(runtimeStateManager, tabId);
         const getTabInternalState = (tabId: string) =>
           selectTabRuntimeInternalState(runtimeStateManager, tabId);
-        void tabsStorageManager.persistLocally(action.payload, getTabAppState, getTabInternalState);
+        void tabsStorageManager.persistLocally(
+          action.payload,
+          getTabAppState,
+          getTabInternalState,
+          discoverSession?.id
+        );
       },
       MIDDLEWARE_THROTTLE_MS,
       MIDDLEWARE_THROTTLE_OPTIONS
@@ -348,19 +369,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
   });
 
   startListening({
-    predicate: (_, currentState, previousState) => {
-      return (
-        currentState.persistedDiscoverSession?.id !== previousState.persistedDiscoverSession?.id
-      );
-    },
-    effect: (_, listenerApi) => {
-      const { tabsStorageManager } = listenerApi.extra;
-      const { persistedDiscoverSession } = listenerApi.getState();
-      tabsStorageManager.updateDiscoverSessionIdLocally(persistedDiscoverSession?.id);
-    },
-  });
-
-  startListening({
     actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
@@ -376,6 +384,7 @@ export interface InternalStateDependencies {
   runtimeStateManager: RuntimeStateManager;
   urlStateStorage: IKbnUrlStateStorage;
   tabsStorageManager: TabsStorageManager;
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';

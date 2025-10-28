@@ -17,13 +17,25 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
     } else if (step.action === 'date') {
       return `${step.from} • ${step.formats.join(' - ')}`;
     } else if (step.action === 'set') {
+      if (step.copy_from) {
+        return i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.setFromProcessorDescription',
+          {
+            defaultMessage: 'Sets value of "{field}" to value of "{copyFromField}"',
+            values: {
+              field: step.to,
+              copyFromField: step.copy_from,
+            },
+          }
+        );
+      }
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.setProcessorDescription',
         {
-          defaultMessage: 'Sets value of "{field}" to "{value}"',
+          defaultMessage: 'Sets value of "{field}" to {value}',
           values: {
             field: step.to,
-            value: step.value,
+            value: JSON.stringify(step.value),
           },
         }
       );
@@ -42,13 +54,39 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.appendProcessorDescription',
         {
-          defaultMessage: 'Appends "{value}" to "{field}"',
+          defaultMessage: 'Appends {value} to "{field}"',
           values: {
             field: step.to,
             value: JSON.stringify(step.value),
           },
         }
       );
+    } else if (step.action === 'convert') {
+      if (step.to) {
+        return i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.convertProcessorDescriptionWithTo',
+          {
+            defaultMessage:
+              'Converts "{field}" field value to "{type}" type and stores it in "{to}" field',
+            values: {
+              field: step.from,
+              type: step.type,
+              to: step.to,
+            },
+          }
+        );
+      } else {
+        return i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.convertProcessorDescription',
+          {
+            defaultMessage: 'Converts "{field}" field value to "{type}" type',
+            values: {
+              field: step.from,
+              type: step.type,
+            },
+          }
+        );
+      }
     } else {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { action, parentId, customIdentifier, where, ignore_failure, ...rest } = step;

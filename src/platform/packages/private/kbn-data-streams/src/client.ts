@@ -19,6 +19,7 @@ import type {
   ClientHelpers,
 } from './types';
 import { initialize } from './initialize';
+import { validateClientArgs } from './validate_client_args';
 
 type AnyDataStream = DataStreamDefinition<any>;
 
@@ -91,6 +92,7 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
   public static async initialize<S extends object, SRM extends BaseSearchRuntimeMappings>(
     args: DataStreamClientArgs<S, SRM>
   ): Promise<DataStreamClient<S, SRM>> {
+    validateClientArgs(args);
     await initialize(args);
     return new DataStreamClient<S, SRM>(args.elasticsearchClient, args.dataStreams);
   }

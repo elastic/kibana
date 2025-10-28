@@ -7,34 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiLoadingSpinner,
-  EuiIcon,
-  useGeneratedHtmlId,
   EuiAccordion,
-  EuiFlexItem,
   EuiFlexGroup,
-  useEuiTheme,
+  EuiFlexItem,
   euiFontSize,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { YamlValidationError } from '../model/types';
+import type {
+  YamlValidationErrorSeverity,
+  YamlValidationResult,
+} from '../../../features/validate_workflow_yaml/model/types';
 
 const severityOrder = ['error', 'warning', 'info'];
 
 interface WorkflowYAMLValidationErrorsProps {
   isMounted: boolean;
+  isLoading: boolean;
   error: Error | null;
-  validationErrors: YamlValidationError[] | null;
-  onErrorClick?: (error: YamlValidationError) => void;
+  validationErrors: YamlValidationResult[] | null;
+  onErrorClick?: (error: YamlValidationResult) => void;
   rightSide?: React.ReactNode;
 }
 
 export function WorkflowYAMLValidationErrors({
   isMounted,
+  isLoading,
   error: errorValidating,
   validationErrors,
   onErrorClick,
@@ -46,7 +52,27 @@ export function WorkflowYAMLValidationErrors({
   let icon: React.ReactNode | null = null;
   let buttonContent: React.ReactNode | null = null;
 
-  const highestSeverity = validationErrors?.reduce((acc: string | null, error) => {
+  const allValidationErrors: YamlValidationResult[] = [
+    ...(validationErrors || []),
+    ...(errorValidating
+      ? [
+          {
+            id: 'error-validating',
+            endLineNumber: 0,
+            endColumn: 0,
+            hoverMessage: null,
+            severity: 'error' as YamlValidationErrorSeverity,
+            message: errorValidating.message,
+            owner: 'variable-validation' as YamlValidationResult['owner'],
+            startLineNumber: 0,
+            startColumn: 0,
+            afterMessage: null,
+          },
+        ]
+      : []),
+  ];
+
+  const highestSeverity = allValidationErrors?.reduce((acc: string | null, error) => {
     if (error.severity === 'error') {
       return 'error';
     }
@@ -62,13 +88,10 @@ export function WorkflowYAMLValidationErrors({
   if (!isMounted) {
     icon = <EuiLoadingSpinner size="m" />;
     buttonContent = 'Loading editor...';
-  } else if (errorValidating) {
-    icon = <EuiIcon type="error" color="danger" size="m" />;
-    buttonContent = errorValidating.message;
-  } else if (!validationErrors) {
+  } else if (!allValidationErrors || isLoading) {
     icon = <EuiLoadingSpinner size="m" />;
     buttonContent = 'Initializing validation...';
-  } else if (validationErrors?.length === 0) {
+  } else if (allValidationErrors?.length === 0) {
     icon = (
       <EuiIcon
         type="checkInCircleFilled"
@@ -85,19 +108,22 @@ export function WorkflowYAMLValidationErrors({
         size="m"
       />
     );
-    buttonContent = `${validationErrors?.length} validation ${
-      validationErrors?.length === 1 ? 'error' : 'errors'
+    buttonContent = `${allValidationErrors?.length} validation ${
+      allValidationErrors?.length === 1 ? 'error' : 'errors'
     }`;
   }
 
-  const sortedValidationErrors = validationErrors?.sort((a, b) => {
-    if (a.lineNumber === b.lineNumber) {
-      if (a.column === b.column) {
-        return severityOrder.indexOf(a.severity) - severityOrder.indexOf(b.severity);
+  const sortedValidationErrors = allValidationErrors?.sort((a, b) => {
+    if (a.startLineNumber === b.startLineNumber) {
+      if (a.startColumn === b.startColumn) {
+        if (a.severity && b.severity) {
+          return severityOrder.indexOf(a.severity) - severityOrder.indexOf(b.severity);
+        }
+        return 0;
       }
-      return a.column - b.column;
+      return a.startColumn - b.startColumn;
     }
-    return a.lineNumber - b.lineNumber;
+    return a.startLineNumber - b.startLineNumber;
   });
 
   return (
@@ -115,9 +141,11 @@ export function WorkflowYAMLValidationErrors({
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      arrowDisplay={validationErrors !== null && validationErrors.length > 0 ? 'left' : 'none'}
-      initialIsOpen={validationErrors !== null && validationErrors.length > 0}
-      isDisabled={validationErrors == null || validationErrors.length === 0}
+      arrowDisplay={
+        allValidationErrors !== null && allValidationErrors.length > 0 ? 'left' : 'none'
+      }
+      initialIsOpen={allValidationErrors !== null && allValidationErrors.length > 0}
+      isDisabled={allValidationErrors == null || allValidationErrors.length === 0}
       css={styles.accordion}
     >
       <div css={styles.separator} />
@@ -125,7 +153,8 @@ export function WorkflowYAMLValidationErrors({
         <EuiFlexGroup direction="column" gutterSize="s">
           {sortedValidationErrors?.map((error, index) => (
             <button
-              key={`${error.lineNumber}-${error.column}-${error.message}-${index}-${error.severity}`}
+              type="button"
+              key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
               css={styles.validationError}
               onClick={() => onErrorClick?.(error)}
               onKeyDown={(e) => {
@@ -137,7 +166,9 @@ export function WorkflowYAMLValidationErrors({
               tabIndex={0}
             >
               <EuiFlexItem grow={false} css={styles.validationErrorLineNumber}>
-                <b>{error.lineNumber}</b>:{error.column}
+                <b>{error.startLineNumber}</b>
+                {':'}
+                {error.startColumn}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiIcon
@@ -160,7 +191,14 @@ export function WorkflowYAMLValidationErrors({
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <span>{error.message}</span>
+                <EuiText color="text" size="xs">
+                  <span>{error.message}</span>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="xs">
+                  <span>{error.source}</span>
+                </EuiText>
               </EuiFlexItem>
             </button>
           ))}

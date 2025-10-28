@@ -40,6 +40,7 @@ import {
   USER_SETTINGS_TEMPLATE_SUFFIX,
   STACK_COMPONENT_TEMPLATES,
   MAX_CONCURRENT_COMPONENT_TEMPLATES,
+  OTEL_COMPONENT_TEMPLATES,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -427,17 +428,6 @@ export function buildComponentTemplates(params: {
       isSyntheticSourceEnabledByDefault ||
       isTimeSeriesEnabledByDefault);
 
-  const isPkgConfiguringDynamicSettings =
-    Object.keys(mappingsRuntimeFields).length > 0 || indexTemplateMappings?.dynamic !== undefined;
-
-  // Setting overrides for otel input packages, but only if the packages don't explicitly disable dynamic mappings or use `dynamic: runtime`
-  // Override the `dynamic: false` set in otel@mappings to avoid conflicts in case
-  const shouldOverrideSettingsForOtelInputs = isOtelInputType && !isPkgConfiguringDynamicSettings;
-
-  // Override `subobjects: false` to avoid conflicts with traces-otel@mappings
-  const shouldOverrideSettingsForOtelInputsTraces =
-    shouldOverrideSettingsForOtelInputs && type === 'traces' && !indexTemplateMappings.runtime;
-
   templatesMap[packageTemplateName] = {
     template: {
       settings: {
@@ -471,8 +461,6 @@ export function buildComponentTemplates(params: {
           : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', 'runtime'),
-        ...(shouldOverrideSettingsForOtelInputs ? { dynamic: true } : {}),
-        ...(shouldOverrideSettingsForOtelInputsTraces ? { subobjects: undefined } : {}),
       },
       ...(lifecycle ? { lifecycle } : {}),
     },
@@ -674,6 +662,7 @@ export function prepareTemplate({
   const defaultSettings = buildDefaultSettings({
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
+    isOtelInputType,
   });
 
   const componentTemplates = buildComponentTemplates({
@@ -746,6 +735,8 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
       )
       // Filter stack component templates shared between integrations
       .filter((componentTemplateId) => !STACK_COMPONENT_TEMPLATES.includes(componentTemplateId))
+      // Filter OTEL component templates shared between integrations
+      .filter((componentTemplateId) => !OTEL_COMPONENT_TEMPLATES.includes(componentTemplateId))
       .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,

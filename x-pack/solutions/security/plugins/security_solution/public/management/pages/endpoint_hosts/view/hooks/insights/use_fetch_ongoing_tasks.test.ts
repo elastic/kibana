@@ -25,11 +25,11 @@ jest.mock('../../../../../../common/lib/kibana', () => ({
   }),
 }));
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn(),
 }));
 
-const mockUseQuery = jest.requireMock('@tanstack/react-query').useQuery;
+const mockUseQuery = jest.requireMock('@kbn/react-query').useQuery;
 
 describe('useFetchLatestScan', () => {
   const mockOnSuccess = jest.fn();
@@ -39,7 +39,7 @@ describe('useFetchLatestScan', () => {
     jest.clearAllMocks();
     mockUseQuery.mockImplementation((_queryKey: unknown, queryFn: unknown) => {
       if (typeof queryFn === 'function') {
-        queryFn().catch(() => {});
+        queryFn({ signal: new AbortController().signal }).catch(() => {});
       }
       return { data: undefined, isLoading: false, error: null, refetch: jest.fn() };
     });
@@ -77,8 +77,9 @@ describe('useFetchLatestScan', () => {
           endpoint_ids: ['endpoint-1'],
           size: 1,
         },
+        signal: expect.any(AbortSignal),
       });
-      expect(mockOnSuccess).toHaveBeenCalledWith(2);
+      expect(mockOnSuccess).toHaveBeenCalledWith(2, null);
     });
   });
 
@@ -88,11 +89,13 @@ describe('useFetchLatestScan', () => {
         data: [
           {
             id: 'test-insight-1',
+            insightType: 'incompatible_antivirus',
             status: DefendInsightStatusEnum.succeeded,
             insights: [{ group: 'test', events: [{}] }],
           },
           {
             id: 'test-insight-2',
+            insightType: 'policy_response_failure',
             status: DefendInsightStatusEnum.succeeded,
             insights: [{ group: 'test', events: [{}] }],
           },
@@ -119,8 +122,9 @@ describe('useFetchLatestScan', () => {
           endpoint_ids: ['endpoint-1'],
           size: 2,
         },
+        signal: expect.any(AbortSignal),
       });
-      expect(mockOnSuccess).toHaveBeenCalledWith(2); // 1 event from each insight
+      expect(mockOnSuccess).toHaveBeenCalledWith(2, null); // 1 event from each insight
     });
 
     it('should continue polling when insights are running', async () => {
@@ -151,6 +155,7 @@ describe('useFetchLatestScan', () => {
       expect(mockOnSuccess).not.toHaveBeenCalled();
       expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
     });
+
     it('should call onInsightGenerationFailure when insights fail', async () => {
       mockHttpGet.mockResolvedValue({
         data: [
@@ -177,7 +182,7 @@ describe('useFetchLatestScan', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(mockOnInsightGenerationFailure).toHaveBeenCalled();
-      expect(mockOnSuccess).not.toHaveBeenCalled();
+      expect(mockOnSuccess).toHaveBeenCalledWith(1, null);
     });
 
     it('should call onSuccess with 0 when no insights found', async () => {
@@ -196,7 +201,7 @@ describe('useFetchLatestScan', () => {
       // Wait for async operations to complete
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(mockOnSuccess).toHaveBeenCalledWith(0);
+      expect(mockOnSuccess).toHaveBeenCalledWith(0, null);
       expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
     });
   });
@@ -224,6 +229,7 @@ describe('useFetchLatestScan', () => {
           endpoint_ids: ['endpoint-1'],
           size: 2,
         },
+        signal: expect.any(AbortSignal),
       });
       expect(mockOnSuccess).not.toHaveBeenCalled();
       expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
@@ -259,7 +265,7 @@ describe('useFetchLatestScan', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(mockOnSuccess).toHaveBeenCalledWith(2);
+      expect(mockOnSuccess).toHaveBeenCalledWith(2, null);
       expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
     });
 
@@ -268,6 +274,7 @@ describe('useFetchLatestScan', () => {
         data: [
           {
             id: 'insight-1',
+            insightType: 'incompatible_antivirus',
             status: DefendInsightStatusEnum.succeeded,
             insights: [
               { group: 'test1', events: [{}, {}, {}] },
@@ -276,6 +283,7 @@ describe('useFetchLatestScan', () => {
           },
           {
             id: 'insight-2',
+            insightType: 'policy_response_failure',
             status: DefendInsightStatusEnum.succeeded,
             insights: [{ group: 'test3', events: [{}, {}] }],
           },
@@ -286,7 +294,7 @@ describe('useFetchLatestScan', () => {
         useFetchLatestScan({
           isPolling: false,
           endpointId: 'endpoint-1',
-          insightTypes: ['incompatible_antivirus'],
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
           onSuccess: mockOnSuccess,
           onInsightGenerationFailure: mockOnInsightGenerationFailure,
         })
@@ -294,7 +302,7 @@ describe('useFetchLatestScan', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(mockOnSuccess).toHaveBeenCalledWith(6);
+      expect(mockOnSuccess).toHaveBeenCalledWith(6, null);
     });
   });
 
@@ -334,22 +342,25 @@ describe('useFetchLatestScan', () => {
           endpoint_ids: ['endpoint-1'],
           size: 2,
         },
+        signal: expect.any(AbortSignal),
       });
       expect(mockOnSuccess).not.toHaveBeenCalled();
       expect(mockOnInsightGenerationFailure).not.toHaveBeenCalled();
     });
 
-    it('should handle failed status with running status - failed takes precedence', async () => {
+    it('should handle failed status with running status - running takes precedence', async () => {
       mockHttpGet.mockResolvedValue({
         data: [
           {
             id: 'failed-insight',
+            insightType: 'incompatible_antivirus',
             status: DefendInsightStatusEnum.failed,
             failureReason: 'Test failure',
             insights: [],
           },
           {
             id: 'running-insight',
+            insightType: 'policy_response_failure',
             status: DefendInsightStatusEnum.running,
             insights: [],
           },
@@ -375,6 +386,7 @@ describe('useFetchLatestScan', () => {
           endpoint_ids: ['endpoint-1'],
           size: 2,
         },
+        signal: expect.any(AbortSignal),
       });
       expect(mockOnInsightGenerationFailure).toHaveBeenCalled();
       expect(mockOnSuccess).not.toHaveBeenCalled();

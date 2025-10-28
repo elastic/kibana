@@ -18,6 +18,7 @@ export function TraceWaterfallEmbeddable({
   scrollElement,
   onNodeClick,
   getRelatedErrorsHref,
+  onErrorClick,
 }: Omit<ApmTraceWaterfallEmbeddableEntryProps, 'mode'>) {
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -44,6 +45,7 @@ export function TraceWaterfallEmbeddable({
       isEmbeddable
       showLegend
       serviceName={serviceName}
+      onErrorClick={onErrorClick}
     />
   );
 }
