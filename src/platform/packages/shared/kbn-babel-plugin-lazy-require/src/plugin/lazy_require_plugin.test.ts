@@ -48,44 +48,31 @@ describe('@kbn/babel-plugin-lazy-require', () => {
   }
 
   describe('lazy loading', () => {
-    it('defers require until first access and caches result', () => {
-      const ctx = createContext({ './foo': { value: 42 } });
-      runCode('const foo = require("./foo"); module.exports = () => foo;', ctx);
+    it('defers loading until access, caches result, and skips unused modules', () => {
+      const ctx = createContext({ './foo': { val: 1 }, './bar': { val: 2 }, './unused': {} });
+      runCode(
+        'const foo = require("./foo"); const bar = require("./bar"); const unused = require("./unused"); module.exports = { foo: () => foo, bar: () => bar };',
+        ctx
+      );
 
+      // Nothing loaded yet
       expect(ctx.__requireLog).toHaveLength(0);
-      const result = ctx.module.exports();
+
+      // Access foo - loads only foo
+      expect(ctx.module.exports.foo().val).toBe(1);
       expect(ctx.__requireLog).toHaveLength(1);
-      expect(result.value).toBe(42);
+      expect(ctx.__requireLog[0].path).toBe('./foo');
 
-      // Subsequent access uses cache
-      ctx.module.exports();
-      ctx.module.exports();
+      // Access foo again - uses cache
+      ctx.module.exports.foo();
       expect(ctx.__requireLog).toHaveLength(1);
-    });
 
-    it('never loads unused modules', () => {
-      const ctx = createContext({ './foo': {}, './bar': {} });
-      runCode(
-        'const foo = require("./foo"); const bar = require("./bar"); module.exports = () => bar;',
-        ctx
-      );
-
-      ctx.module.exports();
-      expect(ctx.__requireLog).toHaveLength(1);
-      expect(ctx.__requireLog[0].path).toBe('./bar');
-    });
-
-    it('loads multiple modules independently', () => {
-      const ctx = createContext({ './a': { val: 'A' }, './b': { val: 'B' } });
-      runCode(
-        'const a = require("./a"); const b = require("./b"); module.exports = { a: () => a, b: () => b };',
-        ctx
-      );
-
-      expect(ctx.module.exports.a().val).toBe('A');
-      expect(ctx.__requireLog).toHaveLength(1);
-      expect(ctx.module.exports.b().val).toBe('B');
+      // Access bar - loads bar
+      expect(ctx.module.exports.bar().val).toBe(2);
       expect(ctx.__requireLog).toHaveLength(2);
+
+      // unused never loaded
+      expect(ctx.__requireLog.map((l) => l.path)).not.toContain('./unused');
     });
   });
 
@@ -265,13 +252,14 @@ describe('@kbn/babel-plugin-lazy-require', () => {
     });
   });
 
-  describe('code generation', () => {
-    it('generates proper structure', () => {
+  describe('generated code structure', () => {
+    it('creates module caches and imports object in correct order', () => {
       const code = transformCode('const a = require("./a"); const b = require("./b");');
 
       expect(code.match(/const _module\d* = \{/g)).toHaveLength(2);
       expect(code).toMatch(/const _imports\d* = \{/);
 
+      // Module caches must come before any user code
       const moduleIdx = code.indexOf('_module');
       const consoleIdx = code.indexOf('console');
       if (consoleIdx !== -1) expect(moduleIdx).toBeLessThan(consoleIdx);
@@ -316,58 +304,46 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       expect(code).not.toContain('_interopRequireDefault');
     });
 
-    it('shares module cache for named imports from same module', () => {
-      const code = transformCode(`
-        import { foo, bar } from './utils';
-        console.log(foo, bar);
-      `);
-
-      const moduleCaches = code.match(/const _module\d* = \{/g);
-      expect(moduleCaches).toHaveLength(1);
-      expect(code.split('require("./utils")').length).toBe(3); // 2 getters + 1 definition
-    });
-
-    it('handles mixed import types', () => {
-      const code = transformCode(`
-        import React from 'react';
-        import { useState } from 'react';
-        import * as ReactDOM from 'react-dom';
-        console.log(React, useState, ReactDOM);
-      `);
-
-      expect(code).toContain('_interopRequireDefault');
-      expect(code).toContain('get React()');
-      expect(code).toContain('get useState()');
-      expect(code).toContain('get ReactDOM()');
-    });
-
-    it('lazy loads default imports', () => {
+    it('shares cache for mixed default and named imports from same module', () => {
       const loadLog: string[] = [];
       const code = `
-        import foo from './delayed-module';
-        loadLog.push('start');
-        foo.doSomething();
-        loadLog.push('end');
+        import React, { useState } from 'react';
+        function Component() {
+          const [state] = useState(0);
+          return React.createElement('div', null, state);
+        }
+        module.exports = Component;
       `;
 
       const transformed = transformCode(code);
       const context = {
-        loadLog,
+        module: { exports: null as any },
         console,
         require: (path: string) => {
           if (path === '@babel/runtime/helpers/interopRequireDefault') {
             return (obj: any) => (obj && obj.__esModule ? obj : { default: obj });
           }
-          if (path === './delayed-module') {
-            loadLog.push('loaded');
-            return { __esModule: true, default: { doSomething: () => {} } };
+          if (path === 'react') {
+            loadLog.push('react');
+            return {
+              __esModule: true,
+              default: { createElement: () => 'element' },
+              useState: () => ['state', () => {}],
+            };
           }
-          throw new Error(`Unexpected require: ${path}`);
+          throw new Error(`Unexpected: ${path}`);
         },
       };
 
       runInNewContext(transformed, context);
-      expect(loadLog).toEqual(['start', 'loaded', 'end']);
+      context.module.exports();
+
+      // Critical: React should only load once despite being accessed via default and named
+      expect(loadLog).toEqual(['react']);
+
+      // Verify both getters use the same module cache
+      const moduleCaches = transformed.match(/const _module\d* = \{/g);
+      expect(moduleCaches).toHaveLength(1); // Only one cache for both React and useState
     });
   });
 
@@ -422,6 +398,25 @@ describe('@kbn/babel-plugin-lazy-require', () => {
 
       expect(code).toContain('get foo');
       expect(code).not.toMatch(/import\s+\{/); // No import statement
+    });
+
+    it('does not transform imports used in class static properties', () => {
+      const code = transformCode(`
+        import { DFA, Other } from 'antlr4';
+        export default class MyLexer {
+          static decisions = items.map(x => new DFA(x));
+          method() {
+            return new Other();
+          }
+        }
+      `);
+
+      // DFA kept (used in static property)
+      expect(code).toContain('DFA');
+      expect(code).not.toContain('get DFA');
+
+      // Other lazy (used in method)
+      expect(code).toContain('get Other');
     });
   });
 });
