@@ -20,7 +20,7 @@ export function SvlWorkplaceAINavigationServiceProvider({
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
         await testSubjects.existOrFail('workplaceAIHomePage', { timeout: 2000 });
-        await testSubjects.existOrFail('projectLayoutSideNav', { timeout: 2000 });
+        await testSubjects.existOrFail('~projectSideNav', { timeout: 2000 });
       });
     },
   };

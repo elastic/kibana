@@ -8,11 +8,11 @@
  */
 
 import { SearchWorkflowCommandSchema } from '@kbn/workflows';
-import type { GetWorkflowsParams } from '../workflows_management_api';
-import type { RouteDependencies } from './types';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { WORKFLOW_READ_SECURITY } from './route_security';
 import { handleRouteError } from './route_error_handlers';
+import { WORKFLOW_READ_SECURITY } from './route_security';
+import type { RouteDependencies } from './types';
+import type { GetWorkflowsParams } from '../workflows_management_api';
 
 export function registerPostSearchWorkflowsRoute({
   router,

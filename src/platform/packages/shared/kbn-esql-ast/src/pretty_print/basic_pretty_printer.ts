@@ -25,7 +25,11 @@ import {
 import type { ESQLAstExpressionNode } from '../visitor';
 import { Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
-import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
+import {
+  commandOptionsWithEqualsSeparator,
+  commandsWithNoCommaArgSeparator,
+  commandsWithSpecialCommaRules,
+} from './constants';
 import { LeafPrinter } from './leaf_printer';
 import type {
   ESQLAstBaseItem,
@@ -509,11 +513,19 @@ export class BasicPrettyPrinter {
       let args = '';
       let options = '';
 
+      let argIndex = 0;
       for (const source of ctx.visitArguments()) {
         const needsSeparator = !!args;
-        const needsComma = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+
+        // Check if this command has special comma rules
+        const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
+        const needsComma = specialRule
+          ? specialRule(argIndex)
+          : !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+
         const separator = needsSeparator ? (needsComma ? ',' : '') + ' ' : '';
         args += separator + source;
+        argIndex++;
       }
 
       for (const option of ctx.visitOptions()) {

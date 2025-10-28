@@ -6,45 +6,20 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import type {
+  SharingSavedObjectProps,
+  LensRuntimeState,
+  LensSavedObjectAttributes,
+  CheckDuplicateTitleProps,
+  LensAttributesService,
+} from '@kbn/lens-common';
 import { extract, inject } from '../common/embeddable_factory';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';
-import type { SharingSavedObjectProps } from './types';
-import type { LensRuntimeState, LensSavedObjectAttributes } from './react_embeddable/types';
-
-type CheckDuplicateTitleProps = OnSaveProps & {
-  id?: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-};
-
-export interface LensAttributesService {
-  loadFromLibrary: (savedObjectId: string) => Promise<{
-    attributes: LensSavedObjectAttributes;
-    sharingSavedObjectProps: SharingSavedObjectProps;
-    managed: boolean;
-  }>;
-  saveToLibrary: (
-    attributes: LensSavedObjectAttributes,
-    references: Reference[],
-    savedObjectId?: string
-  ) => Promise<string>;
-  checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
-  injectReferences: (
-    runtimeState: LensRuntimeState,
-    references: Reference[] | undefined
-  ) => LensRuntimeState;
-  extractReferences: (runtimeState: LensRuntimeState) => {
-    rawState: LensRuntimeState;
-    references: Reference[];
-  };
-}
 
 export const savedObjectToEmbeddableAttributes = (
   savedObject: SavedObjectCommon<LensSavedObjectAttributes>
