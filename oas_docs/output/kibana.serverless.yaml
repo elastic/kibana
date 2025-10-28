@@ -28093,6 +28093,14 @@ paths:
           required: false
           schema:
             type: string
+        - in: query
+          name: cloudProvider
+          required: false
+          schema:
+            enum:
+              - aws
+              - azure
+            type: string
       responses:
         '200':
           content:
@@ -28121,8 +28129,113 @@ paths:
                         updated_at:
                           type: string
                         vars:
-                          additionalProperties: {}
-                          type: object
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                external_id:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    frozen:
+                                      type: boolean
+                                    type:
+                                      enum:
+                                        - password
+                                      type: string
+                                    value:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                        isSecretRef:
+                                          type: boolean
+                                      required:
+                                        - isSecretRef
+                                        - id
+                                  required:
+                                    - value
+                                role_arn:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    type:
+                                      enum:
+                                        - text
+                                      type: string
+                                    value:
+                                      type: string
+                                  required:
+                                    - value
+                              required:
+                                - role_arn
+                                - external_id
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                azure_credentials_cloud_connector_id:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    type:
+                                      enum:
+                                        - text
+                                      type: string
+                                    value:
+                                      type: string
+                                  required:
+                                    - value
+                                client_id:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    frozen:
+                                      type: boolean
+                                    type:
+                                      enum:
+                                        - password
+                                      type: string
+                                    value:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                        isSecretRef:
+                                          type: boolean
+                                      required:
+                                        - isSecretRef
+                                        - id
+                                  required:
+                                    - value
+                                tenant_id:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    frozen:
+                                      type: boolean
+                                    type:
+                                      enum:
+                                        - password
+                                      type: string
+                                    value:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                        isSecretRef:
+                                          type: boolean
+                                      required:
+                                        - isSecretRef
+                                        - id
+                                  required:
+                                    - value
+                              required:
+                                - tenant_id
+                                - client_id
+                                - azure_credentials_cloud_connector_id
                       required:
                         - id
                         - name
@@ -28134,7 +28247,7 @@ paths:
                     type: array
                 required:
                   - items
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28155,7 +28268,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
@@ -28192,39 +28305,121 @@ paths:
                   minLength: 1
                   type: string
                 vars:
-                  additionalProperties:
-                    anyOf:
-                      - maxLength: 1000
-                        type: string
-                      - type: number
-                      - type: boolean
-                      - additionalProperties: false
-                        type: object
-                        properties:
-                          frozen:
-                            type: boolean
-                          type:
-                            maxLength: 50
-                            type: string
-                          value:
-                            anyOf:
-                              - maxLength: 1000
-                                type: string
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  id:
-                                    maxLength: 255
-                                    type: string
-                                  isSecretRef:
-                                    type: boolean
-                                required:
-                                  - isSecretRef
-                                  - id
-                        required:
-                          - type
-                          - value
-                  type: object
+                  anyOf:
+                    - items: {}
+                      type: array
+                    - type: boolean
+                    - type: number
+                    - type: object
+                    - type: string
+                  nullable: true
+                  oneOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        azure_credentials_cloud_connector_id:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            type:
+                              enum:
+                                - text
+                              type: string
+                            value:
+                              type: string
+                          required:
+                            - value
+                        client_id:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            frozen:
+                              type: boolean
+                            type:
+                              enum:
+                                - password
+                              type: string
+                            value:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                isSecretRef:
+                                  type: boolean
+                              required:
+                                - isSecretRef
+                                - id
+                          required:
+                            - value
+                        tenant_id:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            frozen:
+                              type: boolean
+                            type:
+                              enum:
+                                - password
+                              type: string
+                            value:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                isSecretRef:
+                                  type: boolean
+                              required:
+                                - isSecretRef
+                                - id
+                          required:
+                            - value
+                      required:
+                        - tenant_id
+                        - client_id
+                        - azure_credentials_cloud_connector_id
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        external_id:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            frozen:
+                              type: boolean
+                            type:
+                              enum:
+                                - password
+                              type: string
+                            value:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                isSecretRef:
+                                  type: boolean
+                              required:
+                                - isSecretRef
+                                - id
+                          required:
+                            - value
+                        role_arn:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            type:
+                              enum:
+                                - text
+                              type: string
+                            value:
+                              type: string
+                          required:
+                            - value
+                      required:
+                        - role_arn
+                        - external_id
               required:
                 - name
                 - cloudProvider
@@ -28256,8 +28451,113 @@ paths:
                       updated_at:
                         type: string
                       vars:
-                        additionalProperties: {}
-                        type: object
+                        anyOf:
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              external_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  frozen:
+                                    type: boolean
+                                  type:
+                                    enum:
+                                      - password
+                                    type: string
+                                  value:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - isSecretRef
+                                      - id
+                                required:
+                                  - value
+                              role_arn:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  type:
+                                    enum:
+                                      - text
+                                    type: string
+                                  value:
+                                    type: string
+                                required:
+                                  - value
+                            required:
+                              - role_arn
+                              - external_id
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              azure_credentials_cloud_connector_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  type:
+                                    enum:
+                                      - text
+                                    type: string
+                                  value:
+                                    type: string
+                                required:
+                                  - value
+                              client_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  frozen:
+                                    type: boolean
+                                  type:
+                                    enum:
+                                      - password
+                                    type: string
+                                  value:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - isSecretRef
+                                      - id
+                                required:
+                                  - value
+                              tenant_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  frozen:
+                                    type: boolean
+                                  type:
+                                    enum:
+                                      - password
+                                    type: string
+                                  value:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - isSecretRef
+                                      - id
+                                required:
+                                  - value
+                            required:
+                              - tenant_id
+                              - client_id
+                              - azure_credentials_cloud_connector_id
                     required:
                       - id
                       - name
@@ -28268,7 +28568,7 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28289,7 +28589,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
@@ -28331,7 +28631,7 @@ paths:
                     type: string
                 required:
                   - id
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28352,7 +28652,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Delete cloud connector (supports force deletion)
       tags:
         - Fleet cloud connectors
@@ -28396,8 +28696,113 @@ paths:
                       updated_at:
                         type: string
                       vars:
-                        additionalProperties: {}
-                        type: object
+                        anyOf:
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              external_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  frozen:
+                                    type: boolean
+                                  type:
+                                    enum:
+                                      - password
+                                    type: string
+                                  value:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - isSecretRef
+                                      - id
+                                required:
+                                  - value
+                              role_arn:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  type:
+                                    enum:
+                                      - text
+                                    type: string
+                                  value:
+                                    type: string
+                                required:
+                                  - value
+                            required:
+                              - role_arn
+                              - external_id
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              azure_credentials_cloud_connector_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  type:
+                                    enum:
+                                      - text
+                                    type: string
+                                  value:
+                                    type: string
+                                required:
+                                  - value
+                              client_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  frozen:
+                                    type: boolean
+                                  type:
+                                    enum:
+                                      - password
+                                    type: string
+                                  value:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - isSecretRef
+                                      - id
+                                required:
+                                  - value
+                              tenant_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  frozen:
+                                    type: boolean
+                                  type:
+                                    enum:
+                                      - password
+                                    type: string
+                                  value:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - isSecretRef
+                                      - id
+                                required:
+                                  - value
+                            required:
+                              - tenant_id
+                              - client_id
+                              - azure_credentials_cloud_connector_id
                     required:
                       - id
                       - name
@@ -28408,7 +28813,7 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28429,7 +28834,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Get cloud connector
       tags:
         - Fleet cloud connectors
@@ -28465,39 +28870,113 @@ paths:
                   minLength: 1
                   type: string
                 vars:
-                  additionalProperties:
-                    anyOf:
-                      - maxLength: 1000
-                        type: string
-                      - type: number
-                      - type: boolean
-                      - additionalProperties: false
-                        type: object
-                        properties:
-                          frozen:
-                            type: boolean
-                          type:
-                            maxLength: 50
-                            type: string
-                          value:
-                            anyOf:
-                              - maxLength: 1000
-                                type: string
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  id:
-                                    maxLength: 255
-                                    type: string
-                                  isSecretRef:
-                                    type: boolean
-                                required:
-                                  - isSecretRef
-                                  - id
-                        required:
-                          - type
-                          - value
-                  type: object
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        external_id:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            frozen:
+                              type: boolean
+                            type:
+                              enum:
+                                - password
+                              type: string
+                            value:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                isSecretRef:
+                                  type: boolean
+                              required:
+                                - isSecretRef
+                                - id
+                          required:
+                            - value
+                        role_arn:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            type:
+                              enum:
+                                - text
+                              type: string
+                            value:
+                              type: string
+                          required:
+                            - value
+                      required:
+                        - role_arn
+                        - external_id
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        azure_credentials_cloud_connector_id:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            type:
+                              enum:
+                                - text
+                              type: string
+                            value:
+                              type: string
+                          required:
+                            - value
+                        client_id:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            frozen:
+                              type: boolean
+                            type:
+                              enum:
+                                - password
+                              type: string
+                            value:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                isSecretRef:
+                                  type: boolean
+                              required:
+                                - isSecretRef
+                                - id
+                          required:
+                            - value
+                        tenant_id:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            frozen:
+                              type: boolean
+                            type:
+                              enum:
+                                - password
+                              type: string
+                            value:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                isSecretRef:
+                                  type: boolean
+                              required:
+                                - isSecretRef
+                                - id
+                          required:
+                            - value
+                      required:
+                        - tenant_id
+                        - client_id
+                        - azure_credentials_cloud_connector_id
       responses:
         '200':
           content:
@@ -28525,8 +29004,113 @@ paths:
                       updated_at:
                         type: string
                       vars:
-                        additionalProperties: {}
-                        type: object
+                        anyOf:
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              external_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  frozen:
+                                    type: boolean
+                                  type:
+                                    enum:
+                                      - password
+                                    type: string
+                                  value:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - isSecretRef
+                                      - id
+                                required:
+                                  - value
+                              role_arn:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  type:
+                                    enum:
+                                      - text
+                                    type: string
+                                  value:
+                                    type: string
+                                required:
+                                  - value
+                            required:
+                              - role_arn
+                              - external_id
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              azure_credentials_cloud_connector_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  type:
+                                    enum:
+                                      - text
+                                    type: string
+                                  value:
+                                    type: string
+                                required:
+                                  - value
+                              client_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  frozen:
+                                    type: boolean
+                                  type:
+                                    enum:
+                                      - password
+                                    type: string
+                                  value:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - isSecretRef
+                                      - id
+                                required:
+                                  - value
+                              tenant_id:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  frozen:
+                                    type: boolean
+                                  type:
+                                    enum:
+                                      - password
+                                    type: string
+                                  value:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - isSecretRef
+                                      - id
+                                required:
+                                  - value
+                            required:
+                              - tenant_id
+                              - client_id
+                              - azure_credentials_cloud_connector_id
                     required:
                       - id
                       - name
@@ -28537,7 +29121,7 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28558,7 +29142,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Update cloud connector
       tags:
         - Fleet cloud connectors
