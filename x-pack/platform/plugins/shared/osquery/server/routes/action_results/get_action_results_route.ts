@@ -103,18 +103,35 @@ export const getActionResultsRoute = (
           const page = request.query.page ?? 0;
           const pageSize = request.query.pageSize ?? 100;
           const startIndex = page * pageSize;
-          const endIndex = startIndex + pageSize;
 
           let agentIds: string[];
           let agentIdsForCurrentPage: string[];
+          let totalAgentCount: number = 0;
 
+          console.log({ requestedAgentIds });
           if (requestedAgentIds) {
-            agentIds = requestedAgentIds;
-            agentIdsForCurrentPage = requestedAgentIds.slice(startIndex, endIndex);
+            // Client has full agent list and handles pagination UI.
+            // Server only returns results for the provided agents (current page).
+            agentIdsForCurrentPage = requestedAgentIds;
+            totalAgentCount = requestedAgentIds.length;
+
+            logger.info(
+              `Using client-provided agent IDs for action ${request.params.actionId} (fallback path)`,
+              {
+                reason: 'action_document_unavailable',
+                currentPageSize: requestedAgentIds.length,
+                page,
+              }
+            );
           } else {
-            // Fetch action details to get agent IDs (internal UI usage)
+            // Primary path: Fetch action details from action document (preferred)
+            // This is the main code path for internal UI - fetches agent list from Elasticsearch
             try {
-              const { actionDetails } = await lastValueFrom(
+              logger.debug(
+                `Fetching action document for ${request.params.actionId} (primary path)`
+              );
+
+              const actionDetailsResponse = await lastValueFrom(
                 search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
                   {
                     actionId: request.params.actionId,
@@ -126,16 +143,39 @@ export const getActionResultsRoute = (
                 )
               );
 
+              const { actionDetails } = actionDetailsResponse;
+
+              // The action details query uses fields API, so data is in fields, not _source
+              // Extract data from fields (which returns arrays) or fallback to _source
+              const actionData = actionDetails?._source || {
+                agents: actionDetails?.fields?.agents?.[0],
+                queries: actionDetails?.fields?.queries?.[0],
+              };
+
+              console.log({ actionData });
+              console.log({ matchingQuery });
+
               // Extract agent IDs from action document
-              if (actionDetails?._source) {
+              if (actionData?.agents || actionData?.queries) {
                 // Check if actionId is a child query action_id
-                const queries = actionDetails._source.queries || [];
+                const queries = actionData.queries || [];
                 const matchingQuery = queries.find((q) => q.action_id === request.params.actionId);
 
                 // Use query-specific agents if found, otherwise use parent action's agents
-                agentIds = matchingQuery?.agents || actionDetails._source.agents || [];
+                agentIds = matchingQuery?.agents || actionData.agents || [];
+
+                console.log({ agentIds });
+                totalAgentCount = agentIds.length;
+
+                if (agentIds.length > 100000) {
+                  logger.warn(`Action ${request.params.actionId} has ${agentIds.length} agents`);
+                }
               } else {
+                logger.warn(
+                  `Action details for ${request.params.actionId} has no agents data in _source or fields, setting agentIds to empty array`
+                );
                 agentIds = [];
+                totalAgentCount = 0;
               }
             } catch (fetchError) {
               logger.error(
@@ -161,10 +201,7 @@ export const getActionResultsRoute = (
                 agentIds: agentIdsForCurrentPage,
                 kuery: request.query.kuery,
                 startDate: request.query.startDate,
-                pagination: generateTablePaginationOptions(
-                  request.query.page ?? 0,
-                  request.query.pageSize ?? 100
-                ),
+                pagination: generateTablePaginationOptions(page, pageSize),
                 sort: {
                   direction: request.query.sortOrder ?? Direction.desc,
                   field: request.query.sort ?? '@timestamp',
@@ -177,33 +214,34 @@ export const getActionResultsRoute = (
             )
           );
 
-          const totalResponded =
-            res.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-          const totalRowCount =
-            res.rawResponse?.aggregations?.aggs.responses_by_action_id?.rows_count?.value ?? 0;
-          const aggsBuckets =
-            res.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
+          const responseAgg = res.rawResponse?.aggregations?.aggs.responses_by_action_id;
+          const totalResponded = responseAgg?.doc_count ?? 0;
+          const totalRowCount = responseAgg?.rows_count?.value ?? 0;
+          const aggsBuckets = responseAgg?.responses.buckets;
 
           const aggregations = {
             totalRowCount,
             totalResponded,
             successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
             failed: aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
-            pending: Math.max(0, (agentIds?.length ?? 0) - totalResponded),
+            pending: Math.max(0, totalAgentCount - totalResponded),
           };
 
           let processedEdges = res.edges;
 
-          // Only process edges for internal UI (when agentIds NOT provided in request)
-          if (!requestedAgentIds && agentIdsForCurrentPage.length > 0) {
+          // Create placeholders for agents that haven't responded yet
+          // This works for both internal UI (action document) and client-provided agents
+          if (agentIdsForCurrentPage.length > 0) {
             // Extract agent IDs that already have responses
             const respondedAgentIds = new Set(
-              res.edges.map((edge) => getAgentIdFromFields(edge.fields)).filter(Boolean)
+              res.edges
+                .map((edge) => getAgentIdFromFields(edge.fields))
+                .filter((id): id is string => id !== undefined)
             );
 
             // Create placeholder edges ONLY for agents that haven't responded
             const placeholderEdges = agentIdsForCurrentPage
-              .filter((agentId) => !respondedAgentIds.has(agentId))
+              .filter((agentId) => agentId && !respondedAgentIds.has(agentId))
               .map((agentId) => ({
                 _index: '.logs-osquery_manager.action.responses-default',
                 _id: `placeholder-${agentId}`,
@@ -215,14 +253,12 @@ export const getActionResultsRoute = (
             processedEdges = [...res.edges, ...placeholderEdges] as typeof res.edges;
           }
 
-          const totalAgents = agentIds?.length ?? 0;
-          const totalPages = Math.ceil(totalAgents / pageSize);
+          const totalPages = Math.ceil(totalAgentCount / pageSize);
 
           return response.ok({
             body: {
               edges: processedEdges,
               total: processedEdges.length,
-              totalAgents,
               currentPage: page,
               pageSize,
               totalPages,

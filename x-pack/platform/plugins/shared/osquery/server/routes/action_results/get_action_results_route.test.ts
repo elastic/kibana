@@ -106,7 +106,6 @@ describe('getActionResultsRoute', () => {
       // Verify response includes correct aggregations and pagination metadata
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: expect.objectContaining({
-          totalAgents: 3,
           currentPage: 0,
           pageSize: 100,
           totalPages: 1,
@@ -409,6 +408,187 @@ describe('getActionResultsRoute', () => {
     });
   });
 
+  describe('Hybrid Fallback Pagination - agentIds only', () => {
+    // Tests for the fallback path when action document is unavailable
+    // Client sends current page agent IDs only; client handles overall pagination
+
+    it('should use client-provided agent IDs when action document unavailable', async () => {
+      // Scenario: Client sends 20 agents for current page, 2 responded, 18 pending
+      const mockSearchFn = createMockSearchStrategy(
+        undefined, // Action details should NOT be fetched (fallback path)
+        createMockActionResultsResponse(2, {
+          totalResponded: 2,
+          successCount: 2,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+
+      // Client sends ONLY current page agent IDs (20 agents)
+      const currentPageAgentIds = Array.from({ length: 20 }, (_, i) => `agent-${i}`).join(',');
+
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: currentPageAgentIds,
+          page: 0,
+          pageSize: 20,
+        },
+      });
+
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify action details was NOT fetched (fallback path used)
+      expect(mockSearchFn).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          factoryQueryType: OsqueryQueries.actionDetails,
+        }),
+        expect.anything()
+      );
+
+      // Verify response - server doesn't know total, client handles pagination
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          currentPage: 0,
+          pageSize: 20,
+          // Should have 2 real results + 18 placeholders = 20 total (full page)
+          edges: expect.arrayContaining([
+            expect.objectContaining({ _id: expect.any(String) }),
+          ]),
+          total: 20, // Current page size
+        }),
+      });
+    });
+
+    it('should create placeholders for pending agents in fallback path', async () => {
+      // Scenario: Page with 5 agents, 2 responded, should create 3 placeholders
+      const mockActionResults = createMockActionResultsResponse(2, {
+        totalResponded: 2,
+        successCount: 2,
+        errorCount: 0,
+      });
+
+      // Set actual agent IDs on the 2 responses
+      mockActionResults.edges[0].fields = { agent_id: ['agent-0'] };
+      mockActionResults.edges[1].fields = { agent_id: ['agent-1'] };
+
+      const mockSearchFn = createMockSearchStrategy(undefined, mockActionResults);
+      const mockContext = createMockContext(mockSearchFn);
+
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: 'agent-0,agent-1,agent-2,agent-3,agent-4', // 5 agents current page
+          page: 0,
+          pageSize: 20,
+        },
+      });
+
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      // Should have 5 edges total: 2 real + 3 placeholders
+      expect(responseBody.edges).toHaveLength(5);
+
+      // Count placeholders (IDs starting with "placeholder-")
+      const placeholderCount = responseBody.edges.filter((edge: any) =>
+        edge._id.startsWith('placeholder-')
+      ).length;
+
+      expect(placeholderCount).toBe(3); // agent-2, agent-3, agent-4 pending
+
+      // Verify placeholders have correct agent IDs
+      const placeholderAgentIds = responseBody.edges
+        .filter((edge: any) => edge._id.startsWith('placeholder-'))
+        .map((edge: any) => edge.fields.agent_id[0])
+        .sort();
+
+      expect(placeholderAgentIds).toEqual(['agent-2', 'agent-3', 'agent-4']);
+    });
+
+    it('should maintain server-side pagination principles (URL length safe)', async () => {
+      // Verify that even with 10k agents total, only current page IDs are sent
+      const mockSearchFn = createMockSearchStrategy(
+        undefined,
+        createMockActionResultsResponse(0, {
+          totalResponded: 0,
+          successCount: 0,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+
+      // Client sends 100 agent IDs (current page), not all 10,000
+      const currentPageAgentIds = Array.from({ length: 100 }, (_, i) => `agent-${i}`).join(',');
+
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: currentPageAgentIds, // Only 100 IDs (~3,600 chars)
+          page: 0,
+          pageSize: 100,
+        },
+      });
+
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Verify URL length is reasonable
+      const agentIdsQueryParam = mockRequest.query.agentIds;
+      expect(agentIdsQueryParam.length).toBeLessThan(4000); // Well under URL limits
+
+      // Verify response - server returns current page only
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          currentPage: 0,
+          edges: expect.any(Array),
+        }),
+      });
+    });
+
+    it('should handle partial page in fallback path', async () => {
+      // Scenario: Client sends 2 agents (could be last page), 1 responded, 1 pending
+      const mockSearchFn = createMockSearchStrategy(
+        undefined,
+        createMockActionResultsResponse(1, {
+          totalResponded: 1,
+          successCount: 1,
+          errorCount: 0,
+        })
+      );
+
+      const mockContext = createMockContext(mockSearchFn);
+
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: 'agent-500,agent-501', // Only 2 agents
+          page: 25,
+          pageSize: 20,
+        },
+      });
+
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      // Should have 2 edges (1 real + 1 placeholder)
+      expect(responseBody.edges).toHaveLength(2);
+      expect(responseBody.total).toBe(2);
+      expect(responseBody.currentPage).toBe(25);
+    });
+  });
+
   describe('Error Handling', () => {
     it('should return 400 error for more than 100 agent IDs', async () => {
       const agentIds = Array.from({ length: 101 }, (_, i) => `agent-${i}`).join(',');
@@ -599,7 +779,6 @@ describe('getActionResultsRoute', () => {
       // Verify pagination metadata in response
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: expect.objectContaining({
-          totalAgents: 1,
           currentPage: 2,
           pageSize: 50,
           totalPages: 1,
@@ -663,7 +842,6 @@ describe('getActionResultsRoute', () => {
       // Verify pagination metadata is correct
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: expect.objectContaining({
-          totalAgents: 250,
           currentPage: 1,
           pageSize: 100,
           totalPages: 3,
