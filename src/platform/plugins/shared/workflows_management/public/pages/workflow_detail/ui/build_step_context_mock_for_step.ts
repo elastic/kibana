@@ -19,7 +19,6 @@ export function buildContextOverrideForStep(
 ): ContextOverrideData {
   const stepSubGraph =
     WorkflowGraph.fromWorkflowDefinition(workflowDefinition).getStepGraph(stepId);
-
   return buildContextOverride(stepSubGraph, {
     consts: workflowDefinition.consts,
     workflow: {
