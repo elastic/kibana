@@ -8,29 +8,18 @@
  */
 
 import React from 'react';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import useObservable from 'react-use/lib/useObservable';
-import type { NavigationProps } from '../types';
 
 export interface NavigationRedirectWrapperProps {
-  application: NavigationProps['application'];
+  application: any;
   children: React.ReactNode;
 }
 
 export const RedirectNavigationAppLinks: React.FC<NavigationRedirectWrapperProps> = ({
-  application,
   children,
 }) => {
-  const currentAppId = useObservable(application.currentAppId$);
-
   return (
-    <RedirectAppLinks
-      navigateToUrl={application.navigateToUrl}
-      currentAppId={currentAppId}
-      // reset default redirect app links styles
-      css={{ display: 'flex', height: '100%', flexDirection: 'row' }}
-    >
+    <div css={{ display: 'flex', height: '100%', flexDirection: 'row' }}>
       {children}
-    </RedirectAppLinks>
+    </div>
   );
 };

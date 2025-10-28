@@ -35,7 +35,6 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { css } from '@emotion/react';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -199,8 +198,7 @@ export function Header({
 
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>
-            <RedirectAppLinks
-              coreStart={{ application }}
+            <div
               css={css`
                 min-width: 0; // enable text truncation for long breadcrumb titles
               `}
@@ -210,7 +208,7 @@ export function Header({
               >
                 {Breadcrumbs}
               </BreadcrumbsWithExtensionsWrapper>
-            </RedirectAppLinks>
+            </div>
 
             <HeaderBadge badge$={observables.badge$} />
 

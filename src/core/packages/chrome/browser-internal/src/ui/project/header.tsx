@@ -32,7 +32,6 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { type ComponentProps, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -276,16 +275,13 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
-                <RedirectAppLinks
-                  coreStart={{ application }}
-                  css={headerCss.redirectAppLinksContainer}
-                >
+                <div css={headerCss.redirectAppLinksContainer}>
                   <BreadcrumbsWithExtensionsWrapper
                     breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
                   >
                     <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
                   </BreadcrumbsWithExtensionsWrapper>
-                </RedirectAppLinks>
+                </div>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
 
