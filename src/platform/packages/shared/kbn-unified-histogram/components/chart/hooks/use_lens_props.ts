@@ -69,7 +69,14 @@ export const useLensProps = ({
         lastReloadRequestTime,
       }),
     };
-  }, [visContext, request?.searchSessionId, getTimeRange, esqlVariables, onLoad, lastReloadRequestTime]);
+  }, [
+    visContext,
+    request?.searchSessionId,
+    getTimeRange,
+    esqlVariables,
+    onLoad,
+    lastReloadRequestTime,
+  ]);
 
   // Initialize with undefined to avoid rendering Lens until a fetch has been triggered
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
