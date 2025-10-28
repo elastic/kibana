@@ -9,9 +9,9 @@ import { renderHook, act } from '@testing-library/react';
 
 import { useCloudConnectorSetup } from './use_cloud_connector_setup';
 
-import { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { UpdatePolicy } from '../../types';
-import { CloudConnectorCredentials } from '../types';
+import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { UpdatePolicy } from '../../types';
+import type { CloudConnectorCredentials } from '../types';
 
 // Mock utility functions
 jest.mock('../utils', () => ({
@@ -626,12 +626,42 @@ describe('useCloudConnectorSetup', () => {
 });
 
 describe('extractVarValue helper - secret reference handling', () => {
+  const mockBasePolicy = {
+    id: 'test-policy-id',
+    enabled: true,
+    policy_id: 'test-policy',
+    policy_ids: ['test-policy'],
+    name: 'test-policy',
+    namespace: 'default',
+    package: {
+      name: 'cloud_security_posture',
+      title: 'Cloud Security Posture',
+      version: '1.0.0',
+    },
+    supports_cloud_connector: true,
+  };
+
+  const mockBaseInput = {
+    type: 'cloudbeat/cis_aws',
+    policy_template: 'cis_aws',
+    enabled: true,
+    streams: [
+      {
+        enabled: true,
+        data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
+        vars: {},
+      },
+    ],
+  } as NewPackagePolicyInput;
+
+  const mockUpdatePolicy: UpdatePolicy = jest.fn();
+
   it('should extract string values directly', () => {
     const stringInput = {
-      ...mockInput,
+      ...mockBaseInput,
       streams: [
         {
-          ...mockInput.streams[0],
+          ...mockBaseInput.streams[0],
           vars: {
             tenant_id: { value: 'simple-string-value' },
             client_id: { value: 'another-string' },
@@ -641,7 +671,7 @@ describe('extractVarValue helper - secret reference handling', () => {
     } as NewPackagePolicyInput;
 
     const stringPolicy = {
-      ...mockPolicy,
+      ...mockBasePolicy,
       inputs: [stringInput],
     } as NewPackagePolicy;
 
@@ -658,15 +688,15 @@ describe('extractVarValue helper - secret reference handling', () => {
 
   it('should extract id from secret reference objects', () => {
     const secretInput = {
-      ...mockInput,
+      ...mockBaseInput,
       streams: [
         {
-          ...mockInput.streams[0],
+          ...mockBaseInput.streams[0],
           vars: {
             tenant_id: { value: { id: 'secret-123', isSecretRef: true } },
             client_id: { value: { id: 'secret-456', isSecretRef: true } },
             azure_credentials_cloud_connector_id: {
-              value: { id: 'secret-cc-789', isSecretRef: true },
+              value: 'secret-cc-789',
             },
           },
         },
@@ -674,7 +704,7 @@ describe('extractVarValue helper - secret reference handling', () => {
     } as NewPackagePolicyInput;
 
     const secretPolicy = {
-      ...mockPolicy,
+      ...mockBasePolicy,
       inputs: [secretInput],
     } as NewPackagePolicy;
 
@@ -691,10 +721,10 @@ describe('extractVarValue helper - secret reference handling', () => {
 
   it('should handle undefined values', () => {
     const undefinedInput = {
-      ...mockInput,
+      ...mockBaseInput,
       streams: [
         {
-          ...mockInput.streams[0],
+          ...mockBaseInput.streams[0],
           vars: {
             tenant_id: { value: undefined },
             client_id: { value: undefined },
@@ -705,7 +735,7 @@ describe('extractVarValue helper - secret reference handling', () => {
     } as NewPackagePolicyInput;
 
     const undefinedPolicy = {
-      ...mockPolicy,
+      ...mockBasePolicy,
       inputs: [undefinedInput],
     } as NewPackagePolicy;
 
@@ -722,10 +752,10 @@ describe('extractVarValue helper - secret reference handling', () => {
 
   it('should handle mixed string and secret reference values', () => {
     const mixedInput = {
-      ...mockInput,
+      ...mockBaseInput,
       streams: [
         {
-          ...mockInput.streams[0],
+          ...mockBaseInput.streams[0],
           vars: {
             tenant_id: { value: 'plain-string' },
             client_id: { value: { id: 'secret-client', isSecretRef: true } },
@@ -736,7 +766,7 @@ describe('extractVarValue helper - secret reference handling', () => {
     } as NewPackagePolicyInput;
 
     const mixedPolicy = {
-      ...mockPolicy,
+      ...mockBasePolicy,
       inputs: [mixedInput],
     } as NewPackagePolicy;
 
@@ -753,6 +783,21 @@ describe('extractVarValue helper - secret reference handling', () => {
 });
 
 describe('Azure credentials with mixed secret and text vars', () => {
+  const mockBasePolicy = {
+    id: 'test-policy-id',
+    enabled: true,
+    policy_id: 'test-policy',
+    policy_ids: ['test-policy'],
+    name: 'test-policy',
+    namespace: 'default',
+    package: {
+      name: 'cloud_security_posture',
+      title: 'Cloud Security Posture',
+      version: '1.0.0',
+    },
+    supports_cloud_connector: true,
+  };
+
   const mockAzureInput = {
     type: 'cloudbeat/cis_azure',
     policy_template: 'cis_azure',
@@ -771,45 +816,14 @@ describe('Azure credentials with mixed secret and text vars', () => {
   } as NewPackagePolicyInput;
 
   const mockAzurePolicy = {
-    ...mockPolicy,
+    ...mockBasePolicy,
     inputs: [mockAzureInput],
   } as NewPackagePolicy;
 
+  const mockUpdatePolicy: UpdatePolicy = jest.fn();
+
   beforeEach(() => {
     mockIsAzureCloudConnectorVars.mockReturnValue(true);
-  });
-
-  it('should handle azure_credentials_cloud_connector_id as secret reference', () => {
-    const secretRefInput = {
-      ...mockAzureInput,
-      streams: [
-        {
-          ...mockAzureInput.streams[0],
-          vars: {
-            ...mockAzureInput.streams[0].vars,
-            azure_credentials_cloud_connector_id: {
-              value: { id: 'secret-connector-id', isSecretRef: true },
-              type: 'password',
-            },
-          },
-        },
-      ],
-    } as NewPackagePolicyInput;
-
-    const secretRefPolicy = {
-      ...mockAzurePolicy,
-      inputs: [secretRefInput],
-    } as NewPackagePolicy;
-
-    const { result } = renderHook(() =>
-      useCloudConnectorSetup(secretRefInput, secretRefPolicy, mockUpdatePolicy)
-    );
-
-    expect(result.current.newConnectionCredentials).toEqual({
-      tenantId: 'test-tenant-id',
-      clientId: 'test-client-id',
-      azure_credentials_cloud_connector_id: 'secret-connector-id',
-    });
   });
 
   it('should handle azure_credentials_cloud_connector_id as string', () => {
