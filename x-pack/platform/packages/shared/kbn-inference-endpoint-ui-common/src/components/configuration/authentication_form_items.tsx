@@ -40,7 +40,7 @@ export const AuthenticationFormItems: React.FC<AuthenticationFormItemsProps> = (
       })),
     [items]
   );
-  const configEntry = useMemo(
+  const selectedConfigEntry = useMemo(
     () => items.find((item) => item.key === authType) || items[0],
     [authType, items]
   );
@@ -58,27 +58,42 @@ export const AuthenticationFormItems: React.FC<AuthenticationFormItemsProps> = (
         </EuiTitle>
       </EuiFlexItem>
       {isMultiAuthType ? (
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            isDisabled={isLoading}
-            data-test-subj="authTypeSelect"
-            legend="Authentication type"
-            defaultValue={authType}
-            idSelected={authType}
-            onChange={(id) => setAuthType(id)}
-            options={authTypeOptions}
-            color="text"
-            type="single"
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              isDisabled={isLoading}
+              data-test-subj="authTypeSelect"
+              legend="Authentication type"
+              defaultValue={authType}
+              idSelected={authType}
+              onChange={(id) => setAuthType(id)}
+              options={authTypeOptions}
+              color="text"
+              type="single"
+            />
+          </EuiFlexItem>
+          <ItemFormRow
+            configEntry={selectedConfigEntry}
+            isPreconfigured={isPreconfigured}
+            isEdit={isEdit}
+            isLoading={isLoading}
+            setConfigEntry={setConfigEntry}
           />
-        </EuiFlexItem>
+        </>
       ) : null}
-      <ItemFormRow
-        configEntry={configEntry}
-        isPreconfigured={isPreconfigured}
-        isEdit={isEdit}
-        isLoading={isLoading}
-        setConfigEntry={setConfigEntry}
-      />
+      {isMultiAuthType === false
+        ? items.map((configEntry) => {
+            return (
+              <ItemFormRow
+                configEntry={configEntry}
+                isPreconfigured={isPreconfigured}
+                isEdit={isEdit}
+                isLoading={isLoading}
+                setConfigEntry={setConfigEntry}
+              />
+            );
+          })
+        : null}
     </EuiFlexGroup>
   );
 };
