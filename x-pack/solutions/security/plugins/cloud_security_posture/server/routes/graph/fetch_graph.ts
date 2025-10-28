@@ -18,7 +18,9 @@ import {
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
-const NON_ENRICHED_ENTITY_TYPE = 'Entities';
+const NON_ENRICHED_ENTITY_TYPE_PLURAL = 'Entities';
+const NON_ENRICHED_ENTITY_TYPE_SINGULAR = 'Entity';
+const NON_ENRICHED_PLACEHOLDER = 'NonEnriched';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -303,6 +305,34 @@ ${
       targetEntitySubType,
       isOrigin,
       isOriginAlert
+| EVAL actorEntityGroup = CASE(
+    actorEntityGroup == "${NON_ENRICHED_PLACEHOLDER}" AND actorIdsCount == 1,
+    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    actorEntityGroup == "${NON_ENRICHED_PLACEHOLDER}",
+    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}",
+    actorEntityGroup
+  )
+| EVAL targetEntityGroup = CASE(
+    targetEntityGroup == "${NON_ENRICHED_PLACEHOLDER}" AND targetIdsCount == 1,
+    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    targetEntityGroup == "${NON_ENRICHED_PLACEHOLDER}",
+    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}",
+    targetEntityGroup
+  )
+| EVAL actorEntityType = CASE(
+    actorEntityType IS NOT NULL,
+    actorEntityType,
+    actorIdsCount == 1,
+    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
+  )
+| EVAL targetEntityType = CASE(
+    targetEntityType IS NOT NULL,
+    targetEntityType,
+    targetIdsCount == 1,
+    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
+    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
+  )
 | EVAL actorLabel = CASE(
     actorEntitySubType IS NOT NULL,
     actorEntitySubType,
