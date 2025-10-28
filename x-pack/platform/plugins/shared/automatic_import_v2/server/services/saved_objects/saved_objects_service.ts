@@ -382,9 +382,9 @@ export class AutomaticImportSavedObjectService {
       if (!allDataStreamsDeleted && !options?.force) {
         throw new Error(
           `Cannot delete integration ${integrationId}: Failed to delete ${deletionErrors.length} data streams. ` +
-          `Use force option to delete the integration anyway. Errors: ${JSON.stringify(
-            deletionErrors
-          )}`
+            `Use force option to delete the integration anyway. Errors: ${JSON.stringify(
+              deletionErrors
+            )}`
         );
       }
 
