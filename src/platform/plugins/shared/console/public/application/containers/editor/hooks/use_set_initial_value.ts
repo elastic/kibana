@@ -102,7 +102,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     };
 
     // Support for loading a console snippet from a remote source, like support docs.
-    const onHashChange = debounce(async () => {
+    const loadFromUrl = debounce(async () => {
       const url = readLoadFromParam();
       if (!url) {
         return;
@@ -110,17 +110,18 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
       await loadBufferFromRemote(url);
     }, 200);
 
-    window.addEventListener('hashchange', onHashChange);
+    window.addEventListener('hashchange', loadFromUrl);
 
     // Only set the value in the editor if an initial value hasn't been set yet
     if (!isInitialValueSet.current) {
       // Only set to default input value if the localstorage value is undefined
       setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
+      loadFromUrl();
       isInitialValueSet.current = true;
     }
 
     return () => {
-      window.removeEventListener('hashchange', onHashChange);
+      window.removeEventListener('hashchange', loadFromUrl);
     };
   }, [localStorageValue, setValue, toasts, editorDispatch]);
 };

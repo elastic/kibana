@@ -25,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       await PageObjects.console.openConsole();
-      await PageObjects.console.skipTourIfExists();
       await PageObjects.console.clearEditorText();
     });
 
@@ -33,6 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('loads the data from the URI', async () => {
         await PageObjects.console.clearEditorText();
         await PageObjects.console.enterText(`GET _search`);
+        await PageObjects.console.sleepForDebouncePeriod(1000);
+
         await PageObjects.common.navigateToApp('console', {
           hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2Q', // "hello" compressed
         });
@@ -40,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const actualRequest = await PageObjects.console.getEditorText();
           // The data should be appended after the existing text
-          expect(actualRequest.trim()).to.eql('GET _search\n\nhello');
+          expect(actualRequest.trim()).to.eql('GET _search\nhello');
         });
       });
 
