@@ -10,9 +10,15 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { type DragDropAction, RootDragDropProvider } from '@kbn/dom-drag-drop';
+import type {
+  FramePublicAPI,
+  Suggestion,
+  UserMessagesGetter,
+  AddUserMessages,
+  LensInspector,
+} from '@kbn/lens-common';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import type { FramePublicAPI, Suggestion, UserMessagesGetter, AddUserMessages } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { BannerWrapper } from './banner_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -30,7 +36,6 @@ import {
   selectDatasourceStates,
   selectVisualization,
 } from '../../state_management';
-import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { getLongMessage } from '../../user_messages_utils';

@@ -25,7 +25,7 @@ paths:
               properties:
                 title:
                   description: The integration title
-                  $ref: '../primitive.schema.yaml#/components/schemas/NonEmptyString'
+                  $ref: '../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString'
                 description:
                   description: The integration description
                   type: string
@@ -46,7 +46,7 @@ paths:
                 properties:
                   integration_id:
                     description: The integration id created in state.
-                    $ref: '../primitive.schema.yaml#/components/schemas/NonEmptyString'
+                    $ref: '../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString'
   /internal/automatic_import/integrations/{integration_id}:
     patch:
       summary: Updates an existing integration.
@@ -63,7 +63,7 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: '../primitive.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
