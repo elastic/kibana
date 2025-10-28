@@ -757,7 +757,7 @@ export function convertToWorkflowGraph(
   defaultSettings?: WorkflowSettings
 ): graphlib.Graph<GraphNodeUnion> {
   const resolvedSettings = workflowSchema.settings
-    ? resolveWorklfowSettings(workflowSchema.settings, workflows)
+    ? resolveWorklfowSettings(workflowSchema.settings, defaultSettings)
     : undefined;
   const context: GraphBuildContext = {
     settings: resolvedSettings,
@@ -767,13 +767,11 @@ export function convertToWorkflowGraph(
 
   let finalGraph = createStepsSequence(workflowSchema.steps, context);
 
-  const workflowTimeout = workflowSchema.settings?.timeout || defaultSettings?.timeout;
-
-  if (workflowTimeout) {
+  if (resolvedSettings?.timeout) {
     finalGraph = handleTimeout(
       'workflow_level_timeout',
       'workflow_level_timeout',
-      workflowTimeout,
+      resolvedSettings.timeout,
       finalGraph,
       context
     );
