@@ -35,7 +35,6 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { css } from '@emotion/react';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
