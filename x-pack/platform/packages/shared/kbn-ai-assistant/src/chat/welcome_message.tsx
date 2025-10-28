@@ -24,8 +24,8 @@ import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base
 
 const fullHeightClassName = css`
   height: 100%;
-  min-height: 0; /* allow the container to shrink within flex layout */
-  overflow-y: auto; /* make welcome content scrollable when it overflows */
+  min-height: 0;
+  overflow-y: auto;
 `;
 
 const centerMaxWidthClassName = css`
