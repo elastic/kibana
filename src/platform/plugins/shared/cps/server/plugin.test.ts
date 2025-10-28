@@ -21,19 +21,43 @@ describe('CPSServerPlugin', () => {
   let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
 
   beforeEach(() => {
-    mockInitContext = coreMock.createPluginInitializerContext();
-    (mockInitContext.env.packageInfo as any).buildFlavor = 'serverless';
     mockCoreSetup = coreMock.createSetup();
-    plugin = new CPSServerPlugin(mockInitContext);
   });
 
-  it('should initialize the plugin', () => {
-    expect(plugin).toBeDefined();
+  describe('when cpsEnabled is true', () => {
+    beforeEach(() => {
+      mockInitContext = coreMock.createPluginInitializerContext({ cpsEnabled: true });
+      (mockInitContext.env.packageInfo as any).buildFlavor = 'serverless';
+      plugin = new CPSServerPlugin(mockInitContext);
+    });
+
+    it('should return true from getCpsEnabled', () => {
+      const setup = plugin.setup(mockCoreSetup);
+      expect(setup.getCpsEnabled()).toBe(true);
+    });
+
+    it('should call setCpsFeatureFlag with true', () => {
+      plugin.setup(mockCoreSetup);
+      expect(mockCoreSetup.elasticsearch.setCpsFeatureFlag).toHaveBeenCalledWith(true);
+    });
   });
 
-  it('should expose getCpsEnabled method in setup', () => {
-    const setup = plugin.setup(mockCoreSetup);
-    expect(setup).toHaveProperty('getCpsEnabled');
+  describe('when cpsEnabled is false', () => {
+    beforeEach(() => {
+      mockInitContext = coreMock.createPluginInitializerContext({ cpsEnabled: false });
+      (mockInitContext.env.packageInfo as any).buildFlavor = 'serverless';
+      plugin = new CPSServerPlugin(mockInitContext);
+    });
+
+    it('should return false from getCpsEnabled', () => {
+      const setup = plugin.setup(mockCoreSetup);
+      expect(setup.getCpsEnabled()).toBe(false);
+    });
+
+    it('should call setCpsFeatureFlag with false', () => {
+      plugin.setup(mockCoreSetup);
+      expect(mockCoreSetup.elasticsearch.setCpsFeatureFlag).toHaveBeenCalledWith(false);
+    });
   });
 
   it('should register routes in serverless mode', () => {

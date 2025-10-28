@@ -228,11 +228,6 @@ describe('#setup', () => {
     expect(typeof setupContract.agentStatsProvider.getAgentsStats).toEqual('function');
   });
 
-  it('returns an setCpsFeatureFlag function as part of the contract', async () => {
-    const setupContract = await elasticsearchService.setup(setupDeps);
-    expect(typeof setupContract.setCpsFeatureFlag).toEqual('function');
-  });
-
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
