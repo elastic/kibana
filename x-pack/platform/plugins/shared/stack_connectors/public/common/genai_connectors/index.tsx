@@ -21,6 +21,13 @@ export const temperatureField: ConfigFieldSchema = {
       id="xpack.stackConnectors.components.temperature"
     />
   ),
+  euiFieldProps: {
+    append: (
+      <EuiText size="xs" color="subdued">
+        {i18n.OPTIONAL_LABEL}
+      </EuiText>
+    ),
+  },
 };
 export const contextWindowLengthField: ConfigFieldSchema = {
   id: 'contextWindowLength',
