@@ -17,11 +17,13 @@ export interface FlyoutDescriptionItem {
  */
 export const createMainFlyoutDescriptionItems = (
   flyoutType: string,
+  flyoutOwnFocus: boolean,
   mainSize: string,
   mainMaxWidth?: number,
   renderingMethod?: string
 ): FlyoutDescriptionItem[] => [
   { title: 'Flyout type', description: flyoutType },
+  { title: 'Flyout ownFocus', description: flyoutOwnFocus ? 'true' : 'false' },
   { title: 'Main flyout size', description: mainSize },
   { title: 'Main flyout maxWidth', description: mainMaxWidth ?? 'N/A' },
   ...(renderingMethod ? [{ title: 'Rendering method', description: renderingMethod }] : []),

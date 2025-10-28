@@ -8,7 +8,16 @@
  */
 
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from './flyout';
+
+export type OverlaySystemFlyoutOpenOptions = Omit<OverlayFlyoutOpenOptions, 'session'> & {
+  /**
+   * Control the flyout session behavior. See {@link EuiFlyoutProps.session}
+   * @default "start"
+   */
+  session?: EuiFlyoutProps['session'];
+};
 
 /**
  * APIs to open and manage fly-out dialogs.
@@ -24,5 +33,5 @@ export interface OverlaySystemFlyoutStart {
    * @param options {@link EuiFlyoutProps} - options for the flyout
    * @return {@link OverlayRef} A reference to the opened flyout panel.
    */
-  open(content: React.ReactElement, options?: OverlayFlyoutOpenOptions): OverlayRef;
+  open(content: React.ReactElement, options?: OverlaySystemFlyoutOpenOptions): OverlayRef;
 }

@@ -15,7 +15,7 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type {
-  OverlayFlyoutOpenOptions,
+  OverlaySystemFlyoutOpenOptions,
   OverlaySystemFlyoutStart,
 } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -50,7 +50,7 @@ export class SystemFlyoutService {
     return {
       open: (
         content: React.ReactElement,
-        { title, ...options }: OverlayFlyoutOpenOptions = {}
+        { session = 'start', title, ...options }: OverlaySystemFlyoutOpenOptions = {}
       ): OverlayRef => {
         const flyoutId = `system-flyout-${Date.now()}`;
 
@@ -86,7 +86,7 @@ export class SystemFlyoutService {
             <EuiFlyout
               {...options}
               flyoutMenuProps={{ title }}
-              session="start"
+              session={session}
               onClose={onCloseFlyout}
               aria-label={options['aria-label']}
               aria-labelledby={options['aria-labelledby']}
