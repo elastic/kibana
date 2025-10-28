@@ -191,7 +191,7 @@ export function getConnectorInstancesForType(
 /**
  * Generate connector-id suggestions for a specific connector type
  */
-export function getConnectorIdSuggestions(
+export function getConnectorIdSuggestionsItems(
   connectorType: string,
   range: monaco.IRange,
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>

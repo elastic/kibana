@@ -8,6 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import type { AutocompleteContext } from './autocomplete/autocomplete.types';
 
 // Common Liquid filters with descriptions
 export const LIQUID_FILTERS = [
@@ -476,9 +477,16 @@ export const LIQUID_FILTERS = [
  * Creates Monaco completion items for Liquid filters
  */
 export function createLiquidFilterCompletions(
-  range: monaco.IRange,
-  filterPrefix?: string
+  autocompleteContext: AutocompleteContext
 ): monaco.languages.CompletionItem[] {
+  const { lineParseResult, range, isInLiquidBlock } = autocompleteContext;
+  if (
+    !lineParseResult ||
+    (lineParseResult.matchType === 'liquid-block-filter' && !isInLiquidBlock)
+  ) {
+    return [];
+  }
+  const filterPrefix = lineParseResult.fullKey;
   const filteredFilters = filterPrefix
     ? LIQUID_FILTERS.filter((filter) =>
         filter.name.toLowerCase().startsWith(filterPrefix.toLowerCase())
@@ -590,9 +598,13 @@ export const LIQUID_BLOCK_KEYWORDS = [
  * Creates completion items for Liquid block keywords (used inside {%- liquid ... -%} blocks)
  */
 export function createLiquidBlockKeywordCompletions(
-  range: monaco.IRange,
-  keywordPrefix?: string
+  autocompleteContext: AutocompleteContext
 ): monaco.languages.CompletionItem[] {
+  const { lineParseResult, range, isInLiquidBlock } = autocompleteContext;
+  if (!lineParseResult || !isInLiquidBlock) {
+    return [];
+  }
+  const keywordPrefix = lineParseResult.fullKey;
   const filteredKeywords = keywordPrefix
     ? LIQUID_BLOCK_KEYWORDS.filter((keyword) =>
         keyword.name.toLowerCase().startsWith(keywordPrefix.toLowerCase())
