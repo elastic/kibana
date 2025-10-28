@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient, BoundOptions, InferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, BoundOptions } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
 import { createInferenceRestClient, type RestInferenceClient } from './inference_client';
 
