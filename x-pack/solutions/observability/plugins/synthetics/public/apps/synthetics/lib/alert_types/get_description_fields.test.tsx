@@ -12,9 +12,11 @@ import { getDescriptionFields } from './get_description_fields';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 
 describe('synthetics getDescriptionFields', () => {
+  const indexField = { type: 'indexPattern', value: 'synthetics-*' };
   const mockPrebuildField = jest.fn();
   const mockPrebuildFields = {
     [RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY]: mockPrebuildField,
+    [RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]: jest.fn().mockReturnValue(indexField),
   } as unknown as PrebuildFieldsMap;
 
   beforeEach(() => {
@@ -74,6 +76,6 @@ describe('synthetics getDescriptionFields', () => {
     });
 
     expect(mockPrebuildField).toHaveBeenCalledWith('_id: *');
-    expect(result).toEqual([mockReturnValue]);
+    expect(result).toEqual([indexField, mockReturnValue]);
   });
 });

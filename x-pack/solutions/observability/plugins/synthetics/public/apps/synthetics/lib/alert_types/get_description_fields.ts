@@ -6,7 +6,6 @@
  */
 
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
-import { RULE_PREBUILD_DESCRIPTION_FIELDS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { SyntheticsMonitorStatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../common/constants/ui';
@@ -18,14 +17,10 @@ export const getDescriptionFields: GetDescriptionFieldsFn<
     return [];
   }
 
-  const fields = [
-    prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.INDEX_PATTERN]([SYNTHETICS_INDEX_PATTERN]),
-  ];
+  const fields = [prebuildFields.indexPattern([SYNTHETICS_INDEX_PATTERN])];
 
   if (rule.params.kqlQuery) {
-    fields.push(
-      prebuildFields[RULE_PREBUILD_DESCRIPTION_FIELDS.CUSTOM_QUERY](rule.params.kqlQuery)
-    );
+    fields.push(prebuildFields.customQuery(rule.params.kqlQuery));
   }
 
   return fields;
