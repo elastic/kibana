@@ -630,11 +630,11 @@ export default function emailTest({ getService }: FtrProviderContext) {
           expect(text.length).lessThan(longLength);
           expect(html.length).lessThan(longLength);
           const startMessageRegExpText =
-            /^email parameter message length 20000 exceeds 10000 bytes and has been trimmed/;
+            /^Your message's length of 20000 exceeded the 10000 bytes limit that is set for the connector/;
           const startMessageRegExpHtml =
-            /^<p>email parameter message length 20000 exceeds 10000 bytes and has been trimmed<\/p>/;
-          expect(text.match(startMessageRegExpText)).ok();
-          expect(html.match(startMessageRegExpHtml)).ok();
+            /^<p>Your message's length of 20000 exceeded the 10000 bytes limit that is set for the connector/;
+          expect(text).match(startMessageRegExpText);
+          expect(html).match(startMessageRegExpHtml);
         });
     });
 
@@ -658,7 +658,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           expect(text).to.match(/^hallo/);
           expect(`${html}`.length).to.be.lessThan(longLength);
           const startMessageRegExpHtml =
-            /^email parameter messageHTML length 20000 exceeds 10000 bytes and has been trimmed/;
+            /^Your message's length of 20000 exceeded the 10000 bytes limit that is set for the connector /;
           expect(html).to.match(startMessageRegExpHtml);
         });
     });
