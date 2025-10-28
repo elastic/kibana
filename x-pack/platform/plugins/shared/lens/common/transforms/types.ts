@@ -6,6 +6,7 @@
  */
 
 import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
+import type { Required } from 'utility-types';
 
 import type {
   LensSerializedState,
@@ -14,7 +15,8 @@ import type {
 } from '@kbn/lens-common';
 
 export type LensTransforms = Required<
-  EmbeddableTransforms<LensSerializedState, LensSerializedState>
+  EmbeddableTransforms<LensSerializedState, LensSerializedState>,
+  'transformIn' | 'transformOut'
 >;
 
 /**
