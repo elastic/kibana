@@ -6,9 +6,8 @@
  */
 
 import { isUndefined, pick, omitBy } from 'lodash';
+import { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import type {
   ActionType as ConnectorType,
@@ -43,23 +42,25 @@ export type PagerDutyConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions
 
 // config definition
 
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
+export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 
 const configSchemaProps = {
-  apiUrl: schema.nullable(schema.string()),
+  apiUrl: z.string().nullable().default(null),
 };
-const ConfigSchema = schema.object(configSchemaProps);
+const ConfigSchema = z.object(configSchemaProps).strict();
 // secrets definition
 
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
+export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 
-const SecretsSchema = schema.object({
-  routingKey: schema.string(),
-});
+const SecretsSchema = z
+  .object({
+    routingKey: z.string(),
+  })
+  .strict();
 
 // params definition
 
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+export type ActionParamsType = z.infer<typeof ParamsSchema>;
 
 const EVENT_ACTION_TRIGGER = 'trigger';
 const EVENT_ACTION_RESOLVE = 'resolve';
@@ -69,72 +70,79 @@ const EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY = new Set([
   EVENT_ACTION_ACKNOWLEDGE,
 ]);
 
-const EventActionSchema = schema.oneOf([
-  schema.literal(EVENT_ACTION_TRIGGER),
-  schema.literal(EVENT_ACTION_RESOLVE),
-  schema.literal(EVENT_ACTION_ACKNOWLEDGE),
+const EventActionSchema = z.enum([
+  EVENT_ACTION_TRIGGER,
+  EVENT_ACTION_RESOLVE,
+  EVENT_ACTION_ACKNOWLEDGE,
 ]);
 
-const PayloadSeveritySchema = schema.oneOf([
-  schema.literal('critical'),
-  schema.literal('error'),
-  schema.literal('warning'),
-  schema.literal('info'),
-]);
+const PayloadSeveritySchema = z.enum(['critical', 'error', 'warning', 'info']);
 
-const LinksSchema = schema.arrayOf(schema.object({ href: schema.string(), text: schema.string() }));
-const customDetailsSchema = schema.recordOf(schema.string(), schema.any());
+const LinksSchema = z.array(z.object({ href: z.string(), text: z.string() }).strict());
+const customDetailsSchema = z.record(z.string(), z.any());
 
-export const ParamsSchema = schema.object(
-  {
-    eventAction: schema.maybe(EventActionSchema),
-    dedupKey: schema.maybe(schema.string({ maxLength: 255 })),
-    summary: schema.maybe(schema.string({ maxLength: 1024 })),
-    source: schema.maybe(schema.string()),
-    severity: schema.maybe(PayloadSeveritySchema),
-    timestamp: schema.maybe(schema.string()),
-    component: schema.maybe(schema.string()),
-    group: schema.maybe(schema.string()),
-    class: schema.maybe(schema.string()),
-    links: schema.maybe(LinksSchema),
-    customDetails: schema.maybe(customDetailsSchema),
-  },
-  { validate: validateParams }
-);
-
-function validateParams(paramsObject: unknown): string | void {
-  const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
-  const convertedTimestamp = convertTimestamp(timestamp);
-  if (convertedTimestamp != null) {
-    try {
-      const date = moment(convertedTimestamp);
-      if (!date.isValid()) {
-        return i18n.translate('xpack.stackConnectors.pagerduty.invalidTimestampErrorMessage', {
-          defaultMessage: `error parsing timestamp "{timestamp}"`,
-          values: {
-            timestamp,
-          },
+export const ParamsSchema = z
+  .object({
+    eventAction: EventActionSchema.optional(),
+    dedupKey: z.string().max(255).optional(),
+    summary: z.string().max(1024).optional(),
+    source: z.string().optional(),
+    severity: PayloadSeveritySchema.optional(),
+    timestamp: z.string().optional(),
+    component: z.string().optional(),
+    group: z.string().optional(),
+    class: z.string().optional(),
+    links: LinksSchema.optional(),
+    customDetails: customDetailsSchema.optional(),
+  })
+  .strict()
+  .superRefine((paramsObject, ctx) => {
+    const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
+    const convertedTimestamp = convertTimestamp(timestamp);
+    if (convertedTimestamp != null) {
+      try {
+        const date = moment(convertedTimestamp);
+        if (!date.isValid()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.invalid_date,
+            message: i18n.translate(
+              'xpack.stackConnectors.pagerduty.invalidTimestampErrorMessage',
+              {
+                defaultMessage: `error parsing timestamp "{timestamp}"`,
+                values: {
+                  timestamp,
+                },
+              }
+            ),
+          });
+          return;
+        }
+      } catch (err) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.invalid_date,
+          message: i18n.translate(
+            'xpack.stackConnectors.pagerduty.timestampParsingFailedErrorMessage',
+            {
+              defaultMessage: `error parsing timestamp "{timestamp}": {message}`,
+              values: {
+                timestamp,
+                message: err.message,
+              },
+            }
+          ),
         });
       }
-    } catch (err) {
-      return i18n.translate('xpack.stackConnectors.pagerduty.timestampParsingFailedErrorMessage', {
-        defaultMessage: `error parsing timestamp "{timestamp}": {message}`,
-        values: {
-          timestamp,
-          message: err.message,
-        },
+    }
+    if (eventAction && EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: i18n.translate('xpack.stackConnectors.pagerduty.missingDedupkeyErrorMessage', {
+          defaultMessage: `DedupKey is required when eventAction is "{eventAction}"`,
+          values: { eventAction },
+        }),
       });
     }
-  }
-  if (eventAction && EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
-    return i18n.translate('xpack.stackConnectors.pagerduty.missingDedupkeyErrorMessage', {
-      defaultMessage: `DedupKey is required when eventAction is "{eventAction}"`,
-      values: {
-        eventAction,
-      },
-    });
-  }
-}
+  });
 
 export const ConnectorTypeId = '.pagerduty';
 // connector type definition
