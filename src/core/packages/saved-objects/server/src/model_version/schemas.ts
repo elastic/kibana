@@ -59,7 +59,7 @@ export interface SavedObjectsFullModelVersionSchemaDefinitions {
    * The schema applied when creating a document of the current version
    * Allows for validating properties using @kbn/config-schema validations
    */
-  create?: SavedObjectsValidationSpec;
+  create: SavedObjectsValidationSpec;
 }
 
 /**
