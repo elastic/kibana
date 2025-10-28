@@ -5,91 +5,114 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
-export const SlackApiSecretsSchema = schema.object({
-  token: schema.string({ minLength: 1 }),
-});
+export const SlackApiSecretsSchema = z
+  .object({
+    token: z.string().min(1),
+  })
+  .strict();
 
-export const SlackApiConfigSchema = schema.object({
-  allowedChannels: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        id: schema.maybe(schema.string({ minLength: 1 })),
-        name: schema.string({ minLength: 1 }),
-      }),
-      { maxSize: 500 }
-    )
-  ),
-});
+export const SlackApiConfigSchema = z
+  .object({
+    allowedChannels: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1).optional(),
+            name: z.string().min(1),
+          })
+          .strict()
+      )
+      .max(500)
+      .optional(),
+  })
+  .strict();
 
-export const ValidChannelIdSubActionParamsSchema = schema.object({
-  channelId: schema.maybe(schema.string()),
-});
+export const ValidChannelIdSubActionParamsSchema = z
+  .object({
+    channelId: z.string().optional(),
+  })
+  .strict();
 
-export const ValidChannelIdParamsSchema = schema.object({
-  subAction: schema.literal('validChannelId'),
-  subActionParams: ValidChannelIdSubActionParamsSchema,
-});
+export const ValidChannelIdParamsSchema = z
+  .object({
+    subAction: z.literal('validChannelId'),
+    subActionParams: ValidChannelIdSubActionParamsSchema,
+  })
+  .strict();
 
-export const PostMessageSubActionParamsSchema = schema.object({
-  /**
-   * @deprecated Use `channelNames` or `channelIds` instead
-   * `channelNames` takes priority over `channelIds` and `channels`
-   */
-  channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
-  channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
-  channelNames: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: 200, validate: validateChannelName }), { maxSize: 1 })
-  ),
-  text: schema.string({ minLength: 1 }),
-});
+export const PostMessageSubActionParamsSchema = z
+  .object({
+    /**
+     * @deprecated Use `channelNames` or `channelIds` instead
+     * `channelNames` takes priority over `channelIds` and `channels`
+     */
+    channels: z.array(z.string()).max(1).optional(),
+    channelIds: z.array(z.string()).max(1).optional(),
+    channelNames: z.array(z.string()).max(1),
+    text: z.string().min(1),
+  })
+  .strict();
 
-export function validateBlockkit(text: string) {
+export function validateBlockkit(text: string, ctx: z.RefinementCtx) {
   try {
     const parsedText = JSON.parse(text);
 
     if (!Object.hasOwn(parsedText, 'blocks')) {
-      return 'block kit body must contain field "blocks"';
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'block kit body must contain field "blocks"',
+      });
     }
   } catch (err) {
-    return `block kit body is not valid JSON - ${err.message}`;
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `block kit body is not valid JSON - ${err.message}`,
+    });
   }
 }
 
-export function validateChannelName(value?: string) {
+export function validateChannelName(value: string | undefined, ctx: z.RefinementCtx) {
   if (!value || value.length === 0) {
-    return 'Channel name cannot be empty';
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Channel name cannot be empty',
+    });
+    return;
   }
   if (!value.startsWith('#')) {
-    return 'Channel name must start with #';
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Channel name must start with #',
+    });
   }
 }
 
-export const PostBlockkitSubActionParamsSchema = schema.object({
-  /**
-   * @deprecated Use `channelNames` or `channelIds` instead
-   *`channelNames` takes priority over `channelIds` and `channels`
-   */
-  channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
-  channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
-  channelNames: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateChannelName }), { maxSize: 1 })
-  ),
-  text: schema.string({ validate: validateBlockkit }),
-});
+export const PostBlockkitSubActionParamsSchema = z
+  .object({
+    channels: z.array(z.string()).max(1).optional(),
+    channelIds: z.array(z.string()).max(1).optional(),
+    channelNames: z.array(z.string().superRefine(validateChannelName)).max(1),
+    text: z.string().superRefine(validateBlockkit),
+  })
+  .strict();
 
-export const PostMessageParamsSchema = schema.object({
-  subAction: schema.literal('postMessage'),
-  subActionParams: PostMessageSubActionParamsSchema,
-});
+export const PostMessageParamsSchema = z
+  .object({
+    subAction: z.literal('postMessage'),
+    subActionParams: PostMessageSubActionParamsSchema,
+  })
+  .strict();
 
-export const PostBlockkitParamsSchema = schema.object({
-  subAction: schema.literal('postBlockkit'),
-  subActionParams: PostBlockkitSubActionParamsSchema,
-});
+export const PostBlockkitParamsSchema = z
+  .object({
+    subAction: z.literal('postBlockkit'),
+    subActionParams: PostBlockkitSubActionParamsSchema,
+  })
+  .strict();
 
-export const SlackApiParamsSchema = schema.oneOf([
+export const SlackApiParamsSchema = z.union([
   ValidChannelIdParamsSchema,
   PostMessageParamsSchema,
   PostBlockkitParamsSchema,

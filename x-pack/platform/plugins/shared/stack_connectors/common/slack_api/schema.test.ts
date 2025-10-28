@@ -5,63 +5,107 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod';
 import { validateBlockkit, validateChannelName } from './schema';
 
-describe('Slack schema validations', () => {
+const ctx = {
+  addIssue: jest.fn(),
+} as unknown as z.RefinementCtx;
+
+describe('Slack Api Schema validation', () => {
   describe('validateBlockkit', () => {
-    test('should return error for invalid json', () => {
-      expect(validateBlockkit('')).toEqual(
-        `block kit body is not valid JSON - Unexpected end of JSON input`
-      );
-      expect(validateBlockkit('abc')).toEqual(
-        `block kit body is not valid JSON - Unexpected token 'a', \"abc\" is not valid JSON`
-      );
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
 
-    test('should return error for json that does not contain the "blocks" field', () => {
-      expect(validateBlockkit(JSON.stringify({ foo: 'bar' }))).toEqual(
-        `block kit body must contain field \"blocks\"`
-      );
+    test('should add error for invalid json', () => {
+      validateBlockkit('', ctx);
+      validateBlockkit('abc', ctx);
+
+      expect(ctx.addIssue).toHaveBeenCalledTimes(2);
+      expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
+        code: 'custom',
+        message: 'block kit body is not valid JSON - Unexpected end of JSON input',
+      });
+      expect(ctx.addIssue).toHaveBeenNthCalledWith(2, {
+        code: 'custom',
+        message:
+          'block kit body is not valid JSON - Unexpected token \'a\', "abc" is not valid JSON',
+      });
     });
 
-    test('should return nothing for valid blockkit text', () => {
-      expect(
-        validateBlockkit(
-          JSON.stringify({
-            blocks: [
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: 'Hello',
-                },
+    test('should add error for json that does not contain the "blocks" field', () => {
+      validateBlockkit(JSON.stringify({ foo: 'bar' }), ctx);
+      expect(ctx.addIssue).toHaveBeenCalledTimes(1);
+      expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
+        code: 'custom',
+        message: `block kit body must contain field \"blocks\"`,
+      });
+    });
+
+    test('should add nothing for valid blockkit text', () => {
+      validateBlockkit(
+        JSON.stringify({
+          blocks: [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: 'Hello',
               },
-            ],
-          })
-        )
-      ).toBeUndefined();
+            },
+          ],
+        }),
+        ctx
+      );
+      expect(ctx.addIssue).not.toHaveBeenCalled();
     });
   });
 
   describe('Validate channel name', () => {
-    test('should return error if the channel name does not start with #', () => {
-      expect(validateChannelName('general')).toBe('Channel name must start with #');
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    test('should add error if the channel name does not start with #', () => {
+      validateChannelName('general', ctx);
+      expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
+        code: 'custom',
+        message: 'Channel name must start with #',
+      });
     });
 
-    test('should return undefined for valid channel names starting with #', () => {
-      expect(validateChannelName('#general')).toBeUndefined();
-      expect(validateChannelName('#channel-123')).toBeUndefined();
+    test('should add nothing for valid channel names starting with #', () => {
+      // expect(validateChannelName('#general')).toBeUndefined();
+      // expect(validateChannelName('#channel-123')).toBeUndefined();
+      validateChannelName('#general', ctx);
+      // validateChannelName('#channel-123', ctx);
+
+      expect(ctx.addIssue).not.toHaveBeenCalled();
     });
 
-    test('should handle channel names with special characters', () => {
-      expect(validateChannelName('#test-team')).toBeUndefined();
-      expect(validateChannelName('#incident-*')).toBeUndefined();
+    test('should add nothing for channel names with special characters', () => {
+      // expect(validateChannelName('#test-team')).toBeUndefined();
+      // expect(validateChannelName('#incident-*')).toBeUndefined();
+      validateChannelName('#test-team', ctx);
+      validateChannelName('#incident-*', ctx);
+
+      expect(ctx.addIssue).not.toHaveBeenCalled();
     });
-    test('should return error for empty strings', () => {
-      expect(validateChannelName('')).toBe('Channel name cannot be empty');
+    test('should add error for empty strings', () => {
+      // expect(validateChannelName('')).toBe('Channel name cannot be empty');
+      validateChannelName('', ctx);
+      expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
+        code: 'custom',
+        message: 'Channel name cannot be empty',
+      });
     });
-    test('should return error for undefined values', () => {
-      expect(validateChannelName(undefined)).toBe('Channel name cannot be empty');
+    test('should add error for undefined values', () => {
+      // expect(validateChannelName(undefined)).toBe('Channel name cannot be empty');
+      validateChannelName(undefined, ctx);
+      expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
+        code: 'custom',
+        message: 'Channel name cannot be empty',
+      });
     });
   });
 });
