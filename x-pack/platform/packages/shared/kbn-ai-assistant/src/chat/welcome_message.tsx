@@ -24,8 +24,6 @@ import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base
 
 const fullHeightClassName = css`
   height: 100%;
-  min-height: 0;
-  overflow-y: auto;
 `;
 
 const centerMaxWidthClassName = css`
@@ -110,6 +108,7 @@ export function WelcomeMessage({
           <StarterPrompts onSelectPrompt={onSelectPrompt} />
           <EuiSpacer size="l" />
           <Disclaimer />
+          <EuiSpacer size="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
 

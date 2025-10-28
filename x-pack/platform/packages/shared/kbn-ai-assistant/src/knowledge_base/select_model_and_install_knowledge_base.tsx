@@ -162,6 +162,7 @@ export function SelectModelAndInstallKnowledgeBase({
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiButton
+            size="s"
             color="primary"
             fill
             isLoading={isInstalling}
