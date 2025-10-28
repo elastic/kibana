@@ -67,8 +67,6 @@ export interface ReferenceAttachmentTypeDefinition<TContent = unknown> {
   getDelta: (a: unknown, b: unknown) => MaybePromise<unknown>;
 }
 
-// TODO: inline vs reference attachment
-
 export type AttachmentTypeDefinition<TContent = unknown> =
   | InlineAttachmentTypeDefinition<TContent>
   | ReferenceAttachmentTypeDefinition<TContent>;

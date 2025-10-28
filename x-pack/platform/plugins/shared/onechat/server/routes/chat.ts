@@ -19,7 +19,7 @@ import {
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
 } from '@kbn/onechat-common';
-import type { AttachmentInput, UnvalidatedAttachment } from '@kbn/onechat-common/artifacts';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -96,7 +96,7 @@ export function registerChatRoutes({
     attachments,
     attachmentsService,
   }: {
-    attachments: UnvalidatedAttachment[];
+    attachments: AttachmentInput[];
     attachmentsService: AttachmentServiceStart;
   }) => {
     const results: AttachmentInput[] = [];
@@ -250,7 +250,7 @@ export function registerChatRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const [, { cloud }] = await coreSetup.getStartServices();
-        const { chat: chatService } = getInternalServices();
+        const { chat: chatService, attachments: attachmentsService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
 
         const abortController = new AbortController();
@@ -258,10 +258,18 @@ export function registerChatRoutes({
           abortController.abort();
         });
 
+        const attachments = payload.attachments
+          ? await validateAttachments({
+              attachments: payload.attachments,
+              attachmentsService,
+            })
+          : [];
+
         const chatEvents$ = callConverse({
-          chatService,
           payload,
+          attachments,
           request,
+          chatService,
           abortSignal: abortController.signal,
         });
 

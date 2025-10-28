@@ -7,34 +7,31 @@
 
 import type { AttachmentType, AttachmentDataOf } from './attachment_types';
 
-export interface AttachmentMixin<Type extends AttachmentType> {
-  /** The id of the attachment */
+/**
+ * Represents a conversation attachment, as returned by the conversation API.
+ */
+export interface Attachment<
+  Type extends string = string,
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : Record<string, unknown>
+> {
+  /** Unique identifier for the attachment */
   id: string;
   /** Type of the attachment */
-  type: AttachmentType;
+  type: Type;
   /** data bound to the attachment */
-  data: AttachmentDataOf<Type>;
-
-  // TODO: hidden in the UI
+  data: DataType;
+  /** should the attachment be hidden from the user - e.g. for screen context */
   hidden?: boolean;
-  // TODO: transient - only displayed for current round
+  /** transient attachments are only exposed during the round they were added in */
   transient?: boolean;
 }
 
-// Attachments
+// Strongly typed sub-types for known attachment types
 
-export type TextAttachment = AttachmentMixin<AttachmentType.text>;
+export type TextAttachment = Attachment<AttachmentType.text>;
+export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
 
 /**
- * Composite type representing all possible conversation attachments.
+ * Input version of an attachment, where the id is optional
  */
-export type Attachment = TextAttachment;
-
-// AttachmentInput
-
 export type AttachmentInput = Omit<Attachment, 'id'> & Partial<Pick<Attachment, 'id'>>;
-
-export type UnvalidatedAttachment = Omit<AttachmentInput, 'data' | 'type'> & {
-  type: string;
-  data: unknown;
-};

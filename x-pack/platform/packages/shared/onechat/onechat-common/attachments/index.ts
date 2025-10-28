@@ -8,9 +8,8 @@
 export type {
   Attachment,
   TextAttachment,
-  DashboardAttachment,
+  ScreenContextAttachment,
   AttachmentInput,
-  UnvalidatedAttachment,
 } from './attachments';
 export {
   AttachmentType,

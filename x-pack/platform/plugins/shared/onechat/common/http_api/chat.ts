@@ -10,7 +10,7 @@ import type {
   AssistantResponse,
   AgentCapabilities,
 } from '@kbn/onechat-common';
-import type { UnvalidatedAttachment } from '@kbn/onechat-common/artifacts';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 
 /**
  * body payload for request to the /internal/onechat/chat endpoint
@@ -20,7 +20,7 @@ export interface ChatRequestBodyPayload {
   connector_id?: string;
   conversation_id?: string;
   capabilities?: AgentCapabilities;
-  attachments?: UnvalidatedAttachment[];
+  attachments?: AttachmentInput[];
   input: string;
 }
 
