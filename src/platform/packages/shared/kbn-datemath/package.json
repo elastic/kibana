@@ -5,6 +5,5 @@
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "peerDependencies": {
     "moment": "^2.30.1"
-  },
-  "sideEffects": false
+  }
 }
