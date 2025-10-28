@@ -37,7 +37,6 @@ import type {
   ManualIngestPipelineFormState,
   EnrichmentDataSourceWithUIAttributes,
   SetFormState,
-  RemoveFormState,
   WhereBlockFormState,
   ConvertFormState,
 } from './types';
@@ -52,7 +51,7 @@ import type { ProcessorResources } from './state_management/steps_state_machine'
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['convert', 'date', 'dissect', 'grok', 'remove', 'set'];
+export const SPECIALISED_TYPES = ['convert', 'date', 'dissect', 'grok', 'set'];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -164,15 +163,6 @@ const defaultSetProcessorFormState = (): SetFormState => ({
   where: ALWAYS_CONDITION,
 });
 
-const defaultRemoveProcessorFormState = (): RemoveFormState => ({
-  action: 'remove' as const,
-  from: '',
-  by_prefix: false,
-  ignore_failure: true,
-  ignore_missing: true,
-  where: ALWAYS_CONDITION,
-});
-
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -189,7 +179,6 @@ const defaultProcessorFormStateByType: Record<
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
-  remove: defaultRemoveProcessorFormState,
   set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -227,8 +216,7 @@ export const getFormStateFromActionStep = (
     step.action === 'manual_ingest_pipeline' ||
     step.action === 'date' ||
     step.action === 'set' ||
-    step.action === 'convert' ||
-    step.action === 'remove'
+    step.action === 'convert'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -379,26 +367,11 @@ export const convertFormStateToProcessor = (
       };
     }
 
-    if (formState.action === 'remove') {
-      const { from, by_prefix, ignore_failure, ignore_missing } = formState;
-
+    if (configDrivenProcessors[formState.action]) {
       return {
-        processorDefinition: {
-          action: 'remove',
-          from,
-          by_prefix,
-          ignore_failure,
-          ignore_missing,
-          where: formState.by_prefix ? undefined : formState.where,
-        },
-      };
-    }
-
-    if (formState.action in configDrivenProcessors) {
-      return {
-        processorDefinition: configDrivenProcessors[
-          formState.action as ConfigDrivenProcessorType
-        ].convertFormStateToConfig(formState as any),
+        processorDefinition: configDrivenProcessors[formState.action].convertFormStateToConfig(
+          formState as any
+        ),
       };
     }
   }

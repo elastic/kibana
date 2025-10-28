@@ -233,23 +233,35 @@ export const convertProcessorSchema = processorBaseWithWhereSchema
   }) satisfies z.Schema<ConvertProcessor>;
 
 /**
+ * RemoveByPrefix processor
+ */
+
+export interface RemoveByPrefixProcessor extends ProcessorBase {
+  action: 'remove_by_prefix';
+  from: string;
+  ignore_missing?: boolean;
+}
+
+export const removeByPrefixProcessorSchema = processorBaseSchema.extend({
+  action: z.literal('remove_by_prefix'),
+  from: StreamlangSourceField,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<RemoveByPrefixProcessor>;
+
+/**
  * Remove processor
- * When by_prefix is true, removes the field and all its nested fields (field.*)
- * When by_prefix is true, this processor cannot be used within a where block or have a where condition
  */
 
 export interface RemoveProcessor extends ProcessorBaseWithWhere {
   action: 'remove';
   from: string;
   ignore_missing?: boolean;
-  by_prefix?: boolean;
 }
 
 export const removeProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('remove'),
   from: StreamlangSourceField,
   ignore_missing: z.optional(z.boolean()),
-  by_prefix: z.optional(z.boolean()),
 }) satisfies z.Schema<RemoveProcessor>;
 
 export type StreamlangProcessorDefinition =
@@ -260,6 +272,7 @@ export type StreamlangProcessorDefinition =
   | SetProcessor
   | AppendProcessor
   | ConvertProcessor
+  | RemoveByPrefixProcessor
   | RemoveProcessor
   | ManualIngestPipelineProcessor;
 
@@ -270,6 +283,7 @@ export const streamlangProcessorSchema = z.union([
   renameProcessorSchema,
   setProcessorSchema,
   appendProcessorSchema,
+  removeByPrefixProcessorSchema,
   removeProcessorSchema,
   convertProcessorSchema,
   manualIngestPipelineProcessorSchema,

@@ -12,7 +12,6 @@ import type {
   DissectProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
-  RemoveProcessor,
   SetProcessor,
   StreamlangWhereBlockWithUIAttributes,
 } from '@kbn/streamlang';
@@ -31,7 +30,6 @@ export type DissectFormState = DissectProcessor;
 export type DateFormState = DateProcessor;
 export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
 export type ConvertFormState = ConvertProcessor;
-export type RemoveFormState = RemoveProcessor;
 
 export type SetFormState = SetProcessor;
 
@@ -41,7 +39,6 @@ export type SpecialisedFormState =
   | DateFormState
   | ManualIngestPipelineFormState
   | ConvertFormState
-  | RemoveFormState
   | SetFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;

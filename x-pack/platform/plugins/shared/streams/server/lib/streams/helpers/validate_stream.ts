@@ -16,6 +16,7 @@ import type {
   DissectProcessor,
   GrokProcessor,
   ProcessorType,
+  RemoveByPrefixProcessor,
   RemoveProcessor,
   RenameProcessor,
   SetProcessor,
@@ -125,6 +126,7 @@ const actionStepValidators: {
       checkFieldName(step.copy_from);
     }
   },
+  remove_by_prefix: (step: RemoveByPrefixProcessor) => checkFieldName(step.from),
   remove: (step: RemoveProcessor) => checkFieldName(step.from),
   // fields referenced in manual ingest pipelines are not validated here because
   // the interface is Elasticsearch directly here, which has its own validation
@@ -138,16 +140,10 @@ function validateSteps(steps: StreamlangStep[], isWithinWhereBlock = false) {
       // Nested steps are within a where block
       validateSteps(step.where.steps, true);
     } else if (isActionBlock(step)) {
-      // Check if remove with by_prefix has a condition (where clause)
-      if (
-        step.action === 'remove' &&
-        step.by_prefix &&
-        'where' in step &&
-        step.where &&
-        !('always' in step.where)
-      ) {
+      // Check if remove_by_prefix is being used within a where block
+      if (step.action === 'remove_by_prefix' && isWithinWhereBlock) {
         throw new MalformedStreamError(
-          'remove processor with by_prefix enabled cannot have a conditional where clause. Use it unconditionally or disable by_prefix.'
+          'remove_by_prefix processor cannot be used within a where block. Use it at the root level or use the remove processor with a condition instead.'
         );
       }
 

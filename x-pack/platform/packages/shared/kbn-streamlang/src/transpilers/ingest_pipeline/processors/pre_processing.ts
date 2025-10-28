@@ -20,6 +20,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   set: { to: 'field', where: 'if' },
   append: { to: 'field', where: 'if' },
   convert: { from: 'field', to: 'target_field', where: 'if' },
+  remove_by_prefix: { from: 'fields' },
   remove: { from: 'field', where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
@@ -42,31 +43,26 @@ export const applyPreProcessing = (
   action: StreamlangProcessorDefinition['action'],
   processorWithRenames: IngestPipelineProcessor
 ): IngestProcessorContainer[] => {
-  // Special handling for remove with by_prefix: convert to script processor
-  if (action === 'remove' && (processorWithRenames as any).by_prefix) {
-    const {
-      field,
-      ignore_missing: ignoreMissing = false,
-      by_prefix: byPrefix,
-      ...rest
-    } = processorWithRenames as any;
-    const fieldArray = Array.isArray(field) ? field : [field];
+  // Special handling for remove_by_prefix: convert to script processor
+  if (action === 'remove_by_prefix') {
+    const { fields, ignore_missing: ignoreMissing = false, ...rest } = processorWithRenames as any;
+    const fieldArray = Array.isArray(fields) ? fields : [fields];
 
     // Build Painless script to remove field and all nested fields (field.*)
     // This handles both subobjects and flattened fields
     const removeStatements = fieldArray
-      .map((fieldName: string) => {
-        const checkMissing = ignoreMissing ? `if (ctx.containsKey('${fieldName}')) { ` : '';
+      .map((field: string) => {
+        const checkMissing = ignoreMissing ? `if (ctx.containsKey('${field}')) { ` : '';
         const closeMissing = ignoreMissing ? ' }' : '';
 
         // Remove the field itself
-        let script = `${checkMissing}ctx.remove('${fieldName}');${closeMissing}`;
+        let script = `${checkMissing}ctx.remove('${field}');${closeMissing}`;
 
         // For flattened fields, remove all keys that start with the prefix
         script += `
       List keysToRemove = new ArrayList();
       for (key in ctx.keySet()) {
-        if (key.startsWith('${fieldName}.')) {
+        if (key.startsWith('${field}.')) {
           keysToRemove.add(key);
         }
       }
@@ -84,18 +80,6 @@ export const applyPreProcessing = (
           ...rest,
           source: removeStatements,
         },
-      },
-    ];
-  }
-
-  // For remove processor without by_prefix, we need to strip the by_prefix field
-  // since Elasticsearch doesn't recognize it
-  if (action === 'remove') {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { by_prefix, ...rest } = processorWithRenames as any;
-    return [
-      {
-        [action]: { ...rest },
       },
     ];
   }
