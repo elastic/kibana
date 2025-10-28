@@ -7582,6 +7582,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'boolean',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7597,6 +7598,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'cartesian_point',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7612,6 +7614,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'cartesian_shape',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7627,6 +7630,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'date',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7642,6 +7646,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'date_nanos',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7657,6 +7662,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'double',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7672,6 +7678,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geo_point',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7687,6 +7694,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geo_shape',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7702,6 +7710,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geohash',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7717,6 +7726,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geohex',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7732,6 +7742,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geotile',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7747,6 +7758,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'integer',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7762,6 +7774,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'ip',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7777,6 +7790,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'keyword',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7792,6 +7806,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'keyword',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7807,6 +7822,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'long',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7822,6 +7838,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'text',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7837,6 +7854,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'text',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7852,6 +7870,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'unsigned_long',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7867,6 +7886,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'version',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
