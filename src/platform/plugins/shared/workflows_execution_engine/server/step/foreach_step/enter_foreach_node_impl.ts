@@ -126,7 +126,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     return resolvedValue;
   }
 
-  private resolveForeach() {
+  private resolveForeach(): unknown {
     const expression = this.node.configuration.foreach;
 
     if (!expression) {
@@ -137,8 +137,8 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
     if (expression.startsWith('{{') && expression.endsWith('}}')) {
       return this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);
-    } else {
-      return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
     }
+
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
   }
 }
