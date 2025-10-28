@@ -86,7 +86,10 @@ import type {
   PackagePolicyConfigRecord,
   ArchiveEntry,
 } from '../../common/types';
-import type { AzureCloudConnectorVars } from '../../common/types/models/cloud_connector';
+import type {
+  AzureCloudConnectorVars,
+  CloudConnectorVar,
+} from '../../common/types/models/cloud_connector';
 import {
   FleetError,
   fleetErrorToResponseOptions,
@@ -332,7 +335,7 @@ const extractPackagePolicyVars = (
       const azureCloudConnectorVars: AzureCloudConnectorVars = {
         tenant_id: tenantId as CloudConnectorSecretVar,
         client_id: clientId as CloudConnectorSecretVar,
-        azure_credentials_cloud_connector_id: azureCredentials as CloudConnectorSecretVar,
+        azure_credentials_cloud_connector_id: azureCredentials as CloudConnectorVar,
       };
 
       logger.debug(

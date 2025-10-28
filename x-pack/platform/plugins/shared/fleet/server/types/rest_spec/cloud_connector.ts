@@ -26,14 +26,6 @@ const CloudConnectorSecretVarSchema = schema.object({
   frozen: schema.maybe(schema.boolean()),
 });
 
-// Schema for Azure credentials that can be either a secret reference or a cloud connector ID string
-// TODO: we may not need schema.string() refactor this when the connector name is implemented https://github.com/elastic/security-team/issues/14283
-const AzureCredentialsVarSchema = schema.object({
-  type: schema.maybe(schema.literal('password')),
-  value: schema.oneOf([CloudConnectorSecretReferenceSchema, schema.string()]),
-  frozen: schema.maybe(schema.boolean()),
-});
-
 // Schema for AWS Cloud Connector Vars
 
 const AwsCloudConnectorVarsSchema = schema.object({
@@ -45,7 +37,7 @@ const AwsCloudConnectorVarsSchema = schema.object({
 const AzureCloudConnectorVarsSchema = schema.object({
   tenant_id: CloudConnectorSecretVarSchema,
   client_id: CloudConnectorSecretVarSchema,
-  azure_credentials_cloud_connector_id: AzureCredentialsVarSchema,
+  azure_credentials_cloud_connector_id: CloudConnectorVarSchema,
 });
 
 // Conditional CloudConnectorVars schema based on cloudProvider

@@ -952,8 +952,8 @@ describe('Cloud Connector API', () => {
             tenant_id: { value: { id: 'secret-tenant', isSecretRef: true }, type: 'password' },
             client_id: { value: { id: 'secret-client', isSecretRef: true }, type: 'password' },
             azure_credentials_cloud_connector_id: {
-              value: { id: 'secret-cc', isSecretRef: true },
-              type: 'password',
+              value: 'secret-cc',
+              type: 'text',
             },
           },
           packagePolicyCount: 1,
@@ -1011,8 +1011,8 @@ describe('Cloud Connector API', () => {
             tenant_id: { value: { id: 'secret-tenant', isSecretRef: true }, type: 'password' },
             client_id: { value: { id: 'secret-client', isSecretRef: true }, type: 'password' },
             azure_credentials_cloud_connector_id: {
-              value: { id: 'secret-cc', isSecretRef: true },
-              type: 'password',
+              value: 'secret-cc',
+              type: 'text',
             },
           },
           packagePolicyCount: 1,

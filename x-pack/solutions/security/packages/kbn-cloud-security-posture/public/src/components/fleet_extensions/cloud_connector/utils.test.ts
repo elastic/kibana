@@ -215,17 +215,14 @@ describe('updateInputVarsWithCredentials - Azure support', () => {
     const credentials: CloudConnectorCredentials = {
       tenantId: { id: 'secret-tenant-id', isSecretRef: true },
       clientId: { id: 'secret-client-id', isSecretRef: true },
-      azure_credentials_cloud_connector_id: { id: 'secret-cc-id', isSecretRef: true },
+      azure_credentials_cloud_connector_id: 'secret-cc-id',
     };
 
     const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
 
     expect(result?.tenant_id?.value).toEqual({ id: 'secret-tenant-id', isSecretRef: true });
     expect(result?.client_id?.value).toEqual({ id: 'secret-client-id', isSecretRef: true });
-    expect(result?.azure_credentials_cloud_connector_id?.value).toEqual({
-      id: 'secret-cc-id',
-      isSecretRef: true,
-    });
+    expect(result?.azure_credentials_cloud_connector_id?.value).toBe('secret-cc-id');
   });
 });
 
@@ -685,8 +682,8 @@ describe('Cloud Connector Type Guards', () => {
         tenant_id: { value: { id: 'tenant-id', isSecretRef: true }, type: 'password' },
         client_id: { value: { id: 'client-id', isSecretRef: true }, type: 'password' },
         azure_credentials_cloud_connector_id: {
-          value: { id: 'connector-id', isSecretRef: true },
-          type: 'password',
+          value: 'connector-id',
+          type: 'text',
         },
       };
 
@@ -700,8 +697,8 @@ describe('Cloud Connector Type Guards', () => {
         tenant_id: { value: { id: 'tenant-id', isSecretRef: true }, type: 'password' },
         client_id: { value: { id: 'client-id', isSecretRef: true }, type: 'password' },
         azure_credentials_cloud_connector_id: {
-          value: { id: 'connector-id', isSecretRef: true },
-          type: 'password',
+          value: 'connector-id',
+          type: 'text',
         },
       };
 

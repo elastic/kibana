@@ -84,14 +84,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
       }
 
-      // TODO: refactor this to remove the string type when the connector name is implemented https://github.com/elastic/security-team/issues/14283
       let name = cloudConnector.name;
       if (cloudConnector.cloudProvider === 'aws' && isAwsCloudConnectorVars(vars)) {
         name = vars.role_arn.value;
       } else if (cloudConnector.cloudProvider === 'azure' && isAzureCloudConnectorVars(vars)) {
-        // azure_credentials_cloud_connector_id.value can be either a CloudConnectorSecretReference or a string
-        const azureCredValue = vars.azure_credentials_cloud_connector_id.value;
-        name = typeof azureCredValue === 'string' ? azureCredValue : azureCredValue.id;
+        name = vars.azure_credentials_cloud_connector_id.value;
       }
 
       // Check if space awareness is enabled for namespace handling
@@ -389,24 +386,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
       }
 
-      // azure_credentials_cloud_connector_id can be either:
-      // 1. A CloudConnectorSecretReference (with id and isSecretRef)
-      // 2. A plain string (cloud connector ID for reuse)
-      const credValue = azureCredentials?.value;
-      const isSecretRef =
-        typeof credValue === 'object' &&
-        credValue !== null &&
-        'id' in credValue &&
-        'isSecretRef' in credValue;
-      const hasValidSecretRef = isSecretRef && credValue.id && credValue.isSecretRef;
-      const hasValidStringValue = typeof credValue === 'string' && credValue.length > 0;
-
-      if (!hasValidSecretRef && !hasValidStringValue) {
+      if (!azureCredentials?.value) {
         logger.error(
-          `Package policy must contain valid ${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} secret reference`
+          `Package policy must contain valid ${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} value`
         );
         throw new CloudConnectorInvalidVarsError(
-          `${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} must be a valid secret reference`
+          `${AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID} must be a valid string`
         );
       }
     } else {
