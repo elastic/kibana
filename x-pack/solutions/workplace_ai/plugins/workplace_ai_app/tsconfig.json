@@ -27,6 +27,7 @@
     "@kbn/features-plugin",
     "@kbn/logging",
     "@kbn/data-sources-registry-plugin",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",
