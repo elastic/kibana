@@ -14,7 +14,10 @@ import {
 import type { Logger } from '@kbn/logging';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_ENABLED_SETTING_ID,
+  AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
@@ -133,34 +136,39 @@ export class OnechatPlugin
 
     this.internalServices = internalServices;
 
-    // TODO: Render this conditionally based on the UI setting
-    // Register onechat nav control
-    core.chrome.navControls.registerRight({
-      mount: (element) => {
-        ReactDOM.render(
-          <OnechatNavControlInitiator
-            coreStart={core}
-            pluginsStart={startDependencies}
-            onechatService={{
-              tools: createPublicToolContract({ toolsService }),
-              openConversationFlyout: (options) =>
-                openConversationFlyout(options, {
-                  coreStart: core,
-                  services: internalServices,
-                }),
-            }}
-          />,
-          element,
-          () => {}
-        );
+    const isAgentBuilderNavEnabled = core.settings.client.get<boolean>(
+      AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
+      false
+    );
 
-        return () => {
-          ReactDOM.unmountComponentAtNode(element);
-        };
-      },
-      // right before the user profile
-      order: 1001,
-    });
+    if (isAgentBuilderNavEnabled) {
+      core.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <OnechatNavControlInitiator
+              coreStart={core}
+              pluginsStart={startDependencies}
+              onechatService={{
+                tools: createPublicToolContract({ toolsService }),
+                openConversationFlyout: (options) =>
+                  openConversationFlyout(options, {
+                    coreStart: core,
+                    services: internalServices,
+                  }),
+              }}
+            />,
+            element,
+            () => {}
+          );
+
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+        // right before the user profile
+        order: 1001,
+      });
+    }
 
     return {
       tools: createPublicToolContract({ toolsService }),
