@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiDescribedFormGroup,
   EuiFieldPassword,
   EuiFieldText,
@@ -456,6 +457,16 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 )}
               </EuiButton>
             </EuiFlexItem>
+            {isNewUser ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty flush="left" isDisabled={form.isSubmitting} onClick={onCancel}>
+                  <FormattedMessage
+                    id="xpack.security.management.users.userForm.cancelButton"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : undefined}
           </EuiFlexGroup>
         )}
       </EuiDescribedFormGroup>
