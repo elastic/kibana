@@ -20,7 +20,6 @@ import type {
   RangeValue,
   StoredFilterState,
 } from '@kbn/es-query-server';
-import type { Serializable } from '@kbn/utility-types';
 import { FilterStateStore } from '../../..';
 import { FilterConversionError } from '../errors';
 import { getFilterTypeForOperator } from './utils';
@@ -86,8 +85,8 @@ export function convertFromSimpleCondition(
   baseStored: StoredFilter
 ): StoredFilter {
   // Build query and meta based on operator
-  let query: Record<string, any>;
-  let meta: Serializable = {
+  let query: Record<string, unknown>;
+  let meta: Record<string, unknown> = {
     ...baseStored.meta,
     key: condition.field,
     field: condition.field,
@@ -138,7 +137,7 @@ export function convertFromSimpleCondition(
       const rangeValue = condition.value as RangeValue;
 
       // Build range query, preserving format for timestamp fields
-      const rangeQuery: any = { ...rangeValue };
+      const rangeQuery: Record<string, unknown> = { ...rangeValue };
       if (condition.field === '@timestamp') {
         rangeQuery.format = 'strict_date_optional_time';
       }
@@ -146,7 +145,7 @@ export function convertFromSimpleCondition(
       query = { range: { [condition.field]: rangeQuery } };
 
       // Only put range values (not format) in meta.params
-      const paramsValue: any = {};
+      const paramsValue: Record<string, unknown> = {};
       if (rangeValue.gte !== undefined) paramsValue.gte = rangeValue.gte;
       if (rangeValue.lte !== undefined) paramsValue.lte = rangeValue.lte;
       if (rangeValue.gt !== undefined) paramsValue.gt = rangeValue.gt;
@@ -203,7 +202,7 @@ export function convertFromFilterGroup(group: FilterGroup, baseStored: StoredFil
       ...meta,
       key: field,
       type: 'phrases',
-      params: values as any,
+      params: values,
     };
 
     // Build match_phrase queries for each value
@@ -213,7 +212,7 @@ export function convertFromFilterGroup(group: FilterGroup, baseStored: StoredFil
       },
     }));
 
-    const boolQuery: any = {
+    const boolQuery: Record<string, unknown> = {
       should: clauses,
       minimum_should_match: 1,
     };
@@ -272,7 +271,7 @@ export function convertFromFilterGroup(group: FilterGroup, baseStored: StoredFil
 export function convertFromDSLFilter(dsl: RawDSLFilter, baseStored: StoredFilter): StoredFilter {
   // Smart type detection - preserve semantic types when possible
   let type = 'custom';
-  let params: any;
+  let params: Record<string, unknown> | undefined;
 
   // Check if this is actually a phrase filter in DSL form
   if (dsl.query.match_phrase) {

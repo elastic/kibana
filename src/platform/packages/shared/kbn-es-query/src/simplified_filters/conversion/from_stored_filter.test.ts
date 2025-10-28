@@ -11,11 +11,11 @@ import {
   fromStoredFilter,
   convertToSimpleCondition,
   parseQueryFilter,
-  parseLegacyFilter,
   extractFieldFromQuery,
 } from './from_stored_filter';
 import { FilterConversionError } from '../errors';
 import { isConditionFilter, isGroupFilter, isDSLFilter } from './type_guards';
+import type { Filter } from '@kbn/es-query-server';
 
 describe('fromStoredFilter', () => {
   describe('main conversion function', () => {
@@ -140,7 +140,7 @@ describe('fromStoredFilter', () => {
       const storedFilter = {
         meta: { key: 'field' },
         query: { exists: { field: 'test_field' } },
-      };
+      } as Filter;
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -158,7 +158,7 @@ describe('fromStoredFilter', () => {
             age: { gte: 18, lte: 65 },
           },
         },
-      };
+      } as Filter;
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -177,7 +177,7 @@ describe('fromStoredFilter', () => {
             status: ['active', 'pending'],
           },
         },
-      };
+      } as Filter;
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -192,7 +192,7 @@ describe('fromStoredFilter', () => {
       const storedFilter = {
         meta: { key: 'status', negate: true },
         query: { term: { status: 'inactive' } },
-      };
+      } as Filter;
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -207,7 +207,7 @@ describe('fromStoredFilter', () => {
       const storedFilter = {
         meta: {},
         query: { term: { username: 'john' } },
-      };
+      } as Filter;
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -218,7 +218,7 @@ describe('fromStoredFilter', () => {
       const storedFilter = {
         meta: { key: 'field' },
         query: { unsupported_query: { field: 'value' } },
-      };
+      } as Filter;
 
       expect(() => convertToSimpleCondition(storedFilter)).toThrow(FilterConversionError);
     });
@@ -227,12 +227,13 @@ describe('fromStoredFilter', () => {
   describe('parseQueryFilter', () => {
     it('should parse match_phrase queries', () => {
       const storedFilter = {
+        meta: {},
         query: {
           match_phrase: {
             message: 'error occurred',
           },
         },
-      };
+      } as Filter;
 
       const result = parseQueryFilter(storedFilter);
 
@@ -245,12 +246,13 @@ describe('fromStoredFilter', () => {
 
     it('should parse match_phrase queries with object values', () => {
       const storedFilter = {
+        meta: {},
         query: {
           match_phrase: {
             message: { query: 'error occurred' },
           },
         },
-      };
+      } as Filter;
 
       const result = parseQueryFilter(storedFilter);
 
@@ -263,6 +265,7 @@ describe('fromStoredFilter', () => {
 
     it('should parse match queries with phrase type', () => {
       const storedFilter = {
+        meta: {},
         query: {
           match: {
             message: {
@@ -271,7 +274,7 @@ describe('fromStoredFilter', () => {
             },
           },
         },
-      };
+      } as Filter;
 
       const result = parseQueryFilter(storedFilter);
 
@@ -279,39 +282,6 @@ describe('fromStoredFilter', () => {
         field: 'message',
         operator: 'is',
         value: 'test message',
-      });
-    });
-  });
-
-  describe('parseLegacyFilter', () => {
-    it('should parse legacy range filters', () => {
-      const storedFilter = {
-        range: {
-          age: { gte: 18, lte: 65 },
-        },
-      };
-
-      const result = parseLegacyFilter(storedFilter);
-
-      expect(result).toEqual({
-        field: 'age',
-        operator: 'range',
-        value: { gte: 18, lte: 65 },
-      });
-    });
-
-    it('should parse legacy exists filters', () => {
-      const storedFilter = {
-        exists: {
-          field: 'username',
-        },
-      };
-
-      const result = parseLegacyFilter(storedFilter);
-
-      expect(result).toEqual({
-        field: 'username',
-        operator: 'exists',
       });
     });
   });

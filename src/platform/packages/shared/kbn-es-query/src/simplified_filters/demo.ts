@@ -15,7 +15,7 @@
  * Shows both the new functional API and backward-compatible class API.
  */
 
-import type { SimplifiedFilter } from '@kbn/es-query-server';
+import type { Filter, SimplifiedFilter } from '@kbn/es-query-server';
 import { createFilter, field, and, FilterPatterns } from '.';
 // New modular imports
 import {
@@ -82,7 +82,7 @@ export function demoSimpleFilterCreation() {
  */
 export function demoModularAPI() {
   // Example: Legacy filter from production system
-  const legacyStoredFilter = {
+  const legacyStoredFilter: Filter = {
     meta: {
       type: 'phrase',
       key: 'user.status',
@@ -291,7 +291,7 @@ export function demoUnitTestingBenefits() {
   const scriptCompatibility = isFullyCompatibleFn(scriptFilter);
 
   // 2. Test property extraction independently
-  const complexStoredFilter = {
+  const complexStoredFilter: Filter = {
     $state: { store: 'globalState' },
     meta: {
       key: 'user.id',

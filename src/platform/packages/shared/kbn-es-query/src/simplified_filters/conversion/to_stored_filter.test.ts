@@ -44,11 +44,8 @@ describe('toStoredFilter', () => {
         negate: false,
       });
       expect(result.query).toEqual({
-        match: {
-          status: {
-            query: 'active',
-            type: 'phrase',
-          },
+        match_phrase: {
+          status: 'active',
         },
       });
     });
@@ -81,28 +78,10 @@ describe('toStoredFilter', () => {
 
       const result = toStoredFilter(simplified);
 
-      expect(result.query).toEqual({
-        bool: {
-          must: [
-            {
-              match: {
-                status: {
-                  query: 'active',
-                  type: 'phrase',
-                },
-              },
-            },
-            {
-              match: {
-                type: {
-                  query: 'user',
-                  type: 'phrase',
-                },
-              },
-            },
-          ],
-        },
-      });
+      // AND groups use combined filter format
+      expect(result.meta.type).toBe('combined');
+      expect(result.meta.relation).toBe('AND');
+      expect(Array.isArray(result.meta.params)).toBe(true);
     });
 
     it('should convert DSL filters', () => {
@@ -168,11 +147,8 @@ describe('toStoredFilter', () => {
       const result = convertFromSimpleCondition(condition, createBaseStored());
 
       expect(result.query).toEqual({
-        match: {
-          status: {
-            query: 'active',
-            type: 'phrase',
-          },
+        match_phrase: {
+          status: 'active',
         },
       });
       expect(result.meta.type).toBe('phrase');
@@ -210,28 +186,16 @@ describe('toStoredFilter', () => {
 
       const result = convertFromFilterGroup(group, createBaseStored());
 
-      expect(result.query).toEqual({
-        bool: {
-          must: [
-            {
-              match: {
-                status: {
-                  query: 'active',
-                  type: 'phrase',
-                },
-              },
-            },
-            {
-              match: {
-                type: {
-                  query: 'user',
-                  type: 'phrase',
-                },
-              },
-            },
-          ],
-        },
-      });
+      // AND groups use combined filter format with meta.params
+      expect(result.meta.type).toBe('combined');
+      expect(result.meta.relation).toBe('AND');
+      expect(Array.isArray(result.meta.params)).toBe(true);
+      expect(result.meta.params).toHaveLength(2);
+
+      // Verify the params contain the converted filters
+      const params = result.meta.params as unknown as any[];
+      expect(params[0].query).toEqual({ match_phrase: { status: 'active' } });
+      expect(params[1].query).toEqual({ match_phrase: { type: 'user' } });
     });
 
     it('should convert OR groups to should queries', () => {

@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RecursiveWritable, Writable } from '@kbn/utility-types';
+import type { Writable } from '@kbn/utility-types';
 import type {
   timeRangeSchema,
   absoluteTimeRangeSchema,
@@ -38,7 +38,7 @@ export type RelativeTimeRange = TypeOf<typeof relativeTimeRangeSchema>;
 export type Query = Writable<TypeOf<typeof querySchema>>;
 export type AggregateQuery = Writable<TypeOf<typeof aggregateQuerySchema>>;
 
-export type Filter = RecursiveWritable<TypeOf<typeof filterSchema>>;
+export type Filter = Writable<TypeOf<typeof filterSchema>>;
 export type FilterMeta = Writable<TypeOf<typeof filterMetaSchema>>;
 
 /**

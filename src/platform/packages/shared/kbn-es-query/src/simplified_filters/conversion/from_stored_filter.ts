@@ -9,7 +9,17 @@
 
 /**
  * Functions for converting stored filters to SimplifiedFilter format
- * Uses 3-tier approach: Full Compatibility -> Enhanced Compatibility -> Preserve Original
+ *
+ * Conversion Strategy (in order of precedence):
+ * 1. Legacy Migration: Normalize pre-ES 5.x filters with top-level query properties
+ * 2. Full Compatibility: Direct conversion to SimpleFilterCondition (simple operators)
+ * 3. Enhanced Compatibility: Parse complex query structures into SimpleFilterCondition
+ * 4. High-Fidelity: Preserve complex filters as RawDSL (custom queries, scripts, etc.)
+ * 5. Group Filters: Convert combined/bool queries to FilterGroup
+ * 6. Fallback: Preserve as RawDSL to avoid data loss
+ *
+ * Note on typing: Filter.query is Record<string, any> in the core type definition.
+ * We use controlled `any` casts where needed to access dynamic query structures.
  */
 
 import type {
@@ -18,7 +28,9 @@ import type {
   FilterGroup,
   RawDSLFilter,
   RangeValue,
+  Filter,
 } from '@kbn/es-query-server';
+import { migrateFilter } from '../../es_query/migrate_filter';
 import { FilterConversionError } from '../errors';
 import { extractBaseProperties } from './utils';
 import {
@@ -27,26 +39,42 @@ import {
   isStoredGroupFilter,
   requiresHighFidelity,
   isPhraseFilterWithQuery,
+  isLegacyFilter,
 } from './type_guards';
 
 /**
  * Convert stored Filter (from saved objects/URL state) to SimplifiedFilter
- * Uses 3-tier approach: Full Compatibility -> Enhanced Compatibility -> Preserve Original
+ *
+ * Accepts unknown to handle potentially malformed or legacy filter data from saved objects.
+ * Validates and transforms the input into a known good SimplifiedFilter format.
+ *
+ * @param storedFilter - Filter data from saved objects (may be legacy, modern, or malformed)
+ * @returns SimplifiedFilter with condition, group, or dsl format
+ * @throws FilterConversionError if filter is null/undefined or critically malformed
  */
-export function fromStoredFilter(storedFilter: any): SimplifiedFilter {
+export function fromStoredFilter(storedFilter: unknown): SimplifiedFilter {
   try {
     // Handle null/undefined input
     if (!storedFilter) {
       throw new FilterConversionError('Cannot convert null or undefined filter');
     }
 
-    // Extract base properties from stored filter
-    const baseProperties = extractBaseProperties(storedFilter);
+    // Cast to Filter for type-safe access (we validate shape through type guards below)
+    const filter = storedFilter as Filter;
 
-    // TIER 1: Full Compatibility - Direct SimplifiedFilter conversion
-    if (isFullyCompatible(storedFilter)) {
+    // Migrate legacy filter formats (pre-ES 5.x) to modern format only if needed
+    // This avoids unnecessary processing for modern filters, which would lose properties
+    // via migrateFilter's pick() call. Legacy filters have top-level query properties
+    // (range, exists, match_all, match) that need to be moved under .query
+    const normalizedFilter = isLegacyFilter(filter) ? migrateFilter(filter as any) : filter;
+
+    // Extract base properties from stored filter
+    const baseProperties = extractBaseProperties(normalizedFilter);
+
+    // STRATEGY 1: Full Compatibility - Direct SimplifiedFilter conversion
+    if (isFullyCompatible(normalizedFilter)) {
       try {
-        const condition = convertToSimpleCondition(storedFilter);
+        const condition = convertToSimpleCondition(normalizedFilter);
         return {
           ...baseProperties,
           condition,
@@ -56,11 +84,11 @@ export function fromStoredFilter(storedFilter: any): SimplifiedFilter {
       }
     }
 
-    // TIER 2: Enhanced Compatibility - Parse and simplify when possible
-    // This now includes phrase filters with match_phrase queries
-    if (isEnhancedCompatible(storedFilter) || isPhraseFilterWithQuery(storedFilter)) {
+    // STRATEGY 2: Enhanced Compatibility - Parse and simplify when possible
+    // This includes phrase filters with match_phrase queries
+    if (isEnhancedCompatible(normalizedFilter) || isPhraseFilterWithQuery(normalizedFilter)) {
       try {
-        const condition = convertWithEnhancement(storedFilter);
+        const condition = convertWithEnhancement(normalizedFilter);
         return {
           ...baseProperties,
           condition,
@@ -70,18 +98,18 @@ export function fromStoredFilter(storedFilter: any): SimplifiedFilter {
       }
     }
 
-    // TIER 2.5: High-Fidelity Check - Preserve as DSL only for truly complex cases
-    if (requiresHighFidelity(storedFilter)) {
+    // STRATEGY 3: High-Fidelity Check - Preserve as DSL only for truly complex cases
+    if (requiresHighFidelity(normalizedFilter)) {
       return {
         ...baseProperties,
-        dsl: convertToRawDSLWithReason(storedFilter),
+        dsl: convertToRawDSLWithReason(normalizedFilter),
       } as SimplifiedFilter;
     }
 
-    // Handle grouped filters
-    if (isStoredGroupFilter(storedFilter)) {
+    // STRATEGY 4: Handle grouped filters
+    if (isStoredGroupFilter(normalizedFilter)) {
       try {
-        const group = convertToFilterGroup(storedFilter);
+        const group = convertToFilterGroup(normalizedFilter);
         return {
           ...baseProperties,
           group,
@@ -91,10 +119,10 @@ export function fromStoredFilter(storedFilter: any): SimplifiedFilter {
       }
     }
 
-    // TIER 3: Preserve Original - No data loss, keep as RawDSL
+    // STRATEGY 5: Preserve Original - No data loss, keep as RawDSL
     return {
       ...baseProperties,
-      dsl: convertToRawDSLWithReason(storedFilter),
+      dsl: convertToRawDSLWithReason(normalizedFilter),
     } as SimplifiedFilter;
   } catch (error) {
     if (error instanceof FilterConversionError) {
@@ -108,13 +136,15 @@ export function fromStoredFilter(storedFilter: any): SimplifiedFilter {
 }
 
 /**
- * Convert stored filter to simple condition (Tier 1 & 2)
+ * Convert stored filter to simple condition (Strategy 1 & 2)
  */
-export function convertToSimpleCondition(storedFilter: any): SimpleFilterCondition {
+export function convertToSimpleCondition(storedFilter: Filter): SimpleFilterCondition {
   const meta = storedFilter.meta || {};
-  const query = storedFilter.query || {};
+  // Note: Filter.query is Record<string, any> | undefined
+  // We cast to any to access specific query properties dynamically
+  const query = (storedFilter.query || {}) as any;
 
-  // Extract field name
+  // Extract field name - ExtendedFilter type includes optional 'field' property
   const field = meta.key || meta.field || extractFieldFromQuery(query);
   if (!field) {
     throw new FilterConversionError('Cannot determine field name from stored filter');
@@ -185,11 +215,13 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
   }
 
   // Fallback - try to extract from meta.params
-  if (meta.params?.query) {
+  // Note: params can be various types; checking for object with query property
+  const params = meta.params as { query?: unknown } | undefined;
+  if (params && typeof params === 'object' && 'query' in params && params.query !== undefined) {
     return {
       field,
       operator: meta.negate ? 'is_not' : 'is',
-      value: meta.params.query,
+      value: params.query as string | number | boolean,
     };
   }
 
@@ -199,13 +231,20 @@ export function convertToSimpleCondition(storedFilter: any): SimpleFilterConditi
 /**
  * Convert stored filter to filter group
  */
-export function convertToFilterGroup(storedFilter: any): FilterGroup {
+export function convertToFilterGroup(storedFilter: Filter): FilterGroup {
   // Handle combined filter format (legacy): meta.type === 'combined' with params array
   if (storedFilter.meta?.type === 'combined' && Array.isArray(storedFilter.meta.params)) {
+    // ExtendedFilter type includes optional 'relation' property
     const type = storedFilter.meta.relation === 'OR' ? 'OR' : 'AND';
 
-    const conditions: Array<SimpleFilterCondition | FilterGroup> = storedFilter.meta.params.map(
-      (param: any) => {
+    // Type guard: params should be Filter[] for combined filters
+    const params = storedFilter.meta.params;
+    if (!Array.isArray(params) || params.some((p) => typeof p === 'string')) {
+      throw new FilterConversionError('Combined filter params must be Filter array');
+    }
+
+    const conditions: Array<SimpleFilterCondition | FilterGroup> = (params as Filter[]).map(
+      (param) => {
         // Each param is itself a complete stored filter
         // Recursively convert it to get the condition
         const paramFilter = fromStoredFilter(param);
@@ -235,13 +274,14 @@ export function convertToFilterGroup(storedFilter: any): FilterGroup {
   }
 
   const type = query.must ? 'AND' : 'OR';
-  const clauses = query.must || query.should || [];
+  const clausesRaw = query.must || query.should || [];
+  const clauses = Array.isArray(clausesRaw) ? clausesRaw : [clausesRaw];
 
-  const conditions: Array<SimpleFilterCondition | FilterGroup> = clauses.map((clause: any) => {
+  const conditions: Array<SimpleFilterCondition | FilterGroup> = clauses.map((clause: unknown) => {
     // Create a mock stored filter for each clause to convert recursively
-    const mockStored = {
+    const mockStored: Filter = {
       meta: storedFilter.meta,
-      query: clause,
+      query: clause as any,
     };
 
     // This is a simplified conversion - in practice, you'd need more sophisticated logic
@@ -255,17 +295,12 @@ export function convertToFilterGroup(storedFilter: any): FilterGroup {
 }
 
 /**
- * TIER 2: Convert with enhancement - parse complex structures when possible
+ * STRATEGY 2: Convert with enhancement - parse complex structures when possible
  */
-export function convertWithEnhancement(storedFilter: any): SimpleFilterCondition {
-  // Handle query-based filters
+export function convertWithEnhancement(storedFilter: Filter): SimpleFilterCondition {
+  // Handle query-based filters (legacy filters already migrated to query format)
   if (storedFilter.query) {
     return parseQueryFilter(storedFilter);
-  }
-
-  // Handle legacy filter structures
-  if (storedFilter.range || storedFilter.exists) {
-    return parseLegacyFilter(storedFilter);
   }
 
   throw new FilterConversionError('Filter is not enhancement-compatible');
@@ -274,8 +309,12 @@ export function convertWithEnhancement(storedFilter: any): SimpleFilterCondition
 /**
  * Parse query-based filters (match_phrase, range, exists, etc.)
  */
-export function parseQueryFilter(storedFilter: any): SimpleFilterCondition {
-  const query = storedFilter.query;
+export function parseQueryFilter(storedFilter: Filter): SimpleFilterCondition {
+  // Cast to any to access dynamic query properties
+  const query = storedFilter.query as any;
+  if (!query) {
+    throw new FilterConversionError('Filter query is undefined');
+  }
   const meta = storedFilter.meta || {};
 
   // Handle match_phrase queries
@@ -353,36 +392,9 @@ export function parseQueryFilter(storedFilter: any): SimpleFilterCondition {
 }
 
 /**
- * Parse legacy filter structures (pre-query format)
+ * STRATEGY 3: Convert to RawDSL with preservation reason
  */
-export function parseLegacyFilter(storedFilter: any): SimpleFilterCondition {
-  // Handle legacy range filters
-  if (storedFilter.range) {
-    const field = Object.keys(storedFilter.range)[0];
-    const rangeConfig = storedFilter.range[field];
-
-    return {
-      field,
-      operator: 'range',
-      value: rangeConfig,
-    };
-  }
-
-  // Handle legacy exists filters
-  if (storedFilter.exists) {
-    return {
-      field: storedFilter.exists.field,
-      operator: 'exists',
-    };
-  }
-
-  throw new FilterConversionError('Legacy filter type not supported');
-}
-
-/**
- * TIER 3: Convert to RawDSL with preservation reason
- */
-export function convertToRawDSLWithReason(storedFilter: any): RawDSLFilter {
+export function convertToRawDSLWithReason(storedFilter: Filter): RawDSLFilter {
   // Preserved as RawDSL for maximum compatibility
   return {
     query: storedFilter.query || storedFilter,
@@ -390,23 +402,31 @@ export function convertToRawDSLWithReason(storedFilter: any): RawDSLFilter {
 }
 
 /**
- * Extract field name from query structure
+ * Extract field name from query object (for filters without meta.key)
  */
-export function extractFieldFromQuery(query: any): string | null {
-  if (query.term) {
-    return Object.keys(query.term)[0] || null;
+export function extractFieldFromQuery(query: unknown): string | null {
+  if (!query || typeof query !== 'object') return null;
+
+  // Cast to any to access dynamic query properties
+  const q = query as any;
+
+  if (q.term) {
+    return Object.keys(q.term)[0] || null;
   }
-  if (query.terms) {
-    return Object.keys(query.terms)[0] || null;
+  if (q.terms) {
+    return Object.keys(q.terms)[0] || null;
   }
-  if (query.range) {
-    return Object.keys(query.range)[0] || null;
+  if (q.range) {
+    return Object.keys(q.range)[0] || null;
   }
-  if (query.exists) {
-    return query.exists.field || null;
+  if (q.exists) {
+    return q.exists.field || null;
   }
-  if (query.match) {
-    return Object.keys(query.match)[0] || null;
+  if (q.match) {
+    return Object.keys(q.match)[0] || null;
+  }
+  if (q.match_phrase) {
+    return Object.keys(q.match_phrase)[0] || null;
   }
   return null;
 }

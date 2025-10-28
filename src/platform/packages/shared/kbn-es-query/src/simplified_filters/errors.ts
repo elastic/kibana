@@ -11,7 +11,7 @@
  * FilterConversionError: Custom error for filter conversion failures
  */
 export class FilterConversionError extends Error {
-  constructor(message: string, public readonly originalFilter?: any) {
+  constructor(message: string, public readonly originalFilter?: unknown) {
     super(message);
     this.name = 'FilterConversionError';
   }

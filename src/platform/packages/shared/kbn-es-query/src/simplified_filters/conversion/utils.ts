@@ -11,23 +11,24 @@
  * Utility functions for filter conversion
  */
 
-import type { SimplifiedFilter } from '@kbn/es-query-server';
+import type { SimplifiedFilter, Filter } from '@kbn/es-query-server';
 
 /**
  * Extract base properties from stored filter
  */
-export function extractBaseProperties(storedFilter: any): Partial<SimplifiedFilter> {
-  const $state = storedFilter.$state || {};
-  const meta = storedFilter.meta || {};
+export function extractBaseProperties(storedFilter: Filter): Partial<SimplifiedFilter> {
+  const $state = storedFilter.$state;
+  const meta = storedFilter.meta;
 
   return {
-    id: meta.key || undefined,
-    pinned: $state.store === 'globalState' ? true : $state.store === 'appState' ? false : undefined,
-    disabled: meta.disabled === true ? true : meta.disabled === false ? false : undefined,
-    controlledBy: meta.controlledBy || undefined,
-    indexPattern: meta.index || undefined,
-    negate: meta.negate === true ? true : meta.negate === false ? false : undefined,
-    label: meta.alias || undefined,
+    id: meta?.key || undefined,
+    pinned:
+      $state?.store === 'globalState' ? true : $state?.store === 'appState' ? false : undefined,
+    disabled: meta?.disabled === true ? true : meta?.disabled === false ? false : undefined,
+    controlledBy: meta?.controlledBy || undefined,
+    indexPattern: meta?.index || undefined,
+    negate: meta?.negate === true ? true : meta?.negate === false ? false : undefined,
+    label: meta?.alias || undefined,
   };
 }
 

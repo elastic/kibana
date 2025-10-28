@@ -16,7 +16,36 @@ import type {
   SimpleFilterCondition,
   FilterGroup,
   RawDSLFilter,
+  Filter,
 } from '@kbn/es-query-server';
+
+/**
+ * Legacy filter interface for pre-ES 5.x filters
+ * These filters have query properties at the top level instead of under .query
+ */
+interface LegacyFilter {
+  meta?: unknown;
+  $state?: unknown;
+  range?: unknown;
+  exists?: unknown;
+  match_all?: unknown;
+  match?: unknown;
+}
+
+/**
+ * Type guard to check if a filter has legacy pre-ES 5.x properties
+ * These filters have query properties at the top level instead of under .query
+ */
+export function isLegacyFilter(value: unknown): value is LegacyFilter {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const filter = value as Record<string, unknown>;
+
+  // Check for legacy top-level properties (pre-ES 5.x format)
+  return !!(filter.range || filter.exists || filter.match_all || filter.match);
+}
 
 // ====================================================================
 // TIER DETECTION FUNCTIONS
@@ -25,21 +54,22 @@ import type {
 /**
  * TIER 1: Full Compatibility - Can be directly converted to SimplifiedFilter
  */
-export function isFullyCompatible(storedFilter: any): boolean {
-  const meta = storedFilter.meta || {};
+export function isFullyCompatible(storedFilter: unknown): boolean {
+  const filter = storedFilter as Filter;
+  const meta = filter.meta || {};
 
   // Simple phrase filter without complex query structure
-  if (meta.type === 'phrase' && !storedFilter.query && meta.params) {
+  if (meta.type === 'phrase' && !filter.query && meta.params) {
     return true;
   }
 
-  // Basic exists filter without query structure
-  if (meta.type === 'exists' && !storedFilter.query) {
+  // Simple exists filter
+  if (meta.type === 'exists' && !filter.query) {
     return true;
   }
 
   // Simple range filter without complex query structure
-  if (meta.type === 'range' && !storedFilter.query && meta.params) {
+  if (meta.type === 'range' && !filter.query && meta.params) {
     return true;
   }
 
@@ -49,24 +79,28 @@ export function isFullyCompatible(storedFilter: any): boolean {
 /**
  * Check if this is a phrase filter that can be converted to a simple condition
  */
-export function isPhraseFilterWithQuery(storedFilter: any): boolean {
+export function isPhraseFilterWithQuery(storedFilter: unknown): boolean {
+  const filter = storedFilter as Filter;
   // match_phrase queries that can be simplified to phrase conditions
-  if (storedFilter.query?.match_phrase) {
+  if (filter.query?.match_phrase) {
     return true;
   }
 
   // match queries with phrase type that can be simplified
-  if (storedFilter.query?.match) {
-    const matchValues = Object.values(storedFilter.query.match);
-    const isSimplePhrase = matchValues.some((value: any) => {
-      return (
-        typeof value === 'object' &&
-        value !== null &&
-        value.type === 'phrase' &&
-        !value.analyzer &&
-        !value.fuzziness &&
-        !value.minimum_should_match
-      );
+  if (filter.query?.match) {
+    const matchValues = Object.values(filter.query.match);
+    const isSimplePhrase = matchValues.some((value: unknown) => {
+      // Type guard for match query value
+      if (typeof value !== 'object' || value === null) {
+        return false;
+      }
+      const v = value as {
+        type?: string;
+        analyzer?: unknown;
+        fuzziness?: unknown;
+        minimum_should_match?: unknown;
+      };
+      return v.type === 'phrase' && !v.analyzer && !v.fuzziness && !v.minimum_should_match;
     });
     if (isSimplePhrase) {
       return true;
@@ -74,7 +108,7 @@ export function isPhraseFilterWithQuery(storedFilter: any): boolean {
   }
 
   // meta.type indicates this should be treated as phrase filter
-  if (storedFilter.meta?.type === 'phrase' && storedFilter.query) {
+  if (filter.meta?.type === 'phrase' && filter.query) {
     return true;
   }
 
@@ -85,21 +119,26 @@ export function isPhraseFilterWithQuery(storedFilter: any): boolean {
  * TIER 1.5: High-Fidelity Detection - Requires DSL preservation
  * Updated to exclude simple phrase filters
  */
-export function requiresHighFidelity(storedFilter: any): boolean {
+export function requiresHighFidelity(storedFilter: unknown): boolean {
   // Simple phrase filters should be converted, not preserved
   if (isPhraseFilterWithQuery(storedFilter)) {
     return false;
   }
 
+  const filter = storedFilter as Filter;
   // Complex match queries with advanced parameters still need DSL preservation
-  if (storedFilter.query?.match) {
-    const matchValues = Object.values(storedFilter.query.match);
-    const hasComplexParams = matchValues.some((value: any) => {
-      return (
-        typeof value === 'object' &&
-        value !== null &&
-        (value.analyzer || value.fuzziness || value.minimum_should_match)
-      );
+  if (filter.query?.match) {
+    const matchValues = Object.values(filter.query.match);
+    const hasComplexParams = matchValues.some((value: unknown) => {
+      if (typeof value !== 'object' || value === null) {
+        return false;
+      }
+      const v = value as {
+        analyzer?: unknown;
+        fuzziness?: unknown;
+        minimum_should_match?: unknown;
+      };
+      return v.analyzer || v.fuzziness || v.minimum_should_match;
     });
     if (hasComplexParams) {
       return true;
@@ -112,39 +151,53 @@ export function requiresHighFidelity(storedFilter: any): boolean {
 /**
  * TIER 2: Enhanced Compatibility - Can be parsed and simplified
  */
-export function isEnhancedCompatible(storedFilter: any): boolean {
+export function isEnhancedCompatible(storedFilter: unknown): boolean {
+  const filter = storedFilter as Filter;
   // Exclude high-fidelity cases from simple conversion
   if (requiresHighFidelity(storedFilter)) {
     return false;
   }
 
-  // Check for simplifiable query structures
-  if (storedFilter.query?.match) {
+  // Try to convert phrase filters with queries
+  if (isPhraseFilterWithQuery(storedFilter)) {
     return true;
   }
 
-  if (storedFilter.query?.term) {
+  // Match queries can be parsed into phrase/range conditions
+  if (filter.query?.match) {
+    const matchValues = Object.values(filter.query.match);
+    return matchValues.some((value) => typeof value === 'string' || typeof value === 'number');
+  }
+
+  // Term queries
+  if (filter.query?.term) {
     return true;
   }
 
-  if (storedFilter.query?.terms) {
+  // Terms queries (multi-value conditions)
+  if (filter.query?.terms) {
     return true;
   }
 
-  if (storedFilter.query?.range) {
+  // Range queries
+  if (filter.query?.range) {
     return true;
   }
 
-  if (storedFilter.query?.exists) {
+  // Exists queries
+  if (filter.query?.exists) {
     return true;
   }
 
-  // Legacy filter structures that can be migrated
-  if (storedFilter.range && !storedFilter.query) {
+  // Legacy range format (without query wrapper)
+  // Need to cast to access legacy properties not in Filter type
+  const legacyFilter = filter as { range?: unknown; exists?: unknown; query?: unknown };
+  if (legacyFilter.range && !legacyFilter.query) {
     return true;
   }
 
-  if (storedFilter.exists && !storedFilter.query) {
+  // Legacy exists format
+  if (legacyFilter.exists && !legacyFilter.query) {
     return true;
   }
 
@@ -154,21 +207,21 @@ export function isEnhancedCompatible(storedFilter: any): boolean {
 /**
  * Detect if this represents a grouped filter with multiple conditions
  */
-export function isStoredGroupFilter(storedFilter: any): boolean {
+export function isStoredGroupFilter(storedFilter: unknown): boolean {
+  const filter = storedFilter as Filter;
   // Combined filter format (legacy): meta.type === 'combined' with params array
   if (
-    storedFilter.meta?.type === 'combined' &&
-    Array.isArray(storedFilter.meta.params) &&
-    storedFilter.meta.params.length > 0
+    filter.meta?.type === 'combined' &&
+    Array.isArray(filter.meta.params) &&
+    (filter.meta.params as unknown[]).length > 0
   ) {
     return true;
   }
 
-  // Bool query format (modern): bool with must/should clauses
-  if (
-    storedFilter.query?.bool &&
-    (storedFilter.query.bool.must?.length > 1 || storedFilter.query.bool.should?.length > 1)
-  ) {
+  // Nested bool query with multiple conditions
+  // Cast query to access nested bool structure
+  const boolQuery = filter.query?.bool as { must?: unknown[]; should?: unknown[] } | undefined;
+  if (boolQuery && ((boolQuery.must?.length ?? 0) > 1 || (boolQuery.should?.length ?? 0) > 1)) {
     return true;
   }
 
@@ -211,7 +264,7 @@ export function isDSLFilter(
  */
 export function isConditionWithValue(
   condition: SimpleFilterCondition
-): condition is SimpleFilterCondition & { value: any } {
+): condition is SimpleFilterCondition & { value: unknown } {
   return !['exists', 'not_exists'].includes(condition.operator);
 }
 
@@ -230,5 +283,6 @@ export function isExistenceCondition(
 export function isNestedFilterGroup(
   condition: SimpleFilterCondition | FilterGroup
 ): condition is FilterGroup {
-  return 'conditions' in condition && Array.isArray((condition as any).conditions);
+  const c = condition as { conditions?: unknown };
+  return 'conditions' in condition && Array.isArray(c.conditions);
 }

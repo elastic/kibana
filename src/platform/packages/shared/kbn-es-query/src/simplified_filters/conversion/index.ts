@@ -25,7 +25,6 @@ export {
   convertToFilterGroup,
   convertWithEnhancement,
   parseQueryFilter,
-  parseLegacyFilter,
   convertToRawDSLWithReason,
   extractFieldFromQuery,
 } from './from_stored_filter';

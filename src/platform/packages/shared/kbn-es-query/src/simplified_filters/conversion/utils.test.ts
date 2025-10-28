@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Filter } from '@kbn/es-query-server';
 import { extractBaseProperties, getFilterTypeForOperator } from './utils';
 
 describe('Utils', () => {
   describe('extractBaseProperties', () => {
     it('should extract all base properties from stored filter', () => {
-      const storedFilter = {
+      const storedFilter: Filter = {
         $state: { store: 'globalState' },
         meta: {
           key: 'test_field',
@@ -39,7 +40,7 @@ describe('Utils', () => {
     });
 
     it('should handle missing properties gracefully', () => {
-      const storedFilter = {};
+      const storedFilter = {} as unknown as Filter;
 
       const result = extractBaseProperties(storedFilter);
 
@@ -55,7 +56,7 @@ describe('Utils', () => {
     });
 
     it('should detect non-global state as not pinned', () => {
-      const storedFilter = {
+      const storedFilter: Filter = {
         $state: { store: 'appState' },
         meta: { key: 'field1' },
       };
@@ -69,7 +70,7 @@ describe('Utils', () => {
       const storedFilter = {
         $state: {},
         meta: { key: 'field1', disabled: false },
-      };
+      } as unknown as Filter;
 
       const result = extractBaseProperties(storedFilter);
 
