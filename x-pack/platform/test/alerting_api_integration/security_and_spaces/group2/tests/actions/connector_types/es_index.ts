@@ -142,8 +142,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'error validating action type config: [index]: expected value of type [string] but got [number]',
+            message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"number\",\n    \"path\": [\n      \"index\"\n    ],\n    \"message\": \"Expected string, received number\"\n  }\n]`,
           });
         });
     });
