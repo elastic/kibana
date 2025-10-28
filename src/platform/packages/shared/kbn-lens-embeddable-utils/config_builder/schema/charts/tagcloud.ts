@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
-import { coloringTypeSchema } from '../color';
+import { colorByValueSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import {
@@ -32,7 +32,7 @@ const tagcloudStateTagsByOptionsSchema = schema.object({
   /**
    * Color configuration
    */
-  color: schema.maybe(coloringTypeSchema),
+  color: schema.maybe(schema.oneOf([colorByValueSchema, staticColorSchema])),
 });
 
 const tagcloudStateSharedOptionsSchema = {
