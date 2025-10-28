@@ -996,4 +996,169 @@ describe('parseRecords', () => {
       expect(serviceNode.documentsData).toEqual([]);
     });
   });
+
+  describe('non-enriched entities', () => {
+    describe('single non-enriched entity', () => {
+      it('should create node with "Entities" type and entity.id as label', () => {
+        const records: GraphEdge[] = [
+          {
+            action: 'test.action',
+            actorIds: ['non-enriched-actor-123'],
+            targetIds: ['non-enriched-target-456'],
+            actorEntityGroup: 'Entities',
+            targetEntityGroup: 'Entities',
+            actorEntityType: 'Entities',
+            targetEntityType: 'Entities',
+            actorLabel: 'non-enriched-actor-123',
+            targetLabel: 'non-enriched-target-456',
+            actorIdsCount: 1,
+            targetIdsCount: 1,
+            badge: 1,
+            uniqueEventsCount: 1,
+            uniqueAlertsCount: 0,
+            docs: ['{"id":"event1","type":"event"}'],
+            isOrigin: false,
+            isOriginAlert: false,
+            isAlert: false,
+            actorHostIps: [],
+            targetHostIps: [],
+            sourceIps: [],
+            sourceCountryCodes: [],
+          },
+        ];
+
+        const result = parseRecords(mockLogger, records);
+
+        // Find actor node
+        const actorNode = result.nodes.find(
+          (n) => n.id === 'non-enriched-actor-123'
+        ) as EntityNodeDataModel;
+        expect(actorNode).toBeDefined();
+        expect(actorNode.label).toBe('non-enriched-actor-123');
+        expect(actorNode.tag).toBe('Entities');
+        expect(actorNode.icon).toBe('database');
+        expect(actorNode.shape).toBe('rectangle');
+
+        // Find target node
+        const targetNode = result.nodes.find(
+          (n) => n.id === 'non-enriched-target-456'
+        ) as EntityNodeDataModel;
+        expect(targetNode).toBeDefined();
+        expect(targetNode.label).toBe('non-enriched-target-456');
+        expect(targetNode.tag).toBe('Entities');
+        expect(targetNode.icon).toBe('database');
+        expect(targetNode.shape).toBe('rectangle');
+      });
+    });
+
+    describe('multiple non-enriched entities', () => {
+      it('should create grouped node with "Entities" type and null label', () => {
+        const records: GraphEdge[] = [
+          {
+            action: 'test.action.multiple',
+            actorIds: ['entity-1', 'entity-2', 'entity-3'],
+            targetIds: ['target-1', 'target-2'],
+            actorEntityGroup: 'Entities',
+            targetEntityGroup: 'Entities',
+            actorEntityType: 'Entities',
+            targetEntityType: 'Entities',
+            actorLabel: null as any,
+            targetLabel: null as any,
+            actorIdsCount: 3,
+            targetIdsCount: 2,
+            badge: 5,
+            uniqueEventsCount: 5,
+            uniqueAlertsCount: 0,
+            docs: [
+              '{"id":"event1","type":"event"}',
+              '{"id":"event2","type":"event"}',
+              '{"id":"event3","type":"event"}',
+              '{"id":"event4","type":"event"}',
+              '{"id":"event5","type":"event"}',
+            ],
+            isOrigin: false,
+            isOriginAlert: false,
+            isAlert: false,
+            actorHostIps: [],
+            targetHostIps: [],
+            sourceIps: [],
+            sourceCountryCodes: [],
+          },
+        ];
+
+        const result = parseRecords(mockLogger, records);
+
+        // Actor node should use first ID and have null label
+        const actorNode = result.nodes.find((n) => n.id === 'entity-1') as EntityNodeDataModel;
+        expect(actorNode).toBeDefined();
+        expect(actorNode.label).toBeNull();
+        expect(actorNode.tag).toBe('Entities');
+        expect(actorNode.icon).toBe('database');
+        expect(actorNode.shape).toBe('rectangle');
+        expect(actorNode.count).toBe(3);
+
+        // Target node should use first ID and have null label
+        const targetNode = result.nodes.find((n) => n.id === 'target-1') as EntityNodeDataModel;
+        expect(targetNode).toBeDefined();
+        expect(targetNode.label).toBeNull();
+        expect(targetNode.tag).toBe('Entities');
+        expect(targetNode.icon).toBe('database');
+        expect(targetNode.shape).toBe('rectangle');
+        expect(targetNode.count).toBe(2);
+      });
+    });
+
+    describe('mixed enriched and non-enriched entities', () => {
+      it('should handle both enriched and non-enriched entities correctly', () => {
+        const records: GraphEdge[] = [
+          {
+            action: 'test.action.mixed',
+            actorIds: ['enriched-user-1'],
+            targetIds: ['non-enriched-target-1'],
+            actorEntityGroup: 'user',
+            targetEntityGroup: 'Entities',
+            actorEntityType: 'user',
+            targetEntityType: 'Entities',
+            actorLabel: 'admin',
+            targetLabel: 'non-enriched-target-1',
+            actorIdsCount: 1,
+            targetIdsCount: 1,
+            badge: 1,
+            uniqueEventsCount: 1,
+            uniqueAlertsCount: 0,
+            docs: ['{"id":"event1","type":"event"}'],
+            isOrigin: false,
+            isOriginAlert: false,
+            isAlert: false,
+            actorHostIps: [],
+            targetHostIps: [],
+            sourceIps: [],
+            sourceCountryCodes: [],
+          },
+        ];
+
+        const result = parseRecords(mockLogger, records);
+
+        // Enriched actor should maintain its type
+        const actorNode = result.nodes.find(
+          (n) => n.id === 'enriched-user-1'
+        ) as EntityNodeDataModel;
+        expect(actorNode).toBeDefined();
+        expect(actorNode.label).toBe('admin');
+        expect(actorNode.tag).toBe('user');
+        expect(actorNode.icon).toBe('user');
+        expect(actorNode.shape).toBe('ellipse');
+
+        // Non-enriched target should have "Entities" type
+        const targetNode = result.nodes.find(
+          (n) => n.id === 'non-enriched-target-1'
+        ) as EntityNodeDataModel;
+        expect(targetNode).toBeDefined();
+        expect(targetNode.label).toBe('non-enriched-target-1');
+        expect(targetNode.tag).toBe('Entities');
+        expect(targetNode.icon).toBe('database');
+        expect(targetNode.shape).toBe('rectangle');
+      });
+    });
+  });
 });
