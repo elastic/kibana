@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  getRedirectAppLinksServicesMock,
-  getRedirectAppLinksKibanaDependenciesMock,
-} from './src/jest';
-export { StorybookMock as RedirectAppLinksStorybookMock } from './src/storybook';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-global-redirect-app-links'],
+};
