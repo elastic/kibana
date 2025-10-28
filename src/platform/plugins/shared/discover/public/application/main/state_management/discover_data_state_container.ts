@@ -137,8 +137,6 @@ export interface DiscoverDataStateContainer {
   getInitialFetchStatus: () => FetchStatus;
 }
 
-const fallBacklastReloadRequestTime$ = new BehaviorSubject(0);
-
 /**
  * Container responsible for fetching of data in Discover Main
  * Either by triggering requests to Elasticsearch directly, or by
