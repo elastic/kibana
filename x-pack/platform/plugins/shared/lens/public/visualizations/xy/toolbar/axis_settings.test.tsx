@@ -8,12 +8,11 @@
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import type { AxisSettingsPopover } from './axis_settings';
 import { XyAxisSettings } from './axis_settings';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 
-type Props = ComponentProps<typeof AxisSettingsPopover>;
+type Props = ComponentProps<typeof XyAxisSettings>;
 
 jest.useFakeTimers();
 jest.mock('lodash', () => ({
