@@ -78,7 +78,6 @@ export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean 
 /* --- Triggers --- */
 export const AlertRuleTriggerSchema = z.object({
   type: z.literal('alert'),
-  enabled: z.boolean().optional().default(true),
   with: z
     .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
     .optional(),
@@ -86,7 +85,6 @@ export const AlertRuleTriggerSchema = z.object({
 
 export const ScheduledTriggerSchema = z.object({
   type: z.literal('scheduled'),
-  enabled: z.boolean().optional().default(true),
   with: z.union([
     // New format: every: "5m", "2h", "1d", "30s"
     z.object({
@@ -111,7 +109,6 @@ export const ScheduledTriggerSchema = z.object({
 
 export const ManualTriggerSchema = z.object({
   type: z.literal('manual'),
-  enabled: z.boolean().optional().default(true),
 });
 
 export const TriggerSchema = z.discriminatedUnion('type', [
