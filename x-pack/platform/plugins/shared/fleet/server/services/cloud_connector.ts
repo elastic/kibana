@@ -389,7 +389,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
       }
 
-      
       // azure_credentials_cloud_connector_id can be either:
       // 1. A CloudConnectorSecretReference (with id and isSecretRef)
       // 2. A plain string (cloud connector ID for reuse)
