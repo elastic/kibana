@@ -210,6 +210,93 @@ apiTest.describe(
       expect(source).toHaveProperty('message', 'keep-this');
     });
 
+    apiTest('should remove flattened fields within a nested subobject', async ({ testBed }) => {
+      const indexName = 'streams-e2e-test-remove-by-prefix-nested-with-flattened';
+
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'remove_by_prefix',
+            from: 'attributes.foo.bar',
+          } as RemoveByPrefixProcessor,
+        ],
+      };
+
+      const { processors } = transpile(streamlangDSL);
+
+      const docs = [
+        {
+          attributes: {
+            'foo.bar': 123,
+            'foo.bar.xyz': 123,
+            'foo.bar.xyz2': 456,
+            'foo.bar.xyz2.234': 456,
+            'foo.baz': 789, // Should NOT be removed
+          },
+          message: 'keep-this',
+        },
+      ];
+      await testBed.ingest(indexName, docs, processors);
+
+      const ingestedDocs = await testBed.getDocs(indexName);
+      expect(ingestedDocs).toHaveLength(1);
+      const source = ingestedDocs[0];
+      // All foo.bar* fields removed from attributes
+      expect(source.attributes).not.toHaveProperty('foo.bar');
+      expect(source.attributes).not.toHaveProperty('foo.bar.xyz');
+      expect(source.attributes).not.toHaveProperty('foo.bar.xyz2');
+      expect(source.attributes).not.toHaveProperty('foo.bar.xyz2.234');
+      // Other fields kept
+      expect(source.attributes['foo.baz']).toBe(789);
+      expect(source).toHaveProperty('message', 'keep-this');
+    });
+
+    apiTest(
+      'should remove flattened fields within a deeply nested subobject',
+      async ({ testBed }) => {
+        const indexName = 'streams-e2e-test-remove-by-prefix-deeply-nested-with-flattened';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'remove_by_prefix',
+              from: 'resource.attributes.foo.bar',
+            } as RemoveByPrefixProcessor,
+          ],
+        };
+
+        const { processors } = transpile(streamlangDSL);
+
+        const docs = [
+          {
+            resource: {
+              attributes: {
+                'foo.bar': 123,
+                'foo.bar.xyz': 123,
+                'foo.bar.xyz2': 456,
+                'foo.bar.xyz2.234': 456,
+                'foo.baz': 789, // Should NOT be removed
+              },
+            },
+            message: 'keep-this',
+          },
+        ];
+        await testBed.ingest(indexName, docs, processors);
+
+        const ingestedDocs = await testBed.getDocs(indexName);
+        expect(ingestedDocs).toHaveLength(1);
+        const source = ingestedDocs[0];
+        // All foo.bar* fields removed from resource.attributes
+        expect(source.resource.attributes).not.toHaveProperty('foo.bar');
+        expect(source.resource.attributes).not.toHaveProperty('foo.bar.xyz');
+        expect(source.resource.attributes).not.toHaveProperty('foo.bar.xyz2');
+        expect(source.resource.attributes).not.toHaveProperty('foo.bar.xyz2.234');
+        // Other fields kept
+        expect(source.resource.attributes['foo.baz']).toBe(789);
+        expect(source).toHaveProperty('message', 'keep-this');
+      }
+    );
+
     [
       {
         templateField: 'host.{{field_name}}',
