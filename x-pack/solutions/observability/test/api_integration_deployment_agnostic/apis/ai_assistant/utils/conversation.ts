@@ -80,7 +80,7 @@ export async function invokeChatCompleteWithFunctionRequest({
 
   expect(status).to.be(200);
 
-  return body;
+  return body as Readable;
 }
 
 export async function chatComplete({
