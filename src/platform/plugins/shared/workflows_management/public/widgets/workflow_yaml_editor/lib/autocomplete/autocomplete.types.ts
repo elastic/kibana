@@ -14,25 +14,30 @@ import type { z } from '@kbn/zod';
 import type { LineParseResult } from './parse_line_for_completion';
 import type { StepInfo } from '../store/utils/build_workflow_lookup';
 
+// TODO: see if we can reduce the number of properties in this interface
 export interface AutocompleteContext {
   triggerCharacter: string | null;
   triggerKind: monaco.languages.CompletionTriggerKind | null;
+  range: monaco.IRange;
   line: string;
   lineUpToCursor: string;
   lineParseResult: LineParseResult | null;
-  lastPathSegment: string | null;
   contextSchema: z.ZodType;
   focusedStepInfo: StepInfo | null;
   connectorType: string | null;
   yamlDocument: Document;
   scalarType: Scalar.Type | null;
   path: (string | number)[];
-  range: monaco.IRange;
   absolutePosition: number;
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
   isInLiquidBlock: boolean;
   shouldUseCurlyBraces: boolean;
   shouldBeQuoted: boolean;
+}
+
+// we don't want to pass model and position, but currently it's used in getWithBlockSuggestions
+// TODO: refactor this to not pass model and position
+export interface ExtendedAutocompleteContext extends AutocompleteContext {
   model: monaco.editor.ITextModel;
   position: monaco.Position;
 }

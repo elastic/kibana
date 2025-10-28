@@ -14,51 +14,15 @@ import { z } from '@kbn/zod';
 import { parseLineForCompletion } from './autocomplete/parse_line_for_completion';
 import { getCompletionItemProvider } from './get_completion_item_provider';
 import { performComputation } from './store/utils/computation';
+import { createMockMonacoTextModel } from '../../../../common/mocks/monaco_model';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
-
-// Mock Monaco editor model
-const createMockModel = (value: string, cursorOffset: number) => {
-  const lines = value.split('\n');
-  let position = { lineNumber: 1, column: 1 };
-
-  // Calculate line and column from offset
-  let currentOffset = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const lineLength = lines[i].length + 1; // +1 for newline
-    if (currentOffset + lineLength > cursorOffset) {
-      position = {
-        lineNumber: i + 1,
-        column: cursorOffset - currentOffset + 1,
-      };
-      break;
-    }
-    currentOffset += lineLength;
-  }
-
-  return {
-    getValue: () => value,
-    getLineContent: (lineNumber: number) => lines[lineNumber - 1] || '',
-    getWordUntilPosition: (pos: typeof position) => ({
-      word: '',
-      startColumn: pos.column,
-      endColumn: pos.column,
-    }),
-    getWordAtPosition: (pos: typeof position) => ({
-      word: '',
-      startColumn: pos.column,
-      endColumn: pos.column,
-    }),
-    getOffsetAt: (pos: typeof position) => cursorOffset,
-    getPositionAt: (offset: number) => position,
-  };
-};
 
 async function getSuggestions(
   completionProvider: monaco.languages.CompletionItemProvider,
   yamlContent: string
 ) {
   const cursorOffset = yamlContent.indexOf('|<-');
-  const mockModel = createMockModel(yamlContent, cursorOffset);
+  const mockModel = createMockMonacoTextModel(yamlContent, cursorOffset);
   const position = mockModel.getPositionAt(cursorOffset);
   const triggerCharacter = yamlContent.slice(cursorOffset - 1, cursorOffset);
 

@@ -17,13 +17,13 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
   const {
     triggerCharacter,
     range,
-    lastPathSegment,
     contextSchema,
     scalarType,
     shouldBeQuoted,
     shouldUseCurlyBraces,
   } = autocompleteContext;
   const suggestions: monaco.languages.CompletionItem[] = [];
+  const lastPathSegment = autocompleteContext.lineParseResult?.pathSegments?.pop() ?? null;
   // We're inside a variable expression, provide context-based completions
   if (contextSchema instanceof z.ZodObject) {
     const contextKeys = Object.keys(contextSchema.shape);

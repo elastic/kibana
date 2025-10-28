@@ -9,7 +9,7 @@
 
 import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import type { z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
@@ -21,13 +21,15 @@ import { getConnectorTypeFromContext } from '../snippets/generate_connector_snip
 import type { StepInfo, WorkflowDetailState } from '../store';
 
 export function buildAutocompleteContext(
-  editorState: WorkflowDetailState,
+  editorState: Pick<
+    WorkflowDetailState,
+    'yamlString' | 'computed' | 'focusedStepId' | 'connectors'
+  >,
   model: monaco.editor.ITextModel,
   position: monaco.Position,
   completionContext: monaco.languages.CompletionContext
 ): AutocompleteContext | null {
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
-  const workflowYamlSchema = editorState?.schemaLoose;
   const workflowGraph = editorState?.computed?.workflowGraph;
   const yamlDocument = editorState?.computed?.yamlDocument;
   const workflowLookup = editorState?.computed?.workflowLookup;
@@ -81,7 +83,7 @@ export function buildAutocompleteContext(
   // First check if we're in a connector's with block (using enhanced detection)
   const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
 
-  let contextSchema: z.ZodType = workflowYamlSchema as z.ZodType;
+  let contextSchema: z.ZodType = z.object({});
   try {
     if (workflowDefinition && workflowGraph) {
       contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path);
@@ -112,7 +114,6 @@ export function buildAutocompleteContext(
     line,
     lineUpToCursor,
     lineParseResult: parseResult,
-    lastPathSegment,
     contextSchema,
     focusedStepInfo,
     connectorType,
@@ -125,7 +126,5 @@ export function buildAutocompleteContext(
     isInLiquidBlock,
     shouldUseCurlyBraces,
     shouldBeQuoted,
-    model,
-    position,
   };
 }

@@ -7,35 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
-
 /**
  * Simple mock for monaco model, partially compatible with the real model to be use in tests
  * @param yamlContent - The yaml content to create the model from
+ * @param cursorOffset - The offset of the cursor in the model
  * @returns The mock monaco model with getLineCount, getOffsetAt, getPositionAt, getLineContent, pushEditOperations methods
  */
-export function createMockModel(yamlContent: string) {
-  const lines = yamlContent.split('\n');
+export function createMockMonacoTextModel(value: string, cursorOffset: number) {
+  const lines = value.split('\n');
+  let position = { lineNumber: 1, column: 1 };
+
+  // Calculate line and column from offset
+  let currentOffset = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const lineLength = lines[i].length + 1; // +1 for newline
+    if (currentOffset + lineLength > cursorOffset) {
+      position = {
+        lineNumber: i + 1,
+        column: cursorOffset - currentOffset + 1,
+      };
+      break;
+    }
+    currentOffset += lineLength;
+  }
 
   return {
     getLineCount: () => lines.length,
-    getOffsetAt: (position: monaco.Position) => {
-      let offset = 0;
-      for (let i = 0; i < position.lineNumber - 1; i++) {
-        offset += lines[i].length + 1;
-      }
-      offset += position.column - 1;
-      return offset;
-    },
+    getOffsetAt: (pos: typeof position) => cursorOffset,
     getPositionAt: (offset: number) => {
       // Simple implementation: convert offset to line/column
-      let currentOffset = 0;
+      const currentOffset2 = 0;
       for (let i = 0; i < lines.length; i++) {
         const lineLength = lines[i].length + 1; // +1 for newline
-        if (currentOffset + lineLength > offset) {
+        if (currentOffset2 + lineLength > offset) {
           return {
             lineNumber: i + 1,
-            column: offset - currentOffset + 1,
+            column: offset - currentOffset2 + 1,
           };
         }
         currentOffset += lineLength;
@@ -43,6 +50,16 @@ export function createMockModel(yamlContent: string) {
       return { lineNumber: lines.length, column: lines[lines.length - 1].length + 1 };
     },
     getLineContent: (lineNumber: number) => lines[lineNumber - 1] || '',
+    getWordUntilPosition: (pos: typeof position) => ({
+      word: '',
+      startColumn: pos.column,
+      endColumn: pos.column,
+    }),
+    getWordAtPosition: (pos: typeof position) => ({
+      word: '',
+      startColumn: pos.column,
+      endColumn: pos.column,
+    }),
     pushEditOperations: jest.fn(),
   };
 }

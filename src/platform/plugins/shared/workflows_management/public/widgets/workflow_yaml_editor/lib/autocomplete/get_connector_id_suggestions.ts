@@ -10,8 +10,13 @@
 import type { AutocompleteContext } from './autocomplete.types';
 import { getConnectorIdSuggestionsItems } from '../snippets/generate_connector_snippet';
 
-export function getConnectorIdSuggestions(context: AutocompleteContext) {
-  const { line, lineParseResult, range } = context;
+export function getConnectorIdSuggestions({
+  line,
+  lineParseResult,
+  range,
+  focusedStepInfo,
+  dynamicConnectorTypes,
+}: AutocompleteContext) {
   // Find the connector type for this step
   //   let stepConnectorType: string | null = getConnectorTypeFromContext(
   //     context.yamlDocument,
@@ -21,7 +26,7 @@ export function getConnectorIdSuggestions(context: AutocompleteContext) {
   //   );
 
   // eslint-disable-next-line prefer-const
-  let stepConnectorType = context.focusedStepInfo?.stepType ?? null;
+  let stepConnectorType = focusedStepInfo?.stepType ?? null;
 
   if (!stepConnectorType || !lineParseResult) {
     return [];
@@ -38,13 +43,9 @@ export function getConnectorIdSuggestions(context: AutocompleteContext) {
     endColumn: line.length + 1,
   };
 
-  if (!context.dynamicConnectorTypes) {
+  if (!dynamicConnectorTypes) {
     return [];
   }
 
-  return getConnectorIdSuggestionsItems(
-    stepConnectorType,
-    adjustedRange,
-    context.dynamicConnectorTypes
-  );
+  return getConnectorIdSuggestionsItems(stepConnectorType, adjustedRange, dynamicConnectorTypes);
 }

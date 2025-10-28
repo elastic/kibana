@@ -9,7 +9,7 @@
 
 import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
-import type { AutocompleteContext } from './autocomplete.types';
+import type { ExtendedAutocompleteContext } from './autocomplete.types';
 import { getConnectorParamsSchema } from './get_connector_with_schema';
 import {
   getEnhancedTypeInfo,
@@ -17,7 +17,7 @@ import {
 } from '../snippets/generate_connector_snippet';
 
 // eslint-disable-next-line complexity
-export function getWithBlockSuggestions(autocompleteContext: AutocompleteContext) {
+export function getWithBlockSuggestions(autocompleteContext: ExtendedAutocompleteContext) {
   const suggestions: monaco.languages.CompletionItem[] = [];
   const {
     triggerKind,
@@ -28,7 +28,6 @@ export function getWithBlockSuggestions(autocompleteContext: AutocompleteContext
     dynamicConnectorTypes,
     model,
     position,
-    lastPathSegment,
   } = autocompleteContext;
   // 🔍 SPECIAL CASE: Check if we're inside a connector's 'with' block
   // Checking if we're inside a connector's 'with' block
@@ -177,6 +176,7 @@ export function getWithBlockSuggestions(autocompleteContext: AutocompleteContext
 
     // If manually triggered (Ctrl+Space) or no filter, show all parameters
     const isManualTrigger = triggerKind === monaco.languages.CompletionTriggerKind.Invoke;
+    const lastPathSegment = autocompleteContext.lineParseResult?.pathSegments?.pop() ?? null;
     const shouldSkip = lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger;
 
     if (shouldSkip) {

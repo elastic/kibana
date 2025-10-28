@@ -162,7 +162,7 @@ export function getCompletionItemProvider(
       }
 
       return {
-        suggestions: getWithBlockSuggestions(autocompleteContext),
+        suggestions: getWithBlockSuggestions({ ...autocompleteContext, model, position }),
         incomplete: false,
       };
     },
