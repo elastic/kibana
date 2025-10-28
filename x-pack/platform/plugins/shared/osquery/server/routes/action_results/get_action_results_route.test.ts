@@ -455,9 +455,7 @@ describe('getActionResultsRoute', () => {
           currentPage: 0,
           pageSize: 20,
           // Should have 2 real results + 18 placeholders = 20 total (full page)
-          edges: expect.arrayContaining([
-            expect.objectContaining({ _id: expect.any(String) }),
-          ]),
+          edges: expect.arrayContaining([expect.objectContaining({ _id: expect.any(String) })]),
           total: 20, // Current page size
         }),
       });
