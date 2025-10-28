@@ -1039,7 +1039,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.enable_shared_dirty_scan',
       {
         defaultMessage:
-          "Instead of ignoring regions with just no 'Private_Dirty' bytes, ignore regions with the combination of no 'Private_Dirty' bytes, no 'Shared_Dirty' bytes and is file-backed. This has the effect of scanning more memory regions because of the loosened restrictions. Default: true.",
+          "Instead of ignoring memory regions with just no 'Private_Dirty' bytes, ignore regions with the combination of no 'Private_Dirty' bytes, no 'Shared_Dirty' bytes and is file-backed. This has the effect of scanning more memory regions because of the loosened restrictions. Default: true.",
       }
     ),
   },
@@ -1255,7 +1255,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning. Default: 100',
+          'Restrict Endpoint CPU usage to a percentage of the total system CPU. The range is 20-100%. Values under 20 are ignored and trigger a policy warning. Default: 50.',
       }
     ),
   },
@@ -1266,7 +1266,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'The percentage of the aggregate system CPU to which Endpoint is restricted. The range is 20-100%. Values under 20 are ignored and trigger a policy warning. Default: 50.',
+          'Restrict Endpoint CPU usage to a percentage of the total system CPU. The range is 20-100%. Values under 20 are ignored and trigger a policy warning. Default: 50.',
       }
     ),
   },
