@@ -50,19 +50,29 @@ export const streamRoutingMachine = setup({
     notifyStreamSuccess: getPlaceholderFor(createStreamSuccessNofitier),
     notifyStreamFailure: getPlaceholderFor(createStreamFailureNofitier),
     refreshDefinition: () => {},
-    addNewRoutingRule: assign(({ context }) => {
-      const newRule = routingConverter.toUIDefinition({
-        destination: `${context.definition.stream.name}.child`,
-        where: ALWAYS_CONDITION,
-        status: 'enabled',
-        isNew: true,
-      });
+    addNewRoutingRule: assign(
+      (
+        { context },
+        params?: { routingDefinition?: Partial<RoutingDefinitionWithUIAttributes> }
+      ) => {
+        const baseRule = {
+          destination: `${context.definition.stream.name}.child`,
+          where: ALWAYS_CONDITION,
+          status: 'enabled' as const,
+          isNew: true,
+        };
 
-      return {
-        currentRuleId: newRule.id,
-        routing: [...context.routing, newRule],
-      };
-    }),
+        const newRule = routingConverter.toUIDefinition({
+          ...baseRule,
+          ...params?.routingDefinition,
+        });
+
+        return {
+          currentRuleId: newRule.id,
+          routing: [...context.routing, newRule],
+        };
+      }
+    ),
     appendRoutingRules: assign(({ context }, params: { definitions: RoutingDefinition[] }) => {
       return {
         routing: [...context.routing, ...params.definitions.map(routingConverter.toUIDefinition)],
@@ -205,14 +215,32 @@ export const streamRoutingMachine = setup({
         creatingNewRule: {
           id: 'creatingNewRule',
           entry: [
-            { type: 'addNewRoutingRule' },
+            {
+              type: 'addNewRoutingRule',
+              params: ({ event }) => {
+                if (event.type === 'routingRule.create') {
+                  return event.routingDefinition
+                    ? { routingDefinition: event.routingDefinition }
+                    : undefined;
+                }
+                return undefined;
+              },
+            },
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setSelectedPreview',
               preview: { type: 'createStream' },
             }),
-            sendTo('routingSamplesMachine', {
-              type: 'routingSamples.updateCondition',
-              condition: { always: {} },
+            sendTo('routingSamplesMachine', ({ event }) => {
+              // If a routing definition with a condition was provided, use it
+              // Otherwise, default to always condition
+              const condition =
+                event.type === 'routingRule.create' && event.routingDefinition?.where
+                  ? event.routingDefinition.where
+                  : { always: {} };
+              return {
+                type: 'routingSamples.updateCondition',
+                condition,
+              };
             }),
           ],
           exit: [

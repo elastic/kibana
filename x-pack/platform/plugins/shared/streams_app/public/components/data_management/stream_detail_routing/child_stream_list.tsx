@@ -132,7 +132,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
               <CreateButtonComponent
                 size="s"
                 data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-                onClick={createNewRule}
+                onClick={() => createNewRule()}
                 disabled={!canCreateRoutingRules || maxNestingLevel}
               >
                 {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
