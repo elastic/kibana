@@ -7,6 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import {
   LENS_VIS_API_PATH,
   LENS_API_VERSION,
@@ -81,7 +82,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
     },
     async (ctx, req, res) => {
       const requestBodyData = req.body;
-      if (!requestBodyData.visualizationType) {
+      if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
         throw new Error('visualizationType is required');
       }
 

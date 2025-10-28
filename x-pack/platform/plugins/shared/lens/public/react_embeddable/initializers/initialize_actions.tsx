@@ -29,12 +29,13 @@ import type {
   LensRuntimeState,
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
+  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
 import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
 
 import { getMergedSearchContext } from '../expressions/merged_search_context';
 import { isTextBasedLanguage } from '../helper';
-import type { LensSerializedAPIConfig, LensEmbeddableStartServices } from '../types';
+import type { LensEmbeddableStartServices } from '../types';
 import { getActiveDatasourceIdFromDoc, getActiveVisualizationIdFromDoc } from '../../utils';
 
 function getViewUnderlyingDataArgs({

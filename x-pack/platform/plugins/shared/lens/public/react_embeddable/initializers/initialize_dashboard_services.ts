@@ -26,10 +26,11 @@ import type {
   IntegrationCallbacks,
   LensInternalApi,
   LensApi,
+  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
 import { isTextBasedLanguage, transformOutputState } from '../helper';
 
-import type { LensEmbeddableStartServices, LensSerializedAPIConfig } from '../types';
+import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
 import type { StateManagementConfig } from './initialize_state_management';
 

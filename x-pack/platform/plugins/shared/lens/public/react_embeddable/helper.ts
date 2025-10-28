@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import type { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
@@ -19,6 +18,7 @@ import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type {
   LensRuntimeState,
   LensSerializedState,
@@ -27,17 +27,15 @@ import type {
   GeneralDatasourceStates,
   FormBasedPersistedState,
   TextBasedPersistedState,
+  LensByValueSerializedAPIConfig,
+  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
-import { getLensPublicTransforms } from './transforms';
 import { getLensFeatureFlags } from '../get_feature_flags';
-import type {
-  LensByValueSerializedAPIConfig,
-  LensEmbeddableStartServices,
-  LensSerializedAPIConfig,
-} from './types';
+import type { LensEmbeddableStartServices } from './types';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -75,7 +73,7 @@ export async function deserializeState(
     attributeService,
     ...services
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
-  { savedObjectId, ...state }: LensSerializedState
+  { savedObjectId, ...state }: LensSerializedAPIConfig
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
 
@@ -169,51 +167,54 @@ export function getStructuredDatasourceStates(
   };
 }
 
-export function transformInitialState(
-  initialState: LensSerializedAPIConfig,
-  references?: Reference[]
-): LensSerializedState {
+export function transformInitialState(state: LensSerializedAPIConfig): LensSerializedState {
   const enableAPITransforms = getLensFeatureFlags().apiFormat;
   const builder = new LensConfigBuilder(undefined, enableAPITransforms);
-  const transforms = getLensPublicTransforms(builder);
 
-  if (!transforms.transformIn) {
-    throw new Error('transformIn missing');
+  const chartType = builder.getType(state.attributes);
+
+  if (!builder.isSupported(chartType)) {
+    return state as LensSerializedState;
   }
 
-  return transforms.transformIn({
-    ...initialState,
-    // Why are there 2 references?
-    references: initialState.references ?? references ?? [],
-  }).state;
+  if (!state.attributes) {
+    // Not sure if this is possible
+    throw new Error('attributes are missing');
+  }
+
+  // check if already converted
+  if (!isLensAPIFormat(state.attributes)) {
+    return state as LensSerializedState;
+  }
+
+  // TODO: check this type casting
+  const serializedState = builder.fromAPIFormat(state.attributes);
+
+  return serializedState;
 }
 
-export function transformOutputState(
-  outputState: SerializedPanelState<LensSerializedState>
-): SerializedPanelState<LensByValueSerializedAPIConfig> {
+export function transformOutputState(state: LensSerializedState): LensByValueSerializedAPIConfig {
   const enableAPITransforms = getLensFeatureFlags().apiFormat;
   const builder = new LensConfigBuilder(undefined, enableAPITransforms);
-  const transforms = getLensPublicTransforms(builder);
+  const chartType = builder.getType(state.attributes);
 
-  if (!transforms.transformOut) {
-    throw new Error('transformOut missing');
+  if (!builder.isSupported(chartType)) {
+    // TODO: remove this once all formats are supported
+    return state as LensByValueSerializedAPIConfig;
   }
 
-  const transformedState = transforms.transformOut(
-    {
-      ...outputState.rawState,
-    },
-    // Why are there 2 references?
-    outputState.rawState.references ?? outputState?.references ?? []
-  );
-
-  if (!transformedState.attributes) {
+  if (!state.attributes) {
     // This should only ever handle by-value state.
     throw new Error('attributes are missing');
   }
 
+  const apiConfigAttributes = builder.toAPIFormat({
+    ...state.attributes,
+    visualizationType: state.attributes.visualizationType ?? LENS_UNKNOWN_VIS,
+  });
+
   return {
-    ...outputState,
-    rawState: transformedState,
+    ...state,
+    attributes: apiConfigAttributes,
   };
 }

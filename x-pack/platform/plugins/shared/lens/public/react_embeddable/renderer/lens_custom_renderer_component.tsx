@@ -15,10 +15,10 @@ import type {
   LensParentApi,
   LensRendererProps,
   LensSerializedState,
+  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { createEmptyLensState, transformOutputState } from '../helper';
-import type { LensSerializedAPIConfig } from '../types';
 
 // This little utility uses the same pattern of the useSearchApi hook:
 // create the Subject once and then update its value on change

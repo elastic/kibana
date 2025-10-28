@@ -7,7 +7,12 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import type { LensByRefSerializedState, LensSerializedState } from '@kbn/lens-common';
+import type {
+  LensByRefSerializedState,
+  LensSerializedState,
+  LensByRefSerializedAPIConfig,
+  LensSerializedAPIConfig,
+} from '@kbn/lens-common';
 import { DOC_TYPE } from '../constants';
 
 export const LENS_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
@@ -20,4 +25,10 @@ export function findLensReference(references?: Reference[]) {
 
 export function isByRefLensState(state: LensSerializedState): state is LensByRefSerializedState {
   return !state.attributes;
+}
+
+export function isByRefLensConfig(
+  config: LensSerializedAPIConfig
+): config is LensByRefSerializedAPIConfig {
+  return !config.attributes;
 }

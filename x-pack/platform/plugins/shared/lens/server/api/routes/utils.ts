@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type { LensConfigBuilder, LensApiSchemaType } from '@kbn/lens-embeddable-utils';
+
 import type { LensSavedObject, LensUpdateIn } from '../../content_management';
 import type {
   LensCreateRequestBody,
@@ -13,7 +15,6 @@ import type {
   LensResponseItem,
   LensUpdateRequestBody,
 } from './types';
-
 /**
  * Converts Lens request data to Lens Config
  */
@@ -45,6 +46,7 @@ export function getLensRequestConfig(
     // TODO: fix these type issues
     title: attributes.title ?? '',
     description: attributes.description ?? undefined,
+    visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   } satisfies LensUpdateIn['data'] & LensUpdateIn['options'];
 }
 
@@ -76,7 +78,7 @@ export function getLensResponseItem<M extends Record<string, string | boolean>>(
       ...attributes,
       // TODO: fix these type issues
       state: attributes.state!,
-      visualizationType: attributes.visualizationType ?? '',
+      visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
     });
     return {
       id,

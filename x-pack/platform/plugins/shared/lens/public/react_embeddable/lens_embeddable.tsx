@@ -10,7 +10,7 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
-import type { LensApi, LensRuntimeState } from '@kbn/lens-common';
+import type { LensApi, LensRuntimeState, LensSerializedAPIConfig } from '@kbn/lens-common';
 import { DOC_TYPE } from '../../common/constants';
 
 import { loadEmbeddableData } from './data_loader';
@@ -31,7 +31,7 @@ import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
-import type { LensEmbeddableStartServices, LensSerializedAPIConfig } from './types';
+import type { LensEmbeddableStartServices } from './types';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices

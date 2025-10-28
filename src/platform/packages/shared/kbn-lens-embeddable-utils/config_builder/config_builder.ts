@@ -41,7 +41,7 @@ type ChartTypeLike =
   | Pick<LensAttributes, 'visualizationType'>
   | Pick<LensConfig, 'chartType'>
   | Pick<LensApiState, 'type'>
-  | { visualizationType: null }
+  | { visualizationType: null | undefined }
   | undefined;
 
 export class LensConfigBuilder {

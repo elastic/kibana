@@ -244,6 +244,9 @@ export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
   LensSerializedState,
+  LensByValueSerializedAPIConfig,
+  LensByRefSerializedAPIConfig,
+  LensSerializedAPIConfig,
   LensByReferenceInput,
   LensSavedObjectAttributes,
   VisualizationContextHelper,
@@ -297,6 +300,7 @@ export {
   LENS_RANGE_MODES,
 } from './datasources/constants';
 export {
+  LENS_UNKNOWN_VIS,
   LENS_CATEGORY_DISPLAY,
   LENS_NUMBER_DISPLAY,
   LENS_LEGEND_DISPLAY,

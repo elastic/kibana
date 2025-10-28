@@ -390,10 +390,15 @@ export class LensPlugin {
         const flags = await setLensFeatureFlags(featureFlags);
 
         embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
-          const { getLensPublicTransforms } = await import('./react_embeddable/transforms');
+          const { getLensTransforms } = await import('../common/transforms');
           const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
           const builder = new LensConfigBuilder(undefined, flags.apiFormat);
-          return getLensPublicTransforms(builder);
+
+          return getLensTransforms({
+            builder,
+            transformEnhancementsIn: embeddable.transformEnhancementsIn,
+            transformEnhancementsOut: embeddable.transformEnhancementsOut,
+          }).transformOut;
         });
       });
 

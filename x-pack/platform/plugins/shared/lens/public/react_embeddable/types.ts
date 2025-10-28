@@ -17,13 +17,9 @@ import type {
   DocumentToExpressionReturnType,
   LensDocument,
   LensAttributesService,
-  LensByValueBase,
-  LensByRefSerializedState,
-  LensSerializedSharedState,
 } from '@kbn/lens-common';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { RecursiveReadonly } from '@kbn/utility-types';
-import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import type { LensPluginStartDependencies } from '../plugin';
 
 export type LensEmbeddableStartServices = Simplify<
@@ -45,23 +41,3 @@ export type LensEmbeddableStartServices = Simplify<
     attributeService: LensAttributesService;
   }
 >;
-
-type LensByValueAPIConfigBase = Omit<LensByValueBase, 'attributes'> & {
-  // Temporarily allow both old and new attributes until all are new types are supported and feature flag removed
-  attributes: LensApiSchemaType | LensByValueBase['attributes'];
-};
-
-export type LensByValueSerializedAPIConfig = Simplify<
-  LensSerializedSharedState & LensByValueAPIConfigBase
->;
-export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
-
-/**
- * Combined properties of API config used in dashboard API for lens panels
- *
- *  Includes:
- * - Lens document state (for by-value)
- * - Panel settings
- * - other props from the embeddable
- */
-export type LensSerializedAPIConfig = LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig;

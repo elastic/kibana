@@ -9,6 +9,7 @@
 
 import type { BehaviorSubject } from 'rxjs';
 
+import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import type {
   AggregateQuery,
@@ -378,7 +379,7 @@ export interface LensInspectorAdapters {
 }
 
 export type LensApi = Simplify<
-  DefaultEmbeddableApi<LensSerializedState> &
+  DefaultEmbeddableApi<LensSerializedAPIConfig> &
     // This is used by actions to operate the edit action
     HasEditCapabilities &
     // for blocking errors leverage the embeddable panel UI
@@ -400,7 +401,7 @@ export type LensApi = Simplify<
     HasSupportedTriggers &
     PublishesDisabledActionIds &
     // Offers methods to operate from/on the linked saved object
-    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
+    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
     // Let the container know the view mode
     PublishesViewMode &
     // Let the container know the saved object id
@@ -557,4 +558,24 @@ interface GeneralLensApi {
 export type LensParentApi = SearchApi &
   LensRuntimeState &
   GeneralLensApi &
-  HasSerializedChildState<LensSerializedState>;
+  HasSerializedChildState<LensSerializedAPIConfig>;
+
+type LensByValueAPIConfigBase = Omit<LensByValueBase, 'attributes'> & {
+  // Temporarily allow both old and new attributes until all are new types are supported and feature flag removed
+  attributes: LensApiSchemaType | LensByValueBase['attributes'];
+};
+
+export type LensByValueSerializedAPIConfig = Simplify<
+  LensSerializedSharedState & LensByValueAPIConfigBase
+>;
+export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
+
+/**
+ * Combined properties of API config used in dashboard API for lens panels
+ *
+ *  Includes:
+ * - Lens document state (for by-value)
+ * - Panel settings
+ * - other props from the embeddable
+ */
+export type LensSerializedAPIConfig = LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig;

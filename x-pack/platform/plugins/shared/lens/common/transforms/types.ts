@@ -6,18 +6,17 @@
  */
 
 import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
-import type { Required } from 'utility-types';
 
 import type {
   LensSerializedState,
   LensByRefSerializedState,
   LensByValueSerializedState,
+  LensSerializedAPIConfig,
+  LensByRefSerializedAPIConfig,
+  LensByValueSerializedAPIConfig,
 } from '@kbn/lens-common';
 
-export type LensTransforms = Required<
-  EmbeddableTransforms<LensSerializedState, LensSerializedState>,
-  'transformIn' | 'transformOut'
->;
+export type LensTransforms = EmbeddableTransforms<LensSerializedState, LensSerializedAPIConfig>;
 
 /**
  * Transform from Lens API format to Lens Serialized State
@@ -30,13 +29,13 @@ export type LensTransformIn = LensTransforms['transformIn'];
 export type LensTransformOut = LensTransforms['transformOut'];
 
 type LensByRefTransforms = Required<
-  EmbeddableTransforms<LensByRefSerializedState, LensByRefSerializedState>
+  EmbeddableTransforms<LensByRefSerializedState, LensByRefSerializedAPIConfig>
 >;
 export type LensByRefTransformInResult = ReturnType<LensByRefTransforms['transformIn']>;
 export type LensByRefTransformOutResult = ReturnType<LensByRefTransforms['transformOut']>;
 
 type LensByValueTransforms = Required<
-  EmbeddableTransforms<LensByValueSerializedState, LensByValueSerializedState>
+  EmbeddableTransforms<LensByValueSerializedState, LensByValueSerializedAPIConfig>
 >;
 export type LensByValueTransformInResult = ReturnType<LensByValueTransforms['transformIn']>;
 export type LensByValueTransformOutResult = ReturnType<LensByValueTransforms['transformOut']>;
