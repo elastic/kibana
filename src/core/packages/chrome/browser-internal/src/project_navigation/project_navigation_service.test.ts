@@ -459,7 +459,7 @@ describe('initNavigation()', () => {
       isExternalLink: true,
       path: 'group1.node-0',
       sideNavStatus: 'visible',
-      title: 'Users and roles',
+      title: 'Members',
     });
 
     // performance
