@@ -31,6 +31,11 @@ describe('cloud_connector_helpers', () => {
     value: mockSecretReference,
   };
 
+  const mockAzureCredentialsId: CloudConnectorVar = {
+    type: 'text',
+    value: 'azure-connector-id-123',
+  };
+
   describe('isAwsCloudConnectorVars', () => {
     it('should return true for valid AWS cloud connector vars', () => {
       const awsVars: AwsCloudConnectorVars = {
@@ -61,7 +66,7 @@ describe('cloud_connector_helpers', () => {
       const azureVars: AzureCloudConnectorVars = {
         tenant_id: mockSecretVar,
         client_id: mockSecretVar,
-        azure_credentials_cloud_connector_id: mockSecretVar,
+        azure_credentials_cloud_connector_id: mockAzureCredentialsId,
       };
 
       expect(isAwsCloudConnectorVars(azureVars)).toBe(false);
@@ -77,7 +82,7 @@ describe('cloud_connector_helpers', () => {
       const azureVars: AzureCloudConnectorVars = {
         tenant_id: mockSecretVar,
         client_id: mockSecretVar,
-        azure_credentials_cloud_connector_id: mockSecretVar,
+        azure_credentials_cloud_connector_id: mockAzureCredentialsId,
       };
 
       expect(isAzureCloudConnectorVars(azureVars)).toBe(true);
@@ -86,7 +91,7 @@ describe('cloud_connector_helpers', () => {
     it('should return false for partial Azure cloud connector vars (missing tenant_id)', () => {
       const partialVars = {
         client_id: mockSecretVar,
-        azure_credentials_cloud_connector_id: mockSecretVar,
+        azure_credentials_cloud_connector_id: mockAzureCredentialsId,
       };
 
       expect(isAzureCloudConnectorVars(partialVars)).toBe(false);
@@ -95,7 +100,7 @@ describe('cloud_connector_helpers', () => {
     it('should return false for partial Azure cloud connector vars (missing client_id)', () => {
       const partialVars = {
         tenant_id: mockSecretVar,
-        azure_credentials_cloud_connector_id: mockSecretVar,
+        azure_credentials_cloud_connector_id: mockAzureCredentialsId,
       };
 
       expect(isAzureCloudConnectorVars(partialVars)).toBe(false);

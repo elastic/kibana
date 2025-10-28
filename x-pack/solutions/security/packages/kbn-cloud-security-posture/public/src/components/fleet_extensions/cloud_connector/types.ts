@@ -13,11 +13,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CloudConnectorSecretReference } from '@kbn/fleet-plugin/public/types';
-import type {
-  CloudConnectorVar,
-  CloudConnectorSecretVar,
-  AzureCredentialsVar,
-} from '@kbn/fleet-plugin/common/types';
+import type { CloudConnectorVar, CloudConnectorSecretVar } from '@kbn/fleet-plugin/common/types';
 import type { UpdatePolicy } from '../types';
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
@@ -34,7 +30,7 @@ export interface AwsCloudConnectorCredentials extends BaseCloudConnectorCredenti
 export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCredentials {
   tenantId?: string | CloudConnectorSecretReference;
   clientId?: string | CloudConnectorSecretReference;
-  azure_credentials_cloud_connector_id?: string | CloudConnectorSecretReference;
+  azure_credentials_cloud_connector_id?: string;
 }
 
 export type CloudConnectorCredentials =
@@ -76,7 +72,7 @@ export interface AzureCloudConnectorOption {
   id: string;
   tenantId?: CloudConnectorSecretVar;
   clientId?: CloudConnectorSecretVar;
-  azure_credentials_cloud_connector_id?: AzureCredentialsVar;
+  azure_credentials_cloud_connector_id?: CloudConnectorVar;
 }
 
 // Interface for EuiComboBox options (only standard properties)
