@@ -14,6 +14,7 @@ import {
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 
 const tools = {
@@ -140,14 +141,17 @@ export const getAnswerPrompt = ({
   handoverNote,
   searchInterrupted = false,
   capabilities,
+  browserApiTools,
 }: {
   customInstructions?: string;
   discussion: BaseMessageLike[];
   handoverNote?: string;
   searchInterrupted?: boolean;
   capabilities: ResolvedAgentCapabilities;
+  browserApiTools?: BrowserApiToolMetadata[];
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
+  const hasBrowserTools = browserApiTools && browserApiTools.length > 0;
 
   let searchInterruptedMessages: BaseMessageLike[] = [];
   if (searchInterrupted) {
@@ -204,6 +208,8 @@ ${customInstructionsBlock(customInstructions)}
 
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
+${hasBrowserTools ? renderBrowserApiToolsPrompt(browserApiTools!) : ''}
+
 ## ADDITIONAL INFO
 - Current date: ${formatDate()}
 
@@ -259,4 +265,36 @@ function renderVisualizationPrompt() {
 
       To visualize this response as a bar chart your reply should be:
       <${tagName} ${attributes.toolResultId}="LiDoF1" ${attributes.chartType}="${ChartType.Bar}"/>`;
+}
+
+function renderBrowserApiToolsPrompt(browserApiTools: BrowserApiToolMetadata[]): string {
+  const toolsList = browserApiTools
+    .map((tool) => {
+      const schemaStr = JSON.stringify(tool.schema, null, 2);
+      return `  - \`${tool.id}\`: ${tool.description}
+    Parameters: \`\`\`json
+${schemaStr}
+    \`\`\``;
+    })
+    .join('\n\n');
+
+  return `### BROWSER API TOOLS
+
+When you want to execute a browser action, emit XML tags:
+
+<browser_tool id="TOOL_ID">PARAMS_JSON</browser_tool>
+
+**Available Browser Tools**:
+${toolsList}
+
+**Rules**:
+- Tool results are NOT returned to you
+- Use for page actions only (updating UI, changing configuration, etc.)
+- The JSON parameters must conform to the tool's schema
+- Do not invent tool IDs that are not in the list above
+
+**Example**:
+If a tool called \`dashboard.config.update_title\` exists with parameter \`title\`, you would emit:
+<browser_tool id="dashboard.config.update_title">{"title": "My Dashboard"}</browser_tool>
+`;
 }

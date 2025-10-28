@@ -10,6 +10,7 @@ import type {
   AssistantResponse,
   AgentCapabilities,
 } from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
 
 /**
  * body payload for request to the /internal/onechat/chat endpoint
@@ -20,6 +21,7 @@ export interface ChatRequestBodyPayload {
   conversation_id?: string;
   capabilities?: AgentCapabilities;
   input: string;
+  browserApiTools?: BrowserApiToolMetadata[];
 }
 
 export interface ChatResponse {

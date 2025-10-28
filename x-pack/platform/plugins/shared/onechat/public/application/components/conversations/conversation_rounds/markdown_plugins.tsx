@@ -18,6 +18,7 @@ import {
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import classNames from 'classnames';
 import { EuiCode, EuiText, useEuiTheme } from '@elastic/eui';
+import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
 
 import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
@@ -280,3 +281,125 @@ export const esqlLanguagePlugin = () => {
     visitor(tree);
   };
 };
+
+export const browserToolTagParser = () => {
+  const extractAttribute = (value: string, attr: string) => {
+    const regex = new RegExp(`${attr}="([^"]*)"`, 'i');
+    return value.match(regex)?.[1];
+  };
+
+  const getBrowserToolAttributes = (value: string) => {
+    const toolId = extractAttribute(value, 'id');
+    const paramsMatch = value.match(/>([^<]*)</);
+    const paramsJson = paramsMatch?.[1]?.trim();
+
+    return {
+      toolId,
+      paramsJson,
+    };
+  };
+
+  const assignBrowserToolAttributes = (
+    node: MutableNode,
+    attributes: ReturnType<typeof getBrowserToolAttributes>
+  ) => {
+    node.type = 'browser_tool';
+    node.value = attributes.toolId;
+    (node as any).paramsJson = attributes.paramsJson;
+  };
+
+  const browserToolTagRegex = /<browser_tool\b[^>]*>[\s\S]*?<\/browser_tool>/gi;
+
+  const visitParent = (parent: Parent) => {
+    for (let index = 0; index < parent.children.length; index++) {
+      const child = parent.children[index] as MutableNode;
+
+      if ('children' in child) {
+        visitParent(child as Parent);
+      }
+
+      if (child.type !== 'html') {
+        continue;
+      }
+
+      const rawValue = child.value;
+      if (!rawValue) {
+        continue;
+      }
+
+      const trimmedValue = rawValue.trim();
+      if (!trimmedValue.toLowerCase().startsWith('<browser_tool')) {
+        continue;
+      }
+
+      const matches = Array.from(trimmedValue.matchAll(browserToolTagRegex));
+      if (matches.length === 0) {
+        continue;
+      }
+
+      const browserToolAttributes = getBrowserToolAttributes(matches[0][0]);
+      assignBrowserToolAttributes(child, browserToolAttributes);
+    }
+  };
+
+  return (tree: Node) => {
+    if ('children' in tree) {
+      visitParent(tree as Parent);
+    }
+  };
+};
+
+/**
+ * React component renderer for browser tool execution.
+ * Executes browser tools when the component mounts, unless shouldExecute is false.
+ * @param browserApiTools - Map of available browser API tools
+ * @param messageId - ID of the message containing the tool call (for logging)
+ * @param shouldExecute - If false, skips execution (for historical messages)
+ */
+export function createBrowserToolRenderer({
+  browserApiTools,
+  shouldExecute = true,
+}: {
+  browserApiTools: Map<string, BrowserApiToolDefinition<any>>;
+  shouldExecute?: boolean;
+}) {
+  return (props: { children?: React.ReactNode }) => {
+    const toolId = props.children as unknown as string;
+    const paramsJson = (props as any).paramsJson;
+
+    React.useEffect(() => {
+      // Skip execution for historical messages
+      if (!shouldExecute) {
+        return;
+      }
+
+      const tool = browserApiTools.get(toolId);
+      if (!tool) {
+        // eslint-disable-next-line no-console
+        console.error('❌ Browser tool not found:', toolId);
+        return;
+      }
+
+      try {
+        const params = paramsJson ? JSON.parse(paramsJson) : {};
+
+        const validationResult = tool.schema.safeParse(params);
+        if (!validationResult.success) {
+          // eslint-disable-next-line no-console
+          console.error('❌ Browser tool params validation failed:', validationResult.error);
+          return;
+        }
+
+        Promise.resolve(tool.handler(validationResult.data)).catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error('❌ Browser tool execution failed:', toolId, error);
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('❌ Browser tool execution error:', toolId, error);
+      }
+    }, [toolId, paramsJson]);
+
+    return null;
+  };
+}
