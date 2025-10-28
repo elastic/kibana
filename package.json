@@ -1301,7 +1301,7 @@
     "langchain": "^0.3.35",
     "langsmith": "^0.3.72",
     "launchdarkly-js-client-sdk": "^3.9.0",
-    "liquidjs": "^10.22.0",
+    "liquidjs": "^10.24.0",
     "load-json-file": "^6.2.0",
     "lodash": "^4.17.21",
     "lru-cache": "^11.2.2",
