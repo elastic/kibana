@@ -386,13 +386,13 @@ describe('Collapsed mode', () => {
        * WHEN the navigation renders
        * THEN I should see a "More" primary menu item
        */
-      it('should render the "More" primary menu item when items overflow', () => {
+      it('should render the "More" primary menu item when items overflow', async () => {
         // Renders 10 primary menu items + "More" item
         render(
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -410,7 +410,7 @@ describe('Collapsed mode', () => {
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -440,7 +440,7 @@ describe('Collapsed mode', () => {
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -491,7 +491,7 @@ describe('Collapsed mode', () => {
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -539,7 +539,7 @@ describe('Collapsed mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 

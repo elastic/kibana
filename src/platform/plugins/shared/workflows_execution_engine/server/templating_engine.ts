@@ -29,6 +29,29 @@ export class WorkflowTemplatingEngine {
         return value;
       }
     });
+
+    // register base64 filters for data processing
+    this.engine.registerFilter('base64_encode', (value: unknown): string => {
+      if (typeof value !== 'string') {
+        return '';
+      }
+      try {
+        return Buffer.from(value, 'utf8').toString('base64');
+      } catch (error) {
+        return '';
+      }
+    });
+
+    this.engine.registerFilter('base64_decode', (value: unknown): string => {
+      if (typeof value !== 'string') {
+        return '';
+      }
+      try {
+        return Buffer.from(value, 'base64').toString('utf8');
+      } catch (error) {
+        return '';
+      }
+    });
   }
 
   public render<T>(obj: T, context: Record<string, unknown>): T {

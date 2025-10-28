@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   ConfigSchema,
   SecretsSchema,
@@ -16,11 +16,11 @@ import type {
   ExecutorParamsSchema,
 } from './schema';
 
-export type Config = TypeOf<typeof ConfigSchema>;
-export type Secrets = TypeOf<typeof SecretsSchema>;
-export type XSOARRunActionParams = TypeOf<typeof XSOARRunActionParamsSchema>;
-export type XSOARRunActionResponse = TypeOf<typeof XSOARRunActionResponseSchema>;
+export type Config = z.infer<typeof ConfigSchema>;
+export type Secrets = z.input<typeof SecretsSchema>;
+export type XSOARRunActionParams = z.infer<typeof XSOARRunActionParamsSchema>;
+export type XSOARRunActionResponse = z.infer<typeof XSOARRunActionResponseSchema>;
 export type XSOARPlaybooksActionParams = void;
-export type XSOARPlaybooksObject = TypeOf<typeof XSOARPlaybooksObjectSchema>;
-export type XSOARPlaybooksActionResponse = TypeOf<typeof XSOARPlaybooksActionResponseSchema>;
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type XSOARPlaybooksObject = z.infer<typeof XSOARPlaybooksObjectSchema>;
+export type XSOARPlaybooksActionResponse = z.infer<typeof XSOARPlaybooksActionResponseSchema>;
+export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;

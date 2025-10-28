@@ -126,6 +126,7 @@ Guidelines:
 - Each test must have assertions.
 - The end goal is to create working tests. Pay special attention to semantics. You MUST use methods that exist. If you need an API helper, import it rather than creating it (unless absolutely necessary).
 - The TODO comments are guides, not prescriptive rules.
+```
 
 **Checkpoint**: the AI should now populate the Scout test files from Step 1 with implementation code based on the original FTR tests.
 
@@ -137,4 +138,3 @@ Finally, run your new Scout tests. We recommend using the `--ui` mode to easily 
 > Some tests may fail because they rely on an **advanced setting** being set to enable a specific feature or set a specific timezone (e.g., `UTC`). This means the failure isn't specific to the test file itself. Take a careful look at the FTR test config of the original tests to see which setting must be enabled.
 > At this time, Scout doesn't support overriding the Kibana configuration per test config file, but you can take a look at the current [stateful](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout/src/config/stateful) and [serverless](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout/src/config/serverless) config files that apply to all Scout test configs.
 > To apply configuration overrides in your tests, use the `apiServices.core` API helper to access the `PUT kbn:/internal/core/_settings` endpoint, which is available only in test environments.
-```

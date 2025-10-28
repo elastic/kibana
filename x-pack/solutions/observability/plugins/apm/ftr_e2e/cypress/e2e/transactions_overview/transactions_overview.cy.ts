@@ -96,8 +96,8 @@ describe('Transactions Overview', () => {
   it('has no detectable a11y violations on load', () => {
     cy.visitKibana(goServiceTransactionsHref);
     cy.get('a:contains(Transactions)').should('have.attr', 'aria-selected', 'true');
-    // set skipFailures to true to not fail the test when there are accessibility failures
-    checkA11y({ skipFailures: true });
+
+    checkA11y();
   });
 
   it('persists transaction type selected when navigating to Overview tab', () => {

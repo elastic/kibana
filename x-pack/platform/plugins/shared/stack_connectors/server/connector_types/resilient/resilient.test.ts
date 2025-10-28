@@ -262,9 +262,29 @@ describe('IBM Resilient connector', () => {
     it('should throw if the required attributes are not received in response', async () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
-      await expect(connector.createIncident(incidentMock, connectorUsageCollector)).rejects.toThrow(
-        '[Action][IBM Resilient]: Unable to create incident. Error: Response validation failed (Error: [id]: expected value of type [number] but got [undefined]).'
-      );
+      await expect(connector.createIncident(incidentMock, connectorUsageCollector)).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[Action][IBM Resilient]: Unable to create incident. Error: Response validation failed ([
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"number\\",
+            \\"received\\": \\"nan\\",
+            \\"path\\": [
+              \\"id\\"
+            ],
+            \\"message\\": \\"Expected number, received nan\\"
+          },
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"number\\",
+            \\"received\\": \\"nan\\",
+            \\"path\\": [
+              \\"create_date\\"
+            ],
+            \\"message\\": \\"Expected number, received nan\\"
+          }
+        ])."
+      `);
     });
   });
 
@@ -397,9 +417,20 @@ describe('IBM Resilient connector', () => {
       );
       requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
 
-      await expect(connector.updateIncident(req, connectorUsageCollector)).rejects.toThrow(
-        '[Action][IBM Resilient]: Unable to update incident with id 1. Error: Response validation failed (Error: [success]: expected value of type [boolean] but got [undefined]).'
-      );
+      await expect(connector.updateIncident(req, connectorUsageCollector)).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[Action][IBM Resilient]: Unable to update incident with id 1. Error: Response validation failed ([
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"boolean\\",
+            \\"received\\": \\"undefined\\",
+            \\"path\\": [
+              \\"success\\"
+            ],
+            \\"message\\": \\"Required\\"
+          }
+        ])."
+      `);
     });
   });
 
@@ -504,9 +535,20 @@ describe('IBM Resilient connector', () => {
         createAxiosResponse({ data: { id: '1001', name: 'Custom type' } })
       );
 
-      await expect(connector.getIncidentTypes(undefined, connectorUsageCollector)).rejects.toThrow(
-        '[Action][IBM Resilient]: Unable to get incident types. Error: Response validation failed (Error: [values]: expected value of type [array] but got [undefined]).'
-      );
+      await expect(connector.getIncidentTypes(undefined, connectorUsageCollector)).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[Action][IBM Resilient]: Unable to get incident types. Error: Response validation failed ([
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"array\\",
+            \\"received\\": \\"undefined\\",
+            \\"path\\": [
+              \\"values\\"
+            ],
+            \\"message\\": \\"Required\\"
+          }
+        ])."
+      `);
     });
   });
 
@@ -571,9 +613,20 @@ describe('IBM Resilient connector', () => {
         createAxiosResponse({ data: { id: '10', name: 'Critical' } })
       );
 
-      await expect(connector.getSeverity(undefined, connectorUsageCollector)).rejects.toThrow(
-        '[Action][IBM Resilient]: Unable to get severity. Error: Response validation failed (Error: [values]: expected value of type [array] but got [undefined]).'
-      );
+      await expect(connector.getSeverity(undefined, connectorUsageCollector)).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[Action][IBM Resilient]: Unable to get severity. Error: Response validation failed ([
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"array\\",
+            \\"received\\": \\"undefined\\",
+            \\"path\\": [
+              \\"values\\"
+            ],
+            \\"message\\": \\"Required\\"
+          }
+        ])."
+      `);
     });
   });
 
@@ -620,9 +673,18 @@ describe('IBM Resilient connector', () => {
     it('should throw if the required attributes are not received in response', async () => {
       requestMock.mockImplementation(() => createAxiosResponse({ data: { someField: 'test' } }));
 
-      await expect(connector.getFields(undefined, connectorUsageCollector)).rejects.toThrow(
-        '[Action][IBM Resilient]: Unable to get fields. Error: Response validation failed (Error: expected value of type [array] but got [Object]).'
-      );
+      await expect(connector.getFields(undefined, connectorUsageCollector)).rejects
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[Action][IBM Resilient]: Unable to get fields. Error: Response validation failed ([
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"array\\",
+            \\"received\\": \\"object\\",
+            \\"path\\": [],
+            \\"message\\": \\"Expected array, received object\\"
+          }
+        ])."
+      `);
     });
   });
 });

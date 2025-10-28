@@ -3889,6 +3889,24 @@ groups:
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
         stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
+        stability: stable
       - name: network.transport
         type:
           members:
@@ -4008,6 +4026,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -4099,6 +4134,24 @@ groups:
 
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -4214,6 +4267,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -6056,7 +6126,7 @@ groups:
           - sha256:19c92d0a00d1b66d897bceaa7319bee0dd38a10a851c60bcec9474aa3f01e50f
         requirement_level: recommended
         note: |
-          Docker defines a sha256 of the image id; `container.image.id` corresponds to the `Image` field from the Docker container inspect [API](https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerInspect) endpoint.
+          Docker defines a sha256 of the image id; `container.image.id` corresponds to the `Image` field from the Docker container inspect [API](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Container/operation/ContainerInspect) endpoint.
           K8s defines a link to the container registry repository with digest `"imageID": "registry.azurecr.io /namespace/service/dockerfile@sha256:bdeabd40c3a8a492eaf9e8e44d0ebbb84bac7ee25ac0cf8a7159d25f62555625"`.
           The ID is assigned by the container runtime and can vary in different environments. Consider using `oci.manifest.digest` if it is important to identify the same image in different environments/runtimes.
         stability: development
@@ -6077,12 +6147,12 @@ groups:
             - internal.registry.example.com:5000/example@sha256:b69959407d21e8a062e0416bf13405bb2b71ed7a84dde4158ebafacfa06f5578
         requirement_level: recommended
         note: |
-          [Docker](https://docs.docker.com/engine/api/v1.43/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
+          [Docker](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
         stability: development
       - name: container.image.tags
         type: string[]
         brief: |
-          Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/engine/api/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.
+          Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.
         examples:
           - - v1.27.1
             - 3.5.7-0
@@ -6432,7 +6502,7 @@ groups:
           - **Google Cloud Run (Services):** The [revision](https://cloud.google.com/run/docs/managing/revisions)
             (i.e., the function name plus the revision suffix).
           - **Google Cloud Functions:** The value of the
-            [`K_REVISION` environment variable](https://cloud.google.com/functions/docs/env-var#runtime_environment_variables_set_automatically).
+            [`K_REVISION` environment variable](https://cloud.google.com/run/docs/container-contract#services-env-vars).
           - **Azure Functions:** Not applicable. Do not set this attribute.
         stability: development
     name: faas
@@ -8400,6 +8470,56 @@ groups:
             - note
             - requirement_level
             - stability
+  - id: entity.openshift.clusterquota
+    type: entity
+    brief: |
+      An OpenShift [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#clusterresourcequota-quota-openshift-io-v1) object.
+    stability: development
+    attributes:
+      - name: openshift.clusterquota.name
+        type: string
+        brief: |
+          The name of the cluster quota.
+        examples:
+          - opentelemetry
+        requirement_level: recommended
+        stability: development
+        role: descriptive
+      - name: openshift.clusterquota.uid
+        type: string
+        brief: |
+          The UID of the cluster quota.
+        examples:
+          - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
+        requirement_level: recommended
+        stability: development
+        role: identifying
+    name: openshift.clusterquota
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/entities.yaml
+      attributes:
+        openshift.clusterquota.name:
+          source_group: registry.openshift
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
+        openshift.clusterquota.uid:
+          source_group: registry.openshift
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - role
   - id: entity.os
     type: entity
     brief: |
@@ -9221,7 +9341,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -25510,7 +25630,7 @@ groups:
           - dot.net
         requirement_level: required
         note: |
-          If the name field contains non-printable characters (below 32 or above 126), those characters should be represented as escaped base 10 integers (\DDD). Back slashes and quotes should be escaped. Tabs, carriage returns, and line feeds should be converted to \t, \r, and \n respectively.
+          The name represents the queried domain name as it appears in the DNS query without any additional normalization.
         stability: development
       - name: error.type
         type:
@@ -37394,12 +37514,35 @@ groups:
         metric_value_type: int
   - id: metric.k8s.cronjob.active_jobs
     type: metric
+    brief: Deprecated, use `k8s.cronjob.job.active` instead.
+    note: |
+      This metric aligns with the `active` field of the
+      [K8s CronJobStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#cronjobstatus-v1-batch).
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.cronjob.job.active
+      note: Replaced by `k8s.cronjob.job.active`.
+    metric_name: k8s.cronjob.active_jobs
+    instrument: updowncounter
+    unit: '{job}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.cronjob
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.cronjob.job.active
+    type: metric
     brief: The number of actively running jobs for a cronjob.
     note: |
       This metric aligns with the `active` field of the
       [K8s CronJobStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#cronjobstatus-v1-batch).
     stability: development
-    metric_name: k8s.cronjob.active_jobs
+    metric_name: k8s.cronjob.job.active
     instrument: updowncounter
     unit: '{job}'
     lineage:
@@ -37413,18 +37556,22 @@ groups:
         metric_value_type: int
   - id: metric.k8s.daemonset.current_scheduled_nodes
     type: metric
-    brief: Number of nodes that are running at least 1 daemon pod and are supposed to run the daemon pod.
+    brief: Deprecated, use `k8s.daemonset.node.current_scheduled` instead.
     note: |
       This metric aligns with the `currentNumberScheduled` field of the
       [K8s DaemonSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#daemonsetstatus-v1-apps).
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.daemonset.node.current_scheduled
+      note: Replaced by `k8s.daemonset.node.current_scheduled`.
     metric_name: k8s.daemonset.current_scheduled_nodes
     instrument: updowncounter
     unit: '{node}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.daemonset
     annotations:
@@ -37432,12 +37579,58 @@ groups:
         metric_value_type: int
   - id: metric.k8s.daemonset.desired_scheduled_nodes
     type: metric
-    brief: Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod).
+    brief: Deprecated, use `k8s.daemonset.node.desired_scheduled` instead.
     note: |
       This metric aligns with the `desiredNumberScheduled` field of the
       [K8s DaemonSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#daemonsetstatus-v1-apps).
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.daemonset.node.desired_scheduled
+      note: Replaced by `k8s.daemonset.node.desired_scheduled`.
     metric_name: k8s.daemonset.desired_scheduled_nodes
+    instrument: updowncounter
+    unit: '{node}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.daemonset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.daemonset.misscheduled_nodes
+    type: metric
+    brief: Deprecated, use `k8s.daemonset.node.misscheduled` instead.
+    note: |
+      This metric aligns with the `numberMisscheduled` field of the
+      [K8s DaemonSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#daemonsetstatus-v1-apps).
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.daemonset.node.misscheduled
+      note: Replaced by `k8s.daemonset.node.misscheduled`.
+    metric_name: k8s.daemonset.misscheduled_nodes
+    instrument: updowncounter
+    unit: '{node}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.daemonset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.daemonset.node.current_scheduled
+    type: metric
+    brief: Number of nodes that are running at least 1 daemon pod and are supposed to run the daemon pod.
+    note: |
+      This metric aligns with the `currentNumberScheduled` field of the
+      [K8s DaemonSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#daemonsetstatus-v1-apps).
+    stability: development
+    metric_name: k8s.daemonset.node.current_scheduled
     instrument: updowncounter
     unit: '{node}'
     lineage:
@@ -37449,14 +37642,52 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
-  - id: metric.k8s.daemonset.misscheduled_nodes
+  - id: metric.k8s.daemonset.node.desired_scheduled
+    type: metric
+    brief: Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod).
+    note: |
+      This metric aligns with the `desiredNumberScheduled` field of the
+      [K8s DaemonSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#daemonsetstatus-v1-apps).
+    stability: development
+    metric_name: k8s.daemonset.node.desired_scheduled
+    instrument: updowncounter
+    unit: '{node}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.daemonset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.daemonset.node.misscheduled
     type: metric
     brief: Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod.
     note: |
       This metric aligns with the `numberMisscheduled` field of the
       [K8s DaemonSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#daemonsetstatus-v1-apps).
     stability: development
-    metric_name: k8s.daemonset.misscheduled_nodes
+    metric_name: k8s.daemonset.node.misscheduled
+    instrument: updowncounter
+    unit: '{node}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.daemonset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.daemonset.node.ready
+    type: metric
+    brief: Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready.
+    note: |
+      This metric aligns with the `numberReady` field of the
+      [K8s DaemonSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#daemonsetstatus-v1-apps).
+    stability: development
+    metric_name: k8s.daemonset.node.ready
     instrument: updowncounter
     unit: '{node}'
     lineage:
@@ -37470,18 +37701,22 @@ groups:
         metric_value_type: int
   - id: metric.k8s.daemonset.ready_nodes
     type: metric
-    brief: Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready.
+    brief: Deprecated, use `k8s.daemonset.node.ready` instead.
     note: |
       This metric aligns with the `numberReady` field of the
       [K8s DaemonSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#daemonsetstatus-v1-apps).
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.daemonset.node.ready
+      note: Replaced by `k8s.daemonset.node.ready`.
     metric_name: k8s.daemonset.ready_nodes
     instrument: updowncounter
     unit: '{node}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.daemonset
     annotations:
@@ -37489,12 +37724,58 @@ groups:
         metric_value_type: int
   - id: metric.k8s.deployment.available_pods
     type: metric
+    brief: Deprecated, use `k8s.deployment.pod.available` instead.
+    note: |
+      This metric aligns with the `availableReplicas` field of the
+      [K8s DeploymentStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#deploymentstatus-v1-apps).
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.deployment.pod.available
+      note: Replaced by `k8s.deployment.pod.available`.
+    metric_name: k8s.deployment.available_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.deployment
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.deployment.desired_pods
+    type: metric
+    brief: Deprecated, use `k8s.deployment.pod.desired` instead.
+    note: |
+      This metric aligns with the `replicas` field of the
+      [K8s DeploymentSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#deploymentspec-v1-apps).
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.deployment.pod.desired
+      note: Replaced by `k8s.deployment.pod.desired`.
+    metric_name: k8s.deployment.desired_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.deployment
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.deployment.pod.available
+    type: metric
     brief: Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment.
     note: |
       This metric aligns with the `availableReplicas` field of the
       [K8s DeploymentStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#deploymentstatus-v1-apps).
     stability: development
-    metric_name: k8s.deployment.available_pods
+    metric_name: k8s.deployment.pod.available
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -37506,14 +37787,14 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
-  - id: metric.k8s.deployment.desired_pods
+  - id: metric.k8s.deployment.pod.desired
     type: metric
     brief: Number of desired replica pods in this deployment.
     note: |
       This metric aligns with the `replicas` field of the
       [K8s DeploymentSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#deploymentspec-v1-apps).
     stability: development
-    metric_name: k8s.deployment.desired_pods
+    metric_name: k8s.deployment.pod.desired
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -37527,18 +37808,22 @@ groups:
         metric_value_type: int
   - id: metric.k8s.hpa.current_pods
     type: metric
-    brief: Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler.
+    brief: Deprecated, use `k8s.hpa.pod.current` instead.
     note: |
       This metric aligns with the `currentReplicas` field of the
       [K8s HorizontalPodAutoscalerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#horizontalpodautoscalerstatus-v2-autoscaling)
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.hpa.pod.current
+      note: Replaced by `k8s.hpa.pod.current`.
     metric_name: k8s.hpa.current_pods
     instrument: updowncounter
     unit: '{pod}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.hpa
     annotations:
@@ -37546,18 +37831,22 @@ groups:
         metric_value_type: int
   - id: metric.k8s.hpa.desired_pods
     type: metric
-    brief: Desired number of replica pods managed by this horizontal pod autoscaler, as last calculated by the autoscaler.
+    brief: Deprecated, use `k8s.hpa.pod.desired` instead.
     note: |
       This metric aligns with the `desiredReplicas` field of the
       [K8s HorizontalPodAutoscalerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#horizontalpodautoscalerstatus-v2-autoscaling)
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.hpa.pod.desired
+      note: Replaced by `k8s.hpa.pod.desired`.
     metric_name: k8s.hpa.desired_pods
     instrument: updowncounter
     unit: '{pod}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.hpa
     annotations:
@@ -37565,18 +37854,22 @@ groups:
         metric_value_type: int
   - id: metric.k8s.hpa.max_pods
     type: metric
-    brief: The upper limit for the number of replica pods to which the autoscaler can scale up.
+    brief: Deprecated, use `k8s.hpa.pod.max` instead.
     note: |
       This metric aligns with the `maxReplicas` field of the
       [K8s HorizontalPodAutoscalerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#horizontalpodautoscalerspec-v2-autoscaling)
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.hpa.pod.max
+      note: Replaced by `k8s.hpa.pod.max`.
     metric_name: k8s.hpa.max_pods
     instrument: updowncounter
     unit: '{pod}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.hpa
     annotations:
@@ -37758,12 +38051,92 @@ groups:
       - k8s.namespace
   - id: metric.k8s.hpa.min_pods
     type: metric
+    brief: Deprecated, use `k8s.hpa.pod.min` instead.
+    note: |
+      This metric aligns with the `minReplicas` field of the
+      [K8s HorizontalPodAutoscalerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#horizontalpodautoscalerspec-v2-autoscaling)
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.hpa.pod.min
+      note: Replaced by `k8s.hpa.pod.min`.
+    metric_name: k8s.hpa.min_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.hpa
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.hpa.pod.current
+    type: metric
+    brief: Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler.
+    note: |
+      This metric aligns with the `currentReplicas` field of the
+      [K8s HorizontalPodAutoscalerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#horizontalpodautoscalerstatus-v2-autoscaling)
+    stability: development
+    metric_name: k8s.hpa.pod.current
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.hpa
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.hpa.pod.desired
+    type: metric
+    brief: Desired number of replica pods managed by this horizontal pod autoscaler, as last calculated by the autoscaler.
+    note: |
+      This metric aligns with the `desiredReplicas` field of the
+      [K8s HorizontalPodAutoscalerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#horizontalpodautoscalerstatus-v2-autoscaling)
+    stability: development
+    metric_name: k8s.hpa.pod.desired
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.hpa
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.hpa.pod.max
+    type: metric
+    brief: The upper limit for the number of replica pods to which the autoscaler can scale up.
+    note: |
+      This metric aligns with the `maxReplicas` field of the
+      [K8s HorizontalPodAutoscalerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#horizontalpodautoscalerspec-v2-autoscaling)
+    stability: development
+    metric_name: k8s.hpa.pod.max
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.hpa
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.hpa.pod.min
+    type: metric
     brief: The lower limit for the number of replica pods to which the autoscaler can scale down.
     note: |
       This metric aligns with the `minReplicas` field of the
       [K8s HorizontalPodAutoscalerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#horizontalpodautoscalerspec-v2-autoscaling)
     stability: development
-    metric_name: k8s.hpa.min_pods
+    metric_name: k8s.hpa.pod.min
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -37777,18 +38150,22 @@ groups:
         metric_value_type: int
   - id: metric.k8s.job.active_pods
     type: metric
-    brief: The number of pending and actively running pods for a job.
+    brief: Deprecated, use `k8s.job.pod.active` instead.
     note: |
       This metric aligns with the `active` field of the
       [K8s JobStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#jobstatus-v1-batch).
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.job.pod.active
+      note: Replaced by `k8s.job.pod.active`.
     metric_name: k8s.job.active_pods
     instrument: updowncounter
     unit: '{pod}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.job
     annotations:
@@ -37796,18 +38173,22 @@ groups:
         metric_value_type: int
   - id: metric.k8s.job.desired_successful_pods
     type: metric
-    brief: The desired number of successfully finished pods the job should be run with.
+    brief: Deprecated, use `k8s.job.pod.desired_successful` instead.
     note: |
       This metric aligns with the `completions` field of the
       [K8s JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#jobspec-v1-batch)..
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.job.pod.desired_successful
+      note: Replaced by `k8s.job.pod.desired_successful`.
     metric_name: k8s.job.desired_successful_pods
     instrument: updowncounter
     unit: '{pod}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.job
     annotations:
@@ -37815,12 +38196,58 @@ groups:
         metric_value_type: int
   - id: metric.k8s.job.failed_pods
     type: metric
-    brief: The number of pods which reached phase Failed for a job.
+    brief: Deprecated, use `k8s.job.pod.failed` instead.
     note: |
       This metric aligns with the `failed` field of the
       [K8s JobStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#jobstatus-v1-batch).
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.job.pod.failed
+      note: Replaced by `k8s.job.pod.failed`.
     metric_name: k8s.job.failed_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.job
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.job.max_parallel_pods
+    type: metric
+    brief: Deprecated, use `k8s.job.pod.max_parallel` instead.
+    note: |
+      This metric aligns with the `parallelism` field of the
+      [K8s JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#jobspec-v1-batch).
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.job.pod.max_parallel
+      note: Replaced by `k8s.job.pod.max_parallel`.
+    metric_name: k8s.job.max_parallel_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.job
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.job.pod.active
+    type: metric
+    brief: The number of pending and actively running pods for a job.
+    note: |
+      This metric aligns with the `active` field of the
+      [K8s JobStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#jobstatus-v1-batch).
+    stability: development
+    metric_name: k8s.job.pod.active
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -37832,14 +38259,71 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
-  - id: metric.k8s.job.max_parallel_pods
+  - id: metric.k8s.job.pod.desired_successful
+    type: metric
+    brief: The desired number of successfully finished pods the job should be run with.
+    note: |
+      This metric aligns with the `completions` field of the
+      [K8s JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#jobspec-v1-batch)..
+    stability: development
+    metric_name: k8s.job.pod.desired_successful
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.job
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.job.pod.failed
+    type: metric
+    brief: The number of pods which reached phase Failed for a job.
+    note: |
+      This metric aligns with the `failed` field of the
+      [K8s JobStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#jobstatus-v1-batch).
+    stability: development
+    metric_name: k8s.job.pod.failed
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.job
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.job.pod.max_parallel
     type: metric
     brief: The max desired number of pods the job should run at any given time.
     note: |
       This metric aligns with the `parallelism` field of the
       [K8s JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#jobspec-v1-batch).
     stability: development
-    metric_name: k8s.job.max_parallel_pods
+    metric_name: k8s.job.pod.max_parallel
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.job
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.job.pod.successful
+    type: metric
+    brief: The number of pods which reached phase Succeeded for a job.
+    note: |
+      This metric aligns with the `succeeded` field of the
+      [K8s JobStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#jobstatus-v1-batch).
+    stability: development
+    metric_name: k8s.job.pod.successful
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -37853,18 +38337,22 @@ groups:
         metric_value_type: int
   - id: metric.k8s.job.successful_pods
     type: metric
-    brief: The number of pods which reached phase Succeeded for a job.
+    brief: Deprecated, use `k8s.job.pod.successful` instead.
     note: |
       This metric aligns with the `succeeded` field of the
       [K8s JobStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#jobstatus-v1-batch).
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.job.pod.successful
+      note: Replaced by `k8s.job.pod.successful`.
     metric_name: k8s.job.successful_pods
     instrument: updowncounter
     unit: '{pod}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.job
     annotations:
@@ -37968,15 +38456,19 @@ groups:
         metric_value_type: int
   - id: metric.k8s.node.allocatable.pods
     type: metric
-    brief: Amount of pods allocatable on the node.
+    brief: Deprecated, use `k8s.node.pod.allocatable` instead.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.node.pod.allocatable
+      note: Replaced by `k8s.node.pod.allocatable`.
     metric_name: k8s.node.allocatable.pods
     instrument: updowncounter
     unit: '{pod}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.node
     annotations:
@@ -38409,6 +38901,22 @@ groups:
             - note
             - requirement_level
             - stability
+    entity_associations:
+      - k8s.node
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.node.pod.allocatable
+    type: metric
+    brief: Amount of pods allocatable on the node.
+    stability: development
+    metric_name: k8s.node.pod.allocatable
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
     entity_associations:
       - k8s.node
     annotations:
@@ -39412,12 +39920,58 @@ groups:
         metric_value_type: int
   - id: metric.k8s.replicaset.available_pods
     type: metric
+    brief: Deprecated, use `k8s.replicaset.pod.available` instead.
+    note: |
+      This metric aligns with the `availableReplicas` field of the
+      [K8s ReplicaSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#replicasetstatus-v1-apps).
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.replicaset.pod.available
+      note: Replaced by `k8s.replicaset.pod.available`.
+    metric_name: k8s.replicaset.available_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.replicaset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.replicaset.desired_pods
+    type: metric
+    brief: Deprecated, use `k8s.replicaset.pod.desired` instead.
+    note: |
+      This metric aligns with the `replicas` field of the
+      [K8s ReplicaSetSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#replicasetspec-v1-apps).
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.replicaset.pod.desired
+      note: Replaced by `k8s.replicaset.pod.desired`.
+    metric_name: k8s.replicaset.desired_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.replicaset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.replicaset.pod.available
+    type: metric
     brief: Total number of available replica pods (ready for at least minReadySeconds) targeted by this replicaset.
     note: |
       This metric aligns with the `availableReplicas` field of the
       [K8s ReplicaSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#replicasetstatus-v1-apps).
     stability: development
-    metric_name: k8s.replicaset.available_pods
+    metric_name: k8s.replicaset.pod.available
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -39429,14 +39983,14 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
-  - id: metric.k8s.replicaset.desired_pods
+  - id: metric.k8s.replicaset.pod.desired
     type: metric
     brief: Number of desired replica pods in this replicaset.
     note: |
       This metric aligns with the `replicas` field of the
       [K8s ReplicaSetSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#replicasetspec-v1-apps).
     stability: development
-    metric_name: k8s.replicaset.desired_pods
+    metric_name: k8s.replicaset.pod.desired
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -39450,12 +40004,12 @@ groups:
         metric_value_type: int
   - id: metric.k8s.replication_controller.available_pods
     type: metric
-    brief: Deprecated, use `k8s.replicationcontroller.available_pods` instead.
+    brief: Deprecated, use `k8s.replicationcontroller.pod.available` instead.
     stability: development
     deprecated:
       reason: renamed
-      renamed_to: k8s.replicationcontroller.available_pods
-      note: Replaced by `k8s.replicationcontroller.available_pods`.
+      renamed_to: k8s.replicationcontroller.pod.available
+      note: Replaced by `k8s.replicationcontroller.pod.available`.
     metric_name: k8s.replication_controller.available_pods
     instrument: updowncounter
     unit: '{pod}'
@@ -39468,12 +40022,12 @@ groups:
         metric_value_type: int
   - id: metric.k8s.replication_controller.desired_pods
     type: metric
-    brief: Deprecated, use `k8s.replicationcontroller.desired_pods` instead.
+    brief: Deprecated, use `k8s.replicationcontroller.pod.desired` instead.
     stability: development
     deprecated:
       reason: renamed
-      renamed_to: k8s.replicationcontroller.desired_pods
-      note: Replaced by `k8s.replicationcontroller.desired_pods`.
+      renamed_to: k8s.replicationcontroller.pod.desired
+      note: Replaced by `k8s.replicationcontroller.pod.desired`.
     metric_name: k8s.replication_controller.desired_pods
     instrument: updowncounter
     unit: '{pod}'
@@ -39486,12 +40040,48 @@ groups:
         metric_value_type: int
   - id: metric.k8s.replicationcontroller.available_pods
     type: metric
+    brief: Deprecated, use `k8s.replicationcontroller.pod.available` instead.
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.replicationcontroller.pod.available
+      note: Replaced by `k8s.replicationcontroller.pod.available`.
+    metric_name: k8s.replicationcontroller.available_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.replicationcontroller.desired_pods
+    type: metric
+    brief: Deprecated, use `k8s.replicationcontroller.pod.desired` instead.
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.replicationcontroller.pod.desired
+      note: Replaced by `k8s.replicationcontroller.pod.desired`.
+    metric_name: k8s.replicationcontroller.desired_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.replicationcontroller.pod.available
+    type: metric
     brief: Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller.
     note: |
       This metric aligns with the `availableReplicas` field of the
       [K8s ReplicationControllerStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#replicationcontrollerstatus-v1-core)
     stability: development
-    metric_name: k8s.replicationcontroller.available_pods
+    metric_name: k8s.replicationcontroller.pod.available
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -39503,14 +40093,14 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
-  - id: metric.k8s.replicationcontroller.desired_pods
+  - id: metric.k8s.replicationcontroller.pod.desired
     type: metric
     brief: Number of desired replica pods in this replication controller.
     note: |
       This metric aligns with the `replicas` field of the
       [K8s ReplicationControllerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#replicationcontrollerspec-v1-core)
     stability: development
-    metric_name: k8s.replicationcontroller.desired_pods
+    metric_name: k8s.replicationcontroller.pod.desired
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -39872,7 +40462,7 @@ groups:
           - count/replicationcontrollers
         requirement_level: required
         note: |
-          The value for this attribute can be either the full `count/<resource>[.<group>]` string (e.g., count/deployments.apps, count/pods), or, for certain core Kubernetes resources, just the resource name (e.g., pods, services, configmaps). Both forms are supported by Kubernetes for object count quotas. See [Kubernetes Resource Quotas documentation](https://kubernetes.io/docs/concepts/policy/resource-quotas/#object-count-quota) for more details.
+          The value for this attribute can be either the full `count/<resource>[.<group>]` string (e.g., count/deployments.apps, count/pods), or, for certain core Kubernetes resources, just the resource name (e.g., pods, services, configmaps). Both forms are supported by Kubernetes for object count quotas. See [Kubernetes Resource Quotas documentation](https://kubernetes.io/docs/concepts/policy/resource-quotas/#quota-on-object-count) for more details.
         stability: development
     metric_name: k8s.resourcequota.object_count.hard
     instrument: updowncounter
@@ -39914,7 +40504,7 @@ groups:
           - count/replicationcontrollers
         requirement_level: required
         note: |
-          The value for this attribute can be either the full `count/<resource>[.<group>]` string (e.g., count/deployments.apps, count/pods), or, for certain core Kubernetes resources, just the resource name (e.g., pods, services, configmaps). Both forms are supported by Kubernetes for object count quotas. See [Kubernetes Resource Quotas documentation](https://kubernetes.io/docs/concepts/policy/resource-quotas/#object-count-quota) for more details.
+          The value for this attribute can be either the full `count/<resource>[.<group>]` string (e.g., count/deployments.apps, count/pods), or, for certain core Kubernetes resources, just the resource name (e.g., pods, services, configmaps). Both forms are supported by Kubernetes for object count quotas. See [Kubernetes Resource Quotas documentation](https://kubernetes.io/docs/concepts/policy/resource-quotas/#quota-on-object-count) for more details.
         stability: development
     metric_name: k8s.resourcequota.object_count.used
     instrument: updowncounter
@@ -40120,12 +40710,58 @@ groups:
         metric_value_type: int
   - id: metric.k8s.statefulset.current_pods
     type: metric
+    brief: Deprecated, use `k8s.statefulset.pod.current` instead.
+    note: |
+      This metric aligns with the `currentReplicas` field of the
+      [K8s StatefulSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#statefulsetstatus-v1-apps).
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.statefulset.pod.current
+      note: Replaced by `k8s.statefulset.pod.current`.
+    metric_name: k8s.statefulset.current_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.statefulset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.statefulset.desired_pods
+    type: metric
+    brief: Deprecated, use `k8s.statefulset.pod.desired` instead.
+    note: |
+      This metric aligns with the `replicas` field of the
+      [K8s StatefulSetSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#statefulsetspec-v1-apps).
+    stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.statefulset.pod.desired
+      note: Replaced by `k8s.statefulset.pod.desired`.
+    metric_name: k8s.statefulset.desired_pods
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
+    entity_associations:
+      - k8s.statefulset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.statefulset.pod.current
+    type: metric
     brief: The number of replica pods created by the statefulset controller from the statefulset version indicated by currentRevision.
     note: |
       This metric aligns with the `currentReplicas` field of the
       [K8s StatefulSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#statefulsetstatus-v1-apps).
     stability: development
-    metric_name: k8s.statefulset.current_pods
+    metric_name: k8s.statefulset.pod.current
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -40137,14 +40773,52 @@ groups:
     annotations:
       code_generation:
         metric_value_type: int
-  - id: metric.k8s.statefulset.desired_pods
+  - id: metric.k8s.statefulset.pod.desired
     type: metric
     brief: Number of desired replica pods in this statefulset.
     note: |
       This metric aligns with the `replicas` field of the
       [K8s StatefulSetSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#statefulsetspec-v1-apps).
     stability: development
-    metric_name: k8s.statefulset.desired_pods
+    metric_name: k8s.statefulset.pod.desired
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.statefulset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.statefulset.pod.ready
+    type: metric
+    brief: The number of replica pods created for this statefulset with a Ready Condition.
+    note: |
+      This metric aligns with the `readyReplicas` field of the
+      [K8s StatefulSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#statefulsetstatus-v1-apps).
+    stability: development
+    metric_name: k8s.statefulset.pod.ready
+    instrument: updowncounter
+    unit: '{pod}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/k8s/metrics.yaml
+    entity_associations:
+      - k8s.statefulset
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.k8s.statefulset.pod.updated
+    type: metric
+    brief: Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision.
+    note: |
+      This metric aligns with the `updatedReplicas` field of the
+      [K8s StatefulSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#statefulsetstatus-v1-apps).
+    stability: development
+    metric_name: k8s.statefulset.pod.updated
     instrument: updowncounter
     unit: '{pod}'
     lineage:
@@ -40158,18 +40832,22 @@ groups:
         metric_value_type: int
   - id: metric.k8s.statefulset.ready_pods
     type: metric
-    brief: The number of replica pods created for this statefulset with a Ready Condition.
+    brief: Deprecated, use `k8s.statefulset.pod.ready` instead.
     note: |
       This metric aligns with the `readyReplicas` field of the
       [K8s StatefulSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#statefulsetstatus-v1-apps).
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.statefulset.pod.ready
+      note: Replaced by `k8s.statefulset.pod.ready`.
     metric_name: k8s.statefulset.ready_pods
     instrument: updowncounter
     unit: '{pod}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.statefulset
     annotations:
@@ -40177,18 +40855,22 @@ groups:
         metric_value_type: int
   - id: metric.k8s.statefulset.updated_pods
     type: metric
-    brief: Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision.
+    brief: Deprecated, use `k8s.statefulset.pod.updated` instead.
     note: |
       This metric aligns with the `updatedReplicas` field of the
       [K8s StatefulSetStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#statefulsetstatus-v1-apps).
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: k8s.statefulset.pod.updated
+      note: Replaced by `k8s.statefulset.pod.updated`.
     metric_name: k8s.statefulset.updated_pods
     instrument: updowncounter
     unit: '{pod}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/k8s/metrics.yaml
+        path: /home/weaver/source/k8s/deprecated/metrics-deprecated.yaml
     entity_associations:
       - k8s.statefulset
     annotations:
@@ -44232,6 +44914,43 @@ groups:
     note: |
       Linux: this metric is taken from the Linux kernel's svc_stat.nettcpcnt and svc_stat.netudpcnt
     stability: development
+    attributes:
+      - name: network.transport
+        type:
+          members:
+            - id: tcp
+              value: tcp
+              brief: TCP
+              stability: stable
+            - id: udp
+              value: udp
+              brief: UDP
+              stability: stable
+            - id: pipe
+              value: pipe
+              brief: Named or anonymous pipe.
+              stability: stable
+            - id: unix
+              value: unix
+              brief: Unix domain socket
+              stability: stable
+            - id: quic
+              value: quic
+              brief: QUIC
+              stability: stable
+        brief: |
+          [OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).
+        examples:
+          - tcp
+          - udp
+        requirement_level: recommended
+        note: |
+          The value SHOULD be normalized to lowercase.
+
+          Consider always setting the transport when setting a port number, since
+          a port number is ambiguous without knowing the transport. For example
+          different processes could be listening on TCP port 12345 and UDP port 12345.
+        stability: stable
     metric_name: nfs.server.net.count
     instrument: counter
     unit: '{record}'
@@ -44239,6 +44958,15 @@ groups:
       provenance:
         registry_id: main
         path: /home/weaver/source/nfs/metrics.yaml
+      attributes:
+        network.transport:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
     entity_associations:
       - host
   - id: metric.nfs.server.net.tcp.connection.accepted
@@ -44620,6 +45348,622 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
+  - id: metric.openshift.clusterquota.cpu.limit.hard
+    type: metric
+    brief: |
+      The enforced hard limit of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Hard` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.cpu.limit.hard
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.openshift.clusterquota.cpu.limit.used
+    type: metric
+    brief: |
+      The current observed total usage of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Used` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.cpu.limit.used
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.openshift.clusterquota.cpu.request.hard
+    type: metric
+    brief: |
+      The enforced hard limit of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Hard` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.cpu.request.hard
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.openshift.clusterquota.cpu.request.used
+    type: metric
+    brief: |
+      The current observed total usage of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Used` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.cpu.request.used
+    instrument: updowncounter
+    unit: '{cpu}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: double
+  - id: metric.openshift.clusterquota.ephemeral_storage.limit.hard
+    type: metric
+    brief: |
+      The enforced hard limit of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Hard` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.ephemeral_storage.limit.hard
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.ephemeral_storage.limit.used
+    type: metric
+    brief: |
+      The current observed total usage of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Used` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.ephemeral_storage.limit.used
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.ephemeral_storage.request.hard
+    type: metric
+    brief: |
+      The enforced hard limit of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Hard` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.ephemeral_storage.request.hard
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.ephemeral_storage.request.used
+    type: metric
+    brief: |
+      The current observed total usage of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Used` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.ephemeral_storage.request.used
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.hugepage_count.request.hard
+    type: metric
+    brief: |
+      The enforced hard limit of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Hard` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    attributes:
+      - name: k8s.hugepage.size
+        type: string
+        brief: |
+          The size (identifier) of the K8s huge page.
+        examples:
+          - 2Mi
+        requirement_level: required
+        stability: development
+    metric_name: openshift.clusterquota.hugepage_count.request.hard
+    instrument: updowncounter
+    unit: '{hugepage}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+      attributes:
+        k8s.hugepage.size:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.hugepage_count.request.used
+    type: metric
+    brief: |
+      The current observed total usage of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Used` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    attributes:
+      - name: k8s.hugepage.size
+        type: string
+        brief: |
+          The size (identifier) of the K8s huge page.
+        examples:
+          - 2Mi
+        requirement_level: required
+        stability: development
+    metric_name: openshift.clusterquota.hugepage_count.request.used
+    instrument: updowncounter
+    unit: '{hugepage}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+      attributes:
+        k8s.hugepage.size:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.memory.limit.hard
+    type: metric
+    brief: |
+      The enforced hard limit of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Hard` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.memory.limit.hard
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.memory.limit.used
+    type: metric
+    brief: |
+      The current observed total usage of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Used` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.memory.limit.used
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.memory.request.hard
+    type: metric
+    brief: |
+      The enforced hard limit of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Hard` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.memory.request.hard
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.memory.request.used
+    type: metric
+    brief: |
+      The current observed total usage of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Used` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    metric_name: openshift.clusterquota.memory.request.used
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.object_count.hard
+    type: metric
+    brief: |
+      The enforced hard limit of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Hard` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    attributes:
+      - name: k8s.resourcequota.resource_name
+        type: string
+        brief: |
+          The name of the K8s resource a resource quota defines.
+        examples:
+          - count/replicationcontrollers
+        requirement_level: required
+        note: |
+          The value for this attribute can be either the full `count/<resource>[.<group>]` string (e.g., count/deployments.apps, count/pods), or, for certain core Kubernetes resources, just the resource name (e.g., pods, services, configmaps). Both forms are supported by Kubernetes for object count quotas. See [Kubernetes Resource Quotas documentation](https://kubernetes.io/docs/concepts/policy/resource-quotas/#quota-on-object-count) for more details.
+        stability: development
+    metric_name: openshift.clusterquota.object_count.hard
+    instrument: updowncounter
+    unit: '{object}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+      attributes:
+        k8s.resourcequota.resource_name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.object_count.used
+    type: metric
+    brief: |
+      The current observed total usage of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Used` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+    stability: development
+    attributes:
+      - name: k8s.resourcequota.resource_name
+        type: string
+        brief: |
+          The name of the K8s resource a resource quota defines.
+        examples:
+          - count/replicationcontrollers
+        requirement_level: required
+        note: |
+          The value for this attribute can be either the full `count/<resource>[.<group>]` string (e.g., count/deployments.apps, count/pods), or, for certain core Kubernetes resources, just the resource name (e.g., pods, services, configmaps). Both forms are supported by Kubernetes for object count quotas. See [Kubernetes Resource Quotas documentation](https://kubernetes.io/docs/concepts/policy/resource-quotas/#quota-on-object-count) for more details.
+        stability: development
+    metric_name: openshift.clusterquota.object_count.used
+    instrument: updowncounter
+    unit: '{object}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+      attributes:
+        k8s.resourcequota.resource_name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.persistentvolumeclaim_count.hard
+    type: metric
+    brief: |
+      The enforced hard limit of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Hard` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+
+      The `k8s.storageclass.name` should be required when a resource quota is defined for a specific
+      storage class.
+    stability: development
+    attributes:
+      - name: k8s.storageclass.name
+        type: string
+        brief: |
+          The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.
+        examples:
+          - gold.storageclass.storage.k8s.io
+        requirement_level:
+          conditionally_required: |
+            The `k8s.storageclass.name` should be required when a resource quota is defined for a specific
+            storage class.
+        stability: development
+    metric_name: openshift.clusterquota.persistentvolumeclaim_count.hard
+    instrument: updowncounter
+    unit: '{persistentvolumeclaim}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+      attributes:
+        k8s.storageclass.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.persistentvolumeclaim_count.used
+    type: metric
+    brief: |
+      The current observed total usage of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Used` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+
+      The `k8s.storageclass.name` should be required when a resource quota is defined for a specific
+      storage class.
+    stability: development
+    attributes:
+      - name: k8s.storageclass.name
+        type: string
+        brief: |
+          The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.
+        examples:
+          - gold.storageclass.storage.k8s.io
+        requirement_level:
+          conditionally_required: |
+            The `k8s.storageclass.name` should be required when a resource quota is defined for a specific
+            storage class.
+        stability: development
+    metric_name: openshift.clusterquota.persistentvolumeclaim_count.used
+    instrument: updowncounter
+    unit: '{persistentvolumeclaim}'
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+      attributes:
+        k8s.storageclass.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.storage.request.hard
+    type: metric
+    brief: |
+      The enforced hard limit of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Hard` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+
+      The `k8s.storageclass.name` should be required when a resource quota is defined for a specific
+      storage class.
+    stability: development
+    attributes:
+      - name: k8s.storageclass.name
+        type: string
+        brief: |
+          The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.
+        examples:
+          - gold.storageclass.storage.k8s.io
+        requirement_level:
+          conditionally_required: |
+            The `k8s.storageclass.name` should be required when a resource quota is defined for a specific
+            storage class.
+        stability: development
+    metric_name: openshift.clusterquota.storage.request.hard
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+      attributes:
+        k8s.storageclass.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.openshift.clusterquota.storage.request.used
+    type: metric
+    brief: |
+      The current observed total usage of the resource across all projects.
+    note: |
+      This metric is retrieved from the `Status.Total.Used` field of the
+      [K8s ResourceQuotaStatus](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.32/#resourcequotastatus-v1-core)
+      of the
+      [ClusterResourceQuota](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/schedule_and_quota_apis/clusterresourcequota-quota-openshift-io-v1#status-total).
+
+      The `k8s.storageclass.name` should be required when a resource quota is defined for a specific
+      storage class.
+    stability: development
+    attributes:
+      - name: k8s.storageclass.name
+        type: string
+        brief: |
+          The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.
+        examples:
+          - gold.storageclass.storage.k8s.io
+        requirement_level:
+          conditionally_required: |
+            The `k8s.storageclass.name` should be required when a resource quota is defined for a specific
+            storage class.
+        stability: development
+    metric_name: openshift.clusterquota.storage.request.used
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/metrics.yaml
+      attributes:
+        k8s.storageclass.name:
+          source_group: registry.k8s
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+    entity_associations:
+      - openshift.clusterquota
+    annotations:
+      code_generation:
+        metric_value_type: int
   - id: metric.otel.sdk.exporter.log.exported
     type: metric
     brief: The number of log records for which the export has finished, either successful or failed.
@@ -48097,6 +49441,24 @@ groups:
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
         stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
+        stability: stable
       - name: network.transport
         type:
           members:
@@ -48219,6 +49581,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -48316,6 +49695,24 @@ groups:
 
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -48439,6 +49836,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -48541,6 +49955,24 @@ groups:
 
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -48664,6 +50096,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -48761,6 +50210,24 @@ groups:
 
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -48884,6 +50351,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -48986,6 +50470,24 @@ groups:
 
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -49109,6 +50611,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -49209,6 +50728,24 @@ groups:
 
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -49327,6 +50864,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -49424,6 +50978,24 @@ groups:
 
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -49542,6 +51114,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -49644,6 +51233,24 @@ groups:
 
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -49762,6 +51369,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -49859,6 +51483,24 @@ groups:
 
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -49977,6 +51619,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -50079,6 +51738,24 @@ groups:
 
           - Use a domain-specific attribute
           - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -50197,6 +51874,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -50479,7 +52173,7 @@ groups:
         brief: The logical CPU number [0..n-1]
         examples:
           - 1
-        requirement_level: recommended
+        requirement_level: opt_in
         stability: development
       - name: cpu.mode
         type:
@@ -50537,8 +52231,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
+          locally_overridden_fields:
+            - requirement_level
         cpu.mode:
           source_group: registry.cpu
           inherited_fields:
@@ -50563,7 +52258,7 @@ groups:
         brief: The logical CPU number [0..n-1]
         examples:
           - 1
-        requirement_level: recommended
+        requirement_level: opt_in
         stability: development
       - name: cpu.mode
         type:
@@ -50621,8 +52316,9 @@ groups:
             - brief
             - examples
             - note
-            - requirement_level
             - stability
+          locally_overridden_fields:
+            - requirement_level
         cpu.mode:
           source_group: registry.cpu
           inherited_fields:
@@ -50639,7 +52335,7 @@ groups:
         metric_value_type: double
   - id: metric.system.disk.io
     type: metric
-    brief: TODO.
+    brief: Disk bytes transferred.
     stability: development
     attributes:
       - name: disk.io.direction
@@ -50767,7 +52463,7 @@ groups:
         metric_value_type: int
   - id: metric.system.disk.merged
     type: metric
-    brief: TODO.
+    brief: The number of disk reads/writes merged into single physical disk access operations.
     stability: development
     attributes:
       - name: disk.io.direction
@@ -50882,7 +52578,7 @@ groups:
         metric_value_type: double
   - id: metric.system.disk.operations
     type: metric
-    brief: TODO.
+    brief: Disk operations count.
     stability: development
     attributes:
       - name: disk.io.direction
@@ -51163,7 +52859,7 @@ groups:
         metric_value_type: int
   - id: metric.system.filesystem.utilization
     type: metric
-    brief: TODO.
+    brief: Fraction of filesystem bytes used.
     stability: development
     attributes:
       - name: system.device
@@ -51445,7 +53141,7 @@ groups:
         metric_value_type: int
   - id: metric.system.memory.utilization
     type: metric
-    brief: TODO.
+    brief: Percentage of memory bytes in use.
     stability: development
     attributes:
       - name: system.memory.state
@@ -51501,7 +53197,7 @@ groups:
         metric_value_type: double
   - id: metric.system.network.connection.count
     type: metric
-    brief: TODO.
+    brief: The number of connections.
     stability: development
     attributes:
       - name: network.connection.state
@@ -51886,7 +53582,7 @@ groups:
         metric_value_type: int
   - id: metric.system.network.io
     type: metric
-    brief: TODO.
+    brief: The number of bytes transmitted and received.
     stability: development
     attributes:
       - name: network.interface.name
@@ -51942,7 +53638,7 @@ groups:
         metric_value_type: int
   - id: metric.system.network.packet.count
     type: metric
-    brief: TODO.
+    brief: The number of packets transferred.
     stability: development
     attributes:
       - name: network.io.direction
@@ -52118,7 +53814,7 @@ groups:
         metric_value_type: int
   - id: metric.system.paging.faults
     type: metric
-    brief: TODO.
+    brief: The number of page faults.
     stability: development
     attributes:
       - name: system.paging.fault.type
@@ -52158,7 +53854,7 @@ groups:
         metric_value_type: int
   - id: metric.system.paging.operations
     type: metric
-    brief: TODO.
+    brief: The number of paging operations.
     stability: development
     attributes:
       - name: system.paging.direction
@@ -52276,7 +53972,7 @@ groups:
         metric_value_type: int
   - id: metric.system.paging.utilization
     type: metric
-    brief: TODO.
+    brief: Swap (unix) or pagefile (windows) utilization.
     stability: development
     attributes:
       - name: system.device
@@ -52882,7 +54578,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -53055,7 +54751,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -53271,7 +54967,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -53506,7 +55202,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -53668,7 +55364,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -53811,7 +55507,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -54044,7 +55740,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -54303,7 +55999,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -54533,7 +56229,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -55279,6 +56975,11 @@ groups:
           The [`service.name`](/docs/resource/README.md#service) of the remote service. SHOULD be equal to the actual `service.name` resource attribute of the remote service if any.
         examples: AuthTokenCache
         requirement_level: recommended
+        note: |
+          Examples of `peer.service` that users may specify:
+
+          - A Redis cache of auth tokens as `peer.service="AuthTokenCache"`.
+          - A gRPC service `rpc.service="io.opentelemetry.AuthService"` may be hosted in both a gateway, `peer.service="ExternalApiService"` and a backend, `peer.service="AuthService"`.
         stability: development
     lineage:
       provenance:
@@ -55329,6 +57030,15 @@ groups:
           Indicates that there are line numbers related to this mapping.
         requirement_level: recommended
         stability: development
+      - name: pprof.profile.comment
+        type: string[]
+        brief: |
+          Free-form text associated with the profile. This field should not be used to store any machine-readable information, it is only for human-friendly content.
+        examples:
+          - - hello world
+            - bazinga
+        requirement_level: recommended
+        stability: development
     lineage:
       provenance:
         registry_id: main
@@ -55370,6 +57080,15 @@ groups:
           source_group: registry.pprof
           inherited_fields:
             - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        pprof.profile.comment:
+          source_group: registry.pprof
+          inherited_fields:
+            - brief
+            - examples
             - note
             - stability
           locally_overridden_fields:
@@ -58285,7 +60004,7 @@ groups:
           - sha256:19c92d0a00d1b66d897bceaa7319bee0dd38a10a851c60bcec9474aa3f01e50f
         requirement_level: recommended
         note: |
-          Docker defines a sha256 of the image id; `container.image.id` corresponds to the `Image` field from the Docker container inspect [API](https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerInspect) endpoint.
+          Docker defines a sha256 of the image id; `container.image.id` corresponds to the `Image` field from the Docker container inspect [API](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Container/operation/ContainerInspect) endpoint.
           K8s defines a link to the container registry repository with digest `"imageID": "registry.azurecr.io /namespace/service/dockerfile@sha256:bdeabd40c3a8a492eaf9e8e44d0ebbb84bac7ee25ac0cf8a7159d25f62555625"`.
           The ID is assigned by the container runtime and can vary in different environments. Consider using `oci.manifest.digest` if it is important to identify the same image in different environments/runtimes.
         stability: development
@@ -58306,12 +60025,12 @@ groups:
             - internal.registry.example.com:5000/example@sha256:b69959407d21e8a062e0416bf13405bb2b71ed7a84dde4158ebafacfa06f5578
         requirement_level: recommended
         note: |
-          [Docker](https://docs.docker.com/engine/api/v1.43/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
+          [Docker](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect) and [CRI](https://github.com/kubernetes/cri-api/blob/c75ef5b473bbe2d0a4fc92f82235efd665ea8e9f/pkg/apis/runtime/v1/api.proto#L1237-L1238) report those under the `RepoDigests` field.
         stability: development
       - name: container.image.tags
         type: string[]
         brief: |
-          Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/engine/api/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.
+          Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/reference/api/engine/version/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.
         examples:
           - - v1.27.1
             - 3.5.7-0
@@ -59887,7 +61606,7 @@ groups:
           - opentelemetry.io
         requirement_level: recommended
         note: |
-          If the name field contains non-printable characters (below 32 or above 126), those characters should be represented as escaped base 10 integers (\DDD). Back slashes and quotes should be escaped. Tabs, carriage returns, and line feeds should be converted to \t, \r, and \n respectively.
+          The name represents the queried domain name as it appears in the DNS query without any additional normalization.
         stability: development
     lineage:
       provenance:
@@ -60075,7 +61794,7 @@ groups:
         registry_id: main
         path: /home/weaver/source/error/registry.yaml
     display_name: Error Attributes
-  - id: registry.event
+  - id: registry.event.deprecated
     type: attribute_group
     brief: |
       Attributes for Events represented using Log Records.
@@ -60088,13 +61807,15 @@ groups:
           - browser.mouse.click
           - device.app.lifecycle
         requirement_level: recommended
-        note: |
-          This attribute SHOULD be used by non-OTLP exporters when destination does not support `EventName` or equivalent field. This attribute MAY be used by applications using existing logging libraries so that it can be used to set the `EventName` field by Collector or SDK components.
         stability: development
+        deprecated:
+          reason: uncategorized
+          note: |
+            Replaced by EventName top-level field on the LogRecord.
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/event/registry.yaml
+        path: /home/weaver/source/event/deprecated/registry-deprecated.yaml
     display_name: Event Attributes
   - id: registry.exception
     type: attribute_group
@@ -60359,7 +62080,7 @@ groups:
           - **Google Cloud Run (Services):** The [revision](https://cloud.google.com/run/docs/managing/revisions)
             (i.e., the function name plus the revision suffix).
           - **Google Cloud Functions:** The value of the
-            [`K_REVISION` environment variable](https://cloud.google.com/functions/docs/env-var#runtime_environment_variables_set_automatically).
+            [`K_REVISION` environment variable](https://cloud.google.com/run/docs/container-contract#services-env-vars).
           - **Azure Functions:** Not applicable. Do not set this attribute.
         stability: development
     lineage:
@@ -64203,7 +65924,7 @@ groups:
           - count/replicationcontrollers
         requirement_level: recommended
         note: |
-          The value for this attribute can be either the full `count/<resource>[.<group>]` string (e.g., count/deployments.apps, count/pods), or, for certain core Kubernetes resources, just the resource name (e.g., pods, services, configmaps). Both forms are supported by Kubernetes for object count quotas. See [Kubernetes Resource Quotas documentation](https://kubernetes.io/docs/concepts/policy/resource-quotas/#object-count-quota) for more details.
+          The value for this attribute can be either the full `count/<resource>[.<group>]` string (e.g., count/deployments.apps, count/pods), or, for certain core Kubernetes resources, just the resource name (e.g., pods, services, configmaps). Both forms are supported by Kubernetes for object count quotas. See [Kubernetes Resource Quotas documentation](https://kubernetes.io/docs/concepts/policy/resource-quotas/#quota-on-object-count) for more details.
         stability: development
       - name: k8s.resourcequota.uid
         type: string
@@ -65748,6 +67469,32 @@ groups:
         registry_id: main
         path: /home/weaver/source/openai/registry.yaml
     display_name: OpenAI Attributes
+  - id: registry.openshift
+    type: attribute_group
+    brief: |
+      OpenShift resource attributes.
+    attributes:
+      - name: openshift.clusterquota.name
+        type: string
+        brief: |
+          The name of the cluster quota.
+        examples:
+          - opentelemetry
+        requirement_level: recommended
+        stability: development
+      - name: openshift.clusterquota.uid
+        type: string
+        brief: |
+          The UID of the cluster quota.
+        examples:
+          - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
+        requirement_level: recommended
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/openshift/registry.yaml
+    display_name: Openshift Attributes
   - id: registry.opentracing
     type: attribute_group
     brief: Attributes used by the OpenTracing Shim layer.
@@ -66135,7 +67882,9 @@ groups:
   - id: registry.peer
     type: attribute_group
     brief: |
-      Operations that access some remote service.
+      These attribute may be used for any operation that accesses some remote service.
+    note: |
+      Users can define what the name of a service is based on their particular semantics in their distributed system. Instrumentations SHOULD provide a way for users to configure this name.
     attributes:
       - name: peer.service
         type: string
@@ -66143,6 +67892,11 @@ groups:
           The [`service.name`](/docs/resource/README.md#service) of the remote service. SHOULD be equal to the actual `service.name` resource attribute of the remote service if any.
         examples: AuthTokenCache
         requirement_level: recommended
+        note: |
+          Examples of `peer.service` that users may specify:
+
+          - A Redis cache of auth tokens as `peer.service="AuthTokenCache"`.
+          - A gRPC service `rpc.service="io.opentelemetry.AuthService"` may be hosted in both a gateway, `peer.service="ExternalApiService"` and a backend, `peer.service="AuthService"`.
         stability: development
     lineage:
       provenance:
@@ -66182,6 +67936,15 @@ groups:
         type: boolean
         brief: |
           Indicates that there are line numbers related to this mapping.
+        requirement_level: recommended
+        stability: development
+      - name: pprof.profile.comment
+        type: string[]
+        brief: |
+          Free-form text associated with the profile. This field should not be used to store any machine-readable information, it is only for human-friendly content.
+        examples:
+          - - hello world
+            - bazinga
         requirement_level: recommended
         stability: development
     lineage:
@@ -67825,6 +69588,18 @@ groups:
           Current "managed" thread ID (as opposed to OS thread ID).
         examples: 42
         requirement_level: recommended
+        note: |
+
+          Examples of where the value can be extracted from:
+
+          | Language or platform  | Source |
+          | --- | --- |
+          | JVM | `Thread.currentThread().threadId()` |
+          | .NET | `Thread.CurrentThread.ManagedThreadId` |
+          | Python | `threading.current_thread().ident` |
+          | Ruby | `Thread.current.object_id` |
+          | C++ | `std::this_thread::get_id()` |
+          | Erlang | `erlang:self()` |
         stability: development
       - name: thread.name
         type: string
@@ -67832,6 +69607,17 @@ groups:
           Current thread name.
         examples: main
         requirement_level: recommended
+        note: |
+
+          Examples of where the value can be extracted from:
+
+          | Language or platform  | Source |
+          | --- | --- |
+          | JVM | `Thread.currentThread().getName()` |
+          | .NET | `Thread.CurrentThread.Name` |
+          | Python | `threading.current_thread().name` |
+          | Ruby | `Thread.current.name` |
+          | Erlang | `erlang:process_info(self(), registered_name)` |
         stability: development
     lineage:
       provenance:
@@ -68824,7 +70610,7 @@ groups:
       - name: vcs.repository.url.full
         type: string
         brief: |
-          The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
+          The [canonical URL](https://support.google.com/webmasters/answer/10347851) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.
         examples:
           - https://github.com/opentelemetry/open-telemetry-collector-contrib
           - https://gitlab.com/my-org/my-project/my-projects-project/repo
@@ -68919,6 +70705,44 @@ groups:
     type: attribute_group
     brief: This document defines semantic conventions for remote procedure calls.
     attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -68934,6 +70758,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -69026,6 +70868,15 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/common.yaml
       attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -69044,6 +70895,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -69093,6 +70961,44 @@ groups:
     type: attribute_group
     brief: This document defines semantic conventions for remote procedure calls.
     attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -69108,6 +71014,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -69208,6 +71132,15 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/common.yaml
       attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -69226,6 +71159,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -69304,6 +71254,44 @@ groups:
         note: |
           When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
         stability: stable
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -69319,6 +71307,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -69437,6 +71443,15 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -69455,6 +71470,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -69533,6 +71565,44 @@ groups:
         note: |
           When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
         stability: stable
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -69548,6 +71618,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -69658,6 +71746,15 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -69676,6 +71773,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -71235,7 +73349,7 @@ groups:
   - id: span.azure.ai.inference.client
     type: span
     brief: |
-      Semantic Conventions for [Azure AI Inference](https://learn.microsoft.com/azure/ai-studio/reference/reference-model-inference-api) client spans extend and override the semantic conventions for [Gen AI Spans](gen-ai-spans.md).
+      Semantic Conventions for [Azure AI Inference](https://learn.microsoft.com/rest/api/aifoundry/modelinference/) client spans extend and override the semantic conventions for [Gen AI Spans](gen-ai-spans.md).
     note: |
       `gen_ai.provider.name` MUST be set to `"azure.ai.inference"` and SHOULD be provided **at span creation time**.
 
@@ -72087,7 +74201,7 @@ groups:
           Bulk operations:
 
           - `execute_bulk` SHOULD be used on spans reported for methods like
-            [`executeBulkOperations`](https://javadoc.io/doc/com.azure/azure-cosmos/latest/com/azure/cosmos/CosmosAsyncContainer.html#executeBulkOperations)).
+            [`executeBulkOperations`](https://javadoc.io/doc/com.azure/azure-cosmos/latest/com/azure/cosmos/CosmosAsyncContainer.html#executeBulkOperations(reactor.core.publisher.Flux)),
             which represents a bulk execution of multiple operations.
           - `bulk_{operation name}` (`bulk_create_item`, `bulk_upsert_item`, etc) SHOULD be used on spans describing individual operations (when they are reported)
             within the bulk. This pattern SHOULD be used when instrumentation creates span per each operation, but operations are buffered and then performed in bulk.
@@ -82820,12 +84934,22 @@ groups:
   - id: span.gen_ai.invoke_agent.client
     type: span
     brief: |
-      Describes GenAI agent invocation and is usually applicable when working with remote agent services.
+      Describes GenAI agent invocation.
     note: |
       The `gen_ai.operation.name` SHOULD be `invoke_agent`.
       The **span name** SHOULD be `invoke_agent {gen_ai.agent.name}` if `gen_ai.agent.name` is readily available.
       When `gen_ai.agent.name` is not available, it SHOULD be `invoke_agent`.
       Semantic conventions for individual GenAI systems and frameworks MAY specify different span name format.
+
+      **Span kind** SHOULD be `CLIENT` and MAY be set to `INTERNAL` on spans representing
+      invocation of agents running in the same process.
+      It's RECOMMENDED to use `CLIENT` kind when the agent being instrumented usually runs
+      in a different process than its caller or when the agent invocation happens over
+      instrumented protocol such as HTTP.
+
+      Examples of span kinds for different agent scenarios:
+      - `CLIENT`: Remote agent services (e.g., OpenAI Assistants API, AWS Bedrock Agents)
+      - `INTERNAL`: In-process agents (e.g., LangChain agents, CrewAI agents)
     stability: development
     attributes:
       - name: error.type
@@ -83361,7 +85485,8 @@ groups:
           - example.com
           - 10.1.2.80
           - /tmp/my.sock
-        requirement_level: recommended
+        requirement_level:
+          recommended: when span kind is `CLIENT`.
         note: |
           When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
         stability: stable
@@ -85797,6 +87922,44 @@ groups:
       **Span kind** MUST be `CLIENT`.
     stability: development
     attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -85812,6 +87975,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -85949,6 +88130,15 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/spans.yaml
       attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -85967,6 +88157,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -86040,6 +88247,44 @@ groups:
       **Span kind** MUST be `CLIENT`.
     stability: development
     attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -86055,6 +88300,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -86240,6 +88503,15 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/spans.yaml
       attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -86258,6 +88530,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -86369,6 +88658,44 @@ groups:
         note: |
           When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
         stability: stable
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -86384,6 +88711,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -86587,6 +88932,15 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -86605,6 +88959,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -86698,6 +89069,44 @@ groups:
       **Span status** Should be set based on the grpc status code. A mapping is defined in the [grpc status](/docs/rpc/grpc.md#grpc-status) section.
     stability: development
     attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -86713,6 +89122,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -86917,6 +89344,15 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/spans.yaml
       attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -86935,6 +89371,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -87048,6 +89501,44 @@ groups:
         note: |
           When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
         stability: stable
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -87063,6 +89554,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -87285,6 +89794,15 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -87303,6 +89821,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -87394,6 +89929,44 @@ groups:
       **Span kind** MUST be `CLIENT`.
     stability: development
     attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -87409,6 +89982,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -87538,6 +90129,15 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/spans.yaml
       attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -87556,6 +90156,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -87668,6 +90285,44 @@ groups:
         note: |
           When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
         stability: stable
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -87683,6 +90338,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -87830,6 +90503,15 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -87848,6 +90530,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -87958,6 +90657,44 @@ groups:
         note: |
           When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
         stability: stable
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: If and only if the operation failed.
+        note: |
+          The `error.type` SHOULD be predictable, and SHOULD have low cardinality.
+
+          When `error.type` is set to a type (e.g., an exception type), its
+          canonical class name identifying the type within the artifact SHOULD be used.
+
+          Instrumentations SHOULD document the list of errors they report.
+
+          The cardinality of `error.type` within one instrumentation library SHOULD be low.
+          Telemetry consumers that aggregate data from multiple instrumentation libraries and applications
+          should be prepared for `error.type` to have high cardinality at query time when no
+          additional filters are applied.
+
+          If the operation has completed successfully, instrumentations SHOULD NOT set `error.type`.
+
+          If a specific domain defines its own set of error identifiers (such as HTTP or gRPC status codes),
+          it's RECOMMENDED to:
+
+          - Use a domain-specific attribute
+          - Set `error.type` to capture all errors, regardless of whether they are defined within the domain-specific set or not.
+        stability: stable
       - name: network.peer.address
         type: string
         brief: Peer address of the network connection - IP address or Unix domain socket name.
@@ -87973,6 +90710,24 @@ groups:
           - 65123
         requirement_level:
           recommended: If `network.peer.address` is set.
+        stability: stable
+      - name: network.protocol.name
+        type: string
+        brief: '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.'
+        examples:
+          - http
+        requirement_level: recommended
+        note: The value SHOULD be normalized to lowercase.
+        stability: stable
+      - name: network.protocol.version
+        type: string
+        brief: The actual version of the protocol used for network communication.
+        examples:
+          - '1.1'
+          - '2'
+        requirement_level: recommended
+        note: |
+          If protocol version is subject to negotiation (for example using [ALPN](https://www.rfc-editor.org/rfc/rfc7301.html)), this attribute SHOULD be set to the negotiated version. If the actual protocol version is not known, this attribute SHOULD NOT be set.
         stability: stable
       - name: network.transport
         type:
@@ -88128,6 +90883,15 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
         network.peer.address:
           source_group: registry.network
           inherited_fields:
@@ -88146,6 +90910,23 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+        network.protocol.name:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - examples
+        network.protocol.version:
+          source_group: registry.network
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
         network.transport:
           source_group: registry.network
           inherited_fields:
@@ -88219,6 +91000,18 @@ groups:
           Current "managed" thread ID (as opposed to OS thread ID).
         examples: 42
         requirement_level: recommended
+        note: |
+
+          Examples of where the value can be extracted from:
+
+          | Language or platform  | Source |
+          | --- | --- |
+          | JVM | `Thread.currentThread().threadId()` |
+          | .NET | `Thread.CurrentThread.ManagedThreadId` |
+          | Python | `threading.current_thread().ident` |
+          | Ruby | `Thread.current.object_id` |
+          | C++ | `std::this_thread::get_id()` |
+          | Erlang | `erlang:self()` |
         stability: development
       - name: thread.name
         type: string
@@ -88226,6 +91019,17 @@ groups:
           Current thread name.
         examples: main
         requirement_level: recommended
+        note: |
+
+          Examples of where the value can be extracted from:
+
+          | Language or platform  | Source |
+          | --- | --- |
+          | JVM | `Thread.currentThread().getName()` |
+          | .NET | `Thread.CurrentThread.Name` |
+          | Python | `threading.current_thread().name` |
+          | Ruby | `Thread.current.name` |
+          | Erlang | `erlang:process_info(self(), registered_name)` |
         stability: development
     lineage:
       provenance:

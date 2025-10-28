@@ -22,7 +22,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-fips'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       repository: elastic/kibana
-      branch_configuration: main 8.19
+      branch_configuration: main 9.1 8.19
       default_branch: main
       pipeline_file: '.buildkite/pipelines/fips.yml'
       provider_settings:
@@ -31,6 +31,10 @@ spec:
         Daily build (main):
           message: Daily build
           branch: main
+          cronline: 0 5 * * * America/New_York
+        Daily build (9.1):
+          message: Daily build
+          branch: '9.1'
           cronline: 0 5 * * * America/New_York
         Daily build (8.19):
           message: Daily build

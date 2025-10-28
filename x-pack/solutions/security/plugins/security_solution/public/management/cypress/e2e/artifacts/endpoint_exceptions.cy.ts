@@ -62,7 +62,8 @@ describe(
       // todo: add 'should NOT' test case when Endpoint Exceptions sub-feature privilege is separated from Security
     });
 
-    describe('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240814
+    describe.skip('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
       it('should display Endpoint Exceptions in Assets side panel ', () => {
         login(ROLE.t1_analyst);
 

@@ -33,10 +33,7 @@ export interface ScopedModel {
  */
 export interface ModelProvider {
   /**
-   * Returns the default model to be used for LLM tasks.
-   *
-   * Will use Elasticsearch LLMs by default if present, otherwise will pick
-   * the first GenAI compatible connector.
+   * Returns the model used for LLM tasks in the current round.
    */
   getDefaultModel: () => Promise<ScopedModel>;
   /**

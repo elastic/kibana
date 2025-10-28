@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';

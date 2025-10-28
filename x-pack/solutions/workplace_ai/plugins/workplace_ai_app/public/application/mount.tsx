@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';

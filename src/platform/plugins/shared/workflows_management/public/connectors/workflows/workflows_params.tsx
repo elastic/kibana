@@ -10,6 +10,8 @@
 import {
   EuiBadge,
   EuiBadgeGroup,
+  EuiButton,
+  EuiEmptyPrompt,
   EuiFormRow,
   EuiHighlight,
   EuiIcon,
@@ -19,7 +21,9 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
+  EuiSelectableMessage,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -30,6 +34,7 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowListDto } from '@kbn/workflows';
 import * as i18n from './translations';
 import type { WorkflowsActionParams } from './types';
+import { IconDisabledWorkflow } from '../../assets/icons';
 
 interface WorkflowOption {
   id: string;
@@ -40,6 +45,7 @@ interface WorkflowOption {
   label: string;
   disabled?: boolean;
   checked?: 'on' | 'off';
+  namePrepend?: React.ReactNode;
   prepend?: React.ReactNode;
   append?: React.ReactNode;
   data?: {
@@ -90,6 +96,36 @@ const TagsBadge: React.FC<{ tags: string[] }> = ({ tags }) => {
   );
 };
 
+const WorkflowsEmptyState: React.FC<{ onCreateWorkflow: () => void }> = ({ onCreateWorkflow }) => {
+  return (
+    <EuiSelectableMessage>
+      <EuiEmptyPrompt
+        title={
+          <EuiText textAlign="center" color="textParagraph">
+            {i18n.EMPTY_STATE_TITLE}
+          </EuiText>
+        }
+        titleSize="s"
+        body={i18n.EMPTY_STATE_DESCRIPTION}
+        actions={
+          <EuiButton
+            color="primary"
+            fill={false}
+            onClick={onCreateWorkflow}
+            iconType="plusInCircle"
+            size="s"
+            disabled={false}
+            isLoading={false}
+          >
+            {i18n.EMPTY_STATE_BUTTON_TEXT}
+          </EuiButton>
+        }
+        paddingSize="l"
+      />
+    </EuiSelectableMessage>
+  );
+};
+
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
   actionParams,
   editAction,
@@ -111,9 +147,12 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
   // Custom render function for workflow options
   const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
-    return (
+    const content = (
       <>
-        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        <>
+          {option.namePrepend}
+          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        </>
         {option.secondaryContent && (
           <EuiText size="xs" color="subdued" className="eui-displayBlock">
             <small>
@@ -123,6 +162,12 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         )}
       </>
     );
+
+    if (option.disabled) {
+      return <EuiToolTip content={i18n.DISABLED_WORKFLOW_TOOLTIP}>{content}</EuiToolTip>;
+    }
+
+    return content;
   }, []);
 
   // Ensure proper initialization of action parameters
@@ -225,15 +270,21 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           }
 
           // Determine what to show in prepend
-          let prependElement;
+          let prependNameElement;
           if (wasSelectedButNowDisabled) {
             // Show warning icon for previously selected but now disabled workflows
-            prependElement = (
+            prependNameElement = (
               <EuiIcon type="alert" color="warning" aria-label={i18n.WORKFLOW_DISABLED_WARNING} />
             );
           } else if (isDisabled) {
-            // Show disabled badge for disabled workflows
-            prependElement = <EuiBadge color="default">{i18n.DISABLED_BADGE_LABEL}</EuiBadge>;
+            // Show disabled icon for disabled workflows
+            prependNameElement = (
+              <IconDisabledWorkflow
+                size="m"
+                style={{ marginRight: '8px' }}
+                aria-label={i18n.DISABLED_BADGE_LABEL}
+              />
+            );
           }
 
           const workflowTags = workflow.definition?.tags || [];
@@ -248,10 +299,10 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               label: workflow.name,
               disabled: isDisabled,
               checked: isSelected ? 'on' : undefined,
-              prepend: prependElement,
+              namePrepend: prependNameElement,
               append: <TagsBadge tags={workflowTags} />,
               data: {
-                secondaryContent: workflow.description,
+                secondaryContent: workflow.description || 'No description',
               },
             } as WorkflowOption,
             hasAlertTriggerType,
@@ -300,19 +351,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     }
   }, [workflowId, workflows]);
 
-  const workflowOptions =
-    workflows.length > 0
-      ? workflows
-      : [
-          {
-            id: '',
-            name: i18n.NO_WORKFLOWS_AVAILABLE,
-            description: '',
-            status: '',
-            label: i18n.NO_WORKFLOWS_AVAILABLE,
-            disabled: true,
-          },
-        ];
+  const workflowOptions = workflows;
 
   const errorMessages = errors['subActionParams.workflowId'];
   const errorMessage = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
@@ -361,6 +400,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           }}
           isPreFiltered={isSearching ? false : { highlightSearch: false }}
           data-test-subj="workflowIdSelect"
+          emptyMessage={<WorkflowsEmptyState onCreateWorkflow={handleOpenWorkflowManagementApp} />}
           listProps={{
             rowHeight: 60, // Increased height to accommodate secondary content and tags
             showIcons: false,
@@ -385,20 +425,22 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               fullWidth
             >
               {list}
-              <EuiPopoverFooter
-                paddingSize="s"
-                css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
-              >
-                <EuiText size="s" textAlign="right">
-                  <EuiLink onClick={handleOpenWorkflowManagementApp} external>
-                    <FormattedMessage
-                      id="workflows.params.viewAllWorkflowsLinkText"
-                      defaultMessage="View all workflows"
-                    />
-                    <EuiIcon type="popout" size="s" />
-                  </EuiLink>
-                </EuiText>
-              </EuiPopoverFooter>
+              {workflows.length > 0 && (
+                <EuiPopoverFooter
+                  paddingSize="s"
+                  css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+                >
+                  <EuiText size="s" textAlign="right">
+                    <EuiLink onClick={handleOpenWorkflowManagementApp} external>
+                      <FormattedMessage
+                        id="workflows.params.viewAllWorkflowsLinkText"
+                        defaultMessage="View all workflows"
+                      />
+                      <EuiIcon type="popout" size="s" />
+                    </EuiLink>
+                  </EuiText>
+                </EuiPopoverFooter>
+              )}
             </EuiInputPopover>
           )}
         </EuiSelectable>

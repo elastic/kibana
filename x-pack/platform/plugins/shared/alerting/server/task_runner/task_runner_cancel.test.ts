@@ -586,6 +586,7 @@ describe('Task Runner Cancel', () => {
         rule_type_run_duration_ms: 0,
         total_run_duration_ms: 0,
         trigger_actions_duration_ms: 0,
+        update_alerts_duration_ms: 0,
       },
     });
 

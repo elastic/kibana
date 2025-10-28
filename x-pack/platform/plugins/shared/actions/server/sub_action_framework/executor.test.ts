@@ -255,9 +255,19 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
-      'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])'
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Request validation failed ([
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"id\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ])"
+    `);
   });
 
   it('Passes connectorUsageCollector to the subAction method as a second param', async () => {

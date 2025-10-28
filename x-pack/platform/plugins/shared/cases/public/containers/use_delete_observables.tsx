@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { deleteObservable } from './api';
 import * as i18n from './translations';
 import type { ServerError } from '../types';

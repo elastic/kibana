@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { ConnectorUsageCollector, ValidatorServices } from '@kbn/actions-plugin/server/types';
@@ -32,23 +32,23 @@ import type { SNProductsConfigValue } from '../../../../common/servicenow_config
 
 export type { SNProductsConfigValue, SNProductsConfig } from '../../../../common/servicenow_config';
 
-export type ServiceNowPublicConfigurationBaseType = TypeOf<
+export type ServiceNowPublicConfigurationBaseType = z.infer<
   typeof ExternalIncidentServiceConfigurationBaseSchema
 >;
 
-export type ServiceNowPublicConfigurationType = TypeOf<
+export type ServiceNowPublicConfigurationType = z.infer<
   typeof ExternalIncidentServiceConfigurationSchema
 >;
 
-export type ServiceNowSecretConfigurationType = TypeOf<
+export type ServiceNowSecretConfigurationType = z.infer<
   typeof ExternalIncidentServiceSecretConfigurationSchema
 >;
 
-export type ExecutorSubActionCommonFieldsParams = TypeOf<
+export type ExecutorSubActionCommonFieldsParams = z.infer<
   typeof ExecutorSubActionCommonFieldsParamsSchema
 >;
 
-export type ExecutorSubActionGetChoicesParams = TypeOf<
+export type ExecutorSubActionGetChoicesParams = z.infer<
   typeof ExecutorSubActionGetChoicesParamsSchema
 >;
 
@@ -62,11 +62,11 @@ export interface CreateCommentRequest {
 }
 
 export type ExecutorParams =
-  | TypeOf<typeof ExecutorParamsSchemaITSM>
-  | TypeOf<typeof ExecutorParamsSchemaSIR>;
+  | z.infer<typeof ExecutorParamsSchemaITSM>
+  | z.infer<typeof ExecutorParamsSchemaSIR>;
 
-export type ExecutorSubActionPushParamsITSM = TypeOf<typeof ExecutorSubActionPushParamsSchemaITSM>;
-export type ExecutorSubActionPushParamsSIR = TypeOf<typeof ExecutorSubActionPushParamsSchemaSIR>;
+export type ExecutorSubActionPushParamsITSM = z.infer<typeof ExecutorSubActionPushParamsSchemaITSM>;
+export type ExecutorSubActionPushParamsSIR = z.infer<typeof ExecutorSubActionPushParamsSchemaSIR>;
 
 export type ExecutorSubActionPushParams =
   | ExecutorSubActionPushParamsITSM
@@ -136,25 +136,25 @@ export interface ExternalServiceApiHandlerArgs<T = ExternalService> {
   logger: Logger;
 }
 
-export type ExecutorSubActionGetIncidentParams = TypeOf<
+export type ExecutorSubActionGetIncidentParams = z.infer<
   typeof ExecutorSubActionGetIncidentParamsSchema
 >;
 
-export type ExecutorSubActionHandshakeParams = TypeOf<
+export type ExecutorSubActionHandshakeParams = z.infer<
   typeof ExecutorSubActionHandshakeParamsSchema
 >;
 
-export type ExecutorSubActionCloseIncidentParams = TypeOf<
+export type ExecutorSubActionCloseIncidentParams = z.infer<
   typeof ExecutorSubActionCloseIncidentParamsSchema
 >;
 
 export type ServiceNowITSMIncident = Omit<
-  TypeOf<typeof ExecutorSubActionPushParamsSchemaITSM>['incident'],
+  z.infer<typeof ExecutorSubActionPushParamsSchemaITSM>['incident'],
   'externalId'
 >;
 
 export type ServiceNowSIRIncident = Omit<
-  TypeOf<typeof ExecutorSubActionPushParamsSchemaSIR>['incident'],
+  z.infer<typeof ExecutorSubActionPushParamsSchemaSIR>['incident'],
   'externalId'
 >;
 
@@ -321,7 +321,7 @@ export type ServiceFactory<T = ExternalService> = ({
  * ITOM
  */
 
-export type ExecutorSubActionAddEventParams = TypeOf<typeof ExecutorSubActionAddEventParamsSchema>;
+export type ExecutorSubActionAddEventParams = z.infer<typeof ExecutorSubActionAddEventParamsSchema>;
 
 export interface ExternalServiceITOM {
   getChoices: ExternalService['getChoices'];
@@ -342,4 +342,4 @@ export interface ExternalServiceApiITOM {
   addEvent: (args: AddEventApiHandlerArgs) => Promise<void>;
 }
 
-export type ExecutorParamsITOM = TypeOf<typeof ExecutorParamsSchemaITOM>;
+export type ExecutorParamsITOM = z.infer<typeof ExecutorParamsSchemaITOM>;

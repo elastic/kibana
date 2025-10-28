@@ -13,7 +13,7 @@ import {
   ATTACK_DISCOVERY_BULK,
   ATTACK_DISCOVERY_INTERNAL_BULK,
 } from '@kbn/elastic-assistant-common';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useCallback } from 'react';
 
 import { API_VERSIONS } from '../../../../common/constants';

@@ -18,7 +18,7 @@ describe('opsgenie schema', () => {
       ['ValidCreateAlertSchema', ValidCreateAlertSchema],
       ['JiraServiceManagementCreateAlertExample', JiraServiceManagementCreateAlertExample],
     ])('validates the test object [%s] correctly', (objectName, testObject) => {
-      expect(() => CreateAlertParamsSchema.validate(testObject)).not.toThrow();
+      expect(() => CreateAlertParamsSchema.parse(testObject)).not.toThrow();
     });
   });
 
@@ -26,7 +26,7 @@ describe('opsgenie schema', () => {
     it.each([['JiraServiceManagementCloseAlertExample', JiraServiceManagementCloseAlertExample]])(
       'validates the test object [%s] correctly',
       (objectName, testObject) => {
-        expect(() => CloseAlertParamsSchema.validate(testObject)).not.toThrow();
+        expect(() => CloseAlertParamsSchema.parse(testObject)).not.toThrow();
       }
     );
   });

@@ -35,7 +35,7 @@ import {
   FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID,
   FIELD_BROWSER_TEST_ID,
 } from '../constants';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';

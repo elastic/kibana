@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
 import type {
   ExecutorParamsSchema,
@@ -15,15 +15,15 @@ import type {
 } from './schema';
 
 // config
-export type CasesWebhookPublicConfigurationType = TypeOf<
+export type CasesWebhookPublicConfigurationType = z.infer<
   typeof ExternalIncidentServiceConfigurationSchema
 >;
 // secrets
-export type CasesWebhookSecretConfigurationType = TypeOf<
+export type CasesWebhookSecretConfigurationType = z.infer<
   typeof ExternalIncidentServiceSecretConfigurationSchema
 >;
 // params
-export type CasesWebhookActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
+export type CasesWebhookActionParamsType = z.infer<typeof ExecutorParamsSchema>;
 
 export interface ExternalServiceCredentials {
   config: CasesWebhookPublicConfigurationType;
@@ -38,8 +38,8 @@ export interface ExternalServiceIncidentResponse {
 }
 export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
-export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
+export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
+export type ExecutorSubActionPushParams = z.infer<typeof ExecutorSubActionPushParamsSchema>;
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
 // incident service

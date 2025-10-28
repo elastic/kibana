@@ -9,7 +9,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/public';

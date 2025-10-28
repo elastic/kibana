@@ -91,7 +91,7 @@ export const ConsoleTutorialsGroup = () => {
         title={i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
           defaultMessage: 'Explore the API',
         })}
-        icon={commandLineIllustration}
+        icon={commandLineIllustration} // TODO: Replace with EUI icon when it's available
         description={i18n.translate('xpack.searchGettingStarted.consoleTutorials.description', {
           defaultMessage:
             'Choose a tutorial and use Console to quickly start interacting with the Elasticsearch API.',
@@ -112,7 +112,7 @@ export const ConsoleTutorialsGroup = () => {
                 footer={
                   <TryInConsoleButton
                     type="button"
-                    iconType={commandLineIllustration}
+                    iconType={commandLineIllustration} // TODO: Replace with EUI icon when it's available
                     color="text"
                     request={tutorial.request}
                     application={application}

@@ -10,7 +10,7 @@ import React from 'react';
 import { DeleteSynonymsSetModal } from './delete_synonyms_set_modal';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useDeleteSynonymsSet } from '../../hooks/use_delete_synonyms_set';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 jest.mock('../../hooks/use_delete_synonyms_set', () => ({
   useDeleteSynonymsSet: jest.fn(() => ({

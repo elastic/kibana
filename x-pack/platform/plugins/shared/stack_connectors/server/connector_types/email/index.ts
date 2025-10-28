@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import type SMTPConnection from 'nodemailer/lib/smtp-connection';
@@ -49,7 +48,13 @@ export type EmailConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
 >;
 
 // config definition
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
+// due to https://github.com/colinhacks/zod/issues/2491
+type ConfigSchemaType = z.ZodSchema<
+  z.output<typeof ConfigSchema>,
+  z.ZodTypeDef,
+  z.input<typeof ConfigSchema>
+>;
+export type ConnectorTypeConfigType = z.infer<ConfigSchemaType>;
 
 // these values for `service` require users to fill in host/port/secure
 export const CUSTOM_HOST_PORT_SERVICES: string[] = [AdditionalEmailServices.OTHER];
@@ -63,18 +68,18 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
 
 const ConfigSchemaProps = {
-  service: schema.string({ defaultValue: 'other' }),
-  host: schema.nullable(schema.string()),
-  port: schema.nullable(portSchema()),
-  secure: schema.nullable(schema.boolean()),
-  from: schema.string(),
-  hasAuth: schema.boolean({ defaultValue: true }),
-  tenantId: schema.nullable(schema.string()),
-  clientId: schema.nullable(schema.string()),
-  oauthTokenUrl: schema.nullable(schema.string()),
+  service: z.string().default('other'),
+  host: z.string().nullable().default(null),
+  port: portSchema().nullable().default(null),
+  secure: z.boolean().nullable().default(null),
+  from: z.string(),
+  hasAuth: z.boolean().default(true),
+  tenantId: z.string().nullable().default(null),
+  clientId: z.string().nullable().default(null),
+  oauthTokenUrl: z.string().nullable().default(null),
 };
 
-const ConfigSchema = schema.object(ConfigSchemaProps);
+const ConfigSchema = z.object(ConfigSchemaProps).strict();
 
 function validateConfig(
   configObject: ConnectorTypeConfigType,
@@ -171,51 +176,55 @@ function validateConfig(
 }
 
 // secrets definition
-
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
+export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 
 const SecretsSchemaProps = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-  clientSecret: schema.nullable(schema.string()),
+  user: z.string().nullable().default(null),
+  password: z.string().nullable().default(null),
+  clientSecret: z.string().nullable().default(null),
 };
 
-const SecretsSchema = schema.object(SecretsSchemaProps);
+const SecretsSchema = z.object(SecretsSchemaProps).strict();
 
 // params definition
-
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+export type ActionParamsType = z.infer<typeof ParamsSchema>;
 
 const AttachmentSchemaProps = {
-  content: schema.string(),
-  contentType: schema.maybe(schema.string()),
-  filename: schema.string(),
-  encoding: schema.maybe(schema.string()),
+  content: z.string(),
+  contentType: z.string().optional(),
+  filename: z.string(),
+  encoding: z.string().optional(),
 };
-export const AttachmentSchema = schema.object(AttachmentSchemaProps);
-export type Attachment = TypeOf<typeof AttachmentSchema>;
+export const AttachmentSchema = z.object(AttachmentSchemaProps).strict();
+export type Attachment = z.infer<typeof AttachmentSchema>;
 
-const ParamsSchemaProps = {
-  to: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  subject: schema.string(),
-  message: schema.string(),
-  messageHTML: schema.nullable(schema.string()),
+const defaultFooterText = i18n.translate('xpack.stackConnectors.email.kibanaFooterLinkText', {
+  defaultMessage: 'Go to Elastic',
+});
+
+export const ParamsSchemaProps = {
+  to: z.array(z.string()).default([]),
+  cc: z.array(z.string()).default([]),
+  bcc: z.array(z.string()).default([]),
+  subject: z.string(),
+  message: z.string(),
+  messageHTML: z.string().nullable().default(null),
   // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
   // provide a more contextual URL in the footer (ex: URL to the alert details page)
-  kibanaFooterLink: schema.object({
-    path: schema.string({ defaultValue: '/' }),
-    text: schema.string({
-      defaultValue: i18n.translate('xpack.stackConnectors.email.kibanaFooterLinkText', {
-        defaultMessage: 'Go to Elastic',
-      }),
+  kibanaFooterLink: z
+    .object({
+      path: z.string().default('/'),
+      text: z.string().default(defaultFooterText),
+    })
+    .strict()
+    .default({
+      path: '/',
+      text: defaultFooterText,
     }),
-  }),
-  attachments: schema.maybe(schema.arrayOf(AttachmentSchema)),
+  attachments: z.array(AttachmentSchema).optional(),
 };
 
-export const ParamsSchema = schema.object(ParamsSchemaProps);
+export const ParamsSchema = z.object(ParamsSchemaProps).strict();
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;

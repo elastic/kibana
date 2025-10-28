@@ -178,12 +178,18 @@ export class DiscoverPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
-        const [coreStart, discoverStartPlugins] = await core.getStartServices();
+        const [[coreStart, discoverStartPlugins], historyService, ebtManager, { renderApp }] =
+          await Promise.all([
+            core.getStartServices(),
+            getHistoryService(),
+            getEbtManager(),
+            import('./application'),
+          ]);
 
         // Store the current scoped history so initializeKbnUrlTracking can access it
         this.scopedHistory = params.history;
 
-        (await getHistoryService()).syncHistoryLocations();
+        historyService.syncHistoryLocations();
         appMounted();
 
         // dispatch synthetic hash change event to update hash history objects
@@ -192,7 +198,6 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        const ebtManager = await getEbtManager();
         ebtManager.onDiscoverAppMounted();
 
         const services = await this.getDiscoverServicesWithProfiles({
@@ -206,7 +211,6 @@ export class DiscoverPlugin
         // make sure the data view list is up to date
         discoverStartPlugins.dataViews.clearCache();
 
-        const { renderApp } = await import('./application');
         const unmount = renderApp({
           element: params.element,
           onAppLeave: params.onAppLeave,
@@ -262,8 +266,10 @@ export class DiscoverPlugin
     }
 
     const getDiscoverServicesInternal = async () => {
-      const ebtManager = await getEmptyEbtManager();
-      const { profilesManager } = await this.createProfileServices();
+      const [ebtManager, { profilesManager }] = await Promise.all([
+        getEmptyEbtManager(),
+        this.createProfileServices(),
+      ]);
       return this.getDiscoverServices({ core, plugins, profilesManager, ebtManager });
     };
 
@@ -319,12 +325,14 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) {
-    const {
-      rootProfileService,
-      dataSourceProfileService,
-      documentProfileService,
-      profilesManager,
-    } = await this.createProfileServices();
+    const [
+      { rootProfileService, dataSourceProfileService, documentProfileService, profilesManager },
+      { registerProfileProviders },
+    ] = await Promise.all([
+      this.createProfileServices(),
+      import('./context_awareness/profile_providers'),
+    ]);
+
     const services = await this.getDiscoverServices({
       core,
       plugins,
@@ -333,7 +341,6 @@ export class DiscoverPlugin
       scopedHistory,
       setHeaderActionMenu,
     });
-    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
 
     await registerProfileProviders({
       rootProfileService,
@@ -361,7 +368,10 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) => {
-    const { buildServices } = await getSharedServices();
+    const [{ buildServices }, historyService] = await Promise.all([
+      getSharedServices(),
+      getHistoryService(),
+    ]);
     return buildServices({
       core,
       plugins,
@@ -369,7 +379,7 @@ export class DiscoverPlugin
       locator: this.locator!,
       contextLocator: this.contextLocator!,
       singleDocLocator: this.singleDocLocator!,
-      history: (await getHistoryService()).getHistory(),
+      history: historyService.getHistory(),
       scopedHistory,
       urlTracker: this.urlTracker!,
       profilesManager,
@@ -388,8 +398,10 @@ export class DiscoverPlugin
     };
 
     const getDiscoverServicesForEmbeddable = async () => {
-      const [coreStart, deps] = await core.getStartServices();
-      const ebtManager = await getEmptyEbtManager();
+      const [[coreStart, deps], ebtManager] = await Promise.all([
+        core.getStartServices(),
+        getEmptyEbtManager(),
+      ]);
       return this.getDiscoverServicesWithProfiles({
         core: coreStart,
         plugins: deps,
@@ -399,11 +411,10 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
-        const getEmbeddableServices = () => import('./plugin_imports/embeddable_services');
-        const { addControlsFromSavedSession } = await getEmbeddableServices();
-        addControlsFromSavedSession(container, savedObject);
+        const { addControlsFromSavedSession, SAVED_OBJECT_REF_NAME } =
+          await getEmbeddableServices();
 
-        const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
+        addControlsFromSavedSession(container, savedObject);
         container.addNewPanel(
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,

@@ -94,6 +94,7 @@ describe('getCompletionItemProvider', () => {
     yamlString: yamlContent,
     schemaLoose: workflowSchema,
     focusedStepId,
+    isTestModalOpen: false,
     computed: performComputation(yamlContent, getWorkflowZodSchemaLoose({})),
   }));
 

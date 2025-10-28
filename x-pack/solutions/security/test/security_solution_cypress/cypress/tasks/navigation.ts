@@ -110,7 +110,7 @@ const disableNewFeaturesTours = (window: Window) => {
 
 // This should work on both classic and serverless navigation
 const navSearchText = {
-  onboarding: 'Security / Get started',
+  onboarding: 'Security / Launchpad / Get started',
   hosts: 'Security / Explore / Hosts',
   rules: 'Security / Rules / Detection rules (SIEM)',
 } as const;
