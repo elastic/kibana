@@ -74,7 +74,8 @@ describe('ConfigPanel', () => {
   function prepareAndMountComponent(
     props: ReturnType<typeof getDefaultProps>,
     customStoreProps?: Partial<MountStoreProps>,
-    query?: Query | AggregateQuery
+    query?: Query | AggregateQuery,
+    selectedLayerId: string | null = 'first'
   ) {
     (generateId as jest.Mock).mockReturnValue(`newId`);
     const { visualizationMap, datasourceMap, ...rest } = props;
@@ -95,7 +96,7 @@ describe('ConfigPanel', () => {
           visualization: {
             activeId: 'testVis',
             state: 'state',
-            selectedLayerId: 'first',
+            selectedLayerId,
           },
         },
         storeDeps: mockStoreDeps({
@@ -167,8 +168,7 @@ describe('ConfigPanel', () => {
   // in what case is this test needed?
   it('should fail to render layerPanels if the public API is out of date', async () => {
     const props = getDefaultProps();
-    props.framePublicAPI.datasourceLayers = {};
-    const { instance } = await prepareAndMountComponent(props);
+    const { instance } = await prepareAndMountComponent(props, undefined, undefined, null);
     expect(instance.find(LayerPanel).exists()).toBe(false);
   });
 
