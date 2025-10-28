@@ -10,7 +10,6 @@ import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { withSpan } from '@kbn/apm-utils';
 import dateMath from '@kbn/datemath';
 import { findGapsSearchAfter } from '../find_gaps';
 import { processGapsBatch } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
@@ -58,15 +57,27 @@ function formatConsolidatedSummary(consolidated: AggregatedByRuleEntry[]): strin
     .map((r) => (r.error ? `${r.ruleId} (${r.error})` : r.ruleId))
     .join('\n ');
 
+  const successEntries = consolidated.filter(
+    (r) => r.status === GapFillSchedulePerRuleStatus.SUCCESS
+  );
+  const successCount = successEntries.length;
+  const successList = successEntries
+    .map((r) => `${r.ruleId} (${r.processedGaps} gaps processed)`)
+    .join('\n ');
+
   const parts: string[] = [];
   parts.push(
     `processed ${gapsProcessed} gap${gapsProcessed === 1 ? '' : 's'} across ${rulesCount} rule${
       rulesCount === 1 ? '' : 's'
     }`
   );
+  if (successCount > 0) {
+    parts.push(`${successCount} success${successCount === 1 ? '' : 'es'}: ${successList}`);
+  }
   if (errorCount > 0) {
     parts.push(`${errorCount} error${errorCount === 1 ? '' : 's'}: ${errorsList}`);
   }
+
   return `\n${parts.join(' |\n')}`;
 }
 
@@ -88,7 +99,9 @@ async function handleCancellation({
   await logEvent({
     status: GAP_AUTO_FILL_STATUS.SUCCESS,
     results: consolidated,
-    message: `cancelled`,
+    message: `Gap Auto Fill Scheduler cancelled by timeout | Results: ${formatConsolidatedSummary(
+      consolidated
+    )}`,
   });
 
   return true;
@@ -395,7 +408,7 @@ export function registerGapAutoFillSchedulerTask({
               // Step 3: Fetch rule IDs with gaps
               let remainingBackfills = capacityCheckInitial.remainingCapacity;
               const startDate: Date = resolveStartDate(config.gapFillRange);
-              const sortOrder = schedulerConfig?.sortOrder ?? 'asc';
+              const sortOrder = schedulerConfig?.sortOrder ?? 'desc';
               const { ruleIds } = await rulesClient.getRuleIdsWithGaps({
                 start: startDate.toISOString(),
                 end: now.toISOString(),
@@ -468,111 +481,103 @@ export function registerGapAutoFillSchedulerTask({
                   continue;
                 }
 
-                await withSpan(
-                  {
-                    name: 'gapAutoFillBatch',
-                    type: 'rule run',
-                    labels: {
-                      plugin: 'alerting',
-                    },
-                  },
-                  async () => {
-                    let searchAfter: SortResults[] | undefined;
-                    let pitId: string | undefined;
+                let searchAfter: SortResults[] | undefined;
+                let pitId: string | undefined;
 
-                    const gapsPerPage = DEFAULT_GAPS_PER_PAGE;
+                const gapsPerPage = DEFAULT_GAPS_PER_PAGE;
 
-                    while (true) {
-                      if (
-                        await handleCancellation({
-                          wasCancelled,
-                          abortController,
-                          aggregatedByRule,
-                          logEvent,
-                        })
-                      ) {
-                        return { state: {} };
-                      }
-
-                      const {
-                        data: gapsPage,
-                        searchAfter: nextSearchAfter,
-                        pitId: nextPitId,
-                      } = await findGapsSearchAfter({
-                        eventLogClient: await rulesClientContext.getEventLogClient(),
-                        logger,
-                        params: {
-                          ruleIds: toProcessRuleIds,
-                          start: startDate.toISOString(),
-                          end: now.toISOString(),
-                          perPage: gapsPerPage,
-                          sortField: '@timestamp',
-                          sortOrder,
-                          statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-                          searchAfter,
-                          pitId,
-                          hasUnfilledIntervals: true,
-                        },
-                      });
-
-                      pitId = nextPitId ?? pitId;
-                      searchAfter = nextSearchAfter;
-
-                      if (!gapsPage.length) {
-                        break;
-                      }
-
-                      const filteredGaps = await filterGapsWithOverlappingBackfills(
-                        gapsPage,
-                        rulesClientContext,
-                        (message) => logger.warn(loggerMesage(message))
-                      );
-
-                      if (!filteredGaps.length) {
-                        if (gapsPage.length < gapsPerPage) {
-                          break;
-                        }
-                        continue;
-                      }
-
-                      const { results: chunkResults } = await processGapsBatch(rulesClientContext, {
-                        gapsBatch: filteredGaps,
-                        range: { start: startDate.toISOString(), end: now.toISOString() },
-                        initiator: backfillInitiator.SYSTEM,
-                        initiatorId: taskInstance.id,
-                      });
-                      addChunkResultsToAggregation(aggregatedByRule, chunkResults);
-
-                      // If fewer than gapsPerPage gaps returned, we've reached the end for this batch
-                      if (gapsPage.length < gapsPerPage) {
-                        break;
-                      }
-                    }
-
-                    // After finishing this rule batch, re-check backfill capacity
-                    const capacityCheckPostBatch = await checkBackfillCapacity({
-                      rulesClient,
-                      maxBackfills: config.maxBackfills,
-                      logMessage: (message) => logger.warn(loggerMesage(message)),
-                      initiatorId: taskInstance.id,
-                    });
-                    if (!capacityCheckPostBatch.canSchedule) {
-                      const consolidated = resultsFromMap(aggregatedByRule);
-                      await logEvent({
-                        status: GAP_AUTO_FILL_STATUS.SUCCESS,
-                        results: consolidated,
-                        message: `Stopped early: no backfill capacity (${
-                          capacityCheckPostBatch.currentCount
-                        }/${capacityCheckPostBatch.maxBackfills}) | ${formatConsolidatedSummary(
-                          consolidated
-                        )}`,
-                      });
-                      return { state: {} };
-                    }
-                    // Update remaining capacity from the latest system state
-                    remainingBackfills = capacityCheckPostBatch.remainingCapacity;
+                while (true) {
+                  if (
+                    await handleCancellation({
+                      wasCancelled,
+                      abortController,
+                      aggregatedByRule,
+                      logEvent,
+                    })
+                  ) {
+                    return { state: {} };
                   }
-                );
+
+                  const {
+                    data: gapsPage,
+                    searchAfter: nextSearchAfter,
+                    pitId: nextPitId,
+                  } = await findGapsSearchAfter({
+                    eventLogClient: await rulesClientContext.getEventLogClient(),
+                    logger,
+                    params: {
+                      ruleIds: toProcessRuleIds,
+                      start: startDate.toISOString(),
+                      end: now.toISOString(),
+                      perPage: gapsPerPage,
+                      sortField: '@timestamp',
+                      sortOrder,
+                      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+                      searchAfter,
+                      pitId,
+                      hasUnfilledIntervals: true,
+                    },
+                  });
+
+                  pitId = nextPitId ?? pitId;
+                  searchAfter = nextSearchAfter;
+
+                  if (!gapsPage.length) {
+                    break;
+                  }
+
+                  const filteredGaps = await filterGapsWithOverlappingBackfills(
+                    gapsPage,
+                    rulesClientContext,
+                    (message) => logger.warn(loggerMesage(message))
+                  );
+
+                  if (!filteredGaps.length) {
+                    if (gapsPage.length < gapsPerPage) {
+                      break;
+                    }
+                    continue;
+                  }
+
+                  const sortedGaps = filteredGaps.sort(
+                    (a, b) => a.range.gte.getTime() - b.range.gte.getTime()
+                  );
+                  const { results: chunkResults } = await processGapsBatch(rulesClientContext, {
+                    gapsBatch: sortedGaps,
+                    range: { start: startDate.toISOString(), end: now.toISOString() },
+                    initiator: backfillInitiator.SYSTEM,
+                    initiatorId: taskInstance.id,
+                  });
+                  addChunkResultsToAggregation(aggregatedByRule, chunkResults);
+
+                  // If fewer than gapsPerPage gaps returned, we've reached the end for this batch
+                  if (gapsPage.length < gapsPerPage) {
+                    break;
+                  }
+                }
+
+                // After finishing this rule batch, re-check backfill capacity
+                const capacityCheckPostBatch = await checkBackfillCapacity({
+                  rulesClient,
+                  maxBackfills: config.maxBackfills,
+                  logMessage: (message) => logger.warn(loggerMesage(message)),
+                  initiatorId: taskInstance.id,
+                });
+                if (!capacityCheckPostBatch.canSchedule) {
+                  const consolidated = resultsFromMap(aggregatedByRule);
+                  await logEvent({
+                    status: GAP_AUTO_FILL_STATUS.SUCCESS,
+                    results: consolidated,
+                    message: `Stopped early: no backfill capacity (${
+                      capacityCheckPostBatch.currentCount
+                    }/${capacityCheckPostBatch.maxBackfills}) | ${formatConsolidatedSummary(
+                      consolidated
+                    )}`,
+                  });
+                  return { state: {} };
+                }
+                // Update remaining capacity from the latest system state
+                remainingBackfills = capacityCheckPostBatch.remainingCapacity;
               }
 
               // Step 5: Finalize and log results
