@@ -5,50 +5,67 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod';
 import { validateKeysAllowed, validateRecordMaxKeys } from './validators';
 
+const ctx = {
+  addIssue: jest.fn(),
+} as unknown as z.RefinementCtx;
+
 describe('validators', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   describe('validateRecordMaxKeys', () => {
-    it('returns undefined if the keys of the record are less than the maximum', () => {
-      expect(
-        validateRecordMaxKeys({
-          record: { foo: 'bar' },
-          maxNumberOfFields: 2,
-          fieldName: 'myFieldName',
-        })
-      ).toBeUndefined();
+    it('does not add error if the keys of the record are less than the maximum', () => {
+      validateRecordMaxKeys({
+        record: { foo: 'bar' },
+        ctx,
+        maxNumberOfFields: 2,
+        fieldName: 'myFieldName',
+      });
+      expect(ctx.addIssue).not.toHaveBeenCalled();
     });
 
-    it('returns an error if the keys of the record are greater than the maximum', () => {
-      expect(
-        validateRecordMaxKeys({
-          record: { foo: 'bar', bar: 'test', test: 'foo' },
-          maxNumberOfFields: 2,
-          fieldName: 'myFieldName',
-        })
-      ).toEqual('A maximum of 2 fields in myFieldName can be defined at a time.');
+    it('adds error if the keys of the record are greater than the maximum', () => {
+      validateRecordMaxKeys({
+        record: { foo: 'bar', bar: 'test', test: 'foo' },
+        ctx,
+        maxNumberOfFields: 2,
+        fieldName: 'myFieldName',
+      });
+      expect(ctx.addIssue).toHaveBeenCalledTimes(1);
+      expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
+        code: 'custom',
+        message: 'A maximum of 2 fields in myFieldName can be defined at a time.',
+      });
     });
   });
 
   describe('validateKeysAllowed', () => {
-    it('returns undefined if the keys are allowed', () => {
-      expect(
-        validateKeysAllowed({
-          key: 'foo',
-          disallowList: ['bar'],
-          fieldName: 'myFieldName',
-        })
-      ).toBeUndefined();
+    it('does not add erorr if the keys are allowed', () => {
+      validateKeysAllowed({
+        key: 'foo',
+        ctx,
+        disallowList: ['bar'],
+        fieldName: 'myFieldName',
+      });
+      expect(ctx.addIssue).not.toHaveBeenCalled();
     });
 
-    it('returns an error if the keys are not allowed', () => {
-      expect(
-        validateKeysAllowed({
-          key: 'foo',
-          disallowList: ['foo'],
-          fieldName: 'myFieldName',
-        })
-      ).toEqual('The following properties cannot be defined inside myFieldName: foo.');
+    it('adds  error if the keys are not allowed', () => {
+      validateKeysAllowed({
+        key: 'foo',
+        ctx,
+        disallowList: ['foo'],
+        fieldName: 'myFieldName',
+      });
+
+      expect(ctx.addIssue).toHaveBeenCalledTimes(1);
+      expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
+        code: 'custom',
+        message: 'The following properties cannot be defined inside myFieldName: foo.',
+      });
     });
   });
 });

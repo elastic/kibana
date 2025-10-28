@@ -11,7 +11,7 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 153204
   charts: 40269
-  cloud: 9012
+  cloud: 9300
   cloudDataMigration: 5687
   cloudExperiments: 103984
   cloudFullStory: 4752
@@ -46,7 +46,7 @@ pageLoadAssetSize:
   embeddable: 18810
   embeddableAlertsTable: 6524
   embeddableEnhanced: 10332
-  enterpriseSearch: 37475
+  enterpriseSearch: 37956
   esql: 16289
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -66,7 +66,7 @@ pageLoadAssetSize:
   fieldsMetadata: 4901
   files: 6037
   filesManagement: 5270
-  fileUpload: 16910
+  fileUpload: 20700
   fleet: 187942
   genAiSettings: 5003
   globalSearch: 6890
@@ -139,7 +139,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 3252
   searchAssistant: 6150
-  searchGettingStarted: 5453
+  searchGettingStarted: 6009
   searchHomepage: 7962
   searchIndices: 9992
   searchInferenceEndpoints: 8071

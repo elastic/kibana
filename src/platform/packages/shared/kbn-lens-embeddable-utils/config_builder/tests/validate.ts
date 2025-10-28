@@ -8,9 +8,10 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-
+import { unset } from 'lodash';
 import { LensConfigBuilder } from '../config_builder';
 import type { LensAttributes } from '../types';
+import type { LensApiState } from '../schema';
 import { lensApiStateSchema } from '../schema';
 
 /**
@@ -51,4 +52,51 @@ export function validateConverter(attributes: LensAttributes, schema: Type<any>)
   }).not.toThrow();
 
   expect(newApiConfig).toEqual(newApiConfig2);
+}
+
+/**
+ * Test harness to validate LensConfigBuilder conversions
+ *
+ * - Starts with LensAPI config format
+ * - Validates against the provided schema
+ * - Validates against the general lensApiStateSchema
+ * - Converts to LensAttributes
+ * - Converts LensAttributes back to API format
+ * - Validates against the provided schema
+ * - Validates against the general lensApiStateSchema
+ * - Excludes specified fields from the API config
+ * - Checks that the new API config includes the filtered API config
+ * - Note: the excluded fields are expected to be omitted during the conversion to LensStateConfig, so they are not included in the new API config
+ */
+export function validateAPIConverter(
+  apiConfig: LensApiState,
+  schema: Type<any>,
+  excludedFields?: string[]
+) {
+  const builder = new LensConfigBuilder();
+
+  expect(() => {
+    schema.validate(apiConfig);
+  }).not.toThrow();
+
+  expect(() => {
+    lensApiStateSchema.validate(apiConfig);
+  }).not.toThrow();
+
+  const lensStateConfig = builder.fromAPIFormat(apiConfig);
+
+  const newApiConfig = builder.toAPIFormat(lensStateConfig);
+
+  expect(() => {
+    schema.validate(newApiConfig);
+  }).not.toThrow();
+
+  expect(() => {
+    lensApiStateSchema.validate(newApiConfig);
+  }).not.toThrow();
+
+  const filteredApiConfig = structuredClone(apiConfig);
+  excludedFields?.forEach((fieldPath) => unset(filteredApiConfig, fieldPath));
+
+  expect(newApiConfig).toEqual(expect.objectContaining(filteredApiConfig));
 }
