@@ -60,16 +60,8 @@ export function initTracing({
     resource,
   });
 
-  // eslint-disable-next-line no-console
-  console.log('Tracing exporters config:', JSON.stringify(tracingConfig.exporters, null, 2));
-
   castArray(tracingConfig.exporters).forEach((exporter) => {
-    // eslint-disable-next-line no-console
-    console.log('Processing exporter:', JSON.stringify(exporter));
     const variant = fromExternalVariant(exporter);
-    // eslint-disable-next-line no-console
-    console.log('Exporter variant:', variant.type, JSON.stringify(variant.value));
-
     switch (variant.type) {
       case 'langfuse':
         LateBindingSpanProcessor.get().register(new LangfuseSpanProcessor(variant.value));
@@ -79,23 +71,13 @@ export function initTracing({
         LateBindingSpanProcessor.get().register(new PhoenixSpanProcessor(variant.value));
         break;
 
-      case 'otlp':
-        // eslint-disable-next-line no-console
-        console.log('Creating OTLP span processor...');
-        try {
-          const otlpProcessor = new OTLPSpanProcessor(variant.value);
-          LateBindingSpanProcessor.get().register(otlpProcessor);
-          // eslint-disable-next-line no-console
-          console.log('OTLP span processor registered successfully');
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Failed to create OTLP span processor:', error);
-        }
+      case 'grpc':
+        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'grpc'));
         break;
 
-      default:
-        // eslint-disable-next-line no-console
-        console.warn(`Unknown exporter type: ${JSON.stringify(exporter)}`);
+      case 'http':
+        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'http'));
+        break;
     }
   });
 

@@ -6,45 +6,40 @@
  */
 
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import type { InferenceTracingOTLPExportConfig } from '@kbn/inference-tracing-config';
+import type { InferenceTracingOtlpExportConfig } from '@kbn/inference-tracing-config';
 import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-http';
 import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto';
 import { diag } from '@opentelemetry/api';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
+import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from '../root_inference_span';
 
 export class OTLPSpanProcessor extends BaseInferenceSpanProcessor {
-  constructor(private readonly config: InferenceTracingOTLPExportConfig) {
-    diag.info(`Initializing OTLP exporter with protocol: ${config.protocol}, url: ${config.url}`);
+  private readonly config: InferenceTracingOtlpExportConfig;
 
-    try {
-      const exporter =
-        config.protocol === 'grpc'
-          ? new OTLPTraceExporterProto({
-              url: config.url,
-              headers: config.headers,
-            })
-          : new OTLPTraceExporterHTTP({
-              url: config.url,
-              headers: config.headers,
-            });
+  constructor(config: InferenceTracingOtlpExportConfig, protocol: 'grpc' | 'http') {
+    diag.info(`Initializing OTLP exporter with protocol: ${protocol}, url: ${config.url}`);
 
-      super(exporter, config.scheduled_delay);
-      diag.info('OTLP span processor initialized successfully');
-    } catch (error) {
-      diag.error(`Failed to initialize OTLP span processor: ${error}`);
-      throw error;
-    }
-  }
+    const exporter =
+      protocol === 'grpc'
+        ? new OTLPTraceExporterProto({
+            url: config.url,
+            headers: config.headers,
+          })
+        : new OTLPTraceExporterHTTP({
+            url: config.url,
+            headers: config.headers,
+          });
 
-  onStart(span: any, parentContext: any): void {
-    super.onStart(span, parentContext);
-  }
-
-  onEnd(span: any): void {
-    super.onEnd(span);
+    super(exporter, config.scheduled_delay);
+    this.config = config;
+    diag.info('OTLP span processor initialized successfully');
   }
 
   processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
+    // Clean up internal tracking attributes
+    delete span.attributes._should_track;
+    delete span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME];
+
     if (!span.parentSpanContext) {
       const traceId = span.spanContext().traceId;
       diag.info(
