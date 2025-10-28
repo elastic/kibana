@@ -21,16 +21,11 @@ describe('isAgentTypeAndActionSupported() util', () => {
   const enableFeatures = (overrides: Partial<ExperimentalFeatures> = {}): void => {
     (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
       ...allowedExperimentalValues,
-      responseActionsSentinelOneGetFileEnabled: true,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
       responseActionsMSDefenderEndpointEnabled: true,
       responseActionsSentinelOneRunScriptEnabled: true,
       ...overrides,
     });
-  };
-
-  const disableS1GetFileFeature = () => {
-    enableFeatures({ responseActionsSentinelOneGetFileEnabled: false });
   };
   const disableCSIsolateFeature = () => {
     enableFeatures({ responseActionsCrowdstrikeManualHostIsolationEnabled: false });
@@ -64,7 +59,6 @@ describe('isAgentTypeAndActionSupported() util', () => {
     ${'sentinel_one'}                | ${undefined}   | ${undefined}   | ${true}       | ${undefined}
     ${'sentinel_one'}                | ${'isolate'}   | ${'manual'}    | ${true}       | ${undefined}
     ${'sentinel_one'}                | ${'get-file'}  | ${'manual'}    | ${true}       | ${undefined}
-    ${'sentinel_one'}                | ${'get-file'}  | ${undefined}   | ${false}      | ${disableS1GetFileFeature}
     ${'sentinel_one'}                | ${'runscript'} | ${'manual'}    | ${true}       | ${undefined}
     ${'sentinel_one'}                | ${'runscript'} | ${'automated'} | ${false}      | ${undefined}
     ${'sentinel_one'}                | ${'runscript'} | ${undefined}   | ${false}      | ${disableS1RunScript}

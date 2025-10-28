@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { PackageRollbackError } from '../../../errors';
 import { agentPolicyService, appContextService, packagePolicyService } from '../..';
@@ -16,16 +16,19 @@ import { installPackage } from './install';
 
 export async function rollbackInstallation(options: {
   esClient: ElasticsearchClient;
-  savedObjectsClient: SavedObjectsClientContract;
+  currentUserPolicyIds: string[];
   pkgName: string;
   spaceId: string;
 }): Promise<{
   version: string;
   success: boolean;
 }> {
-  const { esClient, savedObjectsClient, pkgName, spaceId } = options;
+  const { esClient, currentUserPolicyIds, pkgName, spaceId } = options;
   const logger = appContextService.getLogger();
   logger.info(`Starting installation rollback for package: ${pkgName}`);
+
+  // Need a less restrictive client than fleetContext.internalSoClient for SO operations in multiple spaces.
+  const savedObjectsClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
   // Retrieve the package saved object, throw if it doesn't exist or doesn't have a previous version.
   const packageSORes = await getPackageSavedObjects(savedObjectsClient, {
@@ -61,6 +64,7 @@ export async function rollbackInstallation(options: {
     }
   );
   const packagePolicySOs = packagePolicySORes.saved_objects;
+  const policyIds = packagePolicySOs.map((so) => so.id);
 
   const managedRollbackError = new PackageRollbackError(
     `Cannot rollback integration with managed package policies`
@@ -79,7 +83,6 @@ export async function rollbackInstallation(options: {
   }
 
   if (packagePolicySOs.length > 0) {
-    const policyIds = packagePolicySOs.map((so) => so.id);
     const policyIdsWithNoPreviousVersion = policyIds.filter((soId) => {
       if (!soId.endsWith(':prev')) {
         return !policyIds.includes(`${soId}:prev`);
@@ -110,6 +113,10 @@ export async function rollbackInstallation(options: {
         `Wrong previous version for package policies: ${report.join(', ')}`
       );
     }
+  }
+
+  if (currentUserPolicyIds.length < policyIds.length) {
+    throw new PackageRollbackError(`Not authorized to rollback integration policies in all spaces`);
   }
 
   // Roll back package policies.

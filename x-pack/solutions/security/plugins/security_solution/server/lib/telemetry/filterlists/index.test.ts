@@ -9,6 +9,7 @@ import { copyAllowlistedFields } from '.';
 import { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
 import type { AllowlistFields } from './types';
 import { unflatten } from '../helpers';
+import { createDefaultExternalRuleSource } from '../../detection_engine/rule_management/logic/detection_rules_client/mergers/rule_source/create_default_external_rule_source';
 
 describe('Security Telemetry filters', () => {
   describe('allowlistEventFields', () => {
@@ -350,6 +351,25 @@ describe('Security Telemetry filters', () => {
               exists: false,
               trusted: false,
             },
+          },
+        },
+      });
+    });
+
+    it('copies over rule source field', () => {
+      const event = {
+        not_event: 'much data, much wow',
+        'kibana.alert.rule.parameters': {
+          rule_source: createDefaultExternalRuleSource(),
+        },
+      };
+      expect(copyAllowlistedFields(prebuiltRuleAllowlistFields, event)).toStrictEqual({
+        'kibana.alert.rule.parameters': {
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+            customized_fields: [],
+            has_base_version: true,
           },
         },
       });

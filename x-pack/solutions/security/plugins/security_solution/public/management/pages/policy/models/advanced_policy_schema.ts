@@ -457,6 +457,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.device_control.filter_images',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.device_control.filter_images',
+      {
+        defaultMessage:
+          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.events.populate_file_data',
     first_supported_version: '9.2.0',
     documentation: i18n.translate(
@@ -941,6 +952,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.canary',
       {
         defaultMessage: 'Enable ransomware canary protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.device_control.filter_images',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.device_control.filter_images',
+      {
+        defaultMessage:
+          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
       }
     ),
   },
@@ -2331,6 +2353,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.security.event_disabled',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.event_disabled',
+      {
+        defaultMessage:
+          'A comma separated list of security event IDs to selectively disable. example: 4624,4800,4801',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.firewall_anti_tamper',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.firewall_anti_tamper',
+      {
+        defaultMessage:
+          'Controls whether the firewall anti tamper plugin is enabled. This value will only take effect if tamper protection is enabled. Allowed values are prevent, detect, and off. Default: prevent.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.alerts.hash.md5',
     first_supported_version: '8.16',
     documentation: i18n.translate(
@@ -2525,6 +2569,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Allow Memory Protection to perform memory scans in response to image loads. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.agent.orphaned_remediation',
+    first_supported_version: '9.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.agent.orphaned_remediation',
+      {
+        defaultMessage:
+          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
       }
     ),
   },

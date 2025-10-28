@@ -23,7 +23,7 @@ import { StatusUserActionRt } from './status/v1';
 import { TagsUserActionRt } from './tags/v1';
 import { TitleUserActionRt } from './title/v1';
 import { CustomFieldsUserActionRt } from './custom_fields/v1';
-
+import { ObservablesUserActionRt } from './observables/v1';
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
 
@@ -61,6 +61,7 @@ const BasicUserActionsRt = rt.union([
   DeleteCaseUserActionRt,
   CategoryUserActionRt,
   CustomFieldsUserActionRt,
+  ObservablesUserActionRt,
 ]);
 
 const CommonUserActionsWithIdsRt = rt.union([BasicUserActionsRt, CommentUserActionRt]);
@@ -154,3 +155,4 @@ export type CreateCaseUserActionWithoutConnectorId = UserActionWithAttributes<
   rt.TypeOf<typeof CreateCaseUserActionWithoutConnectorIdRt>
 >;
 export type CustomFieldsUserAction = UserAction<rt.TypeOf<typeof CustomFieldsUserActionRt>>;
+export type ObservablesUserAction = UserAction<rt.TypeOf<typeof ObservablesUserActionRt>>;

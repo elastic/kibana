@@ -14,6 +14,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
+import { docLinks } from '../common/doc_links';
 import { registerAnalytics, registerApp, registerManagementSection } from './register';
 import type { OnechatInternalService } from './services';
 import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
@@ -81,7 +82,10 @@ export class OnechatPlugin
     return {};
   }
 
-  start({ http }: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
+  start(core: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
+    const { http } = core;
+    docLinks.setDocLinks(core.docLinks.links);
+
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });

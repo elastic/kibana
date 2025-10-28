@@ -30,9 +30,11 @@ import {
   EuiCodeBlock,
   useGeneratedHtmlId,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
@@ -138,6 +140,10 @@ export function StreamsSettingsFlyout({
     {
       id: `${shipperButtonGroupPrefix}__logstash`,
       label: 'Logstash',
+    },
+    {
+      id: `${shipperButtonGroupPrefix}__fleet`,
+      label: 'Fleet',
     },
   ];
   const [selectedShipperId, setSelectedShipperId] = React.useState(
@@ -266,10 +272,22 @@ output.elasticsearch:
             </EuiText>
             <EuiText color="subdued" size="s">
               <p>
-                {i18n.translate('xpack.streams.streamsListView.shipperConfigDescription', {
-                  defaultMessage:
-                    'Send logs data to wired streams. Check the documentation for more info.',
-                })}
+                <FormattedMessage
+                  id="xpack.streams.streamsListView.shipperConfigDescription"
+                  defaultMessage="Send logs data to wired streams. <docLink>Check the documentation</docLink> for more info."
+                  values={{
+                    docLink: (...chunks: React.ReactNode[]) => (
+                      <EuiLink
+                        href={core.docLinks.links.observability.wiredStreams}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        external
+                      >
+                        {chunks}
+                      </EuiLink>
+                    ),
+                  }}
+                />
               </p>
             </EuiText>
             <EuiButtonGroup
@@ -283,14 +301,66 @@ output.elasticsearch:
               isFullWidth={false}
               data-test-subj="streamsShipperButtonGroup"
             />
-            <EuiCodeBlock
-              language="yaml"
-              isCopyable
-              paddingSize="m"
-              data-test-subj="streamsShipperConfigExample"
-            >
-              {shipperConfigExamples[selectedShipperId]}
-            </EuiCodeBlock>
+            {selectedShipperId.endsWith('__fleet') ? (
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.streams.streamsListView.shipperConfigFleetDescription"
+                    defaultMessage="Use the <b>Custom Logs (Filestream)</b> integration to send data to Wired Streams:"
+                    values={{
+                      b: (chunks) => <b>{chunks}</b>,
+                    }}
+                  />
+                </p>
+                <ul>
+                  <li>
+                    {i18n.translate(
+                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep1',
+                      {
+                        defaultMessage:
+                          'Enable "Write to logs streams" for the output you want to use in the Fleet Settings tab.',
+                      }
+                    )}
+                  </li>
+                  <li>
+                    {i18n.translate(
+                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep2',
+                      {
+                        defaultMessage:
+                          'Add the Custom Logs (Filestream) integration to an agent policy.',
+                      }
+                    )}
+                  </li>
+                  <li>
+                    {i18n.translate(
+                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep3',
+                      {
+                        defaultMessage:
+                          'Enable the \'Use the "logs" data stream\' setting in the integration configuration.',
+                      }
+                    )}
+                  </li>
+                  <li>
+                    {i18n.translate(
+                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep4',
+                      {
+                        defaultMessage:
+                          'Make sure the agent policy is using the output you configured in step 1.',
+                      }
+                    )}
+                  </li>
+                </ul>
+              </EuiText>
+            ) : (
+              <EuiCodeBlock
+                language="yaml"
+                isCopyable
+                paddingSize="m"
+                data-test-subj="streamsShipperConfigExample"
+              >
+                {shipperConfigExamples[selectedShipperId]}
+              </EuiCodeBlock>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutBody>
       </EuiFlyout>

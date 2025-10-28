@@ -39,6 +39,7 @@ export async function getEditEmbeddableFlyout({
   onApply,
   onCancel,
   closeFlyout,
+  applyButtonLabel,
 }: {
   core: CoreStart;
   deps: LensPluginStartDependencies & {
@@ -52,6 +53,7 @@ export async function getEditEmbeddableFlyout({
   onApply?: (newAttributes: TypedLensByValueInput['attributes']) => void;
   onCancel?: () => void;
   closeFlyout: () => void;
+  applyButtonLabel?: string;
 }) {
   const isCompatibleAction = isEmbeddableEditActionCompatible(core, attributes);
   if (!isCompatibleAction) {
@@ -92,6 +94,7 @@ export async function getEditEmbeddableFlyout({
     onApply,
     onCancel,
     closeFlyout,
+    applyButtonLabel,
   });
   return ConfigPanel;
 }

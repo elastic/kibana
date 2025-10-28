@@ -15,7 +15,7 @@ describe('Metric Schema', () => {
     type: 'metric' as const,
     dataset: {
       type: 'dataView' as const,
-      name: 'test-data-view',
+      id: 'test-data-view',
     },
   };
 
@@ -132,7 +132,9 @@ describe('Metric Schema', () => {
           operation: 'sum' as const,
           field: 'cost',
           prefix: '$',
-          compare_to: 'previous_period',
+          compare: {
+            to: 'primary',
+          },
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       };
@@ -304,7 +306,9 @@ describe('Metric Schema', () => {
           operation: 'sum' as const,
           field: 'profit',
           prefix: '$',
-          compare_to: 'previous_year',
+          compare: {
+            to: 'primary',
+          },
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
         breakdown_by: {

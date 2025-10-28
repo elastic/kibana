@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 
 import { ResultFields } from './results_fields';
 
-import './result.scss';
 import type { MetaDataProps, ResultFieldProps } from './result_types';
 import { RichResultHeader } from './rich_result_header';
 import { ResultHeader } from './result_header';

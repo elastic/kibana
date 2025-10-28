@@ -37,9 +37,9 @@ export const ALERT_DATA_GRID_ROW = `${ALERT_DATA_GRID} .euiDataGridRow`;
 
 export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
 
-export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
+export const CLOSE_ALERT_BTN = '[data-test-subj="alert-close-context-menu-item"]';
 
-export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closed-alert-status"]';
+export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="alert-close-context-menu-item"]';
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 

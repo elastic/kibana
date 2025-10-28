@@ -21,11 +21,6 @@ import { buildMockDashboardApi } from '../mocks';
 import { dataService, navigationService, shareService } from '../services/kibana_services';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 
-jest.mock('../dashboard_app/top_nav/dashboard_editing_toolbar', () => ({
-  DashboardEditingToolbar: () => {
-    return <div>mockDashboardEditingToolbar</div>;
-  },
-}));
 describe('Internal dashboard top nav', () => {
   const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
     if (badges) {

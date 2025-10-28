@@ -5,30 +5,32 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { JestContext } from '../../test/context_jest';
 import { Scrubber } from './scrubber';
-import {
-  getScrubberSlideContainer as container,
-  getRenderedElement as element,
-} from '../../test/selectors';
 
 jest.mock('../../supported_renderers');
 
 describe('<Scrubber />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<Scrubber />).isEmptyRender());
+    const { container } = render(<Scrubber />);
+    expect(container.firstChild).toBeNull();
   });
 
-  const wrapper = mount(
-    <JestContext>
-      <Scrubber />
-    </JestContext>
-  );
-
   test('renders as expected', () => {
-    expect(container(wrapper).children().length === 1);
-    expect(element(wrapper).text()).toEqual('markdown mock');
+    render(
+      <JestContext>
+        <Scrubber />
+      </JestContext>
+    );
+
+    // Check that the slide container is rendered
+    const slideContainer = document.querySelector('.slideContainer');
+    expect(slideContainer).toBeInTheDocument();
+    expect(slideContainer?.children).toHaveLength(1);
+
+    // Check that the rendered element contains the expected mock text
+    expect(screen.getByText('markdown mock')).toBeInTheDocument();
   });
 });

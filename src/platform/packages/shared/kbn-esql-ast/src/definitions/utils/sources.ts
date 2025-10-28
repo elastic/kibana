@@ -12,8 +12,8 @@ import type { ESQLCommand, ESQLSource } from '../../types';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
+import { withAutoSuggest } from './autocomplete/helpers';
 import { EDITOR_MARKER } from '../constants';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { metadataSuggestion } from '../../commands_registry/options/metadata';
 import { fuzzySearch } from './shared';
 
@@ -51,24 +51,25 @@ function getSafeInsertSourceText(text: string) {
 export const buildSourcesDefinitions = (
   sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>
 ): ISuggestionItem[] =>
-  sources.map(({ name, isIntegration, title, type }) => ({
-    label: title ?? name,
-    text: getSafeInsertSourceText(name),
-    isSnippet: isIntegration,
-    kind: isIntegration ? 'Class' : 'Issue',
-    detail: isIntegration
-      ? i18n.translate('kbn-esql-ast.esql.autocomplete.integrationDefinition', {
-          defaultMessage: `Integration`,
-        })
-      : i18n.translate('kbn-esql-ast.esql.autocomplete.sourceDefinition', {
-          defaultMessage: '{type}',
-          values: {
-            type: type ?? 'Index',
-          },
-        }),
-    sortText: 'A',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  }));
+  sources.map(({ name, isIntegration, title, type }) =>
+    withAutoSuggest({
+      label: title ?? name,
+      text: getSafeInsertSourceText(name),
+      asSnippet: isIntegration,
+      kind: isIntegration ? 'Class' : 'Issue',
+      detail: isIntegration
+        ? i18n.translate('kbn-esql-ast.esql.autocomplete.integrationDefinition', {
+            defaultMessage: `Integration`,
+          })
+        : i18n.translate('kbn-esql-ast.esql.autocomplete.sourceDefinition', {
+            defaultMessage: '{type}',
+            values: {
+              type: type ?? 'Index',
+            },
+          }),
+      sortText: 'A',
+    })
+  );
 
 /**
  * Checks if the source exists in the provided sources set.
@@ -147,20 +148,18 @@ export async function additionalSourcesSuggestions(
         return definitions;
       } else {
         const _suggestions: ISuggestionItem[] = [
-          {
+          withAutoSuggest({
             ...pipeCompleteItem,
             filterText: fragment,
             text: fragment + ' | ',
-            command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace,
-          },
-          {
+          }),
+          withAutoSuggest({
             ...commaCompleteItem,
             filterText: fragment,
             text: fragment + ', ',
-            command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace,
-          },
+          }),
           {
             ...metadataSuggestion,
             filterText: fragment,
@@ -189,30 +188,35 @@ export const specialIndicesToSuggestions = (
   const aliasSuggestions: ISuggestionItem[] = [];
 
   for (const index of indices) {
-    mainSuggestions.push({
-      label: index.name,
-      text: index.name + ' ',
-      kind: 'Issue',
-      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.specialIndexes.indexType.index', {
-        defaultMessage: 'Index',
-      }),
-      sortText: '0-INDEX-' + index.name,
-      command: TRIGGER_SUGGESTION_COMMAND,
-    });
+    mainSuggestions.push(
+      withAutoSuggest({
+        label: index.name,
+        text: index.name + ' ',
+        kind: 'Issue',
+        detail: i18n.translate('kbn-esql-ast.esql.autocomplete.specialIndexes.indexType.index', {
+          defaultMessage: 'Index',
+        }),
+        sortText: '0-INDEX-' + index.name,
+      })
+    );
 
     if (index.aliases) {
       for (const alias of index.aliases) {
-        aliasSuggestions.push({
-          label: alias,
-          text: alias + ' $0',
-          asSnippet: true,
-          kind: 'Issue',
-          detail: i18n.translate('kbn-esql-ast.esql.autocomplete.specialIndexes.indexType.alias', {
-            defaultMessage: 'Alias',
-          }),
-          sortText: '1-ALIAS-' + alias,
-          command: TRIGGER_SUGGESTION_COMMAND,
-        });
+        aliasSuggestions.push(
+          withAutoSuggest({
+            label: alias,
+            text: alias + ' $0',
+            asSnippet: true,
+            kind: 'Issue',
+            detail: i18n.translate(
+              'kbn-esql-ast.esql.autocomplete.specialIndexes.indexType.alias',
+              {
+                defaultMessage: 'Alias',
+              }
+            ),
+            sortText: '1-ALIAS-' + alias,
+          })
+        );
       }
     }
   }

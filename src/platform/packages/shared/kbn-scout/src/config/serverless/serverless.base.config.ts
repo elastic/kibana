@@ -170,6 +170,24 @@ export const defaultConfig: ScoutServerConfig = {
       `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      `--xpack.fleet.fleetServerHosts=${JSON.stringify([
+        {
+          id: 'default-fleet-server',
+          name: 'Default Fleet Server',
+          is_default: true,
+          host_urls: ['https://localhost:8220'],
+        },
+      ])}`,
+      `--xpack.fleet.outputs=${JSON.stringify([
+        {
+          id: 'es-default-output',
+          name: 'Default Output',
+          type: 'elasticsearch',
+          is_default: true,
+          is_default_monitoring: true,
+          hosts: ['https://localhost:9200'],
+        },
+      ])}`,
     ],
   },
 };

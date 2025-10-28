@@ -49,7 +49,7 @@ describe('CopyToDashboardModal', () => {
       savedObjectId$: new BehaviorSubject<string | undefined>('dashboardOne'),
       getDashboardPanelFromId: () => ({
         type: 'testPanelType',
-        gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
+        grid: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
         serializedState: {
           rawState: {
             title: 'Panel One',

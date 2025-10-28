@@ -116,7 +116,7 @@ describe('The metric threshold rule type', () => {
     jest.setSystemTime();
   });
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     mockAssetDetailsLocator.getRedirectUrl.mockImplementation(
       ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>

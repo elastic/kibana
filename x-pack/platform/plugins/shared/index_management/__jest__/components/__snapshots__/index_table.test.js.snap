@@ -62,6 +62,31 @@ Array [
 ]
 `;
 
+exports[`index table should not show "Convert to lookup index" option in the context menu when hidden index is selected 1`] = `
+Array [
+  "Show index overview",
+  "Show index settings",
+  "Show index mapping",
+  "Open index",
+  "Delete index",
+]
+`;
+
+exports[`index table should not show "Convert to lookup index" option in the context menu when lookup index is selected 1`] = `
+Array [
+  "Show index overview",
+  "Show index settings",
+  "Show index mapping",
+  "Show index stats",
+  "Close index",
+  "Force merge index",
+  "Refresh index",
+  "Clear index cache",
+  "Flush index",
+  "Delete index",
+]
+`;
+
 exports[`index table should show hidden indices only when the switch is turned on 1`] = `
 Array [
   "testy0",
@@ -197,6 +222,7 @@ Array [
   "Show index mapping",
   "Open index",
   "Delete index",
+  "Convert to lookup index",
 ]
 `;
 
@@ -212,6 +238,7 @@ Array [
   "Clear index cache",
   "Flush index",
   "Delete index",
+  "Convert to lookup index",
 ]
 `;
 

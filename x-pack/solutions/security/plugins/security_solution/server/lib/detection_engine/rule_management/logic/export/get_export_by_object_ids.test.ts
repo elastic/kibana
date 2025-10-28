@@ -18,6 +18,8 @@ import { getThreatMock } from '../../../../../../common/detection_engine/schemas
 import { internalRuleToAPIResponse } from '../detection_rules_client/converters/internal_rule_to_api_response';
 import { getEqlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getExportByObjectIds } from './get_export_by_object_ids';
+import { createDefaultExternalRuleSource } from '../detection_rules_client/mergers/rule_source/create_default_external_rule_source';
+import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
 
 const exceptionsClient = getExceptionListClientMock();
 const connectors = [
@@ -93,10 +95,7 @@ describe('getExportByObjectIds', () => {
       getQueryRuleParams({
         ruleId: 'rule-1',
         immutable: true,
-        ruleSource: {
-          type: 'external',
-          isCustomized: false,
-        },
+        ruleSource: convertObjectKeysToCamelCase(createDefaultExternalRuleSource()),
       })
     );
 

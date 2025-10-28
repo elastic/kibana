@@ -173,12 +173,17 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickSaveSearchButton() {
+    await this.testSubjects.moveMouseTo('discoverSaveButton');
     await this.testSubjects.click('discoverSaveButton');
   }
 
   public async clickLoadSavedSearchButton() {
     await this.testSubjects.moveMouseTo('discoverOpenButton');
     await this.testSubjects.click('discoverOpenButton');
+  }
+
+  public async hasUnsavedChangesBadge() {
+    return await this.testSubjects.exists('unsavedChangesBadge');
   }
 
   public async revertUnsavedChanges() {

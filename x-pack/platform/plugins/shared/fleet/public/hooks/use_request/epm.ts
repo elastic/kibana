@@ -38,6 +38,7 @@ import type {
   BulkUninstallPackagesRequest,
   DeletePackageDatastreamAssetsRequest,
   DeletePackageDatastreamAssetsResponse,
+  BulkRollbackPackagesRequest,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -362,6 +363,23 @@ export const sendGetOneBulkUninstallPackagesForRq = (taskId: string) => {
   });
 };
 
+export const sendBulkRollbackPackagesForRq = (params: BulkRollbackPackagesRequest) => {
+  return sendRequestForRq<BulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkRollbackPath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: params,
+  });
+};
+
+export const sendGetBulkRollbackInfoPackagesForRq = (taskId: string) => {
+  return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkRollbackInfoPath(taskId),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
+  });
+};
+
 /**
  * @deprecated use sendRemovePackageForRq instead
  */
@@ -394,11 +412,20 @@ export const sendRequestReauthorizeTransforms = (
   pkgVersion: string,
   transforms: Array<{ transformId: string }>
 ) => {
-  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
+  return sendRequestForRq<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getReauthorizeTransformsPath(pkgName, pkgVersion),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: { transforms },
+  });
+};
+
+export const sendRequestInstallRuleAssets = (pkgName: string, pkgVersion: string) => {
+  return sendRequestForRq<InstallPackageResponse, FleetErrorResponse>({
+    path: epmRouteService.getInstallRuleAssetsPath(pkgName, pkgVersion),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {},
   });
 };
 

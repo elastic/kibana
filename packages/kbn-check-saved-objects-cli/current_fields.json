@@ -185,6 +185,7 @@
     "observables.value",
     "owner",
     "settings",
+    "settings.extractObservables",
     "settings.syncAlerts",
     "severity",
     "status",
@@ -192,6 +193,7 @@
     "title",
     "total_alerts",
     "total_comments",
+    "total_events",
     "updated_at",
     "updated_by",
     "updated_by.email",
@@ -207,6 +209,7 @@
     "created_at",
     "created_by",
     "created_by.username",
+    "eventId",
     "externalReferenceAttachmentTypeId",
     "owner",
     "persistableStateAttachmentTypeId",
@@ -618,8 +621,6 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [],
-  "guided-onboarding-plugin-state": [],
   "index-pattern": [
     "name",
     "title",
@@ -817,6 +818,7 @@
     "title"
   ],
   "maintenance-window": [
+    "createdBy",
     "enabled",
     "events",
     "expirationDate",
@@ -939,6 +941,7 @@
   "risk-engine-configuration": [
     "alertSampleSizePerShard",
     "dataViewId",
+    "enableResetToZero",
     "enabled",
     "excludeAlertStatuses",
     "filter",

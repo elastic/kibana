@@ -19,7 +19,6 @@ import {
   EuiI18n,
   useResizeObserver,
   EuiSwitch,
-  type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -391,17 +390,10 @@ export const DocViewerTable = ({
 };
 
 const componentStyles = {
-  fieldsGridWrapper: ({ euiTheme }: UseEuiTheme) =>
+  fieldsGridWrapper: () =>
     css({
       minBlockSize: 0,
       display: 'block',
-
-      '.euiDataGridRow': {
-        '&:hover': {
-          // we keep using a deprecated shade until proper token is available
-          backgroundColor: euiTheme.colors.lightestShade,
-        },
-      },
     }),
   noFieldsFound: css({
     minHeight: 300,

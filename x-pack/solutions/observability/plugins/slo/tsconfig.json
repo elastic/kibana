@@ -90,6 +90,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/monaco",
     "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
     "@kbn/core-application-browser",
     "@kbn/core-theme-browser",
     "@kbn/ebt-tools",
@@ -111,5 +112,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
+    "@kbn/deeplinks-management",
   ]
 }

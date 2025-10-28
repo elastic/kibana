@@ -103,8 +103,8 @@ export const AnalyticsDetailFlyout = () => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={redirectToAnalyticsList}>
               <FormattedMessage
-                id="xpack.ml.jobDetailsFlyout.openJobsListButton"
-                defaultMessage="Open jobs list"
+                id="xpack.ml.jobDetailsFlyout.manageJobButton"
+                defaultMessage="Manage job"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

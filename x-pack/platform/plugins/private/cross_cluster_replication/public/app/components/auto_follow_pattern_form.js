@@ -463,6 +463,7 @@ export class AutoFollowPatternForm extends PureComponent {
             fullWidth
           >
             <EuiComboBox
+              isInvalid={isInvalid}
               noSuggestions
               placeholder={i18n.translate(
                 'xpack.crossClusterReplication.autoFollowPatternForm.fieldLeaderIndexPatternsPlaceholder',

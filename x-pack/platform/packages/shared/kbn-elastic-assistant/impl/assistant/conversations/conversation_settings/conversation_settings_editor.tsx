@@ -17,7 +17,7 @@ import {
   ConversationSharedState,
 } from '@kbn/elastic-assistant-common';
 import { ShareSelect } from '../../share_conversation/share_select';
-import type { Conversation } from '../../../..';
+import { useAssistantContext, type Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
@@ -57,8 +57,10 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     selectedConversation,
     setConversationsSettingsBulkActions,
   }) => {
+    const { settings } = useAssistantContext();
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
+      settings,
     });
     const [conversationUpdates, setConversationUpdates] =
       useState<Conversation>(selectedConversation);

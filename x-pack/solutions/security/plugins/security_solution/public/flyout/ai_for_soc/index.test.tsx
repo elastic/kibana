@@ -27,6 +27,20 @@ jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutState: jest.fn().mockReturnValue({ left: {} }),
 }));
 
+jest.mock('../../common/hooks/use_ai_connectors', () => ({
+  useAIConnectors: jest.fn().mockReturnValue({
+    aiConnectors: [
+      {
+        id: 'test-connector-id',
+        name: 'Test Connector',
+        actionTypeId: '.gen-ai',
+      },
+    ],
+    isLoading: false,
+    error: null,
+  }),
+}));
+
 jest.mock('./context');
 jest.mock('./components/attack_discovery_widget', () => ({
   AttackDiscoveryWidget: jest.fn(),

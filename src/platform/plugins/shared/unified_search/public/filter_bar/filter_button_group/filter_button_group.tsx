@@ -27,7 +27,7 @@ interface Props {
   size?: 'm' | 's';
 }
 
-export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 'm', ...rest }: Props) => {
+export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 's', ...rest }: Props) => {
   const styles = useMemoCss(filterButtonStyles);
   return (
     <EuiFlexGroup
@@ -55,7 +55,7 @@ const filterButtonStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
-      height: euiTheme.size.xxl,
+      height: euiTheme.size.xl,
       backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend,
       borderRadius: euiTheme.border.radius.medium,
       '&::after': {

@@ -159,6 +159,30 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     try {
       // console.log('UnifiedHoverProvider: provideHover called at position', position);
 
+      // FIRST: Check if there are validation errors at this position OR nearby
+      // If there are, let the validation-only hover provider handle it
+      const markers = monaco.editor.getModelMarkers({ resource: model.uri });
+      const validationMarkersNearby = markers.filter(
+        (marker) =>
+          marker.startLineNumber === position.lineNumber && // Same line
+          marker.owner === 'yaml' && // Only check YAML validation errors
+          // Check if the position is within or very close to the marker range
+          ((marker.startColumn <= position.column && marker.endColumn >= position.column) ||
+            Math.abs(marker.startColumn - position.column) <= 3 || // Within 3 columns
+            Math.abs(marker.endColumn - position.column) <= 3)
+      );
+
+      if (validationMarkersNearby.length > 0) {
+        // console.log('UnifiedHoverProvider: Found validation errors nearby, skipping to let validation provider handle');
+        // console.log('Nearby validation markers:', validationMarkersNearby.map(m => ({
+        //  message: m.message,
+        //  startCol: m.startColumn,
+        //  endCol: m.endColumn,
+        //  currentCol: position.column
+        // })));
+        return null;
+      }
+
       // Get YAML document
       const yamlDocument = this.getYamlDocument();
       if (!yamlDocument) {
@@ -174,7 +198,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       }
 
       // console.log('✅ UnifiedHoverProvider: Context detected', {
-      //   connectorType: context.connectorType,
+      //    connectorType: context.connectorType,
       //   yamlPath: context.yamlPath,
       //   stepContext: context.stepContext,
       //   parameterContext: context.parameterContext,
@@ -183,17 +207,21 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // Find appropriate Monaco handler
       const handler = getMonacoConnectorHandler(context.connectorType);
       if (!handler) {
-        // console.log(
-        //   'UnifiedHoverProvider: No Monaco handler found for connector type:',
-        //   context.connectorType
-        // );
+        /*
+        console.log(
+          'UnifiedHoverProvider: No Monaco handler found for connector type:',
+          context.connectorType
+        );
+        */
         return null;
       }
 
-      // console.log(
-      //   'UnifiedHoverProvider: Found Monaco handler for connector type:',
-      //   context.connectorType
-      // );
+      /*
+      console.log(
+        'UnifiedHoverProvider: Found Monaco handler for connector type:',
+        context.connectorType
+      );
+      */
 
       // Generate hover content
       const hoverContent = await handler.generateHoverContent(context);

@@ -23,18 +23,14 @@ import {
 import type {
   CasePatchRequest,
   CaseResolveResponse,
-  CaseSummaryResponse,
   CaseUserActionStatsResponse,
   FindCasesContainingAllAlertsResponse,
-  InferenceConnectorsResponse,
   SingleCaseMetricsResponse,
 } from '../../common/types/api';
 import {
   CaseResolveResponseRt,
-  CaseSummaryResponseRt,
   CaseUserActionStatsResponseRt,
   FindCasesContainingAllAlertsResponseRt,
-  InferenceConnectorsResponseRt,
   SingleCaseMetricsResponseRt,
 } from '../../common/types/api';
 import type {
@@ -100,18 +96,6 @@ export const decodeCaseUserActionStatsResponse = (
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCaseSummaryResponse = (respCase?: CaseSummaryResponse) =>
-  pipe(
-    CaseSummaryResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
-
-export const decodeInferenceConnectorsResponse = (respCase?: InferenceConnectorsResponse) =>
-  pipe(
-    InferenceConnectorsResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
-
 export const decodeFindAllAttachedAlertsResponse = (
   respCase?: FindCasesContainingAllAlertsResponse
 ) =>
@@ -154,11 +138,21 @@ export const createUpdateSuccessToaster = (
     className: 'eui-textBreakWord',
   };
 
-  if (valueToUpdateIsSettings(key, value) && value?.syncAlerts && caseHasAlerts) {
-    return {
-      ...toast,
-      title: i18n.SYNC_CASE(caseAfterUpdate.title),
-    };
+  if (
+    valueToUpdateIsSettings(key, value) &&
+    ((value?.syncAlerts && caseHasAlerts) || value?.extractObservables)
+  ) {
+    if (value?.extractObservables !== caseBeforeUpdate.settings.extractObservables) {
+      return {
+        ...toast,
+        title: i18n.EXTRACT_OBSERVABLES(caseAfterUpdate.title),
+      };
+    } else {
+      return {
+        ...toast,
+        title: i18n.SYNC_CASE(caseAfterUpdate.title),
+      };
+    }
   }
 
   if (valueToUpdateIsStatus(key, value) && caseHasAlerts && caseBeforeUpdate.settings.syncAlerts) {
@@ -233,4 +227,23 @@ export const constructCustomFieldsFilter = (
         customFields: valuesByCustomFieldKey,
       }
     : {};
+};
+
+export const getIncrementalIdSearchOverrides = (search: string) => {
+  const incrementalIdRegEx = /^#(\d{1,50})\s*$/;
+  // overrides for incremental_id search
+  let overrides: Partial<FilterOptions> = {};
+  let trimmedSearch = search?.trim();
+  const isIncrementalIdSearch = incrementalIdRegEx.test(trimmedSearch ?? '');
+  if (trimmedSearch && isIncrementalIdSearch) {
+    // extract the number portion of the inc id search: #123 -> 123
+    trimmedSearch = incrementalIdRegEx.exec(trimmedSearch)?.[1] ?? trimmedSearch;
+    // search only in `incremental_id` since types with `title`
+    // and `description` don't overlap
+    overrides = {
+      searchFields: ['incremental_id.text'],
+      search: trimmedSearch,
+    };
+  }
+  return overrides;
 };

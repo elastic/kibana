@@ -81,8 +81,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
         apm: { enabled: false },
         uptime: { enabled: false },
       },
-      managedOtlpServiceUrl: '',
     },
+    managedOtlpServiceUrl: '',
     aiAssistant: {
       enabled: false,
       feedback: {

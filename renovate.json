@@ -17,6 +17,7 @@
   ],
   "baseBranches": [
     "main",
+    "9.2",
     "9.1",
     "9.0",
     "8.19",
@@ -49,7 +50,6 @@
         "css-loader",
         "file-loader",
         "mini-css-extract-plugin",
-        "postcss-loader",
         "sass-loader",
         "style-loader",
         "val-loader",
@@ -90,8 +90,7 @@
       ],
       "labels": [
         "Team:Operations",
-        "release_note:skip",
-        "backport:current-major"
+        "release_note:skip"
       ],
       "enabled": true,
       "matchManagers": [
@@ -859,7 +858,7 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@elastic/kibana-cloud-security-posture dependencies",
+      "groupName": "@elastic/contextual-security-apps dependencies",
       "matchDepNames": [
         "@mswjs/http-middleware",
         "@types/byte-size",
@@ -868,7 +867,7 @@
         "xterm"
       ],
       "reviewers": [
-        "team:kibana-cloud-security-posture"
+        "team:contextual-security-apps"
       ],
       "matchBaseBranches": [
         "main"
@@ -1190,8 +1189,7 @@
       ],
       "labels": [
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1229,7 +1227,6 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:prev-minor",
         "Team:Operations",
         "Team:Core"
       ],
@@ -1251,7 +1248,6 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:prev-minor",
         "Team:Operations",
         "Team:QA"
       ],
@@ -1317,9 +1313,7 @@
       "labels": [
         "release_note:skip",
         "Team:Security",
-        "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1340,9 +1334,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1364,9 +1356,7 @@
       "labels": [
         "release_note:skip",
         "Team:Security",
-        "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1387,9 +1377,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor",
-        "backport:prev-major"
+        "Team:Core"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1426,8 +1414,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor"
+        "Team:Core"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1465,8 +1452,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor"
+        "Team:Core"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1485,8 +1471,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor"
+        "Team:Core"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1507,8 +1492,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1536,11 +1520,29 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
-        "backport:prev-minor"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "undici",
+      "description": "This library powers native Node.js fetch, and we want to use the exact same version as Node.js to avoid potential issues. Instead of relying on Renovate to update this dependency, we bump it when we bump the Node.js version (enforced by a unit test).",
+      "matchDepNames": [
+        "undici"
+      ],
+      "reviewers": [
+        "team:kibana-security"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Security"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": false
     },
     {
       "groupName": "babel",
@@ -2026,7 +2028,8 @@
       "groupName": "postcss",
       "matchDepNames": [
         "postcss",
-        "postcss-scss"
+        "postcss-scss",
+        "postcss-loader"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -2212,8 +2215,7 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2233,8 +2235,7 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2260,8 +2261,7 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "dependencyDashboardApproval": true,
       "minimumReleaseAge": "14 days",
@@ -2296,8 +2296,7 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2771,7 +2770,6 @@
       "matchDepNames": [
         "expose-loader",
         "html-loader",
-        "jsondiffpatch",
         "object-path-immutable",
         "postcss-prefix-selector",
         "safe-squel",
@@ -2797,8 +2795,7 @@
         "@types/extract-zip",
         "@types/pdfmake",
         "extract-zip",
-        "pdfmake",
-        "puppeteer"
+        "pdfmake"
       ],
       "reviewers": [
         "team:kibana-presentation",
@@ -2815,6 +2812,26 @@
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "puppeteer",
+      "matchDepNames": [
+        "puppeteer"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Reporting Services",
+        "Team:ResponseOps",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": false
     },
     {
       "groupName": "turf",
@@ -3341,6 +3358,7 @@
         "backport:all-open",
         "release_note:skip"
       ],
+      "allowedVersions": "<4.0.0",
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -3499,7 +3517,6 @@
         "require-in-the-middle",
         "tape",
         "tough-cookie",
-        "uuid",
         "xml-crypto",
         "@elastic/node-crypto",
         "@types/js-yaml",
@@ -3507,8 +3524,7 @@
         "@types/minimist",
         "@types/node-forge",
         "@types/object-hash",
-        "@types/tough-cookie",
-        "@types/uuid"
+        "@types/tough-cookie"
       ],
       "reviewers": [
         "team:kibana-security"
@@ -3527,7 +3543,9 @@
     {
       "groupName": "platform security modules - ESM required",
       "matchDepNames": [
-        "@kayahr/text-encoding"
+        "@kayahr/text-encoding",
+        "uuid",
+        "@types/uuid"
       ],
       "reviewers": [
         "team:kibana-security"
@@ -3570,6 +3588,14 @@
     {
       "matchDepNames": [
         "chromedriver"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
       ],
       "enabled": true
     },
@@ -3752,7 +3778,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "main"
+        "main",
+        "8.19"
       ],
       "matchDepNames": [
         "@pmmmwh/react-refresh-webpack-plugin",
@@ -3766,8 +3793,9 @@
         "Team:Operations",
         "release_note:skip",
         "ci:build-storybooks",
-        "backport:prev-minor"
+        "backport:skip"
       ],
+      "allowedVersions": "<9.0.0",
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -3779,7 +3807,7 @@
       ],
       "reviewers": [
         "team:response-ops",
-        "team:kibana-cloud-security-posture",
+        "team:contextual-security-apps",
         "team:security-asset-management",
         "team:fleet",
         "team:awp-platform",
@@ -4100,13 +4128,13 @@
         "nunjucks"
       ],
       "reviewers": [
-        "team:security-scalability"
+        "team:integration-experience"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Security-Scalability",
+        "Team:Integration-Experience",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4119,13 +4147,13 @@
         "oas"
       ],
       "reviewers": [
-        "team:security-scalability"
+        "team:integration-experience"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Security-Scalability",
+        "Team:Integration-Experience",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4139,34 +4167,15 @@
         "@types/seedrandom"
       ],
       "reviewers": [
-        "team:security-scalability"
+        "team:integration-experience"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Security-Scalability",
+        "Team:Integration-Experience",
         "release_note:skip",
         "backport:all-open"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "Cloud Defend",
-      "matchDepNames": [
-        "monaco-yaml"
-      ],
-      "reviewers": [
-        "team:sec-cloudnative-integrations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team: Cloud Native Integrations",
-        "release_note:skip",
-        "backport:skip"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -4395,7 +4404,6 @@
         "Team:Monitoring",
         "Team:Core",
         "Team:Security",
-        "backport:prev-minor",
         "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
@@ -4558,8 +4566,7 @@
       ],
       "labels": [
         "Team:Visualizations",
-        "release_note:skip",
-        "backport:prev-minor"
+        "release_note:skip"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -4612,7 +4619,7 @@
         "@xyflow/react"
       ],
       "reviewers": [
-        "team:kibana-cloud-security-posture"
+        "team:contextual-security-apps"
       ],
       "matchBaseBranches": [
         "main"
@@ -4631,7 +4638,7 @@
         "@dagrejs/dagre"
       ],
       "reviewers": [
-        "team:kibana-cloud-security-posture"
+        "team:contextual-security-apps"
       ],
       "matchBaseBranches": [
         "main"
@@ -4677,7 +4684,6 @@
       ],
       "labels": [
         "Team:Operations",
-        "backport:prev-minor",
         "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",

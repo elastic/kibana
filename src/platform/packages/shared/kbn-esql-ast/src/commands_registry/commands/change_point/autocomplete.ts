@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand } from '../../../types';
 import { ESQL_NUMBER_TYPES } from '../../../definitions/types';
 import { pipeCompleteItem } from '../../complete_items';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import {
   buildUserDefinedColumnsDefinitions,
   findFinalWord,
@@ -65,7 +65,7 @@ export const getPosition = (query: string, command: ESQLCommand): Position | und
   }
 };
 
-export const onSuggestion: ISuggestionItem = {
+export const onSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'ON',
   text: 'ON ',
   kind: 'Reference',
@@ -73,10 +73,9 @@ export const onSuggestion: ISuggestionItem = {
     defaultMessage: 'On',
   }),
   sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
+});
 
-export const asSuggestion: ISuggestionItem = {
+export const asSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'AS',
   text: 'AS ',
   kind: 'Reference',
@@ -84,8 +83,7 @@ export const asSuggestion: ISuggestionItem = {
     defaultMessage: 'As',
   }),
   sortText: '2',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
+});
 
 export async function autocomplete(
   query: string,
@@ -129,17 +127,15 @@ export async function autocomplete(
       return [asSuggestion, pipeCompleteItem];
     case Position.AS_TYPE_COLUMN: {
       // add comma and space
-      return buildUserDefinedColumnsDefinitions(['changePointType']).map((v) => ({
-        ...v,
-        text: v.text + ', ',
-        command: TRIGGER_SUGGESTION_COMMAND,
-      }));
+      return buildUserDefinedColumnsDefinitions(['changePointType']).map((v) =>
+        withAutoSuggest({
+          ...v,
+          text: v.text + ', ',
+        })
+      );
     }
     case Position.AS_P_VALUE_COLUMN: {
-      return buildUserDefinedColumnsDefinitions(['pValue']).map((v) => ({
-        ...v,
-        command: TRIGGER_SUGGESTION_COMMAND,
-      }));
+      return buildUserDefinedColumnsDefinitions(['pValue']).map((v) => withAutoSuggest(v));
     }
     case Position.AFTER_AS_CLAUSE: {
       return [pipeCompleteItem];

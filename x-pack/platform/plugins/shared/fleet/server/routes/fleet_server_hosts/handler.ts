@@ -31,6 +31,9 @@ function ensureNoDuplicateSecrets(fleetServerHost: Partial<FleetServerHost>) {
   if (fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key) {
     throw Boom.badRequest('Cannot specify both ssl.es_key and secrets.ssl.es_key');
   }
+  if (fleetServerHost.ssl?.agent_key && fleetServerHost.secrets?.ssl?.agent_key) {
+    throw Boom.badRequest('Cannot specify both ssl.agent_key and secrets.ssl.agent_key');
+  }
 }
 
 async function checkFleetServerHostsWriteAPIsAllowed(

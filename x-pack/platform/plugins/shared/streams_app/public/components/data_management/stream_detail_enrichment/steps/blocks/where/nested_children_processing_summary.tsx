@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 import type { StepsProcessingSummaryMap } from '../../../state_management/use_steps_processing_summary';
 
 const statusLabels: Record<string, string> = {
@@ -69,8 +70,8 @@ export const NestedChildrenProcessingSummary = ({
   });
 
   return summary ? (
-    <span>
+    <EuiText size="xs" color="subdued">
       {summary} {stepsLabel}
-    </span>
+    </EuiText>
   ) : null;
 };

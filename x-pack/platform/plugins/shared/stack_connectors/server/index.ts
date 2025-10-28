@@ -20,6 +20,7 @@ export { SlackApiParamsSchema };
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableExperimental: true,
+    resilient: true,
   },
   schema: configSchema,
 };

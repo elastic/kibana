@@ -28,7 +28,7 @@ export const ACCORDION_HEIGHT = 48; // px
 export const BORDER_THICKNESS = 1; // px
 
 export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
-  const { duration, margin, showAccordion, onClick, onErrorClick, highlightedTraceId } =
+  const { duration, margin, showAccordion, onClick, highlightedTraceId } =
     useTraceWaterfallContext();
   const isHighlighted = highlightedTraceId === item.id;
   const widthPercent = (item.duration / duration) * 100;
@@ -125,7 +125,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
               }
             >
               <Bar width={widthPercent} left={leftPercent} color={item.color} />
-              <BarDetails item={item} left={leftPercent} onErrorClick={onErrorClick} />
+              <BarDetails item={item} left={leftPercent} />
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>

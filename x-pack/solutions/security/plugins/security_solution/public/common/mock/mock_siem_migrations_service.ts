@@ -24,6 +24,7 @@ const commonMocks = {
   deleteMigration: jest.fn(),
   connectorIdStorage: createRuleMigrationStorageMock(),
   traceOptionsStorage: createRuleMigrationStorageMock(),
+  startMigrationFromStats: jest.fn(),
 };
 
 export const createSiemMigrationsMock = () => {
@@ -36,6 +37,7 @@ export const createSiemMigrationsMock = () => {
       getMigrationsStats: jest.fn(),
       getMissingResources: jest.fn(),
       getIntegrations: jest.fn(),
+      addRuleToMigration: jest.fn(),
       telemetry: createTelemetryServiceMock(),
       api: {
         getMissingResources: jest.fn(),

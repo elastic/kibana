@@ -50,7 +50,6 @@ export interface StartDependencies {
 export interface ConfigSchema {
   logSourcesEnabled: boolean;
   spacesEnabled: boolean;
-  visibilityEnabled: boolean;
 }
 
 export class AiAssistantManagementObservabilityPlugin

@@ -57,13 +57,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           // navigate to a different section
           await solutionNavigation.sidenav.clickLink({
-            deepLinkId: 'searchSynonyms:synonyms',
+            deepLinkId: 'searchPlayground',
           });
           await solutionNavigation.sidenav.expectLinkActive({
-            deepLinkId: 'searchSynonyms:synonyms',
+            deepLinkId: 'searchPlayground',
           });
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Synonyms' });
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
         } else {
           // check the Data > Indices section
           await solutionNavigation.sidenav.clickLink({
@@ -108,6 +108,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
         await browser.refresh();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+      });
+
+      it('renders tour', async () => {
+        await solutionNavigation.sidenav.tour.reset();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectHidden();
+        await browser.refresh();
+        await solutionNavigation.sidenav.tour.expectHidden();
       });
     });
   });

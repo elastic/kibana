@@ -4,6 +4,7 @@ products:
 exclude:
   - settings-gen/readme.md
   - development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.createdefaultinspectoradapters.md
+  - action-type-template.md
 cross_links:
   - apm-agent-nodejs
   - apm-agent-rum-js

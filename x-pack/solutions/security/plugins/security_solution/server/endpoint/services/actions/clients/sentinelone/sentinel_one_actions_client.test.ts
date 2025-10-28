@@ -1422,22 +1422,7 @@ describe('SentinelOneActionsClient class', () => {
     let getFileReqOptions: ResponseActionGetFileRequestBody;
 
     beforeEach(() => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
-
       getFileReqOptions = responseActionsClientMock.createGetFileOptions();
-    });
-
-    it('should error if feature flag is not enabled', async () => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        false;
-
-      await expect(s1ActionsClient.getFile(getFileReqOptions)).rejects.toHaveProperty(
-        'message',
-        'get-file not supported for sentinel_one agent type. Feature disabled'
-      );
     });
 
     it('should call the fetch agent files connector method with expected params', async () => {
@@ -1481,9 +1466,6 @@ describe('SentinelOneActionsClient class', () => {
         responseActionsClientMock.createNormalizedExternalConnectorClient(subActionsClient);
       connectorActionsMock =
         classConstructorOptions.connectorActions as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
       s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
 
       const executeMockFn = (subActionsClient.execute as jest.Mock).getMockImplementation();
@@ -1695,21 +1677,8 @@ describe('SentinelOneActionsClient class', () => {
       });
 
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
-      // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         true;
-    });
-
-    it('should throw error if getFile feature flag is disabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        false;
-
-      await expect(s1ActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
-        'File downloads are not supported for sentinel_one get-file. Feature disabled'
-      );
     });
 
     it('should throw error if action id is not for an agent type of sentinelOne', async () => {
@@ -1806,9 +1775,6 @@ describe('SentinelOneActionsClient class', () => {
       s1DataGenerator = new SentinelOneDataGenerator('seed');
 
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
-      // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         true;
 
@@ -1856,19 +1822,6 @@ describe('SentinelOneActionsClient class', () => {
             };
           }
         }
-      );
-    });
-
-    it('should throw error if get-file feature flag is disabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        false;
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
-        false;
-
-      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'File downloads are not supported for sentinel_one get-file. Feature disabled'
       );
     });
 
@@ -2026,6 +1979,29 @@ describe('SentinelOneActionsClient class', () => {
 
       await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
         'Script ID [1466645476786791838] not found'
+      );
+    });
+
+    it('should throw an error if script does not support OS of agent', async () => {
+      const executeMockImplementation = connectorActionsMock.execute.getMockImplementation()!;
+      connectorActionsMock.execute.mockImplementation(async (options) => {
+        if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPTS) {
+          const scriptsApiResponse = sentinelOneMock.createSentinelOneGetRemoteScriptsApiResponse();
+
+          // @ts-expect-error TS2540: Cannot assign to read-only property.
+          scriptsApiResponse.data[0].osTypes = ['windows'];
+          // @ts-expect-error TS2540: Cannot assign to read-only property.
+          scriptsApiResponse.data[0].scriptName = 'terminate something';
+
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: scriptsApiResponse,
+          });
+        }
+        return executeMockImplementation.call(connectorActionsMock, options);
+      });
+
+      await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
+        'Script [terminate something] not supported for OS type [linux]'
       );
     });
 

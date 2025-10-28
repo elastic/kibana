@@ -101,7 +101,7 @@ describe('Shared Schemas', () => {
 
   describe('collapseBySchema', () => {
     it('validates all allowed collapse by values', () => {
-      const validValues = ['avg', 'sum', 'max', 'min', 'none'] as const;
+      const validValues = ['avg', 'sum', 'max', 'min'] as const;
 
       validValues.forEach((value) => {
         const validated = collapseBySchema.validate(value);
@@ -143,13 +143,11 @@ describe('Shared Schemas', () => {
       const input = {
         panelInfo: {},
         layerSettings: {},
-        collapseBy: 'none' as const,
       };
 
       const validated = {
         panelInfo: schema.object(sharedPanelInfoSchema).validate(input.panelInfo),
         layerSettings: schema.object(layerSettingsSchema).validate(input.layerSettings),
-        collapseBy: collapseBySchema.validate(input.collapseBy),
       };
 
       expect(validated).toEqual({
@@ -158,7 +156,6 @@ describe('Shared Schemas', () => {
           sampling: 1,
           ignore_global_filters: false,
         },
-        collapseBy: 'none',
       });
     });
   });

@@ -43,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Open add panel', async () => {
-      await dashboardAddPanel.clickOpenAddPanel();
+    it('Open Add from library flyout', async () => {
+      await dashboardAddPanel.clickAddFromLibrary();
       await a11y.testAppSnapshot();
     });
 
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Open add panel again', async () => {
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await a11y.testAppSnapshot();
     });
 

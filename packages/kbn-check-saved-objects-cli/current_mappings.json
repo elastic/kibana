@@ -624,6 +624,9 @@
         "fields": {
           "keyword": {
             "type": "keyword"
+          },
+          "text": {
+            "type": "text"
           }
         },
         "type": "unsigned_long"
@@ -644,6 +647,9 @@
       },
       "settings": {
         "properties": {
+          "extractObservables": {
+            "type": "boolean"
+          },
           "syncAlerts": {
             "type": "boolean"
           }
@@ -670,6 +676,9 @@
         "type": "integer"
       },
       "total_comments": {
+        "type": "integer"
+      },
+      "total_events": {
         "type": "integer"
       },
       "updated_at": {
@@ -718,6 +727,9 @@
             "type": "keyword"
           }
         }
+      },
+      "eventId": {
+        "type": "keyword"
       },
       "externalReferenceAttachmentTypeId": {
         "type": "keyword"
@@ -2701,6 +2713,9 @@
   "maintenance-window": {
     "dynamic": false,
     "properties": {
+      "createdBy": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },
@@ -3116,6 +3131,9 @@
       },
       "dataViewId": {
         "type": "keyword"
+      },
+      "enableResetToZero": {
+        "type": "boolean"
       },
       "enabled": {
         "type": "boolean"

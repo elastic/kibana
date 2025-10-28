@@ -13,7 +13,9 @@ import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import type { DataStreamStats } from './use_data_stream_stats';
+import type { FailureStoreStats } from './use_failure_store_stats';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
+import { getFailureStoreIndexName } from '../helpers/failure_store_index_name';
 
 const TIMESTAMP_FIELD = '@timestamp';
 const RANDOM_SAMPLER_PROBABILITY = 0.1;
@@ -46,10 +48,12 @@ export const useIngestionRate = ({
   definition,
   stats,
   timeState,
+  isFailureStore = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  stats?: DataStreamStats;
+  stats?: DataStreamStats | FailureStoreStats;
   timeState: TimeState;
+  isFailureStore?: boolean;
 }) => {
   const {
     core,
@@ -60,15 +64,19 @@ export const useIngestionRate = ({
 
   const ingestionRateFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!stats) {
-        return;
-      }
-
       const intervalData = getIntervalAndType(timeState, core);
       if (!intervalData) {
         return;
       }
+
+      const start = moment(timeState.start);
+      const end = moment(timeState.end);
+
       const { interval, intervalType } = intervalData;
+
+      const indexName = isFailureStore
+        ? getFailureStoreIndexName(definition)
+        : definition.stream.name;
 
       const {
         rawResponse: { aggregations },
@@ -76,14 +84,16 @@ export const useIngestionRate = ({
         data.search.search<
           IKibanaSearchRequest,
           IKibanaSearchResponse<{
-            aggregations: {
-              sampler: { docs_count: { buckets: Array<{ key: number; doc_count: number }> } };
-            };
+            aggregations:
+              | {
+                  sampler: { docs_count: { buckets: Array<{ key: number; doc_count: number }> } };
+                }
+              | undefined;
           }>
         >(
           {
             params: {
-              index: definition.stream.name,
+              index: indexName,
               track_total_hits: false,
               body: {
                 size: 0,
@@ -126,17 +136,21 @@ export const useIngestionRate = ({
         )
       );
 
+      if (!aggregations || aggregations.sampler.docs_count.buckets.length === 0) {
+        return { start, end, interval, buckets: {} };
+      }
+
       return {
-        start: moment(timeState.start),
-        end: moment(timeState.end),
+        start,
+        end,
         interval,
         buckets: aggregations.sampler.docs_count.buckets.map(({ key, doc_count: docCount }) => ({
           key,
-          value: docCount * stats.bytesPerDoc,
+          value: docCount * (stats ? stats.bytesPerDoc : 1),
         })),
       };
     },
-    [definition, stats, timeState, core, data.search]
+    [stats, timeState, core, isFailureStore, definition, data.search]
   );
 
   return {
@@ -152,10 +166,12 @@ export const useIngestionRatePerTier = ({
   definition,
   stats,
   timeState,
+  isFailureStore = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  stats?: DataStreamStats;
+  stats?: DataStreamStats | FailureStoreStats;
   timeState: TimeState;
+  isFailureStore?: boolean;
 }) => {
   const {
     core,
@@ -171,10 +187,6 @@ export const useIngestionRatePerTier = ({
 
   const ingestionRateFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!stats) {
-        return;
-      }
-
       const intervalData = getIntervalAndType(timeState, core);
 
       if (!timeState.start || !timeState.end || !intervalData) {
@@ -186,28 +198,34 @@ export const useIngestionRatePerTier = ({
 
       const { interval, intervalType } = intervalData;
 
+      const indexName = isFailureStore
+        ? getFailureStoreIndexName(definition)
+        : definition.stream.name;
+
       const {
         rawResponse: { aggregations },
       } = await lastValueFrom(
         data.search.search<
           IKibanaSearchRequest,
           IKibanaSearchResponse<{
-            aggregations: {
-              sampler: {
-                docs_count: {
-                  buckets: Array<{
-                    key: number;
-                    doc_count: number;
-                    indices: { buckets: Array<{ key: string; doc_count: number }> };
-                  }>;
-                };
-              };
-            };
+            aggregations:
+              | {
+                  sampler: {
+                    docs_count: {
+                      buckets: Array<{
+                        key: number;
+                        doc_count: number;
+                        indices: { buckets: Array<{ key: string; doc_count: number }> };
+                      }>;
+                    };
+                  };
+                }
+              | undefined;
           }>
         >(
           {
             params: {
-              index: definition.stream.name,
+              index: indexName,
               track_total_hits: false,
               body: {
                 size: 0,
@@ -246,17 +264,17 @@ export const useIngestionRatePerTier = ({
         )
       );
 
-      if (aggregations.sampler.docs_count.buckets.length === 0) {
+      if (!aggregations || aggregations.sampler.docs_count.buckets.length === 0) {
         return { start, end, interval, buckets: {} };
       }
 
-      const ilmExplain = await streamsRepositoryClient.fetch(
-        'GET /internal/streams/{name}/lifecycle/_explain',
-        {
-          params: { path: { name: definition.stream.name } },
-          signal,
-        }
-      );
+      // For failure store, use simplified ILM logic since we can't use streams API with failure store selector
+      const ilmExplain = isFailureStore
+        ? { indices: {} } // Simplified for failure store
+        : await streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_explain', {
+            params: { path: { name: definition.stream.name } },
+            signal,
+          });
 
       const fallbackTier = 'hot';
       const buckets = aggregations.sampler.docs_count.buckets.reduce(
@@ -270,8 +288,9 @@ export const useIngestionRatePerTier = ({
 
           const countByTier = indices.buckets.reduce((tiers, index) => {
             const explain = ilmExplain.indices[index.key];
+            // For failure store, use fallback tier since ILM explain won't exist
             const tier =
-              explain.managed && explain.phase && explain.phase in ilmPhases
+              explain?.managed && explain?.phase && explain.phase in ilmPhases
                 ? (explain.phase as PhaseNameWithoutDelete)
                 : fallbackTier;
             tiers[tier] = (tiers[tier] ?? 0) + index.doc_count;
@@ -280,7 +299,12 @@ export const useIngestionRatePerTier = ({
 
           for (const entry of Object.entries(countByTier)) {
             const tier = entry[0] as PhaseNameWithoutDelete;
-            (acc[tier] = acc[tier] ?? []).push({ key, value: entry[1] * stats.bytesPerDoc });
+            (acc[tier] = acc[tier] ?? []).push({
+              key,
+              value: stats
+                ? entry[1] * (stats && stats.bytesPerDoc > 0 ? stats.bytesPerDoc : 1)
+                : entry[1],
+            });
           }
 
           return acc;
@@ -290,7 +314,16 @@ export const useIngestionRatePerTier = ({
 
       return { start, end, interval, buckets };
     },
-    [definition, stats, timeState, core, data.search, streamsRepositoryClient, ilmPhases]
+    [
+      definition,
+      stats,
+      timeState,
+      core,
+      data.search,
+      streamsRepositoryClient,
+      ilmPhases,
+      isFailureStore,
+    ]
   );
 
   return {

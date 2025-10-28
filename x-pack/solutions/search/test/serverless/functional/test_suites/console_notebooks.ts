@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await pageObjects.svlCommonPage.loginAsViewer();
 
-      await svlSearchNavigation.navigateToGettingStartedPage();
+      await svlSearchNavigation.navigateToElasticsearchHome();
     });
 
     it('has notebooks view available', async () => {

@@ -4,27 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { mount } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { JestContext } from '../../test/context_jest';
 import { PagePreview } from './page_preview';
-import { getRenderedElement as element } from '../../test/selectors';
 
 jest.mock('../../supported_renderers');
 
 describe('<PagePreview />', () => {
   test('null workpad renders nothing', () => {
-    expect(mount(<PagePreview height={100} index={0} />).isEmptyRender());
+    const { container } = render(<PagePreview height={100} index={0} />);
+    expect(container.firstChild).toBeNull();
   });
 
-  const wrapper = mount(
-    <JestContext>
-      <PagePreview height={100} index={0} />
-    </JestContext>
-  );
-
   test('renders as expected', () => {
-    expect(element(wrapper).text()).toEqual('markdown mock');
+    const { container } = render(
+      <JestContext>
+        <PagePreview height={100} index={0} />
+      </JestContext>
+    );
+    expect(container.textContent).toEqual('markdown mock');
   });
 });

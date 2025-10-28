@@ -65,8 +65,6 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
 
     // Enable feature flags by default
     appContextMock.setExperimentalFlag({
-      responseActionsSentinelOneV1Enabled: true,
-      responseActionsSentinelOneGetFileEnabled: true,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
       responseActionsMSDefenderEndpointEnabled: true,
     });
@@ -182,8 +180,8 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
   )('should set `isSupported` to `false` for [%s] if feature flag is disabled', (agentType) => {
     switch (agentType) {
       case 'sentinel_one':
-        appContextMock.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: false });
-        break;
+        // SentinelOne is always enabled now
+        return;
       case 'crowdstrike':
         appContextMock.setExperimentalFlag({
           responseActionsCrowdstrikeManualHostIsolationEnabled: false,

@@ -7,49 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { buildXY } from './xy';
-
-const dataViews: Record<string, DataView> = {
-  test: {
-    id: 'test',
-    fields: {
-      getByName: (name: string) => {
-        switch (name) {
-          case '@timestamp':
-            return {
-              type: 'datetime',
-            } as unknown as DataViewField;
-          case 'category':
-            return {
-              type: 'string',
-            } as unknown as DataViewField;
-          case 'price':
-            return {
-              type: 'number',
-            } as unknown as DataViewField;
-          default:
-            return undefined;
-        }
-      },
-    } as any,
-  } as unknown as DataView,
-};
-
-function mockDataViewsService() {
-  return {
-    get: jest.fn(async (id: '1' | '2') => {
-      const result = {
-        ...dataViews[id],
-        metaFields: [],
-        isPersisted: () => true,
-        toSpec: () => ({}),
-      };
-      return result;
-    }),
-    create: jest.fn(),
-  } as unknown as Pick<DataViewsContract, 'get' | 'create'>;
-}
+import { mockDataViewsService } from './mock_utils';
+import type { XYState } from '@kbn/lens-plugin/public';
 
 test('generates xy chart config', async () => {
   const result = await buildXY(
@@ -75,7 +35,6 @@ test('generates xy chart config', async () => {
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
-      formulaAPI: {} as any,
     }
   );
 
@@ -195,4 +154,105 @@ test('generates xy chart config', async () => {
       "visualizationType": "lnsXY",
     }
   `);
+});
+
+test('it generates xy chart with multiple reference lines', async () => {
+  const result = await buildXY(
+    {
+      chartType: 'xy',
+      title: 'test',
+      dataset: {
+        index: '1',
+        timeFieldName: '@timestamp',
+      },
+      layers: [
+        {
+          type: 'series',
+          seriesType: 'bar',
+          xAxis: {
+            type: 'dateHistogram',
+            field: '@timestamp',
+          },
+          yAxis: [
+            {
+              label: 'test',
+              value: 'count()',
+            },
+          ],
+        },
+        {
+          type: 'reference',
+          yAxis: [
+            {
+              seriesColor: 'red',
+              lineThickness: 2,
+              fill: 'above',
+              value: '123',
+            },
+            {
+              seriesColor: 'blue',
+              lineThickness: 2,
+              fill: 'below',
+              value: '142',
+            },
+          ],
+        },
+        {
+          type: 'reference',
+          yAxis: [
+            {
+              seriesColor: 'yellow',
+              fill: 'none',
+              value: '100',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const xyState = result.state.visualization as XYState;
+
+  expect(xyState.layers).toHaveLength(3);
+
+  const [_, referenceLayer1, referenceLayer2] = xyState.layers;
+
+  expect(referenceLayer1).toEqual({
+    layerId: 'layer_1',
+    layerType: 'referenceLine',
+    accessors: ['metric_formula_accessor1_0', 'metric_formula_accessor1_1'],
+    yConfig: [
+      {
+        axisMode: 'left',
+        color: 'red',
+        fill: 'above',
+        forAccessor: 'metric_formula_accessor1_0',
+        lineWidth: 2,
+      },
+      {
+        axisMode: 'left',
+        color: 'blue',
+        fill: 'below',
+        forAccessor: 'metric_formula_accessor1_1',
+        lineWidth: 2,
+      },
+    ],
+  });
+
+  expect(referenceLayer2).toEqual({
+    layerId: 'layer_2',
+    layerType: 'referenceLine',
+    accessors: ['metric_formula_accessor2_0'],
+    yConfig: [
+      {
+        axisMode: 'left',
+        color: 'yellow',
+        fill: 'none',
+        forAccessor: 'metric_formula_accessor2_0',
+      },
+    ],
+  });
 });

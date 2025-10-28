@@ -21,6 +21,7 @@ import type {
   FieldCapsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
 import type {
   FlattenRecord,
@@ -38,6 +39,8 @@ import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
+import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 
@@ -56,6 +59,7 @@ export interface SimulateProcessingDeps {
   params: ProcessingSimulationParams;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export interface BaseSimulationError {
@@ -140,13 +144,18 @@ export type DetectedField =
   | WithNameAndEsType
   | WithNameAndEsType<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
 
-export type WithNameAndEsType<TObj = {}> = TObj & { name: string; esType?: string };
+export type WithNameAndEsType<TObj = {}> = TObj & {
+  name: string;
+  esType?: string;
+  suggestedType?: string;
+};
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 export const simulateProcessing = async ({
   params,
   scopedClusterClient,
   streamsClient,
+  fieldsMetadataClient,
 }: SimulateProcessingDeps) => {
   /* 0. Retrieve required data to prepare the simulation */
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
@@ -193,12 +202,13 @@ export const simulateProcessing = async ({
     streamFields
   );
 
-  /* 5. Extract valid detected fields asserting existing mapped fields from stream and ancestors */
+  /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
     processorsMetrics,
     params,
     streamFields,
-    streamIndexFieldCaps
+    streamIndexFieldCaps,
+    fieldsMetadataClient
   );
 
   /* 6. Derive general insights and process final response body */
@@ -228,7 +238,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
     traceCustomIdentifiers: true,
   }).processors;
 
-  const formattedProcessors = transpiledIngestPipelineProcessors.map((processor) => {
+  return transpiledIngestPipelineProcessors.map((processor) => {
     const type = Object.keys(processor)[0];
     const processorConfig = (processor as any)[type]; // Safe to use any here due to type structure
 
@@ -251,32 +261,6 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
       },
     };
   });
-
-  const dotExpanderProcessors: Array<Pick<IngestProcessorContainer, 'dot_expander'>> = [
-    {
-      dot_expander: {
-        field: '*',
-        ignore_failure: true,
-        override: true,
-      },
-    },
-    {
-      dot_expander: {
-        path: 'resource.attributes',
-        field: '*',
-        ignore_failure: true,
-      },
-    },
-    {
-      dot_expander: {
-        path: 'attributes',
-        field: '*',
-        ignore_failure: true,
-      },
-    },
-  ];
-
-  return [...dotExpanderProcessors, ...formattedProcessors];
 };
 
 const prepareSimulationData = (
@@ -303,7 +287,8 @@ const preparePipelineSimulationBody = (
 
   return {
     docs,
-    pipeline: { processors },
+    // @ts-expect-error field_access_pattern not supported by typing yet
+    pipeline: { processors, field_access_pattern: 'flexible' },
     verbose: true,
   };
 };
@@ -320,13 +305,14 @@ const prepareIngestSimulationBody = (
   const { docs, processors } = simulationData;
 
   const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
-  const mappings = streamIndex.mappings;
 
   const pipelineSubstitutions: SimulateIngestRequest['pipeline_substitutions'] = {};
 
   if (defaultPipelineName) {
     pipelineSubstitutions[defaultPipelineName] = {
       processors,
+      // @ts-expect-error field_access_pattern not supported by typing yet
+      field_access_pattern: 'flexible',
     };
   }
   if (Streams.WiredStream.Definition.is(stream)) {
@@ -349,13 +335,11 @@ const prepareIngestSimulationBody = (
     // But the ingest simulation API does not validate correctly the mappings unless they are specified in the simulation body.
     // So we need to merge the mappings from the stream index with the detected fields.
     // This is a workaround until the ingest simulation API works as expected.
-    mapping_addition: {
-      ...mappings,
-      properties: {
-        ...(mappings && mappings.properties),
-        ...(detected_fields && computeMappingProperties(detected_fields)),
+    ...(detected_fields && {
+      mapping_addition: {
+        properties: computeMappingProperties(detected_fields),
       },
-    },
+    }),
   };
 
   return simulationBody;
@@ -477,7 +461,12 @@ const computePipelineSimulationResult = (
       ingestDocErrors
     );
 
-    const diff = computeSimulationDocDiff(pipelineDocResult, isWiredStream, forbiddenFields);
+    const diff = computeSimulationDocDiff(
+      sampleDocs[id]._source,
+      pipelineDocResult,
+      isWiredStream,
+      forbiddenFields
+    );
 
     pipelineDocResult.processor_results.forEach((processor) => {
       const procId = processor.tag;
@@ -583,8 +572,7 @@ const getDocumentStatus = (
   if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
     return 'failed';
   }
-  // Remove the always present base processor for dot expanders
-  const processorResults = doc.processor_results.slice(3);
+  const processorResults = doc.processor_results;
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
@@ -608,10 +596,8 @@ const getLastDoc = (
 ) => {
   const status = getDocumentStatus(docResult, ingestDocErrors);
   const lastDocSource =
-    docResult.processor_results
-      .slice(3) // Remove the always present base processors for dot expander
-      .filter((proc) => !isSkippedProcessor(proc))
-      .at(-1)?.doc?._source ?? sample;
+    docResult.processor_results.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ??
+    sample;
 
   if (status === 'parsed') {
     return {
@@ -630,6 +616,7 @@ const getLastDoc = (
  * this function computes the detected fields and the errors for each processor.
  */
 const computeSimulationDocDiff = (
+  base: FlattenRecord,
   docResult: SuccessfulPipelineSimulateDocumentResult,
   isWiredStream: boolean,
   forbiddenFields: string[]
@@ -638,7 +625,7 @@ const computeSimulationDocDiff = (
   const successfulProcessors = docResult.processor_results.filter(isSuccessfulProcessor);
 
   const comparisonDocs = [
-    { processor_id: 'base', value: docResult.processor_results[0]!.doc!._source },
+    { processor_id: 'base', value: base },
     ...successfulProcessors.map((proc) => ({
       processor_id: proc.tag,
       value: omit(proc.doc._source, ['_errors']),
@@ -678,7 +665,7 @@ const computeSimulationDocDiff = (
         diffResult.errors.push({
           processor_id: nextDoc.processor_id,
           type: 'non_namespaced_fields_failure',
-          message: `The fields generated by the processor do not match streams log record fields - put custom fields into attributes, body.structured or resource.attributes: [${nonNamespacedFields.join()}]`,
+          message: `The fields generated by the processor do not match the streams recommended schema - put custom fields into attributes, body.structured or resource.attributes: [${nonNamespacedFields.join()}]`,
         });
       }
     }
@@ -822,7 +809,8 @@ const computeDetectedFields = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
-  streamFieldCaps: FieldCapsResponse['fields']
+  streamFieldCaps: FieldCapsResponse['fields'],
+  fieldsMetadataClient: IFieldsMetadataClient
 ): Promise<DetectedField[]> => {
   const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
 
@@ -835,6 +823,18 @@ const computeDetectedFields = async (
 
   const confirmedValidDetectedFields = computeMappingProperties(params.body.detected_fields ?? []);
 
+  let fieldMetadataMap: Record<string, FieldMetadataPlain>;
+  try {
+    fieldMetadataMap = (
+      await fieldsMetadataClient.find({
+        fieldNames: uniqueFields,
+      })
+    ).toPlain();
+  } catch (error) {
+    // Gracefully handle metadata service failures
+    fieldMetadataMap = {};
+  }
+
   return uniqueFields.map((name) => {
     const existingField = streamFields[name];
     if (existingField) {
@@ -842,10 +842,31 @@ const computeDetectedFields = async (
     }
 
     const existingFieldCaps = Object.keys(streamFieldCaps[name] || {});
-
     const esType = existingFieldCaps.length > 0 ? existingFieldCaps[0] : undefined;
 
-    return { name, type: confirmedValidDetectedFields[name]?.type, esType };
+    let suggestedType: string | undefined;
+    let source: string | undefined;
+    let description: string | undefined;
+
+    const fieldMetadata = fieldMetadataMap[name];
+    if (
+      fieldMetadata &&
+      fieldMetadata.type &&
+      FIELD_DEFINITION_TYPES.includes(fieldMetadata.type as (typeof FIELD_DEFINITION_TYPES)[number])
+    ) {
+      suggestedType = fieldMetadata.type;
+      source = fieldMetadata.source;
+      description = fieldMetadata.description;
+    }
+
+    return {
+      name,
+      type: confirmedValidDetectedFields[name]?.type,
+      esType,
+      suggestedType,
+      source,
+      description,
+    };
   });
 };
 

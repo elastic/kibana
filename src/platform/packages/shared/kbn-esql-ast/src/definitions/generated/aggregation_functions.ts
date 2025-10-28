@@ -45,6 +45,16 @@ const absentDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'boolean',
           optional: false,
         },
@@ -244,6 +254,16 @@ const avgDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
           type: 'double',
           optional: false,
         },
@@ -292,9 +312,19 @@ const countDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'boolean',
+          type: 'aggregate_metric_double',
           optional: true,
           supportsWildcard: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: true,
         },
       ],
       returnType: 'long',
@@ -1054,7 +1084,7 @@ const firstDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'first',
   description: i18n.translate('kbn-esql-ast.esql.definitions.first', {
-    defaultMessage: 'The earliest value of a field.',
+    defaultMessage: 'Calculates the earliest value of a field.',
   }),
   ignoreAsSuggestion: true,
   preview: false,
@@ -1222,7 +1252,7 @@ const lastDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'last',
   description: i18n.translate('kbn-esql-ast.esql.definitions.last', {
-    defaultMessage: 'The latest value of a field.',
+    defaultMessage: 'Calculates the latest value of a field.',
   }),
   ignoreAsSuggestion: true,
   preview: false,
@@ -1395,6 +1425,16 @@ const maxDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
     {
       params: [
         {
@@ -1621,6 +1661,16 @@ const minDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
     {
       params: [
         {
@@ -1913,6 +1963,16 @@ const presentDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
     {
       params: [
         {
@@ -2523,7 +2583,7 @@ const stdDevDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS],
   examples: [
-    'FROM employees\n| STATS STD_DEV(height)',
+    'FROM employees\n| STATS std_dev_height = STD_DEV(height)',
     'FROM employees\n| STATS stddev_salary_change = STD_DEV(MV_MAX(salary_change))',
   ],
 };
@@ -2538,6 +2598,16 @@ const sumDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
     {
       params: [
         {

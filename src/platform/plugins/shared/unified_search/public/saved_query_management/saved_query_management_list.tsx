@@ -663,7 +663,7 @@ const savedQueryListStyles = {
     css({
       // Addition height will ensure one item is "cutoff" to indicate more below the scroll
       maxHeight: `${euiTheme.base * 26}px `,
-      'overflow-y': 'hidden',
+      overflowY: 'hidden',
     }),
   listWrapperInner: css({
     position: 'relative',

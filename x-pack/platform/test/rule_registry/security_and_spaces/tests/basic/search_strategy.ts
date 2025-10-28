@@ -10,7 +10,7 @@ import { ALERT_RULE_TYPE_ID, ALERT_START } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { Client } from '@elastic/elasticsearch';
-import { ObjectRemover } from '../../../../alerting_api_integration/common/lib';
+import { deleteRuleById } from '../../../../alerting_api_integration/common/lib/rules';
 import { getAlwaysFiringInternalRule } from '../../../../alerting_api_integration/common/lib/alert_utils';
 import { getEventLog } from '../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -1016,7 +1016,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('internal rule types', () => {
       const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
-      const objectRemover = new ObjectRemover(supertest);
       const rulePayload = getAlwaysFiringInternalRule();
       let ruleId: string;
 
@@ -1032,12 +1031,11 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         ruleId = createdRule1.id;
-        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
       });
 
       afterEach(async () => {
         await deleteAllAlertsFromIndex(alertAsDataIndex, es);
-        await objectRemover.removeAll();
+        await deleteRuleById(es, ruleId);
       });
 
       it('should not return alerts from internal rule types', async () => {

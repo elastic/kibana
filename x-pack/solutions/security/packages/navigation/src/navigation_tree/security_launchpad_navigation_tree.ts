@@ -9,17 +9,19 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
+import { i18nStrings } from '../i18n_strings';
 
 export interface LaunchpadNavigationTreeOptions {
   hasAiValueAccess?: boolean;
+  sideNavVersion?: 'v1' | 'v2';
 }
 
 export const createLaunchpadNavigationTree = (
   options: LaunchpadNavigationTreeOptions = {}
 ): NodeDefinition => {
-  const { hasAiValueAccess = false } = options;
+  const { hasAiValueAccess = false, sideNavVersion = 'v1' } = options;
 
-  const children = [
+  const children: NodeDefinition['children'] = [
     {
       id: SecurityPageName.landing,
       link: securityLink(SecurityPageName.landing),
@@ -43,15 +45,22 @@ export const createLaunchpadNavigationTree = (
       link: securityLink(SecurityPageName.landing),
       renderAs: 'item',
       icon: 'launch',
+      iconV2: 'launch',
+      sideNavVersion: 'v1',
     };
   }
 
   // If user has AI Value access, return the full panel opener
   return {
     id: SecurityGroupName.launchpad,
-    title: SecurityLinkGroup[SecurityGroupName.launchpad].title,
+    title:
+      sideNavVersion === 'v2'
+        ? i18nStrings.launchPad.title
+        : SecurityLinkGroup[SecurityGroupName.launchpad].title,
     renderAs: 'panelOpener',
     icon: 'launch',
-    children,
+    iconV2: 'launch',
+    sideNavVersion,
+    children: [{ children }],
   };
 };

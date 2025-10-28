@@ -19,7 +19,7 @@ const TEST_SUBJ_EVENT_COUNT = 'label-node-tooltip-event-count';
 
 describe('LabelNodeTooltipContent', () => {
   test('renders nothing with no events or alerts', () => {
-    const analysis = analyzeDocuments({ eventsCount: 0, alertsCount: 0 });
+    const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 0 });
 
     const { container } = render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -28,7 +28,7 @@ describe('LabelNodeTooltipContent', () => {
   });
 
   test('renders with a single event', () => {
-    const analysis = analyzeDocuments({ eventsCount: 1, alertsCount: 0 });
+    const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -39,7 +39,7 @@ describe('LabelNodeTooltipContent', () => {
   });
 
   test('renders with a single alert', () => {
-    const analysis = analyzeDocuments({ eventsCount: 0, alertsCount: 1 });
+    const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 1 });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -52,8 +52,8 @@ describe('LabelNodeTooltipContent', () => {
   });
 
   test('renders with multiple events', () => {
-    const eventsCount = 120;
-    const analysis = analyzeDocuments({ eventsCount, alertsCount: 0 });
+    const uniqueEventsCount = 120;
+    const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount: 0 });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -61,12 +61,14 @@ describe('LabelNodeTooltipContent', () => {
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_SECTION)).not.toBeInTheDocument();
 
     // Check that the event count badge is rendered for multiple events
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventsCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(
+      uniqueEventsCount.toString()
+    );
   });
 
   test('renders with multiple alerts', () => {
-    const alertsCount = 120;
-    const analysis = analyzeDocuments({ eventsCount: 0, alertsCount });
+    const uniqueAlertsCount = 120;
+    const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -75,13 +77,15 @@ describe('LabelNodeTooltipContent', () => {
 
     // Check that the alert icon and count are both present for multiple alerts
     expect(screen.getByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertsCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(
+      uniqueAlertsCount.toString()
+    );
   });
 
   test('renders with multiple events and alerts', () => {
-    const eventsCount = 120;
-    const alertsCount = 120;
-    const analysis = analyzeDocuments({ eventsCount, alertsCount });
+    const uniqueEventsCount = 120;
+    const uniqueAlertsCount = 120;
+    const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -90,16 +94,20 @@ describe('LabelNodeTooltipContent', () => {
 
     // Check that the alert icon and count are both present for multiple alerts
     expect(screen.getByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertsCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(
+      uniqueAlertsCount.toString()
+    );
 
     // Check that the event count is present for multiple events
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventsCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(
+      uniqueEventsCount.toString()
+    );
   });
 
   test('renders abbreviated counters with very large number of events and alerts', () => {
-    const eventsCount = 1_200_000;
-    const alertsCount = 1_200_000;
-    const analysis = analyzeDocuments({ eventsCount, alertsCount });
+    const uniqueEventsCount = 1_200_000;
+    const uniqueAlertsCount = 1_200_000;
+    const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 

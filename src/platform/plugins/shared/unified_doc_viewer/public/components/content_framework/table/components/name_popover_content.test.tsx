@@ -11,15 +11,25 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { NamePopoverContent } from './name_popover_content';
 
+jest.mock('@kbn/field-utils/src/components/field_icon', () => ({
+  FieldIcon: ({}: { type: string; size: string }) => <span data-test-subj="fieldIcon" />,
+}));
+
 describe('NamePopoverContent', () => {
   it('renders the field name', () => {
     render(
       <NamePopoverContent
         fieldName="myField"
-        fieldConfig={{ name: 'myField', value: 'val', description: 'desc' }}
+        fieldConfig={{
+          name: 'myField',
+          value: 'val',
+          description: 'desc',
+          valueCellContent: () => <span>value cell content</span>,
+        }}
         cellActions={null}
       />
     );
+    expect(screen.getByText('myField')).toBeInTheDocument();
     expect(screen.getByText('myField')).toBeInTheDocument();
   });
 
@@ -27,7 +37,12 @@ describe('NamePopoverContent', () => {
     render(
       <NamePopoverContent
         fieldName="fieldA"
-        fieldConfig={{ name: 'fieldA', value: 'val', description: 'A description' }}
+        fieldConfig={{
+          name: 'fieldA',
+          value: 'val',
+          description: 'A description',
+          valueCellContent: () => <span>value cell content</span>,
+        }}
         cellActions={null}
       />
     );
@@ -38,7 +53,11 @@ describe('NamePopoverContent', () => {
     render(
       <NamePopoverContent
         fieldName="fieldB"
-        fieldConfig={{ name: 'fieldB', value: 'val' }}
+        fieldConfig={{
+          name: 'fieldB',
+          value: 'val',
+          valueCellContent: () => <span>value cell content</span>,
+        }}
         cellActions={null}
       />
     );
@@ -49,10 +68,49 @@ describe('NamePopoverContent', () => {
     render(
       <NamePopoverContent
         fieldName="fieldC"
-        fieldConfig={{ name: 'fieldC', value: 'val', description: 'desc' }}
+        fieldConfig={{
+          name: 'fieldC',
+          value: 'val',
+          description: 'desc',
+          valueCellContent: () => <span>value cell content</span>,
+        }}
         cellActions={<button>ActionBtn</button>}
       />
     );
     expect(screen.getByText('ActionBtn')).toBeInTheDocument();
+  });
+
+  it('renders FieldIcon when fieldConfig.type is provided', () => {
+    render(
+      <NamePopoverContent
+        fieldName="myField"
+        fieldConfig={{
+          name: 'name',
+          value: 'value',
+          type: 'keyword',
+          description: 'desc',
+          valueCellContent: () => <span>value cell content</span>,
+        }}
+        cellActions={null}
+      />
+    );
+    const icon = screen.getByTestId('fieldIcon');
+    expect(icon).toBeInTheDocument();
+  });
+
+  it('does not render FieldIcon when fieldConfig.type is not provided', () => {
+    render(
+      <NamePopoverContent
+        fieldName="myField"
+        fieldConfig={{
+          name: 'name',
+          value: 'value',
+          description: 'desc',
+          valueCellContent: () => <span>value cell content</span>,
+        }}
+        cellActions={null}
+      />
+    );
+    expect(screen.queryByTestId('fieldIcon')).toBeNull();
   });
 });

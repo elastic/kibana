@@ -12,6 +12,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseConfig.getAll(),
+    junit: {
+      reportName: 'Serverless Search Functional Tests - v2 Solution Navigation',
+    },
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [

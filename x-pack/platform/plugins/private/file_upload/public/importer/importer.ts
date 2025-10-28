@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { chunk, intersection } from 'lodash';
-import moment from 'moment';
+import { chunk, cloneDeep, intersection } from 'lodash';
 import type {
   IndicesIndexSettings,
   IngestDeletePipelineResponse,
@@ -15,16 +14,17 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type {
-  MessageReader,
-  TikaReader,
-  NdjsonReader,
-  ImportDoc,
-  ImportFailure,
-  ImportResponse,
-  IngestPipeline,
-  IngestPipelineWrapper,
-  ImportResults,
+import {
+  type MessageReader,
+  type TikaReader,
+  type NdjsonReader,
+  type ImportDoc,
+  type ImportFailure,
+  type ImportResponse,
+  type IngestPipeline,
+  type IngestPipelineWrapper,
+  type ImportResults,
+  updatePipelineTimezone,
 } from '@kbn/file-upload-common';
 import { getHttp } from '../kibana_services';
 
@@ -259,7 +259,9 @@ export abstract class Importer implements IImporter {
     ingestPipeline: IngestPipeline,
     limit = 20
   ): Promise<IngestSimulateResponse> {
-    await this.read(data);
+    this.read(data);
+    const pipeline = cloneDeep(ingestPipeline);
+    updatePipelineTimezone(pipeline);
 
     return await getHttp().fetch<IngestSimulateResponse>({
       path: `/internal/file_upload/preview_docs`,
@@ -268,7 +270,7 @@ export abstract class Importer implements IImporter {
       body: JSON.stringify({
         // first doc is the header
         docs: this._docArray.slice(1, limit + 1),
-        pipeline: ingestPipeline,
+        pipeline,
       }),
     });
   }
@@ -288,25 +290,6 @@ function populateFailures(
       failure.item = failure.item + chunkSize * chunkCount;
     }
     failures.push(...error.failures);
-  }
-}
-
-// The file structure endpoint sets the timezone to be {{ event.timezone }}
-// as that's the variable Filebeat would send the client timezone in.
-// In this data import function the UI is effectively performing the role of Filebeat,
-// i.e. doing basic parsing, processing and conversion to JSON before forwarding to the ingest pipeline.
-// But it's not sending every single field that Filebeat would add, so the ingest pipeline
-// cannot look for a event.timezone variable in each input record.
-// Therefore we need to replace {{ event.timezone }} with the actual browser timezone
-function updatePipelineTimezone(ingestPipeline: IngestPipeline) {
-  if (ingestPipeline !== undefined && ingestPipeline.processors && ingestPipeline.processors) {
-    const dateProcessor = ingestPipeline.processors.find(
-      (p: any) => p.date !== undefined && p.date.timezone === '{{ event.timezone }}'
-    );
-
-    if (dateProcessor) {
-      dateProcessor.date.timezone = moment.tz.guess();
-    }
   }
 }
 

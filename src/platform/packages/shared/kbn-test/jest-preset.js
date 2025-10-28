@@ -10,8 +10,22 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const ciStatsJestReporter = [
+  '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/ci_stats_jest_reporter.ts',
+  {
+    testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
+  },
+];
+
+const scoutReporter = [
+  '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
+  { name: 'Jest tests (unit)', configCategory: 'unit-test' },
+];
+
 /** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
+  retryTimes: process.env.CI ? 3 : 0,
+
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
@@ -37,29 +51,20 @@ module.exports = {
   reporters: [
     'default',
     [
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/slow_test_reporter.js',
+      {
+        warnOnSlowerThan: 300,
+        color: true,
+      },
+    ],
+    [
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/junit_reporter',
       {
         rootDirectory: '.',
       },
     ],
-    ...(process.env.TEST_GROUP_TYPE_UNIT
-      ? [
-          [
-            '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/ci_stats_jest_reporter.ts',
-            {
-              testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
-            },
-          ],
-        ]
-      : []),
-    ...(['1', 'yes', 'true'].includes(process.env.SCOUT_REPORTER_ENABLED)
-      ? [
-          [
-            '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
-            { name: 'Jest tests (unit)', configCategory: 'unit-test' },
-          ],
-        ]
-      : []),
+    ...(process.env.TEST_GROUP_TYPE_UNIT ? [ciStatsJestReporter] : []),
+    ...(['1', 'yes', 'true'].includes(process.env.SCOUT_REPORTER_ENABLED) ? [scoutReporter] : []),
   ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test

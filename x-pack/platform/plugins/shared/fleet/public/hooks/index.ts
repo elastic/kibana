@@ -36,3 +36,4 @@ export * from './use_fleet_server_agents';
 export * from './use_multiple_agent_policies';
 export * from './use_tour_manager';
 export * from './use_dismissable_tour';
+export * from './use_agentless_resources';

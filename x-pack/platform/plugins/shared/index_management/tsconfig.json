@@ -61,6 +61,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/streams-app-plugin",
     "@kbn/licensing-types",
+    "@kbn/reindex-service-plugin",
+    "@kbn/upgrade-assistant-pkg-common",
   ],
   "exclude": ["target/**/*"]
 }

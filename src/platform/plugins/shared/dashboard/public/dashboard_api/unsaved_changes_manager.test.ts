@@ -137,7 +137,7 @@ describe('unsavedChangesManager', () => {
             Object {
               "panels": Array [
                 Object {
-                  "panelConfig": Object {
+                  "config": Object {
                     "title": "New panel",
                   },
                   "type": "testType",
@@ -160,7 +160,7 @@ describe('unsavedChangesManager', () => {
           panels: [
             {
               type: 'testType',
-              panelConfig: {
+              config: {
                 title: 'New panel',
               },
             } as unknown as DashboardPanel,

@@ -115,11 +115,6 @@ printf "%s\n" "${results[@]}"
 echo ""
 
 # Scout reporter
-echo "--- Upload Scout reporter events to AppEx QA's team cluster"
-if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
-  node scripts/scout upload-events --dontFailOnError
-else
-  echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
-fi
+source .buildkite/scripts/steps/test/scout_upload_report_events.sh
 
 exit $exitCode

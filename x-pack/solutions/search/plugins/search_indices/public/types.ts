@@ -23,6 +23,7 @@ import type {
 import type { SampleDataIngestPluginStart } from '@kbn/sample-data-ingest/public';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { AvailableLanguages } from './code_examples';
 
 export interface SearchIndicesPluginSetup {
@@ -51,6 +52,7 @@ export interface SearchIndicesAppPluginStartDependencies {
   cloud?: CloudStart;
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
+  licensing: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
   sampleDataIngest?: SampleDataIngestPluginStart;
   indexManagement: IndexManagementPluginStart;

@@ -5,8 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX, AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { enableActionSecrets } from '../../helpers';
+import { checkBulkAgentAction } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -192,6 +194,19 @@ export default function (providerContext: FtrProviderContext) {
       await es.index({
         refresh: 'wait_for',
         index: AGENTS_INDEX,
+        id: 'agent3_91',
+        document: {
+          policy_id: policy3.id,
+          enrolled_at: new Date().toISOString(),
+          agent: {
+            version: '9.1.0',
+          },
+        },
+      });
+
+      await es.index({
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
         id: 'agent4',
         document: {
           policy_id: policy1.id,
@@ -216,6 +231,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /agents/{agentId}/migrate', () => {
       it('should return a 200 if the migration action is successful', async () => {
+        await enableActionSecrets(providerContext);
         const {} = await supertest
           .post(`/api/fleet/agents/agent1/migrate`)
           .set('kbn-xsrf', 'xx')
@@ -224,6 +240,30 @@ export default function (providerContext: FtrProviderContext) {
             uri: 'https://example.com',
           })
           .expect(200);
+
+        const actionsRes = await es.search({
+          index: AGENT_ACTIONS_INDEX,
+          sort: [{ '@timestamp': { order: 'desc' as const } }],
+        });
+        const action: any = actionsRes.hits.hits[0]._source;
+        // Check type.
+        expect(action.type).to.eql('MIGRATE');
+        expect(action.data.enrollment_token).to.match(/^\$co\.elastic\.secret{.+}$/);
+        // Check secret references.
+        expect(Object.keys(action)).to.contain('secret_references');
+        expect(action.secret_references).to.have.length(1);
+        expect(Object.keys(action.secret_references[0])).to.eql(['id']);
+        expect(action.secret_references[0].id).to.be.a('string');
+        // Check that secrets is not stored in the action.
+        expect(Object.keys(action)).to.not.contain(['secrets']);
+
+        const secretRes = await es.get({
+          index: '.fleet-secrets',
+          id: action.secret_references[0].id,
+        });
+        expect(secretRes._source).to.eql({
+          value: '1234',
+        });
       });
 
       it('should return a 403 if the agent is tamper protected', async () => {
@@ -248,6 +288,17 @@ export default function (providerContext: FtrProviderContext) {
           .expect(403);
       });
 
+      it('should return a 400 if the agent is an unsupported version', async () => {
+        const {} = await supertest
+          .post(`/api/fleet/agents/agent3_91/migrate`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            enrollment_token: '1234',
+            uri: 'https://example.com',
+          })
+          .expect(400);
+      });
+
       it('should return a 404 when agent does not exist', async () => {
         await supertest
           .post(`/api/fleet/agents/agent100/migrate`)
@@ -263,6 +314,7 @@ export default function (providerContext: FtrProviderContext) {
     // Bulk migrate agents
     describe('POST /agents/bulk_migrate', () => {
       it('should return a 200 if the migration action is successful', async () => {
+        await enableActionSecrets(providerContext);
         const {} = await supertest
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
@@ -272,6 +324,22 @@ export default function (providerContext: FtrProviderContext) {
             enrollment_token: '1234',
           })
           .expect(200);
+
+        const actionsRes = await es.search({
+          index: AGENT_ACTIONS_INDEX,
+          sort: [{ '@timestamp': { order: 'desc' as const } }],
+        });
+        const action: any = actionsRes.hits.hits[0]._source;
+        // Check type.
+        expect(action.type).to.eql('MIGRATE');
+        expect(action.data.enrollment_token).to.match(/^\$co\.elastic\.secret{.+}$/);
+        // Check secret references.
+        expect(Object.keys(action)).to.contain('secret_references');
+        expect(action.secret_references).to.have.length(1);
+        expect(Object.keys(action.secret_references[0])).to.eql(['id']);
+        expect(action.secret_references[0].id).to.be.a('string');
+        // Check that secrets is not stored in the action.
+        expect(Object.keys(action)).to.not.contain(['secrets']);
       });
 
       it('should return a 200 if any agent is tamper protected', async () => {
@@ -352,27 +420,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const actionId = body.actionId;
-
-        await new Promise((resolve, reject) => {
-          let attempts = 0;
-          const intervalId = setInterval(async () => {
-            if (attempts > 5) {
-              clearInterval(intervalId);
-              reject(new Error('action timed out'));
-            }
-            ++attempts;
-            const {
-              body: { items: actionStatuses },
-            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
-            const action = actionStatuses?.find((a: any) => a.actionId === actionId);
-            if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
-              clearInterval(intervalId);
-              resolve({});
-            }
-          }, 3000);
-        }).catch((e) => {
-          throw e;
-        });
+        await checkBulkAgentAction(supertest, actionId);
       });
     });
   });

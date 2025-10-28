@@ -5,25 +5,51 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React from 'react';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
+import kbnRison from '@kbn/rison';
+import React, { useMemo } from 'react';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
-import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
+import { ExternalLinkDisplayText } from './external_link_display_text';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
-  const { http } = useKibana().services;
   const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
+
+  const {
+    share: {
+      url: { locators },
+    },
+  } = useKibana().services;
+
+  const managementLocator = locators.get(MANAGEMENT_APP_LOCATOR);
+
+  const getUrl = (transformId: string) => {
+    return (
+      managementLocator?.getRedirectUrl({
+        sectionId: 'data',
+        appId: `transform?_a=${kbnRison.encode({
+          transform: {
+            queryText: transformId,
+          },
+        })}`,
+      }) || ''
+    );
+  };
+
+  const rollupTransformId = useMemo(
+    () => getSLOTransformId(slo.id, slo.revision),
+    [slo.id, slo.revision]
+  );
+
+  const summaryTransformId = useMemo(
+    () => getSLOSummaryTransformId(slo.id, slo.revision),
+    [slo.id, slo.revision]
+  );
 
   if (isLoading || isError || data === undefined || data?.length !== 1) {
     return null;
@@ -35,6 +61,9 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   }
 
   const count = health.rollup === 'unhealthy' && health.summary === 'unhealthy' ? 2 : 1;
+
+  const rollupUrl = getUrl(rollupTransformId);
+  const summaryUrl = getUrl(summaryTransformId);
 
   return (
     <EuiCallOut
@@ -49,63 +78,17 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
           <FormattedMessage
             id="xpack.slo.sloDetails.healthCallout.description"
             defaultMessage="The following {count, plural, one {transform is} other {transforms are}
-          } in an unhealthy state:"
+          } in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, it {one} other {each one}} here:"
             values={{ count }}
           />
           <ul>
-            {health.rollup === 'unhealthy' && (
-              <li>
-                {getSLOTransformId(slo.id, slo.revision)}
-                <EuiCopy textToCopy={getSLOTransformId(slo.id, slo.revision)}>
-                  {(copy) => (
-                    <EuiButtonIcon
-                      data-test-subj="sloSloHealthCalloutCopyButton"
-                      aria-label={i18n.translate(
-                        'xpack.slo.sloDetails.healthCallout.copyToClipboard',
-                        { defaultMessage: 'Copy to clipboard' }
-                      )}
-                      color="text"
-                      iconType="copy"
-                      onClick={copy}
-                    />
-                  )}
-                </EuiCopy>
-              </li>
+            {health.rollup === 'unhealthy' && !!rollupUrl && (
+              <ExternalLinkDisplayText content={rollupTransformId} textSize="s" url={rollupUrl} />
             )}
-            {health.summary === 'unhealthy' && (
-              <li>
-                {getSLOSummaryTransformId(slo.id, slo.revision)}
-                <EuiCopy textToCopy={getSLOSummaryTransformId(slo.id, slo.revision)}>
-                  {(copy) => (
-                    <EuiButtonIcon
-                      data-test-subj="sloSloHealthCalloutCopyButton"
-                      aria-label={i18n.translate(
-                        'xpack.slo.sloDetails.healthCallout.copyToClipboard',
-                        { defaultMessage: 'Copy to clipboard' }
-                      )}
-                      color="text"
-                      iconType="copy"
-                      onClick={copy}
-                    />
-                  )}
-                </EuiCopy>
-              </li>
+            {health.summary === 'unhealthy' && !!summaryUrl && (
+              <ExternalLinkDisplayText content={summaryTransformId} textSize="s" url={summaryUrl} />
             )}
           </ul>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="sloSloHealthCalloutInspectTransformButton"
-            color="danger"
-            fill
-            href={http?.basePath.prepend('/app/management/data/transform')}
-          >
-            <FormattedMessage
-              id="xpack.slo.sloDetails.healthCallout.buttonTransformLabel"
-              defaultMessage="Inspect transform"
-            />
-          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCallOut>

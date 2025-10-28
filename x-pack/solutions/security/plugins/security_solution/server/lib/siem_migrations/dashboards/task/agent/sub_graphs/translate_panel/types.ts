@@ -36,3 +36,8 @@ export interface ValidationErrors {
   retries_left: number;
   esql_errors?: string;
 }
+
+export interface EsqlColumn {
+  name: string;
+  type: string;
+}

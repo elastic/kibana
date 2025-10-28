@@ -40,7 +40,6 @@ The default empty state uses any `pageHeader` info provided to populate an [**Eu
   render blank. Make sure your empty state doesn't leave the user confused.
 </DocCallOut>
 
-
 ### Custom empty state
 
 You can also provide a custom empty prompt to replace the pre-built one. You'll want to remove any `pageHeader` props and pass an [`EuiEmptyPrompt`](https://elastic.github.io/eui/#/display/empty-prompt) directly as the child of KibanaPageTemplate.
@@ -126,18 +125,39 @@ This is a built-in configuration that displays a very specific UI and requires v
 
 The `noDataConfig` is of type [`NoDataPageProps`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts):
 
-1. `solution: string`: Single name for the current solution, used to auto-generate the title, logo, and description *(required)*
-2. `docsLink: string`: Required to set the docs link for the whole solution *(required)*
-3. `logo?: string`: Optionally replace the auto-generated logo
-4. `pageTitle?: string`: Optionally replace the auto-generated page title (h1)
-5. `action: Record<string, NoDataPageActions>`: An object of `NoDataPageActions` configurations with a unique primary key *(required)*
+1. `action: Record<string, NoDataPageActions>`: An object of `NoDataPageActions` configurations with a unique primary key _(required)_
 
 ### `NoDataPageActions`
 
+Each action configuration is of type [`NoDataCardProps`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts) and supports the following properties:
+
+**Required:**
+
+- No required properties - all are optional with sensible defaults
+
+**Optional:**
+
+- `title?: string`: Custom title for the card (defaults to "Add Data to get started")
+- `description?: React.ReactNode`: Custom description for the card
+- `buttonText?: string`: Custom label for the action button (defaults to "Browse integrations")
+- `href?: string`: Custom URL for the button (defaults to integrations browse page)
+- `onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void`: Custom click handler
+- `canAccessFleet?: boolean`: Whether user has Fleet access - affects button visibility and content
+- `disabledButtonTooltipText?: string`: Optional custom tooltip text for the disabled action button
+- `docsLink?: string`: Custom documentation link
+- `icon?: EuiEmptyPromptProps['icon']`: Custom icon for the card
+- `data-test-subj?: string`: Custom test subject for testing
+
+#### Main Action: Elastic Agent
+
 There is a main action for adding data that we promote throughout Kibana - Elastic Agent. It is added to the card by using the key `elasticAgent`. For consistent messaging, this card is pre-configured but requires specific `href`s and/or `onClick` handlers for directing the user to the right location for that solution.
 
-Optionally you can also replace the `button` label by passing a string, or the whole component by passing a `ReactNode`.
+#### Permission-based Behavior
 
+The component automatically adapts based on user permissions:
+
+- **With Fleet access (`canAccessFleet: true`)**: Shows the full "Add Data" experience with action buttons
+- **Without Fleet access (`canAccessFleet: false`)**: Shows "Contact your administrator" message with disabled actions
 
 ```tsx
 // Perform your own check
@@ -145,12 +165,28 @@ const hasData = checkForData();
 
 // No data configuration
 const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-  solution: 'Analytics',
-  logo: 'logoKibana',
-  docsLink: '#',
+  pageTitle: 'Custom page title',
+  pageDescription: 'Custom page description',
   action: {
     elasticAgent: {
-      href: '#',
+      href: '/app/integrations/browse/elastic_agent', // Solution-specific URL
+      title: 'Add Observability data', // Custom card title
+      description:
+        'Use Elastic Agent to collect logs, metrics, and traces from your infrastructure.',
+      buttonText: 'Add data', // Custom button text
+      onClick: (e) => {
+        // Custom click handling
+        trackAnalyticsEvent('no_data_add_clicked');
+      },
+      docsLink: 'https://www.elastic.co/guide/en/observability/current/add-observability-data.html',
+    },
+    // You can add additional custom actions
+    customAction: {
+      title: 'Import existing data',
+      description: 'Already have data? Import it directly.',
+      buttonText: 'Import data',
+      href: '/app/management/data/import',
+      icon: 'importAction',
     },
   },
 };
@@ -162,7 +198,7 @@ const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
   noDataConfig={hasData ? undefined : noDataConfig}
 >
   {/* Children will be ignored */}
-</KibanaPageTemplate>
+</KibanaPageTemplate>;
 ```
 
 ![Screenshot of and example in Observability using the no data configuration and using the corresponding list numbers to point out the UI elements that they adjust.](https://raw.githubusercontent.com/elastic/kibana/main/dev_docs/assets/kibana_template_no_data_config.png)

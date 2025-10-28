@@ -26,7 +26,6 @@ import type {
   EnterpriseSearchContentApp,
   EnterpriseSearchApplicationsApp,
   EnterpriseSearchAnalyticsApp,
-  ServerlessSearchApp,
   DeepLinkId as SearchLink,
 } from '@kbn/deeplinks-search';
 import type {
@@ -55,7 +54,6 @@ export type AppId =
   | EnterpriseSearchContentApp
   | EnterpriseSearchApplicationsApp
   | EnterpriseSearchAnalyticsApp
-  | ServerlessSearchApp
   | ObservabilityApp
   | SecurityApp
   | FleetApp

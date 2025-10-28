@@ -9,8 +9,8 @@
 export { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 
 // Attack Discovery
-export { postAttackDiscoveryRoute } from './attack_discovery/post/internal/post_attack_discovery';
-export { findAttackDiscoveriesRoute } from './attack_discovery/get/internal/find_attack_discoveries';
+export { findAttackDiscoveriesRoute } from './attack_discovery/public/get/find_attack_discoveries';
+export { getAttackDiscoveryGenerationsRoute } from './attack_discovery/public/get/get_attack_discovery_generations';
 
 // Defend insights
 export { postDefendInsightsRoute } from './defend_insights/post_defend_insights';

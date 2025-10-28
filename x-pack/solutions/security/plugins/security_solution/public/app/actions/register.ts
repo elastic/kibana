@@ -157,4 +157,9 @@ const registerCellActions = (
   ]);
 
   registerCellActionsTrigger(SecurityCellActionsTrigger.ALERTS_COUNT, ['investigateInNewTimeline']);
+
+  registerCellActionsTrigger(SecurityCellActionsTrigger.CASE_EVENTS, [
+    'addToTimeline',
+    'copyToClipboard',
+  ]);
 };

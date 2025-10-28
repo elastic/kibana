@@ -10,11 +10,11 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
-import { SignificantEventsViewEmptyState } from './empty_state';
+import { NoSignificantEventsEmptyState } from './empty_state';
 
 const stories: Meta<{}> = {
   title: 'Streams/SignificantEventsViewEmptyState',
-  component: SignificantEventsViewEmptyState,
+  component: NoSignificantEventsEmptyState,
 };
 
 export default stories;
@@ -29,7 +29,13 @@ export const Create: StoryFn<{}> = () => {
         `
       )}
     >
-      <SignificantEventsViewEmptyState onAddClick={() => {}} />
+      <NoSignificantEventsEmptyState
+        onGenerateSuggestionsClick={() => {}}
+        onManualEntryClick={() => {}}
+        onSystemsChange={() => {}}
+        selectedSystems={[]}
+        systems={[]}
+      />
     </EuiPanel>
   );
 };

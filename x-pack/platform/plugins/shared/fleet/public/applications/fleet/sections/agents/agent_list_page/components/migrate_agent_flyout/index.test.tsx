@@ -36,7 +36,7 @@ describe('MigrateAgentFlyout', () => {
           },
         ]}
         agentCount={1}
-        protectedAndFleetAgents={[]}
+        unsupportedMigrateAgents={[]}
       />
     );
   });
@@ -66,11 +66,11 @@ describe('MigrateAgentFlyout', () => {
     expect(submitButton).not.toBeDisabled();
   });
 
-  it('replace token button should be visible when there is one agent', () => {
-    const replaceTokenButton = component.getByTestId('migrateAgentFlyoutReplaceTokenButton');
-    expect(replaceTokenButton).toBeInTheDocument();
+  it('replace token field should be visible when there is one agent', () => {
+    const replaceTokenInput = component.getByTestId('migrateAgentFlyoutReplaceTokenInput');
+    expect(replaceTokenInput).toBeInTheDocument();
   });
-  it('replace token button should not be visible when there is more than one agent', () => {
+  it('replace token field should not be visible when there is more than one agent', () => {
     component.rerender(
       <AgentMigrateFlyout
         onClose={jest.fn()}
@@ -96,11 +96,11 @@ describe('MigrateAgentFlyout', () => {
           },
         ]}
         agentCount={2}
-        protectedAndFleetAgents={[]}
+        unsupportedMigrateAgents={[]}
       />
     );
-    const replaceTokenButton = component.queryByTestId('migrateAgentFlyoutReplaceTokenButton');
-    expect(replaceTokenButton).not.toBeInTheDocument();
+    const replaceTokenInput = component.queryByTestId('migrateAgentFlyoutReplaceTokenInput');
+    expect(replaceTokenInput).not.toBeInTheDocument();
   });
   it('alert panel should be visible and show protected and or fleet-server agents when there are any', () => {
     component.rerender(
@@ -119,7 +119,7 @@ describe('MigrateAgentFlyout', () => {
           },
         ]}
         agentCount={1}
-        protectedAndFleetAgents={[
+        unsupportedMigrateAgents={[
           {
             active: true,
             status: 'online',

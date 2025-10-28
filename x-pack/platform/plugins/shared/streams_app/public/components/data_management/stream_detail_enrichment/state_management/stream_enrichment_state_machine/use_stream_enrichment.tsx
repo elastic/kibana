@@ -60,6 +60,10 @@ export const useStreamEnrichmentEvents = () => {
         service.send({ type: 'step.addCondition', step, options });
       },
 
+      reorderStep: (stepId: string, direction: 'up' | 'down') => {
+        service.send({ type: 'step.reorder', stepId, direction });
+      },
+
       resetChanges: () => {
         service.send({ type: 'stream.reset' });
       },

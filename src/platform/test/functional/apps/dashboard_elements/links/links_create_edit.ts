@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can not add an external link that violates externalLinks.policy', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
 
         await dashboardLinks.setExternalUrlInput('https://danger.example.com');
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can create a new by-reference links panel', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
 
         await createSomeLinks();
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('does not close the flyout when the user cancels the save as modal', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
         await createSomeLinks();
         await dashboardLinks.toggleSaveByReference(true);
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('by-value links panel', () => {
         it('can create a new by-value links panel', async () => {
-          await dashboardAddPanel.clickEditorMenuButton();
+          await dashboardAddPanel.openAddPanelFlyout();
           await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');
           await dashboardLinks.setLayout('horizontal');
           await createSomeLinks();

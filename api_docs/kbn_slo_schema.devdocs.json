@@ -1044,7 +1044,7 @@
         "label": "FetchSLOHealthResponse",
         "description": [],
         "signature": [
-          "{ sloId: string; sloInstanceId: string; sloRevision: number; state: \"running\" | \"indexing\" | \"no_data\" | \"stale\"; health: { overall: \"healthy\" | \"unhealthy\"; rollup: \"healthy\" | \"unhealthy\"; summary: \"healthy\" | \"unhealthy\"; }; }[]"
+          "{ sloId: string; sloRevision: number; sloName: string; state: \"running\" | \"indexing\" | \"no_data\" | \"stale\"; health: { overall: \"healthy\" | \"unhealthy\"; rollup: \"healthy\" | \"unhealthy\"; summary: \"healthy\" | \"unhealthy\"; }; }[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
         "deprecated": false,
@@ -4175,14 +4175,10 @@
           "TypeC",
           "<{ sloId: ",
           "Type",
-          "<string, string, unknown>; sloInstanceId: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"*\">, ",
-          "StringC",
-          "]>; sloRevision: ",
+          "<string, string, unknown>; sloRevision: ",
           "NumberC",
+          "; sloName: ",
+          "StringC",
           "; state: ",
           "UnionC",
           "<[",

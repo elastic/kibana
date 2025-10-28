@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
+import { KibanaServices } from '../../common/lib/kibana';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, connectorsMock } from '../../containers/mock';
 import { ConnectorsForm } from './connectors_form';
@@ -20,10 +21,12 @@ import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_ty
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { renderWithTestingProviders } from '../../common/mock';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 
+const getConfigMock = KibanaServices.getConfig as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
@@ -66,6 +69,13 @@ describe('ConnectorsForm ', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    getConfigMock.mockReturnValue({
+      resilient: {
+        additionalFields: {
+          enabled: true,
+        },
+      },
+    });
     useGetChoicesMock.mockReturnValue({ isLoading: false, data: { data: choices } });
     useGetIncidentTypesMock.mockReturnValue({
       isLoading: false,
@@ -190,7 +200,7 @@ describe('ConnectorsForm ', () => {
         name: 'My Resilient connector',
         type: '.resilient',
         // severity changed from 5 to 4
-        fields: { incidentTypes: null, severityCode: '4' },
+        fields: { incidentTypes: null, severityCode: '4', additionalFields: null },
       });
     });
   });
@@ -336,6 +346,7 @@ describe('ConnectorsForm ', () => {
         fields: {
           incidentTypes: null,
           severityCode: null,
+          additionalFields: null,
         },
         id: 'resilient-2',
         name: 'My Resilient connector',

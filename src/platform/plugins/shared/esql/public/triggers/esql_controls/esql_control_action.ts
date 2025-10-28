@@ -9,12 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
+import { firstValueFrom, of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
 
@@ -73,6 +75,16 @@ export class CreateESQLControlAction implements Action<Context> {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
     }
+    const currentApp = await firstValueFrom(this.core.application.currentAppId$ ?? of(undefined));
+
+    // Close all existing flyouts before opening the control flyout
+    try {
+      if (currentApp === 'discover') {
+        dismissAllFlyoutsExceptFor(DiscoverFlyouts.esqlControls);
+      }
+    } catch (error) {
+      // Flyouts don't exist or couldn't be closed, continue with opening the new flyout
+    }
 
     openLazyFlyout({
       core: this.core,
@@ -92,6 +104,7 @@ export class CreateESQLControlAction implements Action<Context> {
           cursorPosition,
           initialState,
           closeFlyout,
+          currentApp,
         });
       },
       flyoutProps: {

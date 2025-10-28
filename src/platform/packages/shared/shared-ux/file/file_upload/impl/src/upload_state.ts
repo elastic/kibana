@@ -102,6 +102,10 @@ export class UploadState {
   private readonly validateFile = (file: File): void => {
     const fileKind = this.fileKind;
 
+    if (!file.size) {
+      throw new Error(i18nTexts.fileEmpty);
+    }
+
     if (fileKind.maxSizeBytes != null && file.size > this.fileKind.maxSizeBytes!) {
       const message = i18nTexts.fileTooLarge(String(this.fileKind.maxSizeBytes));
       throw new Error(message);

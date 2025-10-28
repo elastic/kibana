@@ -7,15 +7,17 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Owner } from '../../../common/constants/types';
 import { AnalyticsIndex } from '../analytics_index';
 import {
-  CAI_CASES_INDEX_NAME,
-  CAI_CASES_INDEX_ALIAS,
+  getCasesDestinationIndexName,
+  getCasesDestinationIndexAlias,
   CAI_CASES_INDEX_VERSION,
   CAI_CASES_SOURCE_INDEX,
-  CAI_CASES_SOURCE_QUERY,
-  CAI_CASES_BACKFILL_TASK_ID,
-  CAI_CASES_SYNCHRONIZATION_TASK_ID,
+  getCasesSourceQuery,
+  getCAICasesBackfillTaskId,
+  getCAICasesSynchronizationTaskId,
+  CAI_CASES_SYNC_TYPE,
 } from './constants';
 import { CAI_CASES_INDEX_MAPPINGS } from './mappings';
 import { CAI_CASES_INDEX_SCRIPT_ID, CAI_CASES_INDEX_SCRIPT } from './painless_scripts';
@@ -26,44 +28,54 @@ export const createCasesAnalyticsIndex = ({
   logger,
   isServerless,
   taskManager,
+  spaceId,
+  owner,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  spaceId: string;
+  owner: Owner;
 }): AnalyticsIndex =>
   new AnalyticsIndex({
     logger,
     esClient,
     isServerless,
     taskManager,
-    indexName: CAI_CASES_INDEX_NAME,
-    indexAlias: CAI_CASES_INDEX_ALIAS,
+    indexName: getCasesDestinationIndexName(spaceId, owner),
+    indexAlias: getCasesDestinationIndexAlias(spaceId, owner),
     indexVersion: CAI_CASES_INDEX_VERSION,
     mappings: CAI_CASES_INDEX_MAPPINGS,
     painlessScriptId: CAI_CASES_INDEX_SCRIPT_ID,
     painlessScript: CAI_CASES_INDEX_SCRIPT,
-    taskId: CAI_CASES_BACKFILL_TASK_ID,
+    taskId: getCAICasesBackfillTaskId(spaceId, owner),
     sourceIndex: CAI_CASES_SOURCE_INDEX,
-    sourceQuery: CAI_CASES_SOURCE_QUERY,
+    sourceQuery: getCasesSourceQuery(spaceId, owner),
   });
 
 export const scheduleCasesAnalyticsSyncTask = ({
   taskManager,
   logger,
+  spaceId,
+  owner,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  spaceId: string;
+  owner: Owner;
 }) => {
+  const taskId = getCAICasesSynchronizationTaskId(spaceId, owner);
   scheduleCAISynchronizationTask({
-    taskId: CAI_CASES_SYNCHRONIZATION_TASK_ID,
+    taskId,
     sourceIndex: CAI_CASES_SOURCE_INDEX,
-    destIndex: CAI_CASES_INDEX_NAME,
+    destIndex: getCasesDestinationIndexName(spaceId, owner),
+    spaceId,
+    owner,
+    syncType: CAI_CASES_SYNC_TYPE,
     taskManager,
     logger,
   }).catch((e) => {
-    logger.error(
-      `Error scheduling ${CAI_CASES_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
-    );
+    logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
   });
 };

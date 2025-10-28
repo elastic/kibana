@@ -6,11 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
-import { SortDirection } from '@kbn/data-plugin/common/search';
-import { FilterStateStore } from '@kbn/es-query';
+import { referenceSchema } from '@kbn/content-management-utils';
+import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -26,15 +27,6 @@ const apiError = schema.object({
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
-export const referenceSchema = schema.object(
-  {
-    name: schema.string(),
-    type: schema.string(),
-    id: schema.string(),
-  },
-  { unknowns: 'forbid' }
-);
-
 export const panelGridDataSchema = schema.object({
   x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
   y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units' } }),
@@ -49,23 +41,23 @@ export const panelGridDataSchema = schema.object({
     min: 1,
     meta: { description: 'The height of the panel in grid units' },
   }),
-  i: schema.maybe(
-    schema.string({
-      meta: { description: 'The unique identifier of the panel' },
-    })
-  ),
 });
 
 export const panelSchema = schema.object({
-  panelConfig: schema.object(
+  config: schema.object(
     {},
     {
       unknowns: 'allow',
     }
   ),
   type: schema.string({ meta: { description: 'The embeddable type' } }),
-  gridData: panelGridDataSchema,
-  panelIndex: schema.maybe(
+  grid: panelGridDataSchema,
+  /**
+   * `uid` was chosen as a name instead of `id` to avoid bwc issues with legacy dashboard URL state that used `id` to
+   * represent ids of library items in by-reference panels. This was previously called `panelIndex` in DashboardPanelState.
+   * In the stored object, `uid` continues to map to `panelIndex`.
+   */
+  uid: schema.maybe(
     schema.string({
       meta: { description: 'The unique ID of the panel.' },
     })
@@ -74,7 +66,7 @@ export const panelSchema = schema.object({
     schema.string({
       meta: {
         description:
-          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (config in this type).",
         deprecated: true,
       },
     })
@@ -83,11 +75,6 @@ export const panelSchema = schema.object({
 
 const sectionGridDataSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
-  i: schema.maybe(
-    schema.string({
-      meta: { description: 'The unique identifier of the section' },
-    })
-  ),
 });
 
 export const sectionSchema = schema.object({
@@ -100,40 +87,17 @@ export const sectionSchema = schema.object({
       defaultValue: false,
     })
   ),
-  gridData: sectionGridDataSchema,
+  grid: sectionGridDataSchema,
   panels: schema.arrayOf(panelSchema, {
     meta: { description: 'The panels that belong to the section.' },
     defaultValue: [],
   }),
-});
-
-const dashboardPanels = {
-  // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
-  panels: schema.arrayOf(
-    schema.oneOf([
-      panelSchema.extends({
-        panelIndex: schema.string(),
-        gridData: panelGridDataSchema.extends({
-          i: schema.string(),
-        }),
-      }),
-      sectionSchema.extends({
-        gridData: sectionGridDataSchema.extends({
-          i: schema.string(),
-        }),
-        panels: schema.arrayOf(
-          panelSchema.extends({
-            panelIndex: schema.string(),
-            gridData: panelGridDataSchema.extends({
-              i: schema.string(),
-            }),
-          })
-        ),
-      }),
-    ]),
-    { defaultValue: [] }
+  uid: schema.maybe(
+    schema.string({
+      meta: { description: 'The unique ID of the section.' },
+    })
   ),
-};
+});
 
 export const dashboardMetaSchema = schema.object({
   updatedAt: schema.maybe(schema.string()),
@@ -170,159 +134,37 @@ export const optionsSchema = schema.object({
   }),
 });
 
-export const filterSchema = schema.object(
-  {
-    meta: schema.object(
-      {
-        alias: schema.maybe(schema.nullable(schema.string())),
-        disabled: schema.maybe(schema.boolean()),
-        negate: schema.maybe(schema.boolean()),
-        controlledBy: schema.maybe(schema.string()),
-        group: schema.maybe(schema.string()),
-        index: schema.maybe(schema.string()),
-        isMultiIndex: schema.maybe(schema.boolean()),
-        type: schema.maybe(schema.string()),
-        key: schema.maybe(schema.string()),
-        params: schema.maybe(schema.any()),
-        field: schema.maybe(schema.string()),
-      },
-      { unknowns: 'allow' }
-    ),
-    query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    $state: schema.maybe(
-      schema.object({
-        store: schema.oneOf(
-          [
-            schema.literal(FilterStateStore.APP_STATE),
-            schema.literal(FilterStateStore.GLOBAL_STATE),
-          ],
-          {
-            meta: {
-              description:
-                "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-            },
-          }
-        ),
-      })
-    ),
-  },
-  { meta: { description: 'A filter for the search source.' } }
-);
-
-export const querySchema = schema.object({
-  query: schema.oneOf([
-    schema.string({
-      meta: {
-        description:
-          'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
-      },
-    }),
-    schema.recordOf(schema.string(), schema.any()),
-  ]),
-  language: schema.string({
-    meta: { description: 'The query language such as KQL or Lucene.' },
-  }),
-});
-
-export const searchSourceSchema = schema.object(
-  {
-    type: schema.maybe(schema.string()),
-    query: schema.maybe(querySchema),
-    filters: schema.maybe(schema.arrayOf(filterSchema)),
-    sort: schema.maybe(
-      schema.arrayOf(
-        schema.recordOf(
-          schema.string(),
-          schema.oneOf([
-            schema.oneOf([schema.literal(SortDirection.asc), schema.literal(SortDirection.desc)]),
-            schema.object({
-              order: schema.oneOf([
-                schema.literal(SortDirection.asc),
-                schema.literal(SortDirection.desc),
-              ]),
-              format: schema.maybe(schema.string()),
-            }),
-            schema.object({
-              order: schema.oneOf([
-                schema.literal(SortDirection.asc),
-                schema.literal(SortDirection.desc),
-              ]),
-              numeric_type: schema.maybe(
-                schema.oneOf([
-                  schema.literal('double'),
-                  schema.literal('long'),
-                  schema.literal('date'),
-                  schema.literal('date_nanos'),
-                ])
-              ),
-            }),
-          ])
-        )
-      )
-    ),
-  },
-  /**
-   The Dashboard _should_ only ever uses the query and filters fields on the search
-   source. But we should be liberal in what we accept, so we allow unknowns.
-   */
-  { defaultValue: {}, unknowns: 'allow' }
-);
-
-export const dashboardAdditionalAttributes = {
-  // Search
-  kibanaSavedObjectMeta: schema.object(
-    {
-      searchSource: schema.maybe(searchSourceSchema),
-    },
-    {
-      meta: {
-        description: 'A container for various metadata',
-      },
-      defaultValue: {},
-    }
-  ),
-  // Time
-  timeFrom: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
-  timeTo: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
-  refreshInterval: schema.maybe(refreshIntervalSchema),
-
-  // Dashboard Content
+export const dashboardState = {
   controlGroupInput: schema.maybe(controlsGroupSchema),
-  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
-  options: optionsSchema,
-  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
-};
-
-export const searchResultsAttributes = {
-  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
   description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
+  filters: schema.maybe(schema.arrayOf(filterSchema)),
+  options: optionsSchema,
+  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
+  query: schema.maybe(querySchema),
+  refreshInterval: schema.maybe(refreshIntervalSchema),
+  tags: schema.maybe(
+    schema.arrayOf(
+      schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } })
+    )
+  ),
+  timeRange: schema.maybe(timeRangeSchema),
   timeRestore: schema.boolean({
     defaultValue: false,
     meta: { description: 'Whether to restore time upon viewing this dashboard' },
   }),
-  tags: schema.maybe(
-    schema.arrayOf(
-      schema.string({ meta: { description: 'An array of tags applied to this dashboard' } })
-    )
-  ),
+  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 };
 
-export const dashboardAttributesSchema = schema.object({
-  ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+export const dashboardDataSchema = schema.object({
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const dashboardDataAttributesSchema = dashboardAttributesSchema.extends(dashboardPanels);
-
 export const dashboardAPIItemSchema = schema.object({
-  data: dashboardDataAttributesSchema,
+  data: dashboardDataSchema,
   meta: dashboardMetaSchema,
   type: schema.string(),
   id: schema.string(),
@@ -332,45 +174,16 @@ export const dashboardAPICreateResultSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
-    data: dashboardDataAttributesSchema,
+    data: dashboardDataSchema,
     meta: dashboardMetaSchema,
   },
   { unknowns: 'forbid' }
 );
 
 export const dashboardResponseAttributesSchema = schema.object({
-  ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
-});
-
-const dashboardStorageAttributesSchemaResponse = dashboardAttributesSchema.extends({
-  // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
-  panels: schema.arrayOf(
-    schema.oneOf([
-      panelSchema.extends({
-        panelIndex: schema.string(),
-        gridData: panelGridDataSchema.extends({
-          i: schema.string(),
-        }),
-      }),
-      sectionSchema.extends({
-        gridData: sectionGridDataSchema.extends({
-          i: schema.string(),
-        }),
-        panels: schema.arrayOf(
-          panelSchema.extends({
-            panelIndex: schema.string(),
-            gridData: panelGridDataSchema.extends({
-              i: schema.string(),
-            }),
-          })
-        ),
-      }),
-    ]),
-    { defaultValue: [] }
-  ),
 });
 
 export const dashboardStorageSchema = schema.object(
@@ -384,7 +197,7 @@ export const dashboardStorageSchema = schema.object(
     updatedBy: schema.maybe(schema.string()),
     managed: schema.maybe(schema.boolean()),
     error: schema.maybe(apiError),
-    attributes: dashboardStorageAttributesSchemaResponse,
+    attributes: schema.object(dashboardState),
     references: schema.arrayOf(referenceSchema),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     originId: schema.maybe(schema.string()),
@@ -404,16 +217,6 @@ export const dashboardResolveMetaSchema = {
   ),
 };
 
-export const dashboardCreateRequestAttributesSchema = schema.object({
-  ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
-  references: schema.maybe(schema.arrayOf(referenceSchema)),
-  spaces: schema.maybe(schema.arrayOf(schema.string())),
-});
-
-export const dashboardAttributesSchemaRequest =
-  dashboardCreateRequestAttributesSchema.extends(dashboardPanels);
-
 export const dashboardItemSchema = schema.object(
   {
     id: schema.string(),
@@ -425,7 +228,7 @@ export const dashboardItemSchema = schema.object(
     updatedBy: schema.maybe(schema.string()),
     managed: schema.maybe(schema.boolean()),
     error: schema.maybe(apiError),
-    attributes: dashboardAttributesSchemaRequest,
+    attributes: schema.object(dashboardState),
     references: schema.arrayOf(referenceSchema),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     originId: schema.maybe(schema.string()),

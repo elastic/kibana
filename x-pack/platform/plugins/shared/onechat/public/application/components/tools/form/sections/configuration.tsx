@@ -6,38 +6,54 @@
  */
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { ToolType } from '@kbn/onechat-common/tools/definition';
-import React, { useEffect } from 'react';
+import type { ToolType } from '@kbn/onechat-common';
+import React, { useEffect, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { docLinks } from '../../../../../../common/doc_links';
 import { ToolFormSection } from '../components/tool_form_section';
 import { i18nMessages } from '../i18n';
+import { useToolTypes } from '../../../../hooks/tools/use_tool_type_info';
 import type { ToolFormData } from '../types/tool_form_types';
-import { EsqlConfiguration } from './configuration_fields/esql_configuration_fields';
-import { IndexSearchConfiguration } from './configuration_fields/index_search_configuration_fields';
-import { TOOL_TYPE_QUERY_PARAM } from '../../create_tool';
-import { useQueryState } from '../../../../hooks/use_query_state';
+import { getToolTypeConfig, getEditableToolTypes } from '../registry/tools_form_registry';
+import { ToolFormMode } from '../tool_form';
 
-export const Configuration = () => {
+interface ConfigurationProps {
+  toolType: ToolType;
+  setToolType: (toolType: ToolType) => void;
+  mode: ToolFormMode;
+}
+
+export const Configuration = ({ toolType, setToolType, mode }: ConfigurationProps) => {
   const {
     formState: { errors },
     control,
   } = useFormContext<ToolFormData>();
   const type = useWatch({ control, name: 'type' });
 
-  const [urlQueryToolType, setUrlQueryToolType] = useQueryState<ToolType>(TOOL_TYPE_QUERY_PARAM);
-
   useEffect(() => {
-    if (type && type !== urlQueryToolType) {
-      setUrlQueryToolType(type);
+    if (type && type !== toolType) {
+      setToolType(type);
     }
-  }, [type, urlQueryToolType, setUrlQueryToolType]);
+  }, [type, toolType, setToolType]);
 
-  const configurationFields =
-    type === ToolType.esql ? (
-      <EsqlConfiguration />
-    ) : type === ToolType.index_search ? (
-      <IndexSearchConfiguration />
-    ) : null;
+  const toolConfig = getToolTypeConfig(type);
+  const ConfigurationComponent = useMemo(() => {
+    return toolConfig!.getConfigurationComponent();
+  }, [toolConfig]);
+
+  const { toolTypes: serverToolTypes, isLoading: toolTypesLoading } = useToolTypes();
+
+  const editableToolTypes = useMemo(() => {
+    let editableTypes = getEditableToolTypes();
+    if (!toolTypesLoading && serverToolTypes) {
+      const serverEnabledEditableTypes = serverToolTypes
+        .filter((st) => st.create)
+        .map((st) => st.type);
+
+      editableTypes = editableTypes.filter((t) => serverEnabledEditableTypes.includes(t.value));
+    }
+    return editableTypes;
+  }, [serverToolTypes, toolTypesLoading]);
 
   return (
     <ToolFormSection
@@ -46,7 +62,7 @@ export const Configuration = () => {
       description={i18nMessages.configuration.documentation.description}
       documentation={{
         title: i18nMessages.configuration.documentation.documentationLink,
-        href: '#', // TODO: add documentation link when available
+        href: docLinks.tools,
       }}
     >
       <EuiFormRow label={i18nMessages.configuration.form.type.label} error={errors.type?.message}>
@@ -55,20 +71,15 @@ export const Configuration = () => {
           name="type"
           render={({ field: { ref, ...field } }) => (
             <EuiSelect
-              options={[
-                { text: i18nMessages.configuration.form.type.esqlOption, value: ToolType.esql },
-                {
-                  text: i18nMessages.configuration.form.type.indexSearchOption,
-                  value: ToolType.index_search,
-                },
-              ]}
+              options={editableToolTypes}
               {...field}
               inputRef={ref}
+              disabled={mode === ToolFormMode.Edit}
             />
           )}
         />
       </EuiFormRow>
-      {configurationFields}
+      <ConfigurationComponent />
     </ToolFormSection>
   );
 };

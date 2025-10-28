@@ -54,6 +54,7 @@ function transformToWorkflowExecutionListModel(
       return {
         spaceId: workflowExecution.spaceId,
         id: hit._id!,
+        stepId: workflowExecution.stepId,
         status: workflowExecution.status,
         startedAt: workflowExecution.startedAt,
         finishedAt: workflowExecution.finishedAt,

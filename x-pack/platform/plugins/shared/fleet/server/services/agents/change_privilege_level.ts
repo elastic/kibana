@@ -11,8 +11,19 @@ import { omit } from 'lodash';
 import { FleetUnauthorizedError } from '../../errors';
 import { packagePolicyService } from '../package_policy';
 
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
+import { SO_SEARCH_LIMIT } from '../../constants';
+
+import type { PackagePolicy } from '../../types';
+
 import { createAgentAction } from './actions';
-import { getAgentById } from './crud';
+import type { GetAgentsOptions } from './crud';
+import { getAgentById, getAgents, getAgentsByKuery, openPointInTime } from './crud';
+import {
+  bulkChangePrivilegeAgentsBatch,
+  ChangePrivilegeActionRunner,
+} from './change_privilege_runner';
 
 export async function changeAgentPrivilegeLevel(
   esClient: ElasticsearchClient,
@@ -30,9 +41,8 @@ export async function changeAgentPrivilegeLevel(
   const agent = await getAgentById(esClient, soClient, agentId);
   const packagePolicies =
     (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id || '')) || [];
-  const packagesWithRootAccess = packagePolicies
-    .map((policy) => policy.package)
-    .filter((pkg) => pkg && pkg.requires_root);
+  const packagesWithRootAccess = getPackagesWithRootAccess(packagePolicies);
+
   if (packagesWithRootAccess.length > 0) {
     throw new FleetUnauthorizedError(
       `Agent policy ${
@@ -57,4 +67,63 @@ export async function changeAgentPrivilegeLevel(
     }),
   });
   return { actionId: res.id };
+}
+
+export async function bulkChangeAgentsPrivilegeLevel(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  options: GetAgentsOptions & {
+    batchSize?: number;
+    actionId?: string;
+    total?: number;
+    user_info?: {
+      username?: string;
+      groupname?: string;
+      password?: string;
+    };
+  }
+): Promise<{ actionId: string }> {
+  const currentSpaceId = getCurrentNamespace(soClient);
+
+  if ('agentIds' in options) {
+    const givenAgents = await getAgents(esClient, soClient, options);
+    return await bulkChangePrivilegeAgentsBatch(esClient, soClient, givenAgents, {
+      ...options,
+      spaceId: currentSpaceId,
+    });
+  }
+
+  const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+
+  const res = await getAgentsByKuery(esClient, soClient, {
+    kuery: options.kuery,
+    spaceId: currentSpaceId,
+    showInactive: false,
+    page: 1,
+    perPage: batchSize,
+  });
+  if (res.total <= batchSize) {
+    return await bulkChangePrivilegeAgentsBatch(esClient, soClient, res.agents, {
+      ...options,
+      spaceId: currentSpaceId,
+    });
+  } else {
+    return await new ChangePrivilegeActionRunner(
+      esClient,
+      soClient,
+      {
+        ...options,
+        batchSize,
+        total: res.total,
+        spaceId: currentSpaceId,
+      },
+      { pitId: await openPointInTime(esClient) }
+    ).runActionAsyncTask();
+  }
+}
+
+export function getPackagesWithRootAccess(packagePolicies: PackagePolicy[]) {
+  return packagePolicies
+    .map((policy) => policy.package)
+    .filter((pkg) => pkg && Boolean(pkg?.requires_root));
 }

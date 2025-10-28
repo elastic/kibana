@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"
@@ -17,5 +17,6 @@
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/i18n",
+    "@kbn/esql-ast"
   ]
 }

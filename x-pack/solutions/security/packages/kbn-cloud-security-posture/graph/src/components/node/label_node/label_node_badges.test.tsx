@@ -17,7 +17,7 @@ import { analyzeDocuments } from './analyze_documents';
 
 describe('LabelNodeBadges', () => {
   test('renders nothing for single event', () => {
-    const analysis = analyzeDocuments({ eventsCount: 1, alertsCount: 0 });
+    const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
 
     const { container } = render(<LabelNodeBadges analysis={analysis} />);
 
@@ -28,7 +28,7 @@ describe('LabelNodeBadges', () => {
   });
 
   test('renders alert badge with icon only for single alert', () => {
-    const analysis = analyzeDocuments({ eventsCount: 0, alertsCount: 1 });
+    const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 1 });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
@@ -38,29 +38,33 @@ describe('LabelNodeBadges', () => {
   });
 
   test('renders event badge with counter for multiple events', () => {
-    const eventsCount = 3;
-    const analysis = analyzeDocuments({ eventsCount, alertsCount: 0 });
+    const uniqueEventsCount = 3;
+    const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount: 0 });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventsCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(
+      uniqueEventsCount.toString()
+    );
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).not.toBeInTheDocument();
   });
 
   test('renders alert badge with icon and counter for multiple alerts', () => {
-    const alertsCount = 3;
-    const analysis = analyzeDocuments({ eventsCount: 0, alertsCount });
+    const uniqueAlertsCount = 3;
+    const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertsCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(
+      uniqueAlertsCount.toString()
+    );
   });
 
   test('renders event badge with counter and alert badge with icon and counter for one event and one alert', () => {
-    const analysis = analyzeDocuments({ eventsCount: 1, alertsCount: 1 });
+    const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 1 });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
@@ -70,20 +74,27 @@ describe('LabelNodeBadges', () => {
   });
 
   test('renders event badge with counter and alert badge with icon and counter for multiple events and alerts', () => {
-    const eventsCount = 2;
-    const alertsCount = 2;
-    const analysis = analyzeDocuments({ eventsCount, alertsCount });
+    const uniqueEventsCount = 2;
+    const uniqueAlertsCount = 2;
+    const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventsCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(
+      uniqueEventsCount.toString()
+    );
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertsCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(
+      uniqueAlertsCount.toString()
+    );
   });
 
   test('renders event badge with limited counter and alert badge with icon and limited counter for multiple events and alerts', () => {
     const countOverLimit = 120;
-    const analysis = analyzeDocuments({ eventsCount: countOverLimit, alertsCount: countOverLimit });
+    const analysis = analyzeDocuments({
+      uniqueEventsCount: countOverLimit,
+      uniqueAlertsCount: countOverLimit,
+    });
 
     render(<LabelNodeBadges analysis={analysis} />);
 

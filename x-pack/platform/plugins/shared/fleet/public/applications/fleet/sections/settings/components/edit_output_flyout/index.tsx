@@ -204,6 +204,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           <>
             <EuiSpacer size="xs" />
             <EuiCallOut
+              announceOnMount
               data-test-subj={`settingsOutputsFlyout.${inputs.typeInput.value}OutputTypeCallout`}
               title={generateWarningMessage()}
               iconType="alert"
@@ -262,6 +263,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         {output?.is_preconfigured && (
           <>
             <EuiCallOut
+              announceOnMount
               iconType="lock"
               title={
                 <FormattedMessage
@@ -463,25 +465,27 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               </EuiFormRow>
             </>
           )}
-          <EuiFormRow
-            helpText={
-              <FormattedMessage
-                id="xpack.fleet.settings.editOutputFlyout.writeToStreamsHelpText"
-                defaultMessage="When enabled, adds logs and logs.* to the output streams configuration in the agent policy."
-              />
-            }
-          >
-            <EuiSwitch
-              label={
+          {(isESOutput || isRemoteESOutput) && (
+            <EuiFormRow
+              helpText={
                 <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.writeToStreamsLabel"
-                  defaultMessage="Write to logs streams"
+                  id="xpack.fleet.settings.editOutputFlyout.writeToStreamsHelpText"
+                  defaultMessage="When enabled, adds logs and logs.* to the output streams configuration in the agent policy."
                 />
               }
-              checked={inputs.writeToStreams.value}
-              onChange={(e) => inputs.writeToStreams.setValue(e.target.checked)}
-            />
-          </EuiFormRow>
+            >
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.writeToStreamsLabel"
+                    defaultMessage="Write to logs streams"
+                  />
+                }
+                checked={inputs.writeToStreams.value}
+                onChange={(e) => inputs.writeToStreams.setValue(e.target.checked)}
+              />
+            </EuiFormRow>
+          )}
           {supportsPresets &&
             outputYmlIncludesReservedPerformanceKey(
               inputs.additionalYamlConfigInput.value,
@@ -490,6 +494,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
+                  announceOnMount
                   color="warning"
                   iconType="alert"
                   size="s"

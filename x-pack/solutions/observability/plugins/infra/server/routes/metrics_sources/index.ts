@@ -278,7 +278,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (context, request, response) => {
       try {
-        const { from, to, dataSource, kuery, filters } = request.query;
+        const { from, to, dataSource, kuery, filters, isInventoryView } = request.query;
         const infraMetricsClient = await getInfraMetricsClient({
           request,
           libs,
@@ -309,7 +309,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
                   should: [
                     ...termsQuery(EVENT_MODULE, inventoryModel.requiredIntegration.beats),
                     ...termsQuery(METRICSET_MODULE, inventoryModel.requiredIntegration.beats),
-                    ...termsQuery(DATASTREAM_DATASET, 'apm*'),
+                    ...(!isInventoryView ? termsQuery(DATASTREAM_DATASET, 'apm*') : []),
                   ],
                   minimum_should_match: 1,
                   filter: [

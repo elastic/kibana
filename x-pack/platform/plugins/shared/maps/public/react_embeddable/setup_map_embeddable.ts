@@ -7,7 +7,6 @@
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { MapAttributes } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import type { MapEmbeddableState } from '../../common';
@@ -23,7 +22,7 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
     return mapEmbeddableFactory;
   });
 
-  embeddableSetup.registerAddFromLibraryType<MapAttributes>({
+  embeddableSetup.registerAddFromLibraryType({
     onAdd: async (container, savedObject) => {
       container.addNewPanel<MapEmbeddableState>(
         {

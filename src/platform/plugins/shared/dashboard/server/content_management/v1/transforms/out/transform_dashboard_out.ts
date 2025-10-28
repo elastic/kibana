@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import type { DashboardAttributes } from '../../types';
 import { transformControlGroupOut } from './transform_control_group_out';
@@ -17,8 +18,7 @@ import { transformPanelsOut } from './transform_panels_out';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
-  references?: SavedObjectReference[],
-  getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[]
+  references?: SavedObjectReference[]
 ): DashboardAttributes | Partial<DashboardAttributes> {
   const {
     controlGroupInput,
@@ -34,19 +34,24 @@ export function transformDashboardOut(
     title,
     version,
   } = attributes;
-  // Inject any tag names from references into the attributes
-  let tags: string[] | undefined;
-  if (getTagNamesFromReferences && references && references.length) {
-    tags = getTagNamesFromReferences(references);
-  }
+  // Extract tag references
+  const tags: string[] = references
+    ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
+    : [];
+
+  const timeRange =
+    timeRestore && timeFrom && timeTo
+      ? {
+          from: timeFrom,
+          to: timeTo,
+        }
+      : undefined;
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
     ...(description && { description }),
-    ...(kibanaSavedObjectMeta && {
-      kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta, references),
-    }),
+    ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
     ...((panelsJSON || sections) && {
       panels: transformPanelsOut(panelsJSON, sections, references),
@@ -55,9 +60,8 @@ export function transformDashboardOut(
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
     ...(tags && tags.length && { tags }),
-    ...(timeFrom && { timeFrom }),
+    ...(timeRange && { timeRange }),
     timeRestore: timeRestore ?? false,
-    ...(timeTo && { timeTo }),
     title,
     ...(version && { version }),
   };

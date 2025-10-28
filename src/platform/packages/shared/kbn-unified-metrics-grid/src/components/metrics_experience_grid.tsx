@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import { ChartSectionTemplate, useFetch } from '@kbn/unified-histogram';
+import { useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -23,12 +23,17 @@ import {
   type EuiFlexGridProps,
 } from '@elastic/eui';
 import { Subject } from 'rxjs';
-import { FIELD_VALUE_SEPARATOR } from '../common/utils';
+import { PAGE_SIZE } from '../common/constants';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
-import { usePaginatedFields, useMetricFieldsQuery, useMetricsGridState } from '../hooks';
-import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
-import { EmptyState } from './empty_state/empty_state';
+import {
+  usePaginatedFields,
+  useMetricFieldsQuery,
+  useMetricsGridState,
+  useValueFilters,
+} from '../hooks';
+import { MetricsGridWrapper } from './metrics_grid_wrapper';
+import { ChartLoadingProgress, EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -41,12 +46,14 @@ export const MetricsExperienceGrid = ({
   requestParams,
   services,
   input$: originalInput$,
+  isChartLoading: isDiscoverLoading,
+  isComponentVisible,
+  abortController,
 }: ChartSectionProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const { currentPage, dimensions, valueFilters, onPageChange } = useMetricsGridState();
-
+  const { currentPage, dimensions, valueFilters, onPageChange, searchTerm } = useMetricsGridState();
   const { getTimeRange, updateTimeRange } = requestParams;
 
   const input$ = useMemo(
@@ -60,64 +67,48 @@ export const MetricsExperienceGrid = ({
   });
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-  const { data: fields = [], isLoading } = useMetricFieldsQuery({
+  const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
     index: indexPattern,
     timeRange: getTimeRange(),
   });
 
-  const { leftSideActions, rightSideActions } = useToolbarActions({
-    fields,
-    requestParams,
-    indexPattern,
-    renderToggleActions,
-  });
-
   const {
-    allFields = [],
     currentPageFields = [],
     totalPages = 0,
-    dimensions: appliedDimensions = [],
-  } = usePaginatedFields({ fields, dimensions, pageSize: 20, currentPage }) ?? {};
+    filteredFieldsBySearch = [],
+  } = usePaginatedFields({
+    fields,
+    dimensions,
+    pageSize: PAGE_SIZE,
+    currentPage,
+    searchTerm,
+  }) ?? {};
 
   const columns = useMemo<EuiFlexGridProps['columns']>(
     () => Math.min(currentPageFields.length, 4) as EuiFlexGridProps['columns'],
     [currentPageFields]
   );
 
-  const filters = useMemo(() => {
-    if (!valueFilters || valueFilters.length === 0) {
-      return [];
-    }
-
-    return valueFilters
-      .map((selectedValue) => {
-        const [field, value] = selectedValue.split(`${FIELD_VALUE_SEPARATOR}`);
-        return {
-          field,
-          value,
-        };
-      })
-      .filter((filter) => filter.field !== '');
-  }, [valueFilters]);
+  const filters = useValueFilters(valueFilters);
 
   if (fields.length === 0) {
-    return <EmptyState isLoading={isLoading} />;
+    return <EmptyState isLoading={isFieldsLoading} />;
   }
 
   return (
-    <ChartSectionTemplate
-      id="unifiedMetricsExperienceGridPanel"
-      toolbarCss={chartToolbarCss}
-      toolbar={{
-        leftSide: leftSideActions,
-        rightSide: rightSideActions,
-      }}
+    <MetricsGridWrapper
+      indexPattern={indexPattern}
+      renderToggleActions={renderToggleActions}
+      chartToolbarCss={chartToolbarCss}
+      requestParams={requestParams}
+      fields={fields}
+      isComponentVisible={isComponentVisible}
     >
       <EuiFlexGroup
         direction="column"
         gutterSize="s"
         tabIndex={-1}
-        data-test-subj="unifiedMetricsExperienceRendered"
+        data-test-subj="metricsExperienceRendered"
         css={css`
           ${histogramCss || ''}
           height: 100%;
@@ -128,16 +119,22 @@ export const MetricsExperienceGrid = ({
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            direction="row"
+          >
             <EuiFlexItem grow={false}>
-              {isLoading ? (
+              {isFieldsLoading ? (
                 <EuiLoadingSpinner size="s" />
               ) : (
                 <EuiText size="s">
                   <strong>
                     {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                      defaultMessage: '{count} metrics',
-                      values: { count: allFields.length },
+                      defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
+                      values: { count: filteredFieldsBySearch.length },
                     })}
                   </strong>
                 </EuiText>
@@ -163,10 +160,11 @@ export const MetricsExperienceGrid = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
+          {isDiscoverLoading && <ChartLoadingProgress />}
           <MetricsGrid
             pivotOn="metric"
             columns={columns}
-            dimensions={appliedDimensions}
+            dimensions={dimensions}
             filters={filters}
             services={services}
             fields={currentPageFields}
@@ -175,6 +173,7 @@ export const MetricsExperienceGrid = ({
             onFilter={onFilter}
             discoverFetch$={discoverFetch$}
             requestParams={requestParams}
+            abortController={abortController}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -185,6 +184,6 @@ export const MetricsExperienceGrid = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </ChartSectionTemplate>
+    </MetricsGridWrapper>
   );
 };

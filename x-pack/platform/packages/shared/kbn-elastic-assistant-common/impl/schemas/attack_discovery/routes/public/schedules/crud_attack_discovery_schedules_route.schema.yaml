@@ -1,0 +1,442 @@
+openapi: 3.0.0
+info:
+  title: Attack discovery scheduling API endpoint
+  version: '2023-10-31'
+components:
+  x-codegen-enabled: true
+  schemas:
+    AttackDiscoveryGenericResponse:
+      type: object
+      additionalProperties: true
+      description: Object containing Attack Discovery schedule.
+    AttackDiscoveryGenericError:
+      type: object
+      description: Generic error response for Attack discovery schedule operations
+      properties:
+        status_code:
+          type: number
+          description: HTTP status code
+          example: 400
+        error:
+          type: string
+          description: Error type
+          example: "Bad Request"
+        message:
+          type: string
+          description: Human-readable error message describing what went wrong
+          example: "Invalid request parameters"
+
+paths:
+  /api/attack_discovery/schedules:
+    post:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Create an Attack discovery schedule
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{
+               "name": "Daily Security Analysis",
+               "enabled": true,
+               "params": {
+                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "api_config": {
+                   "actionTypeId": "bedrock",
+                   "connectorId": "my-bedrock-connector",
+                   "name": "Claude 3.5 Sonnet"
+                 },
+                 "size": 100,
+                 "start": "now-24h",
+                 "end": "now"
+               },
+               "schedule": {
+                 "interval": "24h"
+               },
+               "actions": []
+             }'
+      x-labels: [ess, serverless]
+      operationId: CreateAttackDiscoverySchedules
+      description: Creates a new Attack discovery schedule that analyzes security alerts at specified intervals. The schedule defines when and how Attack discovery analysis should run, including which alerts to analyze, which AI connector to use, and what actions to take when discoveries are found.
+      summary: Create Attack discovery schedule
+      tags:
+        - Attack discovery API
+      requestBody:
+        required: true
+        description: Attack discovery schedule configuration including name, parameters, schedule interval, and actions
+        content:
+          application/json:
+            schema:
+              $ref: './schedules_api.schema.yaml#/components/schemas/AttackDiscoveryApiScheduleCreateProps'
+            example:
+              name: "Daily Security Analysis"
+              enabled: true
+              params:
+                alerts_index_pattern: ".alerts-security.alerts-*"
+                api_config:
+                  actionTypeId: "bedrock"
+                  connectorId: "my-bedrock-connector"
+                  name: "Claude 3.5 Sonnet"
+                size: 100
+                start: "now-24h"
+                end: "now"
+              schedule:
+                interval: "24h"
+              actions: []
+      responses:
+        200:
+          description: Successfully created Attack discovery schedule
+          content:
+            application/json:
+              schema:
+                $ref: './schedules_api.schema.yaml#/components/schemas/AttackDiscoveryApiSchedule'
+              example:
+                id: "12345678-1234-1234-1234-123456789012"
+                name: "Daily Security Analysis"
+                created_by: "elastic"
+                updated_by: "elastic"
+                created_at: "2023-10-31T10:00:00.000Z"
+                updated_at: "2023-10-31T10:00:00.000Z"
+                enabled: true
+                params:
+                  alerts_index_pattern: ".alerts-security.alerts-*"
+                  api_config:
+                    actionTypeId: "bedrock"
+                    connectorId: "my-bedrock-connector"
+                    name: "Claude 3.5 Sonnet"
+                  size: 100
+                  start: "now-24h"
+                  end: "now"
+                schedule:
+                  interval: "24h"
+                actions: []
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters"
+
+  /api/attack_discovery/schedules/{id}:
+    get:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Get an Attack discovery schedule by ID
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-labels: [ess, serverless]
+      operationId: GetAttackDiscoverySchedules
+      description: Retrieves a specific Attack discovery schedule by its unique identifier. Returns complete schedule configuration including parameters, interval settings, associated actions, and execution history.
+      summary: Get Attack discovery schedule by ID
+      tags:
+        - Attack discovery API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier (UUID) of the Attack Discovery schedule to retrieve. This ID is returned when creating a schedule and can be found in schedule listings.
+          schema:
+            $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "12345678-1234-1234-1234-123456789012"
+      responses:
+        200:
+          description: Successfully retrieved Attack Discovery schedule with complete configuration and metadata
+          content:
+            application/json:
+              schema:
+                $ref: './schedules_api.schema.yaml#/components/schemas/AttackDiscoveryApiSchedule'
+              example:
+                id: "12345678-1234-1234-1234-123456789012"
+                name: "Daily Security Analysis"
+                created_by: "elastic"
+                updated_by: "elastic"
+                created_at: "2023-10-31T10:00:00.000Z"
+                updated_at: "2023-10-31T10:00:00.000Z"
+                enabled: true
+                params:
+                  alerts_index_pattern: ".alerts-security.alerts-*"
+                  api_config:
+                    actionTypeId: "bedrock"
+                    connectorId: "my-bedrock-connector"
+                    name: "Claude 3.5 Sonnet"
+                  size: 100
+                  start: "now-24h"
+                  end: "now"
+                schedule:
+                  interval: "24h"
+                actions: []
+                last_execution:
+                  date: "2023-10-31T10:00:00.000Z"
+                  status: "ok"
+                  last_duration: 45.2
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters"
+    put:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Update an Attack discovery schedule
+          source: |
+            curl \
+             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{
+               "name": "Updated Daily Security Analysis",
+               "params": {
+                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "api_config": {
+                   "actionTypeId": "bedrock",
+                   "connectorId": "my-bedrock-connector",
+                   "name": "Claude 3.5 Sonnet"
+                 },
+                 "size": 200,
+                 "start": "now-48h",
+                 "end": "now"
+               },
+               "schedule": {
+                 "interval": "12h"
+               },
+               "actions": []
+             }'
+      x-labels: [ess, serverless]
+      operationId: UpdateAttackDiscoverySchedules
+      description: Updates an existing Attack discovery schedule with new configuration. All schedule properties can be modified including name, parameters, interval, and actions. The update operation replaces the entire schedule configuration with the provided values.
+      summary: Update Attack discovery schedule
+      tags:
+        - Attack discovery API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier (UUID) of the Attack Discovery schedule to update. This ID is returned when creating a schedule and can be found in schedule listings.
+          schema:
+            $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "12345678-1234-1234-1234-123456789012"
+      requestBody:
+        required: true
+        description: Updated Attack discovery schedule configuration. All fields are required as this replaces the entire schedule configuration.
+        content:
+          application/json:
+            schema:
+              $ref: './schedules_api.schema.yaml#/components/schemas/AttackDiscoveryApiScheduleUpdateProps'
+            example:
+              name: "Updated Daily Security Analysis"
+              params:
+                alerts_index_pattern: ".alerts-security.alerts-*"
+                api_config:
+                  actionTypeId: "bedrock"
+                  connectorId: "my-bedrock-connector"
+                  name: "Claude 3.5 Sonnet"
+                size: 200
+                start: "now-48h"
+                end: "now"
+              schedule:
+                interval: "12h"
+              actions: []
+      responses:
+        200:
+          description: Successfully updated Attack Discovery schedule with the new configuration and metadata
+          content:
+            application/json:
+              schema:
+                $ref: './schedules_api.schema.yaml#/components/schemas/AttackDiscoveryApiSchedule'
+              example:
+                id: "12345678-1234-1234-1234-123456789012"
+                name: "Updated Daily Security Analysis"
+                created_by: "elastic"
+                updated_by: "elastic"
+                created_at: "2023-10-31T10:00:00.000Z"
+                updated_at: "2023-10-31T12:00:00.000Z"
+                enabled: true
+                params:
+                  alerts_index_pattern: ".alerts-security.alerts-*"
+                  api_config:
+                    actionTypeId: "bedrock"
+                    connectorId: "my-bedrock-connector"
+                    name: "Claude 3.5 Sonnet"
+                  size: 200
+                  start: "now-48h"
+                  end: "now"
+                schedule:
+                  interval: "12h"
+                actions: []
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters"
+    delete:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Delete an Attack discovery schedule
+          source: |
+            curl \
+             --request DELETE 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-labels: [ess, serverless]
+      operationId: DeleteAttackDiscoverySchedules
+      description: Permanently deletes an Attack discovery schedule and all associated configuration.
+      summary: Delete Attack discovery schedule
+      tags:
+        - Attack discovery API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier (UUID) of the Attack Discovery schedule to delete. This ID is returned when creating a schedule and can be found in schedule listings.
+          schema:
+            $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "12345678-1234-1234-1234-123456789012"
+      responses:
+        200:
+          description: Successfully deleted Attack Discovery schedule, returning the ID of the deleted schedule for confirmation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+                    description: The unique identifier of the deleted Attack Discovery schedule
+              example:
+                id: "12345678-1234-1234-1234-123456789012"
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters"
+
+  /api/attack_discovery/schedules/{id}/_enable:
+    put:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Enable an Attack discovery schedule
+          source: |
+            curl \
+             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-labels: [ess, serverless]
+      operationId: EnableAttackDiscoverySchedules
+      description: Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration.
+      summary: Enable Attack discovery schedule
+      tags:
+        - Attack discovery API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier (UUID) of the Attack Discovery schedule to enable. This ID is returned when creating a schedule and can be found in schedule listings.
+          schema:
+            $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "12345678-1234-1234-1234-123456789012"
+      responses:
+        200:
+          description: Successfully enabled Attack Discovery schedule, returning the schedule ID for confirmation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+                    description: The unique identifier of the enabled Attack Discovery schedule
+              example:
+                id: "12345678-1234-1234-1234-123456789012"
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters"
+
+  /api/attack_discovery/schedules/{id}/_disable:
+    put:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Disable an Attack discovery schedule
+          source: |
+            curl \
+             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-labels: [ess, serverless]
+      operationId: DisableAttackDiscoverySchedules
+      description: Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started.
+      summary: Disable Attack discovery schedule
+      tags:
+        - Attack discovery API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier (UUID) of the Attack Discovery schedule to disable. This ID is returned when creating a schedule and can be found in schedule listings.
+          schema:
+            $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "12345678-1234-1234-1234-123456789012"
+      responses:
+        200:
+          description: Successfully disabled Attack Discovery schedule, returning the schedule ID for confirmation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    $ref: '../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+                    description: The unique identifier of the disabled Attack Discovery schedule
+              example:
+                id: "12345678-1234-1234-1234-123456789012"
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request parameters"

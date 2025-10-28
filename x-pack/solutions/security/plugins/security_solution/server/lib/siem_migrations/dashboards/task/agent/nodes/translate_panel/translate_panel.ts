@@ -22,6 +22,9 @@ export type TranslatePanelNode = ((
   subgraph?: ReturnType<typeof getTranslatePanelGraph>;
 };
 
+/** Number of panels to be processed concurrently per dashboard */
+const DEFAULT_PANELS_CONCURRENCY = 4;
+
 export interface TranslatePanel {
   node: TranslatePanelNode;
   conditionalEdge: (state: MigrateDashboardState) => Send[];
@@ -41,7 +44,9 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
         }
 
         // Invoke the subgraph to translate the panel
-        const output = await translatePanelSubGraph.invoke(nodeParams);
+        const output = await translatePanelSubGraph.invoke(nodeParams, {
+          maxConcurrency: DEFAULT_PANELS_CONCURRENCY,
+        });
 
         if (!output.elastic_panel) {
           throw new Error('No panel visualization generated');
@@ -54,8 +59,8 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
           comments: output.comments,
         };
       } catch (err) {
-        params.logger.error(`Error translating panel: ${err}`);
         const message = `Error translating panel: ${err.toString()}`;
+        params.logger.error(message);
         translatedPanel = {
           index,
           title: nodeParams.parsed_panel.title,

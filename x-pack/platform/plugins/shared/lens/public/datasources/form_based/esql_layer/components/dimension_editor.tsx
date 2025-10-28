@@ -9,7 +9,6 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
@@ -20,6 +19,7 @@ import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
 import type { TextBasedLayer } from '../types';
+import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {
@@ -46,7 +46,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     // in case the columns are not in the cache, I refetch them
     async function fetchColumns() {
       if (query) {
-        const table = await fetchFieldsFromESQL(
+        const table = await fetchFieldsFromESQLExpression(
           { esql: `${query.esql} | limit 0` },
           expressions,
           { from: dateRange.fromDate, to: dateRange.toDate },
@@ -56,6 +56,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             : undefined,
           esqlVariables
         );
+
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
           const columns = table.columns.map((col) => {
@@ -82,11 +83,10 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   }, [
     dateRange.fromDate,
     dateRange.toDate,
+    esqlVariables,
     expressions,
     indexPatterns,
     props,
-    props.expressions,
-    esqlVariables,
     query,
   ]);
 

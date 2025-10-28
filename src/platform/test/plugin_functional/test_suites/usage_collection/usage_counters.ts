@@ -14,12 +14,10 @@ import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   async function getSavedObjectCounters() {
-    // wait until ES indexes the counter SavedObject;
-    await new Promise((res) => setTimeout(res, 10 * 1000));
-
-    return await supertest
+    return supertest
       .get('/api/saved_objects/_find?type=usage-counter')
       .set('kbn-xsrf', 'true')
       .expect(200)
@@ -49,17 +47,25 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('stores usage counters sent during start and setup', async () => {
-      const { duringSetup, duringStart, routeAccessed } = await getSavedObjectCounters();
+      await retry.try(async () => {
+        const { duringSetup, duringStart, routeAccessed } = await getSavedObjectCounters();
 
-      expect(duringSetup).to.be(11);
-      expect(duringStart).to.be(1);
-      expect(routeAccessed).to.be(undefined);
+        expect(duringSetup).to.be(11);
+        expect(duringStart).to.be(1);
+        expect(routeAccessed).to.be(undefined);
+      });
     });
 
     it('stores usage counters triggered by runtime activities', async () => {
       await supertest.get('/api/usage_collection_test_plugin').set('kbn-xsrf', 'true').expect(200);
 
-      const { routeAccessed } = await getSavedObjectCounters();
+      let routeAccessed: number | undefined;
+
+      await retry.waitFor('routeAccessed counter is initialized', async () => {
+        ({ routeAccessed } = await getSavedObjectCounters());
+        return Boolean(routeAccessed);
+      });
+
       expect(routeAccessed).to.be(1);
     });
   });

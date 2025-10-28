@@ -11,14 +11,16 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedFieldList, dashboard, header, timePicker } = getPageObjects([
-    'common',
-    'discover',
-    'unifiedFieldList',
-    'dashboard',
-    'header',
-    'timePicker',
-  ]);
+  const { common, discover, unifiedFieldList, dashboard, header, timePicker, unifiedTabs } =
+    getPageObjects([
+      'common',
+      'discover',
+      'unifiedFieldList',
+      'dashboard',
+      'header',
+      'timePicker',
+      'unifiedTabs',
+    ]);
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
@@ -114,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
         const rows = await dataGrid.getDocTableRows();
         expect(rows.length).to.be.above(0);
-        await testSubjects.click('dashboardEditorMenuButton');
+        await dashboardAddPanel.openAddPanelFlyout();
 
         const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['click'],
@@ -504,6 +506,154 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(event.properties).to.eql({
           eventName: 'kqlQuery',
           fieldNames: ['__FREE_TEXT__'],
+        });
+      });
+    });
+
+    describe('trackTabs telemetry', () => {
+      beforeEach(async () => {
+        await common.navigateToApp('discover');
+        await discover.waitUntilTabIsLoaded();
+        await ebtUIHelper.setOptIn(true);
+      });
+
+      it('should track tabCreated event', async () => {
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_tabs'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'tabCreated',
+          totalTabsOpen: 1,
+          tabId: event.properties.tabId,
+        });
+      });
+
+      it('should track tabClosed event', async () => {
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.closeTab(1);
+        await discover.waitUntilTabIsLoaded();
+
+        const [_createTabEvent, closeTabEvent] = await ebtUIHelper.getEvents(
+          Number.MAX_SAFE_INTEGER,
+          {
+            eventTypes: ['discover_tabs'],
+            withTimeoutMs: 500,
+          }
+        );
+
+        expect(closeTabEvent.properties).to.eql({
+          eventName: 'tabClosed',
+          totalTabsOpen: 2,
+          remainingTabsCount: 1,
+          tabId: closeTabEvent.properties.tabId,
+        });
+      });
+
+      it('should track tabSwitched event', async () => {
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+
+        const [_createTabEvent, switchTabEvent] = await ebtUIHelper.getEvents(
+          Number.MAX_SAFE_INTEGER,
+          {
+            eventTypes: ['discover_tabs'],
+            withTimeoutMs: 500,
+          }
+        );
+
+        expect(switchTabEvent.properties).to.eql({
+          eventName: 'tabSwitched',
+          totalTabsOpen: 2,
+          tabId: switchTabEvent.properties.tabId,
+          fromIndex: 1,
+          toIndex: 0,
+        });
+      });
+
+      it('should track tabDuplicated event', async () => {
+        await unifiedTabs.duplicateTab(0);
+        await discover.waitUntilTabIsLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_tabs'],
+          withTimeoutMs: 500,
+        });
+
+        expect(event.properties).to.eql({
+          eventName: 'tabDuplicated',
+          totalTabsOpen: 1,
+          tabId: event.properties.tabId,
+        });
+      });
+
+      it('should track tabClosedOthers event', async () => {
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.openTabMenu(2);
+        await testSubjects.click('unifiedTabs_tabMenuItem_closeOtherTabs');
+        await discover.waitUntilTabIsLoaded();
+
+        const [_createTabEvent1, _createTabEvent2, closeOtherTabsEvent] =
+          await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+            eventTypes: ['discover_tabs'],
+            withTimeoutMs: 500,
+          });
+
+        expect(closeOtherTabsEvent.properties).to.eql({
+          eventName: 'tabClosedOthers',
+          totalTabsOpen: 3,
+          closedTabsCount: 2,
+          tabId: closeOtherTabsEvent.properties.tabId,
+        });
+      });
+
+      it('should track tabClosedToTheRight event', async () => {
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await unifiedTabs.openTabMenu(0);
+        await testSubjects.click('unifiedTabs_tabMenuItem_closeTabsToTheRight');
+        await discover.waitUntilTabIsLoaded();
+
+        const [_createTabEvent1, _createTabEvent2, closeTabsToTheRightEvent] =
+          await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+            eventTypes: ['discover_tabs'],
+            withTimeoutMs: 500,
+          });
+
+        expect(closeTabsToTheRightEvent.properties).to.eql({
+          eventName: 'tabClosedToTheRight',
+          totalTabsOpen: 3,
+          closedTabsCount: 2,
+          remainingTabsCount: 1,
+          tabId: closeTabsToTheRightEvent.properties.tabId,
+        });
+      });
+
+      it('should track tabRenamed event', async () => {
+        const newTitle = 'New tab title';
+        await unifiedTabs.editTabLabel(0, newTitle);
+        await discover.waitUntilTabIsLoaded();
+
+        const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_tabs'],
+          withTimeoutMs: 500,
+        });
+        expect(event.properties).to.eql({
+          eventName: 'tabRenamed',
+          totalTabsOpen: 1,
+          tabId: event.properties.tabId,
         });
       });
     });

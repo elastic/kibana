@@ -22,13 +22,10 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SearchSourceDependencies } from '../../common/search';
@@ -74,15 +71,9 @@ import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
 import type { ISessionsClient, ISessionService } from './session';
 import { SessionsClient, SessionService } from './session';
-import {
-  registerSearchSessionsMgmt,
-  updateSearchSessionMgmtSectionTitle,
-} from './session/sessions_mgmt';
-import { createConnectedSearchSessionIndicator } from './session/session_indicator';
+import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
 import type { ISearchSetup, ISearchStart } from './types';
 import { openSearchSessionsFlyout } from './session/sessions_mgmt';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from './session/constants';
-
 /** @internal */
 export interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
@@ -206,7 +197,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     if (config.search.sessions.enabled) {
       const sessionsConfig = config.search.sessions;
 
-      const searchSessionsApp = registerSearchSessionsMgmt(
+      registerSearchSessionsMgmt(
         core as CoreSetup<DataStartDependencies>,
         {
           management,
@@ -216,7 +207,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         sessionsConfig,
         this.initializerContext.env.packageInfo.version
       );
-      updateSearchSessionMgmtSectionTitle(getStartServices, searchSessionsApp);
     }
 
     return {
@@ -293,26 +283,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       scriptedFieldsEnabled,
     };
-
     const config = this.initializerContext.config.get();
-    if (config.search.sessions.enabled) {
-      chrome.setBreadcrumbsAppendExtension({
-        content: toMountPoint(
-          React.createElement(
-            createConnectedSearchSessionIndicator({
-              sessionService: this.sessionService,
-              application,
-              basePath: http.basePath,
-              storage: new Storage(window.localStorage),
-              usageCollector: this.usageCollector,
-              tourDisabled: screenshotMode.isScreenshotMode(),
-              featureFlags: coreStart.featureFlags,
-            })
-          ),
-          startServices
-        ),
-      });
-    }
 
     return {
       aggs,
@@ -348,10 +319,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           });
         });
       },
-      isBackgroundSearchEnabled: coreStart.featureFlags.getBooleanValue(
-        BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-        false
-      ),
+      isBackgroundSearchEnabled: config.search.sessions.enabled,
       session: this.sessionService,
       sessionsClient: this.sessionsClient,
       searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),

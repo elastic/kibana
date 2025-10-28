@@ -31,7 +31,7 @@ import { IlmField } from './ilm';
 import { DslField, DEFAULT_RETENTION_UNIT, DEFAULT_RETENTION_VALUE } from './dsl';
 import { useKibana } from '../../../../../hooks/use_kibana';
 
-export type LifecycleEditAction = 'ilm' | 'custom' | 'forever';
+export type LifecycleEditAction = 'ilm' | 'custom' | 'indefinite';
 
 interface Props {
   closeModal: () => void;
@@ -55,7 +55,7 @@ export function EditLifecycleModal({
     ? 'ilm'
     : isDslLifecycle(definition.effective_lifecycle) &&
       !definition.effective_lifecycle.dsl.data_retention
-    ? 'forever'
+    ? 'indefinite'
     : 'custom';
 
   const [isInheritToggleOn, setIsInheritToggleOn] = useState<boolean>(isCurrentLifecycleInherit);
@@ -73,9 +73,9 @@ export function EditLifecycleModal({
   const toggleButtonsCompressed = useMemo(() => {
     const buttons = [
       {
-        id: 'forever',
-        label: i18n.translate('xpack.streams.streamDetailLifecycle.forever', {
-          defaultMessage: 'Forever',
+        id: 'indefinite',
+        label: i18n.translate('xpack.streams.streamDetailLifecycle.indefinite', {
+          defaultMessage: 'Indefinite',
         }),
       },
       {
@@ -122,7 +122,7 @@ export function EditLifecycleModal({
                     ? i18n.translate(
                         'xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel',
                         {
-                          defaultMessage: 'Inherit from parent stream',
+                          defaultMessage: 'Inherit retention',
                         }
                       )
                     : i18n.translate(
@@ -140,15 +140,13 @@ export function EditLifecycleModal({
                     ? i18n.translate(
                         'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
                         {
-                          defaultMessage:
-                            "Use the retention configuration from this stream's parent",
+                          defaultMessage: 'Use the parent stream’s retention configuration',
                         }
                       )
                     : i18n.translate(
                         'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
                         {
-                          defaultMessage:
-                            "Use the retention configuration from this stream's index template",
+                          defaultMessage: 'Use the stream’s index template retention configuration',
                         }
                       )
                 }
@@ -175,7 +173,7 @@ export function EditLifecycleModal({
             <EuiText>
               <h5>
                 {i18n.translate('xpack.streams.streamDetailLifecycle.dataRetention', {
-                  defaultMessage: 'Data retention',
+                  defaultMessage: 'Custom retention',
                 })}
               </h5>
             </EuiText>
@@ -185,7 +183,7 @@ export function EditLifecycleModal({
                 defaultMessage: 'Data retention',
               })}
               onChange={(value) => {
-                if (value === 'forever') {
+                if (value === 'indefinite') {
                   setLifecycle({ dsl: {} });
                   setIsSaveButtonDisabled(false);
                 }

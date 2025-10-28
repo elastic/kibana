@@ -93,6 +93,12 @@ export interface DataStreamDefinition<
   hidden?: boolean;
 
   /**
+   * @remark Must be **incremented** in order to release a new version of the template definition.
+   * @remark Must be greater than 0
+   */
+  version: number;
+
+  /**
    * The index template definition for the data stream.
    *
    * This template definition corresponds to types from ES:
@@ -108,7 +114,7 @@ export interface DataStreamDefinition<
      * Auto-populated with the following properties:
      * managed: true;                  // present as a managed index template/data stream
      * userAgent: string;              // an indication of what code created the resources
-     * version: string;                // the version of the data stream, basically a serialisation of the data stream definition
+     * version: string;                // the deployed version of the template definition
      * previousVersions: string[];     // previous data stream definitions
      */
     _meta?: {

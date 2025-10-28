@@ -85,9 +85,11 @@ export const buildExecutor = <
       );
     }
 
+    let _subActionParams = subActionParams ?? {};
+
     if (action.schema) {
       try {
-        action.schema.validate(subActionParams);
+        _subActionParams = action.schema.validate(subActionParams) as typeof subActionParams;
       } catch (reqValidationError) {
         throw createTaskRunError(
           new Error(`Request validation failed (${reqValidationError})`),
@@ -96,7 +98,7 @@ export const buildExecutor = <
       }
     }
 
-    const data = await func.call(service, subActionParams, connectorUsageCollector);
+    const data = await func.call(service, _subActionParams, connectorUsageCollector);
     return { status: 'ok', data: data ?? {}, actionId };
   };
 };

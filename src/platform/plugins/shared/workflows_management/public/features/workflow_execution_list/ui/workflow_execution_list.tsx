@@ -157,5 +157,6 @@ const componentStyles = {
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.m,
+      overflowY: 'auto',
     }),
 };

@@ -30,6 +30,7 @@ export type CaseFormFieldsSchemaProps = Omit<
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
+  extractObservables: boolean;
   customFields: Record<string, string | boolean>;
 };
 
@@ -96,6 +97,10 @@ export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
   },
   syncAlerts: {
     helpText: i18n.SYNC_ALERTS_HELP,
+    defaultValue: true,
+  },
+  extractObservables: {
+    helpText: i18n.EXTRACT_OBSERVABLES_HELP,
     defaultValue: true,
   },
   customFields: {},

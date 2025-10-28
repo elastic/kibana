@@ -81,6 +81,11 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
+      const requestBodyData = req.body.data;
+      if (!requestBodyData.visualizationType) {
+        throw new Error('visualizationType is required');
+      }
+
       // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
