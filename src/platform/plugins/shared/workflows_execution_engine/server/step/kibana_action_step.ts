@@ -146,17 +146,24 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     stepType: string,
     params: any
   ): Promise<any> {
+    // Extract and remove fetcher configuration from params (it's only for our internal use)
+    const { fetcher: fetcherOptions, ...cleanParams } = params;
+
     // Support both raw API format and connector-driven syntax
-    if (params.request) {
+    if (cleanParams.request) {
       // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
-      const { method = 'GET', path, body, query, headers: customHeaders } = params.request;
-      return this.makeHttpRequest(kibanaUrl, {
-        method,
-        path,
-        body,
-        query,
-        headers: { ...authHeaders, ...customHeaders },
-      });
+      const { method = 'GET', path, body, query, headers: customHeaders } = cleanParams.request;
+      return this.makeHttpRequest(
+        kibanaUrl,
+        {
+          method,
+          path,
+          body,
+          query,
+          headers: { ...authHeaders, ...customHeaders },
+        },
+        fetcherOptions
+      );
     } else {
       // Use generated connector definitions to determine method and path (covers all 454+ Kibana APIs)
       const {
@@ -165,15 +172,19 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         body,
         query,
         headers: connectorHeaders,
-      } = buildKibanaRequestFromAction(stepType, params);
+      } = buildKibanaRequestFromAction(stepType, cleanParams);
 
-      return this.makeHttpRequest(kibanaUrl, {
-        method,
-        path,
-        body,
-        query,
-        headers: { ...authHeaders, ...connectorHeaders },
-      });
+      return this.makeHttpRequest(
+        kibanaUrl,
+        {
+          method,
+          path,
+          body,
+          query,
+          headers: { ...authHeaders, ...connectorHeaders },
+        },
+        fetcherOptions
+      );
     }
   }
 
@@ -185,7 +196,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       body?: any;
       query?: any;
       headers?: Record<string, string>;
-    }
+    },
+    fetcherOptions?: Record<string, any>
   ): Promise<any> {
     const { method, path, body, query, headers = {} } = requestConfig;
 
@@ -196,18 +208,110 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       fullUrl = `${fullUrl}?${queryString}`;
     }
 
-    const response = await fetch(fullUrl, {
+    // Build fetch options
+    const fetchOptions: RequestInit = {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
-    });
+    };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    // Apply undici Agent with all fetcher options
+    if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
+      const { Agent } = await import('undici');
+      const {
+        skip_ssl_verification,
+        follow_redirects,
+        max_redirects,
+        keep_alive,
+        timeout,
+        retry,
+        ...otherOptions
+      } = fetcherOptions;
+
+      const agentOptions: any = { ...otherOptions };
+
+      // Map our options to undici Agent options
+      if (skip_ssl_verification) {
+        agentOptions.connect = { ...(agentOptions.connect || {}), rejectUnauthorized: false };
+      }
+      if (max_redirects !== undefined) {
+        agentOptions.maxRedirections = max_redirects;
+      }
+      if (keep_alive !== undefined) {
+        agentOptions.keepAliveTimeout = keep_alive ? 60000 : 0;
+        agentOptions.keepAliveMaxTimeout = keep_alive ? 600000 : 0;
+      }
+
+      (fetchOptions as any).dispatcher = new Agent(agentOptions);
+
+      // Handle redirect at fetch level
+      if (follow_redirects === false) {
+        fetchOptions.redirect = 'manual';
+      }
     }
 
-    const responseData = await response.json();
-    return responseData;
+    // Setup timeout if configured
+    let timeoutId: NodeJS.Timeout | undefined;
+    if (fetcherOptions?.timeout) {
+      const controller = new AbortController();
+      timeoutId = setTimeout(() => controller.abort(), fetcherOptions.timeout);
+      fetchOptions.signal = controller.signal;
+    }
+
+    // Execute with retry logic
+    return this.executeWithRetry(fullUrl, fetchOptions, fetcherOptions?.retry, timeoutId);
+  }
+
+  private async executeWithRetry(
+    url: string,
+    fetchOptions: RequestInit,
+    retryConfig?: Record<string, any>,
+    timeoutId?: NodeJS.Timeout
+  ): Promise<any> {
+    const maxAttempts = retryConfig?.attempts ?? 1;
+    const retryDelay = retryConfig?.delay ?? 1000;
+    const backoffStrategy = retryConfig?.backoff ?? 'linear';
+    const retryOnStatuses = retryConfig?.retryOn ?? [502, 503, 504];
+
+    let lastError: any;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const response = await fetch(url, fetchOptions);
+
+        if (timeoutId) clearTimeout(timeoutId);
+
+        // Retry on specific status codes
+        if (!response.ok && attempt < maxAttempts - 1 && retryOnStatuses.includes(response.status)) {
+          const delay =
+            backoffStrategy === 'exponential' ? retryDelay * Math.pow(2, attempt) : retryDelay;
+          this.workflowLogger.logInfo(
+            `Retrying request (attempt ${attempt + 1}/${maxAttempts}) after ${delay}ms due to status ${response.status}`,
+            { event: { action: 'kibana-action', outcome: 'unknown' }, tags: ['kibana', 'retry'] }
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          continue;
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        lastError = error;
+        if (timeoutId) clearTimeout(timeoutId);
+
+        if (attempt === maxAttempts - 1) throw error;
+
+        const delay =
+          backoffStrategy === 'exponential' ? retryDelay * Math.pow(2, attempt) : retryDelay;
+        this.workflowLogger.logInfo(
+          `Retrying request (attempt ${attempt + 1}/${maxAttempts}) after ${delay}ms due to error`,
+          { event: { action: 'kibana-action', outcome: 'unknown' }, tags: ['kibana', 'retry'] }
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+    throw lastError;
   }
 }

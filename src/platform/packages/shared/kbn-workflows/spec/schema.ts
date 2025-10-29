@@ -231,6 +231,24 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         body: z.any().optional(),
         headers: z.record(z.string(), z.string()).optional(),
       }),
+      // Fetcher configuration for HTTP request customization
+      fetcher: z
+        .object({
+          skip_ssl_verification: z.boolean().optional(),
+          timeout: z.number().optional(),
+          follow_redirects: z.boolean().optional(),
+          max_redirects: z.number().optional(),
+          keep_alive: z.boolean().optional(),
+          retry: z
+            .object({
+              attempts: z.number().optional(),
+              delay: z.number().optional(),
+              backoff: z.enum(['linear', 'exponential']).optional(),
+              retryOn: z.array(z.number()).optional(),
+            })
+            .optional(),
+        })
+        .optional(),
     }),
     // Sugar syntax for common Kibana operations
     z
@@ -251,6 +269,24 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         page: z.number().optional(),
         perPage: z.number().optional(),
         status: z.string().optional(),
+        // Fetcher configuration for HTTP request customization
+        fetcher: z
+          .object({
+            skip_ssl_verification: z.boolean().optional(),
+            timeout: z.number().optional(),
+            follow_redirects: z.boolean().optional(),
+            max_redirects: z.number().optional(),
+            keep_alive: z.boolean().optional(),
+            retry: z
+              .object({
+                attempts: z.number().optional(),
+                delay: z.number().optional(),
+                backoff: z.enum(['linear', 'exponential']).optional(),
+                retryOn: z.array(z.number()).optional(),
+              })
+              .optional(),
+          })
+          .optional(),
       })
       .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
   ]),
