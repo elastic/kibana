@@ -179,12 +179,12 @@ describe('getVariableSuggestions', () => {
       expect(suggestions).toHaveLength(4);
     });
 
-    it('should not return all suggestions when lastPathSegment is null but fullKey is present', () => {
+    it('should not return all suggestions when we already inside a nested property', () => {
       const context = createMockContext({
         contextSchema: schema,
         lineParseResult: createVariableLineParseResult({
-          fullKey: 'apiUrl',
-          lastPathSegment: null,
+          fullKey: 'docs.apiUrl',
+          lastPathSegment: 'apiUrl',
         }),
       });
 
