@@ -188,6 +188,20 @@
           },
           {
             "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLControlState.singleSelect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "singleSelect",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
             "id": "def-common.ESQLControlState.title",
             "type": "string",
             "tags": [],
@@ -320,7 +334,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "string | number"
+              "string | number | (string | number)[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
             "deprecated": false,

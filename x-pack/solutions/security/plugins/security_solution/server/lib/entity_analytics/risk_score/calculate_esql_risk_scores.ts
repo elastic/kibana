@@ -45,8 +45,8 @@ export const calculateScoresWithESQL = async (
     logger: Logger;
     experimentalFeatures: ExperimentalFeatures;
   } & CalculateScoresParams & {
-      filters?: Array<{ entity_types: string[]; filter: string }>;
-    }
+    filters?: Array<{ entity_types: string[]; filter: string }>;
+  }
 ): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const { identifierType, logger, esClient } = params;
@@ -76,10 +76,12 @@ export const calculateScoresWithESQL = async (
           `Executing ESQL Risk Score query for ${entityType}:\n${JSON.stringify(query)}`
         );
 
+        let error: unknown = null;
         const response = await esClient
           .search<never, RiskScoreCompositeBuckets>(query)
           .catch((e) => {
             logger.error(`Error executing composite query for ${entityType}: ${e.message}`);
+            error = e;
             return null;
           });
 
@@ -87,6 +89,7 @@ export const calculateScoresWithESQL = async (
           entityType,
           response,
           query,
+          error,
         };
       })
     );
@@ -104,12 +107,50 @@ export const calculateScoresWithESQL = async (
       }
     });
 
+    // Check if all queries that had errors failed due to index_not_found_exception
+    const errorsPresent = responses.filter(({ error }) => error).length;
+    const indexNotFoundErrors = responses.filter(({ error }) => {
+      if (!error) return false;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return (
+        errorMessage.includes('index_not_found_exception') ||
+        errorMessage.includes('no such index') ||
+        errorMessage.includes('NoShardAvailableActionException')
+      );
+    }).length;
+
+    // If we have no aggregations, return empty scores if:
+    // 1. All queries that had errors were index-not-found errors
+    // 2. OR there were no errors at all (valid index pattern with no data)
+    const shouldReturnEmptyScores =
+      errorsPresent === 0 || (errorsPresent > 0 && errorsPresent === indexNotFoundErrors);
+
     if (Object.keys(combinedAggregations).length === 0) {
+      if (shouldReturnEmptyScores) {
+        return {
+          after_keys: {},
+          scores: {
+            host: [],
+            user: [],
+            service: [],
+          },
+        };
+      }
+      // Log the actual errors for debugging
+      responses.forEach(({ entityType, error }) => {
+        if (error) {
+          logger.error(
+            `Query failed for ${entityType}: ${error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      });
+      // Otherwise, throw an error as before
       throw new Error('No aggregations in any composite response');
     }
 
     const promises = toEntries(combinedAggregations as Record<string, unknown>).map(
-      ([entityType, aggregationData]: [string, unknown]) => {
+      async ([entityType, aggregationData]: [string, unknown]) => {
         const { buckets, after_key: afterKey } = aggregationData as {
           buckets: Array<{ key: Record<string, string> }>;
           after_key?: Record<string, string>;
@@ -135,7 +176,8 @@ export const calculateScoresWithESQL = async (
           entityType as EntityType,
           bounds,
           params.alertSampleSizePerShard || 10000,
-          params.pageSize
+          params.pageSize,
+          params.index
         );
 
         const entityFilter = getFilters(params, entityType as EntityType);
@@ -153,6 +195,8 @@ export const calculateScoresWithESQL = async (
               identifierField: (EntityTypeToIdentifierField as Record<string, string>)[entityType],
               logger,
               now,
+              identifierType: entityType as EntityType,
+              weights: params.weights,
             });
           })
           .then((scores: EntityRiskScoreRecord[]): ESQLResults[number] => {
@@ -286,11 +330,12 @@ export const getESQL = (
     upper?: string;
   },
   sampleSize: number,
-  pageSize: number
+  pageSize: number,
+  index: string = '.alerts-security.alerts-default'
 ) => {
   const identifierField = EntityTypeToIdentifierField[entityType];
 
-  const lower = afterKeys.lower ? `${identifierField} >= ${afterKeys.lower}` : undefined;
+  const lower = afterKeys.lower ? `${identifierField} > ${afterKeys.lower}` : undefined;
   const upper = afterKeys.upper ? `${identifierField} <= ${afterKeys.upper}` : undefined;
   if (!lower && !upper) {
     throw new Error('Either lower or upper after key must be provided for pagination');
@@ -298,7 +343,7 @@ export const getESQL = (
   const rangeClause = [lower, upper].filter(Boolean).join(' and ');
 
   const query = /* SQL */ `
-  FROM .alerts-security.alerts-default METADATA _index
+  FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
@@ -321,41 +366,42 @@ export const getESQL = (
 
 export const buildRiskScoreBucket =
   (entityType: EntityType, index: string) =>
-  (row: FieldValue[]): RiskScoreBucket => {
-    const [count, score, _inputs, entity] = row as [
-      number,
-      number,
-      string | string[], // ES Multivalue nonsense: if it's just one value we get the value, if it's multiple we get an array
-      string
-    ];
+    (row: FieldValue[]): RiskScoreBucket => {
+      const [count, score, _inputs, entity] = row as [
+        number,
+        number,
+        string | string[], // ES Multivalue nonsense: if it's just one value we get the value, if it's multiple we get an array
+        string
+      ];
 
-    const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
-      const parsedRiskInputData = JSON.parse(input);
-      const value = parseFloat(parsedRiskInputData.score);
-      const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
+      const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
+        const parsedRiskInputData = JSON.parse(input);
+        const value = parseFloat(parsedRiskInputData.risk_score);
+        const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
+        const { risk_score: _, ...otherFields } = parsedRiskInputData;
+        return {
+          ...otherFields,
+          score: value,
+          contribution: currentScore / RIEMANN_ZETA_VALUE,
+          index,
+        };
+      });
+
       return {
-        ...parsedRiskInputData,
-        score: value,
-        contribution: currentScore / RIEMANN_ZETA_VALUE,
-        index,
-      };
-    });
-
-    return {
-      key: { [EntityTypeToIdentifierField[entityType]]: entity },
-      doc_count: count,
-      top_inputs: {
-        doc_count: inputs.length,
-        risk_details: {
-          value: {
-            score,
-            normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
-            notes: [],
-            category_1_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
-            category_1_count: 1,
-            risk_inputs: inputs,
+        key: { [EntityTypeToIdentifierField[entityType]]: entity },
+        doc_count: count,
+        top_inputs: {
+          doc_count: inputs.length,
+          risk_details: {
+            value: {
+              score,
+              normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
+              notes: [],
+              category_1_score: score, // Don't normalize here - will be normalized in calculate_risk_scores.ts
+              category_1_count: count,
+              risk_inputs: inputs,
+            },
           },
         },
-      },
+      };
     };
-  };

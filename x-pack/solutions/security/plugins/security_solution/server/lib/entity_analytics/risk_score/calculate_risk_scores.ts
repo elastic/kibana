@@ -55,22 +55,32 @@ const formatForResponse = ({
   now,
   identifierField,
   includeNewFields,
+  globalWeight,
 }: {
   bucket: RiskScoreBucket;
   criticality?: AssetCriticalityRecord;
   now: string;
   identifierField: string;
   includeNewFields: boolean;
+  globalWeight?: number;
 }): EntityRiskScoreRecord => {
   const riskDetails = bucket.top_inputs.risk_details;
 
+  // Apply global weight to the score if provided
+  const weightedScore =
+    globalWeight !== undefined ? riskDetails.value.score * globalWeight : riskDetails.value.score;
+  const weightedNormalizedScore =
+    globalWeight !== undefined
+      ? riskDetails.value.normalized_score * globalWeight
+      : riskDetails.value.normalized_score;
+
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   const normalizedScoreWithCriticality = applyCriticalityToScore({
-    score: riskDetails.value.normalized_score,
+    score: weightedNormalizedScore,
     modifier: criticalityModifier,
   });
   const calculatedLevel = getRiskLevel(normalizedScoreWithCriticality);
-  const categoryTwoScore = normalizedScoreWithCriticality - riskDetails.value.normalized_score;
+  const categoryTwoScore = normalizedScoreWithCriticality - weightedNormalizedScore;
   const categoryTwoCount = criticalityModifier ? 1 : 0;
 
   const newFields = {
@@ -85,7 +95,7 @@ const formatForResponse = ({
     id_field: identifierField,
     id_value: bucket.key[identifierField],
     calculated_level: calculatedLevel,
-    calculated_score: max10DecimalPlaces(riskDetails.value.score),
+    calculated_score: max10DecimalPlaces(weightedScore),
     calculated_score_norm: max10DecimalPlaces(normalizedScoreWithCriticality),
     category_1_score: max10DecimalPlaces(riskDetails.value.category_1_score / RIEMANN_ZETA_VALUE), // normalize value to be between 0-100
     category_1_count: riskDetails.value.category_1_count,
@@ -220,12 +230,16 @@ export const processScores = async ({
   identifierField,
   logger,
   now,
+  identifierType,
+  weights,
 }: {
   assetCriticalityService: AssetCriticalityService;
   buckets: RiskScoreBucket[];
   identifierField: string;
   logger: Logger;
   now: string;
+  identifierType?: EntityType;
+  weights?: RiskScoreWeights;
 }): Promise<EntityRiskScoreRecord[]> => {
   if (buckets.length === 0) {
     return [];
@@ -245,12 +259,23 @@ export const processScores = async ({
     );
   }
 
+  const globalWeight = identifierType
+    ? getGlobalWeightForIdentifierType(identifierType, weights)
+    : undefined;
+
   return buckets.map((bucket) => {
     const criticality = criticalities.find(
       (c) => c.id_field === identifierField && c.id_value === bucket.key[identifierField]
     );
 
-    return formatForResponse({ bucket, criticality, identifierField, now, includeNewFields: true });
+    return formatForResponse({
+      bucket,
+      criticality,
+      identifierField,
+      now,
+      includeNewFields: true,
+      globalWeight,
+    });
   });
 };
 

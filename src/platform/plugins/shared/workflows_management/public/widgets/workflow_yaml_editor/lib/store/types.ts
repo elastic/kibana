@@ -10,33 +10,44 @@
 import type { EnhancedStore } from '@reduxjs/toolkit';
 import type YAML from 'yaml';
 import type { LineCounter } from 'yaml';
-import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowDetailDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { WorkflowZodSchemaLooseType } from '../../../../../common/schema';
-import type { ConnectorsResponse } from '../../../../entities/connectors/model/use_available_connectors';
+import type { ConnectorsResponse } from '../../../../entities/connectors/model/types';
 
-// State interface - only serializable data
-export interface WorkflowEditorState {
-  isInitialized?: boolean;
-  yamlString?: string;
-  connectors?: ConnectorsResponse; // This will hold connector types info
-  schemaLoose: WorkflowZodSchemaLooseType;
-  computed?: {
-    yamlDocument?: YAML.Document; // This will be handled specially for serialization
-    yamlLineCounter?: LineCounter;
-    workflowLookup?: WorkflowLookup;
-    workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
-    workflowDefinition?: WorkflowYaml | null;
-  };
+export interface WorkflowDetailState {
+  /** The yaml string used by the workflow yaml editor */
+  yamlString: string;
+  /** The persisted workflow detail data */
+  workflow?: WorkflowDetailDto;
+  /** The computed data derived from the workflow yaml string, it is updated by the workflowComputationMiddleware */
+  computed?: ComputedData;
+  /** The step id that is focused in the workflow yaml editor */
   focusedStepId?: string;
+  /** The step id that is highlighted in the workflow yaml editor */
   highlightedStepId?: string;
+  /** The step executions for the workflow */
   stepExecutions?: WorkflowStepExecutionDto[];
+  /** The modal to test the workflow is open */
+  isTestModalOpen: boolean;
+  /** The connectors data */
+  connectors?: ConnectorsResponse;
+  /** The loose schema for the workflow */
+  schemaLoose: WorkflowZodSchemaLooseType;
+}
+
+export interface ComputedData {
+  yamlDocument?: YAML.Document; // This will be handled specially for serialization
+  yamlLineCounter?: LineCounter;
+  workflowLookup?: WorkflowLookup;
+  workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
+  workflowDefinition?: WorkflowYaml | null;
 }
 
 // Store types (will be properly typed when store.ts is imported)
 export interface RootState {
-  workflow: WorkflowEditorState;
+  detail: WorkflowDetailState;
 }
-export type WorkflowEditorStore = EnhancedStore<RootState>;
-export type AppDispatch = WorkflowEditorStore['dispatch'];
+export type WorkflowsStore = EnhancedStore<RootState>;
+export type AppDispatch = WorkflowsStore['dispatch'];
