@@ -79,7 +79,6 @@ export function InternalDashboardTopNav({
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
-  const { showWriteControls } = getDashboardCapabilities();
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -217,6 +216,7 @@ export function InternalDashboardTopNav({
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
       !forceHide && (dataService.query.filterManager.getFilters().length > 0 || !fullScreenMode);
 
+    const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
     const showQueryInput = Boolean(forceHideUnifiedSearch)
       ? false
       : shouldShowNavBarComponent(
@@ -226,7 +226,6 @@ export function InternalDashboardTopNav({
       ? false
       : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
-    const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
     const showSearchBar = showQueryInput || showDatePicker || showFilterBar;
     return {
       showTopNavMenu,
@@ -279,6 +278,7 @@ export function InternalDashboardTopNav({
       });
     }
 
+    const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && dashboardApi.isManaged) {
       const badgeProps = {
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
