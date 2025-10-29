@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { ResponseActionRequestTag } from '../../constants';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
@@ -88,6 +89,8 @@ import type {
   UploadedFileInfo,
   WithAllKeys,
   ResponseActionScriptsApiResponse,
+  ResponseActionMemoryDumpParameters,
+  ResponseActionMemoryDumpOutputContent,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -1029,6 +1032,15 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>> {
     throw new ResponseActionsNotSupportedError('cancel');
+  }
+
+  public async memoryDump(
+    actionRequest: OmitUnsupportedAttributes<MemoryDumpActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
+  > {
+    throw new ResponseActionsNotSupportedError('memory-dump');
   }
 
   public async getCustomScripts(

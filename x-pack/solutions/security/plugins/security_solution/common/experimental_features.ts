@@ -46,6 +46,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
+   * Memory Dump response actions support for Elastic Defend.
+   * Release: v9.3
+   */
+  responseActionsEndpointMemoryDump: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,

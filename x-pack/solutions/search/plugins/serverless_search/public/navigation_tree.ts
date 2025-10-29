@@ -27,12 +27,6 @@ const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
 const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.performance', {
   defaultMessage: 'Performance',
 });
-const MANAGE_ORG_MEMBERS_TITLE = i18n.translate(
-  'xpack.serverlessSearch.nav.mngt.access.userAndRoles',
-  {
-    defaultMessage: 'Manage Organization Members',
-  }
-);
 const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
   'xpack.serverlessSearch.nav.mngt.alertsAndInsights',
   {
@@ -363,7 +357,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                       { link: 'management:roles', breadcrumbStatus: 'hidden' },
                       {
                         cloudLink: 'userAndRoles',
-                        title: MANAGE_ORG_MEMBERS_TITLE,
                       },
                     ],
                   },
@@ -457,12 +450,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   },
                   {
                     cloudLink: 'userAndRoles',
-                    title: i18n.translate(
-                      'xpack.serverlessSearch.nav.adminAndSettings.org.members.title',
-                      {
-                        defaultMessage: 'Members',
-                      }
-                    ),
                   },
                 ],
               },

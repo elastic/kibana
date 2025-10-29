@@ -467,9 +467,6 @@ export const createNavigationTree = ({
                   },
                   {
                     cloudLink: 'userAndRoles',
-                    title: i18n.translate('xpack.serverlessObservability.navLinks.usersAndRoles', {
-                      defaultMessage: 'Members',
-                    }),
                   },
                 ],
               },
@@ -598,10 +595,6 @@ export const createNavigationTree = ({
                       { link: 'management:roles', breadcrumbStatus: 'hidden' },
                       {
                         cloudLink: 'userAndRoles',
-                        title: i18n.translate(
-                          'xpack.serverlessObservability.navLinks.projectSettings.mngt.usersAndRoles',
-                          { defaultMessage: 'Manage organization members' }
-                        ),
                       },
                     ],
                   },
