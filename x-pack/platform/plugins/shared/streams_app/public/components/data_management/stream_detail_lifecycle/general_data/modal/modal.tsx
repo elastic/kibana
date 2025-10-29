@@ -161,7 +161,7 @@ export function EditLifecycleModal({
                         'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
                         {
                           defaultMessage:
-                            '/Use the stream’s index template retention configuration',
+                            'Use the stream’s index template retention configuration',
                         }
                       )
                 }

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { EditLifecycleModal } from './modal';
 
@@ -37,8 +37,8 @@ describe('EditLifecycleModal', () => {
           lifecycle: ingestLifecycle,
           processing: { steps: [] },
           settings: {},
-          wired: { fields: {}, routing: [] },
-        },
+          ...(isWired ? { wired: { fields: {}, routing: [] } } : {}),
+        } as any, // cast for test simplification against schema union
       },
       effective_lifecycle: effectiveLifecycle,
       effective_settings: {},
@@ -87,6 +87,9 @@ describe('EditLifecycleModal', () => {
       { name: 'policy1' },
       { name: 'policy2' },
     ] as PolicyFromES[]);
+    // Override the runtime type guard to treat provided test definitions with a wired ingest block as wired streams.
+    // This ensures the component's isWired branch is exercised in tests. Root determination still follows real isRoot().
+    (Streams as any).WiredStream.GetResponse.is = jest.fn((def: any) => !!def?.stream?.ingest?.wired);
   });
 
   describe('Modal Structure', () => {
