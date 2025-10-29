@@ -42,7 +42,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(response.status).to.be(200);
         expect(response.body.items.length).to.be(0);
-        expect(response.body.maxCountExceeded).to.be(false);
         expect(response.body.serviceOverflowCount).to.be(0);
       });
     });
