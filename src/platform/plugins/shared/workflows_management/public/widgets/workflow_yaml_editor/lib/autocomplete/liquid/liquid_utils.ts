@@ -8,7 +8,10 @@
  */
 
 import type { monaco } from '@kbn/monaco';
-import { LIQUID_BLOCK_END_REGEX, LIQUID_BLOCK_START_REGEX } from '../../../../../common/lib/regex';
+import {
+  LIQUID_BLOCK_END_REGEX,
+  LIQUID_BLOCK_START_REGEX,
+} from '../../../../../../common/lib/regex';
 
 /**
  * Checks if the current position is inside a liquid block by looking for {%- liquid ... -%} tags

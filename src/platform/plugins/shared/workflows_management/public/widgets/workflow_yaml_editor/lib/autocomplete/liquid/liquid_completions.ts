@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { AutocompleteContext } from './autocomplete/autocomplete.types';
+import type { AutocompleteContext } from '../autocomplete.types';
 
 // Common Liquid filters with descriptions
 export const LIQUID_FILTERS = [

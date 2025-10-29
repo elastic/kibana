@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AutocompleteContext } from './autocomplete.types';
 import { getConnectorIdSuggestions } from './get_connector_id_suggestions';
+import type { AutocompleteContext } from '../autocomplete.types';
 
 describe('getConnectorIdSuggestions', () => {
   it('should return an empty array if the line parse result is null', () => {

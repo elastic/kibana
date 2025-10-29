@@ -17,9 +17,9 @@ import {
   ParallelStepSchema,
   WaitStepSchema,
 } from '@kbn/workflows';
-import { getCachedAllConnectors } from '../connectors_cache';
-import { generateBuiltInStepSnippet } from '../snippets/generate_builtin_step_snippet';
-import { generateConnectorSnippet } from '../snippets/generate_connector_snippet';
+import { getCachedAllConnectors } from '../../connectors_cache';
+import { generateBuiltInStepSnippet } from '../../snippets/generate_builtin_step_snippet';
+import { generateConnectorSnippet } from '../../snippets/generate_connector_snippet';
 
 // Cache for connector type suggestions to avoid recalculating on every keystroke
 const connectorTypeSuggestionsCache = new Map<string, monaco.languages.CompletionItem[]>();

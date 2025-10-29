@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AutocompleteContext } from './autocomplete.types';
-import { getConnectorIdSuggestionsItems } from '../snippets/generate_connector_snippet';
+import { getConnectorIdSuggestionsItems } from '../../snippets/generate_connector_snippet';
+import type { AutocompleteContext } from '../autocomplete.types';
 
 export function getConnectorIdSuggestions({
   line,

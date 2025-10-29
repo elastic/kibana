@@ -13,7 +13,7 @@ import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
 import type { AutocompleteContext, MinimalWorkflowDetailState } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
-import { isInsideLiquidBlock } from './liquid_utils';
+import { isInsideLiquidBlock } from './liquid/liquid_utils';
 import { parseLineForCompletion } from './parse_line_for_completion';
 import { isInScheduledTriggerWithBlock } from './triggers_utils';
 import { getCurrentPath } from '../../../../../common/lib/yaml';

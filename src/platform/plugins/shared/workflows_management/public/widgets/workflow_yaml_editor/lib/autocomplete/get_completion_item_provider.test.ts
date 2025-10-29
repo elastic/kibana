@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { getFakeAutocompleteContextParams } from './autocomplete/build_autocomplete_context.test';
+import { getFakeAutocompleteContextParams } from './build_autocomplete_context.test';
 import { getCompletionItemProvider } from './get_completion_item_provider';
 
 async function getSuggestions(yamlContent: string): Promise<monaco.languages.CompletionItem[]> {

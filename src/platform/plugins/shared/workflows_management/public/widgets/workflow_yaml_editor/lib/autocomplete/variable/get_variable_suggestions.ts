@@ -9,10 +9,10 @@
 
 import type { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
-import type { AutocompleteContext } from './autocomplete.types';
-import { isVariableLineParseResult } from './parse_line_for_completion';
-import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
-import { getDetailedTypeDescription } from '../../../../../common/lib/zod';
+import { getDetailedTypeDescription } from '../../../../../../common/lib/zod';
+import type { AutocompleteContext } from '../autocomplete.types';
+import { isVariableLineParseResult } from '../parse_line_for_completion';
+import { wrapAsMonacoSuggestion } from '../wrap_as_monaco_suggestion';
 
 export function getVariableSuggestions(autocompleteContext: AutocompleteContext) {
   const {
@@ -31,20 +31,15 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
 
   const suggestions: monaco.languages.CompletionItem[] = [];
 
-  console.log('getVariableSuggestions - lineParseResult:', lineParseResult);
-
   // We're inside a variable expression, provide context-based completions
   if (contextSchema instanceof z.ZodObject) {
     const contextKeys = Object.keys(contextSchema.shape);
-    console.log('contextKeys:', contextKeys);
-    console.log('lastPathSegment:', lineParseResult.lastPathSegment);
 
     // Filter based on what the user has typed so far
     const filteredKeys =
       lineParseResult.lastPathSegment !== null
         ? contextKeys.filter((key) => key.startsWith(lineParseResult.lastPathSegment ?? ''))
         : contextKeys;
-    console.log('filteredKeys:', filteredKeys);
 
     for (const key of filteredKeys) {
       const keySchema = contextSchema.shape[key];

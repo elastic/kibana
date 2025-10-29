@@ -8,8 +8,8 @@
  */
 
 import type { AutocompleteContext } from './autocomplete.types';
-import { getConnectorTypeSuggestions } from './get_connector_type_suggestions';
-import { getTriggerTypeSuggestions } from './get_trigger_type_suggestions';
+import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
+import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
 import { isInTriggersContext } from './triggers_utils';
 
 export function getDirectTypeSuggestions(autocompleteContext: AutocompleteContext) {

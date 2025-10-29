@@ -14,7 +14,7 @@ import {
   ManualTriggerSchema,
   ScheduledTriggerSchema,
 } from '@kbn/workflows';
-import { generateTriggerSnippet } from '../snippets/generate_trigger_snippet';
+import { generateTriggerSnippet } from '../../snippets/generate_trigger_snippet';
 
 /**
  * Get trigger type suggestions with snippets

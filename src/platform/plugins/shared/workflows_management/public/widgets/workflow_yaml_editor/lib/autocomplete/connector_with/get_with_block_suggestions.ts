@@ -9,12 +9,12 @@
 
 import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
-import type { ExtendedAutocompleteContext } from './autocomplete.types';
 import { getConnectorParamsSchema } from './get_connector_with_schema';
 import {
   getEnhancedTypeInfo,
   getExistingParametersInWithBlock,
-} from '../snippets/generate_connector_snippet';
+} from '../../snippets/generate_connector_snippet';
+import type { ExtendedAutocompleteContext } from '../autocomplete.types';
 
 // eslint-disable-next-line complexity
 export function getWithBlockSuggestions(autocompleteContext: ExtendedAutocompleteContext) {
