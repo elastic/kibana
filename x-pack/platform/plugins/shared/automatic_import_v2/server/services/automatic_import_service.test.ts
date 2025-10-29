@@ -103,7 +103,6 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should use internal repository from createInternalRepository', async () => {
-      const mockInternalRepo = mockSavedObjectsStart.createInternalRepository();
 
       await service.initialize(mockSecurity, mockSavedObjectsStart);
 

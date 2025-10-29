@@ -11,7 +11,6 @@ import type {
   KibanaRequest,
   LoggerFactory,
   SavedObject,
-  SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsFindResponse,
