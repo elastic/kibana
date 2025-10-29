@@ -539,9 +539,17 @@ export class CstToAstConverter {
     const indexPatternOrSubqueryCtxs = indexPatternAndMetadataCtx.indexPatternOrSubquery_list();
     const sources = indexPatternOrSubqueryCtxs
       .map((indexPatternOrSubqueryCtx) => {
-        // ToDo: handle subqueries when implemented
         const indexPatternCtx = indexPatternOrSubqueryCtx.indexPattern();
-        return indexPatternCtx ? this.toSource(indexPatternCtx) : null;
+        if (indexPatternCtx) {
+          return this.toSource(indexPatternCtx);
+        }
+
+        const subqueryCtx = indexPatternOrSubqueryCtx.subquery();
+        if (subqueryCtx) {
+          return this.fromSubquery(subqueryCtx);
+        }
+
+        return null;
       })
       .filter((source): source is ast.ESQLSource => source !== null);
 
@@ -557,6 +565,49 @@ export class CstToAstConverter {
     }
 
     return command;
+  }
+
+  private fromSubquery(ctx: cst.SubqueryContext): ast.ESQLSource {
+    const fromCommandCtx = ctx.fromCommand();
+    const processingCommandCtxs = ctx.processingCommand_list();
+    const commands: ast.ESQLCommand[] = [];
+
+    if (fromCommandCtx) {
+      const fromCommand = this.fromFromCommand(fromCommandCtx);
+
+      if (fromCommand) {
+        commands.push(fromCommand);
+      }
+    }
+
+    for (const procCmdCtx of processingCommandCtxs) {
+      const procCommand = this.fromProcessingCommand(procCmdCtx);
+
+      if (procCommand) {
+        commands.push(procCommand);
+      }
+    }
+
+    const query: ast.ESQLAstQueryExpression = {
+      type: 'query',
+      name: '',
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception),
+      commands,
+    };
+
+    const querySource: ast.ESQLSource = {
+      type: 'source',
+      sourceType: 'subquery',
+      name: '',
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: query.incomplete,
+      subquery: query,
+    };
+
+    return querySource;
   }
 
   // ---------------------------------------------------------------------- ROW

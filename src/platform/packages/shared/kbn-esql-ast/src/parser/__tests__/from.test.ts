@@ -8,6 +8,7 @@
  */
 
 import { parse } from '..';
+import type { ESQLSource } from '../../types';
 
 describe('FROM', () => {
   describe('correctly formatted', () => {
@@ -375,6 +376,102 @@ describe('FROM', () => {
       const { errors } = parse(text);
 
       expect(errors.length > 0).toBe(true);
+    });
+  });
+
+  describe('subqueries', () => {
+    it('can parse simple subquery', () => {
+      const text = 'FROM index1, (FROM index2 | WHERE a > 10)';
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toMatchObject([
+        {
+          type: 'command',
+          name: 'from',
+          args: [
+            {
+              type: 'source',
+              name: 'index1',
+            },
+            {
+              type: 'source',
+              sourceType: 'subquery',
+              subquery: {
+                type: 'query',
+                commands: [
+                  { type: 'command', name: 'from' },
+                  { type: 'command', name: 'where' },
+                ],
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('can parse subquery as only source', () => {
+      const text = 'FROM (FROM index1 | WHERE x > 0)';
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      expect(ast[0].args).toHaveLength(1);
+      expect(ast[0].args[0]).toMatchObject({
+        type: 'source',
+        sourceType: 'subquery',
+        subquery: {
+          type: 'query',
+          commands: [{ name: 'from' }, { name: 'where' }],
+        },
+      });
+    });
+
+    it('can parse subquery followed by main query pipes', () => {
+      const text = 'FROM (FROM index1 | WHERE a > 0) | WHERE b < 10 | LIMIT 5';
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toHaveLength(3);
+      expect(ast[0].name).toBe('from');
+      expect(ast[1].name).toBe('where');
+      expect(ast[2].name).toBe('limit');
+    });
+
+    it('can parse nested subquery', () => {
+      const text = 'FROM (FROM (FROM index))';
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      const outerSubquery = ast[0].args[0] as ESQLSource;
+
+      expect(outerSubquery.sourceType).toBe('subquery');
+
+      const innerSubquery = outerSubquery.subquery!.commands[0].args[0] as ESQLSource;
+
+      expect(innerSubquery.sourceType).toBe('subquery');
+    });
+
+    describe('error cases', () => {
+      it('errors on unclosed subquery', () => {
+        const text = 'FROM (FROM index | WHERE a > 10';
+        const { errors } = parse(text);
+
+        expect(errors.length > 0).toBe(true);
+      });
+
+      it('errors on empty subquery', () => {
+        const text = 'FROM index, ()';
+        const { errors } = parse(text);
+
+        expect(errors.length > 0).toBe(true);
+      });
+
+      it('errors on subquery without FROM', () => {
+        const text = 'FROM (WHERE a > 10)';
+        const { errors } = parse(text);
+
+        expect(errors.length > 0).toBe(true);
+      });
     });
   });
 });

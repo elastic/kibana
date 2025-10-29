@@ -185,6 +185,19 @@ export namespace Builder {
       };
     }
 
+    export const subquery = (
+      queryExpression: ESQLAstQueryExpression,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLSource => {
+      return {
+        type: 'source',
+        sourceType: 'subquery',
+        name: '',
+        subquery: queryExpression,
+        ...Builder.parserFields(fromParser),
+      };
+    };
+
     export type ColumnTemplate = Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted' | 'parts'>;
 
     export const column = (

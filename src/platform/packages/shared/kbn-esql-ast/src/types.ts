@@ -340,7 +340,7 @@ export interface ESQLUnknownItem extends ESQLAstBaseItem {
 
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
-  sourceType: 'index' | 'policy';
+  sourceType: 'index' | 'policy' | 'subquery';
 
   /**
    * Represents the prefix part of the source identifier. Empty string if not
@@ -370,6 +370,15 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * ```
    */
   selector?: ESQLStringLiteral | undefined;
+
+  /**
+   * Represents a subquery when sourceType is 'query'.
+   *
+   * ```
+   * FROM index1, (FROM index2 | WHERE a > 10)
+   * ```
+   */
+  subquery?: ESQLAstQueryExpression | undefined;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {
