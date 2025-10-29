@@ -146,7 +146,7 @@ const addResultToValidation = (
   validation.result[field]!.isInvalid = true;
 };
 
-const validateValues = (values: ArtifactFormComponentProps['item']): ValidationResult => {
+export const validateValues = (values: ArtifactFormComponentProps['item']): ValidationResult => {
   let isValid: ValidationResult['isValid'] = true;
   const validation: ValidationResult = {
     isValid,
@@ -170,7 +170,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
   if (
     isAdvancedModeEnabled(values) &&
     (values.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
-      (e) => e.value === '' || !e.value.length
+      (e) => e.type !== 'nested' && (e.value === '' || !e.value.length)
     )
   ) {
     isValid = false;
