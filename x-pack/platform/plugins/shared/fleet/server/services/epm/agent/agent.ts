@@ -9,7 +9,12 @@ import Handlebars from '@kbn/handlebars';
 import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
-import type { PackagePolicyConfigRecord } from '../../../../common/types';
+import type {
+  PackageInfo,
+  PackagePolicyConfigRecord,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
+} from '../../../../common/types';
 import { PackagePolicyValidationError } from '../../../../common/errors';
 import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
@@ -19,12 +24,46 @@ import {
   getHandlebarsCompiledTemplateCache,
   setHandlebarsCompiledTemplateCache,
 } from '../packages/cache';
+import deepmerge from 'deepmerge';
 
 const handlebars = Handlebars.create();
 
-export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
+export function getMetaVariables(
+  pkg: Pick<PackageInfo, 'name' | 'title' | 'version'>,
+  input: PackagePolicyInput,
+  stream?: PackagePolicyInputStream
+) {
+  return {
+    // Package variables
+    package: {
+      name: pkg.name,
+      title: pkg.title,
+      version: pkg.version,
+    },
+    // Stream meta variables
+    stream: {
+      id: stream?.id || '',
+      data_stream: {
+        dataset: stream?.data_stream.dataset || '',
+        type: stream?.data_stream.type || '',
+      },
+    },
+    // Input meta variables
+    input: {
+      id: input?.id || '',
+    },
+  };
+}
+
+export type MetaVariable = ReturnType<typeof getMetaVariables>;
+
+export function compileTemplate(
+  variables: PackagePolicyConfigRecord,
+  metaVariable: MetaVariable,
+  templateStr: string
+) {
   const logger = appContextService.getLogger();
-  const { vars, yamlValues } = buildTemplateVariables(logger, variables);
+  const { vars, yamlValues } = buildTemplateVariables(logger, variables, metaVariable);
   let compiledTemplate: string;
   try {
     let template = getHandlebarsCompiledTemplateCache(templateStr);
@@ -103,9 +142,13 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRecord) {
+function buildTemplateVariables(
+  logger: Logger,
+  variables: PackagePolicyConfigRecord,
+  metaVariable: MetaVariable
+) {
   const yamlValues: { [k: string]: any } = {};
-  const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
+  let vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop();
@@ -144,6 +187,8 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
     }
     return acc;
   }, {} as { [k: string]: any });
+
+  vars = deepmerge(vars, metaVariable);
 
   return { vars, yamlValues };
 }
