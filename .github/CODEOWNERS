@@ -345,6 +345,7 @@ src/platform/packages/private/kbn-ftr-screenshot-filename @elastic/kibana-operat
 src/platform/packages/private/kbn-gen-ai-functional-testing @elastic/appex-ai-infra
 src/platform/packages/private/kbn-generate-csv @elastic/response-ops
 src/platform/packages/private/kbn-get-repo-files @elastic/kibana-operations
+src/platform/packages/private/kbn-global-redirect-app-links @elastic/appex-sharedux
 src/platform/packages/private/kbn-grid-layout @elastic/kibana-presentation
 src/platform/packages/private/kbn-handlebars @elastic/kibana-security
 src/platform/packages/private/kbn-hapi-mocks @elastic/kibana-core
@@ -671,8 +672,6 @@ src/platform/packages/shared/shared-ux/file/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/util @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/link/redirect_app/impl @elastic/appex-sharedux
-src/platform/packages/shared/shared-ux/link/redirect_app/mocks @elastic/appex-sharedux
-src/platform/packages/shared/shared-ux/link/redirect_app/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/types @elastic/appex-sharedux
