@@ -43,7 +43,7 @@ import {
 import { asyncForEach } from '@kbn/std';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { ControlWidth, StickyControlLayoutState } from '@kbn/controls-schemas';
+import type { StickyControlLayoutState } from '@kbn/controls-schemas';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
 import type { DashboardPanel } from '../../../server';
@@ -327,8 +327,8 @@ export function initializeLayoutManager(
       );
       return newPanel.uuid;
     } else {
-      const displaySettings = pick(existingControlData, 'grow', 'width');
-      const newPanel = await addPinnedPanel(panelPackage, displaySettings);
+      const prevLayoutState = pick(existingControlData, 'grow', 'width', 'order');
+      const newPanel = await addPinnedPanel(panelPackage, prevLayoutState);
       return newPanel.uuid;
     }
   };
@@ -385,7 +385,7 @@ export function initializeLayoutManager(
 
     newControls[uuid] = {
       type: controlToPin.type as StickyControlLayoutState['type'],
-      order: Object.keys(newControls).length,
+      order: controlToPin.order ?? Object.keys(newControls).length,
       width: controlToPin.width ?? DEFAULT_CONTROL_WIDTH,
       grow: controlToPin.grow ?? DEFAULT_CONTROL_GROW,
     };
@@ -398,17 +398,17 @@ export function initializeLayoutManager(
 
   const addPinnedPanel = async (
     panelPackage: PanelPackage,
-    passedDisplaySettings?: { grow?: boolean; width?: ControlWidth }
+    prevLayoutState?: Partial<StickyControlLayoutState>
   ) => {
     const newPanelUuid = createPanel(panelPackage);
     const { serializedState } = panelPackage;
-    const displaySettings = {
+    const layoutState = {
       ...(serializedState ? pick(serializedState.rawState, 'grow', 'width') : {}),
-      ...passedDisplaySettings,
+      ...prevLayoutState,
     };
     const panelToPin = {
       type: panelPackage.panelType,
-      ...displaySettings,
+      ...layoutState,
     };
     pinPanel(newPanelUuid, panelToPin);
     return (await getChildApi(newPanelUuid)) ?? { uuid: newPanelUuid };
