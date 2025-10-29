@@ -357,7 +357,7 @@ export const getESQL = (
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = TOP(input, 10, "desc")
     BY ${identifierField}
-    | SORT scores DESC
+    | SORT scores DESC, ${identifierField} ASC
     | LIMIT ${pageSize}
   `;
 
@@ -378,8 +378,9 @@ export const buildRiskScoreBucket =
       const parsedRiskInputData = JSON.parse(input);
       const value = parseFloat(parsedRiskInputData.risk_score);
       const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
+      const { risk_score: _, ...otherFields } = parsedRiskInputData;
       return {
-        ...parsedRiskInputData,
+        ...otherFields,
         score: value,
         contribution: currentScore / RIEMANN_ZETA_VALUE,
         index,
@@ -396,8 +397,8 @@ export const buildRiskScoreBucket =
             score,
             normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
             notes: [],
-            category_1_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
-            category_1_count: 1,
+            category_1_score: score, // Don't normalize here - will be normalized in calculate_risk_scores.ts
+            category_1_count: count,
             risk_inputs: inputs,
           },
         },
