@@ -218,10 +218,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     // Apply undici Agent with all fetcher options
     if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
       const { Agent } = await import('undici');
+
       const {
-        skip_ssl_verification,
-        follow_redirects,
-        max_redirects,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        skip_ssl_verification, // eslint-disable-next-line @typescript-eslint/naming-convention
+        follow_redirects, // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_redirects, // eslint-disable-next-line @typescript-eslint/naming-convention
         keep_alive,
         timeout,
         retry,
@@ -281,14 +283,21 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         if (timeoutId) clearTimeout(timeoutId);
 
         // Retry on specific status codes
-        if (!response.ok && attempt < maxAttempts - 1 && retryOnStatuses.includes(response.status)) {
+        if (
+          !response.ok &&
+          attempt < maxAttempts - 1 &&
+          retryOnStatuses.includes(response.status)
+        ) {
           const delay =
             backoffStrategy === 'exponential' ? retryDelay * Math.pow(2, attempt) : retryDelay;
           this.workflowLogger.logInfo(
-            `Retrying request (attempt ${attempt + 1}/${maxAttempts}) after ${delay}ms due to status ${response.status}`,
+            `Retrying request (attempt ${
+              attempt + 1
+            }/${maxAttempts}) after ${delay}ms due to status ${response.status}`,
             { event: { action: 'kibana-action', outcome: 'unknown' }, tags: ['kibana', 'retry'] }
           );
           await new Promise((resolve) => setTimeout(resolve, delay));
+          // eslint-disable-next-line no-continue
           continue;
         }
 
@@ -301,8 +310,24 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         lastError = error;
         if (timeoutId) clearTimeout(timeoutId);
 
+        // If this is the last attempt, throw
         if (attempt === maxAttempts - 1) throw error;
 
+        // Check if this is an HTTP error with a status code
+        const isHttpError = error instanceof Error && error.message.startsWith('HTTP ');
+        if (isHttpError) {
+          // Extract status code from error message
+          const statusMatch = error.message.match(/^HTTP (\d+):/);
+          if (statusMatch) {
+            const statusCode = parseInt(statusMatch[1], 10);
+            // Don't retry if status code is not in retryOn list
+            if (!retryOnStatuses.includes(statusCode)) {
+              throw error;
+            }
+          }
+        }
+
+        // Retry on network errors or retryable HTTP errors
         const delay =
           backoffStrategy === 'exponential' ? retryDelay * Math.pow(2, attempt) : retryDelay;
         this.workflowLogger.logInfo(
