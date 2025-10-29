@@ -161,6 +161,7 @@ export const useDashboardMenuItems = ({
         id: 'quick-save',
         iconType: 'save',
         emphasize: true,
+        fill: true,
         testId: 'dashboardQuickSaveMenuItem',
         disableButton: disableTopNav || isResetting,
         run: () => quickSaveDashboard(),

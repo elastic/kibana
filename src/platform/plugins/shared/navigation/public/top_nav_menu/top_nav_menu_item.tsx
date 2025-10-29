@@ -115,6 +115,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
   const btn = props.splitButtonProps ? (
     <SplitButton
       {...commonButtonProps}
+      fill={props.emphasize}
       {...props.splitButtonProps}
       onSecondaryButtonClick={handleSecondaryButtonClick}
       size="s"
