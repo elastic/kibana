@@ -6193,7 +6193,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-data-connectors@link:src/platform/packages/shared/deeplinks/data_sources":
+"@kbn/deeplinks-data-connectors@link:src/platform/packages/shared/deeplinks/data_connectors":
   version "0.0.0"
   uid ""
 
