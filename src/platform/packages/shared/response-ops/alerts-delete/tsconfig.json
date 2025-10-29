@@ -15,5 +15,6 @@
     "@kbn/alerting-types",
     "@kbn/core-notifications-browser",
     "@kbn/kibana-react-plugin",
+    "@kbn/react-query",
   ]
 }
