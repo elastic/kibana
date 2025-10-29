@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { skip } from 'rxjs';
+import { combineLatest, skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
@@ -52,6 +52,15 @@ export function startDashboardSearchSessionIntegration(
   const searchSessionIdChangeSubscription = sessionIdUrlChangeObservable
     ?.pipe(skip(1))
     .subscribe(() => dashboardApi.forceRefresh());
+
+  // TODO: Re-add `isFetchPaused$`
+  // const newSessionSubscription = combineLatest([
+  //   newSession$(dashboardApi),
+  //   dashboardApi.isFetchPaused$,
+  // ])
+  // .pipe(
+  //   filter(([, isFetchPaused]) => !isFetchPaused) // don't generate new search session until fetch is unpaused
+  // )
   const newSessionSubscription = newSession$(dashboardApi).subscribe(() => {
     const currentSearchSessionId = dashboardApi.searchSessionId$.value;
 
