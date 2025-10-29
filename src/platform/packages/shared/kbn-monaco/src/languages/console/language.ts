@@ -74,7 +74,8 @@ export const ConsoleLang: LangModuleType = {
             esqlSuggestions,
             queryText,
             false,
-            insideSingleQuotesQuery
+            insideSingleQuotesQuery,
+            true
           );
         } else if (actionsProvider.current) {
           return actionsProvider.current?.provideCompletionItems(model, position, context);

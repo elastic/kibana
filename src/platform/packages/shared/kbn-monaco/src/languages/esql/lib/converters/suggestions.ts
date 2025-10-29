@@ -15,12 +15,23 @@ import { offsetRangeToMonacoRange } from '../shared/utils';
 function escapeForStringLiteral(str: string): string {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
+// Dynamic time range parameters:
+// We compute start as (now - 15 minutes) and end as now at suggestion generation time.
+// Using ISO strings (UTC) wrapped in quotes to align with existing parameter conventions.
+function getDynamicTstartParam(): string {
+  const d = new Date(Date.now() - 15 * 60 * 1000); // subtract 15 minutes
+  return `"${d.toISOString()}"`;
+}
+function getDynamicTendParam(): string {
+  return `"${new Date().toISOString()}"`;
+}
 
 export function wrapAsMonacoSuggestions(
   suggestions: ISuggestionItem[],
   fullText: string,
   defineRange: boolean = true,
-  escapeSpecialChars: boolean = false
+  escapeSpecialChars: boolean = false,
+  replaceParamsWithDefaults: boolean = false
 ): monaco.languages.CompletionList {
   let hasAnIncompleteSuggestion = false;
 
@@ -42,9 +53,26 @@ export function wrapAsMonacoSuggestions(
         hasAnIncompleteSuggestion = true;
       }
 
+      let insertText = text;
+
+      if (replaceParamsWithDefaults) {
+        // Replace ?_tstart and ?_tend parameters with default/dynamic values
+        // Note: dynamic end timestamp evaluated at suggestion generation time
+        // Precompute once per suggestion so multiple occurrences share identical timestamps
+        const dynamicStart = getDynamicTstartParam();
+        const dynamicEnd = getDynamicTendParam();
+        insertText = insertText.replace(/\?_(tstart|tend)/g, (_match, p1) => {
+          return p1 === 'tstart' ? dynamicStart : dynamicEnd;
+        });
+      }
+
+      if (escapeSpecialChars) {
+        insertText = escapeForStringLiteral(insertText);
+      }
+
       const monacoSuggestion: MonacoAutocompleteCommandDefinition = {
         label,
-        insertText: escapeSpecialChars ? escapeForStringLiteral(text) : text,
+        insertText,
         filterText,
         kind:
           kind in monaco.languages.CompletionItemKind
