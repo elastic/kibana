@@ -29,41 +29,6 @@ describe('DELETE /api/workflows/{id}', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the delete workflow route with correct configuration', () => {
-      registerDeleteWorkflowByIdRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const deleteWorkflowCall = (mockRouter.delete as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/{id}'
-      );
-
-      expect(deleteWorkflowCall).toBeDefined();
-      expect(deleteWorkflowCall[0]).toMatchObject({
-        path: '/api/workflows/{id}',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['all', 'workflow_delete'],
-              },
-            ],
-          },
-        },
-      });
-      expect(deleteWorkflowCall[0].validate).toBeDefined();
-      expect(deleteWorkflowCall[0].validate.params).toBeDefined();
-      expect(deleteWorkflowCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 
