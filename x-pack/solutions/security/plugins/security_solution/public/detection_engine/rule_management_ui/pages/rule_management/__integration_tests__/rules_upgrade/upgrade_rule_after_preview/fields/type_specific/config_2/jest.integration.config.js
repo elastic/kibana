@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createFieldTestingConfig } from '../base.jest.integration.config';
+import { createFieldTestingConfig } from '../../base.jest.integration.config';
 
 export default createFieldTestingConfig({
-  testsDirectory: 'common',
+  testsDirectory: 'type_specific',
   groupNumber: 2,
   totalGroups: 2,
 });
