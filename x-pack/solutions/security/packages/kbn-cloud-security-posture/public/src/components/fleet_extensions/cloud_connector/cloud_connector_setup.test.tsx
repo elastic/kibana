@@ -11,16 +11,17 @@ import { render, act } from '@testing-library/react';
 import { CloudConnectorSetup } from './cloud_connector_setup';
 import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
-import { TestProvider } from '../test/test_provider';
-import { getMockPolicyAWS, getMockPackageInfoAWS } from '../test/mock';
+import { TestProvider } from './test/test_provider';
+import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
 import { CloudConnectorTabs } from './cloud_connector_tabs';
 import { isCloudConnectorReusableEnabled } from './utils';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CloudConnectorSetupProps } from './cloud_connector_setup';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import type { CloudConnector, CloudProvider } from '@kbn/fleet-plugin/public';
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
+import { AWS_PROVIDER } from './constants';
 
 // Mock child components
 jest.mock('./form/new_cloud_connector_form', () => ({
@@ -91,7 +92,7 @@ describe('CloudConnectorSetup', () => {
     updatePolicy: mockUpdatePolicy,
     packageInfo: mockPackageInfo,
     cloud: mockCloudSetup,
-    cloudProvider: 'aws',
+    cloudProvider: AWS_PROVIDER,
     hasInvalidRequiredVars: false,
     templateName: 'cloudbeat/cis_aws',
   };
@@ -99,7 +100,7 @@ describe('CloudConnectorSetup', () => {
   const createMockCloudConnector = (
     id: string,
     name: string,
-    provider: CloudProvider = 'aws'
+    provider: CloudProvider = AWS_PROVIDER
   ): CloudConnector => ({
     id,
     name,
@@ -493,6 +494,48 @@ describe('CloudConnectorSetup', () => {
       );
       expect(mockCloudConnectorTabs).not.toHaveBeenCalled();
       expect(mockNewCloudConnectorForm).toHaveBeenCalled();
+    });
+  });
+
+  describe('Azure', () => {
+    const AZURE_PROVIDER = 'azure';
+
+    it('should render NewCloudConnectorForm when feature is enabled and provider is azure', () => {
+      mockIsCloudConnectorReusableEnabled.mockReturnValue(true);
+      setupMocks([]);
+
+      renderComponent({ cloudProvider: AZURE_PROVIDER });
+
+      // Azure should render NewCloudConnectorForm even when reusable feature is enabled
+      expect(mockNewCloudConnectorForm).toHaveBeenCalled();
+      expect(mockNewCloudConnectorForm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cloudProvider: AZURE_PROVIDER,
+          credentials: {},
+          setCredentials: mockUpdatePolicyWithNewCredentials,
+        }),
+        {}
+      );
+    });
+
+    it('should not render tabs when feature is enabled and provider is azure', () => {
+      mockIsCloudConnectorReusableEnabled.mockReturnValue(true);
+      setupMocks([]);
+
+      renderComponent({ cloudProvider: AZURE_PROVIDER });
+
+      // Azure bypasses tabs - CloudConnectorTabs should not be rendered
+      expect(mockCloudConnectorTabs).not.toHaveBeenCalled();
+    });
+
+    it('should not render tabs when feature is disabled and provider is azure', () => {
+      mockIsCloudConnectorReusableEnabled.mockReturnValue(false);
+      setupMocks([]);
+
+      renderComponent({ cloudProvider: AZURE_PROVIDER });
+
+      // CloudConnectorTabs should not be rendered when feature is disabled
+      expect(mockCloudConnectorTabs).not.toHaveBeenCalled();
     });
   });
 });

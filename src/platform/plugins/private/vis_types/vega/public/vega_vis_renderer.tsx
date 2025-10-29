@@ -12,7 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-common';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { VegaVisualizationDependencies } from './plugin';
 import { getUsageCollectionStart } from './services';
