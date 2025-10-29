@@ -338,6 +338,10 @@ const ESQLEditorInternal = function ESQLEditor({
     openTimePickerPopover();
   });
 
+  monaco.editor.registerCommand('esql.recommendedQuery.accept', () => {
+    telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE);
+  });
+
   const controlCommands = [
     { command: 'esql.control.multi_values.create', variableType: ESQLVariableType.MULTI_VALUES },
     { command: 'esql.control.time_literal.create', variableType: ESQLVariableType.TIME_LITERAL },
