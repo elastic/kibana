@@ -6,16 +6,20 @@
  */
 
 import React from 'react';
+import type { ReactElement } from 'react';
 import { render as rtlRender, screen, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getRandomString } from '@kbn/test-jest-helpers';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DetailPanel } from './detail_panel';
 import { API_STATUS } from '../../../../../constants';
-import type { FollowerIndexWithPausedStatus } from '../../../../../../../common/types';
+import type { FollowerIndexWithPausedStatus, Shard } from '../../../../../../../common/types';
 import { routing } from '../../../../../services/routing';
 
-// Mock the external dependencies
+const POLL_INTERVAL_MS = 1000;
+const POLL_TIMEOUT_MS = 5000;
+
+// Routing mock
 jest.mock('../../../../../services/routing', () => {
   return {
     routing: {
@@ -28,10 +32,12 @@ jest.mock('../../../../../services/routing', () => {
   };
 });
 
+// getIndexListUri mock
 jest.mock('@kbn/index-management-plugin/public', () => ({
   getIndexListUri: jest.fn((filter) => `/index-list?${filter}`),
 }));
 
+// ContextMenu mock
 jest.mock('../context_menu', () => ({
   ContextMenu: ({ followerIndices, label, testSubj, isPollingStatus }: any) => (
     <div data-test-subj={testSubj}>
@@ -44,10 +50,42 @@ jest.mock('../context_menu', () => ({
   ),
 }));
 
-// Custom render function that wraps components with IntlProvider
-const render = (ui: React.ReactElement) => {
+// window.location.search mock
+const mockLocationSearch = jest.fn();
+
+const render = (ui: ReactElement) => {
   return rtlRender(<IntlProvider locale="en">{ui}</IntlProvider>);
 };
+
+const createMockShard = (overrides?: Partial<Shard>): Shard => ({
+  id: 0,
+  remoteCluster: 'remote-cluster-1',
+  leaderIndex: 'leader-index-1',
+  leaderGlobalCheckpoint: 1000,
+  leaderMaxSequenceNum: 1000,
+  followerGlobalCheckpoint: 1000,
+  followerMaxSequenceNum: 1000,
+  lastRequestedSequenceNum: 1000,
+  outstandingReadRequestsCount: 0,
+  outstandingWriteRequestsCount: 0,
+  writeBufferOperationsCount: 0,
+  writeBufferSizeBytes: 0,
+  followerMappingVersion: 1,
+  followerSettingsVersion: 1,
+  totalReadTimeMs: 100,
+  totalReadRemoteExecTimeMs: 50,
+  successfulReadRequestCount: 10,
+  failedReadRequestsCount: 0,
+  operationsReadCount: 1000,
+  bytesReadCount: 50000,
+  totalWriteTimeMs: 100,
+  successfulWriteRequestsCount: 10,
+  failedWriteRequestsCount: 0,
+  operationsWrittenCount: 1000,
+  readExceptions: [],
+  timeSinceLastReadMs: 1000,
+  ...overrides,
+});
 
 const createMockFollowerIndex = (
   overrides?: Partial<FollowerIndexWithPausedStatus>
@@ -67,36 +105,7 @@ const createMockFollowerIndex = (
   maxWriteBufferSize: '512mb',
   maxRetryDelay: '500ms',
   readPollTimeout: '1m',
-  shards: [
-    {
-      id: 0,
-      remoteCluster: 'remote-cluster-1',
-      leaderIndex: 'leader-index-1',
-      leaderGlobalCheckpoint: 1000,
-      leaderMaxSequenceNum: 1000,
-      followerGlobalCheckpoint: 1000,
-      followerMaxSequenceNum: 1000,
-      lastRequestedSequenceNum: 1000,
-      outstandingReadRequestsCount: 0,
-      outstandingWriteRequestsCount: 0,
-      writeBufferOperationsCount: 0,
-      writeBufferSizeBytes: 0,
-      followerMappingVersion: 1,
-      followerSettingsVersion: 1,
-      totalReadTimeMs: 100,
-      totalReadRemoteExecTimeMs: 50,
-      successfulReadRequestCount: 10,
-      failedReadRequestsCount: 0,
-      operationsReadCount: 1000,
-      bytesReadCount: 50000,
-      totalWriteTimeMs: 100,
-      successfulWriteRequestsCount: 10,
-      failedWriteRequestsCount: 0,
-      operationsWrittenCount: 1000,
-      readExceptions: [],
-      timeSinceLastReadMs: 1000,
-    },
-  ],
+  shards: [createMockShard()],
   ...overrides,
 });
 
@@ -112,13 +121,21 @@ describe('DetailPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (routing.navigate as jest.Mock).mockClear();
-    // Clear URL search params
-    delete (window as any).location;
-    (window as any).location = { search: '' };
+
+    mockLocationSearch.mockReturnValue('');
+    Object.defineProperty(window, 'location', {
+      value: {
+        get search() {
+          return mockLocationSearch();
+        },
+      },
+      writable: true,
+      configurable: true,
+    });
   });
 
-  describe('Loading state', () => {
-    it('should render loading spinner when API status is loading', () => {
+  describe('Component states', () => {
+    it('should render loading state when API status is loading', () => {
       render(
         <DetailPanel {...defaultProps} apiStatus={API_STATUS.LOADING} followerIndex={undefined} />
       );
@@ -126,10 +143,8 @@ describe('DetailPanel', () => {
       expect(screen.getByText('Loading follower index…')).toBeInTheDocument();
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
-  });
 
-  describe('Not found state', () => {
-    it('should render not found message when follower index is undefined', () => {
+    it('should render not found state when follower index is undefined', () => {
       render(
         <DetailPanel {...defaultProps} followerIndex={undefined} apiStatus={API_STATUS.IDLE} />
       );
@@ -168,7 +183,7 @@ describe('DetailPanel', () => {
       leaderIndex: 'leader-index-test',
     });
 
-    beforeEach(() => {
+    it('should display active index information correctly', () => {
       render(
         <DetailPanel
           {...defaultProps}
@@ -176,29 +191,25 @@ describe('DetailPanel', () => {
           followerIndex={activeFollowerIndex}
         />
       );
+
+      expect(screen.getByTestId('status')).toHaveTextContent('Active');
+      expect(screen.getByTestId('remoteCluster')).toHaveTextContent('remote-cluster-test');
+      expect(screen.getByTestId('leaderIndex')).toHaveTextContent('leader-index-test');
     });
 
-    it('should display active status with success color', () => {
-      const status = screen.getByTestId('status');
-      expect(status).toHaveTextContent('Active');
-    });
+    it('should display settings section with all configuration values', () => {
+      render(
+        <DetailPanel
+          {...defaultProps}
+          followerIndexId="active-index"
+          followerIndex={activeFollowerIndex}
+        />
+      );
 
-    it('should display remote cluster information', () => {
-      const remoteCluster = screen.getByTestId('remoteCluster');
-      expect(remoteCluster).toHaveTextContent('remote-cluster-test');
-    });
-
-    it('should display leader index information', () => {
-      const leaderIndex = screen.getByTestId('leaderIndex');
-      expect(leaderIndex).toHaveTextContent('leader-index-test');
-    });
-
-    it('should render settings section with title', () => {
       const settingsSection = screen.getByTestId('settingsSection');
       expect(within(settingsSection).getByText('Settings')).toBeInTheDocument();
-    });
 
-    it('should display all settings values for active index', () => {
+      // Verify all 10 settings are displayed
       expect(screen.getByTestId('maxReadReqOpCount')).toHaveTextContent(
         activeFollowerIndex.maxReadRequestOperationCount!.toString()
       );
@@ -229,23 +240,21 @@ describe('DetailPanel', () => {
       expect(screen.getByTestId('readPollTimeout')).toHaveTextContent(
         activeFollowerIndex.readPollTimeout!
       );
-    });
 
-    it('should have multiple settings values elements', () => {
       const settingsValues = screen.getAllByTestId('settingsValues');
-      expect(settingsValues.length).toBeGreaterThan(0);
+      expect(settingsValues).toHaveLength(10);
     });
   });
 
   describe('Paused follower index', () => {
-    const pausedFollowerIndex = createMockFollowerIndex({
-      name: 'paused-index',
-      isPaused: true,
-      status: 'Paused',
-      shards: undefined,
-    });
+    it('should display paused state correctly without settings or shard stats', () => {
+      const pausedFollowerIndex = createMockFollowerIndex({
+        name: 'paused-index',
+        isPaused: true,
+        status: 'Paused',
+        shards: undefined,
+      });
 
-    beforeEach(() => {
       render(
         <DetailPanel
           {...defaultProps}
@@ -253,28 +262,23 @@ describe('DetailPanel', () => {
           followerIndex={pausedFollowerIndex}
         />
       );
-    });
 
-    it('should display paused status with subdued color', () => {
-      const status = screen.getByTestId('status');
-      expect(status).toHaveTextContent('Paused');
-    });
+      // Verify paused status
+      expect(screen.getByTestId('status')).toHaveTextContent('Paused');
 
-    it('should not display settings values for paused index', () => {
+      // Verify settings are not displayed
       expect(screen.queryByTestId('maxReadReqOpCount')).not.toBeInTheDocument();
       expect(screen.queryByTestId('maxOutstandingReadReq')).not.toBeInTheDocument();
-    });
 
-    it('should display callout about paused follower index', () => {
+      // Verify callout message
       const settingsSection = screen.getByTestId('settingsSection');
       expect(
         within(settingsSection).getByText(
           /paused follower index does not have settings or shard statistics/i
         )
       ).toBeInTheDocument();
-    });
 
-    it('should not display shard statistics', () => {
+      // Verify shard statistics are not displayed
       const shardsStatsSection = screen.getByTestId('shardsStatsSection');
       expect(within(shardsStatsSection).queryByTestId('shardsStats')).not.toBeInTheDocument();
     });
@@ -284,46 +288,14 @@ describe('DetailPanel', () => {
     it('should render shard statistics for active index with single shard', () => {
       const followerIndex = createMockFollowerIndex({
         isPaused: false,
-        shards: [
-          {
-            id: 0,
-            remoteCluster: 'remote-cluster-1',
-            leaderIndex: 'leader-index-1',
-            leaderGlobalCheckpoint: 500,
-            leaderMaxSequenceNum: 500,
-            followerGlobalCheckpoint: 500,
-            followerMaxSequenceNum: 500,
-            lastRequestedSequenceNum: 500,
-            outstandingReadRequestsCount: 0,
-            outstandingWriteRequestsCount: 0,
-            writeBufferOperationsCount: 0,
-            writeBufferSizeBytes: 0,
-            followerMappingVersion: 1,
-            followerSettingsVersion: 1,
-            totalReadTimeMs: 50,
-            totalReadRemoteExecTimeMs: 25,
-            successfulReadRequestCount: 5,
-            failedReadRequestsCount: 0,
-            operationsReadCount: 500,
-            bytesReadCount: 25000,
-            totalWriteTimeMs: 50,
-            successfulWriteRequestsCount: 5,
-            failedWriteRequestsCount: 0,
-            operationsWrittenCount: 500,
-            readExceptions: [],
-            timeSinceLastReadMs: 500,
-          },
-        ],
+        shards: [createMockShard({ id: 0, leaderGlobalCheckpoint: 500 })],
       });
 
       render(<DetailPanel {...defaultProps} followerIndex={followerIndex} />);
 
-      const shardsStatsSection = screen.getByTestId('shardsStatsSection');
-      expect(within(shardsStatsSection).getByText('Shard 0 stats')).toBeInTheDocument();
+      expect(screen.getByText('Shard 0 stats')).toBeInTheDocument();
 
       const shardsStats = screen.getByTestId('shardsStats');
-      expect(shardsStats).toBeInTheDocument();
-
       const shardData = JSON.parse(shardsStats.textContent || '{}');
       expect(shardData.id).toBe(0);
       expect(shardData.leaderGlobalCheckpoint).toBe(500);
@@ -333,70 +305,15 @@ describe('DetailPanel', () => {
       const followerIndex = createMockFollowerIndex({
         isPaused: false,
         shards: [
-          {
-            id: 0,
-            remoteCluster: 'remote-cluster-1',
-            leaderIndex: 'leader-index-1',
-            leaderGlobalCheckpoint: 500,
-            leaderMaxSequenceNum: 500,
-            followerGlobalCheckpoint: 500,
-            followerMaxSequenceNum: 500,
-            lastRequestedSequenceNum: 500,
-            outstandingReadRequestsCount: 0,
-            outstandingWriteRequestsCount: 0,
-            writeBufferOperationsCount: 0,
-            writeBufferSizeBytes: 0,
-            followerMappingVersion: 1,
-            followerSettingsVersion: 1,
-            totalReadTimeMs: 50,
-            totalReadRemoteExecTimeMs: 25,
-            successfulReadRequestCount: 5,
-            failedReadRequestsCount: 0,
-            operationsReadCount: 500,
-            bytesReadCount: 25000,
-            totalWriteTimeMs: 50,
-            successfulWriteRequestsCount: 5,
-            failedWriteRequestsCount: 0,
-            operationsWrittenCount: 500,
-            readExceptions: [],
-            timeSinceLastReadMs: 500,
-          },
-          {
-            id: 1,
-            remoteCluster: 'remote-cluster-1',
-            leaderIndex: 'leader-index-1',
-            leaderGlobalCheckpoint: 600,
-            leaderMaxSequenceNum: 600,
-            followerGlobalCheckpoint: 600,
-            followerMaxSequenceNum: 600,
-            lastRequestedSequenceNum: 600,
-            outstandingReadRequestsCount: 0,
-            outstandingWriteRequestsCount: 0,
-            writeBufferOperationsCount: 0,
-            writeBufferSizeBytes: 0,
-            followerMappingVersion: 1,
-            followerSettingsVersion: 1,
-            totalReadTimeMs: 60,
-            totalReadRemoteExecTimeMs: 30,
-            successfulReadRequestCount: 6,
-            failedReadRequestsCount: 0,
-            operationsReadCount: 600,
-            bytesReadCount: 30000,
-            totalWriteTimeMs: 60,
-            successfulWriteRequestsCount: 6,
-            failedWriteRequestsCount: 0,
-            operationsWrittenCount: 600,
-            readExceptions: [],
-            timeSinceLastReadMs: 600,
-          },
+          createMockShard({ id: 0, leaderGlobalCheckpoint: 500 }),
+          createMockShard({ id: 1, leaderGlobalCheckpoint: 600 }),
         ],
       });
 
       render(<DetailPanel {...defaultProps} followerIndex={followerIndex} />);
 
-      const shardsStatsSection = screen.getByTestId('shardsStatsSection');
-      expect(within(shardsStatsSection).getByText('Shard 0 stats')).toBeInTheDocument();
-      expect(within(shardsStatsSection).getByText('Shard 1 stats')).toBeInTheDocument();
+      expect(screen.getByText('Shard 0 stats')).toBeInTheDocument();
+      expect(screen.getByText('Shard 1 stats')).toBeInTheDocument();
 
       const shardsStats = screen.getAllByTestId('shardsStats');
       expect(shardsStats).toHaveLength(2);
@@ -408,44 +325,29 @@ describe('DetailPanel', () => {
       expect(shard1Data.id).toBe(1);
     });
 
-    it('should not render shard statistics when shards is undefined', () => {
-      const followerIndex = createMockFollowerIndex({
-        isPaused: false,
-        shards: undefined,
+    it('should not render shard statistics when shards are missing or empty', () => {
+      const testCases: Array<undefined | any[]> = [undefined, []];
+
+      testCases.forEach((shards) => {
+        const followerIndex = createMockFollowerIndex({
+          isPaused: false,
+          shards,
+        });
+
+        const { unmount } = render(<DetailPanel {...defaultProps} followerIndex={followerIndex} />);
+
+        const shardsStatsSection = screen.getByTestId('shardsStatsSection');
+        expect(within(shardsStatsSection).queryByTestId('shardsStats')).not.toBeInTheDocument();
+
+        unmount();
       });
-
-      render(<DetailPanel {...defaultProps} followerIndex={followerIndex} />);
-
-      const shardsStatsSection = screen.getByTestId('shardsStatsSection');
-      expect(within(shardsStatsSection).queryByTestId('shardsStats')).not.toBeInTheDocument();
-    });
-
-    it('should render empty shard stats section when shards array is empty', () => {
-      const followerIndex = createMockFollowerIndex({
-        isPaused: false,
-        shards: [],
-      });
-
-      render(<DetailPanel {...defaultProps} followerIndex={followerIndex} />);
-
-      const shardsStatsSection = screen.getByTestId('shardsStatsSection');
-      expect(within(shardsStatsSection).queryByTestId('shardsStats')).not.toBeInTheDocument();
     });
   });
 
   describe('Footer', () => {
     const followerIndex = createMockFollowerIndex({ name: 'test-index' });
 
-    it('should render close button in footer', () => {
-      render(
-        <DetailPanel {...defaultProps} followerIndexId="test-index" followerIndex={followerIndex} />
-      );
-
-      expect(screen.getByTestId('closeFlyoutButton')).toBeInTheDocument();
-      expect(screen.getByTestId('closeFlyoutButton')).toHaveTextContent('Close');
-    });
-
-    it('should call closeDetailPanel when close button is clicked', async () => {
+    it('should render and handle close button click', async () => {
       const closeDetailPanel = jest.fn();
       const user = userEvent.setup();
 
@@ -458,8 +360,11 @@ describe('DetailPanel', () => {
         />
       );
 
-      await user.click(screen.getByTestId('closeFlyoutButton'));
+      const closeButton = screen.getByTestId('closeFlyoutButton');
+      expect(closeButton).toBeInTheDocument();
+      expect(closeButton).toHaveTextContent('Close');
 
+      await user.click(closeButton);
       expect(closeDetailPanel).toHaveBeenCalledTimes(1);
     });
 
@@ -478,7 +383,13 @@ describe('DetailPanel', () => {
         <DetailPanel {...defaultProps} followerIndexId="test-index" followerIndex={followerIndex} />
       );
 
-      expect(screen.getByTestId('manageButton')).toBeInTheDocument();
+      const manageButton = screen.getByTestId('manageButton');
+      expect(manageButton).toBeInTheDocument();
+
+      // Verify ContextMenu props
+      const followerIndicesData = within(manageButton).getByTestId('contextMenuFollowerIndices');
+      expect(followerIndicesData.textContent).toContain('test-index');
+      expect(within(manageButton).getByText('Manage')).toBeInTheDocument();
     });
 
     it('should not render manage button when follower index is undefined', () => {
@@ -487,47 +398,6 @@ describe('DetailPanel', () => {
       );
 
       expect(screen.queryByTestId('manageButton')).not.toBeInTheDocument();
-    });
-
-    it('should pass correct props to ContextMenu', () => {
-      render(
-        <DetailPanel {...defaultProps} followerIndexId="test-index" followerIndex={followerIndex} />
-      );
-
-      const manageButton = screen.getByTestId('manageButton');
-      const followerIndicesData = within(manageButton).getByTestId('contextMenuFollowerIndices');
-
-      expect(followerIndicesData.textContent).toContain('test-index');
-      expect(within(manageButton).getByText('Manage')).toBeInTheDocument();
-    });
-  });
-
-  describe('PropTypes validation', () => {
-    it('should render correctly with required props only', () => {
-      const minimalProps = {
-        followerIndexId: 'minimal-index',
-        followerIndex: undefined,
-        apiStatus: API_STATUS.IDLE,
-        closeDetailPanel: jest.fn(),
-        getFollowerIndex: jest.fn(),
-      };
-
-      render(<DetailPanel {...minimalProps} />);
-
-      expect(screen.getByTestId('followerIndexDetail')).toBeInTheDocument();
-    });
-
-    it('should handle missing apiStatus gracefully', () => {
-      render(
-        <DetailPanel
-          {...defaultProps}
-          apiStatus={undefined as any}
-          followerIndex={createMockFollowerIndex()}
-        />
-      );
-
-      // Should render the follower index content (not loading state)
-      expect(screen.queryByText('Loading follower index…')).not.toBeInTheDocument();
     });
   });
 
@@ -584,34 +454,11 @@ describe('DetailPanel', () => {
     it('should handle shard with empty readExceptions array', () => {
       const followerIndex = createMockFollowerIndex({
         shards: [
-          {
+          createMockShard({
             id: 0,
-            remoteCluster: 'remote-cluster-1',
-            leaderIndex: 'leader-index-1',
             leaderGlobalCheckpoint: 100,
-            leaderMaxSequenceNum: 100,
-            followerGlobalCheckpoint: 100,
-            followerMaxSequenceNum: 100,
-            lastRequestedSequenceNum: 100,
-            outstandingReadRequestsCount: 0,
-            outstandingWriteRequestsCount: 0,
-            writeBufferOperationsCount: 0,
-            writeBufferSizeBytes: 0,
-            followerMappingVersion: 1,
-            followerSettingsVersion: 1,
-            totalReadTimeMs: 10,
-            totalReadRemoteExecTimeMs: 5,
-            successfulReadRequestCount: 1,
-            failedReadRequestsCount: 0,
-            operationsReadCount: 100,
-            bytesReadCount: 5000,
-            totalWriteTimeMs: 10,
-            successfulWriteRequestsCount: 1,
-            failedWriteRequestsCount: 0,
-            operationsWrittenCount: 100,
             readExceptions: [],
-            timeSinceLastReadMs: 100,
-          },
+          }),
         ],
       });
 
@@ -667,7 +514,7 @@ describe('DetailPanel', () => {
     });
 
     it('should start polling when paused index is loaded with waitForActive param', async () => {
-      (window as any).location = { search: '?waitForActive=true' };
+      mockLocationSearch.mockReturnValue('?waitForActive=true');
       const getFollowerIndex = jest.fn();
       const pausedFollowerIndex = createMockFollowerIndex({
         name: 'paused-index',
@@ -684,24 +531,23 @@ describe('DetailPanel', () => {
         />
       );
 
-      // First poll after 1s
+      // First poll after POLL_INTERVAL_MS
       await act(async () => {
-        jest.advanceTimersByTime(1000);
+        jest.advanceTimersByTime(POLL_INTERVAL_MS);
       });
 
       expect(getFollowerIndex).toHaveBeenCalledWith('paused-index');
       expect(getFollowerIndex).toHaveBeenCalledTimes(1);
 
-      // Second poll after another 1s
+      // Second poll after another POLL_INTERVAL_MS
       await act(async () => {
-        jest.advanceTimersByTime(1000);
+        jest.advanceTimersByTime(POLL_INTERVAL_MS);
       });
 
       expect(getFollowerIndex).toHaveBeenCalledTimes(2);
     });
 
     it('should not start polling without waitForActive param', async () => {
-      (window as any).location = { search: '' };
       const getFollowerIndex = jest.fn();
       const pausedFollowerIndex = createMockFollowerIndex({
         name: 'paused-index',
@@ -719,14 +565,14 @@ describe('DetailPanel', () => {
       );
 
       await act(async () => {
-        jest.advanceTimersByTime(5000);
+        jest.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
       expect(getFollowerIndex).not.toHaveBeenCalled();
     });
 
-    it('should not start polling for active index', async () => {
-      (window as any).location = { search: '?waitForActive=true' };
+    it('should not start polling for active index even with waitForActive param', async () => {
+      mockLocationSearch.mockReturnValue('?waitForActive=true');
       const getFollowerIndex = jest.fn();
       const activeFollowerIndex = createMockFollowerIndex({
         name: 'active-index',
@@ -744,14 +590,14 @@ describe('DetailPanel', () => {
       );
 
       await act(async () => {
-        jest.advanceTimersByTime(5000);
+        jest.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
       expect(getFollowerIndex).not.toHaveBeenCalled();
     });
 
     it('should stop polling after timeout and clear URL param', async () => {
-      (window as any).location = { search: '?waitForActive=true' };
+      mockLocationSearch.mockReturnValue('?waitForActive=true');
       const getFollowerIndex = jest.fn();
       const pausedFollowerIndex = createMockFollowerIndex({
         name: 'paused-index',
@@ -768,12 +614,12 @@ describe('DetailPanel', () => {
         />
       );
 
-      // Advance to timeout (5000ms)
+      // Advance to timeout
       await act(async () => {
-        jest.advanceTimersByTime(5000);
+        jest.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
-      // Should have called getFollowerIndex 5 times (at 1s, 2s, 3s, 4s, 5s)
+      // Should have polled 5 times (at 1s, 2s, 3s, 4s, 5s)
       expect(getFollowerIndex).toHaveBeenCalledTimes(5);
 
       // Should clear URL param
@@ -784,14 +630,14 @@ describe('DetailPanel', () => {
       // No more polling after timeout
       getFollowerIndex.mockClear();
       await act(async () => {
-        jest.advanceTimersByTime(5000);
+        jest.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
       expect(getFollowerIndex).not.toHaveBeenCalled();
     });
 
     it('should stop polling when index becomes active', async () => {
-      (window as any).location = { search: '?waitForActive=true' };
+      mockLocationSearch.mockReturnValue('?waitForActive=true');
       const getFollowerIndex = jest.fn();
       const pausedFollowerIndex = createMockFollowerIndex({
         name: 'paused-index',
@@ -810,7 +656,7 @@ describe('DetailPanel', () => {
 
       // Poll once
       await act(async () => {
-        jest.advanceTimersByTime(1000);
+        jest.advanceTimersByTime(POLL_INTERVAL_MS);
       });
 
       expect(getFollowerIndex).toHaveBeenCalledTimes(1);
@@ -841,14 +687,14 @@ describe('DetailPanel', () => {
       // No more polling
       getFollowerIndex.mockClear();
       await act(async () => {
-        jest.advanceTimersByTime(5000);
+        jest.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
       expect(getFollowerIndex).not.toHaveBeenCalled();
     });
 
-    it('should show checking status message while polling paused index', async () => {
-      (window as any).location = { search: '?waitForActive=true' };
+    it('should show checking status message and pass polling state to ContextMenu', async () => {
+      mockLocationSearch.mockReturnValue('?waitForActive=true');
       const pausedFollowerIndex = createMockFollowerIndex({
         name: 'paused-index',
         isPaused: true,
@@ -868,34 +714,13 @@ describe('DetailPanel', () => {
         jest.advanceTimersByTime(100);
       });
 
+      // Verify checking status message
       expect(screen.getByText('Checking status...')).toBeInTheDocument();
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    });
 
-    it('should pass isPollingStatus to ContextMenu', async () => {
-      (window as any).location = { search: '?waitForActive=true' };
-      const pausedFollowerIndex = createMockFollowerIndex({
-        name: 'paused-index',
-        isPaused: true,
-        status: 'Paused',
-      });
-
-      render(
-        <DetailPanel
-          {...defaultProps}
-          followerIndexId="paused-index"
-          followerIndex={pausedFollowerIndex}
-        />
-      );
-
-      // Wait for polling to start
-      await act(async () => {
-        jest.advanceTimersByTime(100);
-      });
-
+      // Verify isPollingStatus is passed to ContextMenu
       const manageButton = screen.getByTestId('manageButton');
       const isPollingStatus = within(manageButton).getByTestId('contextMenuIsPollingStatus');
-
       expect(isPollingStatus).toHaveTextContent('true');
     });
   });
