@@ -112,53 +112,52 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
 
-  const btn =
-    props.iconOnly && props.iconType && !props.isMobileMenu ? (
-      // icon only buttons are not supported by EuiHeaderLink
-      React.createElement(
-        props.disableButton ? React.Fragment : EuiToolTip,
-        // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
-        {
-          ...(props.disableButton
-            ? { key: props.label || props.id! }
-            : {
-                content: upperFirst(props.label || props.id!),
-                position: 'bottom',
-                delay: 'long',
-              }),
-        },
-        <EuiButtonIcon
-          size="s"
-          {...omit(commonButtonProps, 'iconSide')}
-          iconType={props.iconType}
-          display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
-          aria-label={upperFirst(props.label || props.id!)}
-        />
-      )
-    ) : props.splitButtonProps ? (
-      <SplitButton
-        {...commonButtonProps}
-        {...props.splitButtonProps}
-        onSecondaryButtonClick={handleSecondaryButtonClick}
+  const btn = props.splitButtonProps ? (
+    <SplitButton
+      {...commonButtonProps}
+      {...props.splitButtonProps}
+      onSecondaryButtonClick={handleSecondaryButtonClick}
+      size="s"
+    >
+      <ButtonContainer />
+    </SplitButton>
+  ) : props.iconOnly && props.iconType && !props.isMobileMenu ? (
+    // icon only buttons are not supported by EuiHeaderLink
+    React.createElement(
+      props.disableButton ? React.Fragment : EuiToolTip,
+      // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
+      {
+        ...(props.disableButton
+          ? { key: props.label || props.id! }
+          : {
+              content: upperFirst(props.label || props.id!),
+              position: 'bottom',
+              delay: 'long',
+            }),
+      },
+      <EuiButtonIcon
         size="s"
-      >
-        <ButtonContainer />
-      </SplitButton>
-    ) : props.emphasize ? (
-      // fill is not compatible with EuiHeaderLink
-      <EuiButton
-        size="s"
-        fullWidth={props.isMobileMenu}
-        {...commonButtonProps}
-        fill={props.fill ?? true}
-      >
-        <ButtonContainer />
-      </EuiButton>
-    ) : (
-      <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
-        <ButtonContainer />
-      </EuiHeaderLink>
-    );
+        {...omit(commonButtonProps, 'iconSide')}
+        iconType={props.iconType}
+        display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
+        aria-label={upperFirst(props.label || props.id!)}
+      />
+    )
+  ) : props.emphasize ? (
+    // fill is not compatible with EuiHeaderLink
+    <EuiButton
+      size="s"
+      fullWidth={props.isMobileMenu}
+      {...commonButtonProps}
+      fill={props.fill ?? true}
+    >
+      <ButtonContainer />
+    </EuiButton>
+  ) : (
+    <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
+      <ButtonContainer />
+    </EuiHeaderLink>
+  );
 
   const tooltip = getTooltip();
   if (tooltip) {
