@@ -9,10 +9,10 @@
 
 import type { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
+import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
 import { getDetailedTypeDescription } from '../../../../../../common/lib/zod';
 import type { AutocompleteContext } from '../autocomplete.types';
 import { isVariableLineParseResult } from '../parse_line_for_completion';
-import { wrapAsMonacoSuggestion } from '../wrap_as_monaco_suggestion';
 
 export function getVariableSuggestions(autocompleteContext: AutocompleteContext) {
   const {
@@ -37,7 +37,7 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
 
     // Filter based on what the user has typed so far
     const filteredKeys =
-      lineParseResult.lastPathSegment !== null
+      lineParseResult.lastPathSegment !== null && lineParseResult.fullKey.length > 0
         ? contextKeys.filter((key) => key.startsWith(lineParseResult.lastPathSegment ?? ''))
         : contextKeys;
 
