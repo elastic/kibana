@@ -81,9 +81,9 @@ export function registerKibanaFunction({
       };
 
       logger.info(
-        `Calling Kibana API by forwarding request from "${requestUrl}" to: ${method} ${format(
+        `Calling Kibana API by forwarding request from "${requestUrl}" to: "${method} ${format(
           nextUrl
-        )}`
+        )}"`
       );
 
       const copiedHeaderNames = [
