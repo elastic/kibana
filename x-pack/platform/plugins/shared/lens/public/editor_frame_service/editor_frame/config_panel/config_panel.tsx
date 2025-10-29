@@ -34,7 +34,6 @@ import {
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
-  setSelectedLayerId,
   useLensSelector,
   selectVisualization,
   selectSelectedLayerId,
@@ -75,11 +74,8 @@ export function ConfigPanel(
 
   const layerIds = activeVisualization.getLayerIds(visualization.state);
 
-  const {
-    setNextFocusedId: setNextFocusedLayerId,
-    removeRef: removeLayerRef,
-    registerNewRef: registerNewLayerRef,
-  } = useFocusUpdate(layerIds);
+  const { removeRef: removeLayerRef, registerNewRef: registerNewLayerRef } =
+    useFocusUpdate(layerIds);
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -248,17 +244,16 @@ export function ConfigPanel(
     [dispatchLens, props.framePublicAPI.dataViews.indexPatterns, props.indexPatternService]
   );
 
+  // This will be used only in dimension editors like metric charts which adds a hidden layer.
+  // That's why we don't update the currently selected or focused layer.
   const addLayer: AddLayerFunction = useCallback(
     (layerType, extraArg, ignoreInitialValues, seriesType) => {
       const layerId = generateId();
       dispatchLens(
         addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType })
       );
-      dispatchLens(setSelectedLayerId({ layerId }));
-
-      setNextFocusedLayerId(layerId);
     },
-    [dispatchLens, setNextFocusedLayerId]
+    [dispatchLens]
   );
 
   const registerLibraryAnnotationGroupFunction = useCallback<

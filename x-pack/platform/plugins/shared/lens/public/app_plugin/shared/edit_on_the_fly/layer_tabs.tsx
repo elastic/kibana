@@ -107,8 +107,6 @@ export function LayerTabs({
         addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType })
       );
       dispatchLens(setSelectedLayerId({ layerId }));
-
-      // setNextFocusedLayerId(layerId);
     },
     [dispatchLens]
   );
@@ -361,7 +359,7 @@ export function LayerTabs({
     visualization.state,
   ]);
 
-  return !hideAddLayerButton ? (
+  return !!addLayerButton ? (
     <>
       <UnifiedTabs
         items={managedItems}
