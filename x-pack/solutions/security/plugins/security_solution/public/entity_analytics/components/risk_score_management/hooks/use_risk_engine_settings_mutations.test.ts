@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { useRiskEngineSettingsMutations } from './use_risk_engine_settings_mutations';
 import { useConfigureSORiskEngineMutation } from '../../../api/hooks/use_configure_risk_engine_saved_object';
