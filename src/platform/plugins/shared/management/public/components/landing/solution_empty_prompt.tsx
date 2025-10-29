@@ -96,7 +96,7 @@ export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => 
               fill
               iconType="spaces"
               onClick={() => {
-                coreStart.chrome.sideNav.setPanelSelectedNode('stack_management');
+                // coreStart.chrome.sideNav.setPanelSelectedNode('stack_management');
               }}
               data-test-subj="viewAllStackMngtPagesButton"
             >

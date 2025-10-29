@@ -15,28 +15,26 @@ import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';
 
 import { Navigation } from './navigation';
-import { SideNavV2CollapseButton } from './collapse_button';
+import { SideNavCollapseButton } from './collapse_button';
 import type { NavigationProps } from './types';
 
 interface CollapsibleNavigationProps {
   toggle: (isVisible: boolean) => void;
   isCollapsed$: BehaviorSubject<boolean>;
   navProps: NavigationProps;
-  side?: 'left' | 'right';
 }
 
-export const FixedLayoutProjectSideNavV2: FunctionComponent<CollapsibleNavigationProps> = ({
+export const FixedLayoutProjectSideNav: FunctionComponent<CollapsibleNavigationProps> = ({
   toggle,
   isCollapsed$,
   navProps,
-  side,
 }) => {
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
 
   return (
     <>
-      <SideNavV2CollapseButton isCollapsed={isCollapsed} toggle={toggle} />
-      <CollapsibleNavigationFlyout side={side}>
+      <SideNavCollapseButton isCollapsed={isCollapsed} toggle={toggle} />
+      <CollapsibleNavigationFlyout>
         {({ setWidth }) => (
           <Navigation {...navProps} isCollapsed={isCollapsed} setWidth={setWidth} />
         )}
@@ -46,9 +44,8 @@ export const FixedLayoutProjectSideNavV2: FunctionComponent<CollapsibleNavigatio
 };
 
 const CollapsibleNavigationFlyout: FunctionComponent<{
-  side?: 'left' | 'right';
   children: (props: { setWidth: (width: number) => void }) => React.ReactNode;
-}> = ({ children, side = 'left' }) => {
+}> = ({ children }) => {
   const [width, setWidth] = React.useState<number>(0);
 
   const childrenProps = React.useMemo(() => ({ setWidth }), [setWidth]);
@@ -65,7 +62,7 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
       />
       <EuiFlyout
         size={width}
-        side={side}
+        side={'left'}
         type={'push'}
         paddingSize="none"
         pushMinBreakpoint="xs"

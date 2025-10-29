@@ -55,7 +55,7 @@ const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
 /**
  * Reimplementation of EuiCollapsibleNavBeta Collapse Button to survey new sidenav and new layout use-cases
  */
-export const SideNavV2CollapseButton: FC<Props> = ({ isCollapsed, toggle, ...rest }) => {
+export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle, ...rest }) => {
   const collapsedObservable = useMemo(
     () => (isObservable(isCollapsed) ? isCollapsed : of(isCollapsed)),
     [isCollapsed]

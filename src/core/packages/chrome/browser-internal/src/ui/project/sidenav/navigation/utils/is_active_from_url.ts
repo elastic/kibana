@@ -9,17 +9,6 @@
 
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-export function isAbsoluteLink(link: string) {
-  return link.startsWith('http://') || link.startsWith('https://');
-}
-
-function isSamePath(pathA: string | null, pathB: string | null) {
-  if (pathA === null || pathB === null) {
-    return false;
-  }
-  return pathA === pathB;
-}
-
 /**
  * Predicate to check if a nodePath is active
  *
@@ -41,18 +30,9 @@ export function isActiveFromUrl(
   }, false);
 }
 
-export const isAccordionNode = (
-  node: Pick<ChromeProjectNavigationNode, 'renderAs' | 'defaultIsCollapsed' | 'isCollapsible'>
-) =>
-  node.renderAs === 'accordion' ||
-  ['defaultIsCollapsed', 'isCollapsible'].some((prop) => Object.hasOwn(node, prop));
-
-/**
- * Can check if the click event is a special click (e.g. right click, click with modifier key)
- * Allows us to not prevent the default behavior in these cases.
- */
-export const isSpecialClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
-  const isModifiedEvent = !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
-  const isLeftClickEvent = e.button === 0;
-  return isModifiedEvent || !isLeftClickEvent;
-};
+function isSamePath(pathA: string | null, pathB: string | null) {
+  if (pathA === null || pathB === null) {
+    return false;
+  }
+  return pathA === pathB;
+}

@@ -8,10 +8,17 @@
  */
 
 import type { CoreSetup, EventTypeOpts, RootSchema } from '@kbn/core/public';
-import {
-  FieldType as NavigationFieldType,
-  EventType as NavigationEventType,
-} from '@kbn/shared-ux-chrome-navigation';
+
+// TODO: These events were reported by old solution navigation, but haven't been implemented in new navigation yet.
+enum NavigationEventType {
+  CLICK_NAVLINK = 'solutionNav_click_navlink',
+}
+enum NavigationFieldType {
+  ID = 'id',
+  PATH = 'path',
+  HREF = 'href',
+  HREF_PREV = 'href_prev',
+}
 
 const fields: Record<NavigationFieldType, RootSchema<Record<string, unknown>>> = {
   [NavigationFieldType.ID]: {
