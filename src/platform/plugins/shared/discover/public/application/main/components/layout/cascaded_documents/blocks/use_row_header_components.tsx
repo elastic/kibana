@@ -33,7 +33,7 @@ import {
   type ESQLStatsQueryMeta,
   type SupportedStatsFunction,
 } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
-import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns/pattern_cell_renderer';
+import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 
 import type { ESQLDataGroupNode, DataTableRecord } from './types';
 import {
