@@ -86,6 +86,7 @@ describe('MS Defender response actions client', () => {
     processPendingActions: true,
     getCustomScripts: true,
     cancel: true,
+    memoryDump: false,
   };
 
   it.each(
