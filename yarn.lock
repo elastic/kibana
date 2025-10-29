@@ -2650,9 +2650,9 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.5.0.tgz#99ca807edeb157baf38fef9e39fd031f19b702a5"
   integrity sha512-dW6U7N4HAdSst+Iqhaw1In8zxT8rE4AMnIJIN6C/vNM8XDKmFyzkw/AddpvW5oZHdV0D7+3w/VI9petN4RnWBQ==
 
-"@elastic/eui-theme-borealis@file:./elastic-eui-theme-borealis-flyout-system.tgz":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_flyout_system.tgz":
   version "4.0.0"
-  resolved "file:./elastic-eui-theme-borealis-flyout-system.tgz#e50d5016546377be256ca77083ea5936a379ec0c"
+  resolved "file:./elastic_eui_theme_borealis_flyout_system.tgz#e50d5016546377be256ca77083ea5936a379ec0c"
 
 "@elastic/eui-theme-common@6.0.0":
   version "6.0.0"
@@ -2663,17 +2663,17 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui-theme-common@file:./elastic-eui-theme-common-flyout-system.tgz":
+"@elastic/eui-theme-common@file:./elastic_eui_theme_common_flyout_system.tgz":
   version "6.0.0"
-  resolved "file:./elastic-eui-theme-common-flyout-system.tgz#efed6091999f4280fb7edffb72dabeb19e42e1ba"
+  resolved "file:./elastic_eui_theme_common_flyout_system.tgz#efed6091999f4280fb7edffb72dabeb19e42e1ba"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic-eui-flyout-system.tgz":
+"@elastic/eui@file:./elastic_eui_flyout_system.tgz":
   version "108.0.0"
-  resolved "file:./elastic-eui-flyout-system.tgz#3f5182b60a26bd3ad961b8f5b105c88cbee2a42e"
+  resolved "file:./elastic_eui_flyout_system.tgz#3f5182b60a26bd3ad961b8f5b105c88cbee2a42e"
   dependencies:
     "@elastic/eui-theme-common" "6.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
