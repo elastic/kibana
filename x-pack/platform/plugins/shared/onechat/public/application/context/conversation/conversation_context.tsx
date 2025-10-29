@@ -12,6 +12,9 @@ interface ConversationContextValue {
   conversationId?: string;
   shouldStickToBottom?: boolean;
   isEmbeddedContext: boolean;
+  sessionTag?: string;
+  agentId?: string;
+  initialMessage?: string;
   setConversationId?: (conversationId: string) => void;
   conversationActions: ConversationActions;
 }

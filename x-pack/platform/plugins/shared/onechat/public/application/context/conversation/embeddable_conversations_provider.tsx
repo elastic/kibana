@@ -16,6 +16,8 @@ import { SendMessageProvider } from '../send_message/send_message_context';
 import { queryKeys } from '../../query_keys';
 import { newConversationId } from '../../utils/new_conversation';
 import { useConversationActions } from './use_conversation_actions';
+import { useResolveConversationId } from '../../hooks/use_resolve_conversation_id';
+import { useSaveLastConversationId } from '../../hooks/use_save_last_conversation_id';
 
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
@@ -38,12 +40,40 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     [coreStart, services.startDependencies]
   );
 
+  const resolvedConversationId = useResolveConversationId({
+    newConversation: contextProps.newConversation,
+    conversationId: contextProps.conversationId,
+    sessionTag: contextProps.sessionTag,
+    agentId: contextProps.agentId,
+  });
+
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
+  const validateAndSetConversationId = useCallback(
+    async (id: string) => {
+      try {
+        const conversation = await services.conversationsService.get({ conversationId: id });
+        setConversationId(conversation ? id : undefined);
+      } catch {
+        setConversationId(undefined);
+      }
+    },
+    [services.conversationsService]
+  );
+
   useEffect(() => {
-    // React to conversationId changing through the flyout API
-    setConversationId(contextProps.conversationId);
-  }, [contextProps.conversationId]);
+    if (!resolvedConversationId) {
+      setConversationId(undefined);
+      return;
+    }
+    validateAndSetConversationId(resolvedConversationId);
+  }, [resolvedConversationId, validateAndSetConversationId]);
+
+  useSaveLastConversationId({
+    conversationId,
+    sessionTag: contextProps.sessionTag,
+    agentId: contextProps.agentId,
+  });
 
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
 
@@ -79,12 +109,21 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       conversationId,
       shouldStickToBottom: true,
       isEmbeddedContext: true,
+      sessionTag: contextProps.sessionTag,
+      agentId: contextProps.agentId,
+      initialMessage: contextProps.initialMessage,
       setConversationId: (id: string) => {
         setConversationId(id);
       },
       conversationActions,
     }),
-    [conversationId, conversationActions]
+    [
+      conversationId,
+      contextProps.sessionTag,
+      contextProps.agentId,
+      contextProps.initialMessage,
+      conversationActions,
+    ]
   );
 
   return (
