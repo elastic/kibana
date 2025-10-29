@@ -9,6 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import { ImageEmbeddableState } from '../server';
 
 export function getTransforms(
   transformEnhancementsIn: EnhancementsRegistry['transformIn'],
@@ -16,7 +17,7 @@ export function getTransforms(
 ) {
   return {
     transformOutInjectsReferences: true,
-    transformIn: (state: any) => {
+    transformIn: (state: ImageEmbeddableState) => {
       const { enhancementsState, enhancementsReferences } = state.enhancements
         ? transformEnhancementsIn(state.enhancements)
         : { enhancementsState: undefined, enhancementsReferences: [] };
@@ -29,7 +30,7 @@ export function getTransforms(
         references: enhancementsReferences,
       };
     },
-    transformOut: (state: any, references?: Reference[]) => {
+    transformOut: (state: ImageEmbeddableState, references?: Reference[]) => {
       const enhancementsState = state.enhancements
         ? transformEnhancementsOut(state.enhancements, references ?? [])
         : undefined;
