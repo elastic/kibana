@@ -9,6 +9,7 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiSelectableMessage, EuiText } from '@elastic/eui';
 import React from 'react';
+import * as i18n from './translations';
 
 interface WorkflowSelectorEmptyStateProps {
   onCreateWorkflow: () => void;
@@ -22,11 +23,11 @@ export const WorkflowSelectorEmptyState: React.FC<WorkflowSelectorEmptyStateProp
       <EuiEmptyPrompt
         title={
           <EuiText textAlign="center" color="textParagraph">
-            {"You don't have any workflows yet"}
+            {i18n.EMPTY_STATE_TITLE}
           </EuiText>
         }
         titleSize="s"
-        body={'Workflows help you automate and streamline tasks.'}
+        body={i18n.EMPTY_STATE_DESCRIPTION}
         actions={
           <EuiButton
             color="primary"
@@ -37,7 +38,7 @@ export const WorkflowSelectorEmptyState: React.FC<WorkflowSelectorEmptyStateProp
             disabled={false}
             isLoading={false}
           >
-            {'Create your first workflow'}
+            {i18n.EMPTY_STATE_BUTTON_TEXT}
           </EuiButton>
         }
         paddingSize="l"
