@@ -24,6 +24,11 @@ import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { AIAssistantService } from '@kbn/elastic-assistant-plugin/server/ai_assistant_service';
+import type {
+  GetAIAssistantKnowledgeBaseDataClientParams,
+  AIAssistantKnowledgeBaseDataClient,
+} from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import type { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { Immutable } from '../common/endpoint/types';
@@ -88,6 +93,10 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;
   getInferenceService: () => InferenceServerStart;
+  getAIAssistantService: () => AIAssistantService | undefined;
+  getAIAssistantKnowledgeBaseDataClient: (
+    params?: GetAIAssistantKnowledgeBaseDataClientParams
+  ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

@@ -22,6 +22,7 @@ export const RuleCreationAnnotation = Annotation.Root({
   }>(),
   validationErrors: Annotation<{ esqlErrors: string }>(),
   queryFixRetries: Annotation<number>(),
+  knowledgeBaseContext: Annotation<string>(),
 });
 
 export type RuleCreationState = typeof RuleCreationAnnotation.State;

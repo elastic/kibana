@@ -15,6 +15,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { END, START, StateGraph } from '@langchain/langgraph';
+import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import type { RuleCreationState } from './state';
 import { RuleCreationAnnotation } from './state';
 import { addDefaultFieldsToRulesNode } from './nodes/add_default_fields_to_rule';
@@ -22,6 +23,7 @@ import { createRuleNameAndDescriptionNode } from './nodes/create_rule_name_and_d
 import { getTagsNode } from './nodes/get_tags';
 import { getEsqlQueryGraph } from './sub_graphs/esql/esql_query_graph';
 import { getIndexPatternNode } from './nodes/get_index_patterns';
+import { createProcessKnowledgeBaseNode } from './nodes/process_knowledge_base';
 
 export interface GetRuleCreationAgentParams {
   model: InferenceChatModel;
@@ -33,6 +35,7 @@ export interface GetRuleCreationAgentParams {
   createLlmInstance: () => Promise<InferenceChatModel>;
   savedObjectsClient: SavedObjectsClientContract;
   rulesClient: RulesClient;
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient | null;
 }
 
 export const getIterativeRuleCreationAgent = async ({
@@ -45,6 +48,7 @@ export const getIterativeRuleCreationAgent = async ({
   model,
   savedObjectsClient,
   rulesClient,
+  kbDataClient,
 }: GetRuleCreationAgentParams) => {
   const esqlQuerySubGraph = await getEsqlQueryGraph({
     model,
@@ -57,12 +61,21 @@ export const getIterativeRuleCreationAgent = async ({
   });
 
   const ruleCreationAgentGraph = new StateGraph(RuleCreationAnnotation)
+    .addNode(
+      'processKnowledgeBase',
+      createProcessKnowledgeBaseNode({
+        model,
+        logger,
+        kbDataClient,
+      })
+    )
     .addNode('getIndexPattern', getIndexPatternNode({ createLlmInstance, esClient }))
     .addNode('esqlQueryCreation', esqlQuerySubGraph)
     .addNode('getTags', getTagsNode({ rulesClient, savedObjectsClient, model }))
     .addNode('createRuleNameAndDescription', createRuleNameAndDescriptionNode({ model }))
     .addNode('addDefaultFieldsToRules', addDefaultFieldsToRulesNode({ model }))
-    .addEdge(START, 'getIndexPattern')
+    .addEdge(START, 'processKnowledgeBase')
+    .addEdge('processKnowledgeBase', 'getIndexPattern')
     .addEdge('getIndexPattern', 'esqlQueryCreation')
     .addEdge('esqlQueryCreation', 'getTags')
     .addEdge('getTags', 'createRuleNameAndDescription')
