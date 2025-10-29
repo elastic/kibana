@@ -303,8 +303,10 @@ export function initializeLayoutManager(
       // Recompute the order of the remaining controls
       const nextControls: typeof controls = Object.entries(controls)
         .sort(([, a], [, b]) => a.order - b.order)
-        .map(([key, value], i) => [key, { ...value, order: i }])
-        .reduce((result, [key, value]) => ({ ...result, [key as string]: value }), {});
+        .reduce(
+          (result, [key, value], i) => ({ ...result, [key as string]: { ...value, order: i } }),
+          {}
+        );
       layout$.next({ ...layout$.value, controls: nextControls });
     }
 
