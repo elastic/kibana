@@ -62,8 +62,9 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 `csp.report_only.object_src`
 :   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/object-src) in reporting mode.
 
-    :::{admonition} Deprecated in 9.3.0
-    This setting was deprecated in 9.3.0 in favor of `csp.object_src`.
+    :::{note}
+    :applies_to: stack: deprecated 9.3
+    This setting is deprecated in favor of `csp.object_src`.
     :::
 
 `csp.report_uri`
