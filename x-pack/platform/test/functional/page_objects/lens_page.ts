@@ -858,6 +858,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.exists('lnsVisualOptionsPopover_title');
       });
     },
+    async closeVisualOptionsPopover() {
+      if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
+        await testSubjects.click('lnsVisualOptionsButton');
+      }
+    },
     async openTextOptions() {
       if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
         return;
@@ -866,6 +871,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('lnsTextOptionsButton');
         await testSubjects.exists('lnsTextOptionsPopover_title');
       });
+    },
+    async closeTitlesAndTextOptionsPopover() {
+      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
+        await testSubjects.click('lnsTextOptionsButton');
+      }
     },
     async retrySetValue(
       input: string,

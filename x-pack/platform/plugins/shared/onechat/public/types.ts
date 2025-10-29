@@ -18,6 +18,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
 
@@ -50,6 +51,7 @@ export interface OnechatStartDependencies {
   cloud: CloudStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface OnechatPluginSetup {}
