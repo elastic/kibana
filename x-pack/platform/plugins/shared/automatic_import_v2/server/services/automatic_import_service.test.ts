@@ -66,10 +66,10 @@ describe('AutomaticImportSetupService', () => {
     it('should register saved object types during construction', () => {
       expect(mockSavedObjectsSetup.registerType).toHaveBeenCalledTimes(2);
       expect(mockSavedObjectsSetup.registerType).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'automatic-import-integration' })
+        expect.objectContaining({ name: 'integration-config' })
       );
       expect(mockSavedObjectsSetup.registerType).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'automatic-import-data-stream' })
+        expect.objectContaining({ name: 'data_stream-config' })
       );
     });
 
