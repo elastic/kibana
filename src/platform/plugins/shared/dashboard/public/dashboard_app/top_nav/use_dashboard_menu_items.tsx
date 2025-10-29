@@ -170,7 +170,6 @@ export const useDashboardMenuItems = ({
         run: () => quickSaveDashboard(),
         secondaryButton: {
           run: (anchorElement: HTMLElement) => {
-            console.log('save menu');
             showSaveMenu({
               dashboardApi,
               anchorElement,

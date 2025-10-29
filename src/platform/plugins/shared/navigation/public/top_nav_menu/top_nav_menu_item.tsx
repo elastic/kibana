@@ -111,8 +111,6 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
 
-  console.log(props.secondaryButton);
-
   const btn =
     props.iconOnly && props.iconType && !props.isMobileMenu ? (
       // icon only buttons are not supported by EuiHeaderLink
