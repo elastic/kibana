@@ -18,6 +18,8 @@ import { retryTransientEsErrors } from '../../services/epm/elasticsearch/retry';
 import { packagePolicyService } from '../../services';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import type { IngestPipelineWithDateFields } from '../../../common/types';
+
 import type { CustomAssetsData, IntegrationsData, SyncIntegrationsData } from './model';
 
 const DELETED_ASSET_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -297,14 +299,22 @@ async function updateIngestPipeline(
 
   if (shouldUpdatePipeline) {
     logger.debug(`Updating ingest pipeline: ${customAsset.name}`);
+
+    // Remove system-managed properties (dates) that cannot be set during create/update of ingest pipelines
+    const {
+      created_date: createdDate,
+      created_date_millis: createdDateMillis,
+      modified_date: modifiedDate,
+      modified_date_millis: modifiedDateMillis,
+      ...ingestPipeline
+    } = customAsset.pipeline as IngestPipelineWithDateFields;
+    const updatedIngestPipeline = ingestPipeline;
     return retryTransientEsErrors(
       () =>
         esClient.ingest.putPipeline(
           {
             id: customAsset.name,
-            description: customAsset.pipeline.description,
-            version: customAsset.pipeline.version,
-            processors: customAsset.pipeline.processors,
+            ...updatedIngestPipeline,
           },
           {
             signal: abortController.signal,
