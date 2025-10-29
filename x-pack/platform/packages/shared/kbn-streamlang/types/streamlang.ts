@@ -66,9 +66,9 @@ export const isActionBlockSchema = (obj: any): obj is StreamlangProcessorDefinit
 // Cheap check that bypasses having to do full schema checks.
 // This is useful for quickly identifying action blocks without full recursive validation.
 export const isActionBlock = <TBlock extends StreamlangStep | StreamlangStepWithUIAttributes>(
-  obj: TBlock
+  obj?: TBlock
 ): obj is Extract<TBlock, { action: string }> => {
-  return 'action' in obj;
+  return obj !== undefined && 'action' in obj;
 };
 
 /**
