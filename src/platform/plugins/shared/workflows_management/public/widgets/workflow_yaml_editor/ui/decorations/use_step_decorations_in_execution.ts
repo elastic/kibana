@@ -41,7 +41,7 @@ export const useStepDecorationsInExecution = (
     const decorations = stepExecutions.flatMap((stepExecution) => {
       const { stepId, status } = stepExecution;
       const stepInfo = workflowLookup.steps[stepId];
-      console.log('stepInfo', stepInfo);
+
       if (!stepInfo) {
         return [];
       }
