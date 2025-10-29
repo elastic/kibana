@@ -107,11 +107,19 @@ export const AuthConfig: FunctionComponent<Props> = ({
     const formData = getFormData();
     const currentHeaders: Array<InternalFormData> = formData.__internal__?.headers ?? [];
     const configHeaders = currentHeaders.filter((header) => header.type === 'config');
-    const secretHeaders = secretHeaderKeys.map((key) => ({
+    const currentSecretHeaders = currentHeaders.filter((header) => header.type === 'secret');
+
+    const fetchedSecretHeaders = secretHeaderKeys.map((key) => ({
       key,
       value: '',
       type: 'secret',
     }));
+
+    const secretHeaders = [
+      ...fetchedSecretHeaders,
+      ...currentSecretHeaders.filter((header) => !secretHeaderKeys.includes(header.key)),
+    ];
+
     let mergedHeaders: Array<InternalFormData> = [...configHeaders, ...secretHeaders];
 
     if (mergedHeaders.length === 0 && hasHeaders) {
