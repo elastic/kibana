@@ -122,14 +122,13 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       return;
     }
     // Creates empty layer
-    const sourceDescriptor = ESSearchSource.createDescriptor({
-      indexPatternId,
-      geoField: 'coordinates',
-      filterByMapBounds: false,
-      applyGlobalQuery: false,
-    });
     const layerDescriptor = createDefaultLayerDescriptor(
-      { ...sourceDescriptor },
+      {
+        indexPatternId,
+        geoField: 'coordinates',
+        filterByMapBounds: false,
+        applyGlobalQuery: false,
+      },
       this.props.mapColors
     );
     this.props.previewLayers([layerDescriptor]);
