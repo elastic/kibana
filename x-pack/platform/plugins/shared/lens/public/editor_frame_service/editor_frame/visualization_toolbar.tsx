@@ -79,6 +79,7 @@ export function VisualizationToolbarWrapper({
     <VisualizationToolbar
       framePublicAPI={framePublicAPI}
       activeVisualization={activeVisualization}
+      enableFlyoutToolbar
     />
   ) : null;
 }
