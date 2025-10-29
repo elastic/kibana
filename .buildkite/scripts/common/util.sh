@@ -199,42 +199,52 @@ docker_with_retry () {
 restore_target_folders() {
   echo "--- Restoring target folders from cache if available"
 
-  .buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
-  set +e
-  gcloud storage ls "gs://ci-artifacts.kibana.dev/target_folders/${BUILDKITE_BRANCH:-default}/target_folders.tar.gz" > /dev/null
-  exit_code=$?
-  set -e
+  if [[ "${CI:-}" == "true" ]]; then
+    .buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
+    set +e
+    gcloud storage ls "gs://ci-artifacts.kibana.dev/target_folders/${BUILDKITE_BRANCH:-default}/target_folders.tar.gz" > /dev/null
+    EXIT_CODE=$?
+    set -e
 
-  if [[ $exit_code -eq 0 ]]; then
-    echo "Downloading cached target folders from GCS"
-    gcloud storage cp "gs://ci-artifacts.kibana.dev/target_folders/${BUILDKITE_BRANCH:-default}/target_folders.tar.gz" .
-    echo "Extracting target folders ($PWD/)target_folders.tar.gz to current directory ($PWD)"
-    tar -xzf target_folders.tar.gz -C .
-    rm -rf target_folders.tar.gz
+    if [[ $EXIT_CODE -eq 0 ]]; then
+      echo "Downloading cached target folders from GCS"
+      gcloud storage cp "gs://ci-artifacts.kibana.dev/target_folders/${BUILDKITE_BRANCH:-default}/target_folders.tar.gz" .
+      echo "Extracting target folders ($PWD/)target_folders.tar.gz to current directory ($PWD)"
+    else
+      echo "No cached target folders found in GCS"
+    fi
+
+    .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   else
-    echo "No cached target folders found in GCS"
+    cp "/tmp/$(git branch --show-current)/target_folders.tar.gz" . || echo "No cached target folders found locally"
   fi
 
-  .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
+  if [[ -f "target_folders.tar.gz" ]]; then
+    tar -xzf target_folders.tar.gz -C .
+    rm -f target_folders.tar.gz
+  fi
 }
 
 archive_target_folders() {
   echo "--- Archiving target folders for caching"
-  mkdir -p target_archive
-  find . -type d -name target -exec rsync -avqR {}/ ./target_archive/ \;
+  ts-node .buildkite/scripts/steps/typecheck/copyTsTargetFolders.ts "$PWD/target_archive"
 
-  rm -rf target_archive/target
-  rm -rf target_archive/node_modules
   tar -czf target_folders.tar.gz -C target_archive .
 
-  rm -rf target_archive
+  if [[ "${CI:-}" == "true" ]]; then
+    .buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
+    set +e
+    gcloud storage cp target_folders.tar.gz "gs://ci-artifacts.kibana.dev/target_folders/${BUILDKITE_BRANCH:-default}/target_folders.tar.gz" || echo "Failed to upload target folders to GCS"
+    EXIT_CODE=$?
+    set -e
 
-  .buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
-  set +e
-  gcloud storage cp target_folders.tar.gz "gs://ci-artifacts.kibana.dev/target_folders/${BUILDKITE_BRANCH:-default}/target_folders.tar.gz" || echo "Failed to upload target folders to GCS"
-  exit_code=$?
-  set -e
-
-  .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
-  rm -rf target_folders.tar.gz target_archive
+    .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
+    rm -rf target_folders.tar.gz target_archive
+  else
+    ARCHIVE_PATH="/tmp/$(git branch --show-current)/target_folders.tar.gz"
+    echo "Not uploading target folders to GCS, but archived to: $ARCHIVE_PATH."
+    mkdir -p "$(dirname "$ARCHIVE_PATH")"
+    mv target_folders.tar.gz "$ARCHIVE_PATH"
+    rm -rf target_folders.tar.gz target_archive
+  fi
 }
