@@ -307,8 +307,8 @@ const deprecations: ConfigDeprecationProvider = () => [
         correctiveActions: {
           manualSteps: [
             i18n.translate('core.deprecations.elasticsearchPingTimeout.manualSteps1', {
-              defaultMessage: 'Remove Setting [{pingTimeoutSetting}] from your kibana configs and use "{requestTimeoutSetting}" instead.',
-              values: { pingTimeoutSetting: `${fromPath}.pingTimeout`, requestTimeoutSetting: `${fromPath}.requestTimeout` },
+              defaultMessage: 'Remove Setting [{pingTimeoutSetting}] from your kibana configs.',
+              values: { pingTimeoutSetting: `${fromPath}.pingTimeout` },
             }),
           ],
         },
