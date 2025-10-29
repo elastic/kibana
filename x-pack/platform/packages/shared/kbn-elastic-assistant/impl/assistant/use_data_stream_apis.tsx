@@ -15,7 +15,7 @@ import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@kbn/react-query';
+} from '@tanstack/react-query';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import type { ConversationWithOwner, FetchConversationsResponse } from './api';
 import { useFetchPrompts } from './api';

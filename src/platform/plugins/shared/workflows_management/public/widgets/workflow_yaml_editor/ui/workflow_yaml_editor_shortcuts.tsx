@@ -9,10 +9,10 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiText, EuiTextColor } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isMac } from '../../../shared/utils/is_mac';
 
 export function WorkflowYAMLEditorShortcuts() {
@@ -31,7 +31,7 @@ export function WorkflowYAMLEditorShortcuts() {
             />
           </b>
           <EuiTextColor color="subdued">
-            <kbd>{commandKey}</kbd> {'+'} <kbd>{'K'}</kbd>
+            <kbd>{commandKey}</kbd> + <kbd>K</kbd>
           </EuiTextColor>
         </p>
       </EuiText>

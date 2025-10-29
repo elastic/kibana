@@ -23,7 +23,6 @@ interface CreateTestConfigOptions<T> {
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
   tier?: 'oblt_logs_essentials';
-  indexRefreshInterval?: string | false;
 }
 
 // include settings from elasticsearch controller
@@ -97,7 +96,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       esTestCluster: {
@@ -148,7 +147,6 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
         include: options.suiteTags?.include,
         exclude: [...(options.suiteTags?.exclude || []), 'skipServerless'],
       },
-      indexRefreshInterval: options.indexRefreshInterval,
     };
   };
 }

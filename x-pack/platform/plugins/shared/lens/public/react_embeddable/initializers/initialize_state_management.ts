@@ -20,7 +20,7 @@ import type {
   LensInternalApi,
   LensRuntimeState,
   LensSerializedState,
-} from '@kbn/lens-common';
+} from '../types';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateSavedObjectId'> &

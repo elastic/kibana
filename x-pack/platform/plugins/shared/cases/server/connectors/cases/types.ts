@@ -7,16 +7,15 @@
 
 import type { ExclusiveUnion } from '@elastic/eui';
 import type { TypeOf } from '@kbn/config-schema';
-import type { z } from '@kbn/zod';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { DecoratedError } from '@kbn/core-saved-objects-server';
 import type {
   CasesConnectorConfigSchema,
   CasesConnectorSecretsSchema,
+  CasesConnectorRunParamsSchema,
   CasesConnectorRuleActionParamsSchema,
   CasesConnectorParamsSchema,
   CasesGroupedAlertsSchema,
-  ZCasesConnectorRunParamsSchema,
 } from './schema';
 
 export interface CaseAlert {
@@ -24,10 +23,10 @@ export interface CaseAlert {
   _index: string;
   [x: string]: unknown;
 }
-export type CasesConnectorConfig = z.infer<typeof CasesConnectorConfigSchema>;
-export type CasesConnectorSecrets = z.infer<typeof CasesConnectorSecretsSchema>;
+export type CasesConnectorConfig = TypeOf<typeof CasesConnectorConfigSchema>;
+export type CasesConnectorSecrets = TypeOf<typeof CasesConnectorSecretsSchema>;
 export type CasesConnectorRunParams = Omit<
-  z.infer<typeof ZCasesConnectorRunParamsSchema>,
+  TypeOf<typeof CasesConnectorRunParamsSchema>,
   'alerts'
 > & { alerts: CaseAlert[] };
 

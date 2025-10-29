@@ -62,13 +62,11 @@ export class AiAssistantManagementObservabilityPlugin
     >
 {
   private readonly config: ConfigSchema;
-  private readonly isServerless: boolean;
   private registeredApp?: ManagementApp;
   private licensingSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.config = context.config.get();
-    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -98,7 +96,6 @@ export class AiAssistantManagementObservabilityPlugin
         id: 'observabilityAiAssistantManagement',
         title,
         hideFromSidebar: true,
-        hideFromGlobalSearch: !this.isServerless,
         order: 2,
         mount: async (mountParams) => {
           const { mountManagementSection } = await import('./app');

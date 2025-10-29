@@ -21,7 +21,6 @@ export type {
   GaugeLabelMajorMode,
   GaugeTicksPosition,
   GaugeState,
-  GaugeColorMode,
   Accessors,
 } from './types';
 

@@ -8,13 +8,12 @@
  */
 
 import { convertMetricToColumns } from '../metrics';
-import type { ExtendedColumnConverterArgs, SiblingPipelineMetric } from './types';
+import type { AggBasedColumn, ExtendedColumnConverterArgs, SiblingPipelineMetric } from './types';
 import { convertToSchemaConfig } from '../../../vis_schemas';
-import type { AnyMetricColumnAndMeta } from '../../types';
 
 export const convertToSiblingPipelineColumns = (
   columnConverterArgs: ExtendedColumnConverterArgs<SiblingPipelineMetric>
-): AnyMetricColumnAndMeta | null => {
+): AggBasedColumn | null => {
   const { aggParams, label, aggId } = columnConverterArgs.agg;
   if (!aggParams) {
     return null;

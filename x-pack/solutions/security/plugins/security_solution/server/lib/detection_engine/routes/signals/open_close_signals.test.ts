@@ -19,15 +19,13 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
-import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let context: SecuritySolutionRequestHandlerContextMock;
+  let { context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
@@ -37,11 +35,6 @@ describe('set signal status', () => {
     );
     const telemetrySenderMock = createMockTelemetryEventsSender();
     setSignalsStatusRoute(server.router, logger, telemetrySenderMock);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('status on signal', () => {

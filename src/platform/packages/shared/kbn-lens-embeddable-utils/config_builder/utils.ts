@@ -14,9 +14,11 @@ import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
+} from '@kbn/lens-plugin/public';
+import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
-} from '@kbn/lens-common';
+} from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Reference } from '@kbn/content-management-utils';
@@ -357,8 +359,4 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
   return (
     typeof config === 'object' && config !== null && 'state' in config && 'references' in config
   );
-}
-
-export function isEsqlTableTypeDataset(dataset: LensApiState['dataset']) {
-  return dataset.type === 'esql' || dataset.type === 'table';
 }

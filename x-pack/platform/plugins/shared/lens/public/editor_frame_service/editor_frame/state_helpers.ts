@@ -7,6 +7,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Ast } from '@kbn/interpreter';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -19,6 +20,8 @@ import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-common';
+import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
+
 import type {
   Datasource,
   DatasourceMap,
@@ -29,16 +32,11 @@ import type {
   VisualizationMap,
   VisualizeEditorContext,
   SuggestionRequest,
-  DatasourceState,
-  DatasourceStates,
-  VisualizationState,
-  DocumentToExpressionReturnType,
-  LensDocument,
-} from '@kbn/lens-common';
-import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
-
+} from '../../types';
 import { buildExpression } from './expression_helpers';
+import type { LensDocument } from '../../persistence';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
+import type { DatasourceState, DatasourceStates, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
@@ -355,6 +353,14 @@ export function initializeDatasources({
     }
   }
   return states;
+}
+
+export interface DocumentToExpressionReturnType {
+  ast: Ast | null;
+  indexPatterns: IndexPatternMap;
+  indexPatternRefs: IndexPatternRef[];
+  activeVisualizationState: unknown;
+  activeDatasourceState: unknown;
 }
 
 export async function persistedStateToExpression(

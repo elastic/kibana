@@ -16,6 +16,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'X-Pack API Integration Tests - ml',
     },
-    indexRefreshInterval: '1s',
   };
 }

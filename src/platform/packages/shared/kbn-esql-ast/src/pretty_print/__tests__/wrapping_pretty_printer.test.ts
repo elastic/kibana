@@ -110,16 +110,6 @@ FROM aaaaaaaaaaaa
           dddddddddddddddddddddddddddddddddddddddd,
           eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`);
     });
-
-    test('supports binary expressions', () => {
-      assertReprint(
-        `FROM employees
-  | LEFT JOIN asdf
-        ON
-          aaaaaaaaaaaaaaaaaaaaaaaaa > bbbbbbbbbbbbbbbbbbbbb AND
-            ccccccccccccccccccc == dddddddddddddddddddddddddddddddddddddddd`
-      );
-    });
   });
 
   describe('GROK', () => {

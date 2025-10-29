@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodSchema } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseChatModel,
@@ -14,7 +14,6 @@ import {
   type BindToolsInput,
   type LangSmithParams,
 } from '@langchain/core/language_models/chat_models';
-import type { InteropZodType } from '@langchain/core/utils/types';
 import type {
   BaseLanguageModelInput,
   StructuredOutputMethodOptions,
@@ -22,7 +21,7 @@ import type {
 } from '@langchain/core/language_models/base';
 import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { isInteropZodSchema } from '@langchain/core/utils/types';
+import { isZodSchema } from '@langchain/core/utils/types';
 import type { ChatResult, ChatGeneration } from '@langchain/core/outputs';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { OutputParserException } from '@langchain/core/output_parsers';
@@ -305,37 +304,34 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   }
 
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
-    outputSchema: InteropZodType<RunOutput> | Record<string, any>,
+    outputSchema: z.ZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<false>
   ): Runnable<BaseLanguageModelInput, RunOutput>;
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
-    outputSchema: InteropZodType<RunOutput> | Record<string, any>,
+    outputSchema: z.ZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<true>
   ): Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }>;
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
-    outputSchema: InteropZodType<RunOutput> | Record<string, any>,
+    outputSchema: z.ZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<boolean>
   ):
     | Runnable<BaseLanguageModelInput, RunOutput>
     | Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }> {
-    const schema: InteropZodType<RunOutput> | Record<string, any> = outputSchema;
+    const schema: z.ZodType<RunOutput> | Record<string, any> = outputSchema;
     const name = config?.name;
-    const description =
-      'description' in schema && typeof schema.description === 'string'
-        ? schema.description
-        : 'A function available to call.';
+    const description = schema.description ?? 'A function available to call.';
     const includeRaw = config?.includeRaw;
 
     let functionName = name ?? 'extract';
     let tools: ToolDefinition[];
-    if (isInteropZodSchema(schema)) {
+    if (isZodSchema(schema)) {
       tools = [
         {
           type: 'function',
           function: {
             name: functionName,
             description,
-            parameters: zodToJsonSchema(schema as unknown as ZodSchema),
+            parameters: zodToJsonSchema(schema),
           },
         },
       ];

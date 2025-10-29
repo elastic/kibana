@@ -11,11 +11,11 @@ import { getMonitoringEntitySourceRoute } from './get';
 import { updateMonitoringEntitySourceRoute } from './update';
 import { listMonitoringEntitySourceRoute } from './list';
 
-export const registerMonitoringEntitySourceRoutes = (
-  router: EntityAnalyticsRoutesDeps['router'],
-  logger: EntityAnalyticsRoutesDeps['logger'],
-  config: EntityAnalyticsRoutesDeps['config']
-) => {
+export const registerMonitoringEntitySourceRoutes = ({
+  router,
+  logger,
+  config,
+}: EntityAnalyticsRoutesDeps) => {
   createMonitoringEntitySourceRoute(router, logger);
   getMonitoringEntitySourceRoute(router, logger, config);
   updateMonitoringEntitySourceRoute(router, logger, config);

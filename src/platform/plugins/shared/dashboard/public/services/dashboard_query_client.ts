@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryClient } from '@kbn/react-query';
+import { QueryClient } from '@tanstack/react-query';
 
 export const dashboardQueryClient = new QueryClient({
   defaultOptions: {

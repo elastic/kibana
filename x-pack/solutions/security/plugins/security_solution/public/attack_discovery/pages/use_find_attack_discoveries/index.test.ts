@@ -6,8 +6,8 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import '@kbn/react-query/mock';
-import { useQueryClient, QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import * as ReactQuery from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
 
@@ -27,8 +27,6 @@ import { getMockAttackDiscoveryAlerts } from '../mock/mock_attack_discovery_aler
 import { ERROR_FINDING_ATTACK_DISCOVERIES } from './translations';
 
 const mockAddError = jest.fn();
-const useQueryClientMock = useQueryClient as unknown as jest.MockedFn<typeof useQueryClient>;
-
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
     addError: mockAddError,
@@ -326,10 +324,11 @@ describe('useFindAttackDiscoveries', () => {
 describe('useInvalidateFindAttackDiscoveries', () => {
   it('calls invalidateQueries with the internal generations route when the feature flag is false', () => {
     const invalidateQueries = jest.fn();
-
-    useQueryClientMock.mockReturnValue({ invalidateQueries } as unknown as ReturnType<
-      typeof useQueryClient
-    >);
+    jest
+      .spyOn(ReactQuery, 'useQueryClient')
+      .mockReturnValue({ invalidateQueries } as unknown as ReturnType<
+        typeof ReactQuery.useQueryClient
+      >);
 
     mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: false }); // <-- feature flag disabled
 
@@ -343,9 +342,11 @@ describe('useInvalidateFindAttackDiscoveries', () => {
 
   it('calls invalidateQueries with the public generations route when the feature flag is true', () => {
     const invalidateQueries = jest.fn();
-    useQueryClientMock.mockReturnValue({ invalidateQueries } as unknown as ReturnType<
-      typeof useQueryClient
-    >);
+    jest
+      .spyOn(ReactQuery, 'useQueryClient')
+      .mockReturnValue({ invalidateQueries } as unknown as ReturnType<
+        typeof ReactQuery.useQueryClient
+      >);
 
     mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: true }); // <-- feature flag
 

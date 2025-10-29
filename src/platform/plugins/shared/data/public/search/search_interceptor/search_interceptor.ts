@@ -292,9 +292,7 @@ export class SearchInterceptor {
   ) {
     const { sessionId, strategy } = options;
 
-    const search = ({
-      abortSignal = searchAbortController.getSignal(),
-    }: Pick<ISearchOptions, 'abortSignal'> = {}) => {
+    const search = () => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
         () => {},
@@ -304,7 +302,7 @@ export class SearchInterceptor {
         {
           ...options,
           ...this.deps.session.getSearchOptions(sessionId),
-          abortSignal,
+          abortSignal: searchAbortController.getSignal(),
           isSearchStored,
         }
       )
@@ -321,9 +319,9 @@ export class SearchInterceptor {
     const searchTracker = this.deps.session.isCurrentSession(sessionId)
       ? this.deps.session.trackSearch({
           abort: () => searchAbortController.abort(),
-          poll: async (abortSignal) => {
+          poll: async () => {
             if (id) {
-              await search({ abortSignal });
+              await search();
             }
           },
         })
@@ -332,8 +330,7 @@ export class SearchInterceptor {
     // track if this search's session will be send to background
     // if yes, then we don't need to cancel this search when it is aborted
     let isSavedToBackground =
-      this.deps.session.isCurrentSession(sessionId) &&
-      (this.deps.session.isSaving() || this.deps.session.isStored());
+      this.deps.session.isCurrentSession(sessionId) && this.deps.session.isStored();
     const savedToBackgroundSub =
       this.deps.session.isCurrentSession(sessionId) &&
       this.deps.session.state$
@@ -418,11 +415,8 @@ export class SearchInterceptor {
             })
           );
         } else {
-          // Don't error out the search or cancel if it is being saved to the background
-          if (!isSavedToBackground) {
-            searchTracker?.error();
-            cancel();
-          }
+          searchTracker?.error();
+          cancel();
           return throwError(e);
         }
       }),

@@ -19,6 +19,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName:
         'Detection Engine - Exception Workflows Integration Tests - ESS Env - Basic License',
     },
-    indexRefreshInterval: '1s',
   };
 }

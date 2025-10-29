@@ -5,92 +5,68 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 
-export const SlackApiSecretsSchema = z
-  .object({
-    token: z.string().min(1),
-  })
-  .strict();
+export const SlackApiSecretsSchema = schema.object({
+  token: schema.string({ minLength: 1 }),
+});
 
-export const SlackApiConfigSchema = z
-  .object({
-    allowedChannels: z
-      .array(
-        z
-          .object({
-            id: z.string().min(1),
-            name: z.string().min(1),
-          })
-          .strict()
-      )
-      .max(500)
-      .optional(),
-  })
-  .strict();
+export const SlackApiConfigSchema = schema.object({
+  allowedChannels: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string({ minLength: 1 }),
+        name: schema.string({ minLength: 1 }),
+      }),
+      { maxSize: 25 }
+    )
+  ),
+});
 
-export const ValidChannelIdSubActionParamsSchema = z
-  .object({
-    channelId: z.string().optional(),
-  })
-  .strict();
+export const ValidChannelIdSubActionParamsSchema = schema.object({
+  channelId: schema.maybe(schema.string()),
+});
 
-export const ValidChannelIdParamsSchema = z
-  .object({
-    subAction: z.literal('validChannelId'),
-    subActionParams: ValidChannelIdSubActionParamsSchema,
-  })
-  .strict();
+export const ValidChannelIdParamsSchema = schema.object({
+  subAction: schema.literal('validChannelId'),
+  subActionParams: ValidChannelIdSubActionParamsSchema,
+});
 
-export const PostMessageSubActionParamsSchema = z
-  .object({
-    channels: z.array(z.string()).max(1).optional(),
-    channelIds: z.array(z.string()).max(1).optional(),
-    text: z.string().min(1),
-  })
-  .strict();
+export const PostMessageSubActionParamsSchema = schema.object({
+  channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  text: schema.string({ minLength: 1 }),
+});
 
-export function validateBlockkit(text: string, ctx: z.RefinementCtx) {
+export function validateBlockkit(text: string) {
   try {
     const parsedText = JSON.parse(text);
 
     if (!Object.hasOwn(parsedText, 'blocks')) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'block kit body must contain field "blocks"',
-      });
+      return 'block kit body must contain field "blocks"';
     }
   } catch (err) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `block kit body is not valid JSON - ${err.message}`,
-    });
+    return `block kit body is not valid JSON - ${err.message}`;
   }
 }
 
-export const PostBlockkitSubActionParamsSchema = z
-  .object({
-    channels: z.array(z.string()).max(1).optional(),
-    channelIds: z.array(z.string()).max(1).optional(),
-    text: z.string().superRefine(validateBlockkit),
-  })
-  .strict();
+export const PostBlockkitSubActionParamsSchema = schema.object({
+  channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  text: schema.string({ validate: validateBlockkit }),
+});
 
-export const PostMessageParamsSchema = z
-  .object({
-    subAction: z.literal('postMessage'),
-    subActionParams: PostMessageSubActionParamsSchema,
-  })
-  .strict();
+export const PostMessageParamsSchema = schema.object({
+  subAction: schema.literal('postMessage'),
+  subActionParams: PostMessageSubActionParamsSchema,
+});
 
-export const PostBlockkitParamsSchema = z
-  .object({
-    subAction: z.literal('postBlockkit'),
-    subActionParams: PostBlockkitSubActionParamsSchema,
-  })
-  .strict();
+export const PostBlockkitParamsSchema = schema.object({
+  subAction: schema.literal('postBlockkit'),
+  subActionParams: PostBlockkitSubActionParamsSchema,
+});
 
-export const SlackApiParamsSchema = z.union([
+export const SlackApiParamsSchema = schema.oneOf([
   ValidChannelIdParamsSchema,
   PostMessageParamsSchema,
   PostBlockkitParamsSchema,

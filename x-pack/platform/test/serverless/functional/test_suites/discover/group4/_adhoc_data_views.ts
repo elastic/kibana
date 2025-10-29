@@ -40,8 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.waitForRenderComplete();
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/237951
-  describe.skip('adhoc data views', function () {
+  describe('adhoc data views', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load(

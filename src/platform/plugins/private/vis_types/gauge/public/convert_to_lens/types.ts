@@ -10,9 +10,9 @@
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type {
   NavigateToLensContext,
-  GaugeVisualizationState as GaugeVisConfiguration,
-  MetricVisualizationState as MetricVisConfiguration,
-} from '@kbn/lens-common';
+  GaugeVisConfiguration,
+  MetricVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { GaugeVisParams } from '../types';
 

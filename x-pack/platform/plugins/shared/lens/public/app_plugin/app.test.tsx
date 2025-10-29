@@ -9,13 +9,8 @@ import React from 'react';
 import { Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
-import type { LensAppProps } from './types';
-import type {
-  LensDocument,
-  LensAppServices,
-  LensAppState,
-  VisualizeEditorContext,
-} from '@kbn/lens-common';
+import type { LensAppProps, LensAppServices } from './types';
+import type { LensDocument } from '../persistence';
 import {
   visualizationMap,
   datasourceMap,
@@ -33,6 +28,7 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import moment from 'moment';
+import type { LensAppState } from '../state_management';
 import { setState } from '../state_management';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { LensSerializedState } from '..';
@@ -40,6 +36,7 @@ import { createMockedField, createMockedIndexPattern } from '../datasources/form
 import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { VisualizeEditorContext } from '../types';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 

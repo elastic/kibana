@@ -26,8 +26,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
     "@kbn/config-schema",
-    "@kbn/chart-expressions-common",
-    "@kbn/lens-common",
   ],
   "exclude": [
     "target/**/*",

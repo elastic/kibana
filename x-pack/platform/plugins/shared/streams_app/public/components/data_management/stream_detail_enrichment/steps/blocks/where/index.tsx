@@ -79,7 +79,8 @@ export const WhereBlock = (props: StepConfigurationProps) => {
         color={isUnderEdit && isRootStepValue ? undefined : panelColour}
         css={
           isUnderEdit
-            ? css`
+            ? // eslint-disable-next-line @elastic/eui/no-css-color
+              css`
                 border: 1px solid ${euiTheme.colors.borderStrongPrimary};
                 box-sizing: border-box;
               `

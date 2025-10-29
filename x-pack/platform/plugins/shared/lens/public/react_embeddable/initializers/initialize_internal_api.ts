@@ -10,19 +10,18 @@ import type { initializeTitleManager } from '@kbn/presentation-publishing';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createEmptyLensState } from '../helper';
 import type {
   ExpressionWrapperProps,
+  LensEmbeddableStartServices,
   LensInternalApi,
   LensOverrides,
   LensPanelProps,
   LensRuntimeState,
   VisualizationContext,
-  UserMessage,
-} from '@kbn/lens-common';
-import { createEmptyLensState } from '../helper';
-
+} from '../types';
 import { apiHasAbortController, apiHasLensComponentProps } from '../type_guards';
-import type { LensEmbeddableStartServices } from '../types';
+import type { UserMessage } from '../../types';
 
 export function initializeInternalApi(
   initialState: LensRuntimeState,

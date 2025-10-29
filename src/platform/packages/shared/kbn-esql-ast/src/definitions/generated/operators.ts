@@ -378,7 +378,6 @@ const addDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -555,7 +554,6 @@ const divDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -1058,7 +1056,6 @@ const equalsDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -1441,7 +1438,6 @@ const greaterThanDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -1824,7 +1820,6 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -2073,7 +2068,6 @@ const inDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: ['ROW a = 1, b = 4, c = 3\n| WHERE c-a IN (3, b / 2, a)'],
 };
@@ -2327,7 +2321,6 @@ const isNotNullDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: ['FROM employees\n| WHERE is_rehired IS NOT NULL\n| STATS COUNT(emp_no)'],
 };
@@ -2581,7 +2574,6 @@ const isNullDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: ['FROM employees\n| WHERE birth_date IS NULL'],
 };
@@ -2964,7 +2956,6 @@ const lessThanDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -3347,7 +3338,6 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -3404,7 +3394,6 @@ const likeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: ['FROM employees\n| WHERE first_name LIKE """?b*"""\n| KEEP first_name, last_name'],
 };
@@ -3914,7 +3903,7 @@ const matchOperatorDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE],
   examples: ['FROM books\n| WHERE author:"Faulkner"'],
 };
 
@@ -4090,7 +4079,6 @@ const modDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -4267,7 +4255,6 @@ const mulDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -4581,7 +4568,6 @@ const notInDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -4638,7 +4624,6 @@ const notLikeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -4695,7 +4680,6 @@ const notRlikeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -5198,7 +5182,6 @@ const notEqualsDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };
@@ -5255,7 +5238,6 @@ const rlikeDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [
     'FROM employees\n| WHERE first_name RLIKE """.leja.*"""\n| KEEP first_name, last_name',
@@ -5580,7 +5562,6 @@ const subDefinition: FunctionDefinition = {
     Location.STATS_BY,
     Location.COMPLETION,
     Location.RERANK,
-    Location.JOIN,
   ],
   examples: [],
 };

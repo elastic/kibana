@@ -46,7 +46,8 @@
       "kibanaReact",
       "kibanaUtils",
       "lens",
-      "unifiedSearch"
+      "unifiedSearch",
+      "visualizations"
     ],
     "extraPublicDirs": [
       "common"

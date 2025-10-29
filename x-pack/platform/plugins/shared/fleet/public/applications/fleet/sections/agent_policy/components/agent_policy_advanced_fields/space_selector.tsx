@@ -9,9 +9,8 @@ import { type EuiComboBoxOptionOption, EuiHealth, EuiFormRow } from '@elastic/eu
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useQuery } from '@kbn/react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 import { useAgentPoliciesSpaces, useStartServices } from '../../../../../../hooks';
 
 export interface SpaceSelectorProps {
@@ -102,13 +101,7 @@ export const SpaceSelectorComponent: React.FC<SpaceSelectorProps> = ({
       }
       const existingSpace = allSpaces.find((space) => space.id === v);
       const color = existingSpace?.color;
-      const label =
-        existingSpace?.name ??
-        (v === ALL_SPACES_ID
-          ? i18n.translate('xpack.fleet.agentPolicies.allSpacesLabel', {
-              defaultMessage: 'All spaces',
-            })
-          : v);
+      const label = existingSpace?.name ?? v;
 
       return existingOption
         ? existingOption
@@ -154,20 +147,7 @@ export const SpaceSelectorComponent: React.FC<SpaceSelectorProps> = ({
           }
         }}
         onChange={(newOptions) => {
-          if (
-            selectedOptions.some((option) => option.key === ALL_SPACES_ID) &&
-            newOptions.some((option) => option.key !== ALL_SPACES_ID)
-          ) {
-            onChange(
-              newOptions
-                .filter((option) => option.key !== ALL_SPACES_ID)
-                .map(({ key }) => key as string)
-            );
-          } else if (newOptions.some((option) => option.key === ALL_SPACES_ID)) {
-            onChange([ALL_SPACES_ID]);
-          } else {
-            onChange(newOptions.map(({ key }) => key as string));
-          }
+          onChange(newOptions.map(({ key }) => key as string));
         }}
       />
     </EuiFormRow>

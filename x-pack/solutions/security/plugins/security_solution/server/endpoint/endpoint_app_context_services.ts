@@ -277,10 +277,14 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
+    const spaceIdValue = this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+      ? spaceId
+      : DEFAULT_SPACE_ID;
+
     return new EndpointMetadataService(
       this.startDependencies.esClient,
-      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId }),
-      this.getInternalFleetServices(spaceId),
+      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId: spaceIdValue }),
+      this.getInternalFleetServices(spaceIdValue),
       this.createLogger('endpointMetadata')
     );
   }
@@ -298,7 +302,10 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.fleetServicesFactory.asInternalUser(spaceId, unscoped);
+    return this.fleetServicesFactory.asInternalUser(
+      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined,
+      unscoped
+    );
   }
 
   public getManifestManager(): ManifestManager | undefined {

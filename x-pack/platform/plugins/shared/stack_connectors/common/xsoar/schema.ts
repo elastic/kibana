@@ -5,54 +5,50 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { SUB_ACTION } from './constants';
 
-export const ConfigSchema = z
-  .object({
-    url: z.string(),
-  })
-  .strict();
+export const ConfigSchema = schema.object({
+  url: schema.string(),
+});
 
-export const SecretsSchema = z
-  .object({
-    apiKey: z.string(),
-    apiKeyID: z.string().nullable().default(null),
-  })
-  .strict();
+export const SecretsSchema = schema.object({
+  apiKey: schema.string(),
+  apiKeyID: schema.nullable(schema.string()),
+});
 
 export const XSOARPlaybooksActionParamsSchema = null;
-export const XSOARPlaybooksObjectSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-});
-export const XSOARPlaybooksActionResponseSchema = z.object({
-  playbooks: z.array(XSOARPlaybooksObjectSchema),
-});
+export const XSOARPlaybooksObjectSchema = schema.object(
+  {
+    id: schema.string(),
+    name: schema.string(),
+  },
+  { unknowns: 'ignore' }
+);
+export const XSOARPlaybooksActionResponseSchema = schema.object(
+  {
+    playbooks: schema.arrayOf(XSOARPlaybooksObjectSchema),
+  },
+  { unknowns: 'ignore' }
+);
 
-export const XSOARRunActionParamsSchema = z
-  .object({
-    name: z.string(),
-    playbookId: z.string().nullable().default(null),
-    createInvestigation: z.boolean(),
-    severity: z.coerce.number(),
-    isRuleSeverity: z.boolean().default(false).nullable(),
-    body: z.string().nullable().default(null),
-  })
-  .strict();
-export const XSOARRunActionResponseSchema = z.object({});
+export const XSOARRunActionParamsSchema = schema.object({
+  name: schema.string(),
+  playbookId: schema.nullable(schema.string()),
+  createInvestigation: schema.boolean(),
+  severity: schema.number(),
+  isRuleSeverity: schema.nullable(schema.boolean({ defaultValue: false })),
+  body: schema.nullable(schema.string()),
+});
+export const XSOARRunActionResponseSchema = schema.object({}, { unknowns: 'ignore' });
 
-export const ExecutorParamsSchema = z.union([
-  z
-    .object({
-      subAction: z.literal(SUB_ACTION.PLAYBOOKS),
-      subActionParams: z.literal(null), // this subaction not required any value as params
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal(SUB_ACTION.RUN),
-      subActionParams: XSOARRunActionParamsSchema,
-    })
-    .strict(),
+export const ExecutorParamsSchema = schema.oneOf([
+  schema.object({
+    subAction: schema.literal(SUB_ACTION.PLAYBOOKS),
+    subActionParams: schema.literal(null), // this subaction not required any value as params
+  }),
+  schema.object({
+    subAction: schema.literal(SUB_ACTION.RUN),
+    subActionParams: XSOARRunActionParamsSchema,
+  }),
 ]);

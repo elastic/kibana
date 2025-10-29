@@ -7,16 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // Re-export everything from the individual modules
-export type * from './types';
+export type { WorkflowEditorState, RootState, AppDispatch, WorkflowEditorStore } from './types';
+
 // Action creators
-export * from './slice';
+export { setYamlString, clearComputedData, setCursorPosition, setStepExecutions } from './slice';
+
 // Store
-export { createWorkflowDetailStore } from './store';
+export { createWorkflowEditorStore, workflowEditorStore } from './store';
 
 // Selectors
-export * from './selectors';
+export {
+  selectYamlString,
+  selectYamlDocument,
+  selectWorkflowLookup,
+  selectWorkflowGraph,
+  selectFocusedStepInfo,
+  selectStepExecutions,
+  selectHighlightedStepId,
+} from './selectors';
 
 // Middleware (if needed for custom store setup)
 export { workflowComputationMiddleware } from './middleware';
 export type { WorkflowLookup, StepInfo } from './utils/build_workflow_lookup';
-export { WorkflowDetailStoreProvider } from './provider';
+export { WorkflowEditorStoreProvider } from './provider';

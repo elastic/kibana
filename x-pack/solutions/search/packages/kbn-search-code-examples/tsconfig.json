@@ -15,7 +15,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/i18n",
-  ]
+  "kbn_references": []
 }

@@ -220,15 +220,6 @@ export class Alert<
     return this;
   }
 
-  clearThrottlingLastScheduledActions(allActionUuids: string[]) {
-    const throttlingActions = this.meta.lastScheduledActions?.actions || {};
-    Object.keys(throttlingActions).forEach((id) => {
-      if (!allActionUuids.includes(id)) {
-        delete throttlingActions[id];
-      }
-    });
-  }
-
   updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null, uuid?: string) {
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
@@ -237,11 +228,9 @@ export class Alert<
     this.meta.lastScheduledActions.group = group;
     this.meta.lastScheduledActions.date = date;
 
-    // action group has changed, clear out the actions history
     if (this.meta.lastScheduledActions.group !== group) {
       this.meta.lastScheduledActions.actions = {};
     } else if (uuid) {
-      // uuid is provided, this is an action on interval
       if (!this.meta.lastScheduledActions.actions) {
         this.meta.lastScheduledActions.actions = {};
       }

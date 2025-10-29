@@ -31,6 +31,5 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/cases-plugin",
     "@kbn/observability-nav-icons",
-    "@kbn/deeplinks-management",
   ]
 }

@@ -16,7 +16,6 @@
     "@kbn/shared-ux-router",
     "@kbn/content-management-table-list-view-common",
     "@kbn/charts-theme",
-    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

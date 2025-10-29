@@ -7,7 +7,8 @@
 
 import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import type { CollapseFunction, LensLayerType as LayerType } from '@kbn/lens-common';
+import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
+import type { LayerType } from '../../../common/types';
 
 export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
 export type PrimaryMetricFontSize = ValueFontMode;

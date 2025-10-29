@@ -21,13 +21,13 @@ describe('Jira schema', () => {
 
   describe('ExecutorSubActionPushParamsSchema', () => {
     it('validates the test object ExecutorSubActionPushParamsSchema correctly', () => {
-      expect(() => ExecutorSubActionPushParamsSchema.parse({ incident })).not.toThrow();
+      expect(() => ExecutorSubActionPushParamsSchema.validate({ incident })).not.toThrow();
     });
 
     describe('otherFields', () => {
       it('validates the otherFields correctly', () => {
         expect(() =>
-          ExecutorSubActionPushParamsSchema.parse({
+          ExecutorSubActionPushParamsSchema.validate({
             incident: {
               ...incident,
               otherFields: {
@@ -49,24 +49,13 @@ describe('Jira schema', () => {
           }, {});
 
         expect(() =>
-          ExecutorSubActionPushParamsSchema.parse({
+          ExecutorSubActionPushParamsSchema.validate({
             incident: {
               ...incident,
               otherFields,
             },
           })
-        ).toThrowErrorMatchingInlineSnapshot(`
-          "[
-            {
-              \\"code\\": \\"custom\\",
-              \\"message\\": \\"A maximum of 20 fields in otherFields can be defined at a time.\\",
-              \\"path\\": [
-                \\"incident\\",
-                \\"otherFields\\"
-              ]
-            }
-          ]"
-        `);
+        ).toThrow('A maximum of 20 fields in otherFields can be defined at a time.');
       });
 
       it.each(incidentSchemaObjectProperties)(
@@ -76,7 +65,7 @@ describe('Jira schema', () => {
             [property]: 'foobar',
           };
           expect(() =>
-            ExecutorSubActionPushParamsSchema.parse({
+            ExecutorSubActionPushParamsSchema.validate({
               incident: {
                 ...incident,
                 otherFields,

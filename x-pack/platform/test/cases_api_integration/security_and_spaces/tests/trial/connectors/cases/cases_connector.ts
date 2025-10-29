@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          `Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Alert ID and index must be defined",\n    "path": [\n      "alerts",\n      0\n    ]\n  }\n])`
+          'Request validation failed (Error: [alerts.0]: Alert ID and index must be defined)'
         );
       });
 
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed ([\n  {\n    "code": "too_big",\n    "maximum": 1,\n    "type": "array",\n    "inclusive": true,\n    "exact": false,\n    "message": "Array must contain at most 1 element(s)",\n    "path": [\n      "groupingBy"\n    ]\n  }\n])'
+          'Request validation failed (Error: [groupingBy]: array size is [2], but cannot be greater than [1])'
         );
       });
 
@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  },\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  }\n])'
+          'Request validation failed (Error: [timeWindow]: Not a valid time window)'
         );
       });
 
@@ -128,32 +128,23 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  }\n])'
+          'Request validation failed (Error: [timeWindow]: Not a valid time window)'
         );
       });
 
       it('returns 400 for unsupported time units', async () => {
-        const res1 = await executeSystemConnector({
-          supertest,
-          connectorId,
-          req: getRequest({ timeWindow: `5s` }),
-        });
+        for (const unit of ['s', 'H']) {
+          const res = await executeSystemConnector({
+            supertest,
+            connectorId,
+            req: getRequest({ timeWindow: `5${unit}` }),
+          });
 
-        expect(res1.status).to.be('error');
-        expect(res1.serviceMessage).to.be(
-          'Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  }\n])'
-        );
-
-        const res2 = await executeSystemConnector({
-          supertest,
-          connectorId,
-          req: getRequest({ timeWindow: `5H` }),
-        });
-
-        expect(res2.status).to.be('error');
-        expect(res2.serviceMessage).to.be(
-          'Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  },\n  {\n    "code": "custom",\n    "message": "Not a valid time window",\n    "path": [\n      "timeWindow"\n    ]\n  }\n])'
-        );
+          expect(res.status).to.be('error');
+          expect(res.serviceMessage).to.be(
+            'Request validation failed (Error: [timeWindow]: Not a valid time window)'
+          );
+        }
       });
 
       it('returns 400 for timeWindow < 5m ', async () => {
@@ -164,7 +155,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed ([\n  {\n    "code": "custom",\n    "message": "Time window should be at least 5 minutes",\n    "path": [\n      "timeWindow"\n    ]\n  }\n])'
+          'Request validation failed (Error: [timeWindow]: Time window should be at least 5 minutes)'
         );
       });
 
@@ -177,7 +168,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed ([\n  {\n    "code": "too_big",\n    "maximum": 20,\n    "type": "number",\n    "inclusive": true,\n    "exact": false,\n    "message": "Number must be less than or equal to 20",\n    "path": [\n      "maximumCasesToOpen"\n    ]\n  }\n])'
+          'Request validation failed (Error: [maximumCasesToOpen]: Value must be equal to or lower than [20].)'
         );
       });
 
@@ -190,7 +181,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed ([\n  {\n    "code": "too_small",\n    "minimum": 1,\n    "type": "number",\n    "inclusive": true,\n    "exact": false,\n    "message": "Number must be greater than or equal to 1",\n    "path": [\n      "maximumCasesToOpen"\n    ]\n  }\n])'
+          'Request validation failed (Error: [maximumCasesToOpen]: Value must be equal to or greater than [1].)'
         );
       });
     });

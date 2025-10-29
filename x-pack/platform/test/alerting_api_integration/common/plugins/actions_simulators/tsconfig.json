@@ -22,6 +22,5 @@
     "@kbn/alerting-api-integration-helpers",
     "@kbn/expect",
     "@kbn/dev-utils",
-    "@kbn/zod",
   ],
 }

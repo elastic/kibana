@@ -22,9 +22,9 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type {
   LayerAction,
   RegisterLibraryAnnotationGroupFunction,
-  LensStartServices as StartServices,
+  StartServices,
   StateSetter,
-} from '@kbn/lens-common';
+} from '../../../../types';
 import type {
   XYByReferenceAnnotationLayerConfig,
   XYAnnotationLayerConfig,

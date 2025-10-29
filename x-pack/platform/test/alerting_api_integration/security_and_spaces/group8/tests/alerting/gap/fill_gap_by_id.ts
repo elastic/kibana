@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { ManualRunOnlyUserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
+import { UserAtSpaceScenarios } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 import { getFindGaps } from './utils';
@@ -40,9 +40,7 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
       });
     }
 
-    const ScenariosToTest = [...UserAtSpaceScenarios, ManualRunOnlyUserAtSpace1];
-
-    for (const scenario of ScenariosToTest) {
+    for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         const apiOptions = {
@@ -136,7 +134,6 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
 
               case 'space_1_all_alerts_none_actions at space1':
               case 'superuser at space1':
-              case 'manual_run_only at space1':
               case 'space_1_all at space1':
               case 'space_1_all_with_restricted_fixture at space1':
                 expect(response.statusCode).to.eql(200);
@@ -188,7 +185,6 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
 
               case 'space_1_all_alerts_none_actions at space1':
               case 'superuser at space1':
-              case 'manual_run_only at space1':
               case 'space_1_all at space1':
               case 'space_1_all_with_restricted_fixture at space1':
                 expect(response.statusCode).to.eql(404);
@@ -238,7 +234,6 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
               case 'global_read at space1':
               case 'space_1_all_alerts_none_actions at space1':
               case 'superuser at space1':
-              case 'manual_run_only at space1':
               case 'space_1_all at space1':
               case 'space_1_all_with_restricted_fixture at space1':
                 expect(response1.statusCode).to.eql(400);

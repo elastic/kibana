@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
+  EuiPanel,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { CancelExecutionButton } from './cancel_execution_button';
-import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { WorkflowExecutionListItem } from '../../workflow_execution_list/ui/workflow_execution_list_item';
+import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
+import { CancelExecutionButton } from './cancel_execution_button';
 import { isCancelableStatus } from '../lib/execution_status';
 
 const i18nTexts = {
@@ -90,7 +90,7 @@ export const WorkflowStepExecutionList = ({
         />
       </EuiFlexItem>
 
-      <EuiFlexItem css={{ overflowY: 'auto' }}>
+      <EuiFlexItem>
         <WorkflowStepExecutionTree
           definition={definition}
           execution={execution ?? null}

@@ -442,7 +442,7 @@ describe('update_agent_tags', () => {
         expect.objectContaining({
           batchSize: 10000,
           kuery:
-            '((namespaces:"default" or namespaces:"*" or not namespaces:*)) AND (status:healthy OR status:offline) AND (tags:remove)',
+            '((namespaces:"default" or not namespaces:*)) AND (status:healthy OR status:offline) AND (tags:remove)',
           tagsToAdd: [],
           tagsToRemove: ['remove'],
         }),
@@ -466,8 +466,7 @@ describe('update_agent_tags', () => {
         expect.anything(),
         expect.objectContaining({
           batchSize: 10000,
-          kuery:
-            '(namespaces:(myspace) or namespaces:"*") AND (status:healthy OR status:offline) AND (tags:remove)',
+          kuery: '(namespaces:(myspace)) AND (status:healthy OR status:offline) AND (tags:remove)',
           tagsToAdd: [],
           tagsToRemove: ['remove'],
         }),

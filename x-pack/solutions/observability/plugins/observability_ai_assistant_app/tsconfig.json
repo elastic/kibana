@@ -87,8 +87,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/traced-es-client",
     "@kbn/licensing-types",
-    "@kbn/utility-types-jest",
-    "@kbn/zod"
+    "@kbn/utility-types-jest"
   ],
   "exclude": ["target/**/*"]
 }

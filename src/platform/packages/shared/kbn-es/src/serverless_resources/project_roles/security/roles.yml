@@ -115,10 +115,6 @@ editor:
       privileges:
         - 'read'
         - 'write'
-    - names:
-        - .entities.v1.latest.security_*
-      privileges:
-        - delete
       allow_restricted_indices: false
     - names:
         - '.ml-anomalies-*'
@@ -643,10 +639,6 @@ detections_admin:
       privileges:
         - read
         - write
-    - names:
-        - .entities.v1.latest.security_*
-      privileges:
-        - delete
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -705,10 +697,6 @@ platform_engineer:
       privileges:
         - read
         - write
-    - names:
-        - .entities.v1.latest.security_*
-      privileges:
-        - delete
     - names:
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*

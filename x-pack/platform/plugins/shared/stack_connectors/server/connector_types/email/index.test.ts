@@ -44,19 +44,6 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 let connectorType: EmailConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
-const getConfig = (overrides?: {}) => ({
-  service: 'gmail',
-  from: 'bob@example.com',
-  host: null,
-  port: null,
-  secure: false,
-  hasAuth: true,
-  tenantId: null,
-  clientId: null,
-  oauthTokenUrl: null,
-  ...overrides,
-});
-
 beforeEach(() => {
   jest.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
@@ -164,19 +151,9 @@ describe('config validation', () => {
     // empty object
     expect(() => {
       validateConfig(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"from\\"
-          ],
-          \\"message\\": \\"Required\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [from]: expected value of type [string] but got [undefined]"`
+    );
 
     // no service or host/port
     expect(() => {
@@ -482,28 +459,9 @@ describe('params validation', () => {
     // empty object
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"subject\\"
-          ],
-          \\"message\\": \\"Required\\"
-        },
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"message\\"
-          ],
-          \\"message\\": \\"Required\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: [subject]: expected value of type [string] but got [undefined]"`
+    );
   });
 
   test('params validation for emails calls validateEmailAddresses', async () => {
@@ -536,12 +494,14 @@ describe('params validation', () => {
     expect(() => {
       validateConfig(
         connectorType,
-        getConfig({
+        {
           service: AdditionalEmailServices.AWS_SES,
+          from: 'bob@example.com',
           host: 'wrong-host',
           port: 123,
           secure: true,
-        }),
+          hasAuth: true,
+        },
         { configurationUtilities }
       );
     }).not.toThrowError();
@@ -559,12 +519,14 @@ describe('params validation', () => {
     expect(() =>
       validateConfig(
         connectorType,
-        getConfig({
+        {
           service: 'other',
+          from: 'bob@example.com',
           host: 'wrong-host',
           port: 123,
           secure: true,
-        }),
+          hasAuth: true,
+        },
         { configurationUtilities: configUtils }
       )
     ).toThrowErrorMatchingInlineSnapshot(
@@ -579,12 +541,14 @@ describe('params validation', () => {
     expect(() =>
       validateConfig(
         connectorType,
-        getConfig({
+        {
           service: 'other',
+          from: 'bob@example.com',
           host: 'wrong-host',
           port: 123,
           secure: true,
-        }),
+          hasAuth: true,
+        },
         { configurationUtilities: configUtils }
       )
     ).not.toThrowError();
@@ -599,12 +563,14 @@ describe('params validation', () => {
     expect(() =>
       validateConfig(
         connectorType,
-        getConfig({
+        {
           service: 'elastic_cloud',
+          from: 'bob@example.com',
           host: 'dockerhost',
           port: 10025,
+          secure: false,
           hasAuth: false,
-        }),
+        },
         { configurationUtilities: configUtils }
       )
     ).not.toThrowError();
@@ -1444,28 +1410,30 @@ describe('execute()', () => {
 describe('validateConfig AWS SES specific checks', () => {
   const awsSesHost = 'email-smtp.us-east-1.amazonaws.com';
   const awsSesPort = 465;
-
-  const getSesConfig = (overrides?: {}) => ({
-    ...getConfig({
-      service: AdditionalEmailServices.AWS_SES,
-      host: awsSesHost,
-      port: awsSesPort,
-      secure: true,
-    }),
-    ...overrides,
-  });
+  const awsSesConfig = {
+    host: awsSesHost,
+    port: awsSesPort,
+    secure: true,
+  };
 
   let configUtilsWithSes: jest.Mocked<ActionsConfigurationUtilities>;
 
   beforeEach(() => {
     configUtilsWithSes = {
       ...actionsConfigMock.create(),
-      getAwsSesConfig: jest.fn(() => getSesConfig()),
+      getAwsSesConfig: jest.fn(() => awsSesConfig),
     } as unknown as jest.Mocked<ActionsConfigurationUtilities>;
   });
 
   test('throws if both host and port do not match AWS SES config', () => {
-    const config = getSesConfig({ host: 'wrong-host', port: 123 });
+    const config = {
+      service: AdditionalEmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: 'wrong-host',
+      port: 123,
+      secure: true,
+      hasAuth: true,
+    };
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
@@ -1474,7 +1442,14 @@ describe('validateConfig AWS SES specific checks', () => {
   });
 
   test('throws if host does not match AWS SES config', () => {
-    const config = getSesConfig({ host: 'wrong-host' });
+    const config = {
+      service: AdditionalEmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: 'wrong-host',
+      port: awsSesPort,
+      secure: true,
+      hasAuth: true,
+    };
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
@@ -1483,7 +1458,14 @@ describe('validateConfig AWS SES specific checks', () => {
   });
 
   test('throws if port does not match AWS SES config', () => {
-    const config = getSesConfig({ port: 123 });
+    const config = {
+      service: AdditionalEmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: awsSesHost,
+      port: 123,
+      secure: true,
+      hasAuth: true,
+    };
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
@@ -1492,7 +1474,14 @@ describe('validateConfig AWS SES specific checks', () => {
   });
 
   test('throws if secure is not true for AWS SES', () => {
-    const config = getSesConfig({ secure: false });
+    const config = {
+      service: AdditionalEmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: awsSesHost,
+      port: awsSesPort,
+      secure: false,
+      hasAuth: true,
+    };
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(

@@ -7,30 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CommonProps } from '@elastic/eui';
-import { EuiButton, EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-export interface SaveButtonProps extends CommonProps {
-  onSave: () => Promise<void | object>;
-  label?: string;
-  isSaving?: boolean;
-}
 export interface DraftModeCalloutProps extends CommonProps {
-  message?: string;
-  node?: ReactNode;
-  saveButtonProps?: SaveButtonProps;
+  message?: React.ReactNode;
+  node?: React.ReactNode;
 }
 
-const defaultCalloutMessage = i18n.translate('share.draftModeCallout.message', {
-  defaultMessage:
-    'This link might not be permanent. Save your changes to ensure it works as expected.',
-});
-
-const saveButtonText = i18n.translate('share.draftModeCallout.saveButtonText', {
-  defaultMessage: 'Save changes',
-});
+const defaultCalloutMessage = (
+  <FormattedMessage
+    id="share.draftModeCallout.message"
+    defaultMessage="This link might not be permanent. Save your changes to ensure it works as expected."
+  />
+);
 
 /**
  * A warning callout to indicate the user has unsaved changes.
@@ -39,7 +32,6 @@ export const DraftModeCallout = ({
   node,
   message = defaultCalloutMessage,
   ['data-test-subj']: dataTestSubj = 'unsavedChangesDraftModeCallOut',
-  saveButtonProps,
 }: DraftModeCalloutProps) => {
   return node ? (
     node
@@ -56,18 +48,6 @@ export const DraftModeCallout = ({
       <EuiText component="p" size="s">
         {message}
       </EuiText>
-      {saveButtonProps && (
-        <EuiButton
-          color="warning"
-          fill
-          size="s"
-          data-test-subj={saveButtonProps['data-test-subj']}
-          onClick={saveButtonProps.onSave}
-          isLoading={saveButtonProps.isSaving}
-        >
-          {saveButtonProps.label ?? saveButtonText}
-        </EuiButton>
-      )}
     </EuiCallOut>
   );
 };

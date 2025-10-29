@@ -29,7 +29,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./list_scheduled_reports'));
     loadTestFile(require.resolve('./disable_scheduled_reports'));
     loadTestFile(require.resolve('./delete_scheduled_reports'));
-    loadTestFile(require.resolve('./update_scheduled_reports'));
     loadTestFile(require.resolve('./list_jobs'));
     loadTestFile(require.resolve('./telemetry'));
 

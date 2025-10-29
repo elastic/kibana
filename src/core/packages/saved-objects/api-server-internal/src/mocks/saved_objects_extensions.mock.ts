@@ -12,8 +12,6 @@ import type {
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
 } from '@kbn/core-saved-objects-server';
-import type { Either } from '@kbn/core-saved-objects-api-server';
-import type { Payload } from '@hapi/boom';
 
 const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> => ({
   isEncryptableType: jest.fn(),
@@ -47,18 +45,6 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
   includeSavedObjectNames: jest.fn(),
   authorizeChangeAccessControl: jest.fn(),
   setAccessControlToWrite: jest.fn(),
-  filterInaccessibleObjectsForBulkAction: jest
-    .fn()
-    .mockImplementation(
-      (
-        expectedResults: Either<
-          { type: string; id?: string | undefined; error: Payload },
-          { type: string; id: string; esRequestIndex?: number | undefined }
-        >[]
-      ) => {
-        return Promise.resolve(expectedResults);
-      }
-    ),
 });
 
 const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => ({

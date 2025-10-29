@@ -41,8 +41,6 @@ import type { DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
 import { cleanFiltersForSerialize } from '../../common';
 
-export const COMPARE_DEBOUNCE = 100;
-
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
@@ -324,14 +322,8 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       controlGroupReload$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([
-          unifiedSearchFilters$,
-          query$,
-          refreshInterval$,
-          timeRange$,
-          timeRestore$,
-        ]).pipe(
-          debounceTime(COMPARE_DEBOUNCE),
+        return combineLatest([unifiedSearchFilters$, query$, refreshInterval$, timeRange$]).pipe(
+          debounceTime(100),
           map(([filters, query, refreshInterval, timeRange]) => ({
             filters,
             query,

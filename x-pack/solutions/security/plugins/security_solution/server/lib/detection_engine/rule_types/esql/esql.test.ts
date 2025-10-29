@@ -33,7 +33,7 @@ describe('esqlExecutor', () => {
   (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
   const params = getEsqlRuleParams();
   const mockScheduleNotificationResponseActionsService = jest.fn();
-  let licensing: ReturnType<typeof licensingMock.createSetup>;
+  const licensing = licensingMock.createSetup();
 
   let mockedArguments: Parameters<typeof esqlExecutor>[0];
 
@@ -41,7 +41,6 @@ describe('esqlExecutor', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    licensing = licensingMock.createSetup();
     ruleServices = createPersistenceExecutorOptionsMock();
     getDataTierFilterMock.mockResolvedValue([]);
 
@@ -52,11 +51,6 @@ describe('esqlExecutor', () => {
       scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
       state: {},
     };
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('errors', () => {

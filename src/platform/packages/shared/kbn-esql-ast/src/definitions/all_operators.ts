@@ -61,7 +61,6 @@ export const logicalOperators: FunctionDefinition[] = [
     Location.STATS_BY,
     Location.STATS_WHERE,
     Location.RERANK,
-    Location.JOIN,
   ],
   signatures: [
     {
@@ -89,7 +88,6 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.STATS_BY,
       Location.STATS_WHERE,
       Location.RERANK,
-      Location.JOIN,
     ],
     signatures: [
       {
@@ -116,7 +114,6 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.COMPLETION,
       Location.RENAME,
       Location.RERANK,
-      Location.JOIN,
     ],
     signatures: [
       {

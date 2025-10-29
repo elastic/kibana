@@ -17,18 +17,12 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { deleteRuleRoute } from './route';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../../routes/__mocks__/request_context';
 
 describe('Delete rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let clients: MockClients;
-  let context: SecuritySolutionRequestHandlerContextMock;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -37,11 +31,6 @@ describe('Delete rule route', () => {
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
 
     deleteRuleRoute(server.router);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('status codes with actionClient and alertClient', () => {

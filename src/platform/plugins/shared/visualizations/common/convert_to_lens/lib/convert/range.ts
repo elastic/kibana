@@ -10,9 +10,8 @@
 import type { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import type { DataType } from '@kbn/lens-common';
-import { LENS_RANGE_MODES } from '@kbn/lens-common';
-import type { RangeParams } from '../../types';
+import { RANGE_MODES } from '../../constants';
+import type { DataType, RangeParams } from '../../types';
 import { getFieldNameFromField } from '../utils';
 import type { RangeColumn } from './types';
 
@@ -27,21 +26,19 @@ export const convertToRangeParams = (
 ): RangeParams => {
   if (isHistogramAggParams(aggParams)) {
     return {
-      type: LENS_RANGE_MODES.Histogram,
+      type: RANGE_MODES.Histogram,
       maxBars: aggParams.maxBars ?? 'auto',
       includeEmptyRows: aggParams.min_doc_count,
-      ranges: [],
     };
   } else {
     return {
-      type: LENS_RANGE_MODES.Range,
+      type: RANGE_MODES.Range,
       maxBars: 'auto',
-      ranges:
-        aggParams.ranges?.map((range) => ({
-          label: range.label ?? '',
-          from: range.from ?? null,
-          to: range.to ?? null,
-        })) || [],
+      ranges: aggParams.ranges?.map((range) => ({
+        label: range.label,
+        from: range.from ?? null,
+        to: range.to ?? null,
+      })),
     };
   }
 };

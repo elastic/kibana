@@ -7,18 +7,17 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import type { DataGridDensity, DatatableVisualizationState, RowHeightMode } from '@kbn/lens-common';
+import { DataGridDensity, RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
+import type { DatatableVisualizationState } from '../../visualization';
+import { RowHeightMode } from '../../../../../common/types';
+import { DEFAULT_PAGE_SIZE } from '../table_basic';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   DEFAULT_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
-  LENS_ROW_HEIGHT_MODE,
-  LENS_DATAGRID_DENSITY,
-} from '@kbn/lens-common';
-import { RowHeightSettings } from '@kbn/unified-data-table';
-import { DEFAULT_PAGE_SIZE } from '../table_basic';
+} from '../constants';
 import { DensitySettings } from './density_settings';
 
 type LineCounts = {
@@ -52,8 +51,8 @@ export function DatatableAppearanceSettings({
       heightLinesProperty: keyof typeof ROW_HEIGHT_LINES_KEYS
     ) => {
       const newRowHeightLines =
-        newHeightMode === LENS_ROW_HEIGHT_MODE.auto
-          ? LENS_ROW_HEIGHT_MODE.auto
+        newHeightMode === RowHeightMode.auto
+          ? ROWS_HEIGHT_OPTIONS.auto
           : lineCounts[heightLinesProperty];
 
       setState({
@@ -102,7 +101,7 @@ export function DatatableAppearanceSettings({
   return (
     <>
       <DensitySettings
-        dataGridDensity={state.density ?? LENS_DATAGRID_DENSITY.NORMAL}
+        dataGridDensity={state.density ?? DataGridDensity.NORMAL}
         onChange={onChangeDensity}
       />
       <RowHeightSettings
@@ -125,7 +124,7 @@ export function DatatableAppearanceSettings({
         rowHeight={
           // @ts-ignore - saved state can contain legacy row height mode
           state.rowHeight === LEGACY_SINGLE_ROW_HEIGHT_MODE
-            ? LENS_ROW_HEIGHT_MODE.custom
+            ? RowHeightMode.custom
             : state.rowHeight ?? DEFAULT_ROW_HEIGHT
         }
         label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {

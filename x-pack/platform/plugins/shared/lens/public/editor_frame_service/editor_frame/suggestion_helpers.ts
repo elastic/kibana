@@ -9,6 +9,7 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type {
   Visualization,
   Datasource,
@@ -20,13 +21,14 @@ import type {
   Suggestion,
   DatasourceLayers,
   SuggestionRequest,
-  LensLayerType as LayerType,
+} from '../../types';
+import type { LayerType } from '../../../common/types';
+import type {
+  LensDispatch,
   DatasourceStates,
   VisualizationState,
   DataViewsState,
-} from '@kbn/lens-common';
-import { showMemoizedErrorNotification } from '../../lens_ui_errors';
-import type { LensDispatch } from '../../state_management';
+} from '../../state_management';
 import { switchVisualization, applyChanges } from '../../state_management';
 
 /**

@@ -34,14 +34,6 @@ import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import type {
-  Visualization,
-  FramePublicAPI,
-  Suggestion,
-  UserMessage,
-  AnnotationGroups,
-  FormBasedPersistedState,
-} from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -64,6 +56,14 @@ import {
   AnnotationsLayerHeader,
   LayerHeaderContent,
 } from './xy_config_panel/layer_header';
+import type {
+  Visualization,
+  FramePublicAPI,
+  Suggestion,
+  UserMessage,
+  AnnotationGroups,
+} from '../../types';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
   type State,
   type XYLayerConfig,
@@ -129,7 +129,7 @@ import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_te
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
 import type { XYPersistedState } from './persistence';
 import { convertPersistedState, convertToPersistable } from './persistence';
-import { shouldDisplayTable } from '../../shared_components/legend/legend_settings';
+import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
 import {
   ANNOTATION_MISSING_DATE_HISTOGRAM,
   LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,

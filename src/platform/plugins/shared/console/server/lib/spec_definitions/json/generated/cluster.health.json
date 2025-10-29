@@ -47,9 +47,7 @@
       "wait_for_status": [
         "green",
         "yellow",
-        "red",
-        "unknown",
-        "unavailable"
+        "red"
       ]
     },
     "methods": [

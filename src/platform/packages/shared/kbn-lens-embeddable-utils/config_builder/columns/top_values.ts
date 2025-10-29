@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TermsIndexPatternColumn } from '@kbn/lens-common';
+import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 
 type TopValuesColumnParams = Pick<
   TermsIndexPatternColumn['params'],

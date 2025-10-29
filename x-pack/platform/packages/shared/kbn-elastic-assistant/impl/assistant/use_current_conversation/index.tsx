@@ -12,7 +12,7 @@ import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@kbn/react-query';
+} from '@tanstack/react-query';
 import type {
   ApiConfig,
   PromptResponse,

@@ -30,7 +30,6 @@ export interface OpenFileUploadLiteContext {
   existingIndex?: string;
   initialIndexName?: string;
   flyoutContent?: FlyoutContent;
-  location: string;
 }
 
 export interface FlyoutContent {

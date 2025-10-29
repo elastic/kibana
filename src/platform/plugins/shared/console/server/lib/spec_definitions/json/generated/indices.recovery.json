@@ -6,16 +6,7 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "active_only": "__flag__",
-      "detailed": "__flag__",
-      "allow_no_indices": "__flag__",
-      "expand_wildcards": [
-        "all",
-        "open",
-        "closed",
-        "hidden",
-        "none"
-      ],
-      "ignore_unavailable": "__flag__"
+      "detailed": "__flag__"
     },
     "methods": [
       "GET"

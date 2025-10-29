@@ -17,7 +17,10 @@ import {
   isDataViewDataset,
 } from './utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { GenericIndexPatternColumn, PersistedIndexPatternLayer } from '@kbn/lens-common';
+import type {
+  GenericIndexPatternColumn,
+  PersistedIndexPatternLayer,
+} from '@kbn/lens-plugin/public';
 
 const dataView = {
   id: 'test-dataview',

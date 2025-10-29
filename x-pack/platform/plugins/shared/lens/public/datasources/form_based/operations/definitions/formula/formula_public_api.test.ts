@@ -6,17 +6,14 @@
  */
 
 import { insertOrReplaceFormulaColumn } from './parse';
-import type {
-  FormulaPublicApi,
-  DateHistogramIndexPatternColumn,
-  PersistedIndexPatternLayer,
-  FormulaIndexPatternColumn,
-} from '@kbn/lens-common';
+import type { FormulaPublicApi } from './formula_public_api';
 import { createFormulaPublicApi } from './formula_public_api';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DateHistogramIndexPatternColumn, PersistedIndexPatternLayer } from '../../../types';
 import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_service/loader';
 import moment from 'moment';
+import type { FormulaIndexPatternColumn } from './formula';
 
 jest.mock('./parse', () => {
   const original = jest.requireActual('./parse');

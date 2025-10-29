@@ -166,8 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/239769
-    describe.skip('Selections made in control apply to dashboard', () => {
+    describe('Selections made in control apply to dashboard', () => {
       it('Shows available options in options list', async () => {
         await queryBar.setQuery('');
         await queryBar.submitQuery();

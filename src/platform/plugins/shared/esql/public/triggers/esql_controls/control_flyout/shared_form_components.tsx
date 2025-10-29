@@ -18,7 +18,6 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiComboBox,
-  EuiRadioGroup,
   type EuiComboBoxOptionOption,
   EuiButtonGroup,
   EuiSpacer,
@@ -29,7 +28,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiLink,
   EuiFlyoutHeader,
   EuiTitle,
   EuiBetaBadge,
@@ -37,11 +35,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiCode,
-  EuiCallOut,
-  useEuiTheme,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ServiceDeps } from '../../../kibana_services';
 import { checkVariableExistence } from './helpers';
 
 const controlTypeOptions = [
@@ -78,21 +72,6 @@ const minimumWidthButtonGroup = [
     id: `large`,
     label: i18n.translate('esql.flyout.minimumWidth.large', {
       defaultMessage: 'Large',
-    }),
-  },
-];
-
-const selectionTypeOptions = [
-  {
-    id: 'single',
-    label: i18n.translate('esql.flyout.selectionType.single', {
-      defaultMessage: 'Only allow a single selection',
-    }),
-  },
-  {
-    id: 'multi',
-    label: i18n.translate('esql.flyout.selectionType.multi', {
-      defaultMessage: 'Allow multiple selections',
     }),
   },
 ];
@@ -335,73 +314,6 @@ export function ControlWidth({
           />
         </>
       )}
-    </>
-  );
-}
-
-export function ControlSelectionType({
-  singleSelect,
-  onSelectionTypeChange,
-}: {
-  singleSelect: boolean;
-  onSelectionTypeChange: (isSingleSelect: boolean) => void;
-}) {
-  const theme = useEuiTheme();
-  const {
-    services: { docLinks },
-  } = useKibana<ServiceDeps>();
-  const multiValuesGuideLink = docLinks?.links.query.queryESQLMultiValueControls ?? '';
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label={i18n.translate('esql.flyout.selectionType.label', {
-          defaultMessage: 'Selections',
-        })}
-        fullWidth
-      >
-        <EuiRadioGroup
-          compressed
-          options={selectionTypeOptions}
-          idSelected={singleSelect ? 'single' : 'multi'}
-          onChange={(id) => {
-            const newSingleSelect = id === 'single';
-            onSelectionTypeChange(newSingleSelect);
-          }}
-          name="selectionType"
-          data-test-subj="esqlControlSelectionType"
-        />
-      </EuiFormRow>
-      {!singleSelect ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            color="primary"
-            iconType="info"
-            css={css`
-              .euiText {
-                color: ${theme.euiTheme.colors.textPrimary} !important;
-              }
-            `}
-          >
-            <EuiText size="s">
-              <FormattedMessage
-                id="esql.flyout.selectionType.callout"
-                defaultMessage="You must use {mvContainsLink} in your ES|QL query for multi-select controls to work."
-                values={{
-                  mvContainsLink: (
-                    <EuiLink href={multiValuesGuideLink} target="_blank">
-                      MV_CONTAINS
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiText>
-          </EuiCallOut>
-        </>
-      ) : null}
     </>
   );
 }

@@ -84,7 +84,7 @@ Object {
   "payloadTimeout": 20000,
   "port": 5601,
   "protocol": "http1",
-  "prototypeHardening": true,
+  "prototypeHardening": false,
   "rateLimiter": Object {
     "enabled": false,
   },

@@ -147,34 +147,31 @@ describe('StarterPrompts', () => {
   });
   it('the component renders correctly with valid props', () => {
     (useFindPrompts as jest.Mock).mockReturnValue({ data: { prompts: mockResponse } });
-    const testId = 'starter-prompt-starter-prompt-title-1-from-api-yall';
     const { getByTestId } = render(
       <TestProviders>
         <StarterPrompts {...testProps} />
       </TestProviders>
     );
-    expect(getByTestId(testId)).toBeInTheDocument();
+    expect(getByTestId('starterPromptPrompt2 from API yall')).toBeInTheDocument();
   });
   it('calls setUserPrompt when a prompt is selected', () => {
     (useFindPrompts as jest.Mock).mockReturnValue({ data: { prompts: mockResponse } });
-    const testId = 'starter-prompt-starter-prompt-title-2-from-api-yall';
     const { getByTestId } = render(
       <TestProviders>
         <StarterPrompts {...testProps} />
       </TestProviders>
     );
-    fireEvent.click(getByTestId(testId));
+    fireEvent.click(getByTestId('starterPromptPrompt2 from API yall'));
     expect(testProps.setUserPrompt).toHaveBeenCalledWith('starterPromptPrompt2 from API yall');
   });
   it('calls reportAssistantStarterPrompt with prompt title when a prompt is selected', () => {
     (useFindPrompts as jest.Mock).mockReturnValue({ data: { prompts: mockResponse } });
-    const testId = 'starter-prompt-starter-prompt-title-2-from-api-yall';
     const { getByTestId } = render(
       <TestProviders>
         <StarterPrompts {...testProps} />
       </TestProviders>
     );
-    fireEvent.click(getByTestId(testId));
+    fireEvent.click(getByTestId('starterPromptPrompt2 from API yall'));
     expect(mockReportAssistantStarterPrompt).toHaveBeenCalledWith({
       promptTitle: 'starterPromptTitle2 from API yall',
     });

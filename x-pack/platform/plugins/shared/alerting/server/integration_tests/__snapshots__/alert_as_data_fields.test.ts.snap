@@ -826,20 +826,6 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.scheduled_action.date": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.group": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.throttling": Object {
-      "required": false,
-      "type": "unmapped",
-    },
     "kibana.alert.severity_improving": Object {
       "array": false,
       "required": false,
@@ -1875,20 +1861,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.date": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.group": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.throttling": Object {
-      "required": false,
-      "type": "unmapped",
     },
     "kibana.alert.severity": Object {
       "array": false,
@@ -3048,20 +3020,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "kibana.alert.scheduled_action.date": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.group": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.throttling": Object {
-      "required": false,
-      "type": "unmapped",
-    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -4219,20 +4177,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.date": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.group": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.throttling": Object {
-      "required": false,
-      "type": "unmapped",
     },
     "kibana.alert.severity": Object {
       "array": false,
@@ -5392,20 +5336,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "kibana.alert.scheduled_action.date": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.group": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.throttling": Object {
-      "required": false,
-      "type": "unmapped",
-    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -6563,20 +6493,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.date": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.group": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.throttling": Object {
-      "required": false,
-      "type": "unmapped",
     },
     "kibana.alert.severity": Object {
       "array": false,
@@ -7742,20 +7658,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "kibana.alert.scheduled_action.date": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.group": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.throttling": Object {
-      "required": false,
-      "type": "unmapped",
-    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -8913,20 +8815,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.date": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.group": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.throttling": Object {
-      "required": false,
-      "type": "unmapped",
     },
     "kibana.alert.severity": Object {
       "array": false,
@@ -10086,20 +9974,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "kibana.alert.scheduled_action.date": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.group": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.throttling": Object {
-      "required": false,
-      "type": "unmapped",
-    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -10927,20 +10801,6 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.date": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.group": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "kibana.alert.scheduled_action.throttling": Object {
-      "required": false,
-      "type": "unmapped",
     },
     "kibana.alert.severity_improving": Object {
       "array": false,

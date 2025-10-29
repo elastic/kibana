@@ -29,7 +29,7 @@ import type {
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
-} from '@kbn/lens-common';
+} from '@kbn/lens-plugin/public';
 
 export type AnyMetricLensStateColumn =
   | CountIndexPatternColumn

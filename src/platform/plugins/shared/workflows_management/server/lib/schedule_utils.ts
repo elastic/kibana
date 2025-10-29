@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any, complexity */
-
 import { Frequency } from '@kbn/rrule';
 
 // Define the trigger type based on the schema
 export interface WorkflowTrigger {
   type: 'alert' | 'scheduled' | 'manual';
   with?: Record<string, any>;
+  enabled?: boolean;
 }
 
 /**
@@ -113,14 +112,14 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
  * Checks if a workflow has any scheduled triggers
  */
 export function hasScheduledTriggers(triggers: WorkflowTrigger[]): boolean {
-  return triggers.some((trigger) => trigger.type === 'scheduled');
+  return triggers.some((trigger) => trigger.type === 'scheduled' && trigger.enabled);
 }
 
 /**
  * Gets all scheduled triggers from a workflow
  */
 export function getScheduledTriggers(triggers: WorkflowTrigger[]): WorkflowTrigger[] {
-  return triggers.filter((trigger) => trigger.type === 'scheduled');
+  return triggers.filter((trigger) => trigger.type === 'scheduled' && trigger.enabled);
 }
 
 /**

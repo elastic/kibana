@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { WorkflowListDto } from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowsSearchParams } from '../../../types';
 
 export function useWorkflows(params: WorkflowsSearchParams) {
@@ -19,7 +19,7 @@ export function useWorkflows(params: WorkflowsSearchParams) {
     networkMode: 'always',
     queryKey: ['workflows', params],
     queryFn: () => {
-      return http.post<WorkflowListDto>('/api/workflows/search', {
+      return http!.post<WorkflowListDto>('/api/workflows/search', {
         body: JSON.stringify(params),
       });
     },

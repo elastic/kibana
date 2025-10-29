@@ -94,8 +94,6 @@ export const getVariableSuggestion = (variableType: ESQLVariableType) => {
       return 'function';
     case ESQLVariableType.TIME_LITERAL:
       return 'interval';
-    case ESQLVariableType.MULTI_VALUES:
-      return 'values';
     default:
       return 'variable';
   }
@@ -161,8 +159,7 @@ export const getVariableTypeFromQuery = (str: string, variableType: ESQLVariable
   if (
     leadingQuestionMarksCount === 1 &&
     variableType !== ESQLVariableType.TIME_LITERAL &&
-    variableType !== ESQLVariableType.VALUES &&
-    variableType !== ESQLVariableType.MULTI_VALUES
+    variableType !== ESQLVariableType.VALUES
   ) {
     return ESQLVariableType.VALUES;
   }
@@ -177,7 +174,6 @@ export const getVariableNamePrefix = (type: ESQLVariableType) => {
       return VariableNamePrefix.IDENTIFIER;
     case ESQLVariableType.VALUES:
     case ESQLVariableType.TIME_LITERAL:
-    case ESQLVariableType.MULTI_VALUES:
     default:
       return VariableNamePrefix.VALUE;
   }

@@ -9,6 +9,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { useEffect, useMemo, useState } from 'react';
 import { keyBy } from 'lodash';
 import { useBulkFetchFleetIntegrationPolicies } from '../policy/use_bulk_fetch_fleet_integration_policies';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getPolicyIdsFromArtifact } from '../../../../common/endpoint/service/artifacts';
 
 export interface ArtifactRestrictedPolicyAssignments {
@@ -28,6 +29,9 @@ export interface ArtifactRestrictedPolicyAssignments {
 export const useArtifactRestrictedPolicyAssignments = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags' | 'item_id'>>
 ): ArtifactRestrictedPolicyAssignments => {
+  const isSpaceAwarenessEnabled = useIsExperimentalFeatureEnabled(
+    'endpointManagementSpaceAwarenessEnabled'
+  );
   const [{ itemId, policies }, setOriginalItem] = useState<{ itemId: string; policies: string[] }>({
     itemId: item.item_id ?? '',
     policies: getPolicyIdsFromArtifact(item),
@@ -35,18 +39,18 @@ export const useArtifactRestrictedPolicyAssignments = (
 
   const { data, isFetching } = useBulkFetchFleetIntegrationPolicies(
     { ids: policies },
-    { enabled: policies.length > 0 }
+    { enabled: isSpaceAwarenessEnabled && policies.length > 0 }
   );
 
   const restrictedPolicyIds = useMemo(() => {
-    if (!data?.items) {
+    if (!isSpaceAwarenessEnabled || !data?.items) {
       return [];
     }
 
     const policiesFoundById = keyBy(data.items, 'id');
 
     return policies.filter((id) => !policiesFoundById[id]);
-  }, [data?.items, policies]);
+  }, [data?.items, isSpaceAwarenessEnabled, policies]);
 
   useEffect(() => {
     if (item.item_id !== itemId) {
@@ -59,8 +63,8 @@ export const useArtifactRestrictedPolicyAssignments = (
 
   return useMemo(() => {
     return {
-      isLoading: policies.length > 0 ? isFetching : false,
+      isLoading: isSpaceAwarenessEnabled && policies.length > 0 ? isFetching : false,
       policyIds: restrictedPolicyIds,
     };
-  }, [isFetching, policies.length, restrictedPolicyIds]);
+  }, [isFetching, isSpaceAwarenessEnabled, policies.length, restrictedPolicyIds]);
 };

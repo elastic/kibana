@@ -67,7 +67,7 @@ export const defaultConfig: ScoutServerConfig = {
       port: dockerRegistryPort,
       args: dockerArgs,
       waitForLogLine: 'package manifests loaded',
-      waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
+      waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
     },
   }),
   esTestCluster: {
@@ -102,6 +102,7 @@ export const defaultConfig: ScoutServerConfig = {
     sourceArgs: ['--no-base-path', '--env.name=development'],
     serverArgs: [
       `--server.port=${servers.kibana.port}`,
+      `--server.prototypeHardening=true`,
       '--status.allowAnonymous=true',
       // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
       // either include `kibanaServerTestUser` credentials, or credentials provided by the test

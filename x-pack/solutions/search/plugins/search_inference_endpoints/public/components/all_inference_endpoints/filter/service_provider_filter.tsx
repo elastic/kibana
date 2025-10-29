@@ -33,11 +33,16 @@ export const ServiceProviderFilter: React.FC<Props> = ({
     });
   };
 
-  const filteredOptions = useMemo<MultiSelectFilterOption[]>(() => {
-    return Array.from(uniqueProviders).map((provider) => ({
-      key: provider,
-      label: SERVICE_PROVIDERS[provider]?.name ?? provider,
-    }));
+  const filteredOptions = useMemo(() => {
+    const options: any = [];
+    uniqueProviders.forEach((provider) => {
+      const { name } = SERVICE_PROVIDERS[provider];
+      options.push({
+        key: provider,
+        label: name,
+      });
+    });
+    return options;
   }, [uniqueProviders]);
 
   return (

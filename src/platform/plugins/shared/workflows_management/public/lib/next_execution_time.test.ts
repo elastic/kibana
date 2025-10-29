@@ -29,6 +29,7 @@ describe('next_execution_time', () => {
         const lastRun = new Date('2025-01-10T08:00:00Z');
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -49,6 +50,7 @@ describe('next_execution_time', () => {
       it('should use current time as dtstart when lastRun is null', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -71,6 +73,7 @@ describe('next_execution_time', () => {
         const dtstart = new Date('2025-01-05T06:00:00Z');
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -93,6 +96,7 @@ describe('next_execution_time', () => {
         const lastRun = new Date('2025-01-10T08:00:00Z');
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '2h',
           },
@@ -107,6 +111,7 @@ describe('next_execution_time', () => {
       it('should handle interval-based scheduling with null lastRun', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '1h',
           },
@@ -121,6 +126,7 @@ describe('next_execution_time', () => {
       it('should handle different lastRun dates for weekly RRule', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'WEEKLY',
@@ -151,6 +157,7 @@ describe('next_execution_time', () => {
       it('should handle monthly RRule with different lastRun dates', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'MONTHLY',
@@ -182,6 +189,7 @@ describe('next_execution_time', () => {
         const lastRun = new Date('2025-01-10T08:00:00Z'); // UTC
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -203,6 +211,7 @@ describe('next_execution_time', () => {
         const futureLastRun = new Date('2025-02-01T08:00:00Z'); // Future date
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -224,6 +233,7 @@ describe('next_execution_time', () => {
         const oldLastRun = new Date('2020-01-01T08:00:00Z'); // Very old date
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -245,6 +255,7 @@ describe('next_execution_time', () => {
         const invalidLastRun = new Date('invalid');
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -273,6 +284,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for daily RRule at specific time', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -293,6 +305,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for daily RRule with dtstart', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -313,6 +326,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for weekly RRule on specific days', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'WEEKLY',
@@ -334,6 +348,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for monthly RRule on specific day', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'MONTHLY',
@@ -354,6 +369,7 @@ describe('next_execution_time', () => {
       it('should handle RRule with empty arrays (default behavior)', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -376,6 +392,7 @@ describe('next_execution_time', () => {
       it('should handle RRule with multiple hours', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -396,6 +413,7 @@ describe('next_execution_time', () => {
       it('should handle RRule with timezone', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -414,6 +432,7 @@ describe('next_execution_time', () => {
       it('should handle RRule with interval > 1', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -432,6 +451,7 @@ describe('next_execution_time', () => {
       it('should return null for invalid RRule configuration', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'INVALID',
@@ -448,6 +468,7 @@ describe('next_execution_time', () => {
       it('should return null for RRule missing required fields', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -465,6 +486,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for minute intervals', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '5m',
           },
@@ -478,6 +500,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for hour intervals', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '2h',
           },
@@ -491,6 +514,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for day intervals', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '1d',
           },
@@ -507,6 +531,7 @@ describe('next_execution_time', () => {
         units.forEach((unit) => {
           const trigger: WorkflowTrigger = {
             type: 'scheduled',
+            enabled: true,
             with: {
               every: `1${unit}`,
             },
@@ -520,6 +545,7 @@ describe('next_execution_time', () => {
       it('should return null for invalid interval', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: 'invalid-m',
           },
@@ -532,6 +558,7 @@ describe('next_execution_time', () => {
       it('should return null for unsupported unit', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '1-invalid',
           },
@@ -546,6 +573,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for minute intervals', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '5m',
           },
@@ -559,6 +587,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for hour intervals', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '2h',
           },
@@ -572,6 +601,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for day intervals', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '1d',
           },
@@ -585,6 +615,7 @@ describe('next_execution_time', () => {
       it('should calculate next execution for second intervals', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '30s',
           },
@@ -601,6 +632,7 @@ describe('next_execution_time', () => {
         intervals.forEach((interval) => {
           const trigger: WorkflowTrigger = {
             type: 'scheduled',
+            enabled: true,
             with: {
               every: interval,
             },
@@ -614,6 +646,7 @@ describe('next_execution_time', () => {
       it('should return null for invalid interval format', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: 'invalid',
           },
@@ -626,6 +659,7 @@ describe('next_execution_time', () => {
       it('should return null for unsupported unit in new format', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             every: '5w', // weeks not supported
           },
@@ -640,6 +674,20 @@ describe('next_execution_time', () => {
       it('should return null for non-scheduled trigger', () => {
         const trigger: WorkflowTrigger = {
           type: 'manual',
+          enabled: true,
+        };
+
+        const result = calculateNextExecutionTime(trigger, new Date());
+        expect(result).toBeNull();
+      });
+
+      it('should return null for disabled trigger', () => {
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: false,
+          with: {
+            every: '1m',
+          },
         };
 
         const result = calculateNextExecutionTime(trigger, new Date());
@@ -649,6 +697,7 @@ describe('next_execution_time', () => {
       it('should return null for trigger without configuration', () => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
         };
 
         const result = calculateNextExecutionTime(trigger, new Date());
@@ -659,7 +708,20 @@ describe('next_execution_time', () => {
 
   describe('getWorkflowNextExecutionTime', () => {
     it('should return null for workflows with no scheduled triggers', () => {
-      const triggers: WorkflowTrigger[] = [{ type: 'manual' }, { type: 'alert' }];
+      const triggers: WorkflowTrigger[] = [
+        { type: 'manual', enabled: true },
+        { type: 'alert', enabled: true },
+      ];
+
+      const result = getWorkflowNextExecutionTime(triggers, []);
+      expect(result).toBeNull();
+    });
+
+    it('should return null for workflows with no enabled scheduled triggers', () => {
+      const triggers: WorkflowTrigger[] = [
+        { type: 'scheduled', enabled: false, with: { every: '1m' } },
+        { type: 'manual', enabled: true },
+      ];
 
       const result = getWorkflowNextExecutionTime(triggers, []);
       expect(result).toBeNull();
@@ -667,8 +729,8 @@ describe('next_execution_time', () => {
 
     it('should return next execution time for single scheduled trigger', () => {
       const triggers: WorkflowTrigger[] = [
-        { type: 'scheduled', with: { every: '5m' } },
-        { type: 'manual' },
+        { type: 'scheduled', enabled: true, with: { every: '5m' } },
+        { type: 'manual', enabled: true },
       ];
 
       const result = getWorkflowNextExecutionTime(triggers, []);
@@ -678,9 +740,9 @@ describe('next_execution_time', () => {
 
     it('should return earliest next execution time for multiple scheduled triggers', () => {
       const triggers: WorkflowTrigger[] = [
-        { type: 'scheduled', with: { every: '10m' } },
-        { type: 'scheduled', with: { every: '5m' } },
-        { type: 'manual' },
+        { type: 'scheduled', enabled: true, with: { every: '10m' } },
+        { type: 'scheduled', enabled: true, with: { every: '5m' } },
+        { type: 'manual', enabled: true },
       ];
 
       const result = getWorkflowNextExecutionTime(triggers, []);
@@ -693,6 +755,7 @@ describe('next_execution_time', () => {
       const triggers: WorkflowTrigger[] = [
         {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -703,8 +766,8 @@ describe('next_execution_time', () => {
             },
           },
         },
-        { type: 'scheduled', with: { every: '1m' } },
-        { type: 'manual' },
+        { type: 'scheduled', enabled: true, with: { every: '1m' } },
+        { type: 'manual', enabled: true },
       ];
 
       const result = getWorkflowNextExecutionTime(triggers, []);
@@ -715,8 +778,8 @@ describe('next_execution_time', () => {
 
     it('should handle triggers with invalid configurations', () => {
       const triggers: WorkflowTrigger[] = [
-        { type: 'scheduled', with: { every: 'invalid-m' } },
-        { type: 'scheduled', with: { every: '5m' } },
+        { type: 'scheduled', enabled: true, with: { every: 'invalid-m' } },
+        { type: 'scheduled', enabled: true, with: { every: '5m' } },
       ];
 
       const result = getWorkflowNextExecutionTime(triggers, []);
@@ -727,8 +790,8 @@ describe('next_execution_time', () => {
 
     it('should return null when all scheduled triggers have invalid configurations', () => {
       const triggers: WorkflowTrigger[] = [
-        { type: 'scheduled', with: { every: 'invalid-m' } },
-        { type: 'scheduled', with: { rrule: { freq: 'INVALID' } } },
+        { type: 'scheduled', enabled: true, with: { every: 'invalid-m' } },
+        { type: 'scheduled', enabled: true, with: { rrule: { freq: 'INVALID' } } },
       ];
 
       const result = getWorkflowNextExecutionTime(triggers, []);
@@ -740,6 +803,7 @@ describe('next_execution_time', () => {
     it('should handle weekly RRule with multiple weekdays', () => {
       const trigger: WorkflowTrigger = {
         type: 'scheduled',
+        enabled: true,
         with: {
           rrule: {
             freq: 'WEEKLY',
@@ -759,6 +823,7 @@ describe('next_execution_time', () => {
     it('should handle monthly RRule with multiple month days', () => {
       const trigger: WorkflowTrigger = {
         type: 'scheduled',
+        enabled: true,
         with: {
           rrule: {
             freq: 'MONTHLY',
@@ -778,6 +843,7 @@ describe('next_execution_time', () => {
     it('should handle RRule with multiple hours and minutes', () => {
       const trigger: WorkflowTrigger = {
         type: 'scheduled',
+        enabled: true,
         with: {
           rrule: {
             freq: 'DAILY',
@@ -799,6 +865,7 @@ describe('next_execution_time', () => {
       timezones.forEach((tzid) => {
         const trigger: WorkflowTrigger = {
           type: 'scheduled',
+          enabled: true,
           with: {
             rrule: {
               freq: 'DAILY',
@@ -818,6 +885,7 @@ describe('next_execution_time', () => {
     it('should handle RRule with large intervals', () => {
       const trigger: WorkflowTrigger = {
         type: 'scheduled',
+        enabled: true,
         with: {
           rrule: {
             freq: 'DAILY',

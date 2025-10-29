@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PersistedIndexPatternLayer, FormulaIndexPatternColumn } from '@kbn/lens-common';
+import type {
+  PersistedIndexPatternLayer,
+  FormulaIndexPatternColumn,
+} from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FormulaValueConfig } from '../types';
 

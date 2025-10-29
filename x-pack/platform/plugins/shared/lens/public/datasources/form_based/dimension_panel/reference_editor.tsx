@@ -15,23 +15,21 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type {
-  FormBasedLayer,
-  IndexPattern,
-  IndexPatternField,
-  ParamEditorCustomProps,
-  IncompleteColumn,
-  GenericIndexPatternColumn,
-  DateRange,
-  FieldBasedIndexPatternColumn,
-} from '@kbn/lens-common';
+import type { DateRange } from '../../../../common/types';
 import type { OperationSupportMatrix } from './operation_support';
-import type { OperationType } from '../form_based';
-import type { RequiredReference, GenericOperationDefinition } from '../operations';
+import type { GenericIndexPatternColumn, OperationType } from '../form_based';
+import type {
+  FieldBasedIndexPatternColumn,
+  RequiredReference,
+  IncompleteColumn,
+  GenericOperationDefinition,
+} from '../operations';
 import { getOperationDisplay, isOperationAllowedAsReference } from '../operations';
 import type { FieldChoiceWithOperationType } from './field_select';
 import { FieldSelect } from './field_select';
 import { hasField } from '../pure_utils';
+import type { FormBasedLayer } from '../types';
+import type { IndexPattern, IndexPatternField, ParamEditorCustomProps } from '../../../types';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import { FormRow } from '../operations/definitions/shared_components';
 import { operationsButtonStyles } from './shared_styles';

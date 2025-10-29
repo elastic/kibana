@@ -35,7 +35,6 @@ describe('useRequestParams', () => {
         query: '',
         language: 'kuery',
       },
-      esqlVariables: [],
     };
     const hook = renderHook((props) => useRequestParams(props), {
       initialProps: originalProps,

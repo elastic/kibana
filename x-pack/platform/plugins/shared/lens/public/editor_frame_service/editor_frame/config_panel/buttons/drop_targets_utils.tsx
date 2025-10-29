@@ -11,8 +11,8 @@ import type {
   Visualization,
   DragDropOperation,
   VisualizationDimensionGroupConfig,
-} from '@kbn/lens-common';
-import { isOperation } from '../../../../types_guards';
+} from '../../../../types';
+import { isOperation } from '../../../../types';
 
 export interface OnVisDropProps<T> {
   prevState: T;

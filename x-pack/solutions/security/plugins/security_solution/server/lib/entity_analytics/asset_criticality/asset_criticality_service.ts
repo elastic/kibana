@@ -15,7 +15,7 @@ interface CriticalityIdentifier {
   id_value: string;
 }
 
-export interface IdentifierValuesByField {
+interface IdentifierValuesByField {
   [idField: string]: string[];
 }
 
@@ -39,7 +39,7 @@ const groupIdentifierValuesByField = (
     return acc;
   }, {} as IdentifierValuesByField);
 
-export const buildCriticalitiesQuery = (identifierValuesByField: IdentifierValuesByField) => ({
+const buildCriticalitiesQuery = (identifierValuesByField: IdentifierValuesByField) => ({
   bool: {
     filter: {
       bool: {

@@ -16,13 +16,13 @@ interface TelemetryTestPluginSetupDependencies {
 
 export class TelemetryTestPlugin implements Plugin {
   setup(core: CoreSetup, { telemetry }: TelemetryTestPluginSetupDependencies) {
-    window._checkCanSendTelemetry = async (signal?: AbortSignal) => {
-      await telemetry.telemetryService.setOptIn(true, signal);
+    window._checkCanSendTelemetry = async () => {
+      await telemetry.telemetryService.setOptIn(true);
       return telemetry.telemetryService.canSendTelemetry();
     };
 
-    window._resetTelemetry = async (signal?: AbortSignal) => {
-      await telemetry.telemetryService.setOptIn(false, signal);
+    window._resetTelemetry = async () => {
+      await telemetry.telemetryService.setOptIn(false);
     };
   }
   start() {}

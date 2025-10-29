@@ -88,9 +88,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('anomalies table is not empty');
         await ml.anomaliesTable.assertTableNotEmpty();
-
-        await ml.testExecution.logTestStep('displays the feedback button');
-        await ml.singleMetricViewer.assertFeedbackButtonExists();
       });
 
       it('should click on an anomaly marker', async () => {

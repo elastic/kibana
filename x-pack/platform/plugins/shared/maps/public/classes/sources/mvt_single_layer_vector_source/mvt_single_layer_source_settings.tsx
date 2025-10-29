@@ -30,7 +30,6 @@ interface State {
   currentMinSourceZoom: number;
   currentMaxSourceZoom: number;
   currentFields: MVTFieldDescriptor[];
-  touchedLayerName: boolean;
 }
 
 interface Props {
@@ -51,7 +50,6 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
     currentMinSourceZoom: this.props.minSourceZoom,
     currentMaxSourceZoom: this.props.maxSourceZoom,
     currentFields: _.cloneDeep(this.props.fields),
-    touchedLayerName: false,
   };
 
   _handleChange = _.debounce(() => {
@@ -65,10 +63,6 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
 
   _handleLayerNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({ currentLayerName: e.target.value }, this._handleChange);
-  };
-
-  _handleLayerNameInputBlur = () => {
-    this.setState({ touchedLayerName: true });
   };
 
   _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
@@ -86,13 +80,6 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
   };
 
   render() {
-    const isInvalidLayerName = this.state.currentLayerName === '' && this.state.touchedLayerName;
-    const layerNameErrorMessage = i18n.translate(
-      'xpack.maps.source.MVTSingleLayerVectorSourceEditor.layerNameErrorMessage',
-      {
-        defaultMessage: 'Source layer is required',
-      }
-    );
     const preMessage = i18n.translate(
       'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsPreHelpMessage',
       {
@@ -149,14 +136,11 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
               defaultMessage: 'Source layer',
             }
           )}
-          isInvalid={isInvalidLayerName}
-          error={isInvalidLayerName ? layerNameErrorMessage : undefined}
         >
           <EuiFieldText
             value={this.state.currentLayerName}
             onChange={this._handleLayerNameInputChange}
-            onBlur={this._handleLayerNameInputBlur}
-            isInvalid={isInvalidLayerName}
+            isInvalid={this.state.currentLayerName === ''}
             compressed
           />
         </EuiFormRow>

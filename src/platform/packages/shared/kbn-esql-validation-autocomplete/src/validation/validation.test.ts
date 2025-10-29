@@ -6,13 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
-  FieldType,
-  SupportedDataType,
-  FunctionDefinition,
-  ESQLMessage,
-  EditorError,
-} from '@kbn/esql-ast';
+import type { FieldType, SupportedDataType, FunctionDefinition } from '@kbn/esql-ast';
 import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
 import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
@@ -28,8 +22,9 @@ import {
   policies,
   unsupported_field,
 } from '../__tests__/helpers';
+import { nonNullable } from '../shared/helpers';
 import { setup } from './__tests__/helpers';
-import { validateQuery } from './validation';
+import { ignoreErrorsMap, validateQuery } from './validation';
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
@@ -219,7 +214,12 @@ describe('validation logic', () => {
         `${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`,
         async () => {
           const callbackMocks = getCallbackMocks();
-          const { warnings, errors } = await validateQuery(statement, callbackMocks);
+          const { warnings, errors } = await validateQuery(
+            statement,
+
+            undefined,
+            callbackMocks
+          );
           expect(errors.map((e) => ('message' in e ? e.message : e.text))).toEqual(expectedErrors);
           expect(warnings.map((w) => w.text)).toEqual(expectedWarnings);
         }
@@ -268,7 +268,7 @@ describe('validation logic', () => {
 
         await expectErrors('f', [expect.any(String)]);
         await expectErrors('from ', [
-          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
+          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
         ]);
       });
 
@@ -277,10 +277,10 @@ describe('validation logic', () => {
           const { expectErrors } = await setup();
 
           await expectErrors('from index,', [
-            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
           ]);
           await expectErrors(`FROM index\n, \tother_index\t,\n \t `, [
-            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
           ]);
 
           await expectErrors(`from assignment = 1`, [
@@ -305,7 +305,8 @@ describe('validation logic', () => {
           const { expectErrors } = await setup();
 
           await expectErrors(`from index (metadata _id)`, [
-            "SyntaxError: mismatched input '(' expecting <EOF>",
+            "SyntaxError: extraneous input ')' expecting <EOF>",
+            "SyntaxError: token recognition error at: '('",
           ]);
         });
 
@@ -353,11 +354,6 @@ describe('validation logic', () => {
       testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', [
         '"t" is not a valid JOIN index. Please use a "lookup" mode index.',
       ]);
-
-      testErrorsAndWarnings(
-        'FROM a_index | LEFT JOIN join_index ON textField == keywordField, booleanField',
-        ['JOIN ON clause must be a comma separated list of fields or a single expression']
-      );
     });
 
     describe('drop', () => {
@@ -571,27 +567,32 @@ describe('validation logic', () => {
     describe('callbacks', () => {
       it(`should not fetch source and fields list when a row command is set`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(`row a = 1 | eval a`, callbackMocks);
+        await validateQuery(`row a = 1 | eval a`, undefined, callbackMocks);
         expect(callbackMocks.getColumnsFor).not.toHaveBeenCalled();
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
       });
 
       it(`should not fetch policies if no enrich command is found`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(`row a = 1 | eval a`, callbackMocks);
+        await validateQuery(`row a = 1 | eval a`, undefined, callbackMocks);
         expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
       });
 
       it(`should not fetch source and fields for empty command`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(` `, callbackMocks);
+        await validateQuery(` `, undefined, callbackMocks);
         expect(callbackMocks.getColumnsFor).not.toHaveBeenCalled();
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
       });
 
       it(`should skip initial source and fields call but still call fields for enriched policy`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(`row a = 1 | eval b  = a | enrich policy`, callbackMocks);
+        await validateQuery(
+          `row a = 1 | eval b  = a | enrich policy`,
+
+          undefined,
+          callbackMocks
+        );
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
         expect(callbackMocks.getPolicies).toHaveBeenCalled();
         expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(0);
@@ -599,7 +600,12 @@ describe('validation logic', () => {
 
       it(`should fetch additional fields if an enrich command is found`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(`from a_index | eval b  = a | enrich policy`, callbackMocks);
+        await validateQuery(
+          `from a_index | eval b  = a | enrich policy`,
+
+          undefined,
+          callbackMocks
+        );
         expect(callbackMocks.getSources).toHaveBeenCalled();
         expect(callbackMocks.getPolicies).toHaveBeenCalled();
         expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(0);
@@ -609,6 +615,8 @@ describe('validation logic', () => {
         try {
           await validateQuery(
             `from a_index | eval b  = a | enrich policy | dissect textField "%{firstWord}"`,
+
+            undefined,
             {
               getColumnsFor: undefined,
               getSources: undefined,
@@ -715,16 +723,15 @@ describe('validation logic', () => {
 
     async function loadFixtures() {
       // early exit if the testCases are already defined locally
-      const localTestCases: Array<{ query: string; error: string[] }> = [];
-      if (localTestCases.length) {
-        return { testCases: localTestCases };
+      if (testCases.length) {
+        return { testCases };
       }
       const json = await readFile(join(__dirname, 'esql_validation_meta_tests.json'), 'utf8');
       const esqlPackage = JSON.parse(json);
       return esqlPackage as Fixtures;
     }
 
-    function excludeErrorsByContent(excludedCallback: string[]) {
+    function excludeErrorsByContent(excludedCallback: Array<keyof typeof ignoreErrorsMap>) {
       const contentByCallback = {
         getSources: /Unknown index/,
         getPolicies: /Unknown policy/,
@@ -754,7 +761,14 @@ describe('validation logic', () => {
       const allErrors = await Promise.all(
         fixtures.testCases
           .filter(({ query }) => query === 'from index METADATA _id, _source2')
-          .map(({ query }) => validateQuery(query, getCallbackMocks()))
+          .map(({ query }) =>
+            validateQuery(
+              query,
+
+              { ignoreOnMissingCallbacks: true },
+              getCallbackMocks()
+            )
+          )
       );
       for (const [index, { errors }] of Object.entries(allErrors)) {
         expect(errors.map((e) => ('severity' in e ? e.message : e.text))).toEqual(
@@ -766,7 +780,7 @@ describe('validation logic', () => {
     });
 
     // test excluding one callback at the time
-    it.each(['getSources', 'getColumnsFor', 'getPolicies'])(
+    it.each(['getSources', 'getColumnsFor', 'getPolicies'] as Array<keyof typeof ignoreErrorsMap>)(
       `should not error if %s is missing`,
       async (excludedCallback) => {
         const filteredTestCases = fixtures.testCases.filter((t) =>
@@ -776,151 +790,43 @@ describe('validation logic', () => {
         );
         const allErrors = await Promise.all(
           filteredTestCases.map(({ query }) =>
-            validateQuery(query, getPartialCallbackMocks(excludedCallback))
+            validateQuery(
+              query,
+              { ignoreOnMissingCallbacks: true },
+              getPartialCallbackMocks(excludedCallback)
+            )
           )
         );
         for (const { errors } of allErrors) {
-          const errorCodes = errors.map((e) => e.code);
-          // Verify errors related to excluded callback are not present
-          if (excludedCallback === 'getSources') {
-            expect(errorCodes.every((code) => code !== 'unknownIndex')).toBe(true);
-          } else if (excludedCallback === 'getColumnsFor') {
-            expect(
-              errorCodes.every(
-                (code) =>
-                  code !== 'unknownColumn' &&
-                  code !== 'wrongArgumentType' &&
-                  code !== 'unsupportedFieldType'
-              )
-            ).toBe(true);
-          } else if (excludedCallback === 'getPolicies') {
-            expect(errorCodes.every((code) => code !== 'unknownPolicy')).toBe(true);
-          }
+          expect(
+            errors.every(({ code }) =>
+              ignoreErrorsMap[excludedCallback].every((ignoredCode) => ignoredCode !== code)
+            )
+          ).toBe(true);
         }
       }
     );
 
     it('should work if no callback passed', async () => {
-      const excludedCallbacks = ['getSources', 'getPolicies', 'getColumnsFor'];
+      const excludedCallbacks = ['getSources', 'getPolicies', 'getColumnsFor'] as Array<
+        keyof typeof ignoreErrorsMap
+      >;
       for (const testCase of fixtures.testCases.filter((t) =>
         t.error.some((message) =>
           excludeErrorsByContent(excludedCallbacks).every((regexp) => regexp?.test(message))
         )
       )) {
-        const { errors } = await validateQuery(
-          testCase.query,
-          {} // ignoreOnMissingCallbacks is now automatic
-        );
-        // Verify no callback-dependent errors are present
-        const errorCodes = errors.map((e) => e.code);
+        const { errors } = await validateQuery(testCase.query, {
+          ignoreOnMissingCallbacks: true,
+        });
         expect(
-          errorCodes.every(
-            (code) =>
-              code !== 'unknownIndex' &&
-              code !== 'unknownColumn' &&
-              code !== 'wrongArgumentType' &&
-              code !== 'unsupportedFieldType' &&
-              code !== 'unknownPolicy'
+          errors.every(({ code }) =>
+            Object.values(ignoreErrorsMap)
+              .filter(nonNullable)
+              .every((ignoredCode) => ignoredCode.every((i) => i !== code))
           )
         ).toBe(true);
       }
-    });
-  });
-
-  describe('Error Tagging behavior', () => {
-    // Helper to get error text from either ESQLMessage or EditorError
-    const getErrorText = (error: ESQLMessage | EditorError): string => {
-      if ('text' in error) {
-        return (error as ESQLMessage).text;
-      } else {
-        return (error as EditorError).message;
-      }
-    };
-
-    it('should preserve syntax errors regardless of missing callbacks', async () => {
-      const { errors } = await validateQuery('FROM index | WHERE field ==', {});
-
-      // ANTLR parser should still catch basic syntax errors
-      expect(errors.length).toBeGreaterThan(0);
-      const hasSyntaxError = errors.some((e) => {
-        const errorText = getErrorText(e);
-        return (
-          errorText?.includes('mismatched input') ||
-          errorText?.includes('missing') ||
-          errorText?.includes('==')
-        );
-      });
-      expect(hasSyntaxError).toBe(true);
-    });
-
-    it('should filter semantic errors when required callback is missing', async () => {
-      const callbacks = {
-        ...getCallbackMocks(),
-        getColumnsFor: undefined, // Missing this callback
-      };
-
-      const { errors } = await validateQuery('FROM index | WHERE unknownField > 10', callbacks);
-
-      const hasUnknownColumnError = errors.some((e) => e.code === 'unknownColumn');
-      expect(hasUnknownColumnError).toBe(false);
-    });
-
-    it('should show semantic errors when required callback is available', async () => {
-      const callbacks = getCallbackMocks(); // All callbacks available
-
-      const { errors } = await validateQuery('FROM index | WHERE unknownField > 10', callbacks);
-
-      const unknownColumnError = errors.find((e) => e.code === 'unknownColumn');
-      expect(unknownColumnError).toBeDefined();
-      if (unknownColumnError) {
-        const errorText = getErrorText(unknownColumnError);
-        expect(errorText).toContain('unknownField');
-      }
-    });
-
-    it('should handle mixed syntax and semantic errors correctly', async () => {
-      const callbacks = {
-        ...getCallbackMocks(),
-        getSources: undefined, // Missing source callback
-      };
-
-      const { errors } = await validateQuery(
-        'FROM unknown_index | LIMIT abc', // unknown_index (semantic) + invalid limit (syntax)
-        callbacks
-      );
-
-      expect(errors.length).toBeGreaterThan(0);
-
-      const hasUnknownIndexError = errors.some((e) => e.code === 'unknownIndex');
-      expect(hasUnknownIndexError).toBe(false);
-    });
-
-    it('should filter errors based on specific callback requirements', async () => {
-      const callbacksNoSources = {
-        ...getCallbackMocks(),
-        getSources: undefined,
-      };
-
-      const { errors: errorsNoSources } = await validateQuery(
-        'FROM unknown_index | ENRICH unknown_policy',
-        callbacksNoSources
-      );
-
-      expect(errorsNoSources.some((e) => e.code === 'unknownIndex')).toBe(false);
-      expect(errorsNoSources.some((e) => e.code === 'unknownPolicy')).toBe(true);
-
-      const callbacksNoPolicies = {
-        ...getCallbackMocks(),
-        getPolicies: undefined,
-      };
-
-      const { errors: errorsNoPolicies } = await validateQuery(
-        'FROM unknown_index | ENRICH unknown_policy',
-        callbacksNoPolicies
-      );
-
-      expect(errorsNoPolicies.some((e) => e.code === 'unknownIndex')).toBe(true);
-      expect(errorsNoPolicies.some((e) => e.code === 'unknownPolicy')).toBe(false);
     });
   });
 });

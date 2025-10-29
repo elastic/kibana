@@ -19,32 +19,37 @@ import {
   DraggableBucketContainer,
   isQueryValid,
 } from '@kbn/visualization-ui-components';
-import type {
-  FiltersIndexPatternColumn,
-  LensAggFilter as Filter,
-  LensAggFilterValue as FilterValue,
-  TermsIndexPatternColumn,
-  IndexPattern,
-} from '@kbn/lens-common';
+import type { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
+import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
+import type { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
 import { draggablePopoverButtonStyles } from '../styles';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';
 
+// references types from src/plugins/data/common/search/aggs/buckets/filters.ts
+export interface Filter {
+  input: Query;
+  label: string;
+}
+
+export interface FilterValue {
+  id: string;
+  input: Query;
+  label: string;
+}
+
 const filtersLabel = i18n.translate('xpack.lens.indexPattern.filters', {
   defaultMessage: 'Filters',
 });
 
-export const filtersDefaultLabel = i18n.translate(
-  'xpack.lens.indexPattern.filters.label.placeholder',
-  {
-    defaultMessage: 'All records',
-  }
-);
+export const defaultLabel = i18n.translate('xpack.lens.indexPattern.filters.label.placeholder', {
+  defaultMessage: 'All records',
+});
 
 // to do: get the language from uiSettings
 const defaultFilter: Filter = {
@@ -54,6 +59,13 @@ const defaultFilter: Filter = {
   },
   label: '',
 };
+
+export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
+  operationType: typeof OPERATION_NAME;
+  params: {
+    filters: Filter[];
+  };
+}
 
 export const filtersOperation: OperationDefinition<
   FiltersIndexPatternColumn,
@@ -266,7 +278,7 @@ export const FilterList = ({
                     })}
                     css={draggablePopoverButtonStyles(euiThemeContext)}
                   >
-                    {filter.label || (filter.input.query as string) || filtersDefaultLabel}
+                    {filter.label || (filter.input.query as string) || defaultLabel}
                   </EuiLink>
                 }
               />

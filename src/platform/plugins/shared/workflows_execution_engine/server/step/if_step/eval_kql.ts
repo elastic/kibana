@@ -7,18 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
-import type {
-  KqlFunctionNode,
-  KqlLiteralNode,
-  KqlWildcardNode,
-} from '@kbn/es-query/src/kuery/node_types';
-import { KQL_NODE_TYPE_WILDCARD, nodeTypes } from '@kbn/es-query/src/kuery/node_types';
-import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
+import type { KqlLiteralNode, KqlFunctionNode } from '@kbn/es-query/src/kuery/node_types';
+import { KQL_NODE_TYPE_WILDCARD } from '@kbn/es-query/src/kuery/node_types';
 
 export function evaluateKql(kql: string, context: Record<string, any>): boolean {
   const kqlAst = fromKueryExpression(kql);
@@ -49,26 +41,21 @@ function evaluateRecursive(node: KueryNode, context: Record<string, any>): boole
 }
 
 function visitIs(node: KqlFunctionNode, context: Record<string, any>): boolean {
-  const [leftLiteral, rightLiteral] = node.arguments as [KqlLiteralNode, unknown];
+  const [leftLiteral, rightLiteral] = node.arguments as [KqlLiteralNode, KqlLiteralNode];
   const { value: contextValue, pathExists } = readContextPath(leftLiteral.value, context);
 
   if (!pathExists) {
     return false; // Path does not exist in context
   }
 
-  if ((rightLiteral as KqlWildcardNode).type === KQL_NODE_TYPE_WILDCARD) {
-    if (typeof contextValue === 'string') {
-      return nodeTypes.wildcard.test(rightLiteral as KqlWildcardNode, String(contextValue));
-    }
-
-    return contextValue != null && contextValue !== undefined;
+  if ((rightLiteral.type as any) === KQL_NODE_TYPE_WILDCARD) {
+    return true;
+  } else if (typeof contextValue === 'string') {
+    return wildcardToRegex(rightLiteral.value?.toString() as string).test(contextValue);
   }
 
   try {
-    return (
-      contextValue ===
-      convertLiteralToValue(rightLiteral as KqlLiteralNode, typeof contextValue as any)
-    );
+    return contextValue === convertLiteralToValue(rightLiteral, typeof contextValue as any);
   } catch (error) {
     return false;
   }
@@ -114,7 +101,7 @@ function readContextPath(
   context: Record<string, any>
 ): { pathExists: boolean; value: any } {
   const strPropertyPath = String(propertyPath); // sometimes it could be boolean or number
-  const propertyPathSegments = parseJsPropertyAccess(strPropertyPath);
+  const propertyPathSegments = strPropertyPath.split('.');
   let result: any = context;
 
   for (const segment of propertyPathSegments) {
@@ -142,4 +129,27 @@ function convertLiteralToValue(
     default:
       throw new Error(`Unsupported type: ${expectedType}`);
   }
+}
+
+function wildcardToRegex(value: string): RegExp {
+  const tokenized = value
+    // Temporarily replace escaped wildcards with placeholders
+    .replace(/\\\\/g, '__ESCAPED_BACKSLASH__') // handles \\ correctly
+    .replace(/\\\*/g, '__LITERAL_AST__')
+    .replace(/\\\?/g, '__LITERAL_Q__')
+
+    // Escape regex metacharacters (except wildcards)
+    .replace(/([.+^${}()|[\]\\])/g, '\\$1')
+
+    // Convert real wildcards
+    .replace(/\*/g, '.*')
+    .replace(/\?/g, '.')
+
+    // Restore literal wildcards
+    .replace(/__LITERAL_AST__/g, '\\*')
+    .replace(/__LITERAL_Q__/g, '\\?')
+    .replace(/__ESCAPED_BACKSLASH__/g, '\\\\');
+  const wildcardPattern = `^${tokenized}$`;
+
+  return new RegExp(wildcardPattern);
 }

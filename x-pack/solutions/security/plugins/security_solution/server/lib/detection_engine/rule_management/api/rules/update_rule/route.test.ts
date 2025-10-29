@@ -26,18 +26,12 @@ import {
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../../routes/__mocks__/request_context';
 
 describe('Update rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let clients: MockClients;
-  let context: SecuritySolutionRequestHandlerContextMock;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -48,11 +42,6 @@ describe('Update rule route', () => {
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
     updateRuleRoute(server.router);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {

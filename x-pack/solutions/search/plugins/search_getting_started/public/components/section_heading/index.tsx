@@ -5,38 +5,26 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiIcon } from '@elastic/eui';
 
 interface Props {
   title: string;
   icon: string;
-  description?: string;
 }
 
-export const SearchGettingStartedSectionHeading = ({ title, icon, description }: Props) => {
+export const SearchGettingStartedSectionHeading = ({ title, icon }: Props) => {
   return (
-    <EuiFlexGroup gutterSize="xs" direction={'column'} justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiPanel color="subdued" paddingSize="s" grow={false}>
-              <EuiIcon type={icon} size="m" color="subdued" />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h2>{title}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiPanel color="subdued" paddingSize="s" grow={false}>
+          <EuiIcon type={icon} size="m" />
+        </EuiPanel>
       </EuiFlexItem>
-      {description && (
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" grow={false}>
-            <p>{description}</p>
-          </EuiText>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h2>{title}</h2>
+        </EuiTitle>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

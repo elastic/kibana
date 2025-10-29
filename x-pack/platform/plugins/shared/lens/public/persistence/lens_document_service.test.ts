@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 import { LensClient } from './lens_client';
 import { LensDocumentService } from './lens_document_service';
-import type { LensDocument } from '@kbn/lens-common';
+import type { LensDocument } from './types';
 
 jest.mock('./lens_client', () => {
   const mockClient = {

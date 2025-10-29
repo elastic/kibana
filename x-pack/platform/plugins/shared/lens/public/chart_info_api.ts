@@ -8,13 +8,9 @@
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type {
-  DatasourceMap,
-  OperationDescriptor,
-  VisualizationMap,
-  LensDocument,
-} from '@kbn/lens-common';
 import { getActiveDatasourceIdFromDoc } from './utils';
+import type { DatasourceMap, OperationDescriptor, VisualizationMap } from './types';
+import type { LensDocument } from './persistence';
 
 export type ChartInfoApi = Promise<{
   getChartInfo: (vis: LensDocument) => Promise<ChartInfo | undefined>;

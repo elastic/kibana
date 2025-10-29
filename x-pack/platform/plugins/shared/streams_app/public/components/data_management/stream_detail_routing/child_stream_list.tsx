@@ -106,7 +106,6 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             flex-grow: 1;
             min-height: 80px;
           `}
-          wrap
         >
           {aiFeatures && aiFeatures.enabled && (
             <EuiFlexItem grow={false}>

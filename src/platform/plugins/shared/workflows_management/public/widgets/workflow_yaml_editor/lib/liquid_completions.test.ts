@@ -9,11 +9,11 @@
 
 import { monaco } from '@kbn/monaco';
 import {
-  createLiquidBlockKeywordCompletions,
   createLiquidFilterCompletions,
   createLiquidSyntaxCompletions,
-  LIQUID_BLOCK_KEYWORDS,
+  createLiquidBlockKeywordCompletions,
   LIQUID_FILTERS,
+  LIQUID_BLOCK_KEYWORDS,
 } from './liquid_completions';
 
 describe('liquid_completions', () => {
@@ -38,8 +38,6 @@ describe('liquid_completions', () => {
       expect(filterNames).toContain('join');
       expect(filterNames).toContain('plus');
       expect(filterNames).toContain('minus');
-      expect(filterNames).toContain('base64_encode');
-      expect(filterNames).toContain('base64_decode');
     });
 
     it('should have proper structure for each filter', () => {

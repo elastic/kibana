@@ -241,29 +241,23 @@ export class VegaBaseView {
 
     const vegaLogger = logger(Warn);
 
-    vegaLogger.warn = (...args) => {
-      this.onWarn(...args);
-      return vegaLogger;
-    };
-    vegaLogger.error = (...args) => {
-      this.onError(...args);
-      return vegaLogger;
-    };
+    vegaLogger.warn = this.onWarn.bind(this);
+    vegaLogger.error = this.onError.bind(this);
 
     config.logger = vegaLogger;
 
     return config;
   }
 
-  onError(...args) {
-    const error = Utils.formatErrorToStr(...args);
+  onError() {
+    const error = Utils.formatErrorToStr(...arguments);
     this._addMessage('err', error);
     this._parser.searchAPI.inspectorAdapters?.vega.setError(error);
   }
 
-  onWarn(...args) {
+  onWarn() {
     if (this._renderMode !== 'view' && (!this._parser || !this._parser.hideWarnings)) {
-      this._addMessage('warn', Utils.formatWarningToStr(...args));
+      this._addMessage('warn', Utils.formatWarningToStr(...arguments));
     }
   }
 

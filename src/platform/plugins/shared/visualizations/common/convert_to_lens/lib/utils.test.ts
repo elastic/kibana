@@ -10,6 +10,8 @@
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { IAggConfig } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { AggBasedColumn, ColumnWithMeta } from '../..';
+import { Operations } from '../..';
 import type { SchemaConfig } from '../../types';
 import {
   getCustomBucketsFromSiblingAggs,
@@ -27,9 +29,6 @@ import {
   isSiblingPipeline,
   isStdDevAgg,
 } from './utils';
-import { Operations } from '../constants';
-import type { AggBasedColumn } from './convert/types';
-import type { ColumnWithMeta } from '../types';
 
 describe('getLabel', () => {
   const label = 'some label';
@@ -118,9 +117,7 @@ describe('getValidColumns', () => {
       isBucketed: true,
     },
   ];
-  test.each<
-    [string, Parameters<typeof getValidColumns>, AggBasedColumn | (AggBasedColumn | null)[] | null]
-  >([
+  test.each<[string, Parameters<typeof getValidColumns>, AggBasedColumn[] | null]>([
     ['null if array contains null', [[null, ...columns]], null],
     ['null if columns is null', [null], null],
     ['null if columns is undefined', [undefined], null],

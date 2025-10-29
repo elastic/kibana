@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { EnableDisableOnlyUserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import type { TaskManagerDoc } from '../../../../common/lib';
 import {
@@ -38,9 +38,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
       return scheduledTask._source!;
     }
 
-    const ScenariosToTest = [...UserAtSpaceScenarios, EnableDisableOnlyUserAtSpace1];
-
-    for (const scenario of ScenariosToTest) {
+    for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       const alertUtils = new AlertUtils({ user, space, supertestWithoutAuth });
 
@@ -100,7 +98,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               break;
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
-            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
@@ -151,7 +148,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
@@ -217,7 +213,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
                 statusCode: 403,
               });
               break;
-            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
@@ -268,7 +263,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               });
               break;
             case 'superuser at space1':
-            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -338,7 +332,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(taskRecord1.task.enabled).to.eql(true);
               break;
             case 'superuser at space1':
-            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -378,7 +371,6 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'superuser at space1':
-            case 'enable_disable_only at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':

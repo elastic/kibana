@@ -62,7 +62,6 @@ describe('config schema', () => {
             "dnsCacheTtl": "P0D",
             "healthCheck": Object {
               "delay": "PT2.5S",
-              "retry": 3,
               "startupDelay": "PT0.5S",
             },
             "idleSocketTimeout": "PT1M",

@@ -9,13 +9,13 @@
 
 import { stringify, type ToStringOptions } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { z } from '@kbn/zod';
-import { getZodTypeName } from '../../../../../common/lib/zod';
+import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { isMac } from '../../../../shared/utils/is_mac';
+import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
 import { getCachedAllConnectors } from '../connectors_cache';
 import { getIndentLevel } from '../get_indent_level';
-import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
+import { getZodTypeName } from '../../../../../common/lib/zod';
 
 interface GenerateConnectorSnippetOptions {
   full?: boolean;
@@ -36,7 +36,7 @@ export function generateConnectorSnippet(
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
-  let parameters: Record<string, unknown>;
+  let parameters: Record<string, any>;
 
   const isConnectorIdRequired = getCachedAllConnectors().find(
     (c) => c.type === connectorType
@@ -68,12 +68,14 @@ export function generateConnectorSnippet(
     // We'll add the comment manually after YAML serialization
   } else {
     // Create with block with required parameters as placeholders
-    const withParams: Record<string, unknown> = {};
+    parameters = {
+      'connector-id': connectorIdValue,
+      with: {},
+    };
     requiredParams.forEach((param) => {
       const placeholder = param.example || param.defaultValue || '';
-      withParams[param.name] = placeholder;
+      parameters.with[param.name] = placeholder;
     });
-    parameters = { 'connector-id': connectorIdValue, with: withParams };
   }
 
   if (full) {
@@ -131,7 +133,7 @@ export function generateConnectorSnippet(
  */
 export function connectorTypeRequiresConnectorId(
   connectorType: string,
-  dynamicConnectorTypes?: Record<string, unknown>
+  dynamicConnectorTypes?: Record<string, any>
 ): boolean {
   // Built-in step types don't need connector-id
   const builtInStepTypes = ['foreach', 'if', 'parallel', 'merge', 'http', 'wait'];
@@ -153,7 +155,7 @@ export function connectorTypeRequiresConnectorId(
  */
 export function getConnectorInstancesForType(
   connectorType: string,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, any>
 ): Array<{
   id: string;
   name: string;
@@ -194,7 +196,7 @@ export function getConnectorInstancesForType(
 export function getConnectorIdSuggestions(
   connectorType: string,
   range: monaco.IRange,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, any>
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
 
@@ -255,27 +257,19 @@ export function getConnectorIdSuggestions(
 /**
  * Enhanced function to detect connector type from context, including when path is empty
  */
-
 export function getConnectorTypeFromContext(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   yamlDocument: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   path: any[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   model: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   position: any
 ): string | null {
   try {
     // SPECIAL CASE: If we're directly on a connector-id field, get the step's type
     if (path.length >= 3 && path[0] === 'steps' && path[2] === 'connector-id') {
       const stepPath = [path[0], path[1]]; // ["steps", stepIndex]
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const stepNode = yamlDocument.getIn(stepPath, true) as any;
 
       if (stepNode && stepNode.has && typeof stepNode.has === 'function' && stepNode.has('type')) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const typeNode = stepNode.get('type', true) as any;
         if (typeNode && typeNode.value) {
           const connectorType = typeNode.value;
@@ -293,11 +287,9 @@ export function getConnectorTypeFromContext(
       !path.includes('with')
     ) {
       const stepPath = [path[0], path[1]]; // ["steps", stepIndex]
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const stepNode = yamlDocument.getIn(stepPath, true) as any;
 
       if (stepNode && stepNode.has && typeof stepNode.has === 'function' && stepNode.has('type')) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const typeNode = stepNode.get('type', true) as any;
         if (typeNode && typeNode.value) {
           const connectorType = typeNode.value;
@@ -328,7 +320,6 @@ export function getConnectorTypeFromContext(
 /**
  * Detect connector type by analyzing YAML structure around the cursor position using Monaco
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getConnectorTypeFromPosition(model: any, position: any): string | null {
   try {
     const currentLineNumber = position.lineNumber;
@@ -358,7 +349,6 @@ function getConnectorTypeFromPosition(model: any, position: any): string | null 
 /**
  * Detect if the current line is inside a "with" block by analyzing YAML structure
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
   const currentLine = model.getLineContent(currentLineNumber);
   const currentIndent = getIndentLevel(currentLine);
@@ -423,7 +413,6 @@ function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
 /**
  * Find the connector type by looking for the "type:" field in the current step
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function findConnectorTypeInStep(model: any, currentLineNumber: number): string | null {
   // Look backwards for the type field, staying within the same step
   for (let lineNumber = currentLineNumber - 1; lineNumber >= 1; lineNumber--) {
@@ -467,7 +456,6 @@ export function getEnhancedTypeInfo(schema: z.ZodType): {
   }
 
   const baseType = getZodTypeName(currentSchema);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const description = (currentSchema as any)?._def?.description || '';
 
   // Extract example from description if available
@@ -507,7 +495,6 @@ export function getEnhancedTypeInfo(schema: z.ZodType): {
 /**
  * Get existing parameters in the current with block to avoid suggesting duplicates
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getExistingParametersInWithBlock(model: any, position: any): Set<string> {
   const existingParams = new Set<string>();
   const currentLineNumber = position.lineNumber;
@@ -584,7 +571,6 @@ export function getExistingParametersInWithBlock(model: any, position: any): Set
   return existingParams;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getConnectorTypeFromWithBlock(yamlDocument: any, path: any[]): string | null {
   try {
     // Getting connector type from with block
@@ -610,7 +596,6 @@ function getConnectorTypeFromWithBlock(yamlDocument: any, path: any[]): string |
     }
 
     // Get the step path (should be something like ['steps', stepIndex])
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let stepPath: any[];
     if (withIndex !== -1) {
       stepPath = path.slice(0, withIndex);

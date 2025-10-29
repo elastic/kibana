@@ -16,12 +16,9 @@ import type {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
-import type {
-  MakeOverridesSerializable,
-  Simplify,
-  ExpressionValueVisDimension,
-} from '@kbn/chart-expressions-common';
+import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import type { GoalProps } from '@elastic/charts';
 import type {
   EXPRESSION_GAUGE_NAME,

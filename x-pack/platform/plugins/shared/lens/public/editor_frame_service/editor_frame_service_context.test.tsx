@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EditorFrameServiceProvider, useEditorFrameService } from './editor_frame_service_context';
-import type { DatasourceMap, VisualizationMap, Visualization, Datasource } from '@kbn/lens-common';
+import type { DatasourceMap, VisualizationMap, Visualization, Datasource } from '../types';
 
 describe('EditorFrameServiceContext', () => {
   const mockVisualizationMap: VisualizationMap = {

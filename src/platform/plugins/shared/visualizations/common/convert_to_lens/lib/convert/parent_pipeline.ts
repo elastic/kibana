@@ -9,10 +9,11 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { SchemaConfig } from '../../..';
-import type { AnyMetricColumnAndMeta, MovingAverageParams } from '../../types';
+import type { MovingAverageParams } from '../../types';
 import { convertMetricToColumns, getFormulaForPipelineAgg } from '../metrics';
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
+import type { MetricAggregationColumnWithoutSpecialParams } from './metric';
 import { convertMetricAggregationColumnWithoutSpecialParams } from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import type {
@@ -22,6 +23,7 @@ import type {
   FormulaColumn,
   ExtendedColumnConverterArgs,
   OtherParentPipelineAggs,
+  AggBasedColumn,
 } from './types';
 import { PIPELINE_AGGS, SIBLING_PIPELINE_AGGS } from './constants';
 import { getMetricFromParentPipelineAgg } from '../utils';
@@ -37,7 +39,7 @@ export const convertToMovingAverageParams = (
 export const convertToOtherParentPipelineAggColumns = (
   { agg, dataView, aggs, visType }: ExtendedColumnConverterArgs<OtherParentPipelineAggs>,
   reducedTimeRange?: string
-): FormulaColumn | [ParentPipelineAggColumn, AnyMetricColumnAndMeta] | null => {
+): FormulaColumn | [ParentPipelineAggColumn, AggBasedColumn] | null => {
   const { aggType } = agg;
   const op = SUPPORTED_METRICS[aggType];
   if (!op) {
@@ -89,7 +91,10 @@ export const convertToOtherParentPipelineAggColumns = (
 export const convertToCumulativeSumAggColumn = (
   { agg, dataView, aggs, visType }: ExtendedColumnConverterArgs<METRIC_TYPES.CUMULATIVE_SUM>,
   reducedTimeRange?: string
-): FormulaColumn | [ParentPipelineAggColumn, AnyMetricColumnAndMeta] | null => {
+):
+  | FormulaColumn
+  | [ParentPipelineAggColumn, MetricAggregationColumnWithoutSpecialParams]
+  | null => {
   const { aggParams, aggType } = agg;
   if (!aggParams) {
     return null;

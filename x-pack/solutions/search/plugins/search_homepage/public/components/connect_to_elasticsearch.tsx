@@ -29,7 +29,7 @@ export const ConnectToElasticsearch = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup alignItems="flexStart" gutterSize="m" wrap>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem style={{ minWidth: '300px' }} grow={false}>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem>
                 <FormInfoField
@@ -41,7 +41,7 @@ export const ConnectToElasticsearch = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem style={{ minWidth: '250px' }}>
             <ApiKeyForm />
           </EuiFlexItem>
         </EuiFlexGroup>

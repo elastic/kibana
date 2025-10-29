@@ -7,15 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
+import { useEffect, useState } from 'react';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { TabsServices } from '../../types';
 
 export const useChromeStyle = (services: TabsServices) => {
   const chrome = services.core?.chrome;
-  const chromeStyle$ = useMemo(() => chrome?.getChromeStyle$?.() ?? of(undefined), [chrome]);
-  const chromeStyle = useObservable(chromeStyle$);
+
+  const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
+
+  useEffect(() => {
+    if (!chrome) {
+      return;
+    }
+
+    const subscription = chrome.getChromeStyle$().subscribe(setChromeStyle);
+    return () => subscription.unsubscribe();
+  }, [chrome]);
 
   return {
     isProjectChromeStyle: chromeStyle === 'project',

@@ -7,12 +7,8 @@
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { SecurityGroupName, SecurityPageName } from '@kbn/security-solution-navigation';
-import {
-  SecurityLinkGroup,
-  i18nStrings,
-  securityLink,
-} from '@kbn/security-solution-navigation/links';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 
 import { type Services } from '../common/services';
@@ -27,6 +23,20 @@ const SOLUTION_NAME = i18n.translate(
 export const createNavigationTree = async (
   services: Services
 ): Promise<NavigationTreeDefinition> => {
+  // Check if user has AI Value access
+  let hasAiValueAccess = false;
+  try {
+    const currentUser = await services.security.authc.getCurrentUser();
+    if (currentUser) {
+      const userRoles = currentUser.roles || [];
+      const allowedRoles = ['admin', 'soc_manager'];
+      hasAiValueAccess = allowedRoles.some((role) => userRoles.includes(role));
+    }
+  } catch (error) {
+    // If we can't get the current user, default to no access
+    hasAiValueAccess = false;
+  }
+
   return {
     body: [
       {
@@ -122,32 +132,9 @@ export const createNavigationTree = async (
         id: 'security_solution_nav_footer',
         type: 'navGroup',
         children: [
+          defaultNavigationTree.launchpad({ hasAiValueAccess, sideNavVersion: 'v1' }),
           {
-            id: SecurityGroupName.launchpad,
-            title: SecurityLinkGroup[SecurityGroupName.launchpad].title,
-            renderAs: 'panelOpener',
-            sideNavVersion: 'v1',
-            iconV2: 'launch',
-            children: [
-              {
-                children: [
-                  {
-                    id: SecurityPageName.landing,
-                    link: securityLink(SecurityPageName.landing),
-                    sideNavVersion: 'v1',
-                  },
-                  {
-                    // value report
-                    id: SecurityPageName.aiValue,
-                    link: securityLink(SecurityPageName.aiValue),
-                    sideNavVersion: 'v1',
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            id: SecurityGroupName.launchpad,
+            id: 'launchpad',
             title: i18nStrings.launchPad.title,
             renderAs: 'panelOpener',
             sideNavVersion: 'v2',
@@ -156,18 +143,16 @@ export const createNavigationTree = async (
               {
                 children: [
                   {
-                    id: SecurityPageName.landing,
+                    id: 'launchpad_get_started',
                     link: securityLink(SecurityPageName.landing),
                     sideNavVersion: 'v2',
                   },
                   {
-                    id: SecurityPageName.siemReadiness,
                     link: securityLink(SecurityPageName.siemReadiness),
                     sideNavVersion: 'v2',
                   },
                   {
                     // value report
-                    id: SecurityPageName.aiValue,
                     link: securityLink(SecurityPageName.aiValue),
                     sideNavVersion: 'v2',
                   },

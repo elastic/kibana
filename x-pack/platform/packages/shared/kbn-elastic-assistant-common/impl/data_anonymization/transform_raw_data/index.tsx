@@ -11,7 +11,13 @@ import { getAnonymizedData } from '../get_anonymized_data';
 import { getAnonymizedValues } from '../get_anonymized_values';
 import { getCsvFromData } from '../get_csv_from_data';
 
-interface TransformRawDataParams {
+export const transformRawData = ({
+  anonymizationFields,
+  currentReplacements,
+  getAnonymizedValue,
+  onNewReplacements,
+  rawData,
+}: {
   anonymizationFields?: AnonymizationFieldResponse[];
   currentReplacements: Replacements | undefined;
   getAnonymizedValue: ({
@@ -23,40 +29,11 @@ interface TransformRawDataParams {
   }) => string;
   onNewReplacements?: (replacements: Replacements) => void;
   rawData: string | Record<string, unknown[]>;
-}
-
-export const transformRawData = ({
-  anonymizationFields,
-  currentReplacements,
-  getAnonymizedValue,
-  onNewReplacements,
-  rawData,
-}: TransformRawDataParams): string => {
+}): string => {
   if (typeof rawData === 'string') {
     return rawData;
   }
 
-  const anonymizedData = transformRawDataToRecord({
-    anonymizationFields,
-    currentReplacements,
-    getAnonymizedValue,
-    onNewReplacements,
-    rawData,
-  });
-
-  return getCsvFromData(anonymizedData);
-};
-
-export const transformRawDataToRecord = ({
-  anonymizationFields,
-  currentReplacements,
-  getAnonymizedValue,
-  onNewReplacements,
-  rawData,
-}: Omit<TransformRawDataParams, 'rawData'> & { rawData: Record<string, unknown[]> }): Record<
-  string,
-  string[]
-> => {
   const anonymizedData = getAnonymizedData({
     anonymizationFields,
     currentReplacements,
@@ -69,5 +46,5 @@ export const transformRawDataToRecord = ({
     onNewReplacements(anonymizedData.replacements);
   }
 
-  return anonymizedData.anonymizedData;
+  return getCsvFromData(anonymizedData.anonymizedData);
 };

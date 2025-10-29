@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getErrorsContextService } from '../data_types';
+import { getApmErrorsContextService } from '../data_types';
 
-export const createErrorsContextServiceMock = () => getErrorsContextService('errors-*');
+export const createApmErrorsContextServiceMock = () => getApmErrorsContextService('errors-*');

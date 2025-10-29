@@ -18,20 +18,8 @@ export const GetSettingsRequestSchema = {};
 
 export const PutSettingsRequestSchema = {
   body: schema.object({
-    has_seen_add_data_notice: schema.maybe(
-      schema.boolean({
-        meta: {
-          deprecated: true,
-        },
-      })
-    ),
-    additional_yaml_config: schema.maybe(
-      schema.string({
-        meta: {
-          deprecated: true,
-        },
-      })
-    ),
+    has_seen_add_data_notice: schema.maybe(schema.boolean()),
+    additional_yaml_config: schema.maybe(schema.string()),
     // Deprecated not used
     kibana_urls: schema.maybe(
       schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
@@ -40,18 +28,9 @@ export const PutSettingsRequestSchema = {
             return 'Protocol and path must be the same for each URL';
           }
         },
-        meta: {
-          deprecated: true,
-        },
       })
     ),
-    kibana_ca_sha256: schema.maybe(
-      schema.string({
-        meta: {
-          deprecated: true,
-        },
-      })
-    ),
+    kibana_ca_sha256: schema.maybe(schema.string()),
     prerelease_integrations_enabled: schema.maybe(schema.boolean()),
     delete_unenrolled_agents: schema.maybe(
       schema.object({

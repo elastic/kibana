@@ -19,12 +19,13 @@ scripts                 // => scripts used to manage the validation engine code
 #### Validation
 
 This module contains the validation logic useful to perform a full check of an ES|QL query string.
-The validation service can be gracefully degraded when it is not possible to pass all callbacks: this is useful in environments where it is not possible to connect to an ES instance to retrieve more metadata, while preserving most of the validation value.
-The validator automatically skips semantic checks that require missing callbacks. For instance, not passing the `getSources` callback will skip index validation, and not passing field callbacks will skip field validation.
+The validation service can be gracefully degraded leveraging the `ignoreOnMissingCallbacks` option when it is not possible to pass all callbacks: this is useful in environments where it is not possible to connect to a ES instance to retrieve more metadata, while preserving most of the validation value.
+For instance, not passing the `getSources` callback will report all index mentioned in the ES|QL with the `Unknown index [...]` error, but with the `ignoreOnMissingCallbacks` option enabled this type of errors will be muted.
 
 ##### Usage
 
 ```js
+import { parse } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 
 // define all callbacks
@@ -34,12 +35,13 @@ const myCallbacks = {
 };
 
 // Full validation performed
-const { errors, warnings } = await validateQuery("from index | stats 1 + avg(myColumn)", myCallbacks);
+const { errors, warnings } = await validateQuery("from index | stats 1 + avg(myColumn)", parse, undefined, myCallbacks);
 ```
 
-If not all callbacks are available, the validation will automatically skip semantic checks that require those callbacks:
+If not all callbacks are available it is possible to gracefully degrade the validation experience with the `ignoreOnMissingCallbacks` option:
 
 ```js
+import { parse } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 
 // define only the getSources callback
@@ -47,11 +49,13 @@ const myCallbacks = {
   getSources: async () => [{ name: 'index', hidden: false }],
 };
 
-// Validation will automatically skip checks that require missing callbacks (e.g., field validation)
-const { errors, warnings } = await validateQuery('from index | stats 1 + avg(myColumn)', myCallbacks);
-
-// Or perform purely syntactic validation without any callbacks
-const { errors, warnings } = await validateQuery('from index | stats 1 + avg(myColumn)');
+// ignore errors that might be triggered by the lack of some callbacks (i.e. "Unknown columns", etc...)
+const { errors, warnings } = await validateQuery(
+  'from index | stats 1 + avg(myColumn)',
+  parse,
+  { ignoreOnMissingCallbacks: true },
+  myCallbacks
+);
 ```
 
 #### Autocomplete
@@ -107,7 +111,7 @@ const myCallbacks = {
   getSources: async () => [{name: 'index', hidden: false}],
   ...
 };
-const { errors, warnings } = await validateQuery(queryString, myCallbacks);
+const { errors, warnings } = await validateQuery(queryString, parse, undefined, myCallbacks);
 
 const {title, edits} = await getActions(
   queryString,
@@ -122,7 +126,7 @@ const {title, edits} = await getActions(
 console.log({ title, edits });
 ```
 
-Like with validation, `getActions` can also work with partial or no callbacks, automatically skipping checks that require missing callbacks.
+Like with validation also `getActions` can 'relax' its internal checks when no callbacks, either all or specific ones, are passed.
 
 ```js
 import { parse } from '@kbn/esql-ast';
@@ -134,7 +138,7 @@ const myCallbacks = {
   getSources: async () => [{name: 'index', hidden: false}],
   ...
 };
-const { errors, warnings } = await validateQuery(queryString, myCallbacks);
+const { errors, warnings } = await validateQuery(queryString, parse, undefined, myCallbacks);
 
 const {title, edits} = await getActions(
   queryString,

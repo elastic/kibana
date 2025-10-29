@@ -7,33 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiEmptyPromptProps,
-  EuiThemeComputed,
-  EuiTreeViewProps,
-  UseEuiTheme,
-} from '@elastic/eui';
+import type { EuiThemeComputed, EuiTreeViewProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
+  useEuiTheme,
   EuiTreeView,
   logicalCSS,
-  useEuiTheme,
+  type EuiEmptyPromptProps,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus, isInProgressStatus } from '@kbn/workflows';
+import { isDangerousStatus, type WorkflowExecutionDto } from '@kbn/workflows';
+import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { ExecutionStatus, isDangerousStatus, isInProgressStatus } from '@kbn/workflows';
-import type { StepExecutionTreeItem } from './build_step_executions_tree';
-import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import type { StepExecutionTreeItem } from './build_step_executions_tree';
+import { buildStepExecutionsTree } from './build_step_executions_tree';
+
+// handle special nodes like foreachstep:0, foreachstep:1, if:true, if:false
+function getStepStatus(item: StepExecutionTreeItem, status: ExecutionStatus | null) {
+  const stepType = item.stepType;
+  if (
+    (stepType === 'foreach-iteration' ||
+      stepType === 'foreach' ||
+      stepType === 'if-branch' ||
+      stepType === 'if') &&
+    !item.children.length &&
+    !isInProgressStatus(status ?? ExecutionStatus.PENDING)
+  ) {
+    return ExecutionStatus.SKIPPED;
+  }
+
+  if (status) {
+    return status;
+  }
+
+  return null;
+}
 
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],
@@ -45,7 +63,7 @@ function convertTreeToEuiTreeViewItems(
   const onClickFn = onClickHandler;
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
-    const status = stepExecution?.status || null;
+    const status = getStepStatus(item, stepExecution?.status ?? null);
     return {
       ...item,
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,

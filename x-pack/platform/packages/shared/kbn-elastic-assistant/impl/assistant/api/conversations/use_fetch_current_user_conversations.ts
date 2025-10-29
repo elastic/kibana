@@ -11,8 +11,8 @@ import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@kbn/react-query';
-import { useInfiniteQuery } from '@kbn/react-query';
+} from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import type { User } from '@kbn/elastic-assistant-common';
 import {
   getIsConversationOwner,

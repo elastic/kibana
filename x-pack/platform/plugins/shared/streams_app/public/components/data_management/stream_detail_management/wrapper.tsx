@@ -136,11 +136,10 @@ export function Wrapper({
           <EuiFlexGroup
             direction="row"
             gutterSize="s"
-            alignItems="baseline"
+            alignItems="center"
             justifyContent="spaceBetween"
-            wrap
           >
-            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap>
+            <EuiFlexGroup gutterSize="s" alignItems="baseline">
               {streamId}
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
                 <EuiFlexItem grow={true}>

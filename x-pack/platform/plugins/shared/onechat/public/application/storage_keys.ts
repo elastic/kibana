@@ -7,5 +7,4 @@
 
 export const storageKeys = {
   agentId: 'agentBuilder.agentId',
-  lastUsedConnector: 'agentBuilder.lastUsedConnector',
 };

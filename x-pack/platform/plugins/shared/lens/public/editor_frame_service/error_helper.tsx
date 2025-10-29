@@ -8,7 +8,7 @@
 import type { ExpressionRenderError } from '@kbn/expressions-plugin/public';
 import { renderSearchError } from '@kbn/search-errors';
 import React from 'react';
-import type { UserMessage } from '@kbn/lens-common';
+import type { UserMessage } from '../types';
 
 export function getOriginalRequestErrorMessages(
   error: ExpressionRenderError | null

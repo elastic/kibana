@@ -142,7 +142,6 @@ interface FieldSuggestionsOptions {
   openSuggestions?: boolean;
   addComma?: boolean;
   promoteToTop?: boolean;
-  canBeMultiValue?: boolean;
 }
 
 export async function getFieldsSuggestions(
@@ -157,20 +156,13 @@ export async function getFieldsSuggestions(
     openSuggestions = false,
     addComma = false,
     promoteToTop = true,
-    canBeMultiValue = false,
   } = options;
-
-  const variableType = (() => {
-    if (canBeMultiValue) return ESQLVariableType.MULTI_VALUES;
-    if (values) return ESQLVariableType.VALUES;
-    return ESQLVariableType.FIELDS;
-  })();
 
   const suggestions = await getFieldsByType(types, ignoreColumns, {
     advanceCursor: addSpaceAfterField,
     openSuggestions,
     addComma,
-    variableType,
+    variableType: values ? ESQLVariableType.VALUES : ESQLVariableType.FIELDS,
   });
 
   return pushItUpInTheList(suggestions as ISuggestionItem[], promoteToTop);

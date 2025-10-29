@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { type AgentDefinition, type ToolSelection, defaultAgentToolIds } from '@kbn/onechat-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useOnechatServices } from '../use_onechat_service';
@@ -15,7 +15,6 @@ import { useToolsService } from '../tools/use_tools';
 import { queryKeys } from '../../query_keys';
 import { duplicateName } from '../../utils/duplicate_name';
 import { searchParamNames } from '../../search_param_names';
-import { cleanInvalidToolReferences } from '../../utils/tool_selection_utils';
 
 export type AgentEditState = Omit<AgentDefinition, 'type' | 'readonly'>;
 
@@ -102,16 +101,14 @@ export function useAgentEdit({
 
   const submit = useCallback(
     async (data: AgentEditState) => {
-      const cleanedData = cleanInvalidToolReferences(data, tools);
-
       if (editingAgentId) {
-        const { id, ...updatedAgent } = cleanedData;
+        const { id, ...updatedAgent } = data;
         await updateMutation.mutateAsync(updatedAgent);
       } else {
-        await createMutation.mutateAsync(cleanedData);
+        await createMutation.mutateAsync(data);
       }
     },
-    [editingAgentId, createMutation, updateMutation, tools]
+    [editingAgentId, createMutation, updateMutation]
   );
 
   const isLoading = agentId ? agentLoading || toolsLoading : false;

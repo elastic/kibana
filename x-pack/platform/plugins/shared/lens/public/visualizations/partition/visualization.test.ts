@@ -6,12 +6,7 @@
  */
 
 import { getPieVisualization } from './visualization';
-import type {
-  LensPartitionVisualizationState,
-  FramePublicAPI,
-  OperationDescriptor,
-  Visualization,
-} from '@kbn/lens-common';
+import type { PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -22,12 +17,13 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import type { FramePublicAPI, OperationDescriptor, Visualization } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import type { CollapseFunction } from '../../../common/expressions';
 import type { PaletteOutput } from '@kbn/coloring';
 import { LegendValue } from '@elastic/charts';
-import type { DeprecatedLegendValueLensPartitionVisualizationState } from './runtime_state/converters/legend_stats';
+import type { DeprecatedLegendValuePieVisualizationState } from './runtime_state/converters/legend_stats';
 
 jest.mock('../../id_generator');
 
@@ -47,7 +43,7 @@ const pieVisualization = getPieVisualization({
   formatFactory: fieldFormatsServiceMock.createStartContract().deserialize,
 });
 
-function getExampleState(): LensPartitionVisualizationState {
+function getExampleState(): PieVisualizationState {
   return {
     shape: PieChartTypes.PIE,
     layers: [
@@ -139,7 +135,7 @@ describe('pie_visualization', () => {
 
   describe('#setDimension', () => {
     it('returns expected state', () => {
-      const prevState: LensPartitionVisualizationState = {
+      const prevState: PieVisualizationState = {
         layers: [
           {
             primaryGroups: ['a'],
@@ -182,8 +178,7 @@ describe('pie_visualization', () => {
         expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
       });
       it('loads a xy chart with `showValuesInLegend` property equal to false and converts to legendStats: []', () => {
-        const persistedState: DeprecatedLegendValueLensPartitionVisualizationState =
-          getExampleState();
+        const persistedState: DeprecatedLegendValuePieVisualizationState = getExampleState();
         persistedState.layers[0].showValuesInLegend = false;
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
@@ -193,8 +188,7 @@ describe('pie_visualization', () => {
       });
 
       it('loads a xy chart with `showValuesInLegend` property equal to true and converts to legendStats: [`values`]', () => {
-        const persistedState: DeprecatedLegendValueLensPartitionVisualizationState =
-          getExampleState();
+        const persistedState: DeprecatedLegendValuePieVisualizationState = getExampleState();
         persistedState.layers[0].showValuesInLegend = true;
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
@@ -587,7 +581,7 @@ describe('pie_visualization', () => {
         const state = getExampleState();
         state.layers[0].primaryGroups = colIds;
 
-        const getConfig = (_state: LensPartitionVisualizationState) =>
+        const getConfig = (_state: PieVisualizationState) =>
           pieVisualization.getConfiguration({
             state: _state,
             frame,
@@ -615,7 +609,7 @@ describe('pie_visualization', () => {
         state.layers[0].primaryGroups = colIds;
         state.layers[0].allowMultipleMetrics = true;
 
-        const getConfig = (_state: LensPartitionVisualizationState) =>
+        const getConfig = (_state: PieVisualizationState) =>
           pieVisualization.getConfiguration({
             state: _state,
             frame,
@@ -641,7 +635,7 @@ describe('pie_visualization', () => {
         state.layers[0].primaryGroups = [];
         state.layers[0].allowMultipleMetrics = false; // always true for mosaic
 
-        const getConfig = (_state: LensPartitionVisualizationState) =>
+        const getConfig = (_state: PieVisualizationState) =>
           pieVisualization.getConfiguration({
             state: _state,
             frame,

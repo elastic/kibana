@@ -24,8 +24,6 @@ interface FormInfoFieldProps {
   copyValue?: string;
   dataTestSubj?: string;
   copyValueDataTestSubj?: string;
-  maxWidth?: number;
-  minWidth?: number;
 }
 
 export const FormInfoField: React.FC<FormInfoFieldProps> = ({
@@ -35,82 +33,61 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
   copyValue,
   dataTestSubj,
   copyValueDataTestSubj,
-  maxWidth,
-  minWidth,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      wrap
-      style={{
-        maxWidth: maxWidth ? `${maxWidth}px` : undefined,
-        minWidth: minWidth ? `${minWidth}px` : undefined,
-      }}
-    >
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       {label && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
-            <span>{label}</span>
+            <h1>{label}</h1>
           </EuiTitle>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false} style={{ flexBasis: 'content', maxWidth: '100%' }}>
-        <EuiFlexGroup
+      <EuiFlexItem grow={false} css={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+        <code
+          data-test-subj={dataTestSubj}
           style={{
             color: euiTheme.colors.textParagraph,
+            padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
             backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
             borderRadius: euiTheme.border.radius.small,
+            fontSize: euiTheme.size.m,
           }}
-          alignItems="center"
-          gutterSize="xs"
-          responsive={false}
         >
-          <EuiFlexItem css={{ minWidth: 0 }} grow={false}>
-            <code
-              data-test-subj={dataTestSubj}
-              style={{
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                fontSize: euiTheme.size.m,
-                padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
-              }}
-            >
-              {value}
-            </code>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCopy
-              textToCopy={copyValue ?? value}
-              afterMessage={i18n.translate('xpack.searchSharedUI.formInfoField.copyAfterMessage', {
-                defaultMessage: 'Copied',
-              })}
-            >
-              {(copy) => (
-                <EuiButtonIcon
-                  size="s"
-                  display="empty"
-                  onClick={copy}
-                  iconType="copy"
-                  color="text"
-                  data-test-subj={copyValueDataTestSubj}
-                  aria-label={i18n.translate('xpack.searchSharedUI.formInfoField.copyAriaLabel', {
-                    defaultMessage: 'Copy to clipboard',
-                  })}
-                />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-          {actions.map((action, index) => (
-            <EuiFlexItem key={index} grow={false}>
-              {action}
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+          {value}
+        </code>
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiCopy
+          textToCopy={copyValue ?? value}
+          afterMessage={i18n.translate('xpack.searchSharedUI.formInfoField.copyMessage', {
+            defaultMessage: 'Copied',
+          })}
+        >
+          {(copy) => (
+            <EuiButtonIcon
+              size="s"
+              display="base"
+              onClick={copy}
+              iconType="copy"
+              color="text"
+              data-test-subj={copyValueDataTestSubj}
+              aria-label={i18n.translate('xpack.searchSharedUI.formInfoField.copyMessage', {
+                defaultMessage: 'Copy to clipboard',
+              })}
+            />
+          )}
+        </EuiCopy>
+      </EuiFlexItem>
+      {actions.map((action, index) => (
+        <EuiFlexItem key={index} grow={false}>
+          {action}
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

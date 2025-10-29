@@ -9,20 +9,28 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
-import { LegendSize } from '@kbn/chart-expressions-common';
-import { type PartitionLegendValue } from '@kbn/expression-partition-vis-plugin/common';
-import type {
-  LensPartitionVisualizationState as PieVisualizationState,
-  VisualizationToolbarProps,
-} from '@kbn/lens-common';
-import { PARTITION_EMPTY_SIZE_RADIUS as EmptySizeRatios } from '@kbn/lens-common';
+import { LegendValue } from '@elastic/charts';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { PartitionChartsMeta } from '../partition_charts_meta';
+import type { PieVisualizationState, SharedPieLayerState } from '../../../../common/types';
+import { EmptySizeRatios } from '../../../../common/types';
+import { LegendDisplay } from '../../../../common/constants';
+import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getLegendStats } from '../render_helpers';
 import { PartitionAppearanceSettings } from './appearance_settings';
 import { PartitionTitlesAndTextSettings } from './titles_and_text_setttings';
-import { legendOptions, partitionLegendValues } from './legend_settings';
+
+const partitionLegendValues = [
+  {
+    value: LegendValue.Value,
+    label: i18n.translate('xpack.lens.shared.legendValues.value', {
+      defaultMessage: 'Value',
+    }),
+  },
+];
 
 const PANEL_STYLE = {
   width: '500px',
@@ -164,3 +172,31 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     </EuiFlexGroup>
   );
 }
+
+const legendOptions: Array<{
+  value: SharedPieLayerState['legendDisplay'];
+  label: string;
+  id: string;
+}> = [
+  {
+    id: 'pieLegendDisplay-default',
+    value: LegendDisplay.DEFAULT,
+    label: i18n.translate('xpack.lens.pieChart.legendVisibility.auto', {
+      defaultMessage: 'Auto',
+    }),
+  },
+  {
+    id: 'pieLegendDisplay-show',
+    value: LegendDisplay.SHOW,
+    label: i18n.translate('xpack.lens.pieChart.legendVisibility.show', {
+      defaultMessage: 'Show',
+    }),
+  },
+  {
+    id: 'pieLegendDisplay-hide',
+    value: LegendDisplay.HIDE,
+    label: i18n.translate('xpack.lens.pieChart.legendVisibility.hide', {
+      defaultMessage: 'Hide',
+    }),
+  },
+];

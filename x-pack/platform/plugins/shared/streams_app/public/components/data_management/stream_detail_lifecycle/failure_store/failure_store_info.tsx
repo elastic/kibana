@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { TimeState } from '@kbn/es-query';
 import { RetentionCard } from './cards/retention_card';
@@ -54,27 +54,13 @@ export const FailureStoreInfo = ({
       </EuiTitle>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <RetentionCard
-            openModal={openModal}
-            canManageFailureStore={definition.privileges?.manage_failure_store}
-            isWired={Streams.WiredStream.GetResponse.is(definition)}
-            streamName={definition.stream.name}
-            failureStore={config}
-          />
+          <RetentionCard openModal={openModal} definition={definition} failureStore={config} />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <StorageSizeCard
-            stats={stats}
-            hasPrivileges={definition.privileges?.manage_failure_store}
-            statsError={statsError}
-          />
+          <StorageSizeCard stats={stats} definition={definition} statsError={statsError} />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <IngestionCard
-            stats={stats}
-            hasPrivileges={definition.privileges?.manage_failure_store}
-            statsError={statsError}
-          />
+          <IngestionCard stats={stats} definition={definition} statsError={statsError} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <FailureStoreIngestionRate

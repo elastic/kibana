@@ -60,8 +60,7 @@
     "@kbn/search-queries",
     "@kbn/monaco",
     "@kbn/search-shared-ui",
-    "@kbn/license-management-plugin",
-    "@kbn/react-query"
+    "@kbn/license-management-plugin"
   ],
   "exclude": [
     "target/**/*",

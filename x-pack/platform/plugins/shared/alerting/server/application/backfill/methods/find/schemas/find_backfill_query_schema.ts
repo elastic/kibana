@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { backfillInitiator } from '../../../../../../common/constants';
 
 export const findBackfillQuerySchema = schema.object(
   {
@@ -14,19 +13,12 @@ export const findBackfillQuerySchema = schema.object(
     page: schema.number({ defaultValue: 1, min: 1 }),
     perPage: schema.number({ defaultValue: 10, min: 0 }),
     ruleIds: schema.maybe(schema.string()),
-    initiator: schema.maybe(
-      schema.oneOf([
-        schema.literal(backfillInitiator.USER),
-        schema.literal(backfillInitiator.SYSTEM),
-      ])
-    ),
-    initiatorId: schema.maybe(schema.string()),
     start: schema.maybe(schema.string()),
     sortField: schema.maybe(schema.oneOf([schema.literal('createdAt'), schema.literal('start')])),
     sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   },
   {
-    validate({ start, end, initiatorId, initiator }) {
+    validate({ start, end }) {
       if (start) {
         const parsedStart = Date.parse(start);
         if (isNaN(parsedStart)) {
@@ -38,9 +30,6 @@ export const findBackfillQuerySchema = schema.object(
         if (isNaN(parsedEnd)) {
           return `[end]: query end must be valid date`;
         }
-      }
-      if (initiatorId && initiator !== backfillInitiator.SYSTEM) {
-        return 'Initiator ID can only be used with system initiator';
       }
     },
   }

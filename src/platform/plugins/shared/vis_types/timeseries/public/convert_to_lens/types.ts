@@ -9,11 +9,11 @@
 
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type {
-  MetricVisualizationState as MetricVisConfiguration,
+  MetricVisConfiguration,
   NavigateToLensContext,
-  XYState as XYConfiguration,
-  DatatableVisualizationState as TableVisConfiguration,
-} from '@kbn/lens-common';
+  XYConfiguration,
+  TableVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { Panel } from '../../common/types';
 

@@ -15,7 +15,6 @@ import { Location } from '../../types';
 import { autocomplete } from './autocomplete';
 import {
   expectSuggestions,
-  suggest,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
 } from '../../../__tests__/autocomplete';
@@ -90,29 +89,22 @@ export const EXPECTED_FOR_EMPTY_EXPRESSION = [
   ...allEvalFunctionsForStats,
 ];
 
-type ExpectedSuggestions = string[] | { contains?: string[]; notContains?: string[] };
-
-const forkExpectSuggestions = async (
+const forkExpectSuggestions = (
   query: string,
-  expected: ExpectedSuggestions,
+  expectedSuggestions: string[],
   mockCallbacks?: ICommandCallbacks,
   context = mockContext,
   offset?: number
-): Promise<void> => {
-  if (Array.isArray(expected)) {
-    return expectSuggestions(query, expected, context, 'fork', mockCallbacks, autocomplete, offset);
-  }
-
-  const results = await suggest(query, context, 'fork', mockCallbacks, autocomplete, offset);
-  const texts = results.map(({ text }) => text);
-
-  if (expected.contains?.length) {
-    expect(texts).toEqual(expect.arrayContaining(expected.contains));
-  }
-
-  if (expected.notContains?.length) {
-    expect(texts).not.toEqual(expect.arrayContaining(expected.notContains));
-  }
+) => {
+  return expectSuggestions(
+    query,
+    expectedSuggestions,
+    context,
+    'fork',
+    mockCallbacks,
+    autocomplete,
+    offset
+  );
 };
 
 describe('FORK Autocomplete', () => {
@@ -299,18 +291,17 @@ describe('FORK Autocomplete', () => {
         });
 
         test('lookup join after ON keyword', async () => {
+          const expected = getFieldNamesByType('any')
+            .sort()
+            .map((field) => field.trim());
+
+          for (const { name } of lookupIndexFields) {
+            expected.push(name.trim());
+          }
+
           await forkExpectSuggestions(
             'FROM a | FORK (LOOKUP JOIN join_index ON ',
-            {
-              contains: [
-                'textField',
-                'keywordField',
-                'booleanField',
-                'joinIndexOnlyField ',
-                'STARTS_WITH($0)',
-                'CONTAINS($0)',
-              ],
-            },
+            expected,
             mockCallbacks
           );
         });
@@ -461,20 +452,27 @@ describe('FORK Autocomplete', () => {
       });
 
       describe('user-defined columns', () => {
+        const suggest = async (query: string) => {
+          const correctedQuery = correctQuerySyntax(query);
+          const { ast } = parse(correctedQuery, { withFormatting: true });
+          const cursorPosition = query.length;
+          const { command } = findAstPosition(ast, cursorPosition);
+          if (!command) {
+            throw new Error('Command not found in the parsed query');
+          }
+          return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
+        };
         it('suggests user-defined columns from earlier in this branch', async () => {
-          await forkExpectSuggestions(
-            'FROM a | FORK (EVAL col0 = 1 | EVAL var0 = 2 | WHERE ',
-            { contains: ['col0', 'var0'] },
-            mockCallbacks
+          const suggestions = await suggest(
+            'FROM a | FORK (EVAL col0 = 1 | EVAL var0 = 2 | WHERE '
           );
+          expect(suggestions.map(({ label }) => label)).toContain('col0');
+          expect(suggestions.map(({ label }) => label)).toContain('var0');
         });
 
         it('does NOT suggest user-defined columns from another branch', async () => {
-          await forkExpectSuggestions(
-            'FROM a | FORK (EVAL foo = 1) (WHERE ',
-            { notContains: ['foo'] },
-            mockCallbacks
-          );
+          const suggestions = await suggest('FROM a | FORK (EVAL foo = 1) (WHERE ');
+          expect(suggestions.map(({ label }) => label)).not.toContain('foo');
         });
       });
     });

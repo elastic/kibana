@@ -112,7 +112,7 @@ export function VisualizeESQL({
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return getESQLAdHocDataview(query, dataViews, { skipFetchFields: true });
+    return getESQLAdHocDataview(query, dataViews);
   }, [query, dataViews]);
 
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);

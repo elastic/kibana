@@ -10,7 +10,7 @@ import type { FormatFactory } from '../../../common/types';
 import { getDatatable } from '../../../common/expressions';
 import { getColumnCellValueActions, getColumnsFilterable } from './expression';
 import type { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import type { LensCellValueAction } from '@kbn/lens-common';
+import type { LensCellValueAction } from '../../types';
 
 const cellValueAction: LensCellValueAction = {
   displayName: 'Test',

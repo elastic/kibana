@@ -2244,9 +2244,7 @@
           "PlaywrightTestArgs",
           " & ",
           "PlaywrightTestOptions",
-          " & { context: ",
-          "BrowserContext",
-          "; } & { browserAuth: ",
+          " & { browserAuth: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
@@ -2541,9 +2539,7 @@
           "PlaywrightTestArgs",
           " & ",
           "PlaywrightTestOptions",
-          " & { context: ",
-          "BrowserContext",
-          "; } & { browserAuth: ",
+          " & { browserAuth: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
@@ -2693,9 +2689,7 @@
           "PlaywrightTestArgs",
           " & ",
           "PlaywrightTestOptions",
-          " & { context: ",
-          "BrowserContext",
-          "; } & { browserAuth: ",
+          " & { browserAuth: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",

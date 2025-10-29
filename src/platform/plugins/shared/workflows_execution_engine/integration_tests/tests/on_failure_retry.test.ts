@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin.mock';
+import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 
 describe('workflow with retry', () => {
   let workflowRunFixture: WorkflowRunFixture;

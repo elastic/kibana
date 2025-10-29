@@ -12,9 +12,7 @@
       "xpack",
       "searchGettingStarted"
     ],
-    "requiredPlugins": [
-      "share"
-    ],
+    "requiredPlugins": [],
     "optionalPlugins": [
       "cloud",
       "console",

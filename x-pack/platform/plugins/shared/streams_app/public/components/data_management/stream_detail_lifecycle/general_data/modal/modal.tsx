@@ -88,14 +88,12 @@ export function EditLifecycleModal({
         label: i18n.translate('xpack.streams.streamDetailLifecycle.indefinite', {
           defaultMessage: 'Indefinite',
         }),
-        'data-test-subj': 'indefiniteRetentionButton',
       },
       {
         id: 'custom',
         label: i18n.translate('xpack.streams.streamDetailLifecycle.customPeriod', {
           defaultMessage: 'Custom period',
         }),
-        'data-test-subj': 'customRetentionButton',
       },
     ];
 
@@ -105,7 +103,6 @@ export function EditLifecycleModal({
         label: i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicy', {
           defaultMessage: 'ILM policy',
         }),
-        'data-test-subj': 'ilmRetentionButton',
       });
     }
 
@@ -119,7 +116,7 @@ export function EditLifecycleModal({
   return (
     <EuiModal onClose={closeModal} aria-labelledby={modalTitleId} css={{ width: '600px' }}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="editLifecycleModalTitle">
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.streamDetailLifecycle.editRetention', {
             defaultMessage: 'Edit data retention',
           })}
@@ -131,7 +128,7 @@ export function EditLifecycleModal({
           {(!isWired || !isRoot(definition.stream.name)) && (
             <EuiFlexItem>
               <EuiText>
-                <h5 data-test-subj="inheritRetentionHeading">
+                <h5>
                   {isWired
                     ? i18n.translate(
                         'xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel',
@@ -185,7 +182,7 @@ export function EditLifecycleModal({
 
           <EuiFlexItem>
             <EuiText>
-              <h5 data-test-subj="customRetentionHeading">
+              <h5>
                 {i18n.translate('xpack.streams.streamDetailLifecycle.dataRetention', {
                   defaultMessage: 'Custom retention',
                 })}
@@ -215,7 +212,6 @@ export function EditLifecycleModal({
               buttonSize="m"
               isDisabled={isInheritToggleOn}
               isFullWidth
-              data-test-subj="dataRetentionButtonGroup"
             />
             <EuiSpacer size="s" />
 

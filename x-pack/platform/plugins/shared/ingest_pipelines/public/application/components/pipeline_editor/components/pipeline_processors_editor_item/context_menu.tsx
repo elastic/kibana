@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, forwardRef } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
@@ -30,7 +31,7 @@ const getStyles = ({ hidden }: { hidden?: boolean }) => ({
     : undefined,
 });
 
-export const ContextMenu = forwardRef<HTMLButtonElement, Props>((props, ref) => {
+export const ContextMenu: FunctionComponent<Props> = (props) => {
   const { showAddOnFailure, onDuplicate, onAddOnFailure, onDelete, disabled, hidden } = props;
   const styles = getStyles({ hidden });
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -84,7 +85,6 @@ export const ContextMenu = forwardRef<HTMLButtonElement, Props>((props, ref) => 
         closePopover={() => setIsOpen(false)}
         button={
           <EuiButtonIcon
-            buttonRef={ref}
             data-test-subj="button"
             disabled={disabled}
             onClick={() => setIsOpen((v) => !v)}
@@ -97,4 +97,4 @@ export const ContextMenu = forwardRef<HTMLButtonElement, Props>((props, ref) => 
       </EuiPopover>
     </div>
   );
-});
+};

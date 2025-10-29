@@ -22,7 +22,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/data-plugin",
-    "@kbn/visualizations-common",
   ],
   "exclude": [
     "target/**/*",

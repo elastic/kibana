@@ -474,7 +474,7 @@
         "label": "MOCK_IDP_UIAM_SHARED_SECRET",
         "description": [],
         "signature": [
-          "\"Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=\""
+          "\"XmLutyDzrWDcz9i+xXRXzSMJEfulI+Q9yIaibncLRyA=\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
@@ -489,7 +489,7 @@
         "label": "MOCK_IDP_UIAM_SIGNING_SECRET",
         "description": [],
         "signature": [
-          "\"MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=\""
+          "\"vLJb9lkGSmVVPsvYdgoRCcsGDzeaFxpBV10Pr3SPEYU=\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,

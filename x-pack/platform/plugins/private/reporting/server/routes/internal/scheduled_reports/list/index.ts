@@ -18,7 +18,6 @@ import {
 import type { ReportingPluginRouter } from '../../../../types';
 import { authorizedUserPreRouting, getCounters } from '../../../common';
 import { handleUnavailable } from '../../../common/request_handler';
-import { validateReportingLicense } from '../utils';
 
 const { SCHEDULED } = INTERNAL_ROUTES;
 
@@ -72,7 +71,13 @@ export const registerInternalListRoute = ({
           return handleUnavailable(res);
         }
 
-        await validateReportingLicense({ reporting, responseFactory: res });
+        // check license
+        const licenseInfo = await reporting.getLicenseInfo();
+        const licenseResults = licenseInfo.scheduledReports;
+
+        if (!licenseResults.enableLinks) {
+          return res.forbidden({ body: licenseResults.message });
+        }
 
         const { page: queryPage = '1', size: querySize = `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}` } =
           req.query;

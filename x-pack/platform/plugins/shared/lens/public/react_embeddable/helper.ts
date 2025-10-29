@@ -20,19 +20,18 @@ import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import type {
+  LensEmbeddableStartServices,
   LensRuntimeState,
   LensSerializedState,
   StructuredDatasourceStates,
-  DatasourceStates,
-  GeneralDatasourceStates,
-  FormBasedPersistedState,
-  TextBasedPersistedState,
-} from '@kbn/lens-common';
+} from './types';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
+import type { DatasourceStates, GeneralDatasourceStates } from '../state_management';
+import type { FormBasedPersistedState } from '../datasources/form_based/types';
+import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import { DOC_TYPE } from '../../common/constants';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
-import type { LensEmbeddableStartServices } from './types';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,

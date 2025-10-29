@@ -21,6 +21,7 @@ import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import { OptionalFieldLabel } from '../../common/optional_field_label';
 import { AdditionalFields } from '../../common/components/additional_fields';
+import { ConfigService } from '../../common/config_service';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
   actionConnector,
@@ -34,6 +35,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const showAdditionalFields = ConfigService.get().resilient.additionalFields.enabled;
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
     () =>
@@ -254,19 +256,21 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         isOptionalField
       />
 
-      <AdditionalFields
-        value={actionParams.subActionParams?.incident.additionalFields}
-        messageVariables={messageVariables}
-        errors={errors['subActionParams.incident.additionalFields'] as string[]}
-        onChange={additionalFieldsOnChange}
-        isOptionalField
-        helpText={i18n.translate(
-          'xpack.stackConnectors.components.resilient.additionalFieldsHelpTooltipText',
-          {
-            defaultMessage: 'Additional fields in JSON format',
-          }
-        )}
-      />
+      {showAdditionalFields && (
+        <AdditionalFields
+          value={actionParams.subActionParams?.incident.additionalFields}
+          messageVariables={messageVariables}
+          errors={errors['subActionParams.incident.additionalFields'] as string[]}
+          onChange={additionalFieldsOnChange}
+          isOptionalField
+          helpText={i18n.translate(
+            'xpack.stackConnectors.components.resilient.additionalFieldsHelpTooltipText',
+            {
+              defaultMessage: 'Additional fields in JSON format',
+            }
+          )}
+        />
+      )}
     </>
   );
 };

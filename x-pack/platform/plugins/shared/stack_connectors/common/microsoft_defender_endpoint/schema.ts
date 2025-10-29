@@ -5,208 +5,276 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from './constants';
 
 // ----------------------------------
 // Connector setup schemas
 // ----------------------------------
-export const MicrosoftDefenderEndpointConfigSchema = z
-  .object({
-    clientId: z.string().min(1),
-    tenantId: z.string().min(1),
-    oAuthServerUrl: z.string().min(1),
-    oAuthScope: z.string().min(1),
-    apiUrl: z.string().min(1),
-  })
-  .strict();
-export const MicrosoftDefenderEndpointSecretsSchema = z
-  .object({
-    clientSecret: z.string().min(1),
-  })
-  .strict();
+export const MicrosoftDefenderEndpointConfigSchema = schema.object({
+  clientId: schema.string({ minLength: 1 }),
+  tenantId: schema.string({ minLength: 1 }),
+  oAuthServerUrl: schema.string({ minLength: 1 }),
+  oAuthScope: schema.string({ minLength: 1 }),
+  apiUrl: schema.string({ minLength: 1 }),
+});
+export const MicrosoftDefenderEndpointSecretsSchema = schema.object({
+  clientSecret: schema.string({ minLength: 1 }),
+});
 
 // ----------------------------------
 // Connector Methods
 // ----------------------------------
-export const MicrosoftDefenderEndpointDoNotValidateResponseSchema = z.any();
+export const MicrosoftDefenderEndpointDoNotValidateResponseSchema = schema.any();
 
-export const MicrosoftDefenderEndpointBaseApiResponseSchema = z.object({}).passthrough().optional();
+export const MicrosoftDefenderEndpointBaseApiResponseSchema = schema.maybe(
+  schema.object({}, { unknowns: 'allow' })
+);
 
-export const MicrosoftDefenderEndpointEmptyParamsSchema = z.object({}).strict();
+export const MicrosoftDefenderEndpointEmptyParamsSchema = schema.object({});
 
-export const TestConnectorParamsSchema = z.object({}).strict();
+export const TestConnectorParamsSchema = schema.object({});
 
-export const AgentDetailsParamsSchema = z
-  .object({
-    id: z.string().min(1),
-  })
-  .strict();
+export const AgentDetailsParamsSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
+});
 
-const MachineHealthStatusSchema = z.enum([
-  'Active',
-  'Inactive',
-  'ImpairedCommunication',
-  'NoSensorData',
-  'NoSensorDataImpairedCommunication',
-  'Unknown',
+const MachineHealthStatusSchema = schema.oneOf([
+  schema.literal('Active'),
+  schema.literal('Inactive'),
+  schema.literal('ImpairedCommunication'),
+  schema.literal('NoSensorData'),
+  schema.literal('NoSensorDataImpairedCommunication'),
+  schema.literal('Unknown'),
 ]);
 
-export const AgentListParamsSchema = z
-  .object({
-    computerDnsName: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    id: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    version: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    deviceValue: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    aaDeviceId: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    machineTags: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    lastSeen: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    exposureLevel: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    onboardingStatus: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    lastIpAddress: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    healthStatus: z
-      .union([MachineHealthStatusSchema, z.array(MachineHealthStatusSchema).min(1)])
-      .optional(),
-    osPlatform: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    riskScore: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    rbacGroupId: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    page: z.coerce.number().min(1).default(1).optional(),
-    pageSize: z.coerce.number().min(1).max(1000).default(20).optional(),
-  })
-  .strict();
+export const AgentListParamsSchema = schema.object({
+  computerDnsName: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  id: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  version: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  deviceValue: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  aaDeviceId: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  machineTags: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  lastSeen: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  exposureLevel: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  onboardingStatus: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  lastIpAddress: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  healthStatus: schema.maybe(
+    schema.oneOf([
+      MachineHealthStatusSchema,
+      schema.arrayOf(MachineHealthStatusSchema, { minSize: 1 }),
+    ])
+  ),
+  osPlatform: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  riskScore: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  rbacGroupId: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
 
-export const IsolateHostParamsSchema = z
-  .object({
-    id: z.string().min(1),
-    comment: z.string().min(1),
-  })
-  .strict();
+  page: schema.maybe(schema.number({ min: 1, defaultValue: 1 })),
+  pageSize: schema.maybe(schema.number({ min: 1, max: 1000, defaultValue: 20 })),
+});
 
-export const ReleaseHostParamsSchema = z
-  .object({
-    id: z.string().min(1),
-    comment: z.string().min(1),
-  })
-  .strict();
+export const IsolateHostParamsSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
+  comment: schema.string({ minLength: 1 }),
+});
 
-export const RunScriptParamsSchema = z
-  .object({
-    id: z.string().min(1),
-    comment: z.string().min(1).optional(),
-    parameters: z
-      .object({
-        scriptName: z.string().min(1),
-        args: z.string().min(1).optional(),
-      })
-      .strict(),
-  })
-  .strict();
+export const ReleaseHostParamsSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
+  comment: schema.string({ minLength: 1 }),
+});
 
-export const CancelParamsSchema = z
-  .object({
-    comment: z.string().min(1),
-    actionId: z.string().min(1),
-  })
-  .strict();
+export const RunScriptParamsSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
+  comment: schema.maybe(schema.string({ minLength: 1 })),
+  parameters: schema.object({
+    scriptName: schema.string({ minLength: 1 }),
+    args: schema.maybe(schema.string({ minLength: 1 })),
+  }),
+});
 
-const MachineActionTypeSchema = z.enum([
-  'RunAntiVirusScan',
-  'Offboard',
-  'LiveResponse',
-  'CollectInvestigationPackage',
-  'Isolate',
-  'Unisolate',
-  'StopAndQuarantineFile',
-  'RestrictCodeExecution',
-  'UnrestrictCodeExecution',
+export const CancelParamsSchema = schema.object({
+  comment: schema.string({ minLength: 1 }),
+  actionId: schema.string({ minLength: 1 }),
+});
+
+const MachineActionTypeSchema = schema.oneOf([
+  schema.literal('RunAntiVirusScan'),
+  schema.literal('Offboard'),
+  schema.literal('LiveResponse'),
+  schema.literal('CollectInvestigationPackage'),
+  schema.literal('Isolate'),
+  schema.literal('Unisolate'),
+  schema.literal('StopAndQuarantineFile'),
+  schema.literal('RestrictCodeExecution'),
+  schema.literal('UnrestrictCodeExecution'),
 ]);
 
-const MachineActionStatusSchema = z.enum([
-  'Pending',
-  'InProgress',
-  'Succeeded',
-  'Failed',
-  'TimeOut',
-  'Cancelled',
+const MachineActionStatusSchema = schema.oneOf([
+  schema.literal('Pending'),
+  schema.literal('InProgress'),
+  schema.literal('Succeeded'),
+  schema.literal('Failed'),
+  schema.literal('TimeOut'),
+  schema.literal('Cancelled'),
 ]);
 
-export const GetActionsParamsSchema = z
-  .object({
-    id: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    status: z
-      .union([MachineActionStatusSchema, z.array(MachineActionStatusSchema).min(1)])
-      .optional(),
-    machineId: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    type: z.union([MachineActionTypeSchema, z.array(MachineActionTypeSchema).min(1)]).optional(),
-    requestor: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    creationDateTimeUtc: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    page: z.coerce.number().min(1).default(1).optional(),
-    pageSize: z.coerce.number().min(1).max(1000).default(20).optional(),
-    sortField: z.string().min(1).optional(),
-    sortDirection: z.enum(['asc', 'desc']).optional(),
-  })
-  .strict();
+export const GetActionsParamsSchema = schema.object({
+  id: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  status: schema.maybe(
+    schema.oneOf([
+      MachineActionStatusSchema,
+      schema.arrayOf(MachineActionStatusSchema, { minSize: 1 }),
+    ])
+  ),
+  machineId: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  type: schema.maybe(
+    schema.oneOf([MachineActionTypeSchema, schema.arrayOf(MachineActionTypeSchema, { minSize: 1 })])
+  ),
+  requestor: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  creationDateTimeUtc: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    ])
+  ),
+  page: schema.maybe(schema.number({ min: 1, defaultValue: 1 })),
+  pageSize: schema.maybe(schema.number({ min: 1, max: 1000, defaultValue: 20 })),
+  sortField: schema.maybe(schema.string({ minLength: 1 })),
+  sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+});
 
-export const GetActionResultsParamsSchema = z
-  .object({
-    id: z.string().min(1),
-  })
-  .strict();
+export const GetActionResultsParamsSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
+});
 
-export const MSDefenderLibraryFileSchema = z
-  .object({
-    fileName: z.string().optional(),
-    sha256: z.string().optional(),
-    description: z.string().optional(),
-    creationTime: z.string().optional(),
-    lastUpdatedTime: z.string().optional(),
-    createdBy: z.string().optional(),
-    hasParameters: z.boolean().optional(),
-    parametersDescription: z.string().nullish(),
-  })
-  .passthrough();
+export const MSDefenderLibraryFileSchema = schema.object(
+  {
+    fileName: schema.maybe(schema.string()),
+    sha256: schema.maybe(schema.string()),
+    description: schema.maybe(schema.string()),
+    creationTime: schema.maybe(schema.string()),
+    lastUpdatedTime: schema.maybe(schema.string()),
+    createdBy: schema.maybe(schema.string()),
+    hasParameters: schema.maybe(schema.boolean()),
+    parametersDescription: schema.maybe(schema.nullable(schema.string())),
+  },
+  { unknowns: 'allow' }
+);
 
-export const GetLibraryFilesResponse = z
-  .object({
-    '@odata.context': z.string().optional(),
-    value: z.array(MSDefenderLibraryFileSchema).optional(),
-  })
-  .passthrough();
+export const GetLibraryFilesResponse = schema.object(
+  {
+    '@odata.context': schema.maybe(schema.string()),
+    value: schema.maybe(schema.arrayOf(MSDefenderLibraryFileSchema)),
+  },
+  { unknowns: 'allow' }
+);
 
-export const DownloadActionResultsResponseSchema = z.any();
+export const DownloadActionResultsResponseSchema = schema.stream();
 
 // ----------------------------------
 // Connector Sub-Actions
 // ----------------------------------
 
-const TestConnectorSchema = z
-  .object({
-    subAction: z.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR),
-    subActionParams: TestConnectorParamsSchema,
-  })
-  .strict();
+const TestConnectorSchema = schema.object({
+  subAction: schema.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR),
+  subActionParams: TestConnectorParamsSchema,
+});
 
-const IsolateHostSchema = z
-  .object({
-    subAction: z.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST),
-    subActionParams: IsolateHostParamsSchema,
-  })
-  .strict();
+const IsolateHostSchema = schema.object({
+  subAction: schema.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST),
+  subActionParams: IsolateHostParamsSchema,
+});
 
-const ReleaseHostSchema = z
-  .object({
-    subAction: z.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RELEASE_HOST),
-    subActionParams: ReleaseHostParamsSchema,
-  })
-  .strict();
-const RunScriptSchema = z
-  .object({
-    subAction: z.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT),
-    subActionParams: RunScriptParamsSchema,
-  })
-  .strict();
+const ReleaseHostSchema = schema.object({
+  subAction: schema.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RELEASE_HOST),
+  subActionParams: ReleaseHostParamsSchema,
+});
+const RunScriptSchema = schema.object({
+  subAction: schema.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT),
+  subActionParams: RunScriptParamsSchema,
+});
 
-export const MicrosoftDefenderEndpointActionParamsSchema = z.union([
+export const MicrosoftDefenderEndpointActionParamsSchema = schema.oneOf([
   TestConnectorSchema,
   IsolateHostSchema,
   ReleaseHostSchema,

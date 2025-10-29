@@ -18,15 +18,11 @@ import {
   IconDonutHoleMedium,
   IconDonutHoleLarge,
 } from '@kbn/chart-icons';
-import type { PartitionLegendValue } from '@kbn/expression-partition-vis-plugin/common';
+import type { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { LegendValue } from '@elastic/charts';
-import type {
-  PartitionChartType as PieChartType,
-  SharedPartitionLayerState as SharedLensPartitionLayerState,
-  EmptySizeRatiosType,
-} from '@kbn/lens-common';
-import { PARTITION_EMPTY_SIZE_RADIUS as EmptySizeRatios } from '@kbn/lens-common';
+import { EmptySizeRatios } from '../../../common/types';
 import { CategoryDisplay, NumberDisplay } from '../../../common/constants';
+import type { PieChartType, SharedPieLayerState } from '../../../common/types';
 
 interface PartitionChartMeta {
   id: string;
@@ -39,16 +35,16 @@ interface PartitionChartMeta {
   toolbarPopover: {
     isDisabled?: boolean;
     categoryOptions: Array<{
-      id: SharedLensPartitionLayerState['categoryDisplay'];
+      id: SharedPieLayerState['categoryDisplay'];
       label: string;
     }>;
     numberOptions: Array<{
-      id: SharedLensPartitionLayerState['numberDisplay'];
+      id: SharedPieLayerState['numberDisplay'];
       label: string;
     }>;
     emptySizeRatioOptions?: Array<{
       id: string;
-      value: EmptySizeRatiosType | 0;
+      value: EmptySizeRatios | 0;
       label: string;
       icon?: IconType;
     }>;

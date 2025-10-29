@@ -23,7 +23,8 @@ import { createGetDocViewer } from './accessors';
 const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-document-profile';
 
 export const createObservabilityTracesDocumentProfileProvider = ({
-  apmContextService,
+  tracesContextService,
+  apmErrorsContextService,
   logsContextService,
 }: ProfileProviderServices): DocumentProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
@@ -31,8 +32,8 @@ export const createObservabilityTracesDocumentProfileProvider = ({
   profile: {
     getDocViewer: createGetDocViewer({
       apm: {
-        errors: apmContextService.errorsService.getErrorsIndexPattern(),
-        traces: apmContextService.tracesService.getAllTracesIndexPattern(),
+        errors: apmErrorsContextService.getErrorsIndexPattern(),
+        traces: tracesContextService.getAllTracesIndexPattern(),
       },
       logs: logsContextService.getAllLogsIndexPattern(),
     }),
@@ -42,7 +43,7 @@ export const createObservabilityTracesDocumentProfileProvider = ({
 
     if (
       isObservabilitySolutionView &&
-      isTraceDocument(record, apmContextService.tracesService.isTracesIndexPattern)
+      isTraceDocument(record, tracesContextService.isTracesIndexPattern)
     ) {
       return {
         isMatch: true,
@@ -58,7 +59,7 @@ export const createObservabilityTracesDocumentProfileProvider = ({
 
 function isTraceDocument(
   record: DataTableRecord,
-  isTracesIndexPattern: ProfileProviderServices['apmContextService']['tracesService']['isTracesIndexPattern']
+  isTracesIndexPattern: ProfileProviderServices['tracesContextService']['isTracesIndexPattern']
 ): boolean {
   const traceId = getFieldValue(record, TRACE_ID_FIELD);
   const index = getFieldValues(record, INDEX_FIELD);

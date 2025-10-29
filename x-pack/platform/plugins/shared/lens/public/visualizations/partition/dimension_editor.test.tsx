@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import type { LensPartitionVisualizationState } from '@kbn/lens-common';
+import type { PieVisualizationState } from '../../../common/types';
 import type { DimensionEditorProps } from './dimension_editor';
 import { DimensionEditor } from './dimension_editor';
 import { getKbnPalettes } from '@kbn/palettes';
@@ -21,7 +21,7 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const palettes = getKbnPalettes({ name: 'borealis', darkMode });
 
 describe('DimensionEditor', () => {
-  let defaultState: LensPartitionVisualizationState;
+  let defaultState: PieVisualizationState;
   let defaultProps: DimensionEditorProps;
   let buildProps: (props?: Partial<DimensionEditorProps>) => DimensionEditorProps;
 

@@ -87,8 +87,6 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
         data-test-subj="streamsAppDslModalDaysField"
         value={isDisabled && existingRetention ? existingRetention?.value : retentionValue}
         onChange={(e) => {
-          // Ignore changes when disabled to prevent updating lifecycle state in read-only mode
-          if (isDisabled) return;
           setRetentionValue(e.target.value);
         }}
         disabled={isDisabled}
@@ -122,7 +120,6 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
                     closeUnitMenu();
                     setSelectedUnit(unit);
                   }}
-                  data-test-subj={`streamsAppDslModalUnitOption-${unit.value}`}
                 >
                   {unit.name}
                 </EuiContextMenuItem>

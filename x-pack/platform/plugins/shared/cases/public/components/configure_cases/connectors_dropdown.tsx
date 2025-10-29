@@ -69,7 +69,6 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   isLoading,
   onChange,
   selectedConnector,
-  ...props
 }) => {
   const { triggersActionsUi } = useKibana().services;
   const { euiTheme } = useEuiTheme();
@@ -108,7 +107,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                   <EuiFlexItem grow={false}>
                     <EuiIconTip
                       css={css`
-                        margin-left: ${euiTheme.size.s};
+                        margin-left: ${euiTheme.size.s}
                         margin-bottom: 0 !important;
                       `}
                       aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
@@ -134,7 +133,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
 
   return (
     <EuiSuperSelect
-      aria-label={i18n.CONNECTOR_DROPDOWN_LABEL}
+      aria-label={i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}
       data-test-subj="dropdown-connectors"
       disabled={disabled}
       fullWidth
@@ -142,7 +141,6 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       onChange={onChange}
       options={connectorsAsOptions}
       valueOfSelected={selectedConnector}
-      {...props} // inherit aria props for accessibility
     />
   );
 };

@@ -7,10 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { validateBackfillSchedule } from '../../../../../../common';
-import {
-  MAX_SCHEDULE_BACKFILL_BULK_SIZE,
-  backfillInitiator,
-} from '../../../../../../common/constants';
+import { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from '../../../../../../common/constants';
 
 export const scheduleBackfillParamSchema = schema.object(
   {
@@ -22,24 +19,15 @@ export const scheduleBackfillParamSchema = schema.object(
       })
     ),
     runActions: schema.maybe(schema.boolean()),
-    initiator: schema.oneOf([
-      schema.literal(backfillInitiator.USER),
-      schema.literal(backfillInitiator.SYSTEM),
-    ]),
-    initiatorId: schema.maybe(schema.string()),
   },
   {
-    validate({ ranges, initiatorId, initiator }) {
+    validate({ ranges }) {
       const errors = ranges
         .map((range) => validateBackfillSchedule(range.start, range.end))
         .filter(Boolean)
         .join('\n');
       if (errors.length > 0) {
         return errors;
-      }
-
-      if (initiatorId && initiator !== backfillInitiator.SYSTEM) {
-        return 'Initiator ID can only be used with system initiator';
       }
     },
   }

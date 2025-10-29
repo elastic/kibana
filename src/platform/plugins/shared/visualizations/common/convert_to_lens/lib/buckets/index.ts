@@ -11,7 +11,7 @@ import type { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { BUCKET_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { convertToSchemaConfig } from '../../../vis_schemas';
-import type { SchemaConfig } from '../../..';
+import type { AggBasedColumn, SchemaConfig } from '../../..';
 import type { CommonBucketConverterArgs } from '../convert';
 import {
   convertToDateHistogramColumn,
@@ -20,7 +20,6 @@ import {
   convertToRangeColumn,
 } from '../convert';
 import { getFieldNameFromField, getLabel, isSchemaConfig } from '../utils';
-import type { AnyBucketColumnWithMeta, AnyMetricColumnWithSourceFieldWithMeta } from '../../types';
 
 export type BucketAggs =
   | BUCKET_TYPES.TERMS
@@ -113,12 +112,12 @@ export const convertBucketToColumns = (
     visType: string;
     agg: SchemaConfig | IAggConfig;
     dataView: DataView;
-    metricColumns: AnyMetricColumnWithSourceFieldWithMeta[];
+    metricColumns: AggBasedColumn[];
     aggs: Array<SchemaConfig<METRIC_TYPES>>;
   },
   isSplit: boolean = false,
   dropEmptyRowsInDateHistogram: boolean = false
-): AnyBucketColumnWithMeta | null => {
+) => {
   const currentAgg = isSchemaConfig(agg) ? agg : convertToSchemaConfig(agg);
   if (!currentAgg.aggParams || !isSupportedBucketAgg(currentAgg)) {
     return null;

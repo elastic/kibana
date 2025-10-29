@@ -144,7 +144,10 @@ export const getExceptionsPreUpdateItemHandler = (
       );
     }
 
-    if (isEndpointArtifact) {
+    if (
+      isEndpointArtifact &&
+      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+    ) {
       if (!hasArtifactOwnerSpaceId(validatedItem)) {
         if (!request) {
           throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);

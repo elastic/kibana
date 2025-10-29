@@ -106,6 +106,7 @@ describe('When using cancel action from response actions console', () => {
     // @ts-expect-error - we do not need to specify whole object for testing purposes
     mockedExperimentalFeaturesService.get.mockReturnValue({
       microsoftDefenderEndpointCancelEnabled: true,
+      responseActionsMSDefenderEndpointEnabled: true,
       microsoftDefenderEndpointRunScriptEnabled: true,
     });
 
@@ -240,6 +241,7 @@ describe('When using cancel action from response actions console', () => {
       // @ts-expect-error - we do not need to specify whole object for testing purposes
       mockedExperimentalFeaturesService.get.mockReturnValue({
         microsoftDefenderEndpointCancelEnabled: false,
+        responseActionsMSDefenderEndpointEnabled: true,
         microsoftDefenderEndpointRunScriptEnabled: true,
       });
       mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: false });

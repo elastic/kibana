@@ -273,20 +273,6 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
-      "kibana.alert.scheduled_action.date": Object {
-        "array": false,
-        "required": false,
-        "type": "keyword",
-      },
-      "kibana.alert.scheduled_action.group": Object {
-        "array": false,
-        "required": false,
-        "type": "keyword",
-      },
-      "kibana.alert.scheduled_action.throttling": Object {
-        "required": false,
-        "type": "unmapped",
-      },
       "kibana.alert.severity": Object {
         "array": false,
         "required": false,

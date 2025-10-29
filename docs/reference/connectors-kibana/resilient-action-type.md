@@ -49,24 +49,20 @@ You can test connectors as you're creating or editing the connector in {{kib}}. 
 
 {{ibm-r}} actions have the following configuration properties.
 
-Incident type
-:   The type of the incident.
-
-Severity
-:   The severity of the incident.
-
-Name
-:   A name for the issue, used for searching the contents of the knowledge base.
+Additional comments
+:   Extra information for the client, such as how to troubleshoot the issue.
 
 Description
 :   The details about the incident.
 
-Additional comments
-:   Extra information for the client, such as how to troubleshoot the issue.
+Incident type
+:   The type of the incident.
 
-Additional fields {applies_to}`stack: ga 9.2`
-:   An object that contains custom field identifiers and their values. These fields must exist in the {{ibm-r}} application and must be specified in JSON format.
+Name
+:   A name for the issue, used for searching the contents of the knowledge base.
 
+Severity
+:   The severity of the incident.
 
 ## Connector networking configuration [resilient-connector-networking-configuration]
 

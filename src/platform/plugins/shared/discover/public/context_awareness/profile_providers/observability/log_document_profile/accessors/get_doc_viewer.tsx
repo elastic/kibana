@@ -31,8 +31,8 @@ export const createGetDocViewer =
 
     const indexes = {
       apm: {
-        errors: services.apmContextService.errorsService.getErrorsIndexPattern(),
-        traces: services.apmContextService.tracesService.getAllTracesIndexPattern(),
+        errors: services.apmErrorsContextService.getErrorsIndexPattern(),
+        traces: services.tracesContextService.getAllTracesIndexPattern(),
       },
       logs: services.logsContextService.getAllLogsIndexPattern(),
     };

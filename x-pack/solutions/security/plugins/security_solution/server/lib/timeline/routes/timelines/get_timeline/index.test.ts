@@ -11,7 +11,6 @@ import { getTimelineOrNull, getTimelineTemplateOrNull } from '../../../saved_obj
 import { getTimelineRequest } from '../../../__mocks__/request_responses';
 
 import { getTimelineRoute } from '.';
-import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
 jest.mock('../../../saved_object/timelines', () => ({
   getAllTimeline: jest.fn(),
@@ -21,7 +20,7 @@ jest.mock('../../../saved_object/timelines', () => ({
 
 describe('get timeline', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let context: SecuritySolutionRequestHandlerContextMock;
+  let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
     jest.resetModules();
@@ -31,11 +30,6 @@ describe('get timeline', () => {
     context = requestContextMock.createTools().context;
 
     getTimelineRoute(server.router);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('should call getTimelineTemplateOrNull if templateTimelineId is given', async () => {

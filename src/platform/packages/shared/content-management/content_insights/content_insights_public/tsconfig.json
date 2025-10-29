@@ -30,6 +30,5 @@
     "@kbn/content-management-table-list-view-common",
     "@kbn/charts-theme",
     "@kbn/logging",
-    "@kbn/react-query",
   ]
 }

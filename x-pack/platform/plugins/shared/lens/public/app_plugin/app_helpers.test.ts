@@ -10,7 +10,7 @@ import { faker } from '@faker-js/faker';
 import type { UseNavigateBackToAppProps } from './app_helpers';
 import { useNavigateBackToApp } from './app_helpers';
 import { defaultDoc, makeDefaultServices } from '../mocks/services_mock';
-import type { LensDocument } from '@kbn/lens-common';
+import type { LensDocument } from '../persistence';
 
 function getLensDocumentMock(someProps?: Partial<LensDocument>) {
   return structuredClone({ ...defaultDoc, ...someProps });

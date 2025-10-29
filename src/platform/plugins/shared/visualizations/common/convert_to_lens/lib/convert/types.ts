@@ -33,8 +33,6 @@ import type {
   TermsColumn as BaseTermsColumn,
   FiltersColumn as BaseFiltersColumn,
   RangeColumn as BaseRangeColumn,
-  AnyMetricColumnWithSourceFieldWithMeta,
-  Meta,
 } from '../../types';
 
 export type MetricsWithField = Exclude<
@@ -82,8 +80,14 @@ export interface CommonBucketConverterArgs<
   visType: string;
   agg: SchemaConfig<Agg>;
   dataView: DataView;
-  metricColumns: AnyMetricColumnWithSourceFieldWithMeta[];
+  metricColumns: AggBasedColumn[];
   aggs: Array<SchemaConfig<METRIC_TYPES>>;
+}
+
+export type AggId = `${string}`;
+
+export interface Meta {
+  aggId: AggId;
 }
 
 export type GeneralColumn = Omit<GenericBaseColumn<Operation, unknown>, 'operationType' | 'params'>;

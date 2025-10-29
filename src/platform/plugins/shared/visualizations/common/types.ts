@@ -16,7 +16,10 @@ import type {
   BUCKET_TYPES,
 } from '@kbn/data-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { VisParams } from '@kbn/visualizations-common';
+
+export interface VisParams {
+  [key: string]: any;
+}
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SavedVisState<TVisParams = SerializableRecord> = {

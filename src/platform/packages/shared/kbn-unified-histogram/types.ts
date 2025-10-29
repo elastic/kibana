@@ -30,7 +30,6 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { UseRequestParamsResult } from './hooks/use_request_params';
 
 /**
@@ -262,12 +261,12 @@ export interface ChartSectionProps {
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover
  */
-export type ChartSectionConfiguration<T extends object = object> =
+export type ChartSectionConfiguration =
   | {
       /**
        * The component to render for the chart section
        */
-      Component: React.ComponentType<ChartSectionProps & RestorableStateProviderProps<T>>;
+      Component: React.ComponentType<ChartSectionProps>;
       /**
        * Controls whether or not to replace the default histogram and activate the custom chart
        */

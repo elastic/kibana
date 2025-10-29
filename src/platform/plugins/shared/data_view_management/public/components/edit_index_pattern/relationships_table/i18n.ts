@@ -37,10 +37,3 @@ export const filterTitle = i18n.translate(
   'indexPatternManagement.objectsTable.relationships.search.filters.type.name',
   { defaultMessage: 'Type' }
 );
-
-export const managedBadge = i18n.translate(
-  'indexPatternManagement.objectsTable.relationships.managedBadge',
-  {
-    defaultMessage: 'Managed',
-  }
-);

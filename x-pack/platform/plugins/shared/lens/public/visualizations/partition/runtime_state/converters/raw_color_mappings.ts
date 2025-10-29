@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import type {
-  LensPartitionLayerState,
-  LensPartitionVisualizationState,
-  GeneralDatasourceStates,
-} from '@kbn/lens-common';
+import type { PieLayerState, PieVisualizationState } from '../../../../../common/types';
 import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
   convertToRawColorMappings,
   isDeprecatedColorMapping,
   getColumnMetaFn,
 } from '../../../../runtime_state/converters/raw_color_mappings';
+import type { GeneralDatasourceStates } from '../../../../state_management';
 
 /** @deprecated */
-interface DeprecatedColorMappingLayer extends Omit<LensPartitionLayerState, 'colorMapping'> {
+interface DeprecatedColorMappingLayer extends Omit<PieLayerState, 'colorMapping'> {
   colorMapping: DeprecatedColorMappingConfig;
 }
 
@@ -27,9 +24,9 @@ interface DeprecatedColorMappingLayer extends Omit<LensPartitionLayerState, 'col
  *
  * @deprecated
  */
-export interface DeprecatedColorMappingLensPartitionVisualizationState
-  extends Omit<LensPartitionVisualizationState, 'layers'> {
-  layers: Array<DeprecatedColorMappingLayer | LensPartitionLayerState>;
+export interface DeprecatedColorMappingPieVisualizationState
+  extends Omit<PieVisualizationState, 'layers'> {
+  layers: Array<DeprecatedColorMappingLayer | PieLayerState>;
 }
 
 export const convertToRawColorMappingsFn = (
@@ -38,13 +35,13 @@ export const convertToRawColorMappingsFn = (
   const getColumnMeta = getColumnMetaFn(datasourceStates);
 
   return (
-    state: DeprecatedColorMappingLensPartitionVisualizationState | LensPartitionVisualizationState
-  ): LensPartitionVisualizationState => {
+    state: DeprecatedColorMappingPieVisualizationState | PieVisualizationState
+  ): PieVisualizationState => {
     const hasDeprecatedColorMappings = state.layers.some((layer) => {
       return layer.layerType === 'data' && isDeprecatedColorMapping(layer.colorMapping);
     });
 
-    if (!hasDeprecatedColorMappings) return state as LensPartitionVisualizationState;
+    if (!hasDeprecatedColorMappings) return state as PieVisualizationState;
 
     const convertedLayers = state.layers.map((layer) => {
       if (
@@ -57,15 +54,15 @@ export const convertToRawColorMappingsFn = (
         return {
           ...layer,
           colorMapping: convertToRawColorMappings(layer.colorMapping, columnMeta),
-        } satisfies LensPartitionLayerState;
+        } satisfies PieLayerState;
       }
 
-      return layer as LensPartitionLayerState;
+      return layer as PieLayerState;
     });
 
     return {
       ...state,
       layers: convertedLayers,
-    } satisfies LensPartitionVisualizationState;
+    } satisfies PieVisualizationState;
   };
 };

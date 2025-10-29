@@ -37,7 +37,6 @@ import {
   getHistoryItems,
   dateFormat,
   getStorageStats,
-  getTrimmedQuery,
 } from '../history_local_storage';
 import { type ESQLEditorDeps, HistoryTabId } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
@@ -235,7 +234,7 @@ export function QueryList({
   listItems: QueryHistoryItem[];
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
-  onUpdateAndSubmit: (qs: string, isStarred: boolean) => void;
+  onUpdateAndSubmit: (qs: string) => void;
   height: number;
   starredQueriesService?: EsqlStarredQueriesService;
   tableCaption?: string;
@@ -284,9 +283,6 @@ export function QueryList({
     return [
       {
         render: (item: QueryHistoryItem) => {
-          const isStarred =
-            starredQueriesService?.checkIfQueryIsStarred(getTrimmedQuery(item.queryString)) ??
-            false;
           return (
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -305,7 +301,7 @@ export function QueryList({
                     data-test-subj="ESQLEditor-history-starred-queries-run-button"
                     role="button"
                     iconSize="m"
-                    onClick={() => onUpdateAndSubmit(item.queryString, isStarred)}
+                    onClick={() => onUpdateAndSubmit(item.queryString)}
                     css={css`
                       cursor: pointer;
                     `}
@@ -339,7 +335,7 @@ export function QueryList({
         },
       },
     ];
-  }, [onUpdateAndSubmit, starredQueriesService]);
+  }, [onUpdateAndSubmit]);
 
   const isOnReducedSpaceLayout = containerWidth < 560;
   const columns = useMemo(() => {
@@ -493,7 +489,7 @@ export function HistoryAndStarredQueriesTabs({
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
-  onUpdateAndSubmit: (qs: string, isStarred: boolean) => void;
+  onUpdateAndSubmit: (qs: string) => void;
   isSpaceReduced?: boolean;
   height: number;
 }) {

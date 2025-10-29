@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
 
 import type {
   ActionType as ConnectorType,
@@ -40,7 +40,7 @@ import type {
 } from './types';
 import * as i18n from './translations';
 
-export type ActionParamsType = z.infer<typeof ExecutorParamsSchema>;
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
 const supportedSubActions: string[] = [
   'getFields',

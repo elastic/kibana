@@ -21,7 +21,10 @@ export function RedirectToHomeIfUnauthorized({
     application: { capabilities, navigateToApp },
   } = coreStart;
 
-  const allowed = capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show] ?? false;
+  const allowed =
+    (capabilities?.management.ai.observabilityAiAssistantManagement &&
+      capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show]) ??
+    false;
 
   if (!allowed) {
     navigateToApp('home');

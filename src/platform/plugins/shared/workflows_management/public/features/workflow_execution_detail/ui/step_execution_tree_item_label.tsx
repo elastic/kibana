@@ -9,10 +9,10 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, euiFontSize } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React from 'react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
+import React from 'react';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
 
@@ -57,7 +57,7 @@ export function StepExecutionTreeItemLabel({
         {status === ExecutionStatus.SKIPPED && (
           <>
             {' '}
-            <span>{`(${getStatusLabel(status).toLowerCase()})`}</span>
+            <span>({getStatusLabel(status).toLowerCase()})</span>
           </>
         )}
       </EuiFlexItem>

@@ -34,12 +34,6 @@ export const APM_ROLES = {
   apmReadPrivilegesWithWriteSettings: {
     elasticsearch: {
       cluster: ['manage_api_key'],
-      indices: [
-        {
-          names: ['traces-apm*', 'logs-apm*', 'metrics-apm*', 'apm-*'],
-          privileges: ['read'],
-        },
-      ],
     },
     kibana: [
       {
@@ -57,19 +51,19 @@ export const APM_ROLES = {
 
   apmMonitor: {
     elasticsearch: {
-      cluster: ['monitor'],
       indices: [
         {
           names: ['traces-apm*', 'logs-apm*', 'metrics-apm*', 'apm-*'],
-          privileges: ['monitor', 'read', 'view_index_metadata'],
+          privileges: ['monitor', 'read'],
         },
       ],
+      cluster: ['monitor'],
     },
     kibana: [
       {
         base: [],
         feature: {
-          apm: ['minimal_all', 'read', 'settings_save'],
+          apm: ['all', 'read'],
         },
         spaces: ['*'],
       },

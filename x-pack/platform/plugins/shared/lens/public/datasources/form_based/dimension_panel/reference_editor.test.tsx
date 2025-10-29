@@ -18,17 +18,14 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type {
-  OperationMetadata,
-  FormBasedLayer,
-  LastValueIndexPatternColumn,
-  TermsIndexPatternColumn,
-} from '@kbn/lens-common';
+import type { OperationMetadata } from '../../../types';
 import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../mocks';
 import type { ReferenceEditorProps } from './reference_editor';
 import { ReferenceEditor } from './reference_editor';
+import type { LastValueIndexPatternColumn, TermsIndexPatternColumn } from '../operations';
 import { insertOrReplaceColumn, operationDefinitionMap } from '../operations';
 import { FieldSelect } from './field_select';
+import type { FormBasedLayer } from '../types';
 
 jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
   useExistingFieldsReader: jest.fn(() => {

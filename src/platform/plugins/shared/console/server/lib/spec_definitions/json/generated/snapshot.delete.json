@@ -9,8 +9,7 @@
         "30s",
         "-1",
         "0"
-      ],
-      "wait_for_completion": "__flag__"
+      ]
     },
     "methods": [
       "DELETE"

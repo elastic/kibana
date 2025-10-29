@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import type { Color } from '@elastic/charts';
 import {
   Axis,
@@ -18,10 +20,8 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
-import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
-import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
+import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { useWorkflowStats } from '../../../entities/workflows/model/use_workflow_stats';
 
 interface WorkflowExecutionStatsBarProps {
@@ -41,7 +41,7 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
     return null;
   }
 
-  const executionStats: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const executionStats: any[] = [];
   data.executions.forEach((day, index) => {
     executionStats.push({
       timestamp: day.timestamp,

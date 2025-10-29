@@ -21,7 +21,6 @@ interface CreateTestConfigOptions {
   ssl?: boolean;
   testFiles?: string[];
   publicBaseUrl?: boolean;
-  indexRefreshInterval?: string | false;
 }
 
 const enabledActionTypes = [
@@ -122,7 +121,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.cases.analytics.index.enabled=true',
         ],
       },
-      indexRefreshInterval: options.indexRefreshInterval,
     };
   };
 }

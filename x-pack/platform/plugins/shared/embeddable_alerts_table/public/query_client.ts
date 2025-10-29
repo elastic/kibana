@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryClient } from '@kbn/react-query';
+import { QueryClient } from '@tanstack/react-query';
 
 export const queryClient = new QueryClient({
   defaultOptions: {

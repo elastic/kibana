@@ -260,7 +260,7 @@ export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {
   id: string;
-  lastUpdatedAt: string;
+  lastUpdatedAt: Date;
   lastUpdatedBy: string | undefined;
   enabled: boolean;
   valid: boolean;
@@ -272,9 +272,9 @@ export interface WorkflowDetailDto {
   name: string;
   description?: string;
   enabled: boolean;
-  createdAt: string;
+  createdAt: Date;
   createdBy: string;
-  lastUpdatedAt: string;
+  lastUpdatedAt: Date;
   lastUpdatedBy: string;
   definition: WorkflowYaml | null;
   yaml: string;
@@ -287,7 +287,7 @@ export interface WorkflowListItemDto {
   description: string;
   enabled: boolean;
   definition: WorkflowYaml | null;
-  createdAt: string;
+  createdAt: Date;
   history: WorkflowExecutionHistoryModel[];
   tags?: string[];
   valid: boolean;

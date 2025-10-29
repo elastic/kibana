@@ -247,9 +247,6 @@ exports.EcsCustomPropertyMappings = {
                       total_enrichment_duration_ms: {
                         type: 'long',
                       },
-                      update_alerts_duration_ms: {
-                        type: 'long',
-                      },
                     },
                   },
                 },

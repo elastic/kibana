@@ -48,13 +48,13 @@ describe('normalizeObject', () => {
   test('should throw if a function is given as the object property', async () => {
     expect(() => {
       normalizeObject({ toJSON: () => alert('gotcha') });
-    }).toThrow('Object normalization error');
+    }).toThrow('a function cannot be used as a property name');
   });
 
   test('should throw if a function is given on a nested object', async () => {
     expect(() => {
       normalizeObject({ test: { toJSON: () => alert('gotcha') } });
-    }).toThrow('Object normalization error');
+    }).toThrow('a function cannot be used as a property name');
   });
 
   test('should return null for null', async () => {

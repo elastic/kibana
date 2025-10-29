@@ -16,6 +16,7 @@ import { connectorTokenClientMock } from '../../../../lib/connector_token_client
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { actionsAuthorizationMock } from '../../../../mocks';
 import { inMemoryMetricsMock } from '../../../../monitoring/in_memory_metrics.mock';
+import { schema } from '@kbn/config-schema';
 import {
   httpServerMock,
   loggingSystemMock,
@@ -25,12 +26,16 @@ import {
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ActionsClient } from '../../../../actions_client/actions_client';
+import type { ExecutorType } from '../../../../types';
 import { ConnectorRateLimiter } from '../../../../lib/connector_rate_limiter';
-import { getConnectorType } from '../../../../fixtures';
 
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let actionTypeRegistry: ActionTypeRegistry;
+
+const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
+  return { status: 'ok', actionId: options.actionId };
+};
 
 describe('listTypes()', () => {
   let actionsClient: ActionsClient;
@@ -74,20 +79,36 @@ describe('listTypes()', () => {
   it('filters action types by feature ID', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
-    actionTypeRegistry.register(getConnectorType());
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
 
-    actionTypeRegistry.register(
-      getConnectorType({
-        id: 'my-connector-type-2',
-        name: 'My connector type 2',
-        supportedFeatureIds: ['cases'],
-      })
-    );
+    actionTypeRegistry.register({
+      id: 'my-action-type-2',
+      name: 'My action type 2',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['cases'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
 
     expect(await actionsClient.listTypes({ featureId: 'alerting' })).toEqual([
       {
-        id: 'my-connector-type',
-        name: 'My connector type',
+        id: 'my-action-type',
+        name: 'My action type',
         minimumLicenseRequired: 'basic',
         enabled: true,
         enabledInConfig: true,
@@ -102,29 +123,50 @@ describe('listTypes()', () => {
   it('filters out system action types when not defining options', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
-    actionTypeRegistry.register(getConnectorType());
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
 
-    actionTypeRegistry.register(
-      getConnectorType({
-        id: 'my-connector-type-2',
-        name: 'My connector type 2',
-        supportedFeatureIds: ['cases'],
-      })
-    );
+    actionTypeRegistry.register({
+      id: 'my-action-type-2',
+      name: 'My action type 2',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['cases'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
 
-    actionTypeRegistry.register(
-      getConnectorType({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        isSystemActionType: true,
-      })
-    );
+    actionTypeRegistry.register({
+      id: '.cases',
+      name: 'Cases',
+      minimumLicenseRequired: 'platinum',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      isSystemActionType: true,
+      executor,
+    });
 
     expect(await actionsClient.listTypes({})).toEqual([
       {
-        id: 'my-connector-type',
-        name: 'My connector type',
+        id: 'my-action-type',
+        name: 'My action type',
         minimumLicenseRequired: 'basic',
         enabled: true,
         enabledInConfig: true,
@@ -134,8 +176,8 @@ describe('listTypes()', () => {
         isDeprecated: false,
       },
       {
-        id: 'my-connector-type-2',
-        name: 'My connector type 2',
+        id: 'my-action-type-2',
+        name: 'My action type 2',
         isSystemActionType: false,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['cases'],
@@ -150,22 +192,37 @@ describe('listTypes()', () => {
   it('return system action types when defining options', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
-    actionTypeRegistry.register(getConnectorType());
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
 
-    actionTypeRegistry.register(
-      getConnectorType({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        isSystemActionType: true,
-      })
-    );
+    actionTypeRegistry.register({
+      id: '.cases',
+      name: 'Cases',
+      minimumLicenseRequired: 'platinum',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      isSystemActionType: true,
+      executor,
+    });
 
     expect(await actionsClient.listTypes({ includeSystemActionTypes: true })).toEqual([
       {
-        id: 'my-connector-type',
-        name: 'My connector type',
+        id: 'my-action-type',
+        name: 'My action type',
         minimumLicenseRequired: 'basic',
         enabled: true,
         enabledInConfig: true,

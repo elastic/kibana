@@ -33,7 +33,6 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       value,
       disabledUiPlugins,
       errors,
-      ...props
     },
     ref
   ) => {
@@ -87,7 +86,6 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         errors={[...markdownErrorMessages, ...(errors ?? [])]}
         data-test-subj={dataTestSubj}
         height={height}
-        {...props} // inherit aria props for accessibility
       />
     );
   }

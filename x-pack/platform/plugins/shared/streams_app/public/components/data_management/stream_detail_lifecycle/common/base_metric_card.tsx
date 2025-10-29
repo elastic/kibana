@@ -34,17 +34,11 @@ interface BaseMetricCardProps {
   title: React.ReactNode;
   actions?: ActionButton[] | React.ReactNode;
   metrics: Metrics[];
-  'data-test-subj'?: string;
 }
 
 const EMPTY_LINE = '\u00A0';
 
-export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
-  title,
-  actions,
-  metrics,
-  'data-test-subj': dataTestSubj,
-}) => {
+export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({ title, actions, metrics }) => {
   const renderActionButtons = () => {
     if (!actions) return null;
 
@@ -137,7 +131,7 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
           >
             <EuiFlexItem grow>
               <EuiText size="s">
-                <b data-test-subj={dataTestSubj && `${dataTestSubj}-title`}>{title}</b>
+                <b>{title}</b>
               </EuiText>
             </EuiFlexItem>
             {renderActionButtons()}

@@ -8,7 +8,6 @@
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
-import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
 export const createV2footerItemsTree = (): NodeDefinition => ({
   id: 'category-management',
@@ -20,7 +19,7 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
   sideNavVersion: 'v2',
   children: [
     {
-      id: DATA_MANAGEMENT_NAV_ID,
+      id: 'ingest_and_manage_data',
       iconV2: 'database',
       title: i18nStrings.ingestAndManageData.title,
       renderAs: 'panelOpener',
@@ -76,7 +75,6 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
     },
     {
       title: i18nStrings.stackManagementV2.serverlessTitle,
-      id: STACK_MANAGEMENT_NAV_ID,
       iconV2: 'gear',
       breadcrumbStatus: 'hidden',
       renderAs: 'panelOpener',

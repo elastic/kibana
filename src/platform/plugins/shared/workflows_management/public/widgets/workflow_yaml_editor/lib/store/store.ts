@@ -8,27 +8,32 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
+import { workflowEditorReducer } from './slice';
 import { workflowComputationMiddleware } from './middleware';
-import { ignoredActions, ignoredPaths, workflowDetailReducer } from './slice';
-import type { WorkflowsServices } from '../../../../types';
 
 // Store factory
-export const createWorkflowDetailStore = (services: WorkflowsServices) => {
+export const createWorkflowEditorStore = () => {
   return configureStore({
     reducer: {
-      detail: workflowDetailReducer,
+      workflow: workflowEditorReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
-        thunk: { extraArgument: { services } },
         serializableCheck: {
           // Ignore these non-serializable fields in the state
-          ignoredPaths,
+          ignoredPaths: [
+            'workflow.computed.yamlDocument',
+            'workflow.computed.yamlLineCounter',
+            'workflow.computed.workflowGraph',
+            'workflow.computed.workflowLookup',
+            'workflow.computed.workflowDefinition',
+          ],
           // Ignore these specific action types that contain non-serializable data
-          ignoredActions,
+          ignoredActions: ['workflow/_setComputedDataInternal'],
         },
       }).concat(workflowComputationMiddleware),
   });
 };
 
-export type AppDispatch = ReturnType<typeof createWorkflowDetailStore>['dispatch'];
+// Default store
+export const workflowEditorStore = createWorkflowEditorStore();

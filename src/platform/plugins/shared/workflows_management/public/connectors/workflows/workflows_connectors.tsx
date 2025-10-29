@@ -8,11 +8,11 @@
  */
 
 import { EuiText } from '@elastic/eui';
-import React from 'react';
 import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import React from 'react';
 import * as i18n from './translations';
 
-const WorkflowsConnectorFields: React.FunctionComponent = () => {
+const WorkflowsConnectorFields: React.FunctionComponent<any> = () => {
   return (
     <EuiText size="s" color="subdued">
       {i18n.NO_CONFIGURATION_REQUIRED}

@@ -8,17 +8,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
-import {
-  findAccessorOrFail,
-  type ExpressionValueVisDimension,
-} from '@kbn/chart-expressions-common';
+import type {
+  ExpressionFunctionDefinition,
+  ExpressionValueBoxed,
+  Datatable,
+  DatatableColumn,
+} from '@kbn/expressions-plugin/common';
+import { findAccessorOrFail } from '../utils/accessors';
 
 export interface Arguments {
   accessor: string | number;
   format?: string;
   formatParams?: string;
 }
+
+export type ExpressionValueVisDimension = ExpressionValueBoxed<
+  'vis_dimension',
+  {
+    accessor: number | DatatableColumn;
+    format: {
+      id?: string;
+      params?: Record<string, any>;
+    };
+  }
+>;
 
 export type ExpressionFunctionVisDimension = ExpressionFunctionDefinition<
   'visdimension',

@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any, complexity */
-
-import { Frequency, RRule, Weekday } from '@kbn/rrule';
+import { RRule, Frequency, Weekday } from '@kbn/rrule';
 import type { WorkflowExecutionHistoryModel } from '@kbn/workflows';
 import { parseIntervalString, type WorkflowTrigger } from '../../server/lib/schedule_utils';
 
@@ -20,7 +18,7 @@ export function calculateNextExecutionTime(
   trigger: WorkflowTrigger,
   lastRun: Date | null
 ): Date | null {
-  if (trigger.type !== 'scheduled') {
+  if (trigger.type !== 'scheduled' || !trigger.enabled) {
     return null;
   }
 
@@ -184,7 +182,9 @@ export function getWorkflowNextExecutionTime(
   triggers: WorkflowTrigger[],
   history: WorkflowExecutionHistoryModel[]
 ): Date | null {
-  const scheduledTriggers = triggers.filter((trigger) => trigger.type === 'scheduled');
+  const scheduledTriggers = triggers.filter(
+    (trigger) => trigger.type === 'scheduled' && trigger.enabled
+  );
 
   if (scheduledTriggers.length === 0) {
     return null;

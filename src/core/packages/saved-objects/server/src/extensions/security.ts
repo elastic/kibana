@@ -8,7 +8,6 @@
  */
 
 import type {
-  Either,
   SavedObjectAccessControl,
   SavedObjectReferenceWithContext,
   SavedObjectsFindResult,
@@ -16,7 +15,6 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import type { Payload } from '@hapi/boom';
 import type { SavedObject, BulkResolveError } from '../..';
 
 /**
@@ -172,11 +170,6 @@ export interface AuthorizeChangeAccessControlObject extends AuthorizeObjectWithE
   objectNamespace?: string;
 }
 
-/**
- * The ObjectRequiringPrivilegeCheckResult interface represents the authorization
- * result for a single saved object and includes a flag indicating whether the object
- * requires a check for the manage access control privilege.
- */
 export interface ObjectRequiringPrivilegeCheckResult {
   type: string;
   id: string;
@@ -184,12 +177,6 @@ export interface ObjectRequiringPrivilegeCheckResult {
   requiresManageAccessControl: boolean;
 }
 
-/**
- * The GetObjectsRequiringPrivilegeCheckResult interface represents the authorization
- * result for an array of saved object and includes both a set of types that require
- * a check for the manage access control privilege, and an array of objects each with
- * and individual requiresManageAccessControl flag.
- */
 export interface GetObjectsRequiringPrivilegeCheckResult {
   types: Set<string>;
   objects: ObjectRequiringPrivilegeCheckResult[];
@@ -389,19 +376,10 @@ export interface RedactNamespacesParams<T, A extends string> {
 
 export type WithAuditName<T> = T & { name?: string };
 
-/**
- * The SetAccessControlToWriteParams interface defines the parameters for the setAccessControlToWrite
- * function. It includes the incoming access control mode, saved object type, the createdBy
- * (current user profile ID if it exists), and the accessControl attributes from the prfelight check.
- */
 export interface SetAccessControlToWriteParams {
-  /** The access control mode (default | write_restricted) */
   accessMode: SavedObjectAccessControl['accessMode'] | undefined;
-  /** The saved object type */
   type: string;
-  /** The relevant user profile ID for the operation - used in create and bulk create */
   createdBy?: string;
-  /** The existing access control metadata from the operation's preflight check */
   preflightAccessControl?: SavedObjectAccessControl;
 }
 
@@ -516,12 +494,21 @@ export interface ISavedObjectsSecurityExtension {
    * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
    * @param params the namespace and object to authorize for changing ownership
    * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
-   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeChangeAccessControl: <A extends string>(
     params: AuthorizeChangeAccessControlParams,
     operation: 'changeAccessMode' | 'changeOwnership'
-  ) => Promise<AuthorizationResult<A>>;
+  ) => Promise<CheckAuthorizationResult<A>>;
+
+  // /**
+  //  * Gets the objects that require a privilege check for access control
+  //  * @param objects the requested objects
+  //  * @returns GetObjectsRequiringPrivilegeCheckResult - the resulting arrays of types and objects that require a privilege check
+  //  */
+  // getTypesRequiringAccessControlCheck: (
+  //   objects: AuthorizeObject[]
+  // ) => GetObjectsRequiringPrivilegeCheckResult;
 
   /**
    * Performs audit logging for the CLOSE_POINT_IN_TIME security action
@@ -622,17 +609,4 @@ export interface ISavedObjectsSecurityExtension {
   setAccessControlToWrite: (
     params: SetAccessControlToWriteParams
   ) => SavedObjectAccessControl | undefined;
-
-  /**
-   * Filters bulk operation expected results array to filter inaccessible object left
-   */
-  filterInaccessibleObjectsForBulkAction<
-    L extends { type: string; id?: string; error: Payload },
-    R extends { type: string; id: string; esRequestIndex?: number }
-  >(
-    expectedResults: Array<Either<L, R>>,
-    inaccessibleObjects: Array<{ type: string; id: string }>,
-    action: 'bulk_create' | 'bulk_update' | 'bulk_delete', // could alternatively move the SecurityAction definition to a core package to reference here
-    reindex?: boolean // will re-index the esRequestIndex field (used only in bulk_delete)
-  ): Promise<Array<Either<L, R>>>;
 }

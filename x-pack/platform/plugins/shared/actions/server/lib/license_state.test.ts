@@ -7,17 +7,11 @@
 
 import type { ActionType } from '../types';
 import { Subject } from 'rxjs';
+import { schema } from '@kbn/config-schema';
 import type { ILicenseState } from './license_state';
 import { LicenseState } from './license_state';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { ILicense } from '@kbn/licensing-types';
-import { getConnectorType } from '../fixtures';
-
-const fooActionType: ActionType = getConnectorType({
-  id: 'foo',
-  name: 'Foo',
-  minimumLicenseRequired: 'gold',
-});
 
 describe('checkLicense()', () => {
   const getRawLicense = jest.fn();
@@ -65,6 +59,20 @@ describe('isLicenseValidForActionType', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
+  const fooActionType: ActionType = {
+    id: 'foo',
+    name: 'Foo',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
+    },
+    executor: async (options) => {
+      return { status: 'ok', actionId: options.actionId };
+    },
+  };
 
   beforeEach(() => {
     license = new Subject();
@@ -152,6 +160,20 @@ describe('ensureLicenseForActionType()', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
+  const fooActionType: ActionType = {
+    id: 'foo',
+    name: 'Foo',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}) },
+      secrets: { schema: schema.object({}) },
+      params: { schema: schema.object({}) },
+    },
+    executor: async (options) => {
+      return { status: 'ok', actionId: options.actionId };
+    },
+  };
 
   beforeEach(() => {
     license = new Subject();

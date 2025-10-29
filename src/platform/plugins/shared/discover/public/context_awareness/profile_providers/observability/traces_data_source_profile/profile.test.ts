@@ -16,11 +16,11 @@ import {
 } from '../../../profiles';
 import { DataSourceType, createDataViewDataSource } from '../../../../../common/data_sources';
 import { createTracesDataSourceProfileProvider } from './profile';
-import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
+import { createContextAwarenessMocks } from '../../../__mocks__';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
-const mockServices = createProfileProviderSharedServicesMock();
+const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('tracesDataSourceProfileProvider', () => {
   const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider(mockServices);

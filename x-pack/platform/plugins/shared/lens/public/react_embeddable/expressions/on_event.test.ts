@@ -7,8 +7,7 @@
 
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { getLensApiMock, getLensRuntimeStateMock, makeEmbeddableServices } from '../mocks';
-import type { LensEmbeddableStartServices } from '../types';
-import type { LensApi, LensPublicCallbacks } from '@kbn/lens-common';
+import type { LensApi, LensEmbeddableStartServices, LensPublicCallbacks } from '../types';
 import { prepareEventHandler } from './on_event';
 import { faker } from '@faker-js/faker';
 import {
@@ -16,7 +15,7 @@ import {
   LENS_EDIT_RESIZE_ACTION,
   LENS_EDIT_SORT_ACTION,
   LENS_TOGGLE_ACTION,
-} from '@kbn/lens-common';
+} from '../../visualizations/datatable/components/constants';
 
 describe('Embeddable interaction event handlers', () => {
   beforeEach(() => {

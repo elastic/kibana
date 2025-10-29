@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ALL_SPACES_ID } from '../../../common/constants';
 import type { Agent } from '../../types';
 
 import { agentsKueryNamespaceFilter, isAgentInNamespace } from './agent_namespaces';
@@ -60,16 +59,6 @@ describe('isAgentInNamespace', () => {
         const agent = { id: '123' } as Agent;
         expect(await isAgentInNamespace(agent, 'space1')).toEqual(false);
       });
-
-      it('returns true in the default space if the agent has all spaces namespaces', async () => {
-        const agent = { id: '123', namespaces: [ALL_SPACES_ID] } as Agent;
-        expect(await isAgentInNamespace(agent, 'default')).toEqual(true);
-      });
-
-      it('returns true in a custom space if the agent has all spaces namespaces', async () => {
-        const agent = { id: '123', namespaces: [ALL_SPACES_ID] } as Agent;
-        expect(await isAgentInNamespace(agent, 'space1')).toEqual(true);
-      });
     });
 
     describe('when the namespace is undefined', () => {
@@ -118,14 +107,12 @@ describe('agentsKueryNamespaceFilter', () => {
 
     it('returns a kuery for the default space', async () => {
       expect(await agentsKueryNamespaceFilter('default')).toEqual(
-        '(namespaces:"default" or namespaces:"*" or not namespaces:*)'
+        '(namespaces:"default" or not namespaces:*)'
       );
     });
 
     it('returns a kuery for custom spaces', async () => {
-      expect(await agentsKueryNamespaceFilter('space1')).toEqual(
-        'namespaces:(space1) or namespaces:"*"'
-      );
+      expect(await agentsKueryNamespaceFilter('space1')).toEqual('namespaces:(space1)');
     });
   });
 });

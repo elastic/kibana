@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Client } from '@elastic/elasticsearch';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import { setupDependencies } from './setup_dependencies';
-import type { WorkflowsExecutionEngineConfig } from '../config';
-import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
-import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
+import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
+import type { WorkflowsExecutionEngineConfig } from '../config';
+import { setupDependencies } from './setup_dependencies';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
+import type { ContextDependencies } from '../workflow_context_manager/types';
 
 export async function runWorkflow({
   workflowRunId,
@@ -38,7 +39,7 @@ export async function runWorkflow({
   spaceId: string;
   taskAbortController: AbortController;
   coreStart: CoreStart;
-  esClient: ElasticsearchClient;
+  esClient: Client;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
   logsRepository: LogsRepository;
@@ -70,9 +71,9 @@ export async function runWorkflow({
     workflowExecutionRepository,
     stepExecutionRepository,
     logsRepository,
-    coreStart,
     dependencies,
-    fakeRequest // Provided by Task Manager's first-class API key support
+    fakeRequest, // Provided by Task Manager's first-class API key support
+    coreStart
   );
   await workflowRuntime.start();
 

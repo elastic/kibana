@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
 import type { Mutable } from 'utility-types';
 import type {
   SentinelOneBaseApiResponseSchema,
@@ -27,7 +27,6 @@ import type {
   SentinelOneExecuteScriptResponseSchema,
   SentinelOneGetRemoteScriptResultsParamsSchema,
   SentinelOneDownloadRemoteScriptResultsParamsSchema,
-  SentinelOneGetActivitiesResponseNoDataSchema,
 } from './schema';
 
 interface SentinelOnePagination {
@@ -43,16 +42,16 @@ interface SentinelOneErrors {
 
 export type SentinelOneOsType = 'linux' | 'macos' | 'windows';
 
-export type SentinelOneConfig = z.infer<typeof SentinelOneConfigSchema>;
-export type SentinelOneSecrets = z.infer<typeof SentinelOneSecretsSchema>;
+export type SentinelOneConfig = TypeOf<typeof SentinelOneConfigSchema>;
+export type SentinelOneSecrets = TypeOf<typeof SentinelOneSecretsSchema>;
 
-export type SentinelOneBaseApiResponse = z.infer<typeof SentinelOneBaseApiResponseSchema>;
+export type SentinelOneBaseApiResponse = TypeOf<typeof SentinelOneBaseApiResponseSchema>;
 
-export type SentinelOneGetAgentsParams = Partial<z.infer<typeof SentinelOneGetAgentsParamsSchema>>;
-export type SentinelOneGetAgentsResponse = z.input<typeof SentinelOneGetAgentsResponseSchema>;
+export type SentinelOneGetAgentsParams = Partial<TypeOf<typeof SentinelOneGetAgentsParamsSchema>>;
+export type SentinelOneGetAgentsResponse = TypeOf<typeof SentinelOneGetAgentsResponseSchema>;
 
-export type SentinelOneExecuteScriptParams = z.infer<typeof SentinelOneExecuteScriptParamsSchema>;
-export type SentinelOneExecuteScriptResponse = z.infer<
+export type SentinelOneExecuteScriptParams = TypeOf<typeof SentinelOneExecuteScriptParamsSchema>;
+export type SentinelOneExecuteScriptResponse = TypeOf<
   typeof SentinelOneExecuteScriptResponseSchema
 >;
 
@@ -97,7 +96,7 @@ export interface SentinelOneRemoteScriptExecutionStatus {
   updatedAt: string;
 }
 
-export type SentinelOneGetRemoteScriptStatusParams = z.infer<
+export type SentinelOneGetRemoteScriptStatusParams = TypeOf<
   typeof SentinelOneGetRemoteScriptStatusParamsSchema
 >;
 
@@ -107,7 +106,7 @@ export interface SentinelOneGetRemoteScriptStatusApiResponse
   data: SentinelOneRemoteScriptExecutionStatus[];
 }
 
-export type SentinelOneGetRemoteScriptResultsParams = z.infer<
+export type SentinelOneGetRemoteScriptResultsParams = TypeOf<
   typeof SentinelOneGetRemoteScriptResultsParamsSchema
 >;
 
@@ -127,45 +126,45 @@ export interface SentinelOneGetRemoteScriptResultsApiResponse extends SentinelOn
   data: SentinelOneGetRemoteScriptResults;
 }
 
-export type SentinelOneDownloadRemoteScriptResultsParams = z.infer<
+export type SentinelOneDownloadRemoteScriptResultsParams = TypeOf<
   typeof SentinelOneDownloadRemoteScriptResultsParamsSchema
 >;
 
 export type SentinelOneGetRemoteScriptsParams = Partial<
-  z.infer<typeof SentinelOneGetRemoteScriptsParamsSchema>
+  TypeOf<typeof SentinelOneGetRemoteScriptsParamsSchema>
 >;
 
-export type SentinelOneGetRemoteScriptsResponse = z.input<
+export type SentinelOneGetRemoteScriptsResponse = TypeOf<
   typeof SentinelOneGetRemoteScriptsResponseSchema
 >;
 
 export type SentinelOneFetchAgentFilesParams = Mutable<
-  z.infer<typeof SentinelOneFetchAgentFilesParamsSchema>
+  TypeOf<typeof SentinelOneFetchAgentFilesParamsSchema>
 >;
-export type SentinelOneFetchAgentFilesResponse = z.infer<
+export type SentinelOneFetchAgentFilesResponse = TypeOf<
   typeof SentinelOneFetchAgentFilesResponseSchema
 >;
 
 export type SentinelOneDownloadAgentFileParams = Mutable<
-  z.infer<typeof SentinelOneDownloadAgentFileParamsSchema>
+  TypeOf<typeof SentinelOneDownloadAgentFileParamsSchema>
 >;
 
-export type SentinelOneGetActivitiesResponseData = z.infer<
-  typeof SentinelOneGetActivitiesResponseNoDataSchema
->;
-export type SentinelOneActivityRecord<TData = unknown> = SentinelOneGetActivitiesResponseData & {
+export type SentinelOneActivityRecord<TData = unknown> = Omit<
+  TypeOf<typeof SentinelOneGetActivitiesResponseSchema>['data'][number],
+  'data'
+> & {
   data: TData;
 };
 
-export type SentinelOneGetActivitiesParams = z.infer<typeof SentinelOneGetActivitiesParamsSchema>;
+export type SentinelOneGetActivitiesParams = TypeOf<typeof SentinelOneGetActivitiesParamsSchema>;
 
 export type SentinelOneGetActivitiesResponse<TData = unknown> = Omit<
-  z.infer<typeof SentinelOneGetActivitiesResponseSchema>,
+  TypeOf<typeof SentinelOneGetActivitiesResponseSchema>,
   'data'
 > & { data: Array<SentinelOneActivityRecord<TData>> };
 
 export type SentinelOneIsolateHostParams = Partial<
-  Mutable<z.infer<typeof SentinelOneIsolateHostParamsSchema>>
+  Mutable<TypeOf<typeof SentinelOneIsolateHostParamsSchema>>
 >;
 
-export type SentinelOneActionParams = z.infer<typeof SentinelOneActionParamsSchema>;
+export type SentinelOneActionParams = TypeOf<typeof SentinelOneActionParamsSchema>;

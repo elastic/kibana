@@ -13,12 +13,13 @@
  * and the start index of the current query.
  * @param text The text up to the current position
  */
-export const checkForTripleQuotesAndEsqlQuery = (
+export const checkForTripleQuotesAndQueries = (
   text: string
 ): {
   insideTripleQuotes: boolean;
-  insideEsqlQuery: boolean;
-  esqlQueryIndex: number;
+  insideSingleQuotesQuery: boolean;
+  insideTripleQuotesQuery: boolean;
+  queryIndex: number;
 } => {
   let insideSingleQuotes = false;
   let insideTripleQuotes = false;
@@ -26,18 +27,14 @@ export const checkForTripleQuotesAndEsqlQuery = (
   let insideSingleQuotesQuery = false;
   let insideTripleQuotesQuery = false;
 
-  let insideEsqlQueryRequest = false;
-
   let currentQueryStartIndex = -1;
   let i = 0;
 
   while (i < text.length) {
-    const textBefore = text.slice(0, i);
-    const textFromIndex = text.slice(i);
     if (text.startsWith('"""', i)) {
       insideTripleQuotes = !insideTripleQuotes;
       if (insideTripleQuotes) {
-        insideTripleQuotesQuery = /.*"query"\s*:\s*$/.test(textBefore);
+        insideTripleQuotesQuery = /.*"query"\s*:\s*$/.test(text.slice(0, i));
         if (insideTripleQuotesQuery) {
           currentQueryStartIndex = i + 3;
         }
@@ -49,7 +46,7 @@ export const checkForTripleQuotesAndEsqlQuery = (
     } else if (text.at(i) === '"' && text.at(i - 1) !== '\\') {
       insideSingleQuotes = !insideSingleQuotes;
       if (insideSingleQuotes) {
-        insideSingleQuotesQuery = /.*"query"\s*:\s*$/.test(textBefore);
+        insideSingleQuotesQuery = /.*"query"\s*:\s*$/.test(text.slice(0, i));
         if (insideSingleQuotesQuery) {
           currentQueryStartIndex = i + 1;
         }
@@ -58,17 +55,6 @@ export const checkForTripleQuotesAndEsqlQuery = (
         currentQueryStartIndex = -1;
       }
       i++;
-    } else if (/^(GET|POST|PUT|DELETE|HEAD|PATCH)/i.test(textFromIndex)) {
-      // If this is the start of a new request, check if it is a _query API request
-      insideEsqlQueryRequest = /^(P|p)(O|o)(S|s)(T|t)\s+\/?_query(\n|\s|\?)/.test(textFromIndex);
-      // Move the index past the current line that contains request method and endpoint.
-      const newlineIndex = text.indexOf('\n', i);
-      if (newlineIndex === -1) {
-        // No newline after the request line; advance to end to avoid infinite loop.
-        i = text.length;
-      } else {
-        i = newlineIndex + 1; // Position at start of next line
-      }
     } else {
       i++;
     }
@@ -76,8 +62,9 @@ export const checkForTripleQuotesAndEsqlQuery = (
 
   return {
     insideTripleQuotes,
-    insideEsqlQuery: insideEsqlQueryRequest && (insideSingleQuotesQuery || insideTripleQuotesQuery),
-    esqlQueryIndex: insideEsqlQueryRequest ? currentQueryStartIndex : -1,
+    insideSingleQuotesQuery,
+    insideTripleQuotesQuery,
+    queryIndex: currentQueryStartIndex,
   };
 };
 

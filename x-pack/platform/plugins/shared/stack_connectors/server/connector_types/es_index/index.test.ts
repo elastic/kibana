@@ -81,19 +81,9 @@ describe('config validation', () => {
 
     expect(() => {
       validateConfig(connectorType, { index: 666 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"number\\",
-          \\"path\\": [
-            \\"index\\"
-          ],
-          \\"message\\": \\"Expected string, received number\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [index]: expected value of type [string] but got [number]"`
+    );
     delete config.executionTimeField;
 
     expect(() => {
@@ -103,18 +93,10 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"boolean\\",
-          \\"path\\": [
-            \\"executionTimeField\\"
-          ],
-          \\"message\\": \\"Expected string, received boolean\\"
-        }
-      ]"
-    `);
+"error validating action type config: [executionTimeField]: types that failed validation:
+- [executionTimeField.0]: expected value of type [string] but got [boolean]
+- [executionTimeField.1]: expected value to equal [null]"
+`);
 
     delete config.refresh;
     expect(() => {
@@ -123,19 +105,9 @@ describe('config validation', () => {
         { index: 'testing-123', refresh: 'foo' },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"boolean\\",
-          \\"received\\": \\"string\\",
-          \\"path\\": [
-            \\"refresh\\"
-          ],
-          \\"message\\": \\"Expected boolean, received string\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [refresh]: expected value of type [boolean] but got [string]"`
+    );
   });
 
   test('config validation fails when config is not valid', () => {
@@ -145,27 +117,9 @@ describe('config validation', () => {
 
     expect(() => {
       validateConfig(connectorType, baseConfig, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"index\\"
-          ],
-          \\"message\\": \\"Required\\"
-        },
-        {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"indeX\\"
-          ],
-          \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'indeX'\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [index]: expected value of type [string] but got [undefined]"`
+    );
   });
 });
 
@@ -191,34 +145,15 @@ describe('params validation', () => {
   test('params validation fails when params is not valid', () => {
     expect(() => {
       validateParams(connectorType, { documents: [{}], jim: 'bob' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"jim\\"
-          ],
-          \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'jim'\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: [jim]: definition for this key is missing"`
+    );
 
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"array\\",
-          \\"received\\": \\"undefined\\",
-          \\"path\\": [
-            \\"documents\\"
-          ],
-          \\"message\\": \\"Required\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: [documents]: expected value of type [array] but got [undefined]"`
+    );
 
     expect(() => {
       validateParams(
@@ -226,20 +161,9 @@ describe('params validation', () => {
         { documents: ['should be an object'] },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: [
-        {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"object\\",
-          \\"received\\": \\"string\\",
-          \\"path\\": [
-            \\"documents\\",
-            0
-          ],
-          \\"message\\": \\"Expected object, received string\\"
-        }
-      ]"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: [documents.0]: could not parse record value from json input"`
+    );
   });
 });
 
@@ -679,7 +603,7 @@ describe('execute()', () => {
         AlertHistoryEsIndexConnectorId
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"error creating alert history document for preconfigured-alert-history-es-index connector"`
+      `"error creating alert history document for ${AlertHistoryEsIndexConnectorId} connector"`
     );
   });
 

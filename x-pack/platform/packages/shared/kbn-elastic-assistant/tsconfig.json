@@ -51,6 +51,5 @@
     "@kbn/management-settings-ids",
     "@kbn/core-ui-settings-browser",
     "@kbn/ai-assistant-connector-selector-action",
-    "@kbn/react-query",
   ]
 }

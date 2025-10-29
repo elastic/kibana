@@ -167,12 +167,6 @@ export function enrichFunctionParameters(functionDefinition: FunctionDefinition)
     });
   }
 
-  if (functionDefinition.name === 'mv_contains') {
-    return enrichFunctionSignatures(functionDefinition, 'superset', {
-      supportsMultiValues: true,
-    });
-  }
-
   if (functionDefinition.name === 'qstr') {
     return {
       ...functionDefinition,

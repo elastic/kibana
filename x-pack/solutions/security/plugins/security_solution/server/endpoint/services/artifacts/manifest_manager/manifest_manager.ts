@@ -738,14 +738,18 @@ export class ManifestManager {
           // SO client is used for the update.
           const updatesBySpace: Record<string, PackagePolicy[]> = {};
 
-          for (const packagePolicy of currentBatch) {
-            const packagePolicySpace = packagePolicy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID;
+          if (this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+            for (const packagePolicy of currentBatch) {
+              const packagePolicySpace = packagePolicy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID;
 
-            if (!updatesBySpace[packagePolicySpace]) {
-              updatesBySpace[packagePolicySpace] = [];
+              if (!updatesBySpace[packagePolicySpace]) {
+                updatesBySpace[packagePolicySpace] = [];
+              }
+
+              updatesBySpace[packagePolicySpace].push(packagePolicy);
             }
-
-            updatesBySpace[packagePolicySpace].push(packagePolicy);
+          } else {
+            updatesBySpace[DEFAULT_SPACE_ID] = currentBatch;
           }
 
           const response: Required<

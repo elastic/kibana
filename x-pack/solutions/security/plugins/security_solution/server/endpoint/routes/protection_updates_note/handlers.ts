@@ -69,6 +69,11 @@ async function getSavedObjectClient(
   endpointContext: EndpointAppContext,
   packagePolicyId: string
 ): Promise<SavedObjectsClientContract> {
+  const { endpointManagementSpaceAwarenessEnabled } = endpointContext.experimentalFeatures;
+  if (!endpointManagementSpaceAwarenessEnabled) {
+    return (await context.core).savedObjects.client;
+  }
+
   const spaceId = (await context.securitySolution).getSpaceId();
   const scopedFleetService = endpointContext.service.getInternalFleetServices(spaceId);
   await scopedFleetService.ensureInCurrentSpace({ integrationPolicyIds: [packagePolicyId] });

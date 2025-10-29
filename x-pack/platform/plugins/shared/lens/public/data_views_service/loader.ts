@@ -13,12 +13,7 @@ import type {
   DataViewField,
 } from '@kbn/data-views-plugin/public';
 import { keyBy } from 'lodash';
-import type {
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternMap,
-  IndexPatternRef,
-} from '@kbn/lens-common';
+import type { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
 import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
 

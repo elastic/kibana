@@ -25,7 +25,7 @@ import type {
   StandardDeviationIndexPatternColumn,
   StaticValueIndexPatternColumn,
   SumIndexPatternColumn,
-} from '@kbn/lens-common';
+} from '@kbn/lens-plugin/public';
 import { v4 as uuid } from 'uuid';
 
 import { fromCountAPItoLensState, fromCountLensStateToAPI } from './count';

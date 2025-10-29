@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { DatasourcePublicAPI, Datasource } from '@kbn/lens-common';
+import type { DatasourcePublicAPI, Datasource } from '../types';
 
 export type DatasourceMock = jest.Mocked<Datasource> & {
   publicAPIMock: jest.Mocked<DatasourcePublicAPI>;

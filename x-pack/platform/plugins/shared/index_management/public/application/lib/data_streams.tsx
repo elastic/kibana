@@ -76,8 +76,11 @@ export const getLifecycleValue = (
 
   // Extract size and unit, in order to correctly map the unit to the correct text
   const activeRetention = lifecycle?.effective_retention || lifecycle?.data_retention;
+  const { size, unit } = splitSizeAndUnits(activeRetention as string);
+  const availableTimeUnits = [...timeUnits, ...extraTimeUnits];
+  const match = availableTimeUnits.find((timeUnit) => timeUnit.value === unit);
 
-  return getRetentionPeriod(activeRetention as string);
+  return `${size} ${match?.text ?? unit}`;
 };
 
 export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
@@ -135,12 +138,4 @@ export const deserializeGlobalMaxRetention = (globalMaxRetention?: string) => {
     unit,
     unitText: match?.text ?? unit,
   };
-};
-
-export const getRetentionPeriod = (retention: string) => {
-  const { size, unit } = splitSizeAndUnits(retention);
-  const availableTimeUnits = [...timeUnits, ...extraTimeUnits];
-  const match = availableTimeUnits.find((timeUnit) => timeUnit.value === unit);
-
-  return `${size} ${match?.text ?? unit}`;
 };

@@ -14,26 +14,32 @@ import { noop } from 'lodash';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { cellValueTrigger, CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { DocumentToExpressionReturnType } from '../../async_services';
+import type { LensDocument } from '../../persistence';
 import type {
-  DocumentToExpressionReturnType,
-  LensDocument,
   GetCompatibleCellValueActions,
   IndexPatternMap,
   IndexPatternRef,
   UserMessage,
   VisualizationDisplayOptions,
-  ExpressionWrapperProps,
-  LensApi,
-  LensRuntimeState,
-} from '@kbn/lens-common';
+} from '../../types';
 import {
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,
-} from '../../types_guards';
+} from '../../types';
+import type {
+  ExpressionWrapperProps,
+  LensApi,
+  LensEmbeddableStartServices,
+  LensRuntimeState,
+} from '../types';
 import { getVariables } from './variables';
+// import {
+//   getSearchContextIncompatibleMessage,
+//   isSearchContextIncompatibleWithDataViews,
+// } from '../user_messages/checks';
 import { getExecutionSearchContext, type MergedSearchContext } from './merged_search_context';
-import type { LensEmbeddableStartServices } from '../types';
 
 interface GetExpressionRendererPropsParams {
   searchContext: MergedSearchContext;

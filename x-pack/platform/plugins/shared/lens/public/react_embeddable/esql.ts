@@ -12,9 +12,8 @@ import {
   getESQLQueryColumns,
 } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import type { LensSerializedState } from '@kbn/lens-common';
 import { isESQLModeEnabled } from './initializers/utils';
-import type { LensEmbeddableStartServices } from './types';
+import type { LensEmbeddableStartServices, LensSerializedState } from './types';
 
 export type ESQLStartServices = Pick<
   LensEmbeddableStartServices,

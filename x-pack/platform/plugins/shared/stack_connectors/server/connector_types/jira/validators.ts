@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type {
   JiraPublicConfigurationType,
@@ -39,10 +38,9 @@ export const validate: ExternalServiceValidation = {
   secrets: validateCommonSecrets,
 };
 
-export const validateOtherFieldsKeys = (key: string, ctx: z.RefinementCtx) => {
-  validateKeysAllowed({
+export const validateOtherFieldsKeys = (key: string): string | undefined => {
+  return validateKeysAllowed({
     key,
-    ctx,
     disallowList: incidentSchemaObjectProperties,
     fieldName: 'otherFields',
   });

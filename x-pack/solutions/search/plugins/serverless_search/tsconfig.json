@@ -54,8 +54,6 @@
     "@kbn/security-plugin-types-public",
     "@kbn/deeplinks-search",
     "@kbn/core-application-browser",
-    "@kbn/search-shared-ui",
-    "@kbn/deeplinks-management",
-    "@kbn/react-query"
+    "@kbn/search-shared-ui"
   ]
 }

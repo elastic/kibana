@@ -6,7 +6,7 @@
  */
 
 import { type ExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
-import type { IndexPattern } from '@kbn/lens-common';
+import type { IndexPattern } from '../../types';
 
 /**
  * Checks if the provided field contains data (works for meta field)

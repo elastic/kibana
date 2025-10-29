@@ -850,6 +850,7 @@ describe('MS Defender response actions client', () => {
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
         false;
+
       await expect(msClientMock.getFileInfo('abc', '123')).rejects.toThrow(
         'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
       );
@@ -1014,6 +1015,7 @@ describe('MS Defender response actions client', () => {
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
         false;
+
       await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
         'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
       );
@@ -2530,6 +2532,9 @@ describe('MS Defender response actions client', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
+      // @ts-expect-error assign to readonly property
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+        true;
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointCancelEnabled =
         true;

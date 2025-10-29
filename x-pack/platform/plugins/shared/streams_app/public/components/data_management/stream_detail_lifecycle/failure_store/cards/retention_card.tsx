@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { Streams } from '@kbn/streams-schema';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { useFailureStoreRedirectLink } from '../../hooks/use_failure_store_redirect_link';
 import { BaseMetricCard } from '../../common/base_metric_card';
@@ -13,24 +14,19 @@ import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
 
 export const RetentionCard = ({
   openModal,
-  canManageFailureStore,
-  isWired,
-  streamName,
+  definition,
   failureStore,
 }: {
   openModal: (show: boolean) => void;
-  canManageFailureStore: boolean;
-  isWired: boolean;
-  streamName: string;
+  definition: Streams.ingest.all.GetResponse;
   failureStore?: FailureStore;
 }) => {
-  const { href } = useFailureStoreRedirectLink({ streamName });
+  const { href } = useFailureStoreRedirectLink({ definition });
 
-  if (
-    !failureStore ||
-    !failureStore.enabled ||
-    (!failureStore.retentionPeriod.custom && !failureStore.retentionPeriod.default)
-  ) {
+  const {
+    privileges: { manage_failure_store: manageFailureStorePrivilege },
+  } = definition;
+  if (!failureStore || !failureStore.retentionPeriod) {
     return null;
   }
   const { retentionPeriod } = failureStore;
@@ -75,7 +71,7 @@ export const RetentionCard = ({
 
   const getActions = () => {
     const actions = [];
-    if (canManageFailureStore && !isWired) {
+    if (manageFailureStorePrivilege && !Streams.WiredStream.GetResponse.is(definition)) {
       actions.push({
         iconType: 'pencil',
         ariaLabel: editFailureStore,

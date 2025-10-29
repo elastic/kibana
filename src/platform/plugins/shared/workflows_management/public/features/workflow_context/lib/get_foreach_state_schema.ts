@@ -9,14 +9,14 @@
 
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { ForEachContextSchema } from '@kbn/workflows';
-import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod';
-import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
+import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
 import {
   getDetailedTypeDescription,
   getSchemaAtPath,
   inferZodType,
 } from '../../../../common/lib/zod';
+import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 const extractForeachItemSchemaFromJson = (foreachParam: string) => {
   try {

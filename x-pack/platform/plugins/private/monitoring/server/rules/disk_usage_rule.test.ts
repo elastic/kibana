@@ -151,7 +151,7 @@ describe('DiskUsageRule', () => {
                         {
                           endToken: '#end_link',
                           partialUrl:
-                            '{elasticWebsiteUrl}docs/deploy-manage/production-guidance/optimize-performance/disk-usage',
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tune-for-disk-usage.html',
                           startToken: '#start_link',
                           type: 'docLink',
                         },
@@ -300,7 +300,7 @@ describe('DiskUsageRule', () => {
                         {
                           endToken: '#end_link',
                           partialUrl:
-                            '{elasticWebsiteUrl}docs/deploy-manage/production-guidance/optimize-performance/disk-usage',
+                            '{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tune-for-disk-usage.html',
                           startToken: '#start_link',
                           type: 'docLink',
                         },

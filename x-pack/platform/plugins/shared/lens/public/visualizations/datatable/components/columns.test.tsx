@@ -14,8 +14,9 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
+import { RowHeightMode } from '../../../../common/types';
 import type { FormatFactory } from '../../../../common/types';
-import { LENS_ROW_HEIGHT_MODE, type LensCellValueAction } from '@kbn/lens-common';
+import type { LensCellValueAction } from '../../../types';
 import { createGridColumns } from './columns';
 
 const table: Datatable = {
@@ -78,7 +79,7 @@ const callCreateGridColumns = (
     params.onColumnResize ?? jest.fn(),
     params.onColumnHide ?? jest.fn(),
     params.alignments ?? new Map(),
-    params.headerRowHeight ?? LENS_ROW_HEIGHT_MODE.auto,
+    params.headerRowHeight ?? RowHeightMode.auto,
     params.headerRowLines ?? 1,
     params.columnCellValueActions ?? [],
     params.closeCellPopover ?? jest.fn(),

@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { DIFFERENCES_ID, DIFFERENCES_NAME } from '@kbn/lens-formula-docs';
-import type { DerivativeIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
+import type {
+  FormattedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from '../column_types';
+import type { FormBasedLayer } from '../../../types';
 import {
   buildLabelFunction,
   checkForDateHistogram,
@@ -31,6 +35,11 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
+
+export type DerivativeIndexPatternColumn = FormattedIndexPatternColumn &
+  ReferenceBasedIndexPatternColumn & {
+    operationType: typeof DIFFERENCES_ID;
+  };
 
 export const derivativeOperation: OperationDefinition<
   DerivativeIndexPatternColumn,

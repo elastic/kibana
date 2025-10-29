@@ -17,8 +17,8 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type {
   NavigateToLensContext,
-  LensTagCloudState as TagcloudVisConfiguration,
-} from '@kbn/lens-common';
+  TagcloudVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import type { TagCloudVisParams } from '../types';
 import { getDataViewsStart } from '../services';
 

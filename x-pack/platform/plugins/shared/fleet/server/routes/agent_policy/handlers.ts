@@ -12,7 +12,7 @@ import { dump } from 'js-yaml';
 
 import { isEmpty } from 'lodash';
 
-import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
+import { FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -129,24 +129,22 @@ function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
   };
 }
 
-export async function getAuthorizedSpacesWithAgentPoliciesAllPrivileges(
+export async function checkAgentPoliciesAllPrivilegesForSpaces(
   request: KibanaRequest,
-  context: FleetRequestHandlerContext
+  context: FleetRequestHandlerContext,
+  spaceIds: string[]
 ) {
   const security = appContextService.getSecurity();
   const spaces = await (await context.fleet).getAllSpaces();
-
-  const allSpaceId = [...spaces.map(({ id }) => id), ALL_SPACES_ID];
+  const allSpaceId = spaces.map((s) => s.id);
   const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(allSpaceId, {
     kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
   });
 
-  const authorizedSpaces = allSpaceId.filter(
+  return allSpaceId.filter(
     (id) =>
       res.privileges.kibana.find((privilege) => privilege.resource === id)?.authorized ?? false
   );
-
-  return authorizedSpaces;
 }
 
 export const getAgentPoliciesHandler: FleetRequestHandler<
@@ -367,7 +365,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     if (spaceIds?.length) {
       logger.debug(`Checking privileges for spaces [${spaceIds.join(', ')}] `);
 
-      authorizedSpaces = await getAuthorizedSpacesWithAgentPoliciesAllPrivileges(request, context);
+      authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(request, context, spaceIds);
       for (const requestedSpaceId of spaceIds) {
         if (!authorizedSpaces.includes(requestedSpaceId)) {
           throw new FleetError(
@@ -555,9 +553,10 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
     const requestSpaceId = spaceId;
 
     if (spaceIds?.length) {
-      const authorizedSpaces = await getAuthorizedSpacesWithAgentPoliciesAllPrivileges(
+      const authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(
         request,
-        context
+        context,
+        spaceIds
       );
       await updateAgentPolicySpaces({
         agentPolicyId: request.params.agentPolicyId,

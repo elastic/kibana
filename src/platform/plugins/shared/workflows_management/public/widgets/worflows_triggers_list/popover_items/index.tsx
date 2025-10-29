@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useState } from 'react';
 import {
-  EuiBadge,
+  EuiPopover,
   EuiBadgeGroup,
+  EuiBadge,
+  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
-  EuiPopoverTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 
 export interface PopoverItemsProps<T> {
   renderItem: (item: T, index: number, items: T[]) => React.JSX.Element;

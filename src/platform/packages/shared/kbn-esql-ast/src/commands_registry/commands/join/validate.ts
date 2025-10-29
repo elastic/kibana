@@ -16,17 +16,13 @@ import type {
   ESQLAst,
 } from '../../../types';
 import { isBinaryExpression, isIdentifier, isSource } from '../../../ast/is';
-import type { ICommandCallbacks, ICommandContext } from '../../types';
+import type { ICommandContext } from '../../types';
 import { errors } from '../../../definitions/utils/errors';
-import { validateCommandArguments } from '../../../definitions/utils/validation';
-import { getOnOption } from './utils';
-import type { ESQLSingleAstItem } from '../../../types';
 
 export const validate = (
   command: ESQLAstAllCommands,
   ast: ESQLAst,
-  context?: ICommandContext,
-  callbacks?: ICommandCallbacks
+  context?: ICommandContext
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const { commandType, args } = command as ESQLAstJoinCommand;
@@ -79,33 +75,6 @@ export const validate = (
     messages.push(error);
 
     return messages;
-  }
-
-  // Validate JOIN ON expressions
-  const onOption = getOnOption(command as ESQLAstJoinCommand);
-
-  if (onOption) {
-    messages.push(...validateOnExpressions(command as ESQLAstJoinCommand));
-  }
-
-  messages.push(...validateCommandArguments(command, ast, context, callbacks));
-
-  return messages;
-};
-
-const validateOnExpressions = (joinCommand: ESQLAstJoinCommand): ESQLMessage[] => {
-  const messages: ESQLMessage[] = [];
-  const onOption = getOnOption(joinCommand)!;
-  const expressions = onOption.args as ESQLSingleAstItem[];
-
-  // Find complete binary expressions
-  const binaryExpressions = expressions.filter(
-    (expr) => isBinaryExpression(expr) && !expr.incomplete
-  );
-
-  // Binary expressions cannot be mixed with comma-separated fields
-  if (binaryExpressions.length > 0 && expressions.length > 1) {
-    messages.push(errors.joinOnSingleExpression(onOption.location));
   }
 
   return messages;

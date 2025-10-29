@@ -149,9 +149,8 @@ describe(
       it('without access to any of the subpages, none of those should be displayed', () => {
         login(ROLE.detections_admin);
         loadPage('/app/security');
-        // assets should be missing, checking that assets link and more button is missing
-        cy.get(ServerlessHeaders.MORE_MENU_BTN).should('not.exist');
-        cy.get(MenuButtonSelector).should('not.exist');
+        cy.get(MenuButtonSelector).click();
+        cy.get('[data-test-subj~="sideNavPanel-id-securityGroup:assets"]');
 
         for (const page of allPages) {
           cy.get(page.selector).should('not.exist');
@@ -161,9 +160,8 @@ describe(
       it('with access to all of the subpages, all of those should be displayed', () => {
         login(ROLE.soc_manager);
         loadPage('/app/security');
-        ServerlessHeaders.showMoreItems();
-        cy.get(MenuButtonSelector).click(); // click "Assets" to open the menu
-        cy.get(allPages[0].selector).click(); // open the Assets anv panel by clicking the first item in more>assets popover
+        cy.get(MenuButtonSelector).click();
+        cy.get('[data-test-subj~="sideNavPanel-id-securityGroup:assets"]');
 
         for (const page of allPages) {
           if (page.selector !== Selectors.TRUSTED_DEVICES) {

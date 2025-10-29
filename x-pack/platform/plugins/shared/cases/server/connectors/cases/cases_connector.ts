@@ -12,7 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SAVED_OBJECT_TYPES } from '../../../common';
 import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
-import { ZCasesConnectorRunParamsSchema } from './schema';
+import { CasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
@@ -67,7 +67,7 @@ export class CasesConnector extends SubActionConnector<
     this.registerSubAction({
       name: CASES_CONNECTOR_SUB_ACTION.RUN,
       method: 'run',
-      schema: ZCasesConnectorRunParamsSchema,
+      schema: CasesConnectorRunParamsSchema,
     });
   }
 

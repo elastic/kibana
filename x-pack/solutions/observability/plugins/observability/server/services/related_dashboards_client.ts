@@ -8,7 +8,7 @@ import { isEmpty, omit } from 'lodash';
 import type { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
-import type { DashboardState, DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -28,7 +28,7 @@ import {
 } from './helpers';
 import type { ReferencedPanelManager } from './referenced_panel_manager';
 
-type Dashboard = SavedObjectsFindResult<DashboardState>;
+type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 
 export class RelatedDashboardsClient {
   public dashboardsById = new Map<string, Dashboard>();

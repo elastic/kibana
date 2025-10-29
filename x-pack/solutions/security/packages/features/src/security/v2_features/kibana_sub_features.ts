@@ -118,12 +118,19 @@ export const getSecurityV2SubFeaturesMap = ({
         subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
       }
 
-      // Space awareness is now always enabled - set requireAllSpaces to false and remove privilegesTooltip
-      subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
+      // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
+      if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+        subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
+      }
 
       return [id, subFeature];
     })
   );
+
+  // Remove disabled experimental features
+  if (!experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+    securitySubFeaturesMap.delete(SecuritySubFeatureId.globalArtifactManagement);
+  }
 
   return Object.freeze(securitySubFeaturesMap);
 };

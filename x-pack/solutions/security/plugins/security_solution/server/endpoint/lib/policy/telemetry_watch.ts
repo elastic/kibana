@@ -71,6 +71,8 @@ export class TelemetryConfigWatcher {
     let updated = 0;
     let failed = 0;
     let conflicts = 0;
+    const isSpacesEnabled =
+      this.endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
 
     this.logger.debug(
       `Checking Endpoint policies to update due to changed global telemetry config setting. (New value: ${isTelemetryEnabled})`
@@ -88,7 +90,7 @@ export class TelemetryConfigWatcher {
                 page,
                 perPage: 100,
                 kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-                spaceId: '*',
+                spaceId: isSpacesEnabled ? '*' : undefined,
               })
               .then((result) => {
                 this.logger.debug(
@@ -143,11 +145,12 @@ export class TelemetryConfigWatcher {
       for (const [spaceId, spaceUpdates] of Object.entries(updatesBySpace)) {
         this.logger.debug(`Updating [${spaceUpdates.length}] policies for space [${spaceId}]`);
 
-        const soClientForSpace =
-          this.endpointAppContextService.savedObjects.createInternalScopedSoClient({
-            spaceId,
-            readonly: false,
-          });
+        const soClientForSpace = isSpacesEnabled
+          ? this.endpointAppContextService.savedObjects.createInternalScopedSoClient({
+              spaceId,
+              readonly: false,
+            })
+          : this.endpointAppContextService.savedObjects.createInternalUnscopedSoClient(false);
 
         try {
           const updateResult = await pRetry(

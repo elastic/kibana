@@ -7,9 +7,10 @@
 
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 import { operationDefinitionMap } from '.';
+import type { IndexPattern } from '../../../../types';
 import type { FormBasedLayer } from '../../../..';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { DateRange, IndexPattern } from '@kbn/lens-common';
+import type { DateRange } from '../../../../../common/types';
 
 describe('count operation', () => {
   describe('getGroupByKey', () => {

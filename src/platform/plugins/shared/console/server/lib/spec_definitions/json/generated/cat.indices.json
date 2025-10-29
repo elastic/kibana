@@ -28,9 +28,7 @@
       "health": [
         "green",
         "yellow",
-        "red",
-        "unknown",
-        "unavailable"
+        "red"
       ],
       "include_unloaded_segments": "__flag__",
       "pri": "__flag__",

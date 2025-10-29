@@ -7,130 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/consistent-type-imports */
-import { getStaticPosition, getPosition, markCommonFields } from './utils';
-import { ISuggestionItem } from '../../types';
-import { ESQLAstJoinCommand } from '../../../types';
+import { getPosition, suggestionIntersection, suggestionUnion } from './utils';
+import type { ISuggestionItem } from '../../types';
 
-describe('getStaticPosition()', () => {
+describe('getPosition()', () => {
   test('returns correct position on complete modifier matches', () => {
-    expect(getStaticPosition('L')).toBe('type');
-    expect(getStaticPosition('LE')).toBe('type');
-    expect(getStaticPosition('LEFT')).toBe('type');
-    expect(getStaticPosition('LEFT ')).toBe('after_type');
-    expect(getStaticPosition('LEFT  ')).toBe('after_type');
-    expect(getStaticPosition('LEFT  J')).toBe('mnemonic');
-    expect(getStaticPosition('LEFT  JO')).toBe('mnemonic');
-    expect(getStaticPosition('LEFT  JOI')).toBe('mnemonic');
-    expect(getStaticPosition('LEFT  JOIN')).toBe('mnemonic');
-    expect(getStaticPosition('LEFT  JOIN ')).toBe('after_mnemonic');
-    expect(getStaticPosition('LEFT  JOIN  ')).toBe('after_mnemonic');
-    expect(getStaticPosition('LEFT  JOIN  i')).toBe('index');
-    expect(getStaticPosition('LEFT  JOIN  i2')).toBe('index');
-    expect(getStaticPosition('LEFT  JOIN  ind')).toBe('index');
-    expect(getStaticPosition('LEFT  JOIN  index')).toBe('index');
-    expect(getStaticPosition('LEFT  JOIN  index ')).toBe('after_index');
-    expect(getStaticPosition('LEFT  JOIN  index  ')).toBe('after_index');
-    expect(getStaticPosition('LEFT  JOIN  index  A')).toBe('as');
-    expect(getStaticPosition('LEFT  JOIN  index  As')).toBe('as');
-    expect(getStaticPosition('LEFT  JOIN  index  AS')).toBe('as');
-    expect(getStaticPosition('LEFT  JOIN  index  AS ')).toBe('after_as');
-    expect(getStaticPosition('LEFT  JOIN  index  AS  ')).toBe('after_as');
-    expect(getStaticPosition('LEFT  JOIN  index  AS a')).toBe('alias');
-    expect(getStaticPosition('LEFT  JOIN  index  AS al2')).toBe('alias');
-    expect(getStaticPosition('LEFT  JOIN  index  AS alias')).toBe('alias');
-    expect(getStaticPosition('LEFT  JOIN  index  AS  alias ')).toBe('after_alias');
-    expect(getStaticPosition('LEFT  JOIN  index  AS  alias  ')).toBe('after_alias');
-    expect(getStaticPosition('LEFT  JOIN  index  AS  alias  O')).toBe('on');
-    expect(getStaticPosition('LEFT  JOIN  index  AS  alias  On')).toBe('on');
-    expect(getStaticPosition('LEFT  JOIN  index  AS  alias  ON')).toBe('on');
-    expect(getStaticPosition('LEFT  JOIN  index  AS  alias  ON ')).toBe('on');
-    expect(getStaticPosition('LEFT  JOIN  index  AS  alias  ON  ')).toBe('on');
-    expect(getStaticPosition('LEFT  JOIN  index  AS  alias  ON  a')).toBe('on');
+    expect(getPosition('L').pos).toBe('type');
+    expect(getPosition('LE').pos).toBe('type');
+    expect(getPosition('LEFT').pos).toBe('type');
+    expect(getPosition('LEFT ').pos).toBe('after_type');
+    expect(getPosition('LEFT  ').pos).toBe('after_type');
+    expect(getPosition('LEFT  J').pos).toBe('mnemonic');
+    expect(getPosition('LEFT  JO').pos).toBe('mnemonic');
+    expect(getPosition('LEFT  JOI').pos).toBe('mnemonic');
+    expect(getPosition('LEFT  JOIN').pos).toBe('mnemonic');
+    expect(getPosition('LEFT  JOIN ').pos).toBe('after_mnemonic');
+    expect(getPosition('LEFT  JOIN  ').pos).toBe('after_mnemonic');
+    expect(getPosition('LEFT  JOIN  i').pos).toBe('index');
+    expect(getPosition('LEFT  JOIN  i2').pos).toBe('index');
+    expect(getPosition('LEFT  JOIN  ind').pos).toBe('index');
+    expect(getPosition('LEFT  JOIN  index').pos).toBe('index');
+    expect(getPosition('LEFT  JOIN  index ').pos).toBe('after_index');
+    expect(getPosition('LEFT  JOIN  index  ').pos).toBe('after_index');
+    expect(getPosition('LEFT  JOIN  index  A').pos).toBe('as');
+    expect(getPosition('LEFT  JOIN  index  As').pos).toBe('as');
+    expect(getPosition('LEFT  JOIN  index  AS').pos).toBe('as');
+    expect(getPosition('LEFT  JOIN  index  AS ').pos).toBe('after_as');
+    expect(getPosition('LEFT  JOIN  index  AS  ').pos).toBe('after_as');
+    expect(getPosition('LEFT  JOIN  index  AS a').pos).toBe('alias');
+    expect(getPosition('LEFT  JOIN  index  AS al2').pos).toBe('alias');
+    expect(getPosition('LEFT  JOIN  index  AS alias').pos).toBe('alias');
+    expect(getPosition('LEFT  JOIN  index  AS  alias ').pos).toBe('after_alias');
+    expect(getPosition('LEFT  JOIN  index  AS  alias  ').pos).toBe('after_alias');
+    expect(getPosition('LEFT  JOIN  index  AS  alias  O').pos).toBe('on');
+    expect(getPosition('LEFT  JOIN  index  AS  alias  On').pos).toBe('on');
+    expect(getPosition('LEFT  JOIN  index  AS  alias  ON').pos).toBe('on');
+    expect(getPosition('LEFT  JOIN  index  AS  alias  ON ').pos).toBe('after_on');
+    expect(getPosition('LEFT  JOIN  index  AS  alias  ON  ').pos).toBe('after_on');
+    expect(getPosition('LEFT  JOIN  index  AS  alias  ON  a').pos).toBe('condition');
   });
 
   test('returns correct position, when no <alias> part specified', () => {
-    expect(getStaticPosition('LEFT  JOIN  index O')).toBe('on');
-    expect(getStaticPosition('LEFT  JOIN  index ON')).toBe('on');
-    expect(getStaticPosition('LEFT  JOIN  index ON ')).toBe('on');
-    expect(getStaticPosition('LEFT  JOIN  index ON  ')).toBe('on');
+    expect(getPosition('LEFT  JOIN  index O').pos).toBe('on');
+    expect(getPosition('LEFT  JOIN  index ON').pos).toBe('on');
+    expect(getPosition('LEFT  JOIN  index ON ').pos).toBe('after_on');
+    expect(getPosition('LEFT  JOIN  index ON  ').pos).toBe('after_on');
   });
 });
 
-describe('getPosition()', () => {
-  test('returns on_expression position with incomplete expression metadata', () => {
-    const command = {
-      name: 'join',
-      text: 'JOIN index ON field',
-      location: { min: 0, max: 19 },
-      type: 'option',
-      args: [
-        { name: 'index', type: 'source', text: 'index', location: { min: 5, max: 10 } },
-        {
-          name: 'on',
-          type: 'option',
-          text: 'ON field',
-          location: { min: 11, max: 19 },
-          args: [
-            {
-              type: 'column',
-              name: 'field',
-              text: 'field',
-              location: { min: 14, max: 19 },
-              incomplete: true,
-            },
-          ],
-        },
-      ],
-    };
-
-    const result = getPosition('JOIN index ON field', command as ESQLAstJoinCommand, 19);
-
-    expect(result.pos).toBe('on_expression');
-    expect(result.isExpressionComplete).toBe(false);
-    expect(result.expression?.name).toBe('field');
-  });
-
-  test('returns on_expression position after comma for new expression', () => {
-    const command = {
-      name: 'join',
-      text: 'JOIN index ON a == b, ',
-      location: { min: 0, max: 22 },
-      type: 'option',
-      args: [
-        { name: 'index', type: 'source', text: 'index', location: { min: 5, max: 10 } },
-        {
-          name: 'on',
-          type: 'option',
-          text: 'ON a == b, ',
-          location: { min: 11, max: 22 },
-          args: [
-            {
-              type: 'function',
-              name: '==',
-              text: 'a == b',
-              location: { min: 14, max: 20 },
-              args: [
-                { type: 'column', name: 'a', text: 'a', location: { min: 14, max: 15 } },
-                { type: 'column', name: 'b', text: 'b', location: { min: 19, max: 20 } },
-              ],
-            },
-          ],
-        },
-      ],
-    };
-
-    const result = getPosition('JOIN index ON a == b, ', command as ESQLAstJoinCommand, 22);
-
-    expect(result.pos).toBe('on_expression');
-    expect(result.isExpressionComplete).toBe(false);
-    expect(result.expression).toBeUndefined();
-  });
-});
-
-describe('markCommonFields()', () => {
+describe('suggestionIntersection()', () => {
   test('returns shared fields between two lists', () => {
-    const result = markCommonFields(
+    const intersection = suggestionIntersection(
       [
         { label: 'id', text: '', kind: 'Field', detail: '' },
         { label: 'currency', text: '', kind: 'Field', detail: '' },
@@ -144,37 +71,24 @@ describe('markCommonFields()', () => {
       ]
     );
 
-    expect(result.commonFieldLabels.has('id')).toBe(true);
-    expect(result.commonFieldLabels.has('currency')).toBe(true);
-    expect(result.commonFieldLabels.size).toBe(2);
-
-    const intersection = result.markedSourceSuggestions
-      .filter((s) => result.commonFieldLabels.has(s.label))
-      .map((s) => ({
-        label: s.label,
-        text: s.text,
-        kind: s.kind,
-        detail: s.detail,
-      }));
-
     expect(intersection).toEqual([
       {
         label: 'id',
         text: '',
         kind: 'Field',
-        detail: '(common field)',
+        detail: '',
       },
       {
         label: 'currency',
         text: '',
         kind: 'Field',
-        detail: '(common field)',
+        detail: '',
       },
     ]);
   });
 
   test('returns empty list if there are no shared fields', () => {
-    const result = markCommonFields(
+    const intersection = suggestionIntersection(
       [
         { label: 'id1', text: '', kind: 'Field', detail: '' },
         { label: 'value', text: '', kind: 'Field', detail: '' },
@@ -187,11 +101,11 @@ describe('markCommonFields()', () => {
       ]
     );
 
-    expect(result.commonFieldLabels.size).toBe(0);
+    expect(intersection).toEqual([]);
   });
 
   test('returns all fields, if all intersect', () => {
-    const result = markCommonFields(
+    const intersection = suggestionIntersection(
       [
         { label: 'id1', text: '', kind: 'Field', detail: '' },
         { label: 'value', text: '', kind: 'Field', detail: '' },
@@ -203,52 +117,36 @@ describe('markCommonFields()', () => {
       ]
     );
 
-    expect(result.commonFieldLabels.has('id1')).toBe(true);
-    expect(result.commonFieldLabels.has('value')).toBe(true);
-    expect(result.commonFieldLabels.size).toBe(2);
-
-    const intersection = result.markedSourceSuggestions
-      .filter((s) => result.commonFieldLabels.has(s.label))
-      .map((s) => ({
-        label: s.label,
-        text: s.text,
-        kind: s.kind,
-        detail: s.detail,
-      }));
-
     expect(intersection).toEqual([
-      { label: 'id1', text: '', kind: 'Field', detail: '(common field)' },
-      { label: 'value', text: '', kind: 'Field', detail: '(common field)' },
+      { label: 'id1', text: '', kind: 'Field', detail: '' },
+      { label: 'value', text: '', kind: 'Field', detail: '' },
     ]);
   });
 
   test('creates a clone of suggestions', () => {
-    const suggestion1 = {
+    const suggestion1: ISuggestionItem = {
       label: 'id1',
       text: '',
       kind: 'Field',
       detail: '',
     };
-    const suggestion2 = {
+    const suggestion2: ISuggestionItem = {
       label: 'id1',
       text: '',
       kind: 'Field',
       detail: '',
     };
-    const result = markCommonFields(
-      [suggestion1] as ISuggestionItem[],
-      [suggestion2] as ISuggestionItem[]
-    );
+    const intersection = suggestionIntersection([suggestion1], [suggestion2]);
 
-    expect(result.commonFieldLabels.has('id1')).toBe(true);
-    expect(result.markedSourceSuggestions[0]).not.toBe(suggestion1);
-    expect(result.markedSourceSuggestions[0].label).toBe('id1');
+    expect(intersection).toEqual([suggestion1]);
+    expect(intersection[0]).not.toBe(suggestion1);
+    expect(intersection[0]).not.toBe(suggestion2);
   });
 });
 
-describe('markCommonFields() - union behavior', () => {
+describe('suggestionUnion()', () => {
   test('combines two sets without duplicates', () => {
-    const result = markCommonFields(
+    const intersection = suggestionUnion(
       [
         { label: 'id', text: '', kind: 'Field', detail: '' },
         { label: 'currency', text: '', kind: 'Field', detail: '' },
@@ -262,33 +160,18 @@ describe('markCommonFields() - union behavior', () => {
       ]
     );
 
-    const union = [
-      ...result.markedSourceSuggestions.map((s) => ({
-        label: s.label,
-        text: s.text,
-        kind: s.kind,
-        detail: s.detail,
-      })),
-      ...result.uniqueLookupSuggestions.map((s) => ({
-        label: s.label,
-        text: s.text,
-        kind: s.kind,
-        detail: s.detail,
-      })),
-    ];
-
-    expect(union).toEqual([
+    expect(intersection).toEqual([
       {
         label: 'id',
         text: '',
         kind: 'Field',
-        detail: '(common field)',
+        detail: '',
       },
       {
         label: 'currency',
         text: '',
         kind: 'Field',
-        detail: '(common field)',
+        detail: '',
       },
       {
         label: 'value',
@@ -312,29 +195,12 @@ describe('markCommonFields() - union behavior', () => {
   });
 
   test('combines two non-overlapping sets', () => {
-    const result = markCommonFields(
+    const intersection = suggestionUnion(
       [{ label: 'id', text: '', kind: 'Field', detail: '' }],
       [{ label: 'currency', text: '', kind: 'Field', detail: '' }]
     );
 
-    expect(result.commonFieldLabels.size).toBe(0);
-
-    const union = [
-      ...result.markedSourceSuggestions.map((s) => ({
-        label: s.label,
-        text: s.text,
-        kind: s.kind,
-        detail: s.detail,
-      })),
-      ...result.uniqueLookupSuggestions.map((s) => ({
-        label: s.label,
-        text: s.text,
-        kind: s.kind,
-        detail: s.detail,
-      })),
-    ];
-
-    expect(union).toEqual([
+    expect(intersection).toEqual([
       {
         label: 'id',
         text: '',

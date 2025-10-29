@@ -22,17 +22,12 @@ import type {
 } from '@kbn/expression-partition-vis-plugin/common';
 import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
 import type { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
-import type {
-  LensPartitionLayerState,
-  LensPartitionVisualizationState,
-  Operation,
-  DatasourcePublicAPI,
-  DatasourceLayers,
-} from '@kbn/lens-common';
-import { PARTITION_EMPTY_SIZE_RADIUS } from '@kbn/lens-common';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
+import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { getLegendStats } from './render_helpers';
+import type { PieLayerState, PieVisualizationState } from '../../../common/types';
+import { EmptySizeRatios } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -54,18 +49,18 @@ interface OperationColumnId {
 }
 
 type GenerateExpressionAstFunction = (
-  state: LensPartitionVisualizationState,
+  state: PieVisualizationState,
   attributes: Attributes,
   operations: OperationColumnId[],
-  layer: LensPartitionLayerState,
+  layer: PieLayerState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry
 ) => Ast | null;
 
 type GenerateLabelsAstArguments = (
-  state: LensPartitionVisualizationState,
+  state: PieVisualizationState,
   attributes: Attributes,
-  layer: LensPartitionLayerState,
+  layer: PieLayerState,
   columnToLabelMap: Record<string, string>
 ) => [Ast];
 
@@ -85,7 +80,7 @@ export const getColumnToLabelMap = (
 
 export const getSortedAccessorsForGroup = (
   datasource: DatasourcePublicAPI | undefined,
-  layer: LensPartitionLayerState,
+  layer: PieLayerState,
   accessor: 'primaryGroups' | 'secondaryGroups' | 'metrics'
 ) => {
   const originalOrder = datasource
@@ -171,10 +166,10 @@ const generatePaletteAstArguments = (
     : [paletteService.get('default').toExpression()];
 
 const generateCommonArguments = (
-  state: LensPartitionVisualizationState,
+  state: PieVisualizationState,
   attributes: Attributes,
   operations: OperationColumnId[],
-  layer: LensPartitionLayerState,
+  layer: PieLayerState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry
 ) => {
@@ -228,7 +223,7 @@ const generateDonutVisAst: GenerateExpressionAstFunction = (...rest) => {
       respectSourceOrder: false,
       isDonut: true,
       startFromSecondLargestSlice: true,
-      emptySizeRatio: layer.emptySizeRatio ?? PARTITION_EMPTY_SIZE_RADIUS.SMALL,
+      emptySizeRatio: layer.emptySizeRatio ?? EmptySizeRatios.SMALL,
     }),
   ]).toAst();
 };
@@ -290,7 +285,7 @@ const generateExprAst: GenerateExpressionAstFunction = (state, ...restArgs) =>
   }[state.shape]());
 
 function expressionHelper(
-  state: LensPartitionVisualizationState,
+  state: PieVisualizationState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Attributes = { isPreview: false },
@@ -349,7 +344,7 @@ function expressionHelper(
 }
 
 export function toExpression(
-  state: LensPartitionVisualizationState,
+  state: PieVisualizationState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
@@ -368,7 +363,7 @@ export function toExpression(
 }
 
 export function toPreviewExpression(
-  state: LensPartitionVisualizationState,
+  state: PieVisualizationState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}

@@ -33,12 +33,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
-import {
-  ShareProvider,
-  type IShareContext,
-  useShareTypeContext,
-  useShareContext,
-} from '../context';
+import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
 import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
 import type { DraftModeCalloutProps } from '../common/draft_mode_callout';
 import { DraftModeCallout } from '../common/draft_mode_callout';
@@ -71,8 +66,6 @@ interface ManagedFlyoutProps {
   shareObjectTypeMeta: ReturnType<
     typeof useShareTypeContext<'integration', 'export'>
   >['objectTypeMeta'];
-  onSave?: () => Promise<void | object>;
-  isSaving?: boolean;
 }
 
 function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOptionsProps) {
@@ -135,8 +128,6 @@ function ManagedFlyout({
   shareObjectTypeMeta,
   shareObjectType,
   shareObjectTypeAlias,
-  onSave,
-  isSaving,
 }: ManagedFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
@@ -236,15 +227,7 @@ function ManagedFlyout({
           <Fragment>
             {publicAPIEnabled && isDirty && draftModeCallout && (
               <EuiFlexItem>
-                <DraftModeCallout
-                  {...draftModeCalloutContent}
-                  {...(onSave && {
-                    saveButtonProps: {
-                      onSave,
-                      isSaving,
-                    },
-                  })}
-                />
+                <DraftModeCallout {...draftModeCalloutContent} />
               </EuiFlexItem>
             )}
           </Fragment>
@@ -280,7 +263,6 @@ function ManagedFlyout({
 }
 
 function ExportMenuPopover({ intl }: ExportMenuProps) {
-  const { onSave, isSaving } = useShareContext();
   const {
     onClose,
     anchorElement,
@@ -462,8 +444,6 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               publicAPIEnabled={publicAPIEnabled}
               intl={intl}
               onCloseFlyout={flyoutOnCloseHandler}
-              onSave={onSave}
-              isSaving={isSaving}
             />
           ) : (
             (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent({

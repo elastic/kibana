@@ -78,7 +78,6 @@ export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = 
             isDisabled={isDisabled}
             groupPosition={groupPosition}
             data-test-subj={buttonDataTestSubj}
-            size="s"
           />
         }
         isOpen={isOpen}

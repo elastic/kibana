@@ -15,7 +15,6 @@ import {
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
-  ENDPOINT_EXCEPTIONS_PATH,
   ENDPOINTS_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -24,17 +23,15 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
-  SECURITY_FEATURE_ID,
   SecurityPageName,
+  SECURITY_FEATURE_ID,
   TRUSTED_APPS_PATH,
+  ENDPOINT_EXCEPTIONS_PATH,
   TRUSTED_DEVICES_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
-  ENDPOINT_EXCEPTIONS,
   ENDPOINTS,
-  ENTITY_ANALYTICS_RISK_SCORE,
-  ENTITY_STORE,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
@@ -42,6 +39,9 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
   TRUSTED_DEVICES,
+  ENTITY_ANALYTICS_RISK_SCORE,
+  ENTITY_STORE,
+  ENDPOINT_EXCEPTIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -218,6 +218,7 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+      experimentalKey: 'riskScoringRoutesEnabled',
       licenseType: 'platinum',
     },
     {

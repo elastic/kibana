@@ -103,17 +103,11 @@ const outdatedTransformsRequiredReinstallMock = {
   ],
 } as TransformGetTransformResponse;
 
-describe('transforms utils', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+const logger = loggingSystemMock.createLogger();
 
+describe('transforms utils', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    logger = loggingSystemMock.createLogger();
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('scheduleTransformNow', () => {

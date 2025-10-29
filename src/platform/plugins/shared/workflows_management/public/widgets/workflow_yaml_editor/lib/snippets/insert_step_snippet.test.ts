@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createMockModel } from '../../../../../common/mocks/monaco_model';
 import { parseDocument } from 'yaml';
+import { insertStepSnippet } from './insert_step_snippet';
 import { monaco } from '@kbn/monaco';
 import * as generateBuiltInStepSnippetModule from './generate_builtin_step_snippet';
 import * as generateConnectorSnippetModule from './generate_connector_snippet';
-import { insertStepSnippet } from './insert_step_snippet';
-import { createMockModel } from '../../../../../common/mocks/monaco_model';
 import { prependIndentToLines } from '../prepend_indent_to_lines';
 
 describe('insertStepSnippet', () => {

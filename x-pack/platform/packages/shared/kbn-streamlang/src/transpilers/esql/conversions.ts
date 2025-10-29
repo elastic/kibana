@@ -12,7 +12,6 @@ import { conditionToESQLAst } from './condition_to_esql';
 import type { ESQLTranspilationOptions } from '.';
 import type {
   AppendProcessor,
-  ConvertProcessor,
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
@@ -26,7 +25,6 @@ import { convertAppendProcessorToESQL } from './processors/append';
 import { convertDateProcessorToESQL } from './processors/date';
 import { convertDissectProcessorToESQL } from './processors/dissect';
 import { convertGrokProcessorToESQL } from './processors/grok';
-import { convertConvertProcessorToESQL } from './processors/convert';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -38,9 +36,6 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'append':
       return convertAppendProcessorToESQL(processor as AppendProcessor);
-
-    case 'convert':
-      return convertConvertProcessorToESQL(processor as ConvertProcessor);
 
     case 'date':
       return convertDateProcessorToESQL(processor as DateProcessor);
@@ -78,7 +73,6 @@ export function convertStreamlangDSLToESQLCommands(
     .flat();
 
   const query = Builder.expression.query(esqlAstCommands);
-
   return BasicPrettyPrinter.multiline(query, { pipeTab: transpilationOptions.pipeTab });
 }
 

@@ -7,10 +7,10 @@
 
 import { LegendValue } from '@elastic/charts';
 
-import type { LensPartitionLayerState, LensPartitionVisualizationState } from '@kbn/lens-common';
+import type { PieLayerState, PieVisualizationState } from '../../../../../common/types';
 
 /** @deprecated */
-type DeprecatedLegendValueLayer = LensPartitionLayerState & {
+type DeprecatedLegendValueLayer = PieLayerState & {
   showValuesInLegend?: boolean;
 };
 
@@ -19,15 +19,12 @@ type DeprecatedLegendValueLayer = LensPartitionLayerState & {
  *
  * @deprecated
  */
-export type DeprecatedLegendValueLensPartitionVisualizationState = Omit<
-  LensPartitionVisualizationState,
-  'layers'
-> & {
+export type DeprecatedLegendValuePieVisualizationState = Omit<PieVisualizationState, 'layers'> & {
   layers: DeprecatedLegendValueLayer[];
 };
 
 export function convertToLegendStats(
-  state: DeprecatedLegendValueLensPartitionVisualizationState | LensPartitionVisualizationState
+  state: DeprecatedLegendValuePieVisualizationState | PieVisualizationState
 ) {
   state.layers.forEach((l) => {
     if ('showValuesInLegend' in l) {

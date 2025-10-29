@@ -8,8 +8,7 @@
 import React from 'react';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { AWSReusableConnectorForm } from '../aws_cloud_connector/aws_reusable_connector_form';
-import type { CloudConnectorCredentials } from '../types';
-import { AWS_PROVIDER, AZURE_PROVIDER } from '../constants';
+import type { CloudConnectorCredentials } from '../hooks/use_cloud_connector_setup';
 
 export const ReusableCloudConnectorForm: React.FC<{
   credentials: CloudConnectorCredentials;
@@ -18,10 +17,10 @@ export const ReusableCloudConnectorForm: React.FC<{
   cloudProvider?: string;
   isEditPage: boolean;
 }> = ({ credentials, setCredentials, cloudProvider, newPolicy, isEditPage }) => {
-  const provider = cloudProvider || AWS_PROVIDER;
+  const provider = cloudProvider || 'aws';
 
   switch (provider) {
-    case AWS_PROVIDER:
+    case 'aws':
       return (
         <AWSReusableConnectorForm
           isEditPage={isEditPage}
@@ -30,9 +29,9 @@ export const ReusableCloudConnectorForm: React.FC<{
           setCredentials={setCredentials}
         />
       );
-    case AZURE_PROVIDER:
     case 'gcp':
-      // TODO: Implement GCP cloud connector forms
+    case 'azure':
+      // TODO: Implement GCP and Azure cloud connector forms
       return null;
     default:
       return null;

@@ -29,7 +29,6 @@ describe('MetricsGrid', () => {
     query: {
       esql: 'FROM metrics-*',
     },
-    esqlVariables: [],
     relativeTimeRange: { from: 'now-1h', to: 'now' },
     updateTimeRange: () => {},
   };

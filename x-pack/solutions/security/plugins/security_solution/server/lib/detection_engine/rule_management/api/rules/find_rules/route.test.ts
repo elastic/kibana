@@ -16,16 +16,10 @@ import {
   getEmptySavedObjectsResponse,
 } from '../../../../routes/__mocks__/request_responses';
 import { findRulesRoute } from './route';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../../routes/__mocks__/request_context';
 
 describe('Find rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let clients: MockClients;
-  let context: SecuritySolutionRequestHandlerContextMock;
-
+  let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(async () => {
@@ -38,11 +32,6 @@ describe('Find rules route', () => {
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
 
     findRulesRoute(server.router, logger);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {

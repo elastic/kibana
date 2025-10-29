@@ -582,6 +582,8 @@ describe('features', () => {
         'delete',
         'update',
         'updateApiKey',
+        'enable',
+        'disable',
         'muteAll',
         'unmuteAll',
         'muteAlert',
@@ -589,11 +591,14 @@ describe('features', () => {
         'snooze',
         'bulkEdit',
         'bulkDelete',
+        'bulkEnable',
+        'bulkDisable',
         'unsnooze',
         'runSoon',
+        'scheduleBackfill',
+        'deleteBackfill',
+        'fillGaps',
       ],
-      ...['enable', 'disable', 'bulkEnable', 'bulkDisable'],
-      ...['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
     ];
 
     const expectedAllPrivileges = [
@@ -755,6 +760,8 @@ describe('features', () => {
         'delete',
         'update',
         'updateApiKey',
+        'enable',
+        'disable',
         'muteAll',
         'unmuteAll',
         'muteAlert',
@@ -762,11 +769,14 @@ describe('features', () => {
         'snooze',
         'bulkEdit',
         'bulkDelete',
+        'bulkEnable',
+        'bulkDisable',
         'unsnooze',
         'runSoon',
+        'scheduleBackfill',
+        'deleteBackfill',
+        'fillGaps',
       ],
-      ...['enable', 'disable', 'bulkEnable', 'bulkDisable'],
-      ...['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
     ];
 
     const expectedAllPrivileges = [

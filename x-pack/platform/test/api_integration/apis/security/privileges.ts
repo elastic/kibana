@@ -374,6 +374,7 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
+      aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };

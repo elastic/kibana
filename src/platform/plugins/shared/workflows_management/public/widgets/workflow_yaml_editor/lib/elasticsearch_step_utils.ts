@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any, complexity */
-
-import { isMap, isPair, isScalar, visit } from 'yaml';
-import type YAML from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import { isPair, isScalar, visit, isMap } from 'yaml';
+import type YAML from 'yaml';
 import { buildRequestFromConnector } from '@kbn/workflows';
 
 export interface ElasticsearchStepData {
@@ -205,7 +203,7 @@ export function getConsoleFormat(step: ElasticsearchStepData): string {
   let consoleFormat = `${request.method} ${request.url}`;
 
   if (request.data && request.data.length > 0) {
-    consoleFormat += `\n${request.data.join('\n')}`;
+    consoleFormat += '\n' + request.data.join('\n');
   }
 
   return consoleFormat;

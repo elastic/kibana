@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  euiFontSize,
   EuiIcon,
   EuiTextColor,
   EuiToolTip,
-  type UseEuiTheme,
   useResizeObserver,
+  euiFontSize,
+  type UseEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useCallback, useState } from 'react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { IgnoredReason } from '@kbn/discover-utils';
+import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { IgnoredReason } from '@kbn/discover-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 // copied from unified_doc_viewer/public/components/doc_viewer_table/table_cell_value.tsx
 
@@ -97,8 +97,6 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
   );
 });
 
-IgnoreWarning.displayName = 'IgnoreWarning';
-
 interface TableFieldValueProps {
   field: string;
   formattedValue: string;
@@ -159,7 +157,7 @@ export const TableFieldValue = ({
   const valueElementId = `tableDocViewRow-${field}-value`;
 
   return (
-    <>
+    <Fragment>
       {ignoreReason && (
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -200,7 +198,7 @@ export const TableFieldValue = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </Fragment>
   );
 };
 

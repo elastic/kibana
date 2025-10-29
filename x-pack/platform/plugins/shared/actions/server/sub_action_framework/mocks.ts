@@ -6,20 +6,21 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { z } from '@kbn/zod';
+import type { Type, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { AxiosError } from 'axios';
 import type { ConnectorUsageCollector } from '../usage';
 import { SubActionConnector } from './sub_action_connector';
 import { CaseConnector } from './case';
 import type { ExternalServiceIncidentResponse, ServiceParams } from './types';
 
-export const TestConfigSchema = z.object({ url: z.string() });
-export const TestSecretsSchema = z.object({
-  username: z.string(),
-  password: z.string(),
+export const TestConfigSchema = schema.object({ url: schema.string() });
+export const TestSecretsSchema = schema.object({
+  username: schema.string(),
+  password: schema.string(),
 });
-export type TestConfig = z.infer<typeof TestConfigSchema>;
-export type TestSecrets = z.infer<typeof TestSecretsSchema>;
+export type TestConfig = TypeOf<typeof TestConfigSchema>;
+export type TestSecrets = TypeOf<typeof TestSecretsSchema>;
 
 export interface GetIncidentResponse {
   id: string;
@@ -44,7 +45,7 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
     this.registerSubAction({
       name: 'testUrl',
       method: 'testUrl',
-      schema: z.object({ url: z.string() }),
+      schema: schema.object({ url: schema.string() }),
     });
 
     this.registerSubAction({
@@ -67,7 +68,7 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
         url,
         data,
         headers: { 'X-Test-Header': 'test' },
-        responseSchema: z.object({ status: z.string() }),
+        responseSchema: schema.object({ status: schema.string() }),
       },
       connectorUsageCollector
     );
@@ -84,7 +85,7 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
         url: 'https://example.com',
         data: this.removeNullOrUndefinedFields(data),
         headers: { 'X-Test-Header': 'test' },
-        responseSchema: z.object({ status: z.string() }),
+        responseSchema: schema.object({ status: schema.string() }),
       },
       connectorUsageCollector
     );
@@ -102,7 +103,7 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
         data: {},
         auth: { username: 'username', password: 'password' },
         headers: { 'X-Test-Header': 'test', ...headers },
-        responseSchema: z.object({ status: z.string() }),
+        responseSchema: schema.object({ status: schema.string() }),
       },
       connectorUsageCollector
     );
@@ -125,19 +126,19 @@ export class TestExecutor extends SubActionConnector<TestConfig, TestSecrets> {
     this.registerSubAction({
       name: 'testUrl',
       method: 'not-exist',
-      schema: z.object({}),
+      schema: schema.object({}),
     });
 
     this.registerSubAction({
       name: 'notAFunction',
       method: 'notAFunction',
-      schema: z.object({}),
+      schema: schema.object({}),
     });
 
     this.registerSubAction({
       name: 'echo',
       method: 'echo',
-      schema: z.object({ id: z.string() }),
+      schema: schema.object({ id: schema.string() }),
     });
 
     this.registerSubAction({
@@ -184,7 +185,7 @@ export class TestCaseConnector extends CaseConnector<
 > {
   constructor(
     params: ServiceParams<TestConfig, TestSecrets>,
-    pushToServiceParamsSchema: Record<string, z.ZodType<unknown>>
+    pushToServiceParamsSchema: Record<string, Type<unknown>>
   ) {
     super(params, pushToServiceParamsSchema);
   }

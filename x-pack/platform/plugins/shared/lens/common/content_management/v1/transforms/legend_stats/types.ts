@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { DeprecatedLegendValueLensPartitionVisualizationState } from './partition';
+import type { DeprecatedLegendValuePieVisualizationState } from './partition';
 import type { DeprecatedLegendValueXYState } from './xy';
 
 export type DeprecatedLegendValueState =
   | DeprecatedLegendValueXYState
-  | DeprecatedLegendValueLensPartitionVisualizationState;
+  | DeprecatedLegendValuePieVisualizationState;

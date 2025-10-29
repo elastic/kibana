@@ -139,39 +139,26 @@ describe('Update profile routes', () => {
       });
       authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ elastic_cloud_user: true }));
 
-      const ALLOWED_SETTINGS = {
-        userSettings: {
-          darkMode: 'dark',
-          contrastMode: 'high',
-        },
-        'solutionNavigationTour:completed': true,
-      };
-
       await expect(
         routeHandler(
           getMockContext(),
           httpServerMock.createKibanaRequest({
-            body: ALLOWED_SETTINGS,
+            body: {
+              userSettings: {
+                darkMode: 'dark', // "userSettings.darkMode" is allowed
+              },
+            },
           }),
           kibanaResponseFactory
         )
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
 
       expect(userProfileService.update).toBeCalledTimes(1);
-      expect(userProfileService.update).toBeCalledWith('u_some_id', ALLOWED_SETTINGS);
-
-      await expect(
-        routeHandler(
-          getMockContext(),
-          httpServerMock.createKibanaRequest({
-            body: {
-              ...ALLOWED_SETTINGS,
-              NOT_ALLOWED_KEY: 'some value',
-            },
-          }),
-          kibanaResponseFactory
-        )
-      ).resolves.toEqual(expect.objectContaining({ status: 403 }));
+      expect(userProfileService.update).toBeCalledWith('u_some_id', {
+        userSettings: {
+          darkMode: 'dark',
+        },
+      });
     });
 
     it('updates profile.', async () => {

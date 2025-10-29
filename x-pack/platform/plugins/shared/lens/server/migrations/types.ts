@@ -9,11 +9,11 @@ import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { Query, Filter } from '@kbn/es-query';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type {
-  LensLayerType as LayerType,
+  LayerType,
   PersistableFilter,
   RowHeightMode,
   ValueLabelConfig,
-} from '@kbn/lens-common';
+} from '../../common/types';
 
 export type CustomVisualizationMigrations = Record<string, () => MigrateFunctionsObject>;
 

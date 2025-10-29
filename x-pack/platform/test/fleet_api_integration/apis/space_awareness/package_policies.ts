@@ -30,7 +30,6 @@ export default function (providerContext: FtrProviderContext) {
 
     let multiSpacePolicy: CreateAgentPolicyResponse;
     let defaultSpacePolicy: CreateAgentPolicyResponse;
-    let allSpacePolicy: CreateAgentPolicyResponse;
 
     before(async () => {
       await setupTestUsers(getService('security'), true);
@@ -49,9 +48,6 @@ export default function (providerContext: FtrProviderContext) {
       });
       defaultSpacePolicy = await apiClient.createAgentPolicy(undefined, {
         space_ids: ['default'],
-      });
-      allSpacePolicy = await apiClient.createAgentPolicy(undefined, {
-        space_ids: ['*'],
       });
       await apiClient.installPackage({ pkgName: 'nginx', force: true, pkgVersion: '1.20.0' });
     });
@@ -87,38 +83,6 @@ export default function (providerContext: FtrProviderContext) {
         packagePolicyId = packagePolicyRes.item.id;
       });
 
-      it('should allow to add a package policy to an all agent policy in the default space', async () => {
-        const packagePolicyRes = await apiClient.createPackagePolicy(undefined, {
-          policy_ids: [allSpacePolicy.item.id],
-          name: `test-nginx-${Date.now()}`,
-          description: 'test',
-          package: {
-            name: 'nginx',
-            version: '1.20.0',
-          },
-          inputs: {},
-        });
-
-        expect(packagePolicyRes.item).to.have.property('id');
-        packagePolicyId = packagePolicyRes.item.id;
-      });
-
-      it('should allow to add a package policy to an all agent policy in the test space', async () => {
-        const packagePolicyRes = await apiClient.createPackagePolicy(undefined, {
-          policy_ids: [allSpacePolicy.item.id],
-          name: `test-nginx-${Date.now()}`,
-          description: 'test',
-          package: {
-            name: 'nginx',
-            version: '1.20.0',
-          },
-          inputs: {},
-        });
-
-        expect(packagePolicyRes.item).to.have.property('id');
-        packagePolicyId = packagePolicyRes.item.id;
-      });
-
       it('should not allow to add a reusable package policy to a multi-space agent policy in the default space', async () => {
         await expectToRejectWithError(
           () =>
@@ -135,65 +99,12 @@ export default function (providerContext: FtrProviderContext) {
           /400 "Bad Request" Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
         );
       });
-
-      it('should not allow to add a reusable package policy to an all space agent policy in the default space', async () => {
-        await expectToRejectWithError(
-          () =>
-            apiClient.createPackagePolicy(undefined, {
-              policy_ids: [allSpacePolicy.item.id, defaultSpacePolicy.item.id],
-              name: `test-nginx-${Date.now()}`,
-              description: 'test',
-              package: {
-                name: 'nginx',
-                version: '1.20.0',
-              },
-              inputs: {},
-            }),
-          /400 "Bad Request" Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
-        );
-      });
     });
 
     describe('PUT /package_policies', () => {
       let packagePolicyId: string;
-      let allSpacePolicyId: string;
       before(async () => {
-        const [packagePolicyRes, allSpacePackagePolicyRes] = await Promise.all([
-          apiClient.createPackagePolicy(undefined, {
-            policy_ids: [multiSpacePolicy.item.id],
-            name: `test-nginx-multispace-${Date.now()}`,
-            description: 'test',
-            package: {
-              name: 'nginx',
-              version: '1.20.0',
-            },
-            inputs: {},
-          }),
-          apiClient.createPackagePolicy(undefined, {
-            policy_ids: [allSpacePolicy.item.id],
-            name: `test-nginx-allspace-${Date.now()}`,
-            description: 'test',
-            package: {
-              name: 'nginx',
-              version: '1.20.0',
-            },
-            inputs: {},
-          }),
-        ]);
-
-        packagePolicyId = packagePolicyRes.item.id;
-        allSpacePolicyId = allSpacePackagePolicyRes.item.id;
-      });
-      after(async () => {
-        if (packagePolicyId) {
-          await apiClient.deletePackagePolicy(packagePolicyId);
-        }
-        if (allSpacePolicyId) {
-          await apiClient.deletePackagePolicy(allSpacePolicyId);
-        }
-      });
-      it('should allow to edit a package policy in a multi-space agent policy in the default space', async () => {
-        await apiClient.updatePackagePolicy(packagePolicyId, {
+        const packagePolicyRes = await apiClient.createPackagePolicy(undefined, {
           policy_ids: [multiSpacePolicy.item.id],
           name: `test-nginx-${Date.now()}`,
           description: 'test',
@@ -203,11 +114,16 @@ export default function (providerContext: FtrProviderContext) {
           },
           inputs: {},
         });
+        packagePolicyId = packagePolicyRes.item.id;
       });
-
-      it('should allow to edit a package policy in an all spaces agent policy in the default space', async () => {
-        await apiClient.updatePackagePolicy(allSpacePolicyId, {
-          policy_ids: [allSpacePolicy.item.id],
+      after(async () => {
+        if (packagePolicyId) {
+          await apiClient.deletePackagePolicy(packagePolicyId);
+        }
+      });
+      it('should allow to edit a package policy in a multi-space agent policy in the default space', async () => {
+        const packagePolicyRes = await apiClient.updatePackagePolicy(packagePolicyId, {
+          policy_ids: [multiSpacePolicy.item.id],
           name: `test-nginx-${Date.now()}`,
           description: 'test',
           package: {
@@ -216,23 +132,9 @@ export default function (providerContext: FtrProviderContext) {
           },
           inputs: {},
         });
-      });
 
-      it('should allow to edit a package policy in an all spaces agent policy in the test space', async () => {
-        await apiClient.updatePackagePolicy(
-          allSpacePolicyId,
-          {
-            policy_ids: [allSpacePolicy.item.id],
-            name: `test-nginx-${Date.now()}`,
-            description: 'test',
-            package: {
-              name: 'nginx',
-              version: '1.20.0',
-            },
-            inputs: {},
-          },
-          TEST_SPACE_1
-        );
+        expect(packagePolicyRes.item).to.have.property('id');
+        packagePolicyId = packagePolicyRes.item.id;
       });
 
       it('should not allow to make a policy used in multiple space reusable', async () => {
@@ -240,23 +142,6 @@ export default function (providerContext: FtrProviderContext) {
           () =>
             apiClient.updatePackagePolicy(packagePolicyId, {
               policy_ids: [multiSpacePolicy.item.id, defaultSpacePolicy.item.id],
-              name: `test-nginx-${Date.now()}`,
-              description: 'test',
-              package: {
-                name: 'nginx',
-                version: '1.20.0',
-              },
-              inputs: {},
-            }),
-          /400 "Bad Request" Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
-        );
-      });
-
-      it('should not allow to make a policy used in all space reusable', async () => {
-        await expectToRejectWithError(
-          () =>
-            apiClient.updatePackagePolicy(packagePolicyId, {
-              policy_ids: [allSpacePolicy.item.id, defaultSpacePolicy.item.id],
               name: `test-nginx-${Date.now()}`,
               description: 'test',
               package: {

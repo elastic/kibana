@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { Provider } from 'react-redux';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
-import { MetricsExperienceClientProvider } from '../context/metrics_experience_client_provider';
-import { withRestorableState } from '../restorable_state';
-import { MetricsExperienceStateProvider } from '../context/metrics_experience_state_provider';
+import { store } from '../store';
+import { MetricsExperienceProvider } from '../context/metrics_experience_provider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,7 +27,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const InternalUnifiedMetricsExperienceGrid = (
+export const UnifiedMetricsExperienceGrid = (
   props: ChartSectionProps & { client?: MetricsExperienceClient }
 ) => {
   if (!props.client) {
@@ -35,19 +35,15 @@ const InternalUnifiedMetricsExperienceGrid = (
   }
 
   return (
-    <MetricsExperienceClientProvider value={{ client: props.client }}>
-      <MetricsExperienceStateProvider>
+    <MetricsExperienceProvider value={{ client: props.client }}>
+      <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <MetricsExperienceGrid {...props} />
         </QueryClientProvider>
-      </MetricsExperienceStateProvider>
-    </MetricsExperienceClientProvider>
+      </Provider>
+    </MetricsExperienceProvider>
   );
 };
 
-const UnifiedMetricsExperienceGridWithRestorableState = withRestorableState(
-  InternalUnifiedMetricsExperienceGrid
-);
-
 // eslint-disable-next-line import/no-default-export
-export default UnifiedMetricsExperienceGridWithRestorableState;
+export default UnifiedMetricsExperienceGrid;

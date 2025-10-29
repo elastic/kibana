@@ -8,8 +8,8 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { runNode } from './run_node';
 import type { WorkflowExecutionLoopParams } from './types';
+import { runNode } from './run_node';
 
 /**
  * Executes the main workflow execution loop, processing nodes sequentially until completion.

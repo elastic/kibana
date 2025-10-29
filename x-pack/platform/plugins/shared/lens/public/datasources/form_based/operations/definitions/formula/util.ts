@@ -14,9 +14,12 @@ import type {
 } from '@kbn/tinymath';
 import type { Query } from '@kbn/es-query';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
-import type { GenericIndexPatternColumn } from '@kbn/lens-common';
 import { nonNullable } from '../../../../../utils';
-import type { OperationDefinition, GenericOperationDefinition } from '..';
+import type {
+  OperationDefinition,
+  GenericIndexPatternColumn,
+  GenericOperationDefinition,
+} from '..';
 import type { GroupedNodes } from './types';
 
 export const unquotedStringRegex = /[^0-9A-Za-z._@\[\]/]/;

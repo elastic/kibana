@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
+import React, { useEffect, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
 
 const WORKFLOW_POPOVER_WIDTH = 500;
 
 interface WorkflowFilterPopoverProps {
   filter: string;
   title: string;
-  selectedValues: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  selectedValues: any[];
   values: EuiSelectableOption[];
-  onSelectedValuesChanged: (newValues: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  onSelectedValuesChanged: (newValues: any[]) => void;
 }
 
 const WorkflowsFilterPopoverComponent = ({
@@ -46,7 +44,7 @@ const WorkflowsFilterPopoverComponent = ({
   const handleSelectableOptionsChange = (newOptions: EuiSelectableOption[]) => {
     onSelectedValuesChanged(
       newOptions
-        .map(({ key, checked }: any): string | number | boolean | null => (checked ? key : null)) // eslint-disable-line @typescript-eslint/no-explicit-any
+        .map(({ key, checked }: any): string | number | boolean | null => (checked ? key : null))
         .filter((value) => value !== null)
     );
   };

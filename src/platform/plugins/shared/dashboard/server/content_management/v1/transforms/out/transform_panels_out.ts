@@ -12,7 +12,7 @@ import type {
   SavedDashboardPanel,
   SavedDashboardSection,
 } from '../../../../dashboard_saved_object';
-import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
+import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 import { getReferencesForPanelId } from '../../../../../common';
 import { embeddableService, logger } from '../../../../kibana_services';
 
@@ -20,7 +20,7 @@ export function transformPanelsOut(
   panelsJSON: string = '{}',
   sections: SavedDashboardSection[] = [],
   references?: SavedObjectReference[]
-): DashboardState['panels'] {
+): DashboardAttributes['panels'] {
   const topLevelPanels: DashboardPanel[] = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
   sections.forEach((section) => {

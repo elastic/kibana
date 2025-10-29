@@ -12,8 +12,10 @@ import React, { useEffect, useState } from 'react';
 
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import type { Duration } from 'moment';
-import type { GenericIndexPatternColumn, FormBasedLayer, IndexPattern } from '@kbn/lens-common';
+import type { GenericIndexPatternColumn } from '../operations';
 import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
+import type { FormBasedLayer } from '../types';
+import type { IndexPattern } from '../../../types';
 import { reducedTimeRangeOptions } from '../reduced_time_range_utils';
 
 export function setReducedTimeRange(

@@ -37,7 +37,6 @@
     "@kbn/licensing-plugin",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/object-utils",
-    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

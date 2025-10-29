@@ -20,21 +20,14 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../../routes/__mocks__/request_context';
 
 describe('Read rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let clients: MockClients;
-  let context: SecuritySolutionRequestHandlerContextMock;
-
+  let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const myFakeId = '99403909-ca9b-49ba-9d7a-7e5320e68d05';
   beforeEach(() => {
-    jest.clearAllMocks();
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
@@ -49,11 +42,6 @@ describe('Read rule route', () => {
       id: myFakeId,
     });
     readRuleRoute(server.router, logger);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {

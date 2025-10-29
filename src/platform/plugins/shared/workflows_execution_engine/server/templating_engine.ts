@@ -29,65 +29,9 @@ export class WorkflowTemplatingEngine {
         return value;
       }
     });
-
-    // register base64 filters for data processing
-    this.engine.registerFilter('base64_encode', (value: unknown): string => {
-      if (typeof value !== 'string') {
-        return '';
-      }
-      try {
-        return Buffer.from(value, 'utf8').toString('base64');
-      } catch (error) {
-        return '';
-      }
-    });
-
-    this.engine.registerFilter('base64_decode', (value: unknown): string => {
-      if (typeof value !== 'string') {
-        return '';
-      }
-      try {
-        return Buffer.from(value, 'base64').toString('utf8');
-      } catch (error) {
-        return '';
-      }
-    });
   }
 
-  public render<T>(obj: T, context: Record<string, unknown>): T {
-    return this.renderValueRecursively(obj, context) as T;
-  }
-
-  private renderValueRecursively(value: unknown, context: Record<string, unknown>): unknown {
-    // Handle null and undefined
-    if (value === null || value === undefined) {
-      return value;
-    }
-
-    // Handle string values - render them using the template engine
-    if (typeof value === 'string') {
-      return this.renderString(value, context);
-    }
-
-    // Handle arrays - recursively render each element
-    if (Array.isArray(value)) {
-      return value.map((item) => this.renderValueRecursively(item, context));
-    }
-
-    // Handle objects - recursively render each property
-    if (typeof value === 'object') {
-      const renderedObject: Record<string, unknown> = {};
-      for (const [key, val] of Object.entries(value)) {
-        renderedObject[key] = this.renderValueRecursively(val, context);
-      }
-      return renderedObject;
-    }
-
-    // Return primitive values as-is (numbers, booleans, etc.)
-    return value;
-  }
-
-  public renderString(template: string, context: Record<string, unknown>): string {
+  public render(template: string, context: Record<string, any>): string {
     try {
       return this.engine.parseAndRenderSync(template, context);
     } catch (error) {

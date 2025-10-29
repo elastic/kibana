@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { IndexMode } from '@kbn/index-management-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
 
@@ -41,34 +40,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('get', () => {
       let templateName: string;
-      let templateWithIndexModeName: string;
 
       before(async () => {
         templateName = `template-${getRandomString()}`;
         const indexTemplate = {
           name: templateName,
-          index_patterns: ['a-test*'],
+          index_patterns: ['test*'],
         };
-
-        templateWithIndexModeName = `template-${getRandomString()}`;
-        const indexTemplateWithIndexMode = {
-          name: templateWithIndexModeName,
-          index_patterns: ['b-test*'],
-          template: {
-            settings: {
-              index: {
-                mode: IndexMode.standard,
-              },
-            },
-          },
-        };
-
-        // Create a new index templates to test against
+        // Create a new index template to test against
         try {
           await es.indices.putIndexTemplate(indexTemplate);
-          await es.indices.putIndexTemplate(indexTemplateWithIndexMode);
         } catch (err) {
-          log.debug('[Setup error] Error creating index templates');
+          log.debug('[Setup error] Error creating index template');
           throw err;
         }
       });
@@ -79,11 +62,8 @@ export default function ({ getService }: FtrProviderContext) {
           await es.indices.deleteIndexTemplate({
             name: templateName,
           });
-          await es.indices.deleteIndexTemplate({
-            name: templateWithIndexModeName,
-          });
         } catch (err) {
-          log.debug('[Cleanup error] Error deleting index templates');
+          log.debug('[Cleanup error] Error deleting index template');
           throw err;
         }
       });
@@ -108,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
           const expectedKeys = [
             'name',
             'indexPatterns',
+            'indexMode',
             'hasSettings',
             'hasAliases',
             'hasMappings',
@@ -118,40 +99,6 @@ export default function ({ getService }: FtrProviderContext) {
           ].sort();
 
           expect(Object.keys(indexTemplateFound).sort()).to.eql(expectedKeys);
-        });
-
-        describe('with index mode', () => {
-          it('should list all the index templates with the expected parameters', async () => {
-            const { status, body: allTemplates } = await supertestWithoutAuth
-              .get(`${API_BASE_PATH}/index_templates`)
-              .set(internalReqHeader)
-              .set(roleAuthc.apiKeyHeader);
-            expect(status).to.eql(200);
-
-            // Legacy templates are not applicable on serverless
-            expect(allTemplates.legacyTemplates.length).to.eql(0);
-
-            const indexTemplateFound = allTemplates.templates.find(
-              (template: { name: string }) => template.name === templateWithIndexModeName
-            );
-
-            expect(indexTemplateFound).to.be.ok();
-
-            const expectedKeys = [
-              'name',
-              'indexPatterns',
-              'indexMode',
-              'hasSettings',
-              'hasAliases',
-              'hasMappings',
-              '_kbnMeta',
-              'allowAutoCreate',
-              'composedOf',
-              'ignoreMissingComponentTemplates',
-            ].sort();
-
-            expect(Object.keys(indexTemplateFound).sort()).to.eql(expectedKeys);
-          });
         });
       });
 
@@ -166,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
           const expectedKeys = [
             'name',
             'indexPatterns',
+            'indexMode',
             'template',
             '_kbnMeta',
             'allowAutoCreate',
@@ -193,9 +141,9 @@ export default function ({ getService }: FtrProviderContext) {
             await svlTemplatesApi.deleteTemplates([{ name: logsdbTemplateName }], roleAuthc);
           });
 
-          const logsdbSettings: Array<{ enabled: boolean | null; indexMode?: string }> = [
+          const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
             { enabled: true, indexMode: 'logsdb' },
-            { enabled: false, indexMode: undefined }, // If the the cluster.logsdb.enabled setting is false, and the settings.index.mode is not set, index mode is undefined
+            { enabled: false, indexMode: 'standard' },
             { enabled: null, indexMode: 'logsdb' }, // In serverless Kibana, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
           ];
 
@@ -218,30 +166,6 @@ export default function ({ getService }: FtrProviderContext) {
               expect(status).to.eql(200);
               expect(body.indexMode).to.equal(indexMode);
             });
-          });
-        });
-
-        describe('with index mode', () => {
-          it('should return an index template with the expected parameters', async () => {
-            const { body, status } = await supertestWithoutAuth
-              .get(`${API_BASE_PATH}/index_templates/${templateWithIndexModeName}`)
-              .set(internalReqHeader)
-              .set(roleAuthc.apiKeyHeader);
-            expect(status).to.eql(200);
-
-            const expectedKeys = [
-              'name',
-              'indexPatterns',
-              'indexMode',
-              'template',
-              '_kbnMeta',
-              'allowAutoCreate',
-              'composedOf',
-              'ignoreMissingComponentTemplates',
-            ].sort();
-
-            expect(body.name).to.eql(templateWithIndexModeName);
-            expect(Object.keys(body).sort()).to.eql(expectedKeys);
           });
         });
       });

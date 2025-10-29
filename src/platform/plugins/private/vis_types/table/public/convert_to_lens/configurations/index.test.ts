@@ -9,7 +9,7 @@
 
 import { AggTypes } from '../../../common';
 import { getConfiguration } from '.';
-import type { CollapseFunction } from '@kbn/lens-common';
+import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
 
 const params = {
   perPage: 20,

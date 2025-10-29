@@ -326,7 +326,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   });
 
   it('navigates to the Endpoints page', () => {
-    ServerlessHeaders.showMoreItems();
     navigateFromHeaderTo(ServerlessHeaders.ENDPOINTS, true);
     cy.url().should('include', ENDPOINTS_URL);
   });

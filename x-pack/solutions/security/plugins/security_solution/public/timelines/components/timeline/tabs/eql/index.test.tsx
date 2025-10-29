@@ -199,8 +199,7 @@ describe('EQL Tab', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    // FLAKY: https://github.com/elastic/kibana/issues/224186
-    describe.skip('pagination', () => {
+    describe('pagination', () => {
       beforeEach(() => {
         // pagination tests need more than 1 record so here
         // we return 5 records instead of just 1.

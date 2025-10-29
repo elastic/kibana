@@ -9,31 +9,17 @@
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { CustomGridColumnProps } from '@kbn/unified-data-table';
-import {
-  EuiFieldText,
-  EuiButtonEmpty,
-  EuiForm,
-  EuiToolTip,
-  useEuiTheme,
-  EuiFocusTrap,
-  findElementBySelectorOrRef,
-} from '@elastic/eui';
-import type { HTMLAttributes, KeyboardEvent } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import { EuiFieldText, EuiButtonEmpty, EuiForm, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { KeyboardEvent } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { isPlaceholderColumn } from '../../utils';
 import type { IndexUpdateService } from '../../index_update_service';
 import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 
-const COLUMN_INDEX_PROP = 'data-column-index';
-
 export const getColumnInputRenderer = (
   columnName: string,
-  columnIndex: number,
-  isColumnInEditMode: boolean,
-  setEditingColumnIndex: (columnIndex: number | null) => void,
   indexUpdateService: IndexUpdateService,
   telemetryService: IndexEditorTelemetryService
 ): ((props: CustomGridColumnProps) => EuiDataGridColumn) => {
@@ -41,35 +27,14 @@ export const getColumnInputRenderer = (
     ...column,
     display: (
       <AddColumnHeader
-        isColumnInEditMode={isColumnInEditMode}
-        setEditingColumnIndex={setEditingColumnIndex}
         initialColumnName={columnName}
-        columnIndex={columnIndex}
+        containerId={column.id}
         telemetryService={telemetryService}
       />
     ),
-    displayHeaderCellProps: { [COLUMN_INDEX_PROP]: columnIndex } as HTMLAttributes<HTMLDivElement>,
     actions: {
       showHide: false,
-      showSortAsc: false,
-      showSortDesc: false,
-      showMoveLeft: false,
-      showMoveRight: false,
       additional: [
-        {
-          'data-test-subj': 'indexEditorindexEditorEditColumnButton',
-          label: (
-            <FormattedMessage
-              id="indexEditor.flyout.grid.columnHeader.editAction"
-              defaultMessage="Edit name"
-            />
-          ),
-          size: 'xs',
-          iconType: 'pencil',
-          onClick: () => {
-            setEditingColumnIndex(columnIndex);
-          },
-        },
         {
           'data-test-subj': 'indexEditorindexEditorDeleteColumnButton',
           label: (
@@ -90,23 +55,17 @@ export const getColumnInputRenderer = (
 };
 
 interface AddColumnHeaderProps {
-  isColumnInEditMode: boolean;
-  setEditingColumnIndex: (columnIndex: number | null) => void;
   initialColumnName: string;
-  columnIndex: number;
+  containerId: string;
   telemetryService: IndexEditorTelemetryService;
 }
 
-export const AddColumnHeader = ({
-  isColumnInEditMode,
-  setEditingColumnIndex,
-  initialColumnName,
-  columnIndex,
-  telemetryService,
-}: AddColumnHeaderProps) => {
+export const AddColumnHeader = ({ initialColumnName, telemetryService }: AddColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   const { columnName, setColumnName, saveColumn, resetColumnName, validationError } =
     useAddColumnName(initialColumnName);
+
+  const [isEditing, setIsEditing] = useState(false);
 
   const onBlur = useCallback(() => {
     if (columnName && !validationError) {
@@ -114,8 +73,8 @@ export const AddColumnHeader = ({
     } else {
       resetColumnName();
     }
-    setEditingColumnIndex(null);
-  }, [columnName, validationError, setEditingColumnIndex, saveColumn, resetColumnName]);
+    setIsEditing(false);
+  }, [columnName, validationError, saveColumn, resetColumnName]);
 
   const onSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -123,8 +82,8 @@ export const AddColumnHeader = ({
       event.stopPropagation();
 
       if (columnName && !validationError) {
-        setEditingColumnIndex(null);
         saveColumn();
+        setIsEditing(false);
       } else {
         telemetryService.trackEditInteraction({
           actionType: 'add_column',
@@ -132,7 +91,7 @@ export const AddColumnHeader = ({
         });
       }
     },
-    [columnName, validationError, setEditingColumnIndex, saveColumn, telemetryService]
+    [columnName, validationError, saveColumn, telemetryService]
   );
 
   const columnLabel = isPlaceholderColumn(initialColumnName) ? (
@@ -151,77 +110,62 @@ export const AddColumnHeader = ({
       : validationError;
   }, [validationError, columnName]);
 
-  const returnFocus = useCallback(() => {
-    requestAnimationFrame(() => {
-      const headerWrapper = findElementBySelectorOrRef(`[${COLUMN_INDEX_PROP}="${columnIndex}"]`);
-
-      if (headerWrapper) {
-        headerWrapper.focus();
-      }
-    });
-
-    return false;
-  }, [columnIndex]);
-
-  if (isColumnInEditMode) {
+  if (isEditing) {
     return (
-      <EuiFocusTrap initialFocus="input" returnFocus={returnFocus}>
-        <EuiForm component="form" onSubmit={onSubmit}>
-          <EuiToolTip
-            position="top"
-            content={errorMessage}
-            anchorProps={{ css: { width: '100%' } }}
-          >
-            <EuiFieldText
-              data-test-subj="indexEditorindexEditorColumnNameInput"
-              value={columnName}
-              fullWidth
-              controlOnly
-              compressed
-              onChange={(e) => {
-                setColumnName(e.target.value);
-              }}
-              onBlur={onBlur}
-              onKeyDown={(e: KeyboardEvent) => {
-                e.stopPropagation();
-
-                if (e.key === 'Escape') {
-                  e.preventDefault();
-                  resetColumnName();
-                  setEditingColumnIndex(null);
-                }
-              }}
-              css={{
-                '&:focus-within': {
-                  outline: 'none',
-                },
-              }}
-            />
-          </EuiToolTip>
-        </EuiForm>
-      </EuiFocusTrap>
+      <EuiForm component="form" onSubmit={onSubmit}>
+        <EuiToolTip position="top" content={errorMessage} anchorProps={{ css: { width: '100%' } }}>
+          <EuiFieldText
+            data-test-subj="indexEditorindexEditorColumnNameInput"
+            value={columnName}
+            autoFocus
+            fullWidth
+            controlOnly
+            compressed
+            onChange={(e) => {
+              setColumnName(e.target.value);
+            }}
+            onBlur={onBlur}
+            onKeyDown={(e: KeyboardEvent) => {
+              e.stopPropagation();
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                resetColumnName();
+                setIsEditing(false);
+              }
+            }}
+            css={{
+              '&:focus-within': {
+                outline: 'none',
+              },
+            }}
+          />
+        </EuiToolTip>
+      </EuiForm>
     );
   }
 
   return (
     <EuiButtonEmpty
       data-test-subj="indexEditorindexEditorColumnNameButton"
-      aria-label={i18n.translate('indexEditor.columnHeaderEdit.aria', {
-        defaultMessage: 'Edit column name',
-      })}
       css={{
         color: euiTheme.colors.textSubdued,
         width: '100%',
         height: euiTheme.size.xl,
       }}
-      tabIndex={-1}
       flush="left"
       contentProps={{
         css: {
           justifyContent: 'left',
         },
       }}
-      onClick={() => setEditingColumnIndex(columnIndex)}
+      onClick={() => setIsEditing(true)}
+      onKeyDown={(e: KeyboardEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.key === 'Enter') {
+          setIsEditing(true);
+        }
+      }}
     >
       {columnLabel}
     </EuiButtonEmpty>

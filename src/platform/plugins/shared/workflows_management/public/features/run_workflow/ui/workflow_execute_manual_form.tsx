@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import type { WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
-import type { WorkflowInputChoiceSchema, WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import { i18n } from '@kbn/i18n';
 
 const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
   return z.object(
@@ -32,27 +32,6 @@ const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputS
             ? z.enum(input.options as [string, ...string[]])
             : z.enum(input.options as [string, ...string[]]).optional();
           break;
-        case 'array': {
-          const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
-          const { minItems, maxItems } = input;
-          const applyConstraints = (
-            schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>
-          ) => {
-            let s = schema;
-            if (minItems != null) s = s.min(minItems);
-            if (maxItems != null) s = s.max(maxItems);
-            return s;
-          };
-          const arr = z.union(
-            arraySchemas.map(applyConstraints) as [
-              z.ZodArray<z.ZodString>,
-              z.ZodArray<z.ZodNumber>,
-              z.ZodArray<z.ZodBoolean>
-            ]
-          );
-          acc[input.name] = input.required ? arr : arr.optional();
-          break;
-        }
       }
       return acc;
     }, {} as Record<string, z.ZodType>)
@@ -67,31 +46,20 @@ interface WorkflowExecuteManualFormProps {
   setErrors: (errors: string | null) => void;
 }
 
-type WorkflowInputPlaceholder =
-  | string
-  | number
-  | boolean
-  | string[]
-  | number[]
-  | boolean[]
-  | ((input: z.infer<typeof WorkflowInputSchema>) => string);
-
-const defaultWorkflowInputsMappings: Record<string, WorkflowInputPlaceholder> = {
+const defaultWorkflowInputsMappings: Record<string, any> = {
   string: 'Enter a string',
   number: 0,
   boolean: false,
-  choice: (input: z.infer<typeof WorkflowInputSchema>) =>
-    `Select an option: ${(input as z.infer<typeof WorkflowInputChoiceSchema>).options.join(', ')}`,
-  array: (input: z.infer<typeof WorkflowInputSchema>) =>
-    'Enter array of strings, numbers or booleans',
+  choice: (input: any) => `Select an option: ${input.options.join(', ')}`,
 };
 
 const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
-  const inputPlaceholder: Record<string, WorkflowInputPlaceholder> = {};
+  const inputPlaceholder: Record<string, any> = {};
 
   if (definition.inputs) {
-    definition.inputs.forEach((input: z.infer<typeof WorkflowInputSchema>) => {
-      let placeholder: WorkflowInputPlaceholder = defaultWorkflowInputsMappings[input.type];
+    definition.inputs.forEach((input: any) => {
+      let placeholder: string | number | boolean | ((input: any) => string) =
+        defaultWorkflowInputsMappings[input.type];
       if (typeof placeholder === 'function') {
         placeholder = placeholder(input);
       }
@@ -122,19 +90,17 @@ export const WorkflowExecuteManualForm = ({
           const res = inputsValidator.safeParse(JSON.parse(data));
           if (!res.success) {
             setErrors(
-              res.error.issues
-                .map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
-                .join(', ')
+              res.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')
             );
           } else {
             setErrors(null);
           }
-        } catch (e: Error | unknown) {
+        } catch (e: Error | any) {
           setErrors(
             i18n.translate('workflows.workflowExecuteManualForm.invalidJSONError', {
               defaultMessage: 'Invalid JSON: {message}',
               values: {
-                message: e instanceof Error ? e.message : String(e),
+                message: e.message || e.toString(),
               },
             })
           );

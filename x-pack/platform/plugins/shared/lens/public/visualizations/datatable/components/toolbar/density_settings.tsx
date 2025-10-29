@@ -8,19 +8,18 @@
 import React, { useCallback } from 'react';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataGridDensity } from '@kbn/lens-common';
-import { LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 export interface DensitySettingsProps {
   dataGridDensity: DataGridDensity;
   onChange: (density: DataGridDensity) => void;
 }
 
-const densityValues = Object.values(LENS_DATAGRID_DENSITY);
+const densityValues = Object.values(DataGridDensity);
 
 const getValidDensity = (density: string) => {
   const isValidDensity = densityValues.includes(density as DataGridDensity);
-  return isValidDensity ? (density as DataGridDensity) : LENS_DATAGRID_DENSITY.NORMAL;
+  return isValidDensity ? (density as DataGridDensity) : DataGridDensity.NORMAL;
 };
 
 const densityLabel = i18n.translate('xpack.lens.table.densityLabel', {
@@ -29,19 +28,19 @@ const densityLabel = i18n.translate('xpack.lens.table.densityLabel', {
 
 const densityOptions = [
   {
-    id: LENS_DATAGRID_DENSITY.COMPACT,
+    id: DataGridDensity.COMPACT,
     label: i18n.translate('xpack.lens.table.labelCompact', {
       defaultMessage: 'Compact',
     }),
   },
   {
-    id: LENS_DATAGRID_DENSITY.NORMAL,
+    id: DataGridDensity.NORMAL,
     label: i18n.translate('xpack.lens.table.labelNormal', {
       defaultMessage: 'Normal',
     }),
   },
   {
-    id: LENS_DATAGRID_DENSITY.EXPANDED,
+    id: DataGridDensity.EXPANDED,
     label: i18n.translate('xpack.lens.table.labelExpanded', {
       defaultMessage: 'Expanded',
     }),

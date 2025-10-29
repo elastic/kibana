@@ -138,8 +138,6 @@ export interface ListScheduledReportApiJSON {
   title: RawScheduledReport['title'];
 }
 
-export type ScheduledReportApiJson = ListScheduledReportApiJSON;
-
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }

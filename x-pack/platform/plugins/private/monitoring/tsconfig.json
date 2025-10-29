@@ -58,8 +58,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/licensing-types",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/autoops-promotion-callout",
-    "@kbn/react-query"
+    "@kbn/autoops-promotion-callout"
   ],
   "exclude": ["target/**/*"]
 }

@@ -8,13 +8,13 @@
  */
 
 import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
-import type { Column } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type {
-  XYState as XYConfiguration,
+  Column,
+  XYConfiguration,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '@kbn/lens-common';
-import { SeriesTypes } from '@kbn/lens-common';
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { SeriesTypes } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { Layer } from '..';
 import type { ChartType } from '../../../common';
@@ -279,6 +279,5 @@ export const getConfiguration = (
         ? InterpolationMode.Linear
         : series[0]?.interpolate
     ),
-    preferredSeriesType: 'bar',
   };
 };

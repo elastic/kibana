@@ -150,8 +150,6 @@ export class PerAlertActionScheduler<
       }
 
       for (const alert of activeAlertsArray) {
-        const allActionUuids = this.actions.map((a) => a.uuid!);
-        alert.clearThrottlingLastScheduledActions(allActionUuids);
         if (
           this.isExecutableAlert({ alert, action, summarizedAlerts }) &&
           this.isExecutableActiveAlert({ alert, action })
@@ -185,6 +183,7 @@ export class PerAlertActionScheduler<
 
     for (const { action, alert } of executables) {
       const { actionTypeId } = action;
+
       if (
         !shouldScheduleAction({
           action,
@@ -197,6 +196,7 @@ export class PerAlertActionScheduler<
       ) {
         continue;
       }
+
       this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActions();
       this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(
         actionTypeId

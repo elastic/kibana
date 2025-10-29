@@ -10,7 +10,6 @@
     "browser": true,
     "configPath": [
       "rendering_plugin"
-    ],
-    "enabledOnAnonymousPages": true
-  },
+    ]
+  }
 }

@@ -29,11 +29,10 @@ import type {
   Visualization,
   VisualizationDimensionGroupConfig,
   VisualizationMap,
-  DataViewsState,
-  LensAppState,
-} from '@kbn/lens-common';
-import { LENS_LAYER_TYPES } from '@kbn/lens-common';
+} from '../types';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
+import type { DataViewsState, LensAppState } from './types';
+import { layerTypes } from '../../common/layer_types';
 
 describe('lensSlice', () => {
   let store: EnhancedStore<{ lens: LensAppState }>;
@@ -309,7 +308,7 @@ describe('lensSlice', () => {
           getLayerIds: (layerIds: unknown) => layerIds as string[],
           getLayersToLinkTo: (state, newLayerId) => ['linked-layer-id'],
           appendLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
-          getSupportedLayers: jest.fn(() => [{ type: LENS_LAYER_TYPES.DATA, label: 'Data Layer' }]),
+          getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
         } as Partial<Visualization>,
       };
 
@@ -386,7 +385,7 @@ describe('lensSlice', () => {
         customStore.dispatch(
           addLayer({
             layerId: 'foo',
-            layerType: LENS_LAYER_TYPES.DATA,
+            layerType: layerTypes.DATA,
             extraArg: undefined,
           })
         );

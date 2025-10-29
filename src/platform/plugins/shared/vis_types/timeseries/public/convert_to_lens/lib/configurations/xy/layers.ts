@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  EventAnnotationConfig,
+  XYAnnotationsLayerConfig,
+  XYLayerConfig,
+  YAxisMode,
+} from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { FillTypes } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { PaletteOutput } from '@kbn/coloring';
 import { getValidColor } from '@kbn/coloring';
 import { v4 } from 'uuid';
 import { transparentize } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
-import type { YAxisMode, XYLayerConfig, XYAnnotationLayerConfig } from '@kbn/lens-common';
-import { FillStyles } from '@kbn/expression-xy-plugin/common';
-import type { AvailableAnnotationIcon, EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
@@ -107,7 +111,7 @@ export const getLayers = async (
             ? 'left'
             : getAxisMode(series, model),
           ...(isReferenceLine && {
-            fill: chartType.includes('area') ? FillStyles.BELOW : FillStyles.NONE,
+            fill: chartType.includes('area') ? FillTypes.BELOW : FillTypes.NONE,
             lineWidth: series.line_width,
           }),
         };
@@ -144,7 +148,7 @@ export const getLayers = async (
   });
 
   try {
-    const annotationsLayers: Array<XYAnnotationLayerConfig | undefined> = await Promise.all(
+    const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
       Object.values(annotationsByIndexPatternAndIgnoreFlag).map(async (annotations) => {
         const [firstAnnotation] = annotations;
         const convertedAnnotations: EventAnnotationConfig[] = [];
@@ -186,17 +190,6 @@ export const getLayers = async (
   }
 };
 
-function getEventIcon(annotationIcon: string | undefined): AvailableAnnotationIcon {
-  if (
-    !annotationIcon ||
-    !(annotationIcon in ICON_TYPES_MAP) ||
-    typeof ICON_TYPES_MAP[annotationIcon] !== 'string'
-  ) {
-    return 'triangle';
-  }
-  return ICON_TYPES_MAP[annotationIcon] as AvailableAnnotationIcon;
-}
-
 const convertAnnotation = (
   annotation: Annotation,
   dataView: DataView
@@ -221,7 +214,12 @@ const convertAnnotation = (
       shouldBeCompatibleWithColorJs: true,
     }).hex(),
     timeField: annotation.time_field || dataView.timeFieldName,
-    icon: getEventIcon(annotation.icon),
+    icon:
+      annotation.icon &&
+      ICON_TYPES_MAP[annotation.icon] &&
+      typeof ICON_TYPES_MAP[annotation.icon] === 'string'
+        ? ICON_TYPES_MAP[annotation.icon]
+        : 'triangle',
     filter: {
       type: 'kibana_query',
       query: annotation.query_string?.query || '*',

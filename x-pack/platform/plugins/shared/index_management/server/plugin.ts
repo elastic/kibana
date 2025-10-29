@@ -31,7 +31,10 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     this.config = initContext.config.get();
   }
 
-  setup({ http }: CoreSetup, { features, security }: Dependencies): IndexManagementPluginSetup {
+  setup(
+    { http, getStartServices }: CoreSetup,
+    { features, security }: Dependencies
+  ): IndexManagementPluginSetup {
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
       privileges: [

@@ -23,6 +23,5 @@
     "@kbn/shared-ux-file-upload",
     "@kbn/shared-ux-file-picker",
     "@kbn/developer-examples-plugin",
-    "@kbn/react-query",
   ]
 }

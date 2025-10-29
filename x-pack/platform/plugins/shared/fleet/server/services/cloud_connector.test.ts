@@ -12,7 +12,6 @@ import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import { createSavedObjectClientMock } from '../mocks';
 import type { CreateCloudConnectorRequest } from '../../common/types/rest_spec/cloud_connector';
-import type { AwsCloudConnectorVars } from '../../common/types/models/cloud_connector';
 
 import { CloudConnectorService } from './cloud_connector';
 import { appContextService } from './app_context';
@@ -483,9 +482,8 @@ describe('CloudConnectorService', () => {
 
       expect(result.name).toEqual('updated-name');
       expect(result.id).toEqual('cloud-connector-123');
-      const awsVars = result.vars as AwsCloudConnectorVars;
-      expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/OriginalRole');
-      expect(awsVars.external_id?.value?.id).toEqual('ORIGINALEXTERNALID12');
+      expect(result.vars?.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/OriginalRole');
+      expect(result.vars?.external_id?.value?.id).toEqual('ORIGINALEXTERNALID12');
     });
 
     it('should update cloud connector vars successfully', async () => {
@@ -528,9 +526,8 @@ describe('CloudConnectorService', () => {
         }
       );
 
-      const awsVars = result.vars as AwsCloudConnectorVars;
-      expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/UpdatedRole');
-      expect(awsVars.external_id?.value?.id).toEqual('UPDATEDEXTERNALID123');
+      expect(result.vars?.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/UpdatedRole');
+      expect(result.vars?.external_id?.value?.id).toEqual('UPDATEDEXTERNALID123');
     });
 
     it('should update both name and vars successfully', async () => {
@@ -567,8 +564,9 @@ describe('CloudConnectorService', () => {
       });
 
       expect(result.name).toEqual('fully-updated-connector');
-      const awsVars = result.vars as AwsCloudConnectorVars;
-      expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/FullyUpdatedRole');
+      expect(result.vars?.role_arn?.value).toEqual(
+        'arn:aws:iam::123456789012:role/FullyUpdatedRole'
+      );
     });
 
     it('should validate vars when provided', async () => {

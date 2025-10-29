@@ -119,13 +119,6 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
     return {
       repeatOptions: [
         {
-          text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurHourly', {
-            defaultMessage: 'Hourly',
-          }),
-          value: RRuleFrequency.HOURLY,
-          disabled: disableDailyOption,
-        },
-        {
           text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurDaily', {
             defaultMessage: 'Daily',
           }),
@@ -160,9 +153,6 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
         },
       ],
       rrulePresets: {
-        [RRuleFrequency.HOURLY]: {
-          interval: 1,
-        },
         [RRuleFrequency.DAILY]: {
           interval: 1,
         },

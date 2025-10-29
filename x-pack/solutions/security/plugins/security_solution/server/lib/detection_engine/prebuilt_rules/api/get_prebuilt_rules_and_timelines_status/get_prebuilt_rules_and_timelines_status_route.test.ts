@@ -13,12 +13,7 @@ import {
   getFindResultWithSingleHit,
   getPrepackagedRulesStatusRequest,
 } from '../../../routes/__mocks__/request_responses';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../routes/__mocks__/request_context';
-import { requestContextMock } from '../../../routes/__mocks__/request_context';
-import { serverMock } from '../../../routes/__mocks__/server';
+import { requestContextMock, serverMock } from '../../../routes/__mocks__';
 import { checkTimelinesStatus } from '../../../../timeline/utils/check_timelines_status';
 import {
   mockCheckTimelinesStatusBeforeInstallResult,
@@ -61,7 +56,7 @@ jest.mock('../../../../timeline/utils/check_timelines_status', () => {
 });
 
 describe('get_prepackaged_rule_status_route', () => {
-  let securityCore;
+  const securityCore = securityServiceMock.createStart();
   const mockGetCurrentUser = {
     user: {
       username: 'mockUser',
@@ -69,12 +64,10 @@ describe('get_prepackaged_rule_status_route', () => {
   };
 
   let server: ReturnType<typeof serverMock.create>;
-  let clients: MockClients;
-  let context: SecuritySolutionRequestHandlerContextMock;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    securityCore = securityServiceMock.createStart();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
@@ -89,11 +82,6 @@ describe('get_prepackaged_rule_status_route', () => {
     });
 
     getPrebuiltRulesAndTimelinesStatusRoute(server.router, clients.logger);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {

@@ -17,13 +17,7 @@ export const rRuleRequestSchema = schema.object({
   dtstart: schema.string({ validate: validateStartDateV1 }),
   tzid: schema.string({ validate: validateTimezone }),
   freq: schema.maybe(
-    schema.oneOf([
-      schema.literal(0),
-      schema.literal(1),
-      schema.literal(2),
-      schema.literal(3),
-      schema.literal(4),
-    ])
+    schema.oneOf([schema.literal(0), schema.literal(1), schema.literal(2), schema.literal(3)])
   ),
   interval: schema.maybe(
     schema.number({

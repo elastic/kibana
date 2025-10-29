@@ -147,7 +147,7 @@ export const useAvailablePackages = ({
 }: {
   prereleaseIntegrationsEnabled: boolean;
 }) => {
-  const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
+  const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
 
   const { isAgentlessEnabled } = useAgentless();
 

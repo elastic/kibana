@@ -44,8 +44,7 @@
     "@kbn/zod-helpers",
     "@kbn/core-security-server",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-http-server-utils",
-    "@kbn/react-query"
+    "@kbn/core-http-server-utils"
   ],
   "exclude": ["target/**/*"]
 }

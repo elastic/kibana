@@ -48,6 +48,10 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'inline_stats',
   },
+  inlinestats: {
+    type: 'command',
+    name: 'inlinestats',
+  },
   insist: {
     type: 'command',
     name: 'insist',

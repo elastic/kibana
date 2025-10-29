@@ -24,11 +24,6 @@
       "size": [
         "10000"
       ],
-      "track_total_hits": [
-        "10000",
-        "true",
-        "false"
-      ],
       "with_labels": "__flag__"
     },
     "methods": [

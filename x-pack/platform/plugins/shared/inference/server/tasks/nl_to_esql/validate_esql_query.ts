@@ -38,7 +38,10 @@ export async function runAndValidateEsqlQuery({
     formattedQuery = query;
   }
 
-  const { errors } = await validateQuery(formattedQuery);
+  const { errors } = await validateQuery(formattedQuery, {
+    // setting this to true, we don't want to validate the index / fields existence
+    ignoreOnMissingCallbacks: true,
+  });
 
   const errorMessages = formatQueryWithErrors(formattedQuery, errors);
 

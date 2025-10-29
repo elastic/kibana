@@ -17,7 +17,6 @@
         "1",
         "auto"
       ],
-      "max_docs": "",
       "timeout": [
         "1m",
         "-1",

@@ -32,7 +32,6 @@ export const selectionComparators: StateComparators<
     | 'selectedOptions'
     | 'availableOptions'
     | 'variableName'
-    | 'singleSelect'
     | 'variableType'
     | 'controlType'
     | 'esqlQuery'
@@ -55,7 +54,6 @@ export const selectionComparators: StateComparators<
   controlType: 'referenceEquality',
   esqlQuery: 'referenceEquality',
   title: 'referenceEquality',
-  singleSelect: 'referenceEquality',
 };
 
 export function initializeESQLControlSelections(
@@ -66,7 +64,6 @@ export function initializeESQLControlSelections(
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
-  const singleSelect$ = new BehaviorSubject<boolean>(initialState.singleSelect ?? true);
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
   const variableType$ = new BehaviorSubject<ESQLVariableType>(
     initialState.variableType ?? ESQLVariableType.VALUES
@@ -126,39 +123,19 @@ export function initializeESQLControlSelections(
     });
 
   // derive ESQL control variable from state.
-  const getEsqlVariable = () => {
-    const isSingleSelect = singleSelect$.value;
-    const selectedValues = selectedOptions$.value;
-
-    // For single select, return the first value; for multi-select, return the array
-    let value: ESQLControlVariable['value'];
-
-    if (isSingleSelect) {
-      // Single select: return the first value or empty string if none selected
-      const firstValue = selectedValues[0];
-      if (firstValue !== undefined) {
-        value = isNaN(Number(firstValue)) ? firstValue : Number(firstValue);
-      } else {
-        value = '';
-      }
-    } else {
-      // Multi-select: return array of all selected values
-      value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
-    }
-
-    return {
-      key: variableName$.value,
-      value,
-      type: variableType$.value,
-    };
-  };
+  const getEsqlVariable = () => ({
+    key: variableName$.value,
+    value: isNaN(Number(selectedOptions$.value[0]))
+      ? selectedOptions$.value[0]
+      : Number(selectedOptions$.value[0]),
+    type: variableType$.value,
+  });
   const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
   const variableSubscriptions = combineLatest([
     variableName$,
     variableType$,
     selectedOptions$,
     availableOptions$,
-    singleSelect$,
   ]).subscribe(() => esqlVariable$.next(getEsqlVariable()));
 
   return {
@@ -170,13 +147,11 @@ export function initializeESQLControlSelections(
     api: {
       hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
       esqlVariable$: esqlVariable$ as PublishingSubject<ESQLControlVariable>,
-      singleSelect$: singleSelect$ as PublishingSubject<boolean>,
     },
     anyStateChange$: merge(
       selectedOptions$,
       availableOptions$,
       variableName$,
-      singleSelect$,
       variableType$,
       controlType$,
       esqlQuery$,
@@ -186,7 +161,6 @@ export function initializeESQLControlSelections(
       setSelectedOptions(lastSaved?.selectedOptions ?? []);
       availableOptions$.next(lastSaved?.availableOptions ?? []);
       variableName$.next(lastSaved?.variableName ?? '');
-      singleSelect$.next(lastSaved?.singleSelect ?? true);
       variableType$.next(lastSaved?.variableType ?? ESQLVariableType.VALUES);
       if (lastSaved?.controlType) controlType$.next(lastSaved?.controlType);
       esqlQuery$.next(lastSaved?.esqlQuery ?? '');
@@ -199,7 +173,6 @@ export function initializeESQLControlSelections(
           ? { availableOptions: availableOptions$.getValue() ?? [] }
           : {}),
         variableName: variableName$.getValue() ?? '',
-        singleSelect: singleSelect$.getValue() ?? true,
         variableType: variableType$.getValue() ?? ESQLVariableType.VALUES,
         controlType: controlType$.getValue(),
         esqlQuery: esqlQuery$.getValue() ?? '',

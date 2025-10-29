@@ -14,7 +14,7 @@ import type {
   DerivativeIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
   CounterRateIndexPatternColumn,
-} from '@kbn/lens-common';
+} from '@kbn/lens-plugin/public';
 import type { LensApiMetricOperation } from '../../schema/metric_ops';
 import {
   type LensApiMovingAverageOperation,

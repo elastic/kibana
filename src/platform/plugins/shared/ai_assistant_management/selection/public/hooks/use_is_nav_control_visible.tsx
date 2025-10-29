@@ -46,7 +46,7 @@ export function useIsNavControlVisible(coreStart: CoreStart, spaces?: SpacesPlug
 
   const { currentAppId$, applications$ } = coreStart.application;
 
-  const uiSetting$ = coreStart.settings.client.get$<AIAssistantType>(
+  const uiSetting$ = coreStart.uiSettings.get$<AIAssistantType>(
     PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
     AIAssistantType.Default
   );
@@ -64,7 +64,7 @@ export function useIsNavControlVisible(coreStart: CoreStart, spaces?: SpacesPlug
       uiSetting$,
     ]).subscribe({
       next: ([appId, applications, activeSpace]) => {
-        const isUntouchedUiSetting = coreStart.settings.client.isDefault(
+        const isUntouchedUiSetting = coreStart.uiSettings.isDefault(
           PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
         );
         setIsVisible(getVisibility(appId, applications, isUntouchedUiSetting, activeSpace));

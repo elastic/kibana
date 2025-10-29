@@ -91,6 +91,7 @@ describe('applyConfigOverrides', () => {
         ssl: { certificateAuthorities: expect.stringContaining('ca.crt') },
       },
       plugins: { paths: [] },
+      server: { prototypeHardening: true },
       xpack: {
         security: {
           authc: {
@@ -122,6 +123,7 @@ describe('applyConfigOverrides', () => {
       },
       mockIdpPlugin: { uiam: { enabled: true } },
       plugins: { paths: [] },
+      server: { prototypeHardening: true },
       xpack: {
         cloud: {
           organization_id: '1234567890',
@@ -146,7 +148,7 @@ describe('applyConfigOverrides', () => {
           },
           uiam: {
             enabled: true,
-            sharedSecret: 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=',
+            sharedSecret: 'XmLutyDzrWDcz9i+xXRXzSMJEfulI+Q9yIaibncLRyA=',
             url: 'http://localhost:8080',
           },
         },

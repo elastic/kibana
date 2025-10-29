@@ -9,10 +9,10 @@
 
 // Borrowed from x-pack/solutions/security/plugins/security_solution/public/resolver/view/panels/use_formatted_date.ts
 
-import moment from 'moment-timezone';
-import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../hooks/use_kibana';
+import moment from 'moment-timezone';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useCallback } from 'react';
 
 const invalidDateText = i18n.translate(
   'xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate',
@@ -43,9 +43,8 @@ const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
 export function useFormattedDate(
   timestamp: ConstructorParameters<typeof Date>[0] | Date | undefined
 ): string | undefined {
-  const uiSettings = useKibana().services.settings.client;
-  const dateFormatSetting: string = uiSettings.get('dateFormat');
-  const timezoneSetting: string = uiSettings.get('dateFormat:tz');
+  const dateFormatSetting: string = useUiSetting('dateFormat');
+  const timezoneSetting: string = useUiSetting('dateFormat:tz');
   const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
 
   if (!timestamp) return undefined;
@@ -66,9 +65,8 @@ export function useFormattedDate(
  * @returns Formatted date string with time, or undefined if invalid
  */
 export function useFormattedDateTime(date: Date): string | undefined {
-  const uiSettings = useKibana().services.settings.client;
-  const dateFormatSetting: string = uiSettings.get('dateFormat');
-  const timezoneSetting: string = uiSettings.get('dateFormat:tz');
+  const dateFormatSetting: string = useUiSetting('dateFormat');
+  const timezoneSetting: string = useUiSetting('dateFormat:tz');
   const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
 
   if (!date) {
@@ -85,9 +83,8 @@ export function useFormattedDateTime(date: Date): string | undefined {
 }
 
 export function useGetFormattedDateTime(): (date: Date) => string | undefined {
-  const uiSettings = useKibana().services.settings.client;
-  const dateFormatSetting: string = uiSettings.get('dateFormat');
-  const timezoneSetting: string = uiSettings.get('dateFormat:tz');
+  const dateFormatSetting: string = useUiSetting('dateFormat');
+  const timezoneSetting: string = useUiSetting('dateFormat:tz');
   const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
 
   return useCallback(

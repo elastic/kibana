@@ -5,20 +5,19 @@
  * 2.0.
  */
 import type { DropType } from '@kbn/dom-drag-drop';
+import {
+  isDraggedDataViewField,
+  reorderElements,
+  shouldRemoveSource as shouldRemoveSourceChecker,
+} from '../../../../utils';
 import type {
   DatasourceDimensionDropHandlerProps,
   DragDropOperation,
   IndexPatternMap,
   VisualizationDimensionGroupConfig,
   DraggedField,
-  FormBasedPrivateState,
-} from '@kbn/lens-common';
-import { isOperation } from '../../../../types_guards';
-import {
-  isDraggedDataViewField,
-  reorderElements,
-  shouldRemoveSource as shouldRemoveSourceChecker,
-} from '../../../../utils';
+} from '../../../../types';
+import { isOperation } from '../../../../types';
 import {
   insertOrReplaceColumn,
   getColumnOrder,
@@ -30,7 +29,7 @@ import {
 } from '../../operations';
 import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { getNewOperation, getField } from './get_drop_props';
-import type { DataViewDragDropOperation } from '../../types';
+import type { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
 import { removeColumn } from '../../form_based';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {

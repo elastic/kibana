@@ -63,7 +63,7 @@ export function savedObjectToItem(
   try {
     const dashboardState = transformDashboardOut(attributes, savedObject.references);
 
-    const references = transformReferencesOut(savedObject.references ?? [], dashboardState.panels);
+    const references = transformReferencesOut(savedObject.references ?? []);
 
     return {
       item: {

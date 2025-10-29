@@ -9,19 +9,20 @@
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { BehaviorSubject } from 'rxjs';
 import type {
   DataSourceContext,
   DocumentProfileProviderParams,
   RootContext,
 } from '../../../profiles';
-import { DataSourceCategory, SolutionType } from '../../../profiles';
-import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
+import { DataSourceCategory, DocumentType, SolutionType } from '../../../profiles';
+import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
-import { RESOLUTION_MATCH } from './__mocks__';
+import type { LogOverviewContext } from '../logs_data_source_profile/profile';
 
-const mockServices = createProfileProviderSharedServicesMock();
+const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('logDocumentProfileProvider', () => {
   const logDocumentProfileProvider = createObservabilityLogDocumentProfileProvider(mockServices);
@@ -32,6 +33,13 @@ describe('logDocumentProfileProvider', () => {
   const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
     profileId: 'data-source-profile',
     category: DataSourceCategory.Logs,
+  };
+  const RESOLUTION_MATCH = {
+    isMatch: true,
+    context: {
+      type: DocumentType.Log,
+      logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+    },
   };
   const RESOLUTION_MISMATCH = {
     isMatch: false,
@@ -168,7 +176,12 @@ describe('logDocumentProfileProvider', () => {
           title: 'test title',
           docViewsRegistry: (registry) => registry,
         }),
-        { context: RESOLUTION_MATCH.context }
+        {
+          context: {
+            type: DocumentType.Log,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
+        }
       );
       const docViewer = getDocViewer({
         record: buildDataTableRecord({}),

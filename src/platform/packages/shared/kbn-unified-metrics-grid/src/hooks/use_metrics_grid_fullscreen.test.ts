@@ -59,7 +59,7 @@ describe('useMetricsGridFullScreen', () => {
   });
 
   it('calls useMutationObserver with correct parameters two times', () => {
-    renderHook(() => useMetricsGridFullScreen({ prefix: 'test-metrics-grid-id' }));
+    renderHook(() => useMetricsGridFullScreen());
 
     expect(mockUseMutationObserver).toHaveBeenCalledTimes(2);
     expect(mockUseMutationObserver).toHaveBeenNthCalledWith(1, null, expect.any(Function), {

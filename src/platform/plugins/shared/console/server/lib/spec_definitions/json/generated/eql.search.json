@@ -15,7 +15,6 @@
         "hidden",
         "none"
       ],
-      "ccs_minimize_roundtrips": "__flag__",
       "ignore_unavailable": "__flag__",
       "keep_alive": [
         "5d",

@@ -39,36 +39,30 @@ export const FileDataVisualizerLite: FC<Props> = ({
   };
   const { data, fileUpload, cloud } = services;
 
-  const {
-    existingIndex,
-    autoAddInference,
-    autoCreateDataView,
-    indexSettings,
-    onUploadComplete,
-    location,
-  } = props;
+  const { existingIndex, autoAddInference, autoCreateDataView, indexSettings, onUploadComplete } =
+    props;
   const fileUploadManager = useMemo(
     () =>
       new FileUploadManager(
         fileUpload,
-        coreStart,
+        coreStart.http,
         data,
+        coreStart.notifications,
         autoAddInference ?? null,
         autoCreateDataView,
         true,
         existingIndex ?? null,
-        indexSettings,
-        location
+        indexSettings
       ),
     [
       autoAddInference,
       autoCreateDataView,
-      coreStart,
+      coreStart.http,
+      coreStart.notifications,
       data,
       existingIndex,
       fileUpload,
       indexSettings,
-      location,
     ]
   );
 

@@ -20,7 +20,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Text',
     }),
     documentation: {
-      main: 'text',
+      main: 'text.html',
     },
     description: () => (
       <p>
@@ -49,7 +49,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Match only text',
     }),
     documentation: {
-      main: 'match-only-text',
+      main: 'text.html#match-only-text-field-type',
     },
     description: () => (
       <p>
@@ -78,7 +78,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Keyword',
     }),
     documentation: {
-      main: 'keyword#keyword-field-type',
+      main: 'keyword.html',
     },
     description: () => (
       <p>
@@ -107,7 +107,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Constant keyword',
     }),
     documentation: {
-      main: 'keyword#constant-keyword-field-type',
+      main: 'keyword.html#constant-keyword-field-type',
     },
     description: () => (
       <p>
@@ -127,7 +127,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Numeric',
     }),
     documentation: {
-      main: 'number',
+      main: 'number.html',
     },
     subTypes: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.numericSubtypeDescription', {
@@ -322,7 +322,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'date',
     documentation: {
-      main: 'date',
+      main: 'date.html',
     },
     description: () => (
       <p>
@@ -339,7 +339,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'date_nanos',
     documentation: {
-      main: 'date_nanos',
+      main: 'date_nanos.html',
     },
     description: () => (
       <p>
@@ -368,7 +368,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'binary',
     documentation: {
-      main: 'binary',
+      main: 'binary.html',
     },
     description: () => (
       <p>
@@ -385,7 +385,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'ip',
     documentation: {
-      main: 'ip',
+      main: 'ip.html',
     },
     description: () => (
       <p>
@@ -414,7 +414,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'boolean',
     documentation: {
-      main: 'boolean',
+      main: 'boolean.html',
     },
     description: () => (
       <p>
@@ -435,7 +435,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'range',
     documentation: {
-      main: 'range',
+      main: 'range.html',
     },
     subTypes: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rangeSubtypeDescription', {
@@ -457,7 +457,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'object',
     documentation: {
-      main: 'object',
+      main: 'object.html',
     },
     description: () => (
       <p>
@@ -486,7 +486,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'nested',
     documentation: {
-      main: 'nested',
+      main: 'nested.html',
     },
     description: () => (
       <p>
@@ -515,7 +515,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'rank_feature',
     documentation: {
-      main: 'rank-feature',
+      main: 'rank-feature.html',
     },
     description: () => (
       <p>
@@ -544,7 +544,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'rank_features',
     documentation: {
-      main: 'rank-features',
+      main: 'rank-features.html',
     },
     description: () => (
       <p>
@@ -572,9 +572,6 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Passthrough',
     }),
     value: 'passthrough',
-    documentation: {
-      main: 'passthrough',
-    },
   },
   dense_vector: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.denseVectorDescription', {
@@ -582,7 +579,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'dense_vector',
     documentation: {
-      main: 'dense-vector',
+      main: 'dense-vector.html',
     },
     description: () => (
       <p>
@@ -683,7 +680,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'geo_point',
     documentation: {
-      main: 'geo-point',
+      main: 'geo-point.html',
     },
     description: () => (
       <p>
@@ -700,8 +697,8 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'geo_shape',
     documentation: {
-      main: 'geo-shape',
-      learnMore: 'geo-shape#geoshape-indexing-approach',
+      main: 'geo-shape.html',
+      learnMore: '/geo-shape.html#geoshape-indexing-approach',
     },
     description: () => (
       <p>
@@ -733,7 +730,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'completion',
     documentation: {
-      main: 'completion',
+      main: 'search-suggesters.html#completion-suggester',
     },
     description: () => (
       <p>
@@ -750,7 +747,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'token_count',
     documentation: {
-      main: 'token-count',
+      main: 'token-count.html',
     },
     description: () => (
       <p>
@@ -767,7 +764,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'percolator',
     documentation: {
-      main: 'percolator',
+      main: 'percolator.html',
     },
     description: () => (
       <p>
@@ -796,7 +793,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'histogram',
     documentation: {
-      main: 'histogram',
+      main: 'histogram.html',
     },
     description: () => (
       <p>
@@ -813,7 +810,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'join',
     documentation: {
-      main: 'parent-join',
+      main: 'parent-join.html',
     },
     description: () => (
       <p>
@@ -830,7 +827,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'alias',
     documentation: {
-      main: 'field-alias',
+      main: 'alias.html',
     },
     description: () => (
       <p>
@@ -847,7 +844,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'search_as_you_type',
     documentation: {
-      main: 'search-as-you-type',
+      main: 'search-as-you-type.html',
     },
     description: () => (
       <p>
@@ -864,7 +861,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'flattened',
     documentation: {
-      main: 'flattened',
+      main: 'flattened.html',
     },
     description: () => (
       <p>
@@ -881,7 +878,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'shape',
     documentation: {
-      main: 'shape',
+      main: 'shape.html',
     },
     description: () => (
       <p>
@@ -898,7 +895,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'sparse_vector',
     documentation: {
-      main: 'sparse-vector',
+      main: 'sparse-vector.html',
     },
     description: () => (
       <p>
@@ -915,7 +912,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'semantic_text',
     documentation: {
-      main: 'semantic-text',
+      main: 'semantic-text.html',
     },
     description: () => (
       <p>
@@ -932,7 +929,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'point',
     documentation: {
-      main: 'point',
+      main: 'point.html',
     },
     description: () => (
       <p>
@@ -952,7 +949,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'version',
     documentation: {
-      main: 'version',
+      main: 'version.html',
     },
     description: () => (
       <p>
@@ -981,7 +978,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'wildcard',
     documentation: {
-      main: 'keyword#wildcard-field-type',
+      main: 'keyword.html#wildcard-field-type',
     },
     description: () => (
       <p>

@@ -6,12 +6,8 @@
  */
 
 import memoizeOne from 'memoize-one';
-import type {
-  DatasourceMap,
-  DatasourceLayers,
-  DatasourceStates,
-  DataViewsState,
-} from '@kbn/lens-common';
+import type { DatasourceMap, DatasourceLayers } from '../types';
+import type { DatasourceStates, DataViewsState } from './types';
 
 export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,

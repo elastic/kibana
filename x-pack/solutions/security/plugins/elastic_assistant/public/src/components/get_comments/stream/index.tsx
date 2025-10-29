@@ -127,7 +127,7 @@ export const StreamComment = ({
     );
   }, [isAnythingLoading, isControlsEnabled, reader, regenerateMessage, stopStream]);
 
-  const footer = interruptValue && (
+  const footer = (
     <InterruptFactory
       interruptValue={interruptValue}
       resumeGraph={resumeGraph}

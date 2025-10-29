@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Suggestion } from '@kbn/lens-common';
+import type { Suggestion } from '../types';
 
 export const currentSuggestionMock = {
   title: 'Heat map',

@@ -10,33 +10,34 @@
 import compactStringify from 'json-stringify-pretty-compact';
 import type { CoreTheme } from '@kbn/core/public';
 import { getEuiThemeVars } from '@kbn/ui-theme';
-import { normalizeObject } from '../vega_view/utils';
-
-function normalizeAndStringify(value: unknown) {
-  if (typeof value === 'string') {
-    return value;
-  }
-  return compactStringify(normalizeObject(value), { maxLength: 70 });
-}
 
 export class Utils {
   /**
    * If the 2nd array parameter in args exists, append it to the warning/error string value
    */
-  static formatWarningToStr(...args: any[]): string {
-    const value = normalizeAndStringify(args[0]);
+  static formatWarningToStr(...args: any[]) {
+    let value = args[0];
     if (args.length >= 2) {
       try {
-        return `${value}\n${normalizeAndStringify(args[1])}`;
+        if (typeof args[1] === 'string') {
+          value += `\n${args[1]}`;
+        } else {
+          value += '\n' + compactStringify(args[1], { maxLength: 70 });
+        }
       } catch (err) {
-        return Utils.formatErrorToStr(err);
+        // ignore
       }
     }
     return value;
   }
 
-  static formatErrorToStr(...args: unknown[]) {
-    const error: string = args[0] instanceof Error ? args[0].message : 'Error';
+  static formatErrorToStr(...args: any[]) {
+    let error: Error | string = args[0];
+    if (!error) {
+      error = 'ERR';
+    } else if (error instanceof Error) {
+      error = error.message;
+    }
     return Utils.formatWarningToStr(error, ...Array.from(args).slice(1));
   }
 }

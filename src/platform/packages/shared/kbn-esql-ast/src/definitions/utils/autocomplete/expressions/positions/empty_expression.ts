@@ -206,15 +206,11 @@ async function buildFieldAndFunctionSuggestions(
   const hasNonConstantParam = paramDefinitions.some(({ constantOnly }) => !constantOnly);
   const isVariadicOrUnknownPosition = paramDefinitions.length === 0;
   if (hasNonConstantParam || isVariadicOrUnknownPosition) {
-    const canBeMultiValue = paramDefinitions.some(
-      (t) => t && (t.supportsMultiValues === true || t.name === 'values')
-    );
     await builder.addFields({
       types: config.acceptedTypes,
       ignoredColumns,
       addComma: config.shouldAddComma,
       promoteToTop: true,
-      canBeMultiValue,
     });
   }
 

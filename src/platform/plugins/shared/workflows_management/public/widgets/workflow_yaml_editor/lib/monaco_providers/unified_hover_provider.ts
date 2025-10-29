@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
+import { monaco } from '@kbn/monaco';
 import type YAML from 'yaml';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
-import type { HoverContext, ProviderConfig } from './provider_interfaces';
-import { getMonacoConnectorHandler } from './provider_registry';
-import { getCurrentPath } from '../../../../../common/lib/yaml_utils';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
+import { getCurrentPath } from '../../../../../common/lib/yaml_utils';
+import { getMonacoConnectorHandler } from './provider_registry';
+import type { HoverContext, ProviderConfig } from './provider_interfaces';
 
 /**
  * Unified hover provider that delegates to connector-specific handlers

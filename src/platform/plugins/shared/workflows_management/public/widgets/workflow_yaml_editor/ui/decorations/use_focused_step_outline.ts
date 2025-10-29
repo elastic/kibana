@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-import { useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { monaco } from '@kbn/monaco';
+import { useEffect, useMemo } from 'react';
+import { css } from '@emotion/react';
+import { useSelector } from 'react-redux';
 import { selectFocusedStepInfo } from '../../lib/store';
 
 export const useFocusedStepOutline = (editor: monaco.editor.IStandaloneCodeEditor | null) => {

@@ -219,10 +219,6 @@ import type {
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
-  EntityDetailsHighlightsRequestBodyInput,
-  EntityDetailsHighlightsResponse,
-} from './entity_analytics/entity_details/highlights.gen';
-import type {
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
 } from './entity_analytics/entity_store/enable.gen';
@@ -251,11 +247,6 @@ import type {
   StopEntityEngineRequestParamsInput,
   StopEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
-import type {
-  DeleteSingleEntityRequestParamsInput,
-  DeleteSingleEntityRequestBodyInput,
-  DeleteSingleEntityResponse,
-} from './entity_analytics/entity_store/entities/delete_entity.gen';
 import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
@@ -1077,24 +1068,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Delete a single entity in Entity Store.
-The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
-
-    */
-  async deleteSingleEntity(props: DeleteSingleEntityProps) {
-    this.log.info(`${new Date().toISOString()} Calling API DeleteSingleEntity`);
-    return this.kbnClient
-      .request<DeleteSingleEntityResponse>({
-        path: replaceParams('/api/entity_store/entities/{entityType}/{entityId}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'DELETE',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Delete one or more Timelines or Timeline templates.
    */
   async deleteTimelines(props: DeleteTimelinesProps) {
@@ -1387,19 +1360,6 @@ The entity will be immediately deleted from the latest index.  It will remain av
         },
         method: 'POST',
         body: props.attachment,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async entityDetailsHighlights(props: EntityDetailsHighlightsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EntityDetailsHighlights`);
-    return this.kbnClient
-      .request<EntityDetailsHighlightsResponse>({
-        path: '/internal/entity_details/highlights',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3249,10 +3209,6 @@ export interface DeleteRuleProps {
 export interface DeleteRuleMigrationProps {
   params: DeleteRuleMigrationRequestParamsInput;
 }
-export interface DeleteSingleEntityProps {
-  params: DeleteSingleEntityRequestParamsInput;
-  body: DeleteSingleEntityRequestBodyInput;
-}
 export interface DeleteTimelinesProps {
   body: DeleteTimelinesRequestBodyInput;
 }
@@ -3297,9 +3253,6 @@ export interface EndpointUnisolateActionProps {
 }
 export interface EndpointUploadActionProps {
   attachment: FormData;
-}
-export interface EntityDetailsHighlightsProps {
-  body: EntityDetailsHighlightsRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;

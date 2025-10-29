@@ -38,9 +38,6 @@ export function FlyoutFooter({
             iconType="cross"
             onClick={onClose}
             flush="left"
-            aria-label={i18n.translate('xpack.apm.settings.customLink.flyout.close', {
-              defaultMessage: 'Close',
-            })}
           >
             {i18n.translate('xpack.apm.settings.customLink.flyout.close', {
               defaultMessage: 'Close',

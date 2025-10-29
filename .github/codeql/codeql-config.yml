@@ -137,5 +137,3 @@ query-filters:
       paths:
         - codeql/javascript-queries/AngularJS
         - codeql/javascript-queries/Electron
-packs:
-  - githubsecuritylab/codeql-javascript-queries

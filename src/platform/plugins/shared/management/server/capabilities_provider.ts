@@ -18,5 +18,10 @@ export const capabilitiesProvider = () => ({
       indexPatterns: true,
       objects: true,
     },
+    ai: {
+      observabilityAiAssistantManagement: true,
+      securityAiAssistantManagement: true,
+      aiAssistantManagementSelection: true,
+    },
   },
 });

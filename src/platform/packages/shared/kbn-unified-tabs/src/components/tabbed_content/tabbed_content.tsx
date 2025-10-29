@@ -31,17 +31,7 @@ import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
 import { TabsEventDataKeys } from '../../event_data_keys';
 
 export interface TabbedContentProps
-  extends Pick<
-    TabsBarProps,
-    | 'unsavedItemIds'
-    | 'maxItemsCount'
-    | 'onClearRecentlyClosed'
-    | 'disableCloseButton'
-    | 'disableInlineLabelEditing'
-    | 'disablePreview'
-    | 'disableDragAndDrop'
-    | 'disableTabsBarMenu'
-  > {
+  extends Pick<TabsBarProps, 'unsavedItemIds' | 'maxItemsCount' | 'onClearRecentlyClosed'> {
   items: TabItem[];
   selectedItemId?: string;
   recentlyClosedItems: TabItem[];
@@ -50,7 +40,6 @@ export interface TabbedContentProps
   hideTabsBar?: boolean;
   renderContent: (selectedItem: TabItem) => React.ReactNode;
   createItem: () => TabItem;
-  customNewTabButton?: React.ReactElement;
   onChanged: (state: TabbedContentState) => void;
   getPreviewData: (item: TabItem) => TabPreviewData;
   onEBTEvent: (event: TabsEBTEvent) => void;
@@ -75,12 +64,6 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   onClearRecentlyClosed,
   getPreviewData,
   onEBTEvent,
-  customNewTabButton,
-  disableCloseButton = false,
-  disableInlineLabelEditing = false,
-  disablePreview = false,
-  disableDragAndDrop = false,
-  disableTabsBarMenu = false,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
@@ -349,12 +332,6 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             onClose={onClose}
             getPreviewData={getPreviewData}
             onEBTEvent={onEBTEvent}
-            customNewTabButton={customNewTabButton}
-            disableCloseButton={disableCloseButton}
-            disableInlineLabelEditing={disableInlineLabelEditing}
-            disablePreview={disablePreview}
-            disableDragAndDrop={disableDragAndDrop}
-            disableTabsBarMenu={disableTabsBarMenu}
           />
         </EuiFlexItem>
       )}

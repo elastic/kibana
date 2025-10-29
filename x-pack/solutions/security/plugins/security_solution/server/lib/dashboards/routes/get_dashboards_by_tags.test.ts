@@ -13,12 +13,10 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 import { mockGetDashboardsResult } from '../__mocks__';
 import { getDashboardsByTagsRoute } from './get_dashboards_by_tags';
-import type { SecuritySolutionRequestHandlerContextMock } from '../../detection_engine/routes/__mocks__/request_context';
 
 describe('getDashboardsByTagsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let context: SecuritySolutionRequestHandlerContextMock;
-
+  const { context } = requestContextMock.createTools();
   const logger = { error: jest.fn() } as unknown as Logger;
 
   const mockRequest = requestMock.create({
@@ -34,14 +32,8 @@ describe('getDashboardsByTagsRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     server = serverMock.create();
-    ({ context } = requestContextMock.createTools());
 
     getDashboardsByTagsRoute(server.router, logger);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('should return dashboards with Security Solution tags', async () => {

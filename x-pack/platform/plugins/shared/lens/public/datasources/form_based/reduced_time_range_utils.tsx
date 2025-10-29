@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormBasedLayer, IndexPattern } from '@kbn/lens-common';
+import type { FormBasedLayer } from './types';
+import type { IndexPattern } from '../../types';
 import type { FieldBasedOperationErrorMessage } from './operations/definitions';
 import {
   REDUCED_TIME_RANGE_DEFAULT_DATE_FIELD,

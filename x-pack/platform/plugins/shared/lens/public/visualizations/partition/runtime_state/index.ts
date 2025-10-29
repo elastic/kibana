@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { LensPartitionVisualizationState, GeneralDatasourceStates } from '@kbn/lens-common';
+import type { PieVisualizationState } from '../../../../common/types';
+import type { GeneralDatasourceStates } from '../../../state_management';
 
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
-  state: LensPartitionVisualizationState,
+  state: PieVisualizationState,
   datasourceStates?: Readonly<GeneralDatasourceStates>
-): LensPartitionVisualizationState {
+): PieVisualizationState {
   return getRuntimeConverters(datasourceStates).reduce(
     (newState, fn) => fn(newState),
     structuredClone(state)

@@ -312,9 +312,6 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
     enabled: true,
     data_retention: '7d',
   },
-  failureStoreRetention: {
-    defaultRetentionPeriod: '30d',
-  },
   indexMode: 'standard',
   ...dataStream,
 });

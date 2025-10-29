@@ -7,7 +7,6 @@
 
 import { LensPlugin } from './plugin';
 
-// Embeddable types
 export { isLensApi } from './react_embeddable/type_guards';
 export { type EmbeddableComponent } from './react_embeddable/renderer/lens_custom_renderer_component';
 export type {
@@ -21,9 +20,19 @@ export type {
   LensEmbeddableOutput,
   LensSavedObjectAttributes,
   LensRendererProps as EmbeddableComponentProps,
-} from '@kbn/lens-common';
+} from './react_embeddable/types';
 
-// Datasource and User message types
+export type {
+  XYState,
+  XYReferenceLineLayerConfig,
+  XYLayerConfig,
+  ValidLayer,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
+  YAxisMode,
+  SeriesType,
+  YConfig,
+} from './visualizations/xy/types';
 export type {
   DatasourcePublicAPI,
   DataType,
@@ -34,7 +43,22 @@ export type {
   VisualizationSuggestion,
   Suggestion,
   UserMessage,
-  TextBasedPersistedState,
+} from './types';
+export type {
+  LegacyMetricState as MetricState,
+  ValueLabelConfig,
+  PieVisualizationState,
+  PieLayerState,
+  SharedPieLayerState,
+  LayerType,
+} from '../common/types';
+
+export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
+export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
+export type { GaugeVisualizationState } from './visualizations/gauge/constants';
+export type { MetricVisualizationState } from './visualizations/metric/types';
+export type { TagcloudState } from './visualizations/tagcloud/types';
+export type {
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
   OperationType,
@@ -67,32 +91,8 @@ export type {
   StaticValueIndexPatternColumn,
   TimeScaleIndexPatternColumn,
   FormBasedLayer,
-} from '@kbn/lens-common';
-
-// Chart types
-export type {
-  XYState,
-  XYReferenceLineLayerConfig,
-  XYLayerConfig,
-  ValidLayer,
-  XYDataLayerConfig,
-  XYAnnotationLayerConfig,
-  YAxisMode,
-  SeriesType,
-  YConfig,
-  LegacyMetricState as MetricState,
-  ValueLabelConfig,
-  LensPartitionVisualizationState as PieVisualizationState,
-  LensPartitionLayerState,
-  SharedPartitionLayerState as SharedLensPartitionLayerState,
-  LensLayerType as LayerType,
-  DatatableVisualizationState,
-  HeatmapVisualizationState,
-  GaugeVisualizationState,
-  MetricVisualizationState,
-  LensTagCloudState as TagcloudState,
-} from '@kbn/lens-common';
-
+} from './datasources/form_based/types';
+export type { TextBasedPersistedState } from './datasources/form_based/esql_layer/types';
 export type {
   XYArgs,
   XYRender,
@@ -122,7 +122,7 @@ export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_len
 
 export type { ChartInfo } from './chart_info_api';
 
-export { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
+export { layerTypes } from '../common/layer_types';
 export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
 export {

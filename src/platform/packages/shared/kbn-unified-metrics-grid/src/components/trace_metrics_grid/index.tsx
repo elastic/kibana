@@ -8,12 +8,15 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils/src';
 import { useFetch } from '@kbn/unified-histogram';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { Provider } from 'react-redux';
 import { Subject } from 'rxjs';
 import { TraceMetricsProvider } from '../../context/trace_metrics_context';
 import { useEsqlQueryInfo } from '../../hooks';
+import { store } from '../../store';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
 import { ThroughputChart } from './throughput';
@@ -55,13 +58,6 @@ function TraceMetricsGrid({
     return [...esqlQuery.filters, ...kqlFilters];
   }, [esqlQuery.filters, kqlFilters]);
 
-  const toolbar = useMemo(
-    () => ({
-      leftSide: [renderToggleActions()],
-    }),
-    [renderToggleActions]
-  );
-
   const { updateTimeRange } = requestParams;
 
   const input$ = useMemo(
@@ -74,6 +70,22 @@ function TraceMetricsGrid({
     beforeFetch: updateTimeRange,
   });
 
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
+        dismissAllFlyoutsExceptFor(DiscoverFlyouts.inspectorPanel);
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, []);
+
   const indexPattern = dataView?.getIndexPattern();
 
   if (!indexPattern) {
@@ -81,48 +93,54 @@ function TraceMetricsGrid({
   }
 
   return (
-    <MetricsGridWrapper
-      id="tracesGrid"
-      toolbarCss={chartToolbarCss}
-      toolbar={toolbar}
-      isComponentVisible={isComponentVisible}
-    >
-      <TraceMetricsProvider
-        value={{
-          dataSource,
-          indexes: indexPattern,
-          filters,
-          requestParams,
-          services,
-          searchSessionId,
-          abortController,
-          onBrushEnd,
-          onFilter,
-          discoverFetch$,
-        }}
+    <Provider store={store}>
+      <MetricsGridWrapper
+        indexPattern={indexPattern}
+        renderToggleActions={renderToggleActions}
+        chartToolbarCss={chartToolbarCss}
+        requestParams={requestParams}
+        fields={[]}
+        isComponentVisible={isComponentVisible}
+        hideRightSideActions
+        hideDimensionsSelector
       >
-        <EuiPanel
-          hasBorder={false}
-          hasShadow={false}
-          css={css`
-            height: 100%;
-            align-content: center;
-          `}
+        <TraceMetricsProvider
+          value={{
+            dataSource,
+            indexes: indexPattern,
+            filters,
+            requestParams,
+            services,
+            searchSessionId,
+            abortController,
+            onBrushEnd,
+            onFilter,
+            discoverFetch$,
+          }}
         >
-          <EuiFlexGrid columns={3} gutterSize="s">
-            <EuiFlexItem>
-              <LatencyChart />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ErrorRateChart />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ThroughputChart />
-            </EuiFlexItem>
-          </EuiFlexGrid>
-        </EuiPanel>
-      </TraceMetricsProvider>
-    </MetricsGridWrapper>
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            css={css`
+              height: 100%;
+              align-content: center;
+            `}
+          >
+            <EuiFlexGrid columns={3} gutterSize="s">
+              <EuiFlexItem>
+                <LatencyChart />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ErrorRateChart />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ThroughputChart />
+              </EuiFlexItem>
+            </EuiFlexGrid>
+          </EuiPanel>
+        </TraceMetricsProvider>
+      </MetricsGridWrapper>
+    </Provider>
   );
 }
 

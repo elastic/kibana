@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { VisualizationToolbarProps } from '@kbn/lens-common';
+import type { VisualizationToolbarProps } from '../../../types';
 import { AppearanceSettingsPopover } from './appearance_settings_popover';
 import type { MetricVisualizationState } from '../types';
 

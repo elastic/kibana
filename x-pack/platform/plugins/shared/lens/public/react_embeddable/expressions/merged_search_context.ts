@@ -16,7 +16,7 @@ import {
 } from '@kbn/es-query';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesTimeslice } from '@kbn/presentation-publishing';
-import type { LensRuntimeState } from '@kbn/lens-common';
+import type { LensRuntimeState } from '../types';
 import { nonNullable } from '../../utils';
 
 export interface MergedSearchContext {

@@ -342,6 +342,8 @@ describe('Update Insights Route Handler', () => {
   describe('space awareness', () => {
     const setupTest = () => {
       const mockEndpointContext = createMockEndpointAppContext();
+      // @ts-expect-error
+      mockEndpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
       return mockEndpointContext;
     };
 

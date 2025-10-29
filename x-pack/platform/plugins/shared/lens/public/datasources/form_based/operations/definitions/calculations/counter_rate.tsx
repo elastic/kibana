@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { COUNTER_RATE_ID, COUNTER_RATE_NAME } from '@kbn/lens-formula-docs';
-import type { CounterRateIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
+import type {
+  FormattedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from '../column_types';
+import type { FormBasedLayer } from '../../../types';
 import {
   buildLabelFunction,
   getErrorsForDateReference,
@@ -32,6 +36,11 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
+
+export type CounterRateIndexPatternColumn = FormattedIndexPatternColumn &
+  ReferenceBasedIndexPatternColumn & {
+    operationType: typeof COUNTER_RATE_ID;
+  };
 
 export const counterRateOperation: OperationDefinition<
   CounterRateIndexPatternColumn,

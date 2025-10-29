@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -25,10 +25,10 @@ export type WebhookConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ActionParamsType
 >;
 
-export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
+export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 // secrets definition
-export type ConnectorTypeSecretsType = z.infer<typeof SecretConfigurationSchema>;
+export type ConnectorTypeSecretsType = TypeOf<typeof SecretConfigurationSchema>;
 
 // params definition
-export type ActionParamsType = z.infer<typeof ParamsSchema>;
+export type ActionParamsType = TypeOf<typeof ParamsSchema>;

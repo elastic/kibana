@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { Streams } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIconTip } from '@elastic/eui';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
@@ -14,14 +15,16 @@ import { formatBytes } from '../../helpers/format_bytes';
 import type { EnhancedFailureStoreStats } from '../../hooks/use_data_stream_stats';
 
 export const IngestionCard = ({
-  hasPrivileges,
+  definition,
   stats,
   statsError,
 }: {
-  hasPrivileges: boolean;
+  definition: Streams.ingest.all.GetResponse;
   stats?: EnhancedFailureStoreStats;
   statsError?: Error;
 }) => {
+  const hasPrivileges = definition.privileges?.manage_failure_store;
+
   const title = (
     <FormattedMessage
       id="xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.title"
@@ -55,13 +58,11 @@ export const IngestionCard = ({
         <PrivilegesWarningIconWrapper
           hasPrivileges={hasPrivileges}
           title={i18n.translate(
-            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.ingestiondailyLabel',
-            { defaultMessage: 'ingestionDaily' }
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.dailyIngestionRateLabel',
+            { defaultMessage: 'Daily ingestion rate' }
           )}
         >
-          {statsError || !stats || stats.bytesPerDay === undefined
-            ? '-'
-            : formatBytes(stats.bytesPerDay)}
+          {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay)}
         </PrivilegesWarningIconWrapper>
       ),
 
@@ -78,13 +79,11 @@ export const IngestionCard = ({
         <PrivilegesWarningIconWrapper
           hasPrivileges={hasPrivileges}
           title={i18n.translate(
-            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.ingestionmonthlyLabel',
-            { defaultMessage: 'ingestionMonthly' }
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.monthlyIngestionRateLabel',
+            { defaultMessage: 'Monthly ingestion rate' }
           )}
         >
-          {statsError || !stats || stats.bytesPerDay === undefined
-            ? '-'
-            : formatBytes(stats.bytesPerDay * 30)}
+          {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay * 30)}
         </PrivilegesWarningIconWrapper>
       ),
       subtitle: i18n.translate(

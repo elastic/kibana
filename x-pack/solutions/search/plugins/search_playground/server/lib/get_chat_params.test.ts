@@ -25,6 +25,7 @@ jest.mock('@kbn/langchain/server', () => {
   return {
     ...original,
     ActionsClientChatOpenAI: jest.fn(),
+    ActionsClientSimpleChatModel: jest.fn(),
   };
 });
 

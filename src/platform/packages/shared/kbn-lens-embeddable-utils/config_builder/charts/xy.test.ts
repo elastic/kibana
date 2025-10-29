@@ -9,7 +9,7 @@
 
 import { buildXY } from './xy';
 import { mockDataViewsService } from './mock_utils';
-import type { XYState } from '@kbn/lens-common';
+import type { XYState } from '@kbn/lens-plugin/public';
 import { LegendValue } from '@elastic/charts';
 
 test('generates xy chart config', async () => {

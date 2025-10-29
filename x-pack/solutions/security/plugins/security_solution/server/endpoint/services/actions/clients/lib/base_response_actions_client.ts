@@ -583,10 +583,12 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     // if space awareness is enabled, then validate that agents are valid for active space.
     // We do this validation by just calling `fetchAgentPolicyInfo()` which will throw if agents
     // are not found in active space
-    try {
-      await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids);
-    } catch (err) {
-      return { isValid: false, error: err };
+    if (this.options.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      try {
+        await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids);
+      } catch (err) {
+        return { isValid: false, error: err };
+      }
     }
 
     return { isValid: true, error: undefined };
@@ -607,6 +609,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       TMeta
     >
   ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    const isSpacesEnabled =
+      this.options.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
     let errorMsg = String(actionRequest.error ?? '').trim();
 
     if (!errorMsg) {
@@ -629,7 +633,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     // the `integration deleted` tag to the action request, which means these are only
     // visible in the space configured (via ref. data) show orphaned actions
     const agentPolicyInfo: LogsEndpointAction['agent']['policy'] =
-      actionRequest.endpoint_ids.length > 0
+      isSpacesEnabled && actionRequest.endpoint_ids.length > 0
         ? await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids)
         : [];
     const tags: LogsEndpointAction['tags'] = actionRequest.tags ?? [];
@@ -641,11 +645,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
-      originSpaceId: this.options.spaceId,
-      tags,
+
+      // Add the `originSpaceId` property to the document if spaces is enabled
+      ...(isSpacesEnabled ? { originSpaceId: this.options.spaceId } : {}),
+
+      // Add `tags` property to the document if spaces is enabled
+      ...(isSpacesEnabled ? { tags } : {}),
+
+      // Need to suppress this TS error around `agent.policy` not supporting `undefined`.
+      // It will be removed once we enable the feature and delete the feature flag checks.
+      // @ts-expect-error
       agent: {
         id: actionRequest.endpoint_ids,
-        policy: agentPolicyInfo,
+        // add the `policy` info if space awareness is enabled
+        ...(isSpacesEnabled ? { policy: agentPolicyInfo } : {}),
       },
       EndpointActions: {
         action_id: actionId,
@@ -670,7 +683,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         : {}),
     };
 
-    await this.ensureActionRequestsIndexIsConfigured();
+    if (isSpacesEnabled) {
+      await this.ensureActionRequestsIndexIsConfigured();
+    }
 
     this.log.debug(() => `creating action request document:\n${stringify(doc)}`);
 
@@ -906,6 +921,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   protected sendActionCreationTelemetry(actionRequest: LogsEndpointAction): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
     this.options.endpointService
       .getTelemetryService()
       .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
@@ -922,6 +940,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     command: ResponseActionsApiCommandNames,
     error: Error
   ): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
     this.options.endpointService
       .getTelemetryService()
       .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
@@ -934,6 +955,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   protected sendActionResponseTelemetry(responseList: LogsEndpointActionResponse[]): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
     for (const response of responseList) {
       this.options.endpointService
         .getTelemetryService()

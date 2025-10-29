@@ -66,9 +66,6 @@ export default function ({ getService }: FtrProviderContext) {
         storageSizeBytes: expect.any(Number),
         failureStoreEnabled: false,
         indexMode: 'standard',
-        failureStoreRetention: {
-          defaultRetentionPeriod: '30d',
-        },
       });
     });
   });

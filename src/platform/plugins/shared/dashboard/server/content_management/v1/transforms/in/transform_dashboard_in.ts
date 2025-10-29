@@ -9,7 +9,7 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
-import type { DashboardState } from '../../types';
+import type { DashboardAttributes } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
 import { transformControlGroupIn } from './transform_control_group_in';
@@ -20,7 +20,7 @@ export const transformDashboardIn = ({
   dashboardState,
   incomingReferences = [],
 }: {
-  dashboardState: DashboardState;
+  dashboardState: DashboardAttributes;
   incomingReferences?: SavedObjectReference[];
 }):
   | {
@@ -64,7 +64,6 @@ export const transformDashboardIn = ({
     );
 
     const attributes = {
-      description: '',
       ...rest,
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),

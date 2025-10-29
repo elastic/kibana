@@ -25,30 +25,20 @@ const FileDataVisualizerComponent = React.lazy(
 export const FileDataVisualizerWrapper: FC<{
   resultLinks?: ResultLinks;
   setUploadResults?: (results: FileUploadResults) => void;
-  location: string;
-}> = ({ resultLinks, setUploadResults, location }) => {
+}> = ({ resultLinks, setUploadResults }) => {
   return (
     <React.Suspense fallback={<div />}>
-      <FileDataVisualizerComponent
-        resultLinks={resultLinks}
-        setUploadResults={setUploadResults}
-        location={location}
-      />
+      <FileDataVisualizerComponent resultLinks={resultLinks} setUploadResults={setUploadResults} />
     </React.Suspense>
   );
 };
 
 export function getFileDataVisualizerWrapper(
-  location: string,
   resultLinks?: ResultLinks,
   setUploadResults?: (results: FileUploadResults) => void
 ) {
   return (
-    <FileDataVisualizerWrapper
-      resultLinks={resultLinks}
-      setUploadResults={setUploadResults}
-      location={location}
-    />
+    <FileDataVisualizerWrapper resultLinks={resultLinks} setUploadResults={setUploadResults} />
   );
 }
 

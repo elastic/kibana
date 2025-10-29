@@ -11,7 +11,6 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
-import { LENS_ROW_HEIGHT_MODE as RowHeightMode, type LegacyMetricState } from '@kbn/lens-common';
 import type {
   LensDocShapePre712,
   OperationTypePre712,
@@ -35,6 +34,7 @@ import type {
   LensDocShape860,
 } from './types';
 import { DOCUMENT_FIELD_NAME } from '../../common/constants';
+import { RowHeightMode, type LegacyMetricState } from '../../common/types';
 import { isPartitionShape } from '../../common/visualizations';
 import type { LensDocShape } from './saved_object_migrations';
 

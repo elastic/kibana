@@ -14,9 +14,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export interface NavigationFeedbackSnippetProps {
+interface NavigationFeedbackSnippetProps {
   solutionId: SolutionId;
-  feedbackUrlParams: URLSearchParams | undefined;
 }
 
 const feedbackSnippetId = 'sideNavigationFeedback';
@@ -42,24 +41,8 @@ const promptViewMessage = (
   />
 );
 
-const getSurveyFeedbackURL = (
-  solutionId: SolutionId,
-  feedbackUrlParams: URLSearchParams | undefined
-) => {
-  const url = new URL(feedbackUrls[solutionId]);
-  if (feedbackUrlParams) {
-    feedbackUrlParams.forEach((value, key) => {
-      url.searchParams.set(key, value);
-    });
-  }
-  return url.href;
-};
-
-export const NavigationFeedbackSnippet = ({
-  solutionId,
-  feedbackUrlParams,
-}: NavigationFeedbackSnippetProps) => {
-  const feedbackSurveyUrl = getSurveyFeedbackURL(solutionId, feedbackUrlParams);
+export const NavigationFeedbackSnippet = ({ solutionId }: NavigationFeedbackSnippetProps) => {
+  const feedbackSurveyUrl = feedbackUrls[solutionId];
   const { euiTheme } = useEuiTheme();
 
   return (

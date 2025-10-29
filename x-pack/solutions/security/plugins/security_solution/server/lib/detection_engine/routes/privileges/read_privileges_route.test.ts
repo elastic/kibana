@@ -6,18 +6,15 @@
  */
 
 import { readPrivilegesRoute } from './read_privileges_route';
-import { serverMock } from '../__mocks__/server';
-import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
-import { requestContextMock } from '../__mocks__/request_context';
+import { serverMock, requestContextMock } from '../__mocks__';
 import { getPrivilegeRequest, getMockPrivilegesResult } from '../__mocks__/request_responses';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('read_privileges route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let context: SecuritySolutionRequestHandlerContextMock;
+  let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    jest.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
@@ -26,11 +23,6 @@ describe('read_privileges route', () => {
     );
 
     readPrivilegesRoute(server.router, true);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('normal status codes', () => {

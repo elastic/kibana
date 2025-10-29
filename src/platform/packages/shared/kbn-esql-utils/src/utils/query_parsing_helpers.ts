@@ -25,8 +25,6 @@ import type {
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
-  ESQLCommand,
-  ESQLAstQueryExpression,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -81,65 +79,15 @@ export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefi
   return clustersSet.size > 0 ? [...clustersSet] : undefined;
 }
 
-/**
- * Determines if an ES|QL query contains transformational commands.
- *
- * For ES|QL, we consider the following as transformational commands:
- * - `stats`: Performs aggregations and transformations
- * - `keep`: Filters and selects specific fields
- * - `fork` commands where ALL branches contain only transformational commands
- *
- * @param esql - The ES|QL query string to analyze
- * @returns true if the query contains transformational commands or fork commands with all transformational branches
- *
- * @example
- * hasTransformationalCommand('from index | stats count() by field') // true
- * hasTransformationalCommand('from index | keep field1, field2') // true
- * hasTransformationalCommand('from index | fork (stats count()) (keep field)') // true
- * hasTransformationalCommand('from index | fork (where x > 0) (eval y = x * 2)') // false
- * hasTransformationalCommand('from index | where field > 0') // false
- */
+// For ES|QL we consider stats and keep transformational command
+// The metrics command too but only if it aggregates
 export function hasTransformationalCommand(esql?: string) {
-  if (!esql) return false;
   const transformationalCommands = ['stats', 'keep'];
-  const { root } = Parser.parse(esql);
-
-  // Check for direct transformational commands first
+  const { ast } = parse(esql);
   const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
-    root.commands.find(({ name }) => name === command)
+    ast.find(({ name }) => name === command)
   );
-
-  // Early return if we found direct transformational commands
-  if (hasAtLeastOneTransformationalCommand) {
-    return true;
-  }
-
-  // Check for fork commands with all transformational branches
-  const forkCommands = Walker.findAll(root, (node) => node.name === 'fork') as Array<ESQLCommand>;
-
-  const hasForkWithAllTransformationalBranches = forkCommands.some((forkCommand) => {
-    const forkArguments = forkCommand?.args as ESQLAstQueryExpression[];
-
-    if (!forkArguments || forkArguments.length === 0) {
-      return false;
-    }
-
-    return forkArguments.every((branch) => {
-      if (branch.type !== 'query') {
-        return false;
-      }
-
-      const branchCommands = branch.commands;
-
-      // Branch must have at least one command and all commands must be transformational
-      return (
-        branchCommands.length > 0 &&
-        branchCommands.every((cmd) => transformationalCommands.includes(cmd.name))
-      );
-    });
-  });
-
-  return hasForkWithAllTransformationalBranches;
+  return hasAtLeastOneTransformationalCommand;
 }
 
 export function getLimitFromESQLQuery(esql: string): number {
@@ -573,34 +521,4 @@ export const getCategorizeField = (esql: string): string[] => {
   }
 
   return columns;
-};
-
-export const hasLimitBeforeAggregate = (esql: string): boolean => {
-  const {
-    root: { commands },
-  } = Parser.parse(esql);
-  const statsCommand = commands.find(({ name }) => name === 'stats');
-  const limitCommand = commands.find(({ name }) => name === 'limit');
-
-  if (statsCommand && limitCommand) {
-    return commands.indexOf(limitCommand) < commands.indexOf(statsCommand);
-  }
-  return false;
-};
-
-export const missingSortBeforeLimit = (esql: string): boolean => {
-  const {
-    root: { commands },
-  } = Parser.parse(esql);
-  const sortCommand = commands.find(({ name }) => name === 'sort');
-  const limitCommand = commands.find(({ name }) => name === 'limit');
-
-  if (limitCommand) {
-    if (sortCommand) {
-      return commands.indexOf(sortCommand) > commands.indexOf(limitCommand);
-    } else {
-      return false;
-    }
-  }
-  return false;
 };

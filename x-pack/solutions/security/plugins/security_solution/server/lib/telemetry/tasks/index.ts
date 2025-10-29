@@ -38,10 +38,15 @@ export function createTelemetryTaskConfigs(
     createTelemetryFilterListArtifactTaskConfig(),
     createTelemetryIndicesMetadataTaskConfig(),
     createIngestStatsTaskConfig(),
-    createTelemetryCustomResponseActionRulesTaskConfig(
-      telemetryConfiguration.max_detection_rule_telemetry_batch
-    ),
   ];
+
+  if (experimentalFeatures.responseActionsTelemetryEnabled) {
+    tasks.push(
+      createTelemetryCustomResponseActionRulesTaskConfig(
+        telemetryConfiguration.max_detection_rule_telemetry_batch
+      )
+    );
+  }
 
   return tasks;
 }

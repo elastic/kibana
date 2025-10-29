@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type {
@@ -22,15 +22,13 @@ import type {
   ExecutorSubActionCommonFieldsParamsSchema,
 } from './schema';
 
-export type JiraPublicConfigurationType = z.infer<
-  typeof ExternalIncidentServiceConfigurationSchema
->;
-export type JiraSecretConfigurationType = z.infer<
+export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
+export type JiraSecretConfigurationType = TypeOf<
   typeof ExternalIncidentServiceSecretConfigurationSchema
 >;
 
-export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
-export type ExecutorSubActionPushParams = z.infer<typeof ExecutorSubActionPushParamsSchema>;
+export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
 
 export interface ExternalServiceCredentials {
   config: Record<string, unknown>;
@@ -113,31 +111,31 @@ export interface ExternalService {
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
-export type ExecutorSubActionGetIncidentParams = z.infer<
+export type ExecutorSubActionGetIncidentParams = TypeOf<
   typeof ExecutorSubActionGetIncidentParamsSchema
 >;
 
-export type ExecutorSubActionHandshakeParams = z.infer<
+export type ExecutorSubActionHandshakeParams = TypeOf<
   typeof ExecutorSubActionHandshakeParamsSchema
 >;
 
-export type ExecutorSubActionGetCapabilitiesParams = z.infer<
+export type ExecutorSubActionGetCapabilitiesParams = TypeOf<
   typeof ExecutorSubActionGetCapabilitiesParamsSchema
 >;
 
-export type ExecutorSubActionCommonFieldsParams = z.infer<
+export type ExecutorSubActionCommonFieldsParams = TypeOf<
   typeof ExecutorSubActionCommonFieldsParamsSchema
 >;
 
-export type ExecutorSubActionGetFieldsByIssueTypeParams = z.infer<
+export type ExecutorSubActionGetFieldsByIssueTypeParams = TypeOf<
   typeof ExecutorSubActionGetFieldsByIssueTypeParamsSchema
 >;
 
-export type ExecutorSubActionGetIssuesParams = z.infer<
+export type ExecutorSubActionGetIssuesParams = TypeOf<
   typeof ExecutorSubActionGetIssuesParamsSchema
 >;
 
-export type ExecutorSubActionGetIssueParams = z.infer<typeof ExecutorSubActionGetIssueParamsSchema>;
+export type ExecutorSubActionGetIssueParams = TypeOf<typeof ExecutorSubActionGetIssueParamsSchema>;
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;

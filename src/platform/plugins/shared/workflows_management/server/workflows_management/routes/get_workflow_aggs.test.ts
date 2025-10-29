@@ -9,11 +9,11 @@
 
 import { registerGetWorkflowAggsRoute } from './get_workflow_aggs';
 import {
-  createMockResponse,
-  createMockRouterInstance,
-  createMockWorkflowsApi,
-  createSpacesMock,
   mockLogger,
+  createMockRouterInstance,
+  createSpacesMock,
+  createMockWorkflowsApi,
+  createMockResponse,
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 

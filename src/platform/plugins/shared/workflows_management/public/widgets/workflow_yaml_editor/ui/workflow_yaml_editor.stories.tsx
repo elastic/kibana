@@ -8,19 +8,23 @@
  */
 
 import type { Decorator, StoryObj } from '@storybook/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
-import { WorkflowDetailStoreProvider } from '../lib/store';
+import { WorkflowEditorStoreProvider } from '../lib/store';
 
 const StoryProviders: Decorator = (story: Function) => {
+  const queryClient = new QueryClient();
   return (
     <MemoryRouter>
-      <WorkflowDetailStoreProvider>
-        <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>{story()}</div>
-      </WorkflowDetailStoreProvider>
+      <QueryClientProvider client={queryClient}>
+        <WorkflowEditorStoreProvider>
+          <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>{story()}</div>
+        </WorkflowEditorStoreProvider>
+      </QueryClientProvider>
     </MemoryRouter>
   );
 };
@@ -85,22 +89,41 @@ type Story = StoryObj<typeof WorkflowYAMLEditor>;
 
 export const Default: Story = {
   args: {
-    workflowYaml,
+    workflowId: '1',
+    filename: 'workflow.yaml',
     readOnly: false,
+    hasChanges: false,
+    lastUpdatedAt: new Date(),
+    highlightStep: undefined,
+    stepExecutions: [],
+    onMount: () => {},
+    onChange: () => {},
+    onSave: () => {},
+    value: workflowYaml,
   },
 };
 
-export const ReadOnly: Story = {
+export const WithHighlightStep: Story = {
   args: {
-    workflowYaml,
-    readOnly: true,
+    workflowId: '1',
+    filename: 'workflow.yaml',
+    readOnly: false,
+    hasChanges: false,
+    lastUpdatedAt: new Date(),
+    highlightStep: 'analysis',
+    value: workflowYaml,
   },
 };
 
 export const WithStepExecutions: Story = {
   args: {
-    workflowYaml,
+    workflowId: '1',
+    filename: 'workflow.yaml',
     readOnly: false,
+    hasChanges: false,
+    lastUpdatedAt: new Date(),
+    highlightStep: undefined,
+    value: workflowYaml,
     stepExecutions: [
       {
         stepId: 'analysis',

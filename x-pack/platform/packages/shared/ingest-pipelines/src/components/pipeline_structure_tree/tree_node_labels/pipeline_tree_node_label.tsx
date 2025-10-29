@@ -16,8 +16,6 @@ interface PipelineTreeNodeLabelProps {
   isDeprecated: boolean;
 }
 
-const MAX_PIPELINE_NAME_LENGTH = 30;
-
 export const PipelineTreeNodeLabel = ({
   pipelineName,
   isManaged,
@@ -36,9 +34,7 @@ export const PipelineTreeNodeLabel = ({
         grow={(10 - Number(isDeprecated) - Number(isManaged)) as EuiFlexItemProps['grow']}
         css={{ textAlign: 'left' }}
       >
-        {pipelineName.length > MAX_PIPELINE_NAME_LENGTH
-          ? `${pipelineName.slice(0, MAX_PIPELINE_NAME_LENGTH)}...`
-          : pipelineName}
+        {pipelineName}
       </EuiFlexItem>
       {isManaged && (
         <EuiFlexItem grow={1} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>

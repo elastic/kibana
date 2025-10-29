@@ -130,16 +130,10 @@ export interface InternalChromeStart extends ChromeStart {
     setCloudUrls(cloudUrls: CloudURLs): void;
 
     /**
-     * Sets the feedback URL parameters.
-     * @param feedbackUrlParams
+     * Sets the project name.
+     * @param projectName
      */
-    setFeedbackUrlParams(feedbackUrlParams: URLSearchParams): void;
-
-    /**
-     * Sets the Kibana name - project name for serverless, deployment name for ECH.
-     * @param kibanaName
-     */
-    setKibanaName(kibanaName: string): void;
+    setProjectName(projectName: string): void;
 
     initNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,

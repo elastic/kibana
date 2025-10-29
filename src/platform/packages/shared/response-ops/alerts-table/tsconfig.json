@@ -47,6 +47,5 @@
     "@kbn/licensing-types",
     "@kbn/zod",
     "@kbn/field-types",
-    "@kbn/react-query",
   ]
 }

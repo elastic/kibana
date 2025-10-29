@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
-import { checkForTripleQuotesAndEsqlQuery } from '@kbn/monaco/src/languages/console/utils';
+import { checkForTripleQuotesAndQueries } from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -789,7 +789,7 @@ export class MonacoEditorActionsProvider {
   private async isPositionInsideTripleQuotesAndQuery(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-  ): Promise<{ insideTripleQuotes: boolean; insideEsqlQuery: boolean }> {
+  ): Promise<{ insideTripleQuotes: boolean; insideQuery: boolean }> {
     const selectedRequests = await this.getSelectedParsedRequests();
 
     for (const request of selectedRequests) {
@@ -804,21 +804,21 @@ export class MonacoEditorActionsProvider {
           endColumn: position.column,
         });
 
-        const { insideTripleQuotes, insideEsqlQuery } =
-          checkForTripleQuotesAndEsqlQuery(requestContentBefore);
+        const { insideTripleQuotes, insideSingleQuotesQuery, insideTripleQuotesQuery } =
+          checkForTripleQuotesAndQueries(requestContentBefore);
         return {
           insideTripleQuotes,
-          insideEsqlQuery,
+          insideQuery: insideSingleQuotesQuery || insideTripleQuotesQuery,
         };
       }
       if (request.startLineNumber > position.lineNumber) {
         // Stop iteration once we pass the cursor position
-        return { insideTripleQuotes: false, insideEsqlQuery: false };
+        return { insideTripleQuotes: false, insideQuery: false };
       }
     }
 
     // Return false if the position is not inside a request
-    return { insideTripleQuotes: false, insideEsqlQuery: false };
+    return { insideTripleQuotes: false, insideQuery: false };
   }
 
   private triggerSuggestions() {
@@ -828,8 +828,8 @@ export class MonacoEditorActionsProvider {
       return;
     }
     this.isPositionInsideTripleQuotesAndQuery(model, position).then(
-      ({ insideTripleQuotes, insideEsqlQuery }) => {
-        if (insideTripleQuotes && !insideEsqlQuery) {
+      ({ insideTripleQuotes, insideQuery }) => {
+        if (insideTripleQuotes && !insideQuery) {
           // Don't trigger autocomplete suggestions inside scripts and strings
           return;
         }
@@ -843,11 +843,11 @@ export class MonacoEditorActionsProvider {
         // Trigger suggestions if the line:
         // - is empty
         // - matches specified regex
-        // - is inside an ESQL query
+        // - is inside a query
         if (
           !lineContentBefore.trim() ||
           shouldTriggerSuggestions(lineContentBefore) ||
-          insideEsqlQuery
+          insideQuery
         ) {
           this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
         }

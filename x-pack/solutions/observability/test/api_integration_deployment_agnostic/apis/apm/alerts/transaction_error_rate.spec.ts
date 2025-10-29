@@ -28,8 +28,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const alertingApi = getService('alertingApi');
   const samlAuth = getService('samlAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/240903
-  describe.skip('transaction error rate alert', () => {
+  describe('transaction error rate alert', () => {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     let roleAuthc: RoleCredentials;
 

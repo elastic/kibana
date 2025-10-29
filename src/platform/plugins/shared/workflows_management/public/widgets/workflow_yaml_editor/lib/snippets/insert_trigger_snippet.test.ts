@@ -8,9 +8,9 @@
  */
 
 import { parseDocument } from 'yaml';
+import { insertTriggerSnippet } from './insert_trigger_snippet';
 import { monaco } from '@kbn/monaco';
 import * as generateTriggerSnippetModule from './generate_trigger_snippet';
-import { insertTriggerSnippet } from './insert_trigger_snippet';
 import { createMockModel } from '../../../../../common/mocks/monaco_model';
 
 describe('insertTriggerSnippet', () => {
@@ -46,7 +46,7 @@ describe('insertTriggerSnippet', () => {
           // we expect the snippet to be inserted at the third line after the alert trigger
           range: new monaco.Range(3, 1, 3, 1),
           // should have 2 spaces before the snippet
-          text: `  ${expectedSnippet}`,
+          text: '  ' + expectedSnippet,
         },
       ],
       expect.any(Function)

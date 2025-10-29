@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionTypeRegistryOpts } from '../action_type_registry';
@@ -154,9 +154,9 @@ beforeEach(() => {
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: z.object({ foo: z.number() }) },
-      secrets: { schema: z.object({ bar: z.number() }) },
-      params: { schema: z.object({}) },
+      config: { schema: schema.object({ foo: schema.number() }) },
+      secrets: { schema: schema.object({ bar: schema.number() }) },
+      params: { schema: schema.object({}) },
     },
     executor,
     preSaveHook,

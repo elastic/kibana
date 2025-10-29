@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DerivativeIndexPatternColumn } from '@kbn/lens-common';
+import type { DerivativeIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type {
   LensApiDifferencesOperation,
   LensApiFieldMetricOperations,

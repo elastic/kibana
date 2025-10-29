@@ -10,7 +10,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { AddLayerButton } from './add_layer';
 import type { XYState } from './types';
 import { Position } from '@elastic/charts';
-import { LENS_LAYER_TYPES as LayerTypes } from '@kbn/lens-common';
+import { LayerTypes } from '@kbn/visualizations-plugin/common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 

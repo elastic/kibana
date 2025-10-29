@@ -6,9 +6,8 @@
  */
 
 import { uniqBy } from 'lodash';
-import type { LensRuntimeState } from '@kbn/lens-common';
 import { getIndexPatternsObjects } from '../../utils';
-import type { LensEmbeddableStartServices } from '../types';
+import type { LensEmbeddableStartServices, LensRuntimeState } from '../types';
 
 export async function getUsedDataViews(
   references: LensRuntimeState['attributes']['references'],

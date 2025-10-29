@@ -11,10 +11,6 @@ import type { Installation, RegistryPackage } from '@kbn/fleet-plugin/common';
 import { requestContextMock, serverMock } from '../../../routes/__mocks__';
 import { getBootstrapRulesRequest } from '../../../routes/__mocks__/request_responses';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../routes/__mocks__/request_context';
 
 const packageMock: RegistryPackage = {
   name: 'detection_engine',
@@ -42,8 +38,7 @@ const installationMock: Installation = {
 
 describe('bootstrap_prebuilt_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let clients: MockClients;
-  let context: SecuritySolutionRequestHandlerContextMock;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -52,11 +47,6 @@ describe('bootstrap_prebuilt_rules_route', () => {
     clients.productFeaturesService = createProductFeaturesServiceMock([]);
 
     bootstrapPrebuiltRulesRoute(server.router, clients.logger);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('returns information about installed packages', async () => {

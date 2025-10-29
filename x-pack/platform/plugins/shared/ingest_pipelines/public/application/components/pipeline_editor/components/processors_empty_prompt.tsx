@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useRef } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiSpacer, EuiLink } from '@elastic/eui';
@@ -29,8 +29,6 @@ export interface Props {
 export const ProcessorsEmptyPrompt: FunctionComponent<Props> = ({ onLoadJson }) => {
   const { onTreeAction } = usePipelineProcessorsContext();
   const { services } = useKibana();
-
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
   return (
     <EuiEmptyPrompt
@@ -59,12 +57,8 @@ export const ProcessorsEmptyPrompt: FunctionComponent<Props> = ({ onLoadJson }) 
       actions={
         <>
           <AddProcessorButton
-            ref={buttonRef}
             onClick={() => {
-              onTreeAction({
-                type: 'addProcessor',
-                payload: { target: ['processors'], buttonRef },
-              });
+              onTreeAction({ type: 'addProcessor', payload: { target: ['processors'] } });
             }}
           />
 

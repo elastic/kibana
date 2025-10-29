@@ -13,7 +13,7 @@ import React, { useState } from 'react';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header';
 import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
-import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
+import { useConversationList } from '../../hooks/use_conversation_list';
 import { SendMessageProvider } from '../../context/send_message/send_message_context';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
@@ -56,51 +56,51 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     }),
   };
 
-  return (
-    <RoutedConversationsProvider>
-      <SendMessageProvider>
-        <KibanaPageTemplate
-          offset={0}
-          restrictWidth={false}
-          data-test-subj="onechatPageConversations"
-          grow={false}
-          panelled={false}
-          mainProps={{
-            css: mainStyles,
-          }}
-          responsive={[]}
-        >
-          {isSidebarOpen && (
-            <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
-              <ConversationSidebar />
-            </KibanaPageTemplate.Sidebar>
-          )}
+  const { conversations = [], isLoading } = useConversationList();
 
-          <KibanaPageTemplate.Header
-            css={headerStyles}
-            bottomBorder={false}
-            aria-label={labels.header}
-            paddingSize="m"
-          >
-            <ConversationHeader
-              isSidebarOpen={isSidebarOpen}
-              onToggleSidebar={() => {
-                setIsSidebarOpen((open) => !open);
-              }}
-            />
-          </KibanaPageTemplate.Header>
-          <KibanaPageTemplate.Section
-            paddingSize="none"
-            grow
-            contentProps={{
-              css: contentStyles,
+  return (
+    <SendMessageProvider>
+      <KibanaPageTemplate
+        offset={0}
+        restrictWidth={false}
+        data-test-subj="onechatPageConversations"
+        grow={false}
+        panelled={false}
+        mainProps={{
+          css: mainStyles,
+        }}
+        responsive={[]}
+      >
+        {isSidebarOpen && (
+          <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
+            <ConversationSidebar conversations={conversations} isLoading={isLoading} />
+          </KibanaPageTemplate.Sidebar>
+        )}
+
+        <KibanaPageTemplate.Header
+          css={headerStyles}
+          bottomBorder={false}
+          aria-label={labels.header}
+          paddingSize="m"
+        >
+          <ConversationHeader
+            isSidebarOpen={isSidebarOpen}
+            onToggleSidebar={() => {
+              setIsSidebarOpen((open) => !open);
             }}
-            aria-label={labels.content}
-          >
-            <Conversation />
-          </KibanaPageTemplate.Section>
-        </KibanaPageTemplate>
-      </SendMessageProvider>
-    </RoutedConversationsProvider>
+          />
+        </KibanaPageTemplate.Header>
+        <KibanaPageTemplate.Section
+          paddingSize="none"
+          grow
+          contentProps={{
+            css: contentStyles,
+          }}
+          aria-label={labels.content}
+        >
+          <Conversation />
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
+    </SendMessageProvider>
   );
 };

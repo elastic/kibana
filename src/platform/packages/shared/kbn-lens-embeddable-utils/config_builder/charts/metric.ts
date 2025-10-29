@@ -11,7 +11,7 @@ import type {
   FormBasedPersistedState,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-common';
+} from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensMetricConfig } from '../types';
 import { DEFAULT_LAYER_ID } from '../types';

@@ -12,6 +12,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   GLOBAL_EFFECT_SCOPE,
@@ -28,6 +29,11 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 //          by policy (>0), but **NOT** show the menu.
 //          So something like: `<EffectScope perPolicyCount={3} />`
 //          This should display it as "Applied to 3 policies", but NOT as a menu with links
+
+const POLICY_DETAILS_NOT_ACCESSIBLE = i18n.translate(
+  'xpack.securitySolution.effectScope.policyDetailsNotAccessible',
+  { defaultMessage: 'Policy is no longer accessible' }
+);
 
 const POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE = i18n.translate(
   'xpack.securitySolution.effectScope.policyDetailsNotAccessibleInActiveSpace',
@@ -110,6 +116,9 @@ const WithContextMenu = memo<WithContextMenuProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isSpacesEnabled = useIsExperimentalFeatureEnabled(
+      'endpointManagementSpaceAwarenessEnabled'
+    );
 
     const menuItems: ContextMenuItemNavByRouterProps[] = useMemo(() => {
       return policies.map((policyMenuItem) => {
@@ -127,10 +136,16 @@ const WithContextMenu = memo<WithContextMenuProps>(
               </StyledEuiButtonEmpty>
             ) : undefined,
           disabled: !hasHref,
-          toolTipContent: !hasHref ? POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE : undefined,
+          toolTipContent: !hasHref ? (
+            <>
+              {isSpacesEnabled
+                ? POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE
+                : POLICY_DETAILS_NOT_ACCESSIBLE}
+            </>
+          ) : undefined,
         };
       });
-    }, [canReadPolicies, policies]);
+    }, [canReadPolicies, isSpacesEnabled, policies]);
 
     return (
       <ContextMenuWithRouterSupport

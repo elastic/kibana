@@ -100,8 +100,7 @@ export function registerAnalyzeLogsRoutes(router: IRouter<AutomaticImportRouteHa
             const graphResults = await graph
               .withConfig({ runName: 'Log Format' })
               .invoke(logFormatParameters, options);
-            const graphLogFormat = (graphResults.results as { samplesFormat: { name: string } })
-              .samplesFormat.name;
+            const graphLogFormat = graphResults.results.samplesFormat.name;
 
             switch (graphLogFormat) {
               case 'unsupported':

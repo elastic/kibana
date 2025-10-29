@@ -24,7 +24,6 @@ import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-p
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -45,7 +44,6 @@ export interface IndexPatternManagementStartDependencies {
   spaces?: SpacesPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
-  savedObjectsTagging?: SavedObjectsTaggingApi;
   uiSettings: IUiSettingsClient;
 }
 

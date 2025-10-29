@@ -21,7 +21,6 @@ import { installPrepackagedTimelines } from './helpers';
 import { checkTimelinesStatus } from '../../../utils/check_timelines_status';
 
 import { installPrepackedTimelinesRoute } from '.';
-import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
 jest.mock('./helpers', () => ({
   installPrepackagedTimelines: jest.fn(),
@@ -37,7 +36,7 @@ jest.mock('../../../utils/check_timelines_status', () => {
 
 describe('installPrepackagedTimelines', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let context: SecuritySolutionRequestHandlerContextMock;
+  let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
     jest.resetModules();
@@ -47,11 +46,6 @@ describe('installPrepackagedTimelines', () => {
     context = requestContextMock.createTools().context;
 
     installPrepackedTimelinesRoute(server.router, createMockConfig());
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('should call installPrepackagedTimelines ', async () => {

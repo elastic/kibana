@@ -34,7 +34,13 @@ export const validate = (
   const policies = context?.policies || new Map<string, ESQLPolicy>();
 
   if (index && !policies.has(index.valueUnquoted)) {
-    messages.push(errors.unknownPolicy(index.valueUnquoted, index.location));
+    messages.push(
+      getMessageFromId({
+        messageId: 'unknownPolicy',
+        values: { name: index.valueUnquoted },
+        locations: index.location,
+      })
+    );
   }
 
   if (cluster) {

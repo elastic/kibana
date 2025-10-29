@@ -8,7 +8,7 @@
  */
 
 export function isMac() {
-  return ((navigator as any)?.userAgentData?.platform || navigator.userAgent) // eslint-disable-line @typescript-eslint/no-explicit-any
+  return ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
     .toLowerCase()
     .includes('mac');
 }

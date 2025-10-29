@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { TimeTypeSection } from './time_type_section';
-import { useShareContext, type IShareContext } from '../../context';
+import type { IShareContext } from '../../context';
 import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
 import type { DraftModeCalloutProps } from '../../common/draft_mode_callout';
 import { DraftModeCallout } from '../../common/draft_mode_callout';
@@ -54,7 +54,6 @@ export const LinkContent = ({
   shareableUrlLocatorParams,
   allowShortUrl,
 }: LinkProps) => {
-  const { onSave, isSaving } = useShareContext();
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -154,15 +153,7 @@ export const LinkContent = ({
         {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            <DraftModeCallout
-              {...draftModeCalloutContent}
-              {...(onSave && {
-                saveButtonProps: {
-                  onSave,
-                  isSaving,
-                },
-              })}
-            />
+            <DraftModeCallout {...draftModeCalloutContent} />
           </>
         )}
         <EuiSpacer size="l" />

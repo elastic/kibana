@@ -776,7 +776,6 @@ export function Detail() {
   const securityCallout = missingSecurityConfiguration ? (
     <>
       <EuiCallOut
-        announceOnMount
         color="warning"
         iconType="lock"
         title={

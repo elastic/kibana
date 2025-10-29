@@ -49,22 +49,9 @@ export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
  * which will be used to update the in-memory processors data structure.
  */
 export type EditorMode =
-  | {
-      id: 'creatingProcessor';
-      arg: {
-        selector: ProcessorSelector;
-        buttonRef?: React.RefObject<HTMLButtonElement | HTMLAnchorElement>;
-      };
-    }
+  | { id: 'creatingProcessor'; arg: { selector: ProcessorSelector } }
   | { id: 'movingProcessor'; arg: ProcessorInfo }
-  | {
-      id: 'managingProcessor';
-      arg: {
-        processor: ProcessorInternal;
-        selector: ProcessorSelector;
-        buttonRef?: React.RefObject<HTMLButtonElement | HTMLAnchorElement>;
-      };
-    }
+  | { id: 'managingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'removingProcessor'; arg: { selector: ProcessorSelector } }
   | { id: 'idle' };
 

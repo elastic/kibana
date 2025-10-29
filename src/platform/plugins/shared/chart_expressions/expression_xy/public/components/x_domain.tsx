@@ -14,7 +14,10 @@ import type { Unit } from '@kbn/datemath';
 import dateMath from '@kbn/datemath';
 import { Endzones, getAdjustedInterval } from '@kbn/charts-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { getAccessorByDimension, getColumnByAccessor } from '@kbn/chart-expressions-common';
+import {
+  getAccessorByDimension,
+  getColumnByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
 import type { AxisExtentConfigResult, CommonXYDataLayerConfig } from '../../common';
 
 export interface XDomain {

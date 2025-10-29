@@ -8,10 +8,12 @@
 import type {
   TextBasedLayer,
   TextBasedPersistedState,
+} from '../../../datasources/form_based/esql_layer/types';
+import type {
   FormBasedLayer,
   FormBasedPersistedState,
-  StructuredDatasourceStates,
-} from '@kbn/lens-common';
+} from '../../../datasources/form_based/types';
+import type { StructuredDatasourceStates } from '../../../react_embeddable/types';
 import type { ColumnMeta } from './utils';
 import { getColumnMetaFn } from './utils';
 

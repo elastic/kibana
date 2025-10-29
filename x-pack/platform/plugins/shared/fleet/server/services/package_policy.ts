@@ -29,7 +29,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { load } from 'js-yaml';
 import semverGt from 'semver/functions/gt';
 
-import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pMap from 'p-map';
 
@@ -580,7 +580,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         useSpaceAwareness &&
         agentPolicy &&
         agentPolicy.space_ids &&
-        (agentPolicy.space_ids.length > 1 || agentPolicy.space_ids.includes(ALL_SPACES_ID))
+        agentPolicy.space_ids.length > 1
       ) {
         await updatePackagePolicySpaces({
           packagePolicyId: newSo.id,
@@ -799,11 +799,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           continue;
         }
         const agentPolicy = agentPoliciesIndexById[newSo.attributes.policy_ids[0]];
-        if (
-          agentPolicy &&
-          agentPolicy.space_ids &&
-          (agentPolicy.space_ids.length > 1 || agentPolicy.space_ids.includes(ALL_SPACES_ID))
-        ) {
+        if (agentPolicy && agentPolicy.space_ids && agentPolicy.space_ids.length > 1) {
           await updatePackagePolicySpaces({
             packagePolicyId: newSo.id,
             currentSpaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
@@ -3817,10 +3813,7 @@ function validateReusableIntegrationsAndSpaceAwareness(
     return;
   }
   for (const agentPolicy of agentPolicies) {
-    if (
-      (agentPolicy?.space_ids?.length ?? 0) > 1 ||
-      agentPolicy?.space_ids?.includes(ALL_SPACES_ID)
-    ) {
+    if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
       throw new FleetError(
         'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
       );

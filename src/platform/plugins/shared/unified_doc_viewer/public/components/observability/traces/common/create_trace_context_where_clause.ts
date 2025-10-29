@@ -18,17 +18,19 @@ export const createTraceContextWhereClause = ({
   spanId?: string;
   transactionId?: string;
 }) => {
-  let queryString = `${TRACE_ID_FIELD} == ?traceId`;
+  const queryStrings: string[] = [];
 
-  if (transactionId && spanId) {
-    queryString += ` AND (${TRANSACTION_ID_FIELD} == ?transactionId OR ${SPAN_ID_FIELD} == ?spanId)`;
-  } else if (transactionId) {
-    queryString += ` AND ${TRANSACTION_ID_FIELD} == ?transactionId`;
-  } else if (spanId) {
-    queryString += ` AND ${SPAN_ID_FIELD} == ?spanId`;
+  queryStrings.push(`${TRACE_ID_FIELD} == ?traceId`);
+
+  if (transactionId) {
+    queryStrings.push(`${TRANSACTION_ID_FIELD} == ?transactionId`);
+  }
+  if (spanId) {
+    queryStrings.push(`${SPAN_ID_FIELD} == ?spanId`);
   }
 
+  const filters = queryStrings.join(' AND ');
   const params = [{ traceId }, { transactionId }, { spanId }];
 
-  return where(queryString, params);
+  return where(filters, params);
 };

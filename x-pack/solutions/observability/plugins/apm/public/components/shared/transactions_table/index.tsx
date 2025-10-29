@@ -182,10 +182,6 @@ export function TransactionsTable({
     });
   }, [setScreenContext, mainStatistics]);
 
-  const title = i18n.translate('xpack.apm.transactionsTable.title', {
-    defaultMessage: 'Transactions',
-  });
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="transactionsGroupTable">
       {!hideTitle && (
@@ -193,7 +189,11 @@ export function TransactionsTable({
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h2>{title}</h2>
+                <h2>
+                  {i18n.translate('xpack.apm.transactionsTable.title', {
+                    defaultMessage: 'Transactions',
+                  })}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
             {!hideViewTransactionsLink && (
@@ -261,7 +261,6 @@ export function TransactionsTable({
             showPerPageOptions={showPerPageOptions}
             saveTableOptionsToUrl={saveTableOptionsToUrl}
             onChangeRenderedItems={setRenderedItems}
-            tableCaption={title}
           />
         </OverviewTableContainer>
       </EuiFlexItem>

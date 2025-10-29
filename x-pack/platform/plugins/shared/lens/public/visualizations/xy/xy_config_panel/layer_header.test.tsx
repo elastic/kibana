@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { FramePublicAPI } from '@kbn/lens-common';
+import type { FramePublicAPI } from '../../../types';
 import { LayerHeader } from './layer_header';
 import type {
   XYByReferenceAnnotationLayerConfig,

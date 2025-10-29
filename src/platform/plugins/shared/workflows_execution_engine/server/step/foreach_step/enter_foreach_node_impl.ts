@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isPropertyAccess } from '@kbn/workflows/common/utils';
 import type { EnterForeachNode } from '@kbn/workflows/graph';
-import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { NodeImplementation } from '../node_implementation';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 
 export class EnterForeachNodeImpl implements NodeImplementation {
   constructor(
@@ -31,13 +30,9 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   }
 
   private async enterForeach(): Promise<void> {
-    await this.stepExecutionRuntime.startStep();
     let foreachState = this.stepExecutionRuntime.getCurrentStepState();
-    const renderedForeachExpression = this.getForeachExpression();
-    await this.stepExecutionRuntime.setInput({
-      foreach: renderedForeachExpression,
-    });
-    const evaluatedItems = this.getItems(renderedForeachExpression);
+    await this.stepExecutionRuntime.startStep();
+    const evaluatedItems = this.getItems();
 
     if (evaluatedItems.length === 0) {
       this.workflowLogger.logDebug(
@@ -72,13 +67,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
     await this.stepExecutionRuntime.setCurrentStepState(foreachState);
     // Enter a new scope for the first iteration
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   private async advanceIteration(): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     let foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
     // Update items and index if they have changed
     const items = foreachState.items;
@@ -93,82 +86,41 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     };
     // Enter a new scope for the new iteration
     await this.stepExecutionRuntime.setCurrentStepState(foreachState);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  private getForeachExpression(): string {
+  private getItems(): any[] {
+    let items: any[] = [];
+
     if (!this.node.configuration.foreach) {
-      throw new Error(
-        `Foreach configuration is required. Please specify an array or expression that evaluates to an array.`
-      );
+      throw new Error('Foreach configuration is required');
     }
 
-    const renderedForeachExpression =
-      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+    try {
+      items = JSON.parse(this.node.configuration.foreach);
+    } catch (error) {
+      const { value, pathExists } = this.stepExecutionRuntime.contextManager.readContextPath(
         this.node.configuration.foreach
       );
 
-    return renderedForeachExpression;
-  }
-
-  private getItems(renderedForeachExpression: string): unknown[] {
-    let resolvedValue;
-
-    if (isPropertyAccess(renderedForeachExpression)) {
-      const result =
-        this.stepExecutionRuntime.contextManager.readContextPath(renderedForeachExpression);
-
-      if (!result.pathExists) {
+      if (!pathExists) {
         throw new Error(
-          `Expression "${renderedForeachExpression}" could not be found in the context. ` +
-            `Please ensure the expression references an array variable or update the configuration.`
+          `Foreach configuration path "${this.node.configuration.foreach}" does not exist in the workflow context.`
         );
       }
 
-      resolvedValue = result.value;
-    } else {
-      resolvedValue = renderedForeachExpression; // renderedForeachExpression could be a JSON array string
-    }
-
-    if (typeof resolvedValue === 'string') {
-      resolvedValue = this.tryParseJSON(resolvedValue);
-    }
-
-    if (resolvedValue) {
-      if (Array.isArray(resolvedValue)) {
-        return resolvedValue;
+      if (Array.isArray(value)) {
+        items = value;
+      } else if (typeof value === 'string') {
+        items = JSON.parse(value);
       }
-
-      throw new Error(
-        `Foreach expression must evaluate to an array. ` +
-          `Expression "${renderedForeachExpression}" resolved to ${typeof resolvedValue}${
-            resolvedValue === null
-              ? ' (null)'
-              : resolvedValue === undefined
-              ? ' (undefined)'
-              : `: ${JSON.stringify(resolvedValue).substring(0, 100)}${
-                  JSON.stringify(resolvedValue).length > 100 ? '...' : ''
-                }`
-          }. `
-      );
     }
 
-    throw new Error(
-      `Foreach expression must be a valid JSON array or a context path. ` +
-        `Got: ${renderedForeachExpression}`
-    );
-  }
-
-  private tryParseJSON(value: string): unknown | undefined {
-    let parsed;
-    try {
-      parsed = JSON.parse(value);
-    } catch (error) {
-      return undefined;
+    if (!Array.isArray(items)) {
+      throw new Error('Foreach configuration must be an array');
     }
 
-    return parsed;
+    return items;
   }
 }

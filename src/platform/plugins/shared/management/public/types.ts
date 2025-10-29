@@ -95,7 +95,6 @@ export interface CreateManagementItemArgs {
   euiIconType?: string; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`
   hideFromSidebar?: boolean;
-  hideFromGlobalSearch?: boolean; // Hide from global search results
   capabilitiesId?: string; // overrides app id
   redirectFrom?: string; // redirects from an old app id to the current app id
 }

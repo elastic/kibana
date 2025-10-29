@@ -134,7 +134,6 @@ export const RetentionCard = ({
         </EuiButtonEmpty>
       }
       metrics={metrics}
-      data-test-subj="retentionCard"
     />
   );
 };

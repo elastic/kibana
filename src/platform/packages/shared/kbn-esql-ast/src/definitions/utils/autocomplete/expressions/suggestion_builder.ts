@@ -32,7 +32,6 @@ export class SuggestionBuilder {
     promoteToTop?: boolean;
     openSuggestions?: boolean;
     values?: boolean;
-    canBeMultiValue?: boolean;
   }): Promise<this> {
     const types = options?.types ?? ['any'];
     const addComma = options?.addComma ?? false;
@@ -41,7 +40,6 @@ export class SuggestionBuilder {
     const ignoredColumns = options?.ignoredColumns ?? [];
     const openSuggestions = options?.openSuggestions ?? (addSpaceAfterField || addComma);
     const values = options?.values;
-    const canBeMultiValue = options?.canBeMultiValue ?? false;
 
     const getByType = this.context.callbacks?.getByType ?? (() => Promise.resolve([]));
 
@@ -52,7 +50,6 @@ export class SuggestionBuilder {
       addComma,
       promoteToTop,
       values,
-      canBeMultiValue,
     });
 
     this.suggestions.push(...fieldSuggestions);

@@ -222,7 +222,8 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message:
+                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -244,7 +245,8 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message:
+                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -442,7 +444,8 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_union_discriminator\",\n    \"options\": [\n      \"addEvent\",\n      \"getChoices\"\n    ],\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'addEvent' | 'getChoices'\"\n  }\n]`,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
               });
             });
         });
@@ -460,7 +463,8 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_union_discriminator\",\n    \"options\": [\n      \"addEvent\",\n      \"getChoices\"\n    ],\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'addEvent' | 'getChoices'\"\n  }\n]`,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
               });
             });
         });
@@ -482,7 +486,8 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                   status: 'error',
                   retry: false,
                   errorSource: TaskErrorSource.USER,
-                  message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"array\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"fields\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                  message:
+                    'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subActionParams.fields]: expected value of type [array] but got [undefined]',
                 });
               });
           });

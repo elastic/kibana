@@ -35,9 +35,6 @@ describe('getPresets', () => {
       '3': {
         interval: 1,
       },
-      '4': {
-        interval: 1,
-      },
     });
   });
 });

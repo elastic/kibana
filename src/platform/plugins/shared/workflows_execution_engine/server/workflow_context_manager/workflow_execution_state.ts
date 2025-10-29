@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -84,12 +81,9 @@ export class WorkflowExecutionState {
       return [];
     }
 
-    return (
-      this.stepIdExecutionIdIndex
-        .get(stepId)
-        ?.map((executionId) => this.stepExecutions.get(executionId) as EsWorkflowStepExecution) ??
-      []
-    );
+    return this.stepIdExecutionIdIndex
+      .get(stepId)!
+      .map((executionId) => this.stepExecutions.get(executionId) as EsWorkflowStepExecution);
   }
 
   /**
@@ -112,7 +106,7 @@ export class WorkflowExecutionState {
       throw new Error('WorkflowExecutionState: Step execution must have an ID to be upserted');
     }
 
-    if (!this.stepExecutions.has(step.id)) {
+    if (!this.stepExecutions.has(step.id!)) {
       this.createStep(step);
     } else {
       this.updateStep(step);
@@ -202,7 +196,7 @@ export class WorkflowExecutionState {
     if (!stepExecutions.length) {
       this.stepIdExecutionIdIndex.set(step.stepId as string, []);
     }
-    this.stepIdExecutionIdIndex.get(step.stepId as string)?.push(step.id as string);
+    this.stepIdExecutionIdIndex.get(step.stepId as string)!.push(step.id as string);
     const newStep: EsWorkflowStepExecution = {
       ...step,
       id: step.id,

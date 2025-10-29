@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
+import { EnterWorkflowTimeoutZoneNodeImpl } from '../enter_workflow_timeout_zone_node_impl';
+import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
+import type { StepExecutionRuntimeFactory } from '../../../../workflow_context_manager/step_execution_runtime_factory';
+
 // Mock parseDuration function
 jest.mock('../../../../utils', () => ({
   parseDuration: jest.fn(),
 }));
 
-import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import { parseDuration } from '../../../../utils';
-import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
-import type { StepExecutionRuntimeFactory } from '../../../../workflow_context_manager/step_execution_runtime_factory';
-import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterWorkflowTimeoutZoneNodeImpl } from '../enter_workflow_timeout_zone_node_impl';
 
 const mockParseDuration = parseDuration as jest.MockedFunction<typeof parseDuration>;
 

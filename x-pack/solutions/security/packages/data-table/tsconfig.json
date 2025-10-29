@@ -21,7 +21,6 @@
     "@kbn/data-views-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/data-plugin",
-    "@kbn/response-ops-alerts-fields-browser",
-    "@kbn/react-query"
+    "@kbn/response-ops-alerts-fields-browser"
   ]
 }

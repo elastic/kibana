@@ -30,9 +30,6 @@ import {
   MOCK_IDP_ROLE_MAPPING_NAME,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
-import { seedTestUser } from './cosmos_db_seeder';
-import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
-import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
 
 /**
  * Creates XML metadata for our mock identity provider.
@@ -109,12 +106,12 @@ export async function createSAMLResponse(options: {
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
 
   const uiamSessionTokens = options.serverless?.uiamEnabled
-    ? await createUiamSessionTokens({
+    ? createUiamSessionTokens({
         username: options.username,
         organizationId: options.serverless.organizationId,
         projectType: options.serverless.projectType,
         roles: options.roles,
-        fullName: options.full_name,
+        familyName: options.full_name,
         email: options.email,
       })
     : undefined;
@@ -249,36 +246,22 @@ export async function ensureSAMLRoleMapping(client: Client) {
   });
 }
 
-async function createUiamSessionTokens({
+function createUiamSessionTokens({
   username,
   organizationId,
   projectType,
   roles,
-  fullName,
+  familyName,
   email,
 }: {
   username: string;
   organizationId: string;
   projectType: string;
   roles: string[];
-  fullName?: string;
+  familyName?: string;
   email?: string;
 }) {
   const iat = Math.floor(Date.now() / 1000);
-
-  const givenName = fullName ? fullName.split(' ')[0] : 'Test';
-  const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
-
-  await seedTestUser({
-    userId: username,
-    organizationId,
-    roleId: 'cloud-role-id',
-    projectType,
-    applicationRoles: roles,
-    email,
-    firstName: givenName,
-    lastName: familyName,
-  });
 
   const accessTokenBody = Buffer.from(
     JSON.stringify({
@@ -288,7 +271,6 @@ async function createUiamSessionTokens({
 
       oid: organizationId,
       sub: username,
-      given_name: givenName,
       family_name: familyName,
       email,
 
@@ -311,6 +293,7 @@ async function createUiamSessionTokens({
       // 1H
       exp: iat + 3600,
       iat,
+
       jti: randomBytes(16).toString('hex'),
     })
   ).toString('base64url');
@@ -327,7 +310,7 @@ async function createUiamSessionTokens({
       // 3D
       exp: iat + 3600 * 24 * 3,
       iat,
-      session_created: iat,
+
       jti: randomBytes(16).toString('hex'),
     })
   ).toString('base64url');
@@ -335,31 +318,17 @@ async function createUiamSessionTokens({
   const tokenHeader = Buffer.from(JSON.stringify({ typ: 'JWT', alg: 'HS256' })).toString(
     'base64url'
   );
-
   const accessToken = `${tokenHeader}.${accessTokenBody}`;
-
   const refreshToken = `${tokenHeader}.${refreshTokenBody}`;
 
   return {
-    accessToken: prepareJwtForUiam(accessToken),
+    accessToken: `${accessToken}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+      .update(accessToken)
+      .digest('base64url')}`,
     accessTokenExpiresAt: (iat + 3600) * 1000,
-    refreshToken: prepareJwtForUiam(refreshToken),
+    refreshToken: `${refreshToken}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+      .update(refreshToken)
+      .digest('base64url')}`,
     refreshTokenExpiresAt: (iat + 3600) * 1000,
   };
-}
-
-function prepareJwtForUiam(unsignedJwt: string): string {
-  const signedAccessToken = signJwt(unsignedJwt);
-  return wrapSignedJwt(signedAccessToken);
-}
-
-function signJwt(unsignedJwt: string): string {
-  return `${unsignedJwt}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
-    .update(unsignedJwt)
-    .digest('base64url')}`;
-}
-
-function wrapSignedJwt(signedJwt: string): string {
-  const accessTokenEncodedWithChecksum = encodeWithChecksum(signedJwt);
-  return prefixWithEssuDev(accessTokenEncodedWithChecksum);
 }

@@ -17,7 +17,6 @@ interface AuthenticationFormItemsProps {
   isPreconfigured?: boolean;
   items: ConfigEntryView[];
   setConfigEntry: (key: string, value: string | number | boolean | null) => void;
-  reenterSecretsOnEdit?: boolean;
 }
 
 export const AuthenticationFormItems: React.FC<AuthenticationFormItemsProps> = ({
@@ -26,7 +25,6 @@ export const AuthenticationFormItems: React.FC<AuthenticationFormItemsProps> = (
   isLoading,
   items,
   setConfigEntry,
-  reenterSecretsOnEdit,
 }) => {
   const [authType, setAuthType] = useState<string>(items[0].key);
   const isMultiAuthType = useMemo(
@@ -80,7 +78,6 @@ export const AuthenticationFormItems: React.FC<AuthenticationFormItemsProps> = (
         isEdit={isEdit}
         isLoading={isLoading}
         setConfigEntry={setConfigEntry}
-        reenterSecretsOnEdit={reenterSecretsOnEdit}
       />
     </EuiFlexGroup>
   );

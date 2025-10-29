@@ -91,7 +91,7 @@ export const useCasesColumns = ({
   const {
     data: { customFields },
     isFetching: isLoadingColumns,
-  } = useGetCaseConfiguration({ keepPreviousData: true });
+  } = useGetCaseConfiguration();
 
   const assignCaseAction = useCallback(
     async (theCase: CaseUI) => {

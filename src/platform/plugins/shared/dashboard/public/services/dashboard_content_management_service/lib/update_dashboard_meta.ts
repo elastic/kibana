@@ -9,18 +9,18 @@
 
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import type {
-  DashboardState,
+  DashboardAttributes,
   DashboardUpdateIn,
   DashboardUpdateOut,
 } from '../../../../server/content_management';
 import { findDashboardsByIds } from './find_dashboards';
-import { contentManagementService } from '../../kibana_services';
+import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
 import { getDashboardContentManagementCache } from '..';
 
 export interface UpdateDashboardMetaProps {
   id: DashboardUpdateIn['id'];
-  title: DashboardState['title'];
-  description?: DashboardState['description'];
+  title: DashboardAttributes['title'];
+  description?: DashboardAttributes['description'];
   tags: string[];
 }
 
@@ -35,11 +35,17 @@ export const updateDashboardMeta = async ({
     return;
   }
 
+  const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
+  const references =
+    savedObjectsTaggingApi?.ui.updateTagsReferences && tags.length
+      ? savedObjectsTaggingApi.ui.updateTagsReferences(dashboard.references, tags)
+      : dashboard.references;
+
   await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     id,
-    data: { title, description, tags },
-    options: { references: [] },
+    data: { title, description },
+    options: { references },
   });
 
   getDashboardContentManagementCache().deleteDashboard(id);

@@ -9,13 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IAggConfig, METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
-import type { VisParams } from '@kbn/visualizations-common';
-import type {
-  AnyMetricColumnAndMeta,
-  AnyMetricColumnWithSourceFieldWithMeta,
-  PercentageModeConfig,
-} from '../../common/convert_to_lens';
-import type { SchemaConfig } from '../../common';
+import type { AggBasedColumn, PercentageModeConfig, SchemaConfig, VisParams } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import {
   getAggIdAndValue,
@@ -63,15 +57,13 @@ const createLayer = (
   percentageModeConfig: PercentageModeConfig,
   dropEmptyRowsInDateHistogram?: boolean
 ) => {
-  const metricColumns: (AnyMetricColumnAndMeta | null)[] = metricsForLayer.flatMap((m) =>
+  const metricColumns = metricsForLayer.flatMap((m) =>
     convertMetricToColumns({ agg: m, dataView, aggs: allMetrics, visType }, percentageModeConfig)
   );
   if (metricColumns.includes(null)) {
     return null;
   }
-  const metricColumnsWithoutNull = metricColumns as NonNullable<
-    AnyMetricColumnWithSourceFieldWithMeta[]
-  >;
+  const metricColumnsWithoutNull = metricColumns as AggBasedColumn[];
 
   const { customBucketColumns, customBucketsMap } = getCustomBucketColumns(
     visType,
@@ -92,7 +84,7 @@ const createLayer = (
     buckets,
     dataView,
     false,
-    metricColumns as AnyMetricColumnWithSourceFieldWithMeta[],
+    metricColumns as AggBasedColumn[],
     dropEmptyRowsInDateHistogram
   );
   if (!bucketColumns) {
@@ -105,7 +97,7 @@ const createLayer = (
     splits,
     dataView,
     true,
-    metricColumns as AnyMetricColumnWithSourceFieldWithMeta[],
+    metricColumns as AggBasedColumn[],
     dropEmptyRowsInDateHistogram
   );
   if (!splitBucketColumns) {

@@ -435,5 +435,12 @@ function isThirdPartyFeatureDisabled(
     return true;
   }
 
+  if (
+    agentType === 'microsoft_defender_endpoint' &&
+    !experimentalFeatures.responseActionsMSDefenderEndpointEnabled
+  ) {
+    return true;
+  }
+
   return false;
 }

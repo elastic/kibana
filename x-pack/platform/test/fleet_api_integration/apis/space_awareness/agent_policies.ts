@@ -26,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
 
-  describe('test_agent_policies', function () {
+  describe('agent policies', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertestWithoutAuth, {
       username: testUsers.fleet_all_int_all.username,
@@ -45,7 +45,6 @@ export default function (providerContext: FtrProviderContext) {
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
     let defaultAndTestSpacePolicy: CreateAgentPolicyResponse;
-    let allSpaceAgentPolicy: CreateAgentPolicyResponse;
 
     before(async () => {
       await setupTestUsers(getService('security'), true);
@@ -64,7 +63,6 @@ export default function (providerContext: FtrProviderContext) {
         _spaceTest1Policy1,
         _spaceTest1Policy2,
         _defaultAndTestSpacePolicy,
-        _allSpacePolicy,
       ] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
@@ -72,15 +70,11 @@ export default function (providerContext: FtrProviderContext) {
         apiClient.createAgentPolicy(undefined, {
           space_ids: ['default', TEST_SPACE_1],
         }),
-        apiClient.createAgentPolicy(undefined, {
-          space_ids: ['*'],
-        }),
       ]);
       defaultSpacePolicy1 = _defaultSpacePolicy1;
       spaceTest1Policy1 = _spaceTest1Policy1;
       spaceTest1Policy2 = _spaceTest1Policy2;
       defaultAndTestSpacePolicy = _defaultAndTestSpacePolicy;
-      allSpaceAgentPolicy = _allSpacePolicy;
     });
 
     after(async () => {
@@ -94,26 +88,22 @@ export default function (providerContext: FtrProviderContext) {
     describe('GET /agent_policies', () => {
       it('should return policies in a specific space', async () => {
         const agentPolicies = await apiClient.getAgentPolicies(TEST_SPACE_1);
-        expect(agentPolicies.total).to.eql(4);
+        expect(agentPolicies.total).to.eql(3);
         const policyIds = agentPolicies.items?.map((item) => item.id);
         expect(policyIds).to.contain(spaceTest1Policy1.item.id);
         expect(policyIds).to.contain(spaceTest1Policy2.item.id);
-        expect(policyIds).to.contain(allSpaceAgentPolicy.item.id);
-        expect(policyIds).to.contain(defaultAndTestSpacePolicy.item.id);
-
         expect(policyIds).to.contain(defaultAndTestSpacePolicy.item.id);
         expect(policyIds).not.to.contain(defaultSpacePolicy1.item.id);
       });
 
       it('should return policies in default space', async () => {
         const agentPolicies = await apiClient.getAgentPolicies();
-        expect(agentPolicies.total).to.eql(3);
+        expect(agentPolicies.total).to.eql(2);
         const policyIds = agentPolicies.items?.map((item) => item.id);
         expect(policyIds).not.to.contain(spaceTest1Policy1.item.id);
         expect(policyIds).not.contain(spaceTest1Policy2.item.id);
         expect(policyIds).to.contain(defaultSpacePolicy1.item.id);
         expect(policyIds).to.contain(defaultAndTestSpacePolicy.item.id);
-        expect(policyIds).to.contain(allSpaceAgentPolicy.item.id);
       });
 
       it('should return only spaces user can access', async () => {
@@ -188,16 +178,10 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('GET /agent_policies_spaces', () => {
-      it('should return all spaces for a user with access to all spaces', async () => {
+      it('should return all spaces user can write agent policies to', async () => {
         const res = await apiClient.getAgentPoliciesSpaces();
 
-        expect(res.items.map(({ id }: { id: string }) => id)).to.eql(['default', 'test1', '*']);
-      });
-
-      it('should return all spaces user can write agent policies to', async () => {
-        const res = await apiClientDefaultSpaceOnly.getAgentPoliciesSpaces();
-
-        expect(res.items.map(({ id }: { id: string }) => id)).to.eql(['default']);
+        expect(res.items.map(({ id }: { id: string }) => id)).to.eql(['default', 'test1']);
       });
 
       it('should return no spaces for user with readonly access', async () => {

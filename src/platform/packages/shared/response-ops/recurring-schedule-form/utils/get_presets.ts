@@ -13,9 +13,6 @@ import { getInitialByWeekday } from './get_initial_by_weekday';
 
 export const getPresets = (startDate: Moment) => {
   return {
-    [Frequency.HOURLY]: {
-      interval: 1,
-    },
     [Frequency.DAILY]: {
       interval: 1,
     },

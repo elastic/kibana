@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
-
 import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
@@ -17,15 +15,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
-const LazyIconAgents = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
-);
-
-const LazyIconPlayground = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
-    default: m.iconPlayground,
-  }))
-);
+import playgroundIcon from './assets/images/playground.svg';
+import agentsIcon from './assets/images/robot.svg';
 
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
@@ -84,7 +75,7 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   badgeTypeV2: 'techPreview',
-                  icon: LazyIconAgents,
+                  icon: agentsIcon,
                   link: 'agent_builder',
                   withBadge: true,
                 },
@@ -107,7 +98,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     {
                       breadcrumbStatus: 'hidden',
-                      icon: LazyIconPlayground,
+                      icon: playgroundIcon,
                       link: 'searchPlayground',
                     },
                   ],

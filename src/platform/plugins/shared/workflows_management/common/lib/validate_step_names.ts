@@ -45,25 +45,24 @@ function collectAllStepNames(steps: WorkflowYaml['steps']): string[] {
 /**
  * Helper function to collect step names from nested structures
  */
-function collectNestedStepNames(step: unknown): string[] {
+function collectNestedStepNames(step: any): string[] {
   const stepNames: string[] = [];
 
   // Handle steps property (foreach, if, atomic, merge)
-  const s = step as { steps?: unknown; else?: unknown; branches?: Array<{ steps?: unknown }> };
-  if (s.steps && Array.isArray(s.steps)) {
-    stepNames.push(...collectAllStepNames(s.steps as WorkflowYaml['steps']));
+  if (step.steps && Array.isArray(step.steps)) {
+    stepNames.push(...collectAllStepNames(step.steps));
   }
 
   // Handle else branch for if steps
-  if (s.else && Array.isArray(s.else)) {
-    stepNames.push(...collectAllStepNames(s.else as WorkflowYaml['steps']));
+  if (step.else && Array.isArray(step.else)) {
+    stepNames.push(...collectAllStepNames(step.else));
   }
 
   // Handle branches for parallel steps
-  if (s.branches && Array.isArray(s.branches)) {
-    for (const branch of s.branches) {
+  if (step.branches && Array.isArray(step.branches)) {
+    for (const branch of step.branches) {
       if (branch.steps && Array.isArray(branch.steps)) {
-        stepNames.push(...collectAllStepNames(branch.steps as WorkflowYaml['steps']));
+        stepNames.push(...collectAllStepNames(branch.steps));
       }
     }
   }

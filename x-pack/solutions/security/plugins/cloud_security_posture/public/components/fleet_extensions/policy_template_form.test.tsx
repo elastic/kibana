@@ -1673,7 +1673,7 @@ describe('<CspPolicyTemplateForm />', () => {
       }
     });
 
-    it('should render setup technology selector for AWS and allow to select cloud connectors in ess aws environment', async () => {
+    it.skip('should render setup technology selector for AWS and allow to select cloud connectors in ess aws environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
@@ -1772,7 +1772,6 @@ describe('<CspPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
@@ -1822,7 +1821,6 @@ describe('<CspPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
@@ -1927,7 +1925,6 @@ describe('<CspPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
@@ -1980,7 +1977,6 @@ describe('<CspPolicyTemplateForm />', () => {
         expect(optionValues).toEqual(
           expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 

@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { getProductDocIndexName } from '@kbn/product-doc-common';
+import { productDocIndexPattern, getProductDocIndexName } from '@kbn/product-doc-common';
 import { getIndicesForProductNames } from './get_indices_for_product_names';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 describe('getIndicesForProductNames', () => {
   it('returns the index pattern when product names are not specified', () => {
-    const allProductNames = [
-      getProductDocIndexName('kibana'),
-      getProductDocIndexName('elasticsearch'),
-      getProductDocIndexName('observability'),
-      getProductDocIndexName('security'),
-    ];
-    expect(getIndicesForProductNames(undefined, undefined)).toEqual(allProductNames);
-    expect(getIndicesForProductNames([], undefined)).toEqual(allProductNames);
+    expect(getIndicesForProductNames(undefined, undefined)).toEqual(productDocIndexPattern);
+    expect(getIndicesForProductNames([], undefined)).toEqual(productDocIndexPattern);
   });
   it('returns individual index names when product names are specified', () => {
     expect(getIndicesForProductNames(['kibana', 'elasticsearch'])).toEqual([

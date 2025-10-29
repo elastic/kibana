@@ -15,14 +15,12 @@ import type {
 } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
-  AttackDiscoveryApiAlert,
   AttackDiscoveryGenerationConfig,
   CreateAttackDiscoveryAlertsParams,
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Document } from '@langchain/core/documents';
 
 import { deduplicateAttackDiscoveries } from '../../../lib/attack_discovery/persistence/deduplication';
 import { reportAttackDiscoverySuccessTelemetry } from './report_attack_discovery_success_telemetry';
@@ -56,12 +54,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
   savedObjectsClient,
   telemetry,
   withReplacements,
-}: GenerateAndUpdateAttackDiscoveriesParams): Promise<{
-  anonymizedAlerts?: Document[];
-  attackDiscoveries?: AttackDiscoveryApiAlert[];
-  error?: { message?: string }; // for compatibility with legacy internal API error handling
-  replacements?: Replacements;
-}> => {
+}: GenerateAndUpdateAttackDiscoveriesParams) => {
   const startTime = moment(); // start timing the generation
 
   // get parameters from the request body
@@ -97,6 +90,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
       telemetry,
     });
 
+    let storedAttackDiscoveries = attackDiscoveries;
     const alertsContextCount = anonymizedAlerts.length;
 
     /**
@@ -122,6 +116,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
       replacements: latestReplacements,
       spaceId: dataClient.spaceId,
     });
+    storedAttackDiscoveries = dedupedDiscoveries;
 
     const createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams = {
       alertsContextCount,
@@ -134,7 +129,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
       replacements: latestReplacements,
       withReplacements,
     };
-    const storedAttackDiscoveries = await dataClient.createAttackDiscoveryAlerts({
+    await dataClient.createAttackDiscoveryAlerts({
       authenticatedUser,
       createAttackDiscoveryAlertsParams,
     });

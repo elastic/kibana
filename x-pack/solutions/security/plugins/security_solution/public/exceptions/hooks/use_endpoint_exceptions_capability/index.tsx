@@ -6,19 +6,23 @@
  */
 
 import { useMemo } from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 
 export const useEndpointExceptionsCapability = (
   capability: 'showEndpointExceptions' | 'crudEndpointExceptions'
 ): boolean => {
+  const isEndpointSpaceAwarenessEnabled = useIsExperimentalFeatureEnabled(
+    'endpointManagementSpaceAwarenessEnabled'
+  );
   const canWriteGlobalArtifacts = useHasSecurityCapability('writeGlobalArtifacts');
   const hasCapability = useHasSecurityCapability(capability);
 
   return useMemo(() => {
-    if (capability === 'showEndpointExceptions') {
+    if (!isEndpointSpaceAwarenessEnabled || capability === 'showEndpointExceptions') {
       return hasCapability;
     }
 
     return hasCapability && canWriteGlobalArtifacts;
-  }, [canWriteGlobalArtifacts, capability, hasCapability]);
+  }, [canWriteGlobalArtifacts, capability, hasCapability, isEndpointSpaceAwarenessEnabled]);
 };

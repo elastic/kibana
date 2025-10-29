@@ -36,8 +36,7 @@
         "all",
         "index-setting"
       ],
-      "require_alias": "__flag__",
-      "require_data_stream": "__flag__"
+      "require_alias": "__flag__"
     },
     "methods": [
       "PUT",

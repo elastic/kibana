@@ -13,66 +13,53 @@ import type { RootState } from './types';
 // Selectors
 
 // Base selectors - these are simple property accessors that don't need memoization
-export const selectDetailState = (state: RootState) => state.detail;
-export const selectDetailComputedState = (state: RootState) => state.detail.computed;
+const selectWorkflowState = (state: RootState) => state.workflow;
+const selectComputedState = (state: RootState) => state.workflow.computed;
 
 // Exported memoized selectors for final properties
-export const selectWorkflow = createSelector(selectDetailState, (detail) => detail.workflow);
-export const selectYamlString = createSelector(selectDetailState, (detail) => detail.yamlString);
-
-export const selectWorkflowId = createSelector(selectWorkflow, (workflow) => workflow?.id);
-export const selectIsEnabled = createSelector(selectWorkflow, (workflow) => !!workflow?.enabled);
-export const selectWorkflowName = createSelector(selectWorkflow, (workflow) => workflow?.name);
-
-export const selectHasChanges = createSelector(
-  selectDetailState,
-  (detail) => detail.yamlString !== detail.workflow?.yaml
+export const selectYamlString = createSelector(
+  selectWorkflowState,
+  (workflow) => workflow.yamlString
 );
 
 export const selectYamlDocument = createSelector(
-  selectDetailComputedState,
+  selectComputedState,
   (computed) => computed?.yamlDocument
 );
 
 export const selectYamlLineCounter = createSelector(
-  selectDetailComputedState,
+  selectComputedState,
   (computed) => computed?.yamlLineCounter
 );
 
 export const selectWorkflowLookup = createSelector(
-  selectDetailComputedState,
+  selectComputedState,
   (computed) => computed?.workflowLookup
 );
 
 export const selectWorkflowGraph = createSelector(
-  selectDetailComputedState,
+  selectComputedState,
   (computed) => computed?.workflowGraph
 );
 
 export const selectWorkflowDefinition = createSelector(
-  selectDetailComputedState,
+  selectComputedState,
   (computed) => computed?.workflowDefinition
 );
 
-// Only checks if the current workflow yaml can be parses, does check the schema, only the yaml syntax
-export const selectIsYamlSyntaxValid = createSelector(
-  selectDetailComputedState,
-  (computed): boolean => Boolean(computed?.workflowDefinition)
-);
-
 export const selectFocusedStepId = createSelector(
-  selectDetailState,
-  (detail) => detail.focusedStepId
+  selectWorkflowState,
+  (workflow) => workflow.focusedStepId
 );
 
 export const selectHighlightedStepId = createSelector(
-  selectDetailState,
-  (detail) => detail.highlightedStepId
+  selectWorkflowState,
+  (workflow) => workflow.highlightedStepId
 );
 
 export const selectStepExecutions = createSelector(
-  selectDetailState,
-  (detail) => detail.stepExecutions
+  selectWorkflowState,
+  (workflow) => workflow.stepExecutions
 );
 
 export const selectFocusedStepInfo = createSelector(
@@ -81,11 +68,3 @@ export const selectFocusedStepInfo = createSelector(
   (focusedStepId, workflowLookup) =>
     focusedStepId && workflowLookup ? workflowLookup.steps[focusedStepId] : undefined
 );
-
-export const selectIsTestModalOpen = createSelector(
-  selectDetailState,
-  (detail) => detail.isTestModalOpen
-);
-
-export const selectConnectors = createSelector(selectDetailState, (detail) => detail.connectors);
-export const selectSchemaLoose = createSelector(selectDetailState, (detail) => detail.schemaLoose);

@@ -37,8 +37,8 @@ import {
   mapVisToChartType,
   computeInterval,
 } from '@kbn/visualization-utils';
-import type { LegendSize } from '@kbn/chart-expressions-common';
-import type { XYState as XYConfiguration } from '@kbn/lens-common';
+import type { LegendSize } from '@kbn/visualizations-plugin/public';
+import type { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';

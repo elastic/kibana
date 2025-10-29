@@ -102,15 +102,11 @@ const disableNewFeaturesTours = (window: Window) => {
   tourStorageKeys.forEach((key) => {
     window.localStorage.setItem(key, JSON.stringify(tourConfig));
   });
-
-  // other keys in incompatible format
-  // TODO: remove in https://github.com/elastic/kibana/issues/239313
-  window.localStorage.setItem('solutionNavigationTour:completed', 'true');
 };
 
 // This should work on both classic and serverless navigation
 const navSearchText = {
-  onboarding: 'Security / Launchpad / Get started',
+  onboarding: 'Security / Get started',
   hosts: 'Security / Explore / Hosts',
   rules: 'Security / Rules / Detection rules (SIEM)',
 } as const;

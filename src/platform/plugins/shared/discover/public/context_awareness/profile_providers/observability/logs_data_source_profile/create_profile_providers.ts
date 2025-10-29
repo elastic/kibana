@@ -9,7 +9,15 @@
 
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createLogsDataSourceProfileProvider } from './profile';
-import { createIntegrationLogsDataSourceProfileProviders } from './sub_profiles';
+import {
+  createApacheErrorLogsDataSourceProfileProvider,
+  createAwsS3accessLogsDataSourceProfileProvider,
+  createKubernetesContainerLogsDataSourceProfileProvider,
+  createNginxAccessLogsDataSourceProfileProvider,
+  createNginxErrorLogsDataSourceProfileProvider,
+  createSystemLogsDataSourceProfileProvider,
+  createWindowsLogsDataSourceProfileProvider,
+} from './sub_profiles';
 
 export const createObservabilityLogsDataSourceProfileProviders = (
   providerServices: ProfileProviderServices
@@ -17,7 +25,13 @@ export const createObservabilityLogsDataSourceProfileProviders = (
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(providerServices);
 
   return [
-    ...createIntegrationLogsDataSourceProfileProviders(logsDataSourceProfileProvider),
+    createSystemLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
+    createKubernetesContainerLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
+    createWindowsLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
+    createAwsS3accessLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
+    createNginxErrorLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
+    createNginxAccessLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
+    createApacheErrorLogsDataSourceProfileProvider(logsDataSourceProfileProvider),
     logsDataSourceProfileProvider,
   ];
 };

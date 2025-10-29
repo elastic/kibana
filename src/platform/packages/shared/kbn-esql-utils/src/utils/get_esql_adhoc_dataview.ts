@@ -36,7 +36,6 @@ export async function getESQLAdHocDataview(
   options?: {
     allowNoIndex?: boolean;
     createNewInstanceEvenIfCachedOneAvailable?: boolean;
-    skipFetchFields?: boolean;
   }
 ) {
   const timeField = getTimeFieldFromESQLQuery(query);
@@ -47,18 +46,13 @@ export async function getESQLAdHocDataview(
     // overwise it might return a cached data view with a different time field
     dataViewsService.clearInstanceCache(dataViewId);
   }
-  const skipFetchFields = options?.skipFetchFields ?? false;
 
-  const dataView = await dataViewsService.create(
-    {
-      title: indexPattern,
-      type: ESQL_TYPE,
-      id: dataViewId,
-      allowNoIndex: options?.allowNoIndex,
-    },
-    // important to skip if you just need the dataview without the fields for performance reasons
-    skipFetchFields
-  );
+  const dataView = await dataViewsService.create({
+    title: indexPattern,
+    type: ESQL_TYPE,
+    id: dataViewId,
+    allowNoIndex: options?.allowNoIndex,
+  });
 
   dataView.timeFieldName = timeField;
 

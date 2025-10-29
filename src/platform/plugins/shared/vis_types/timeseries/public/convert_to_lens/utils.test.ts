@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnyMetricColumnWithSourceField } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import type { DateHistogramColumn, TermsColumn } from './lib/convert';
+import type { Column, DateHistogramColumn, TermsColumn } from './lib/convert';
 import { getUniqueBuckets } from './utils';
 
 describe('getUniqueBuckets', () => {
@@ -52,10 +51,7 @@ describe('getUniqueBuckets', () => {
       columnId: '22',
       params: {
         ...bucket2.params,
-        orderAgg: {
-          ...bucket2.params.orderAgg,
-          columnId: '---1',
-        } as AnyMetricColumnWithSourceField,
+        orderAgg: { ...bucket2.params.orderAgg, columnId: '---1' } as Column,
         orderBy: { ...bucket2.params.orderBy, columnId: '---2' } as {
           type: 'column';
           columnId: string;
@@ -71,10 +67,7 @@ describe('getUniqueBuckets', () => {
       columnId: '22',
       params: {
         ...bucket2.params,
-        orderAgg: {
-          ...bucket2.params.orderAgg,
-          columnId: '---1',
-        } as AnyMetricColumnWithSourceField,
+        orderAgg: { ...bucket2.params.orderAgg, columnId: '---1' } as Column,
         orderBy: { ...bucket2.params.orderBy, columnId: '---2' } as {
           type: 'column';
           columnId: string;

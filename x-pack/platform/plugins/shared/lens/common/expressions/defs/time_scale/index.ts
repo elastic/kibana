@@ -6,4 +6,4 @@
  */
 
 export { getTimeScale } from './time_scale';
-export type { TimeScaleArgs } from './types';
+export type { TimeScaleUnit, TimeScaleArgs } from './types';

@@ -14,10 +14,9 @@ import type {
   Suggestion,
   IndexPatternRef,
   VisualizationMap,
-  TypedLensByValueInput,
-  TypedLensSerializedState,
-  TextBasedPrivateState,
-} from '@kbn/lens-common';
+} from '../types';
+import type { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
+import type { TextBasedPrivateState } from '../datasources/form_based/esql_layer/types';
 
 const datasourceHasIndexPatternRefs = (
   unknownDatasource: unknown

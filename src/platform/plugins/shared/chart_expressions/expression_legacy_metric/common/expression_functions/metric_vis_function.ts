@@ -9,9 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { Dimension } from '@kbn/visualizations-common';
-import { validateAccessor } from '@kbn/chart-expressions-common';
-import { prepareLogTable } from '@kbn/visualizations-common';
+import type { Dimension } from '@kbn/visualizations-plugin/common/utils';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ColorMode } from '@kbn/charts-plugin/common';
 import { visType } from '../types';
 import type { MetricVisExpressionFunctionDefinition } from '../types';

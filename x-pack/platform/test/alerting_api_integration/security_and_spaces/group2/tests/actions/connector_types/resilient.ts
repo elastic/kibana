@@ -129,7 +129,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message:
+                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -148,7 +149,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"orgId\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message:
+                'error validating action type config: [orgId]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -194,7 +196,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiKeyId\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiKeySecret\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message:
+                'error validating action type secrets: [apiKeyId]: expected value of type [string] but got [undefined]',
             });
           });
       });
@@ -272,7 +275,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"object\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"incident\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
+                service_message:
+                  'Request validation failed (Error: [incident.name]: expected value of type [string] but got [undefined])',
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -300,7 +304,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"incident\",\n      \"name\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
+                service_message:
+                  'Request validation failed (Error: [incident.name]: expected value of type [string] but got [undefined])',
               });
             });
         });
@@ -328,7 +333,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"comments\",\n      0,\n      \"commentId\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
+                service_message:
+                  'Request validation failed (Error: [comments]: types that failed validation:\n- [comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [comments.1]: expected value to equal [null])',
               });
             });
         });
@@ -356,7 +362,8 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"comments\",\n      0,\n      \"comment\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
+                service_message:
+                  'Request validation failed (Error: [comments]: types that failed validation:\n- [comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [comments.1]: expected value to equal [null])',
               });
             });
         });

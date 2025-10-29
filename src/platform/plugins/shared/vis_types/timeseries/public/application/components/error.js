@@ -13,7 +13,7 @@ import React, { useMemo } from 'react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { visContainerStyle } from '@kbn/visualizations-common';
+import { visContainerStyle } from '@kbn/visualizations-plugin/public';
 
 const guidPattern = /\[[[a-f\d-\\]{36}\]/g;
 

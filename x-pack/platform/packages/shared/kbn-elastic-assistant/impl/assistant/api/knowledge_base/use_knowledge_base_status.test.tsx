@@ -21,7 +21,7 @@ jest.mock('./api', () => {
   };
 });
 
-jest.mock('@kbn/react-query', () => ({
+jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
     try {
       const res = await fn({});

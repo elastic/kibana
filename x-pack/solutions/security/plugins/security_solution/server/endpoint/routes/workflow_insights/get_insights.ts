@@ -67,7 +67,8 @@ export const getInsightsRouteHandler = (
     request,
     response
   ): Promise<IKibanaResponse<SecurityWorkflowInsight[]>> => {
-    const { defendInsightsPolicyResponseFailure } = endpointContext.experimentalFeatures;
+    const { endpointManagementSpaceAwarenessEnabled, defendInsightsPolicyResponseFailure } =
+      endpointContext.experimentalFeatures;
 
     try {
       // Validate feature flag for policy_response_failure insights
@@ -91,10 +92,12 @@ export const getInsightsRouteHandler = (
       );
 
       // Ensure the insights are in the current space, judging by agent IDs
-      const spaceId = (await context.securitySolution).getSpaceId();
-      const fleetServices = endpointContext.service.getInternalFleetServices(spaceId);
-      const agentIds = Array.from(new Set(body.flatMap((insight) => insight.target.ids)));
-      await fleetServices.ensureInCurrentSpace({ agentIds });
+      if (endpointManagementSpaceAwarenessEnabled) {
+        const spaceId = (await context.securitySolution).getSpaceId();
+        const fleetServices = endpointContext.service.getInternalFleetServices(spaceId);
+        const agentIds = Array.from(new Set(body.flatMap((insight) => insight.target.ids)));
+        await fleetServices.ensureInCurrentSpace({ agentIds });
+      }
 
       return response.ok({ body });
     } catch (e) {

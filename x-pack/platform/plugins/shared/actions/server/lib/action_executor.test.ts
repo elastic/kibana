@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { KibanaRequest } from '@kbn/core/server';
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -121,9 +121,9 @@ const connectorType: jest.Mocked<ConnectorType> = {
   minimumLicenseRequired: 'basic',
   supportedFeatureIds: ['alerting'],
   validate: {
-    config: { schema: z.object({ bar: z.boolean() }) },
-    secrets: { schema: z.object({ baz: z.boolean() }) },
-    params: { schema: z.object({ foo: z.boolean() }) },
+    config: { schema: schema.object({ bar: schema.boolean() }) },
+    secrets: { schema: schema.object({ baz: schema.boolean() }) },
+    params: { schema: schema.object({ foo: schema.boolean() }) },
   },
   executor: jest.fn(),
 };
@@ -135,9 +135,9 @@ const systemConnectorType: jest.Mocked<ConnectorType> = {
   supportedFeatureIds: ['alerting'],
   isSystemActionType: true,
   validate: {
-    config: { schema: z.any() },
-    secrets: { schema: z.any() },
-    params: { schema: z.any() },
+    config: { schema: schema.any() },
+    secrets: { schema: schema.any() },
+    params: { schema: schema.any() },
   },
   executor: jest.fn(),
 };
@@ -149,9 +149,9 @@ const subFeatureConnectorType: jest.Mocked<ConnectorType> = {
   supportedFeatureIds: ['siem'],
   subFeature: 'endpointSecurity',
   validate: {
-    config: { schema: z.any() },
-    secrets: { schema: z.any() },
-    params: { schema: z.any() },
+    config: { schema: schema.any() },
+    secrets: { schema: schema.any() },
+    params: { schema: schema.any() },
   },
   executor: jest.fn(),
 };
@@ -467,9 +467,9 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          config: { schema: z.object({ bar: z.string() }) },
-          secrets: { schema: z.object({ apiKey: z.string() }) },
-          params: { schema: z.object({ foo: z.boolean() }) },
+          config: { schema: schema.object({ bar: schema.string() }) },
+          secrets: { schema: schema.object({ apiKey: schema.string() }) },
+          params: { schema: schema.object({ foo: schema.boolean() }) },
         },
       });
 
@@ -826,9 +826,9 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          config: { schema: z.object({}) },
-          secrets: { schema: z.object({}) },
-          params: { schema: z.object({ foo: z.boolean() }) },
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({ foo: schema.boolean() }) },
         },
       });
 
@@ -854,11 +854,11 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          secrets: { schema: z.object({}) },
-          params: { schema: z.object({ foo: z.boolean() }) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({ foo: schema.boolean() }) },
           config: {
-            schema: z.object({
-              param1: z.string(),
+            schema: schema.object({
+              param1: schema.string(),
             }),
           },
         },
@@ -872,15 +872,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action type config: [
-  {
-    \"code\": \"invalid_type\",
-    \"expected\": \"object\",
-    \"received\": \"undefined\",
-    \"path\": [],
-    \"message\": \"Required\"
-  }
-]`,
+        message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
         errorSource: TaskErrorSource.FRAMEWORK,
       });
     });
@@ -921,9 +913,9 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          secrets: { schema: z.object({}) },
-          config: { schema: z.object({}) },
-          params: { schema: z.object({ foo: z.boolean() }) },
+          secrets: { schema: schema.object({}) },
+          config: { schema: schema.object({}) },
+          params: { schema: schema.object({ foo: schema.boolean() }) },
           connector: () => {
             return 'error';
           },
@@ -938,16 +930,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action type config: [
-  {
-    \"code\": \"invalid_type\",
-    \"expected\": \"object\",
-    \"received\": \"undefined\",
-    \"path\": [],
-    \"message\": \"Required\"
-  }
-]`,
-
+        message: `error validating action type connector: config must be defined`,
         errorSource: TaskErrorSource.FRAMEWORK,
       });
     });
@@ -963,11 +946,11 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          config: { schema: z.object({}) },
-          secrets: { schema: z.object({}) },
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
           params: {
-            schema: z.object({
-              param1: z.string(),
+            schema: schema.object({
+              param1: schema.string(),
             }),
           },
         },
@@ -981,17 +964,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action params: [
-  {
-    \"code\": \"invalid_type\",
-    \"expected\": \"string\",
-    \"received\": \"undefined\",
-    \"path\": [
-      \"param1\"
-    ],
-    \"message\": \"Required\"
-  }
-]`,
+        message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
         errorSource: TaskErrorSource.USER,
       });
     });
@@ -1134,9 +1107,9 @@ describe('Action Executor', () => {
       connectorTypeRegistry.get.mockReturnValueOnce({
         ...connectorType,
         validate: {
-          config: { schema: z.object({ bar: z.string() }) },
-          secrets: { schema: z.object({ apiKey: z.string() }) },
-          params: { schema: z.object({ foo: z.boolean() }) },
+          config: { schema: schema.object({ bar: schema.string() }) },
+          secrets: { schema: schema.object({ apiKey: schema.string() }) },
+          params: { schema: schema.object({ foo: schema.boolean() }) },
         },
       });
 
@@ -1924,9 +1897,9 @@ describe('Event log', () => {
 
   test('writes usage data to event log for streaming OpenAI events', async () => {
     const executorMock = setupActionExecutorMock('.gen-ai', {
-      params: { schema: z.any() },
-      config: { schema: z.any() },
-      secrets: { schema: z.any() },
+      params: { schema: schema.any() },
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
     });
 
     const stream = new PassThrough();

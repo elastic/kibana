@@ -6,7 +6,7 @@
  */
 
 import { createMockedIndexPattern, createMockedRestrictedIndexPattern } from '../mocks';
-import type { FormBasedPrivateState } from '@kbn/lens-common';
+import type { FormBasedPrivateState } from '../types';
 
 export function loadInitialState() {
   const indexPattern = createMockedIndexPattern();

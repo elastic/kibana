@@ -28,12 +28,11 @@ import type {
   SynthtraceFixture,
 } from '../../fixtures/scope/worker';
 import {
-  pageContextFixture,
   scoutPageFixture,
   browserAuthFixture,
   pageObjectsFixture,
   validateTagsFixture,
-  persistentContextFixture,
+  persistentContext,
   perfTrackerFixture,
 } from '../../fixtures/scope/test';
 import type {
@@ -54,7 +53,6 @@ export const scoutFixtures = mergeTests(
   // api fixtures
   apiServicesFixture,
   // test scope fixtures
-  pageContextFixture,
   browserAuthFixture,
   scoutPageFixture,
   pageObjectsFixture,
@@ -83,8 +81,4 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
 }
 
-export const lighthouseFixtures = mergeTests(
-  scoutFixtures,
-  persistentContextFixture,
-  lighthouseFixture
-);
+export const lighthouseFixtures = mergeTests(scoutFixtures, persistentContext, lighthouseFixture);

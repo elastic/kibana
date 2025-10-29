@@ -69,5 +69,4 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
     );
   }
 );
-
 StepExecutionDataView.displayName = 'StepExecutionDataView';

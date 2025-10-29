@@ -9,7 +9,6 @@ import { serverMock, requestContextMock } from '../../../../detection_engine/rou
 import { getAllTimeline } from '../../../saved_object/timelines';
 import { getTimelineRequest } from '../../../__mocks__/request_responses';
 import { getTimelinesRoute } from '.';
-import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
 jest.mock('../../../saved_object/timelines', () => ({
   getAllTimeline: jest.fn(),
@@ -17,7 +16,7 @@ jest.mock('../../../saved_object/timelines', () => ({
 
 describe('get all timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let context: SecuritySolutionRequestHandlerContextMock;
+  let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
     jest.resetModules();
@@ -27,11 +26,6 @@ describe('get all timelines', () => {
     context = requestContextMock.createTools().context;
 
     getTimelinesRoute(server.router);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   test('should get the total count', async () => {

@@ -68,7 +68,6 @@ export async function mountManagementSection(
       share,
       spaces,
       savedObjectsManagement,
-      savedObjectsTagging,
     },
     indexPatternManagementStart,
   ] = await getStartServices();
@@ -109,7 +108,6 @@ export async function mountManagementSection(
     fieldFormats,
     spaces: spaces?.hasOnlyDefaultSpace ? undefined : spaces,
     savedObjectsManagement,
-    savedObjectsTagging,
     noDataPage,
     ...startServices,
   };

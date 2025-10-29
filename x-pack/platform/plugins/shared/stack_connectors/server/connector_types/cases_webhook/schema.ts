@@ -5,36 +5,59 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { WebhookMethods } from '../../../common/auth/constants';
 import { AuthConfiguration, SecretConfigurationSchema } from '../../../common/auth/schema';
 
-const HeadersSchema = z.record(z.string(), z.string());
+const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
 export const ExternalIncidentServiceConfiguration = {
-  createIncidentUrl: z.string(),
-  createIncidentMethod: z
-    .enum([WebhookMethods.POST, WebhookMethods.PUT])
-    .default(WebhookMethods.POST),
-  createIncidentJson: z.string(), // stringified object
-  createIncidentResponseKey: z.string(),
-  getIncidentMethod: z.enum([WebhookMethods.GET, WebhookMethods.POST]).default(WebhookMethods.GET),
-  getIncidentUrl: z.string(),
-  getIncidentJson: z.string().nullable().default(null),
-  getIncidentResponseExternalTitleKey: z.string(),
-  viewIncidentUrl: z.string(),
-  updateIncidentUrl: z.string(),
-  updateIncidentMethod: z
-    .enum([WebhookMethods.POST, WebhookMethods.PATCH, WebhookMethods.PUT])
-    .default(WebhookMethods.PUT),
-  updateIncidentJson: z.string(),
-  createCommentUrl: z.string().nullable().default(null),
-  createCommentMethod: z
-    .enum([WebhookMethods.POST, WebhookMethods.PUT, WebhookMethods.PATCH])
-    .default(WebhookMethods.PUT)
-    .nullable(),
-  createCommentJson: z.string().nullable().default(null),
-  headers: HeadersSchema.nullable().default(null),
+  createIncidentUrl: schema.string(),
+  createIncidentMethod: schema.oneOf(
+    [schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)],
+    {
+      defaultValue: WebhookMethods.POST,
+    }
+  ),
+  createIncidentJson: schema.string(), // stringified object
+  createIncidentResponseKey: schema.string(),
+  getIncidentMethod: schema.oneOf(
+    [schema.literal(WebhookMethods.GET), schema.literal(WebhookMethods.POST)],
+    {
+      defaultValue: WebhookMethods.GET,
+    }
+  ),
+  getIncidentUrl: schema.string(),
+  getIncidentJson: schema.nullable(schema.string()),
+  getIncidentResponseExternalTitleKey: schema.string(),
+  viewIncidentUrl: schema.string(),
+  updateIncidentUrl: schema.string(),
+  updateIncidentMethod: schema.oneOf(
+    [
+      schema.literal(WebhookMethods.POST),
+      schema.literal(WebhookMethods.PATCH),
+      schema.literal(WebhookMethods.PUT),
+    ],
+    {
+      defaultValue: WebhookMethods.PUT,
+    }
+  ),
+  updateIncidentJson: schema.string(),
+  createCommentUrl: schema.nullable(schema.string()),
+  createCommentMethod: schema.nullable(
+    schema.oneOf(
+      [
+        schema.literal(WebhookMethods.POST),
+        schema.literal(WebhookMethods.PUT),
+        schema.literal(WebhookMethods.PATCH),
+      ],
+      {
+        defaultValue: WebhookMethods.PUT,
+      }
+    )
+  ),
+  createCommentJson: schema.nullable(schema.string()),
+  headers: schema.nullable(HeadersSchema),
   hasAuth: AuthConfiguration.hasAuth,
   authType: AuthConfiguration.authType,
   certType: AuthConfiguration.certType,
@@ -46,44 +69,35 @@ export const ExternalIncidentServiceConfiguration = {
   additionalFields: AuthConfiguration.additionalFields,
 };
 
-export const ExternalIncidentServiceConfigurationSchema = z
-  .object(ExternalIncidentServiceConfiguration)
-  .strict();
+export const ExternalIncidentServiceConfigurationSchema = schema.object(
+  ExternalIncidentServiceConfiguration
+);
 
-export const ExecutorSubActionPushParamsSchema = z
-  .object({
-    incident: z
-      .object({
-        title: z.string(),
-        description: z.string().nullable().default(null),
-        id: z.string().nullable().default(null),
-        severity: z.string().nullable().default(null),
-        status: z.string().nullable().default(null),
-        externalId: z.string().nullable().default(null),
-        tags: z.array(z.string()).nullable().default(null),
+export const ExecutorSubActionPushParamsSchema = schema.object({
+  incident: schema.object({
+    title: schema.string(),
+    description: schema.nullable(schema.string()),
+    id: schema.nullable(schema.string()),
+    severity: schema.nullable(schema.string()),
+    status: schema.nullable(schema.string()),
+    externalId: schema.nullable(schema.string()),
+    tags: schema.nullable(schema.arrayOf(schema.string())),
+  }),
+  comments: schema.nullable(
+    schema.arrayOf(
+      schema.object({
+        comment: schema.string(),
+        commentId: schema.string(),
       })
-      .strict(),
-    comments: z
-      .array(
-        z
-          .object({
-            comment: z.string(),
-            commentId: z.string(),
-          })
-          .strict()
-      )
-      .nullable()
-      .default(null),
-  })
-  .strict();
+    )
+  ),
+});
 
-export const ExecutorParamsSchema = z.discriminatedUnion('subAction', [
-  z
-    .object({
-      subAction: z.literal('pushToService'),
-      subActionParams: ExecutorSubActionPushParamsSchema,
-    })
-    .strict(),
+export const ExecutorParamsSchema = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('pushToService'),
+    subActionParams: ExecutorSubActionPushParamsSchema,
+  }),
 ]);
 
 export const ExternalIncidentServiceSecretConfigurationSchema = SecretConfigurationSchema;

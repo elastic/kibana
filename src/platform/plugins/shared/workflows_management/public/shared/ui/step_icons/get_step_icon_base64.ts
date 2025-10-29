@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getStackConnectorLogo } from '@kbn/stack-connectors-plugin/public/common/logos';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { getStackConnectorLogo } from '@kbn/stack-connectors-plugin/public/common/logos';
-import { ElasticsearchLogo } from './icons/elasticsearch.svg';
 import { HARDCODED_ICONS } from './icons/hardcoded_icons';
+import { ElasticsearchLogo } from './icons/elasticsearch.svg';
 import { KibanaLogo } from './icons/kibana.svg';
 
 /**

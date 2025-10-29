@@ -7,12 +7,12 @@
 
 import { renderHook, act } from '@testing-library/react';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { useQuery } from '@kbn/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useAllEsqlRuleFields } from './use_all_esql_rule_fields';
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
 jest.mock('@kbn/securitysolution-utils', () => ({ computeIsESQLQueryAggregating: jest.fn() }));
-jest.mock('@kbn/react-query', () => {
+jest.mock('@tanstack/react-query', () => {
   return {
     useQuery: jest.fn(),
   };

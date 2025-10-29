@@ -69,8 +69,6 @@ export type {
   SavedObjectsChangeAccessModeOptions,
 } from './src/apis';
 
-export { type Left, type Either, type Right, isLeft, isRight, left, right } from './src/utils';
-
 export type {
   SavedObject,
   SavedObjectAccessControl,

@@ -197,13 +197,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('configureFailureStoreButton');
 
         // Verify modal is open
-        expect(await testSubjects.exists('editFailureStoreModal')).to.be(true);
+        expect(await testSubjects.exists('configureFailureStoreModal')).to.be(true);
 
         // Enable failure store
-        await testSubjects.click('enableFailureStoreToggle');
+        await testSubjects.click('enableDataStreamFailureStoreToggle > input');
 
         // Submit the form
-        await testSubjects.click('failureStoreModalSaveButton');
+        await testSubjects.click('saveButton');
 
         // Expect to see a success toast
         const successToast = await toasts.getElementByIndex(1);
@@ -220,13 +220,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('configureFailureStoreButton');
 
         // Verify modal is open
-        expect(await testSubjects.exists('editFailureStoreModal')).to.be(true);
+        expect(await testSubjects.exists('configureFailureStoreModal')).to.be(true);
 
         // Disable failure store (toggle off if it's on)
-        await testSubjects.click('enableFailureStoreToggle');
+        await testSubjects.click('enableDataStreamFailureStoreToggle > input');
 
         // Submit the form
-        await testSubjects.click('failureStoreModalSaveButton');
+        await testSubjects.click('saveButton');
 
         // Expect to see a success toast
         const successToast = await toasts.getElementByIndex(1);

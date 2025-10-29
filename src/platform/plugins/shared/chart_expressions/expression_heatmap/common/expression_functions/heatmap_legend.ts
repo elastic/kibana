@@ -9,7 +9,7 @@
 
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/chart-expressions-common';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { EXPRESSION_HEATMAP_LEGEND_NAME } from '../constants';
 import type { HeatmapLegendExpressionFunctionDefinition } from '../types';
 

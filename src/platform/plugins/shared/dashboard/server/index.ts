@@ -41,7 +41,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
 export type {
-  DashboardState,
+  DashboardAttributes,
   DashboardPanel,
   DashboardSection,
   DashboardFilter,

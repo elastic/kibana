@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { getCurrentPath } from '../../../../common/lib/yaml_utils';
@@ -68,7 +66,6 @@ export function findAllSteps(
 
             // Skip if we've already processed this step
             if (processedSteps.has(stepKey)) {
-              // eslint-disable-next-line no-continue
               continue;
             }
             processedSteps.add(stepKey);
@@ -97,7 +94,6 @@ export function findAllSteps(
         }
       } catch (error) {
         // Skip this position if there's an error
-        // eslint-disable-next-line no-continue
         continue;
       }
     }

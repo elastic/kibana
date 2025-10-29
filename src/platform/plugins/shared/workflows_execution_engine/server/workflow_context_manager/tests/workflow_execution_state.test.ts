@@ -9,9 +9,9 @@
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import { WorkflowExecutionState } from '../workflow_execution_state';
+import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
+import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 
 describe('WorkflowExecutionState', () => {
   let underTest: WorkflowExecutionState;

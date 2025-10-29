@@ -402,15 +402,15 @@
           {
             "parentPluginId": "exploratoryView",
             "id": "def-public.ExploratoryEmbeddableProps.axisTitlesVisibility",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "axisTitlesVisibility",
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/lens-common",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
+                "docId": "kibVisualizationsPluginApi",
                 "section": "def-common.AxesSettingsConfig",
                 "text": "AxesSettingsConfig"
               },
@@ -423,15 +423,15 @@
           {
             "parentPluginId": "exploratoryView",
             "id": "def-public.ExploratoryEmbeddableProps.gridlinesVisibilitySettings",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "gridlinesVisibilitySettings",
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/lens-common",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
+                "docId": "kibVisualizationsPluginApi",
                 "section": "def-common.AxesSettingsConfig",
                 "text": "AxesSettingsConfig"
               },
@@ -1364,18 +1364,18 @@
             "signature": [
               "Partial<",
               {
-                "pluginId": "@kbn/lens-common",
-                "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.LastValueIndexPatternColumn",
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LastValueIndexPatternColumn",
                 "text": "LastValueIndexPatternColumn"
               },
               "> | Partial<",
               {
-                "pluginId": "@kbn/lens-common",
-                "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.DateHistogramIndexPatternColumn",
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DateHistogramIndexPatternColumn",
                 "text": "DateHistogramIndexPatternColumn"
               },
               ">"
@@ -1394,10 +1394,10 @@
             "signature": [
               "Partial<",
               {
-                "pluginId": "@kbn/lens-common",
-                "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.FieldBasedIndexPatternColumn",
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FieldBasedIndexPatternColumn",
                 "text": "FieldBasedIndexPatternColumn"
               },
               ">[]"
@@ -1457,10 +1457,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/lens-common",
-                "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.SeriesType",
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.SeriesType",
                 "text": "SeriesType"
               },
               "[]"
@@ -1495,9 +1495,9 @@
               },
               " | ",
               {
-                "pluginId": "@kbn/lens-common",
+                "pluginId": "lens",
                 "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
+                "docId": "kibLensPluginApi",
                 "section": "def-common.PersistableFilter",
                 "text": "PersistableFilter"
               },
@@ -1533,9 +1533,9 @@
               },
               " | ",
               {
-                "pluginId": "@kbn/lens-common",
+                "pluginId": "lens",
                 "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
+                "docId": "kibLensPluginApi",
                 "section": "def-common.PersistableFilter",
                 "text": "PersistableFilter"
               },
@@ -1646,10 +1646,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/lens-common",
-                "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.YConfig",
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.YConfig",
                 "text": "YConfig"
               },
               "[] | undefined"
@@ -1755,10 +1755,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/lens-common",
-                "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.SeriesType",
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.SeriesType",
                 "text": "SeriesType"
               },
               " | undefined"

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseVariablePath, validateVariablePath } from './parse_variable_path';
+import { validateVariablePath, parseVariablePath } from './parse_variable_path';
 
 describe('validateVariablePath', () => {
   it('should validate a simple path', () => {

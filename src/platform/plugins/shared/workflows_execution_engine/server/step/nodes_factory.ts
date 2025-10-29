@@ -20,18 +20,24 @@ import type {
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
-  GraphNodeUnion,
   HttpGraphNode,
+  GraphNodeUnion,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
 import {
-  isEnterStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
-  isExitStepTimeoutZone,
   isExitWorkflowTimeoutZone,
+  isEnterStepTimeoutZone,
+  isExitStepTimeoutZone,
 } from '@kbn/workflows/graph';
+import type { NodeImplementation } from './node_implementation';
+// Import schema and inferred types
+import type { ConnectorExecutor } from '../connector_executor';
+import type { UrlValidator } from '../lib/url_validator';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
-import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
 import {
@@ -40,33 +46,27 @@ import {
   ExitConditionBranchNodeImpl,
   ExitIfNodeImpl,
 } from './if_step';
-import { KibanaActionStepImpl } from './kibana_action_step';
-import type { NodeImplementation } from './node_implementation';
-// Import schema and inferred types
+import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
 import { EnterContinueNodeImpl, ExitContinueNodeImpl } from './on_failure/continue_step';
 import {
-  EnterFallbackPathNodeImpl,
-  EnterNormalPathNodeImpl,
   EnterTryBlockNodeImpl,
-  ExitFallbackPathNodeImpl,
-  ExitNormalPathNodeImpl,
   ExitTryBlockNodeImpl,
+  EnterNormalPathNodeImpl,
+  ExitNormalPathNodeImpl,
+  EnterFallbackPathNodeImpl,
+  ExitFallbackPathNodeImpl,
 } from './on_failure/fallback-step';
-import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
 import {
-  EnterStepTimeoutZoneNodeImpl,
   EnterWorkflowTimeoutZoneNodeImpl,
-  ExitStepTimeoutZoneNodeImpl,
   ExitWorkflowTimeoutZoneNodeImpl,
+  EnterStepTimeoutZoneNodeImpl,
+  ExitStepTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
 import { WaitStepImpl } from './wait_step/wait_step';
-import type { ConnectorExecutor } from '../connector_executor';
-import type { UrlValidator } from '../lib/url_validator';
+import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
+import { KibanaActionStepImpl } from './kibana_action_step';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export class NodesFactory {
   constructor(
@@ -79,7 +79,6 @@ export class NodesFactory {
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
   ) {}
 
-  // eslint-disable-next-line complexity
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;
@@ -91,7 +90,6 @@ export class NodesFactory {
         tags: ['step-factory', 'elasticsearch', 'internal-action'],
       });
       return new ElasticsearchActionStepImpl(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         node as any,
         stepExecutionRuntime,
         this.workflowRuntime,
@@ -105,7 +103,6 @@ export class NodesFactory {
         tags: ['step-factory', 'kibana', 'internal-action'],
       });
       return new KibanaActionStepImpl(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         node as any,
         stepExecutionRuntime,
         this.workflowRuntime,
@@ -213,7 +210,6 @@ export class NodesFactory {
         return new ExitIfNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'wait':
         return new WaitStepImpl(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           node as any,
           stepExecutionRuntime,
           this.workflowRuntime,

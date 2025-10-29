@@ -78,9 +78,7 @@
     "@kbn/ui-actions-browser",
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/css-utils",
-    "@kbn/visualizations-common",
-    "@kbn/lens-common",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }

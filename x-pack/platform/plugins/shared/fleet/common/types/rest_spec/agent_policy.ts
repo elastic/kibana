@@ -41,7 +41,6 @@ export interface CurrentVersionCount {
   version: string;
   agents: number;
   failedUpgradeAgents: number;
-  failedUpgradeActionIds?: string[];
 }
 
 export interface GetAutoUpgradeAgentsStatusResponse {

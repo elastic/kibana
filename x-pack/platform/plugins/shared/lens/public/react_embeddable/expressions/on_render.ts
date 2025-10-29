@@ -8,15 +8,10 @@
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { canTrackContentfulRender } from '@kbn/presentation-containers';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type {
-  GetStateType,
-  LensApi,
-  LensInternalApi,
-  TableInspectorAdapter,
-} from '@kbn/lens-common';
+import type { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { getExecutionContextEvents, trackUiCounterEvents } from '../../lens_ui_telemetry';
-import type { LensEmbeddableStartServices } from '../types';
+import type { GetStateType, LensApi, LensEmbeddableStartServices, LensInternalApi } from '../types';
 import { getSuccessfulRequestTimings } from '../../report_performance_metric_util';
 import { addLog } from '../logger';
 

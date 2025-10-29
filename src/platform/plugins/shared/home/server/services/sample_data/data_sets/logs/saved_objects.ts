@@ -418,17 +418,21 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Logs] Visits',
       }),
       description: '',
-      columns: ['@timestamp', 'response', 'url', 'clientip', 'machine.os', 'tags'],
-      isTextBasedQuery: true,
-      timeRestore: false,
+      columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
       hits: 0,
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"esql":"FROM kibana_sample_data_logs | SORT @timestamp desc | LIMIT 10000"},"filter":[]}',
+          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
       },
       sort: [['timestamp', 'desc']],
       version: 1,
     },
-    references: [],
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
   },
 ];

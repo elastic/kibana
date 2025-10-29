@@ -18,6 +18,7 @@ describe('getWorkflowGraph', () => {
       triggers: [
         {
           type: 'manual' as const,
+          enabled: true,
         },
       ],
       steps: [
@@ -49,6 +50,7 @@ describe('getWorkflowGraph', () => {
       triggers: [
         {
           type: 'manual' as const,
+          enabled: true,
         },
       ],
       steps: [

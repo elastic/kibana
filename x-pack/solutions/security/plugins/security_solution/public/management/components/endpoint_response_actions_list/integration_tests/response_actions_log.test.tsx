@@ -1894,6 +1894,9 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of agents and action types when opened in page view', async () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsMSDefenderEndpointEnabled: true,
+      });
       render({ isFlyout: false });
       const { getByTestId, getAllByTestId } = renderResult;
 

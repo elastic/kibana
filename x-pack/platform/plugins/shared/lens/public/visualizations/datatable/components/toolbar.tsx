@@ -9,8 +9,11 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup } from '@elastic/eui';
-import type { VisualizationToolbarProps, DatatableVisualizationState } from '@kbn/lens-common';
+
 import { ToolbarPopover } from '../../../shared_components';
+
+import type { VisualizationToolbarProps } from '../../../types';
+import type { DatatableVisualizationState } from '../visualization';
 
 import { DatatableAppearanceSettings } from './toolbar/appearance_settings';
 

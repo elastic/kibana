@@ -10,10 +10,8 @@
 import { monaco } from '@kbn/monaco';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
-import { z } from '@kbn/zod';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
-import { performComputation } from './store/utils/computation';
-import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { z } from '@kbn/zod';
 
 // Mock Monaco editor model
 const createMockModel = (value: string, cursorOffset: number) => {
@@ -86,31 +84,24 @@ describe('getCompletionItemProvider', () => {
       }),
     },
   ];
-  let yamlContent: string;
-  let focusedStepId: string | undefined;
 
   const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors, true);
-  const completionProvider = getCompletionItemProvider(() => ({
-    yamlString: yamlContent,
-    schemaLoose: workflowSchema,
-    focusedStepId,
-    isTestModalOpen: false,
-    computed: performComputation(yamlContent, getWorkflowZodSchemaLoose({})),
-  }));
+  const completionProvider = getCompletionItemProvider(workflowSchema);
 
   describe('Integration tests', () => {
     it('should provide basic completions inside variable expression', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console
+    type: console.log
     with:
       message: "{{|<-}}"
 `.trim();
+
       const suggestions = await getSuggestions(completionProvider, yamlContent);
       expect(suggestions.map((s) => s.label)).toEqual(
         expect.arrayContaining([
@@ -126,15 +117,14 @@ steps:
     });
 
     it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', async () => {
-      focusedStepId = 'step1';
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console
+    type: console.log
     with:
       message: @|<-
 `.trim();
@@ -145,14 +135,14 @@ steps:
     });
 
     it('should provide completions after @ and not quote insertText automatically if cursor is in plain scalar but not starting with { or @', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console
+    type: console.log
     with:
       message: hey, this is @|<-
 `.trim();
@@ -163,14 +153,14 @@ steps:
     });
 
     it('should provide basic completions with @ and not quote insertText automatically if cursor is in string', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console
+    type: console.log
     with:
       message: "@<-"
 `.trim();
@@ -190,7 +180,7 @@ steps:
     });
 
     it('should provide const completion with type', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -203,7 +193,7 @@ consts:
         body: 'Go look at the activity'
 steps:
   - name: step1
-    type: console
+    type: console.log
     with:
       message: "{{consts.|<-}}"
 `.trim();
@@ -227,7 +217,7 @@ steps:
     });
 
     it('should provide const completion with type in array', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -240,7 +230,7 @@ consts:
         body: 'Go look at the activity'
 steps:
   - name: step1
-    type: console
+    type: console.log
     with:
       message: "{{consts.templates[0].|<-}}"
 `.trim();
@@ -258,18 +248,18 @@ steps:
     });
 
     it('should provide previous step completion', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step0
-    type: console
+    type: console.log
     with:
       message: "hello"
   - name: step1
-    type: console
+    type: console.log
     with:
       message: "{{steps.|<-}}"
 `.trim();
@@ -279,7 +269,7 @@ steps:
     });
 
     it('should not provide unreachable step', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -291,16 +281,16 @@ steps:
       condition: "{{steps.step0.output.message == 'hello'}}"
     steps:
       - name: first-true-step
-        type: console
+        type: console.log
         with:
           message: "im true"
       - name: second-true-step
-        type: console
+        type: console.log
         with:
           message: "im true, {{steps.|<-}}"
     else:
       - name: false-step
-        type: console
+        type: console.log
         with:
           message: "im unreachable"
 `.trim();
@@ -312,14 +302,14 @@ steps:
     });
 
     it('should autocomplete incomplete key', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step0
-    type: console
+    type: console.log
     with:
       message: "{{consts.a|<-}}"
 `.trim();
@@ -328,46 +318,47 @@ steps:
       expect(suggestions.map((s) => s.label)).toEqual(expect.arrayContaining(['apiUrl']));
     });
 
-    it('should provide completions with brackets for keys in kebab-case and use single quotes when inside double quoted string', async () => {
-      focusedStepId = 'step0';
-      yamlContent = `
-  version: "1"
-  name: "test"
-  consts:
-    api-url: "https://api.example.com"
-  steps:
-    - name: step0
-    type: console
+    it('should provide completions with brackets for keys in kebab-case and use quote type opposite to the one in the string', async () => {
+      const yamlContentDoubleQuote = `
+version: "1"
+name: "test"
+consts:
+  api-url: "https://api.example.com"
+steps:
+  - name: step0
+    type: console.log
     with:
       message: "{{consts.|<-}}"
-  `.trim();
-      const suggestions = await getSuggestions(completionProvider, yamlContent);
-      expect(suggestions.map((s) => s.insertText)).toEqual(expect.arrayContaining(["['api-url']"]));
-    });
+`.trim();
+      const suggestions1 = await getSuggestions(completionProvider, yamlContentDoubleQuote);
+      expect(suggestions1.map((s) => s.insertText)).toEqual(
+        expect.arrayContaining(["['api-url']"])
+      );
 
-    it('should provide completions with brackets for keys in kebab-case and use double quotes when inside single quoted string', async () => {
-      focusedStepId = 'step0';
-      yamlContent = `
-  version: "1"
-  name: "test"
-  consts:
-    api-url: "https://api.example.com"
-  steps:
-    - name: step0
-    type: console
-    with:
-      message: '{{consts.|<-}}'
+      const yamlContentSingleQuote = `
+      version: "1"
+      name: "test"
+      consts:
+        api-url: "https://api.example.com"
+      steps:
+        - name: step0
+          type: console.log
+          with:
+            message: '{{consts.|<-}}'
       `.trim();
-      const suggestions = await getSuggestions(completionProvider, yamlContent);
-      expect(suggestions.map((s) => s.insertText)).toEqual(expect.arrayContaining(['["api-url"]']));
+      const suggestions2 = await getSuggestions(completionProvider, yamlContentSingleQuote);
+      expect(suggestions2.map((s) => s.insertText)).toEqual(
+        expect.arrayContaining(['["api-url"]'])
+      );
     });
 
     it('should provide rrule suggestions in empty scheduled trigger with block', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 triggers:
   - type: scheduled
+    enabled: true
     with:
       |<-
 steps: []
@@ -385,11 +376,12 @@ steps: []
     });
 
     it('should provide rrule suggestions in scheduled trigger with block with proper YAML', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 triggers:
   - type: scheduled
+    enabled: true
     with:
       |<-
 steps: []
@@ -407,11 +399,12 @@ steps: []
     });
 
     it('should provide rrule suggestions in scheduled trigger with block with empty map', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 triggers:
   - type: scheduled
+    enabled: true
     with:
       |<-
 steps: []
@@ -429,11 +422,12 @@ steps: []
     });
 
     it('should provide rrule suggestions in scheduled trigger with block with cursor inside', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 triggers:
   - type: scheduled
+    enabled: true
     with:
       |<-
 steps: []
@@ -451,11 +445,12 @@ steps: []
     });
 
     it('should NOT provide rrule suggestions when rrule already exists', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 triggers:
   - type: scheduled
+    enabled: true
     with:
       rrule:
         freq: DAILY
@@ -479,11 +474,12 @@ steps: []
     });
 
     it('should NOT provide rrule suggestions when every already exists', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 triggers:
   - type: scheduled
+    enabled: true
     with:
       every: "5m"
       |<-
@@ -502,7 +498,7 @@ steps: []
     });
 
     it('should provide timezone suggestions for tzid field in scheduled trigger', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -527,7 +523,7 @@ triggers:
     });
 
     it('should filter timezone suggestions based on prefix', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -550,7 +546,7 @@ triggers:
     });
 
     it('should prioritize UTC timezones in suggestions', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -575,7 +571,7 @@ triggers:
     });
 
     it('should replace entire tzid value when selecting timezone', async () => {
-      yamlContent = `
+      const yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -955,7 +951,7 @@ triggers:
 
   describe('Integration tests for liquid completions', () => {
     it('should provide liquid filter completions', async () => {
-      yamlContent = `
+      const yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -966,7 +962,10 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const result = await completionProvider.provideCompletionItems(
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
         model as any,
         position as any,
         {
@@ -986,7 +985,7 @@ steps:
     });
 
     it('should provide filtered liquid filter completions', async () => {
-      yamlContent = `
+      const yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -997,7 +996,10 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const result = await completionProvider.provideCompletionItems(
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
@@ -1013,7 +1015,7 @@ steps:
     });
 
     it('should provide liquid syntax completions', async () => {
-      yamlContent = `
+      const yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1025,7 +1027,10 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const result = await completionProvider.provideCompletionItems(
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
         model as any,
         position as any,
         {
@@ -1044,7 +1049,7 @@ steps:
     });
 
     it('should provide liquid syntax completions with partial match', async () => {
-      yamlContent = `
+      const yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1056,7 +1061,10 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const result = await completionProvider.provideCompletionItems(
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
@@ -1071,7 +1079,7 @@ steps:
     });
 
     it('should provide liquid block keyword completions with tab indentation', async () => {
-      yamlContent = `
+      const yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1084,7 +1092,10 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const result = await completionProvider.provideCompletionItems(
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
@@ -1103,7 +1114,7 @@ steps:
     });
 
     it('should provide liquid block keyword completions with mixed tab/space indentation', async () => {
-      yamlContent = `
+      const yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1116,7 +1127,10 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const result = await completionProvider.provideCompletionItems(
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
@@ -1136,7 +1150,7 @@ steps:
 
     it('should properly detect nested liquid blocks', async () => {
       // Test case with nested liquid blocks
-      yamlContent = `
+      const yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1152,7 +1166,10 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const result = await completionProvider.provideCompletionItems(
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,
@@ -1168,7 +1185,7 @@ steps:
     });
 
     it('should not provide liquid block completions outside liquid blocks', async () => {
-      yamlContent = `
+      const yamlContent = `
 steps:
   - name: test
     type: set_variable
@@ -1183,7 +1200,10 @@ steps:
       const model = createMockModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
-      const result = await completionProvider.provideCompletionItems(
+      const schema = generateYamlSchemaFromConnectors(mockConnectors);
+      const provider = getCompletionItemProvider(schema);
+
+      const result = await provider.provideCompletionItems(
         model as any,
         position as any,
         { triggerKind: monaco.languages.CompletionTriggerKind.Invoke } as any,

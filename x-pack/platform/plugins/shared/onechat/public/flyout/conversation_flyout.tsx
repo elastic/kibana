@@ -6,19 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ConversationFlyoutProps } from './types';
 
-export const ConversationFlyout = ({
-  onClose,
-  ConversationComponent,
-  ...embeddableProps
-}: ConversationFlyoutProps) => {
-  return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexItem>
-        <ConversationComponent {...embeddableProps} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+export const ConversationFlyout = ({ onClose }: ConversationFlyoutProps) => {
+  return <div>Agent Builder Conversation Flyout</div>;
 };

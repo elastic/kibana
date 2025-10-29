@@ -8,7 +8,7 @@
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useQueryClient } from '@kbn/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';

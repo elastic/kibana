@@ -20,7 +20,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/object-versioning-utils",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

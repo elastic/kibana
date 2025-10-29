@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useIsMutating } from '@kbn/react-query';
+import { useIsMutating } from '@tanstack/react-query';
 
 export const useSloCrudLoading = () => {
   const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));

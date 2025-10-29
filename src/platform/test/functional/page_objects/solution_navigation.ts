@@ -401,8 +401,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await panelOpenerBtn.click();
       },
       async isCollapsed() {
-        const selector = (await this.isV2()) ? 'sideNavCollapseButton' : 'euiCollapsibleNavButton';
-        const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
+        const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton', TIMEOUT_CHECK);
         return (await collapseNavBtn.getAttribute('aria-expanded')) === 'false';
       },
       async isExpanded() {
@@ -421,10 +420,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
             shouldBeCollapsed ? 'Collapsing' : 'Expanding'
           );
 
-          const selector = (await this.isV2())
-            ? 'sideNavCollapseButton'
-            : 'euiCollapsibleNavButton';
-          const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
+          const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton', TIMEOUT_CHECK);
           await collapseNavBtn.click();
         }
       },
@@ -455,10 +451,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           log.debug('SolutionNavigation.sidenav.tour.ensureHidden');
           await browser.setLocalStorageItem('solutionNavigationTour:completed', 'true');
           await browser.refresh();
-        },
-        isTourStepVisible: async (stepId: TourStepId) => {
-          log.debug('SolutionNavigation.sidenav.tour.isTourStepVisible', stepId);
-          return await testSubjects.exists(`nav-tour-step-${stepId}`, { timeout: TIMEOUT_CHECK });
         },
         expectTourStepVisible: async (stepId: TourStepId) => {
           log.debug('SolutionNavigation.sidenav.tour.expectTourStepVisible', stepId);

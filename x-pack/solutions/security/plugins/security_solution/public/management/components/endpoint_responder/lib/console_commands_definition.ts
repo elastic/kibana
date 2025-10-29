@@ -862,11 +862,13 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
   microsoftDefenderEndpointRunScriptEnabled: boolean;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
+  const isMicrosoftDefenderEndpointEnabled = featureFlags.responseActionsMSDefenderEndpointEnabled;
   const microsoftDefenderEndpointCancelEnabled =
     featureFlags.microsoftDefenderEndpointCancelEnabled;
 
   return commandList.map((command) => {
     if (
+      !isMicrosoftDefenderEndpointEnabled ||
       command.name === 'status' ||
       !isAgentTypeAndActionSupported(
         'microsoft_defender_endpoint',

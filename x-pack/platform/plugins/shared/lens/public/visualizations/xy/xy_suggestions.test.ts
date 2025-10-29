@@ -6,11 +6,7 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import type {
-  TableSuggestionColumn,
-  VisualizationSuggestion,
-  TableSuggestion,
-} from '@kbn/lens-common';
+import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../../types';
 import type { State, XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from './types';
 import { visualizationSubtypes } from './types';
 import { generateId } from '../../id_generator';

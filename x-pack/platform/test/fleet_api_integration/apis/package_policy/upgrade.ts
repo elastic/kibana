@@ -51,7 +51,8 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
-  describe('Package Policy - upgrade', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/238960
+  describe.skip('Package Policy - upgrade', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let packagePolicyId: string;
@@ -121,6 +122,12 @@ export default function (providerContext: FtrProviderContext) {
 
       afterEach(async function () {
         await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId })
@@ -151,7 +158,8 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      describe('upgrade', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/214862
+      describe.skip('upgrade', function () {
         withTestPackage('package_policy_upgrade', '0.2.0-add-non-required-test-var');
         it('should respond with an error', async function () {
           // upgrade policy to 0.2.0
@@ -240,6 +248,12 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       afterEach(async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
         await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
@@ -344,6 +358,12 @@ export default function (providerContext: FtrProviderContext) {
 
       afterEach(async function () {
         await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId })
@@ -446,6 +466,12 @@ export default function (providerContext: FtrProviderContext) {
 
       afterEach(async function () {
         await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId })
@@ -539,6 +565,12 @@ export default function (providerContext: FtrProviderContext) {
 
       afterEach(async function () {
         await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId })
@@ -630,6 +662,12 @@ export default function (providerContext: FtrProviderContext) {
 
       afterEach(async function () {
         await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId })
@@ -720,6 +758,12 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       afterEach(async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
         await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
@@ -846,6 +890,12 @@ export default function (providerContext: FtrProviderContext) {
 
       afterEach(async function () {
         await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId })
@@ -933,6 +983,12 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       afterEach(async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
         await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
@@ -1068,6 +1124,12 @@ export default function (providerContext: FtrProviderContext) {
 
       afterEach(async function () {
         await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
           .send({ agentPolicyId })
@@ -1148,6 +1210,12 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       afterEach(async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
         await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')
@@ -1253,6 +1321,12 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       afterEach(async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds })
+          .expect(200);
+
         await supertest
           .post('/api/fleet/agent_policies/delete')
           .set('kbn-xsrf', 'xxxx')

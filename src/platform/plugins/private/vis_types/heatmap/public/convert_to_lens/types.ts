@@ -10,8 +10,8 @@
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type {
   NavigateToLensContext,
-  HeatmapVisualizationState as HeatmapConfiguration,
-} from '@kbn/lens-common';
+  HeatmapConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { HeatmapVisParams } from '../types';
 

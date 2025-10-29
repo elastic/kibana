@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { debounce } from 'lodash';
-import type { MonacoYaml, MonacoYamlOptions } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import { configureMonacoYamlSchema } from '@kbn/monaco';
+import type { MonacoYaml, MonacoYamlOptions } from 'monaco-yaml';
+import { debounce } from 'lodash';
 
 // Configure Monaco YAML with completions and hover disabled
 // while keeping validation and hover information enabled
@@ -23,7 +23,7 @@ const defaultMonacoYamlOptions: MonacoYamlOptions = {
 };
 
 interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId' | 'onChange'> {
-  onChange: (value: string) => void;
+  onChange: (value: string | undefined) => void;
   schemas: MonacoYamlOptions['schemas'] | null;
 }
 
@@ -67,4 +67,3 @@ export const YamlEditor = React.memo(({ value, onChange, ...props }: YamlEditorP
     <CodeEditor languageId="yaml" value={internalValue} onChange={onChangeInternal} {...props} />
   );
 });
-YamlEditor.displayName = 'YamlEditor';

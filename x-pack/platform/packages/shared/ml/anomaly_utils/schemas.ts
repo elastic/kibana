@@ -30,11 +30,9 @@ export const criteriaFieldSchema = schema.object({
   fieldType: schema.maybe(mlEntityFieldTypeSchema),
 });
 
-export const mlEntityFieldValueSchema = schema.oneOf([schema.string(), schema.number()]);
-
 export const mlEntityFieldSchema = schema.object({
   fieldName: schema.string(),
-  fieldValue: schema.maybe(mlEntityFieldValueSchema),
+  fieldValue: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
   fieldType: schema.maybe(mlEntityFieldTypeSchema),
   operation: schema.maybe(mlEntityFieldOperationSchema),
   cardinality: schema.maybe(schema.number()),

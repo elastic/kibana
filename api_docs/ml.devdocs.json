@@ -1745,15 +1745,17 @@
         "Filter",
         ">; updateFilter(filterId: string, description: string, addItems: string[], removeItems: string[]): Promise<",
         "Filter",
-        ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+        ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: ",
         {
           "pluginId": "@kbn/ml-anomaly-utils",
           "scope": "common",
           "docId": "kibKbnMlAnomalyUtilsPluginApi",
-          "section": "def-common.ML_ENTITY_FIELD_TYPE",
-          "text": "ML_ENTITY_FIELD_TYPE"
+          "section": "def-common.MlEntityField",
+          "text": "MlEntityField"
         },
-        " | undefined; } & { fieldName: string; }>[], aggregationInterval: string, threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords: number, maxExamples?: number | undefined, influencersFilterQuery?: any, functionDescription?: string | undefined): ",
+        "[], aggregationInterval: string, threshold: ",
+        "SeverityThreshold",
+        "[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords: number, maxExamples?: number | undefined, influencersFilterQuery?: any, functionDescription?: string | undefined): ",
         "Observable",
         "<",
         "GetAnomaliesTableDataResult",
@@ -1811,15 +1813,17 @@
         "GetStoppedPartitionResult",
         ">; getDatafeedResultChartData(jobId: string, start: number, end: number): Promise<",
         "GetDatafeedResultsChartDataResult",
-        ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+        ">; getAnomalyCharts$(jobIds: string[], influencers: ",
         {
           "pluginId": "@kbn/ml-anomaly-utils",
           "scope": "common",
           "docId": "kibKbnMlAnomalyUtilsPluginApi",
-          "section": "def-common.ML_ENTITY_FIELD_TYPE",
-          "text": "ML_ENTITY_FIELD_TYPE"
+          "section": "def-common.MlEntityField",
+          "text": "MlEntityField"
         },
-        " | undefined; } & { fieldName: string; }>[], threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
+        "[], threshold: ",
+        "SeverityThreshold",
+        "[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
         "QueryDslQueryContainer",
         " | undefined): ",
         "Observable",
@@ -2838,15 +2842,11 @@
         "label": "ResultsService",
         "description": [],
         "signature": [
-          "{ getAnomaliesTableData: (jobIds: string[], criteriaFields: Readonly<{ fieldValue?: any; fieldType?: ",
-          {
-            "pluginId": "@kbn/ml-anomaly-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAnomalyUtilsPluginApi",
-            "section": "def-common.ML_ENTITY_FIELD_TYPE",
-            "text": "ML_ENTITY_FIELD_TYPE"
-          },
-          " | undefined; } & { fieldName: string; }>[], influencers: Readonly<{ fieldValue?: any; } & { fieldName: string; }>[], aggregationInterval: string, threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords?: number, maxExamples?: number, influencersFilterQuery?: any, functionDescription?: string | undefined) => Promise<{ anomalies: ",
+          "{ getAnomaliesTableData: (jobIds: string[], criteriaFields: ",
+          "CriteriaField",
+          "[], influencers: Influencer[], aggregationInterval: string, threshold: ",
+          "SeverityThreshold",
+          "[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords?: number, maxExamples?: number, influencersFilterQuery?: any, functionDescription?: string | undefined) => Promise<{ anomalies: ",
           {
             "pluginId": "@kbn/ml-anomaly-utils",
             "scope": "common",

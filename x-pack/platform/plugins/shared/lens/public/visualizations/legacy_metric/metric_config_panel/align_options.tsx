@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup } from '@elastic/eui';
-import type { LegacyMetricState } from '@kbn/lens-common';
+import type { LegacyMetricState } from '../../../../common/types';
 
 export interface TitlePositionProps {
   state: LegacyMetricState;

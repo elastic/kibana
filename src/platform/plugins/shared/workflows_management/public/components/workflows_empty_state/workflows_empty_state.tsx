@@ -19,9 +19,10 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
+
 interface WorkflowsEmptyStateProps {
   onCreateWorkflow?: () => void;
   canCreateWorkflow?: boolean;
@@ -37,7 +38,7 @@ export function WorkflowsEmptyState({
       icon={
         <EuiImage
           size="fullWidth"
-          src={http?.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
+          src={http!.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
           alt=""
         />
       }

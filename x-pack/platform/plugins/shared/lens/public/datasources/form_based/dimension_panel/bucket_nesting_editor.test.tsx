@@ -9,7 +9,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import type { GenericIndexPatternColumn, IndexPatternField } from '@kbn/lens-common';
+import type { GenericIndexPatternColumn } from '../form_based';
+import type { IndexPatternField } from '../../../types';
 
 const fieldMap: Record<string, IndexPatternField> = {
   a: { displayName: 'a' } as IndexPatternField,

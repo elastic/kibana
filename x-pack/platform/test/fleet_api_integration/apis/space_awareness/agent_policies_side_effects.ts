@@ -26,15 +26,6 @@ export default function (providerContext: FtrProviderContext) {
 
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
-    let allSpaceTestPolicy1: CreateAgentPolicyResponse;
-
-    function fetchAllPolicies() {
-      return Promise.all([
-        apiClient.getAgentPolicy(defaultSpacePolicy1.item.id),
-        apiClient.getAgentPolicy(spaceTest1Policy1.item.id, TEST_SPACE_1),
-        apiClient.getAgentPolicy(allSpaceTestPolicy1.item.id),
-      ]);
-    }
 
     before(async () => {
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
@@ -47,16 +38,12 @@ export default function (providerContext: FtrProviderContext) {
       await apiClient.postEnableSpaceAwareness();
       await createTestSpace(providerContext, TEST_SPACE_1);
 
-      const [_defaultSpacePolicy1, _spaceTest1Policy1, _allSpaceTestPolicy1] = await Promise.all([
+      const [_defaultSpacePolicy1, _spaceTest1Policy1] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
-        apiClient.createAgentPolicy(undefined, {
-          space_ids: ['*'],
-        }),
       ]);
       defaultSpacePolicy1 = _defaultSpacePolicy1;
       spaceTest1Policy1 = _spaceTest1Policy1;
-      allSpaceTestPolicy1 = _allSpaceTestPolicy1;
     });
 
     after(async () => {
@@ -92,16 +79,13 @@ export default function (providerContext: FtrProviderContext) {
             },
             TEST_SPACE_1
           ),
-          apiClient.putAgentPolicy(allSpaceTestPolicy1.item.id, {
-            name: allSpaceTestPolicy1.item.name,
-            namespace: allSpaceTestPolicy1.item.namespace,
-            description: allSpaceTestPolicy1.item.description,
-            download_source_id: downloadSourceId,
-          }),
         ]);
       });
       it('should remove download_source_id accross spaces', async () => {
-        const policiesResBefore = await fetchAllPolicies();
+        const policiesResBefore = await Promise.all([
+          apiClient.getAgentPolicy(defaultSpacePolicy1.item.id),
+          apiClient.getAgentPolicy(spaceTest1Policy1.item.id, TEST_SPACE_1),
+        ]);
 
         for (const policyRes of policiesResBefore) {
           expect(policyRes.item.download_source_id).to.be(downloadSourceId);
@@ -109,7 +93,10 @@ export default function (providerContext: FtrProviderContext) {
 
         await apiClient.deleteDownloadSource(downloadSourceId);
 
-        const policiesResAfter = await fetchAllPolicies();
+        const policiesResAfter = await Promise.all([
+          apiClient.getAgentPolicy(defaultSpacePolicy1.item.id),
+          apiClient.getAgentPolicy(spaceTest1Policy1.item.id, TEST_SPACE_1),
+        ]);
 
         for (const policyRes of policiesResAfter) {
           expect(policyRes.item.download_source_id).not.to.be(downloadSourceId);
@@ -132,12 +119,6 @@ export default function (providerContext: FtrProviderContext) {
             description: defaultSpacePolicy1.item.description,
             fleet_server_host_id: fleetServerHostId,
           }),
-          apiClient.putAgentPolicy(allSpaceTestPolicy1.item.id, {
-            name: allSpaceTestPolicy1.item.name,
-            namespace: allSpaceTestPolicy1.item.namespace,
-            description: allSpaceTestPolicy1.item.description,
-            fleet_server_host_id: fleetServerHostId,
-          }),
           apiClient.putAgentPolicy(
             spaceTest1Policy1.item.id,
             {
@@ -151,7 +132,10 @@ export default function (providerContext: FtrProviderContext) {
         ]);
       });
       it('should remove fleet server host accross spaces', async () => {
-        const policiesResBefore = await fetchAllPolicies();
+        const policiesResBefore = await Promise.all([
+          apiClient.getAgentPolicy(defaultSpacePolicy1.item.id),
+          apiClient.getAgentPolicy(spaceTest1Policy1.item.id, TEST_SPACE_1),
+        ]);
 
         for (const policyRes of policiesResBefore) {
           expect(policyRes.item.fleet_server_host_id).to.be(fleetServerHostId);
@@ -159,7 +143,10 @@ export default function (providerContext: FtrProviderContext) {
 
         await apiClient.deleteFleetServerHosts(fleetServerHostId);
 
-        const policiesResAfter = await fetchAllPolicies();
+        const policiesResAfter = await Promise.all([
+          apiClient.getAgentPolicy(defaultSpacePolicy1.item.id),
+          apiClient.getAgentPolicy(spaceTest1Policy1.item.id, TEST_SPACE_1),
+        ]);
 
         for (const policyRes of policiesResAfter) {
           expect(policyRes.item.fleet_server_host_id).not.to.be(fleetServerHostId);
@@ -186,13 +173,6 @@ export default function (providerContext: FtrProviderContext) {
             data_output_id: outputId,
             monitoring_output_id: outputId,
           }),
-          apiClient.putAgentPolicy(allSpaceTestPolicy1.item.id, {
-            name: allSpaceTestPolicy1.item.name,
-            namespace: allSpaceTestPolicy1.item.namespace,
-            description: allSpaceTestPolicy1.item.description,
-            data_output_id: outputId,
-            monitoring_output_id: outputId,
-          }),
           apiClient.putAgentPolicy(
             spaceTest1Policy1.item.id,
             {
@@ -207,7 +187,10 @@ export default function (providerContext: FtrProviderContext) {
         ]);
       });
       it('should remove output host accross spaces', async () => {
-        const policiesResBefore = await fetchAllPolicies();
+        const policiesResBefore = await Promise.all([
+          apiClient.getAgentPolicy(defaultSpacePolicy1.item.id),
+          apiClient.getAgentPolicy(spaceTest1Policy1.item.id, TEST_SPACE_1),
+        ]);
 
         for (const policyRes of policiesResBefore) {
           expect(policyRes.item.data_output_id).to.be(outputId);
@@ -216,7 +199,10 @@ export default function (providerContext: FtrProviderContext) {
 
         await apiClient.deleteOutput(outputId);
 
-        const policiesResAfter = await fetchAllPolicies();
+        const policiesResAfter = await Promise.all([
+          apiClient.getAgentPolicy(defaultSpacePolicy1.item.id),
+          apiClient.getAgentPolicy(spaceTest1Policy1.item.id, TEST_SPACE_1),
+        ]);
 
         for (const policyRes of policiesResAfter) {
           expect(policyRes.item.data_output_id).not.to.be(outputId);

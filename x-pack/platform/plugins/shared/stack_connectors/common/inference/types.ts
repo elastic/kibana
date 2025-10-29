@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
 import type { ConfigProperties } from '@kbn/inference-endpoint-ui-common';
 import type {
   ConfigSchema,
@@ -16,6 +16,7 @@ import type {
   RerankParamsSchema,
   RerankResponseSchema,
   SparseEmbeddingParamsSchema,
+  SparseEmbeddingResponseSchema,
   TextEmbeddingParamsSchema,
   TextEmbeddingResponseSchema,
   UnifiedChatCompleteParamsSchema,
@@ -24,30 +25,27 @@ import type {
   DashboardActionResponseSchema,
 } from './schema';
 
-export type Config = z.input<typeof ConfigSchema>;
-export type Secrets = z.input<typeof SecretsSchema>;
+export type Config = TypeOf<typeof ConfigSchema>;
+export type Secrets = TypeOf<typeof SecretsSchema>;
 
-export type UnifiedChatCompleteParams = z.infer<typeof UnifiedChatCompleteParamsSchema>;
-export type UnifiedChatCompleteResponse = z.infer<typeof UnifiedChatCompleteResponseSchema>;
+export type UnifiedChatCompleteParams = TypeOf<typeof UnifiedChatCompleteParamsSchema>;
+export type UnifiedChatCompleteResponse = TypeOf<typeof UnifiedChatCompleteResponseSchema>;
 
-export type ChatCompleteParams = z.infer<typeof ChatCompleteParamsSchema>;
-export type ChatCompleteResponse = z.infer<typeof ChatCompleteResponseSchema>;
+export type ChatCompleteParams = TypeOf<typeof ChatCompleteParamsSchema>;
+export type ChatCompleteResponse = TypeOf<typeof ChatCompleteResponseSchema>;
 
-export type RerankParams = z.infer<typeof RerankParamsSchema>;
-export type RerankResponse = z.infer<typeof RerankResponseSchema>;
+export type RerankParams = TypeOf<typeof RerankParamsSchema>;
+export type RerankResponse = TypeOf<typeof RerankResponseSchema>;
 
-export type SparseEmbeddingParams = z.infer<typeof SparseEmbeddingParamsSchema>;
+export type SparseEmbeddingParams = TypeOf<typeof SparseEmbeddingParamsSchema>;
+export type SparseEmbeddingResponse = TypeOf<typeof SparseEmbeddingResponseSchema>;
 
-export type SparseEmbeddingResponse = Array<{}>;
-// cannot directly infer type due to https://github.com/colinhacks/zod/issues/2938
-// export type SparseEmbeddingResponse = TypeOf<typeof SparseEmbeddingResponseSchema>;
+export type TextEmbeddingParams = TypeOf<typeof TextEmbeddingParamsSchema>;
+export type TextEmbeddingResponse = TypeOf<typeof TextEmbeddingResponseSchema>;
 
-export type TextEmbeddingParams = z.infer<typeof TextEmbeddingParamsSchema>;
-export type TextEmbeddingResponse = z.infer<typeof TextEmbeddingResponseSchema>;
+export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
 
-export type StreamingResponse = z.infer<typeof StreamingResponseSchema>;
-
-export type DashboardActionParams = z.infer<typeof DashboardActionParamsSchema>;
-export type DashboardActionResponse = z.infer<typeof DashboardActionResponseSchema>;
+export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;

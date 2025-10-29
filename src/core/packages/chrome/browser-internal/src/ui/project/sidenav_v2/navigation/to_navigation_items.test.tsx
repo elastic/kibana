@@ -29,7 +29,7 @@ const createNavigationItems = (
   tree: NavigationTreeDefinitionUI = navigationTree,
   activeNodes: ChromeProjectNavigationNode[][] = []
 ) => {
-  return toNavigationItems(tree, activeNodes, mockPanelStateManager);
+  return toNavigationItems(tree, [], activeNodes, mockPanelStateManager);
 };
 
 beforeEach(() => {
@@ -96,8 +96,7 @@ describe('toNavigationItems', () => {
       • No icon found for node \\"securityGroup:assets\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • No icon found for node \\"securityGroup:machineLearning\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • No icon found for node \\"stack_management\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\".
-      • ID \\"endpoints\\" is used 2 times in navigation items. Each navigation item must have a unique ID."
+      • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\"."
     `);
   });
 });

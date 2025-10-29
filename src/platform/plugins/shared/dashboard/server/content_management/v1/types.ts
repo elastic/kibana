@@ -19,7 +19,6 @@ import type {
 } from '@kbn/content-management-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { filterSchema, querySchema } from '@kbn/es-query-server';
-import type { Writable } from '@kbn/utility-types';
 import type * as schema from './schema';
 import type { CONTENT_ID } from '../../../common/content_management';
 
@@ -29,11 +28,12 @@ export type DashboardOptions = TypeOf<typeof schema.optionsSchema>;
 
 export type DashboardPanel = TypeOf<ReturnType<typeof schema.getPanelSchema>>;
 export type DashboardSection = TypeOf<ReturnType<typeof schema.getSectionSchema>>;
-export type DashboardState = Writable<TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>>;
+// TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
+export type DashboardAttributes = TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>;
 
 export type DashboardItem = TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>;
 export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
-  attributes: Partial<DashboardState>;
+  attributes: Partial<DashboardAttributes>;
   references: SavedObjectReference[] | undefined;
 };
 
@@ -46,14 +46,14 @@ export type DashboardAPIGetOut = GetResult<
 >;
 export type DashboardGetOut = TypeOf<ReturnType<typeof schema.getDashboardGetResultSchema>>;
 
-export type DashboardCreateIn = CreateIn<typeof CONTENT_ID, DashboardState>;
+export type DashboardCreateIn = CreateIn<typeof CONTENT_ID, DashboardAttributes>;
 export type DashboardCreateOut = CreateResult<
   TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>,
   TypeOf<typeof schema.dashboardMetaSchema>
 >;
 export type DashboardCreateOptions = TypeOf<typeof schema.dashboardCreateOptionsSchema>;
 
-export type DashboardUpdateIn = UpdateIn<typeof CONTENT_ID, Partial<DashboardState>>;
+export type DashboardUpdateIn = UpdateIn<typeof CONTENT_ID, Partial<DashboardAttributes>>;
 export type DashboardUpdateOut = CreateResult<
   TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>,
   TypeOf<typeof schema.dashboardMetaSchema>

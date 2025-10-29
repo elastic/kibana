@@ -47,7 +47,6 @@ import { ProcessorTypeSelector } from './processor_type_selector';
 import { SetProcessorForm } from './set';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
-import { ConvertProcessorForm } from './convert';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -177,7 +176,6 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
             <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
               <ProcessorTypeSelector disabled={isConfigured} />
               <EuiSpacer size="m" />
-              {type === 'convert' && <ConvertProcessorForm />}
               {type === 'date' && <DateProcessorForm />}
               {type === 'grok' && <GrokProcessorForm />}
               {type === 'dissect' && <DissectProcessorForm />}

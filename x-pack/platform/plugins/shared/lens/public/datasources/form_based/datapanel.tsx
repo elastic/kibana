@@ -31,14 +31,14 @@ import {
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
+import { buildIndexPatternField } from '../../data_views_service/loader';
 import type {
-  FormBasedPrivateState,
   DatasourceDataPanelProps,
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
-} from '@kbn/lens-common';
-import { buildIndexPatternField } from '../../data_views_service/loader';
+} from '../../types';
+import type { FormBasedPrivateState } from './types';
 import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from '../common/field_item';
 import { dataPanelStyles } from '../common/datapanel.styles';
@@ -126,7 +126,6 @@ export function FormBasedDataPanel({
         >
           <EuiFlexItem grow={null}>
             <EuiCallOut
-              announceOnMount
               data-test-subj="indexPattern-no-indexpatterns"
               title={i18n.translate('xpack.lens.indexPattern.noDataViewsLabel', {
                 defaultMessage: 'No data views',

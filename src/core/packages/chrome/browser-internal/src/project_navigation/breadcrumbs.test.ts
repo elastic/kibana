@@ -26,7 +26,7 @@ describe('buildBreadcrumbs', () => {
       params: { absolute: true },
     };
     const result = buildBreadcrumbs({
-      kibanaName: 'Test Project',
+      projectName: 'Test Project',
       cloudLinks: mockCloudLinks,
       projectBreadcrumbs,
       activeNodes: [],
@@ -50,6 +50,7 @@ describe('buildBreadcrumbs', () => {
       ],
     ] as ChromeProjectNavigationNode[][];
     const result = buildBreadcrumbs({
+      projectName: 'Test Project',
       cloudLinks: mockCloudLinks,
       projectBreadcrumbs: { breadcrumbs: [], params: { absolute: false } },
       activeNodes,
@@ -78,6 +79,7 @@ describe('buildBreadcrumbs', () => {
       { text: 'Chrome Crumb 2', href: '/chrome2' },
     ] as ChromeBreadcrumb[];
     const result = buildBreadcrumbs({
+      projectName: 'Test Project',
       cloudLinks: mockCloudLinks,
       projectBreadcrumbs: { breadcrumbs: [], params: { absolute: false } },
       activeNodes,
@@ -95,7 +97,7 @@ describe('buildBreadcrumbs', () => {
     ]);
   });
 
-  it('returns breadcrumbs without root crumb if kibanaName/cloudLinks is empty', () => {
+  it('returns breadcrumbs without root crumb if projectName/cloudLinks is empty', () => {
     const activeNodes = [
       [
         { title: 'Node 1', breadcrumbStatus: 'visible', href: '/node1', deepLink: { id: '1' } },
@@ -107,7 +109,7 @@ describe('buildBreadcrumbs', () => {
       { text: 'Chrome Crumb 2', href: '/chrome2' },
     ] as ChromeBreadcrumb[];
     const result = buildBreadcrumbs({
-      kibanaName: undefined,
+      projectName: undefined,
       cloudLinks: {},
       projectBreadcrumbs: { breadcrumbs: [], params: { absolute: false } },
       activeNodes,

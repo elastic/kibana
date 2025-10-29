@@ -14,7 +14,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../../config/ess/config.base.edr_workflows.trial')
   );
 
-  const securitySolutionEnableExperimental: Array<keyof SecuritySolutionExperimentalFeatures> = [];
+  const securitySolutionEnableExperimental: Array<keyof SecuritySolutionExperimentalFeatures> = [
+    'endpointManagementSpaceAwarenessEnabled',
+  ];
   const fleetEnableExperimental: Partial<FleetExperimentalFeatures> = {
     useSpaceAwareness: true,
   };

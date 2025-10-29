@@ -17,12 +17,12 @@ import type {
   ResponseActionGetFileParameters,
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { useQuery as _useQuery } from '@kbn/react-query';
+import { useQuery as _useQuery } from '@tanstack/react-query';
 
 const useQueryMock = _useQuery as jest.Mock;
 
-jest.mock('@kbn/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
+jest.mock('@tanstack/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
 
   return {
     ...actualReactQueryModule,

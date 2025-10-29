@@ -1480,8 +1480,7 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
-        "ajv-draft-04",
-        "ajv-formats"
+        "@seriousme/openapi-schema-validator"
       ],
       "reviewers": [
         "team:kibana-core"

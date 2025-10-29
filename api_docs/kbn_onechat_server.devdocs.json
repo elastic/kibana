@@ -613,9 +613,7 @@
               "\nHandler to call to execute the tool."
             ],
             "signature": [
-              "(args: ",
-              "TypeOf",
-              "<RunInput>, context: ",
+              "(args: Zod.TypeOf<RunInput>, context: ",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
@@ -768,9 +766,7 @@
                 "section": "def-common.ExecutableToolHandlerParams",
                 "text": "ExecutableToolHandlerParams"
               },
-              "<",
-              "TypeOf",
-              "<TSchema>>) => Promise<",
+              "<Zod.TypeOf<TSchema>>) => Promise<",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
@@ -2018,13 +2014,7 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>>"
+              "<{}, Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>>>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/tool_provider.ts",
             "deprecated": false,
@@ -2080,13 +2070,7 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>[]>"
+              "<{}, Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/tool_provider.ts",
             "deprecated": false,

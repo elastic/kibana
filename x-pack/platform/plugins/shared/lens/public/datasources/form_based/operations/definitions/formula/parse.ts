@@ -8,16 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
-import type {
-  DateRange,
-  IndexPattern,
-  GenericIndexPatternColumn,
-  FormBasedLayer,
-  FormulaIndexPatternColumn,
-} from '@kbn/lens-common';
 import { nonNullable } from '../../../../../utils';
-import type { OperationDefinition, GenericOperationDefinition } from '..';
+import type { DateRange } from '../../../../../../common/types';
+import type { IndexPattern } from '../../../../../types';
+import type {
+  OperationDefinition,
+  GenericOperationDefinition,
+  GenericIndexPatternColumn,
+} from '..';
 import { operationDefinitionMap } from '..';
+import type { FormBasedLayer } from '../../../types';
 import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
 import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
@@ -28,6 +28,7 @@ import {
   groupArgsByType,
   mergeWithGlobalFilters,
 } from './util';
+import type { FormulaIndexPatternColumn } from './formula';
 import { isFormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
 

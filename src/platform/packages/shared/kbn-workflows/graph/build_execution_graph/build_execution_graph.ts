@@ -126,7 +126,7 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return handleTimeout(
       getStepId(step, context),
       'step_level_timeout',
-      step.timeout as string,
+      step.timeout!,
       visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
       context
     );
@@ -426,12 +426,11 @@ function handleStepLevelOnFailure(
     stepId: getStepId(step, context),
     stepType: step.type,
   };
-  const onFailureConfiguration = (step as StepWithOnFailure)['on-failure'];
-  if (context.stack.some((node) => node.id === stackEntry.id) || !onFailureConfiguration) {
+  if (context.stack.some((node) => node.id === stackEntry.id)) {
     return null;
   }
   context.stack.push(stackEntry);
-  const result = visitOnFailure(step, onFailureConfiguration, context);
+  const result = visitOnFailure(step, (step as StepWithOnFailure)['on-failure']!, context);
   context.stack.pop();
   return result;
 }
@@ -440,12 +439,7 @@ function handleWorkflowLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
 ): graphlib.Graph<GraphNodeUnion> | null {
-  const onFailureConfiguration = context.settings?.['on-failure'];
-  if (
-    flowControlStepTypes.has(step.type) ||
-    disallowedWorkflowLevelOnFailureSteps.has(step.type) ||
-    !onFailureConfiguration
-  ) {
+  if (flowControlStepTypes.has(step.type) || disallowedWorkflowLevelOnFailureSteps.has(step.type)) {
     return null;
   }
 
@@ -465,7 +459,7 @@ function handleWorkflowLevelOnFailure(
   }
 
   context.stack.push(stackEntry);
-  const result = visitOnFailure(step, onFailureConfiguration, context);
+  const result = visitOnFailure(step, context.settings!['on-failure']!, context);
   context.stack.pop();
   return result;
 }
@@ -650,9 +644,9 @@ function createStepsSequence(
     });
 
     if (previousGraph) {
-      const previousEndNodes = previousGraph
+      const previousEndNodes = previousGraph!
         .nodes()
-        .filter((nodeId) => previousGraph?.outEdges(nodeId)?.length === 0);
+        .filter((nodeId) => previousGraph!.outEdges(nodeId)?.length === 0);
 
       const currentStartNodes = currentGraph
         .nodes()

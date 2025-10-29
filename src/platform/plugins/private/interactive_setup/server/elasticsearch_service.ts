@@ -398,7 +398,6 @@ export class ElasticsearchService {
         kibanaVersion: this.kibanaVersion,
         ignoreVersionMismatch: false,
         healthCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
-        healthCheckRetry: 1,
       })
     );
   }

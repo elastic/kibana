@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
-import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
-import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 import { EnterIfNodeImpl } from '../enter_if_node_impl';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows/graph';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 
 describe('EnterIfNodeImpl', () => {
   let node: EnterIfNode;
@@ -20,9 +21,7 @@ describe('EnterIfNodeImpl', () => {
   let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let impl: EnterIfNodeImpl;
   let workflowContextLoggerMock: IWorkflowEventLogger;
-  let mockContextManager: jest.Mocked<
-    Pick<WorkflowContextManager, 'getContext' | 'renderValueAccordingToContext'>
-  >;
+  let mockContextManager: jest.Mocked<Pick<WorkflowContextManager, 'getContext'>>;
   let workflowGraph: WorkflowGraph;
 
   beforeEach(() => {
@@ -33,13 +32,11 @@ describe('EnterIfNodeImpl', () => {
       getContext: jest.fn().mockReturnValue({
         event: { type: 'alert' },
       }),
-      renderValueAccordingToContext: jest.fn().mockImplementation((value) => value),
     };
 
     mockStepExecutionRuntime = {
       contextManager: mockContextManager,
       startStep: jest.fn().mockResolvedValue(undefined),
-      setInput: jest.fn(),
     } as any;
 
     node = {
@@ -60,7 +57,7 @@ describe('EnterIfNodeImpl', () => {
       {
         id: 'thenNode',
         type: 'enter-then-branch',
-        condition: 'event.type: alert',
+        condition: 'true',
       } as EnterConditionBranchNode,
       {
         id: 'elseNode',
@@ -76,33 +73,9 @@ describe('EnterIfNodeImpl', () => {
     );
   });
 
-  it('should start the step with condition rendered value and condition result', async () => {
-    mockContextManager.renderValueAccordingToContext = jest
-      .fn()
-      .mockImplementation(() => 'event.type: foo');
-
+  it('should start the step', async () => {
     await impl.run();
-
-    expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
-      'event.type: alert'
-    );
     expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith();
-  });
-
-  it('should set step inputs', async () => {
-    mockContextManager.renderValueAccordingToContext = jest
-      .fn()
-      .mockImplementation(() => 'event.type: foo');
-
-    await impl.run();
-
-    expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
-      'event.type: alert'
-    );
-    expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
-      condition: 'event.type: foo',
-      conditionResult: false,
-    });
   });
 
   describe('then branch', () => {
@@ -191,7 +164,7 @@ describe('EnterIfNodeImpl', () => {
       .fn()
       .mockReturnValueOnce([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
-      `EnterIfNode with id ${node.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type`
+      `EnterIfNode with id ${node.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type.`
     );
   });
 
@@ -203,8 +176,6 @@ describe('EnterIfNodeImpl', () => {
         condition: 'invalid""condition',
       } as EnterConditionBranchNode,
     ]);
-    await expect(impl.run()).rejects.toThrow(
-      `Syntax error in condition "invalid""condition" for step ${node.stepId}:`
-    );
+    await expect(impl.run()).rejects.toThrow();
   });
 });

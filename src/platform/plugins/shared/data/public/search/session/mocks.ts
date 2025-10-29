@@ -52,7 +52,6 @@ export function getSessionServiceMock(
     })),
     destroy: jest.fn(),
     cancel: jest.fn(),
-    isSaving: jest.fn(),
     isStored: jest.fn(),
     isRestore: jest.fn(),
     save: jest.fn(),

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Datasource, TextBasedPrivateState } from '@kbn/lens-common';
+import type { Datasource } from '../../../types';
+import type { TextBasedPrivateState } from './types';
 
 export const removeColumn: Datasource<TextBasedPrivateState>['removeColumn'] = ({
   prevState,

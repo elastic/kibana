@@ -6,20 +6,15 @@
  */
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
-import { ALL_SPACES_ID } from '../../../common/constants';
 import type { Agent } from '../../types';
 
 import { isSpaceAwarenessEnabled } from './helpers';
 
-export const DEFAULT_NAMESPACES_FILTER = `(namespaces:"${DEFAULT_SPACE_ID}" or namespaces:"${ALL_SPACES_ID}" or not namespaces:*)`;
+export const DEFAULT_NAMESPACES_FILTER = `(namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*)`;
 
 export async function isAgentInNamespace(agent: Agent, namespace?: string) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness) {
-    return true;
-  }
-
-  if (agent.namespaces?.includes(ALL_SPACES_ID)) {
     return true;
   }
 
@@ -42,7 +37,5 @@ export async function agentsKueryNamespaceFilter(namespace?: string) {
   if (!useSpaceAwareness || !namespace) {
     return;
   }
-  return namespace === DEFAULT_SPACE_ID
-    ? DEFAULT_NAMESPACES_FILTER
-    : `namespaces:(${namespace}) or namespaces:"*"`;
+  return namespace === DEFAULT_SPACE_ID ? DEFAULT_NAMESPACES_FILTER : `namespaces:(${namespace})`;
 }

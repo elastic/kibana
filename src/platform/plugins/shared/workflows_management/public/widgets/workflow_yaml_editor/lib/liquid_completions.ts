@@ -24,13 +24,6 @@ export const LIQUID_FILTERS = [
     example: '{{ "Hello" | append: " World" }} => Hello World',
   },
   {
-    name: 'array_to_sentence_string',
-    description: 'Converts an array to a sentence format',
-    insertText: 'array_to_sentence_string',
-    example:
-      '{{ ["apple", "banana", "cherry"] | array_to_sentence_string }} => "apple, banana, and cherry"',
-  },
-  {
     name: 'at_least',
     description: 'Limits a number to a minimum value',
     insertText: 'at_least: ${1:number}',
@@ -41,18 +34,6 @@ export const LIQUID_FILTERS = [
     description: 'Limits a number to a maximum value',
     insertText: 'at_most: ${1:number}',
     example: '{{ 4 | at_most: 5 }} => 4',
-  },
-  {
-    name: 'base64_decode',
-    description: 'Decodes a base64-encoded string',
-    insertText: 'base64_decode',
-    example: '{{ "SGVsbG8gV29ybGQ=" | base64_decode }} => "Hello World"',
-  },
-  {
-    name: 'base64_encode',
-    description: 'Encodes a string to base64',
-    insertText: 'base64_encode',
-    example: '{{ "Hello World" | base64_encode }} => "SGVsbG8gV29ybGQ="',
   },
   {
     name: 'capitalize',
@@ -70,49 +51,19 @@ export const LIQUID_FILTERS = [
     name: 'compact',
     description: 'Removes any null values from an array',
     insertText: 'compact',
-    example: '{{ [1, null, 2, null, 3] | compact }} => [1, 2, 3]',
-  },
-  {
-    name: 'cgi_escape',
-    description: 'CGI escapes a string',
-    insertText: 'cgi_escape',
-    example: '{{ "hello world" | cgi_escape }} => "hello%20world"',
+    example: '{{ array | compact }}',
   },
   {
     name: 'concat',
     description: 'Concatenates (joins) multiple arrays',
     insertText: 'concat: ${1:array}',
-    example: '{{ [1, 2] | concat: [3, 4] }} => [1, 2, 3, 4]',
+    example: '{{ array1 | concat: array2 }}',
   },
   {
     name: 'date',
     description: 'Formats a date',
     insertText: 'date: "${1:%Y-%m-%d}"',
-    example: '{{ "now" | date: "%Y-%m-%d" }} => "2024-01-15"',
-  },
-  {
-    name: 'date_to_long_string',
-    description: 'Formats a date as a long string',
-    insertText: 'date_to_long_string',
-    example: '{{ date | date_to_long_string }} => "Monday, January 15, 2024"',
-  },
-  {
-    name: 'date_to_rfc822',
-    description: 'Formats a date as RFC822',
-    insertText: 'date_to_rfc822',
-    example: '{{ date | date_to_rfc822 }} => "Mon, 15 Jan 2024 12:00:00 +0000"',
-  },
-  {
-    name: 'date_to_string',
-    description: 'Formats a date as a string',
-    insertText: 'date_to_string',
-    example: '{{ date | date_to_string }} => "January 15, 2024"',
-  },
-  {
-    name: 'date_to_xmlschema',
-    description: 'Formats a date as XML schema',
-    insertText: 'date_to_xmlschema',
-    example: '{{ date | date_to_xmlschema }} => "2024-01-15T12:00:00Z"',
+    example: '{{ "now" | date: "%Y-%m-%d" }}',
   },
   {
     name: 'default',
@@ -136,19 +87,13 @@ export const LIQUID_FILTERS = [
     name: 'escape',
     description: 'Escapes a string by replacing characters with escape sequences',
     insertText: 'escape',
-    example: '{{ "<p>text</p>" | escape }} => "&lt;p&gt;text&lt;/p&gt;"',
-  },
-  {
-    name: 'escape_once',
-    description: 'Escapes HTML but only once (prevents double escaping)',
-    insertText: 'escape_once',
-    example: '{{ "&lt;p&gt;text&lt;/p&gt;" | escape_once }} => "&lt;p&gt;text&lt;/p&gt;"',
+    example: '{{ "<p>text</p>" | escape }}',
   },
   {
     name: 'first',
     description: 'Returns the first item of an array',
     insertText: 'first',
-    example: '{{ [1, 2, 3] | first }} => 1',
+    example: '{{ array | first }}',
   },
   {
     name: 'floor',
@@ -157,30 +102,16 @@ export const LIQUID_FILTERS = [
     example: '{{ 1.9 | floor }} => 1',
   },
   {
-    name: 'group_by',
-    description: 'Groups array items by a property',
-    insertText: 'group_by: "${1:property}"',
-    example:
-      '{{ products | group_by: "category" }} => [{"name": "Electronics", "items": [...]}, {"name": "Books", "items": [...]}]',
-  },
-  {
-    name: 'group_by_exp',
-    description: 'Groups array items by an expression',
-    insertText: 'group_by_exp: "${1:expression}"',
-    example:
-      '{{ products | group_by_exp: "item.price > 100" }} => [{"name": "true", "items": [...]}, {"name": "false", "items": [...]}]',
-  },
-  {
     name: 'join',
     description: 'Combines the items in an array into a single string',
     insertText: 'join: "${1:separator}"',
-    example: '{{ ["apple", "banana", "cherry"] | join: ", " }} => "apple, banana, cherry"',
+    example: '{{ array | join: ", " }}',
   },
   {
     name: 'json',
     description: 'Converts an object to a JSON string',
     insertText: 'json',
-    example: '{{ {"name": "John", "age": 30} | json }} => "{\\"name\\":\\"John\\",\\"age\\":30}"',
+    example: '{{ object | json: 2 }}',
   },
   {
     name: 'json_parse',
@@ -192,7 +123,7 @@ export const LIQUID_FILTERS = [
     name: 'last',
     description: 'Returns the last item of an array',
     insertText: 'last',
-    example: '{{ [1, 2, 3] | last }} => 3',
+    example: '{{ array | last }}',
   },
   {
     name: 'lstrip',
@@ -205,7 +136,7 @@ export const LIQUID_FILTERS = [
     description:
       'Creates an array of values by extracting the values of a named property from another object',
     insertText: 'map: "${1:property}"',
-    example: '{{ products | map: "title" }} => ["Product 1", "Product 2", "Product 3"]',
+    example: '{{ products | map: "title" }}',
   },
   {
     name: 'minus',
@@ -220,34 +151,16 @@ export const LIQUID_FILTERS = [
     example: '{{ 3 | modulo: 2 }} => 1',
   },
   {
-    name: 'normalize_whitespace',
-    description: 'Normalizes whitespace in a string',
-    insertText: 'normalize_whitespace',
-    example: '{{ "  hello   world  " | normalize_whitespace }} => "hello world"',
-  },
-  {
-    name: 'number_of_words',
-    description: 'Counts the number of words in a string',
-    insertText: 'number_of_words',
-    example: '{{ "hello world" | number_of_words }} => 2',
+    name: 'newline_to_br',
+    description: 'Replaces every newline in a string with an HTML line break',
+    insertText: 'newline_to_br',
+    example: '{{ string | newline_to_br }}',
   },
   {
     name: 'plus',
     description: 'Adds a number to another number',
     insertText: 'plus: ${1:number}',
     example: '{{ 4 | plus: 2 }} => 6',
-  },
-  {
-    name: 'pop',
-    description: 'Removes the last item from an array',
-    insertText: 'pop',
-    example: '{{ [1, 2, 3] | pop }} => [1, 2]',
-  },
-  {
-    name: 'push',
-    description: 'Adds an item to the end of an array',
-    insertText: 'push: ${1:item}',
-    example: '{{ [1, 2] | push: 3 }} => [1, 2, 3]',
   },
   {
     name: 'prepend',
@@ -268,24 +181,6 @@ export const LIQUID_FILTERS = [
     example: '{{ "Hello world" | remove_first: "l" }} => "Helo world"',
   },
   {
-    name: 'remove_last',
-    description: 'Removes only the last occurrence of the specified substring from a string',
-    insertText: 'remove_last: "${1:string}"',
-    example: '{{ "Hello world" | remove_last: "l" }} => "Helo word"',
-  },
-  {
-    name: 'reject',
-    description: 'Removes items from an array that have a specific property value',
-    insertText: 'reject: "${1:property}", "${2:value}"',
-    example: '{{ products | reject: "type", "book" }} => [products without type="book"]',
-  },
-  {
-    name: 'reject_exp',
-    description: 'Removes items from an array that match an expression',
-    insertText: 'reject_exp: "${1:expression}"',
-    example: '{{ products | reject_exp: "item.price < 50" }} => [products where price >= 50]',
-  },
-  {
     name: 'replace',
     description:
       'Replaces every occurrence of the first argument in a string with the second argument',
@@ -300,17 +195,10 @@ export const LIQUID_FILTERS = [
     example: '{{ "Take my money" | replace_first: "my", "your" }}',
   },
   {
-    name: 'replace_last',
-    description:
-      'Replaces only the last occurrence of the first argument in a string with the second argument',
-    insertText: 'replace_last: "${1:search}", "${2:replace}"',
-    example: '{{ "Take my money" | replace_last: "my", "your" }}',
-  },
-  {
     name: 'reverse',
     description: 'Reverses the order of the items in an array',
     insertText: 'reverse',
-    example: '{{ [1, 2, 3] | reverse }} => [3, 2, 1]',
+    example: '{{ array | reverse }}',
   },
   {
     name: 'round',
@@ -325,22 +213,10 @@ export const LIQUID_FILTERS = [
     example: '{{ "hello   " | rstrip }} => "hello"',
   },
   {
-    name: 'shift',
-    description: 'Removes the first item from an array',
-    insertText: 'shift',
-    example: '{{ [1, 2, 3] | shift }} => [2, 3]',
-  },
-  {
     name: 'size',
     description: 'Returns the number of characters in a string or the number of items in an array',
     insertText: 'size',
     example: '{{ "hello" | size }} => 5',
-  },
-  {
-    name: 'slugify',
-    description: 'Creates a URL-friendly slug from a string',
-    insertText: 'slugify',
-    example: '{{ "Hello World!" | slugify }} => "hello-world"',
   },
   {
     name: 'slice',
@@ -353,13 +229,6 @@ export const LIQUID_FILTERS = [
     description: 'Sorts items in an array by a given attribute',
     insertText: 'sort: "${1:property}"',
     example: '{{ array | sort: "name" }}',
-  },
-  {
-    name: 'sort_natural',
-    description:
-      'Sorts the items in an array in case-insensitive alphabetical order (optionally by a given property)',
-    insertText: 'sort_natural: "${1:property}"',
-    example: '{{ array | sort_natural: "name" }}',
   },
   {
     name: 'split',
@@ -383,7 +252,7 @@ export const LIQUID_FILTERS = [
     name: 'strip_newlines',
     description: 'Removes any newline characters from a string',
     insertText: 'strip_newlines',
-    example: '{{ "Line 1\\nLine 2" | strip_newlines }} => "Line 1Line 2"',
+    example: '{{ string | strip_newlines }}',
   },
   {
     name: 'times',
@@ -395,43 +264,25 @@ export const LIQUID_FILTERS = [
     name: 'truncate',
     description: 'Shortens a string down to the number of characters passed as an argument',
     insertText: 'truncate: ${1:length}',
-    example: '{{ "Ground control to Major Tom" | truncate: 20 }} => "Ground control to..."',
+    example: '{{ "Ground control to Major Tom" | truncate: 20 }}',
   },
   {
     name: 'truncatewords',
     description: 'Shortens a string down to the number of words passed as an argument',
     insertText: 'truncatewords: ${1:words}',
-    example: '{{ "Ground control to Major Tom" | truncatewords: 3 }} => "Ground control to..."',
+    example: '{{ "Ground control to Major Tom" | truncatewords: 3 }}',
   },
   {
     name: 'uniq',
     description: 'Removes any duplicate elements in an array',
     insertText: 'uniq',
-    example: '{{ [1, 2, 2, 3, 3, 3] | uniq }} => [1, 2, 3]',
-  },
-  {
-    name: 'unshift',
-    description: 'Adds an item to the beginning of an array',
-    insertText: 'unshift: ${1:item}',
-    example: '{{ [2, 3] | unshift: 1 }} => [1, 2, 3]',
-  },
-  {
-    name: 'uri_escape',
-    description: 'URI escapes a string',
-    insertText: 'uri_escape',
-    example: '{{ "hello world" | uri_escape }} => "hello%20world"',
+    example: '{{ array | uniq }}',
   },
   {
     name: 'upcase',
     description: 'Converts a string to uppercase',
     insertText: 'upcase',
     example: '{{ "hello" | upcase }} => "HELLO"',
-  },
-  {
-    name: 'url_decode',
-    description: 'Decodes URL-encoded characters in a string',
-    insertText: 'url_decode',
-    example: '{{ "hello%20world" | url_decode }} => "hello world"',
   },
   {
     name: 'url_encode',
@@ -443,32 +294,7 @@ export const LIQUID_FILTERS = [
     name: 'where',
     description: 'Filters an array to only include items with a specific property value',
     insertText: 'where: "${1:property}", "${2:value}"',
-    example: '{{ products | where: "type", "book" }} => [filtered products with type="book"]',
-  },
-  {
-    name: 'where_exp',
-    description: 'Filters an array using an expression to test each item',
-    insertText: 'where_exp: "${1:expression}"',
-    example:
-      '{{ products | where_exp: "item.price > 100" }} => [filtered products where price > 100]',
-  },
-  {
-    name: 'xml_escape',
-    description: 'Escapes XML characters in a string',
-    insertText: 'xml_escape',
-    example: '{{ "<tag>content</tag>" | xml_escape }} => "&lt;tag&gt;content&lt;/tag&gt;"',
-  },
-  {
-    name: 'find',
-    description: 'Finds the first item in an array with a specific property value',
-    insertText: 'find: "${1:property}", "${2:value}"',
-    example: '{{ products | find: "type", "book" }} => first product with type="book"',
-  },
-  {
-    name: 'find_exp',
-    description: 'Finds the first item in an array that matches an expression',
-    insertText: 'find_exp: "${1:expression}"',
-    example: '{{ products | find_exp: "item.price > 100" }} => first product where price > 100',
+    example: '{{ products | where: "type", "book" }}',
   },
 ];
 

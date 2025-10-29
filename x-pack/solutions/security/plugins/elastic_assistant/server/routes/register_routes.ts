@@ -68,7 +68,6 @@ import { enableAttackDiscoverySchedulesInternalRoute } from './attack_discovery/
 import type { ConfigSchema } from '../config_schema';
 import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
 import { suggestUsersRoute } from './users/suggest';
-import { updateAnonymizationFieldsRoute } from './test_internal/update_anonymization_fields_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -177,7 +176,4 @@ export const registerRoutes = (
   getDefendInsightRoute(router);
   getDefendInsightsRoute(router);
   postDefendInsightsRoute(router);
-
-  // Test Internal
-  updateAnonymizationFieldsRoute(router);
 };

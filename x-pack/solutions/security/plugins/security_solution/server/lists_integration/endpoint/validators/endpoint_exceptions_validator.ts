@@ -26,16 +26,18 @@ export class EndpointExceptionsValidator extends BaseValidator {
   protected async validateHasWritePrivilege(): Promise<void> {
     await this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
 
-    // Endpoint Exceptions are currently ONLY global, so we need to make sure the user
-    // also has the new Global Artifacts privilege
-    try {
-      await this.validateHasPrivilege('canManageGlobalArtifacts');
-    } catch (error) {
-      // We provide a more detailed error here
-      throw new EndpointExceptionsValidationError(
-        `${error.message}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
-        403
-      );
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      // Endpoint Exceptions are currently ONLY global, so we need to make sure the user
+      // also has the new Global Artifacts privilege
+      try {
+        await this.validateHasPrivilege('canManageGlobalArtifacts');
+      } catch (error) {
+        // We provide a more detailed error here
+        throw new EndpointExceptionsValidationError(
+          `${error.message}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+          403
+        );
+      }
     }
   }
 

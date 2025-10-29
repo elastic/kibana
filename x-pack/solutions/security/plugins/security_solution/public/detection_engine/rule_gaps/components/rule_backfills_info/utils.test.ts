@@ -22,7 +22,6 @@ describe('getBackfillRowsFromResponse', () => {
         created_at: '2023-01-01T00:00:00Z',
         duration: '2h',
         enabled: true,
-        initiator: 'user',
         rule: {
           id: 'rule-1',
           name: 'Test Rule',
@@ -56,7 +55,6 @@ describe('getBackfillRowsFromResponse', () => {
         created_at: '2023-01-02T00:00:00Z',
         duration: '3h',
         enabled: true,
-        initiator: 'user',
         rule: {
           id: 'rule-2',
           name: 'Test Rule 2',

@@ -7,7 +7,10 @@
 
 import { ONBOARDING_CALLOUT } from '../../../screens/privileged_user_monitoring';
 import { cleanFleet } from '../../../tasks/api_calls/fleet';
-import { clickOktaCard } from '../../../tasks/entity_analytics/privmon';
+import {
+  clickOktaCard,
+  togglePrivilegedUserMonitoring,
+} from '../../../tasks/entity_analytics/privmon';
 import { installIntegration } from '../../../tasks/integrations';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -29,9 +32,11 @@ describe.skip(
 
     beforeEach(() => {
       login();
+      togglePrivilegedUserMonitoring();
     });
 
     afterEach(() => {
+      togglePrivilegedUserMonitoring();
       deletePrivMonEngine();
       cleanFleet();
     });

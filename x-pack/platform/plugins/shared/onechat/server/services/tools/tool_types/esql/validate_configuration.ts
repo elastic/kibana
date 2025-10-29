@@ -77,7 +77,9 @@ const validateDefaultValueType = (
 
 export const validateConfig = async (configuration: EsqlToolConfig) => {
   // Ensure query is proper ES|QL syntax
-  const validationResult = await validateQuery(configuration.query);
+  const validationResult = await validateQuery(configuration.query, {
+    ignoreOnMissingCallbacks: true,
+  });
 
   if (validationResult.errors.length > 0) {
     const message = `Validation error: \n${validationResult.errors

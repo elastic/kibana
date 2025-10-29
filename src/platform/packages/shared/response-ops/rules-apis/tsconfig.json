@@ -23,6 +23,5 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/triggers-actions-ui-types",
     "@kbn/alerting-types",
-    "@kbn/react-query",
   ]
 }

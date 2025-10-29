@@ -66,9 +66,9 @@
             "signature": [
               "(string | ",
               {
-                "pluginId": "@kbn/chart-expressions-common",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "docId": "kibVisualizationsPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -88,9 +88,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "@kbn/chart-expressions-common",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "docId": "kibVisualizationsPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -258,9 +258,9 @@
             "signature": [
               "(string | ",
               {
-                "pluginId": "@kbn/chart-expressions-common",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "docId": "kibVisualizationsPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
@@ -280,9 +280,9 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "@kbn/chart-expressions-common",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "docId": "kibVisualizationsPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },

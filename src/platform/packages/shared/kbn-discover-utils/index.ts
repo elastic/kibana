@@ -31,7 +31,8 @@ export {
   buildDataTableRecordList,
   convertValueToString,
   createLogsContextService,
-  createApmContextService,
+  createTracesContextService,
+  createApmErrorsContextService,
   createMetricsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
@@ -72,7 +73,8 @@ export {
 
 export type {
   LogsContextService,
-  ApmContextService,
+  TracesContextService,
+  ApmErrorsContextService,
   MetricsContextService,
   SortOrder,
   SortInput,

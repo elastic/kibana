@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as url from 'url';
+
 export interface UrlValidatorConfig {
   allowedHosts: string[];
 }
@@ -27,12 +29,7 @@ export class UrlValidator {
    */
   isUrlAllowed(uri: string): boolean {
     try {
-      // Reject protocol-relative URLs as they are ambiguous in server context
-      if (uri.startsWith('//')) {
-        return false;
-      }
-
-      const parsedUrl = new URL(uri);
+      const parsedUrl = url.parse(uri, false, true);
       const hostname = parsedUrl.hostname;
 
       if (!hostname) {

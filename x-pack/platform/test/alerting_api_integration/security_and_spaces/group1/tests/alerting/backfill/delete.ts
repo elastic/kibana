@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ManualRunOnlyUserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
+import { UserAtSpaceScenarios } from '../../../../scenarios';
 import type { TaskManagerDoc } from '../../../../../common/lib';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -48,9 +48,7 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
       });
     }
 
-    const ScenariosToTest = [...UserAtSpaceScenarios, ManualRunOnlyUserAtSpace1];
-
-    for (const scenario of ScenariosToTest) {
+    for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         const apiOptions = {
@@ -167,8 +165,6 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything
             case 'superuser at space1':
-            // User has read privileges and manual_run subfeature privilege
-            case 'manual_run_only at space1':
             // User has all privileges in this space
             case 'space_1_all at space1':
             // User has all privileges in this space
@@ -235,8 +231,6 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything
             case 'superuser at space1':
-            // User has read privileges and manual_run subfeature privilege
-            case 'manual_run_only at space1':
             // User has all privileges in this space
             case 'space_1_all at space1':
             // User has all privileges in this space
@@ -292,8 +286,6 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything
             case 'superuser at space1':
-            // User has read privileges and manual_run subfeature privilege
-            case 'manual_run_only at space1':
             // User has all privileges in this space
             case 'space_1_all at space1':
             // User has all privileges in this space

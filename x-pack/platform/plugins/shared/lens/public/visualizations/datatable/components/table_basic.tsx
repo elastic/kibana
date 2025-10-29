@@ -38,21 +38,18 @@ import { css } from '@emotion/react';
 import { DATA_GRID_DENSITY_STYLE_MAP } from '@kbn/unified-data-table/src/hooks/use_data_grid_density';
 import { DATA_GRID_STYLE_NORMAL } from '@kbn/unified-data-table/src/constants';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
-import {
-  LENS_ROW_HEIGHT_MODE as RowHeightMode,
-  DEFAULT_HEADER_ROW_HEIGHT,
-  DEFAULT_HEADER_ROW_HEIGHT_LINES,
-} from '@kbn/lens-common';
+import type { LensTableRowContextMenuEvent } from '../../../types';
+import { RowHeightMode } from '../../../../common/types';
+import type { LensGridDirection } from '../../../../common/expressions';
+import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type {
-  LensTableRowContextMenuEvent,
+  DataContextType,
+  DatatableRenderProps,
   LensSortAction,
   LensResizeAction,
   LensToggleAction,
   LensPagesizeAction,
-} from '@kbn/lens-common';
-import type { LensGridDirection } from '../../../../common/expressions';
-import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
-import type { DataContextType, DatatableRenderProps } from './types';
+} from './types';
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
 import {
@@ -64,6 +61,7 @@ import {
   createTransposeColumnFilterHandler,
 } from './table_actions';
 import { getFinalSummaryConfiguration } from '../../../../common/expressions/impl/datatable/summary';
+import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 import {
   getDatatableColumn,
   isNumericField,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensEmbeddableInput } from '@kbn/lens-common';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
@@ -21,17 +21,8 @@ import {
   buildPartitionChart,
 } from './charts';
 import { fromAPItoLensState, fromLensStateToAPI } from './transforms/charts/metric';
-import {
-  fromAPItoLensState as fromLegacyMetricAPItoLensState,
-  fromLensStateToAPI as fromLegacyMetricLensStateToAPI,
-} from './transforms/charts/legacy_metric';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
-
-const compatibilityMap: Record<string, string> = {
-  lnsMetric: 'metric',
-  lnsLegacyMetric: 'legacy_metric',
-};
 
 export class LensConfigBuilder {
   private charts = {
@@ -50,11 +41,7 @@ export class LensConfigBuilder {
 
   private apiConvertersByChart = {
     metric: { fromAPItoLensState, fromLensStateToAPI },
-    legacy_metric: {
-      fromAPItoLensState: fromLegacyMetricAPItoLensState,
-      fromLensStateToAPI: fromLegacyMetricLensStateToAPI,
-    },
-  } as const;
+  };
   private dataViewsAPI: DataViewsCommon | undefined;
 
   constructor(dataViewsAPI?: DataViewsCommon) {
@@ -103,34 +90,30 @@ export class LensConfigBuilder {
 
   fromAPIFormat(config: LensApiState): LensAttributes {
     const chartType = config.type;
+    if (chartType === 'metric') {
+      const converter = this.apiConvertersByChart[chartType];
+      const attributes = converter.fromAPItoLensState(config);
 
-    if (!(chartType in this.apiConvertersByChart)) {
-      throw new Error(`No attributes converter found for chart type: ${chartType}`);
+      return {
+        ...attributes,
+        state: {
+          ...attributes.state,
+          ...filtersAndQueryToLensState(config),
+        },
+      };
     }
-
-    const converter = this.apiConvertersByChart[chartType];
-    const attributes = converter.fromAPItoLensState(config as any); // handle type mismatches
-
-    return {
-      ...attributes,
-      state: {
-        ...attributes.state,
-        ...filtersAndQueryToLensState(config),
-      },
-    };
+    throw new Error(`No attributes converter found for chart type: ${chartType}`);
   }
 
   toAPIFormat(config: LensAttributes): LensApiState {
-    const visType = config.visualizationType;
-    const type = compatibilityMap[visType];
-
-    if (!type || !(type in this.apiConvertersByChart)) {
-      throw new Error(`No API converter found for chart type: ${visType}`);
+    const chartType = config.visualizationType;
+    if (chartType === 'lnsMetric') {
+      const converter = this.apiConvertersByChart.metric;
+      return {
+        ...converter.fromLensStateToAPI(config),
+        ...filtersAndQueryToApiFormat(config),
+      };
     }
-    const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
-    return {
-      ...converter.fromLensStateToAPI(config),
-      ...filtersAndQueryToApiFormat(config),
-    };
+    throw new Error(`No API converter found for chart type: ${chartType}`);
   }
 }

@@ -8,7 +8,8 @@
 import { createSelector } from '@reduxjs/toolkit';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { LensState, DatasourceMap, VisualizationMap } from '@kbn/lens-common';
+import type { LensState } from './types';
+import type { DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from './utils';
 import { mergeToNewDoc } from './shared_logic';
 

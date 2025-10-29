@@ -9,10 +9,10 @@
 
 import { schema } from '@kbn/config-schema';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { handleRouteError } from './route_error_handlers';
-import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.post(
@@ -59,7 +59,7 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
             },
           });
         }
-        const { inputs } = request.body as { inputs: Record<string, unknown> };
+        const { inputs } = request.body as { inputs: Record<string, any> };
         const workflowForExecution: WorkflowExecutionEngineModel = {
           id: workflow.id,
           name: workflow.name,

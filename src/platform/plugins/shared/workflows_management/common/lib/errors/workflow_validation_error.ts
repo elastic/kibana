@@ -9,6 +9,7 @@
 
 export class WorkflowValidationError extends Error {
   public readonly statusCode = 400;
+  public readonly isWorkflowValidationError = true;
 
   constructor(message: string, public readonly validationErrors?: string[]) {
     super(message);
@@ -25,6 +26,6 @@ export class WorkflowValidationError extends Error {
   }
 }
 
-export function isWorkflowValidationError(error: Error): error is WorkflowValidationError {
-  return error instanceof WorkflowValidationError;
+export function isWorkflowValidationError(error: any): error is WorkflowValidationError {
+  return Boolean(error && error.isWorkflowValidationError === true);
 }

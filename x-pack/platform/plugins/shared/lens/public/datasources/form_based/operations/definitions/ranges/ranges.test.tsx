@@ -15,8 +15,9 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { mountWithProviders } from '../../../../../test_utils/test_utils';
-import type { FormBasedLayer, RangeIndexPatternColumn, IndexPattern } from '@kbn/lens-common';
+import type { FormBasedLayer } from '../../../types';
 import { rangeOperation } from '..';
+import type { RangeIndexPatternColumn } from './ranges';
 import {
   MODES,
   DEFAULT_INTERVAL,
@@ -27,6 +28,7 @@ import {
 import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '@kbn/visualization-ui-components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
+import type { IndexPattern } from '../../../../../types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {

@@ -39,6 +39,7 @@ import type {
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { CoreStart } from '@kbn/core/public';
 import chroma from 'chroma-js';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import type {
   Datasource,
   Visualization,
@@ -46,13 +47,12 @@ import type {
   DatasourceMap,
   UserMessagesGetter,
   DatasourceLayers,
-  DatasourceStates,
-} from '@kbn/lens-common';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
+} from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
 import { getMissingIndexPattern } from './state_helpers';
+import type { DatasourceStates } from '../../state_management';
 import {
   rollbackSuggestion,
   selectExecutionContextSearch,

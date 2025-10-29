@@ -48,6 +48,7 @@ describe('typedInterrupt', () => {
     expect(state.tasks[0].interrupts).toHaveLength(1);
     expect(state.tasks[0].interrupts[0]).toEqual(
       expect.objectContaining({
+        resumable: true,
         value: {
           description: 'description',
           threadId: 'threadId',
@@ -93,6 +94,7 @@ describe('typedInterrupt', () => {
     expect(state.tasks[0].interrupts).toHaveLength(1);
     expect(state.tasks[0].interrupts[0]).toEqual(
       expect.objectContaining({
+        resumable: true,
         value: {
           description: 'description',
           threadId: 'threadId',
@@ -163,6 +165,7 @@ describe('typedInterrupt', () => {
     expect(state.tasks[0].interrupts).toHaveLength(1);
     expect(state.tasks[0].interrupts[0]).toEqual(
       expect.objectContaining({
+        resumable: true,
         value: {
           description: 'description',
           threadId: 'threadId',

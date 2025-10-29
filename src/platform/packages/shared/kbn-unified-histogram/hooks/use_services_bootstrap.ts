@@ -53,7 +53,6 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     localStorageKeyPrefix,
     filters,
     timeRange,
-    esqlVariables,
   } = props;
 
   const initialBreakdownField = useMemo(
@@ -82,7 +81,6 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     services,
     query,
     filters,
-    esqlVariables,
     timeRange,
   });
 

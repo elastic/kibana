@@ -34,7 +34,7 @@ export default {
 export const IntegrationPreference = () => {
   return (
     <Component
-      initialType="agent"
+      initialType="recommended"
       onChange={action('onChange')}
       prereleaseIntegrationsEnabled={false}
     />

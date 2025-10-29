@@ -16,6 +16,7 @@ import {
 } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { isDraggedField } from '../../../../utils';
 import type {
   Datasource,
   VisualizationDimensionGroupConfig,
@@ -23,9 +24,8 @@ import type {
   IndexPatternMap,
   DragDropOperation,
   Visualization,
-} from '@kbn/lens-common';
-import { isOperation } from '../../../../types_guards';
-import { isDraggedField } from '../../../../utils';
+} from '../../../../types';
+import { isOperation } from '../../../../types';
 
 export function DraggableDimensionButton({
   order,

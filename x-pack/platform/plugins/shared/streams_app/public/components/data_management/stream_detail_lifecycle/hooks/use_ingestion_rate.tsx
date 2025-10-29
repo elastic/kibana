@@ -155,7 +155,7 @@ export const useIngestionRatePerTier = ({
       const { interval, intervalType } = intervalData;
 
       const indexName = isFailureStore
-        ? getFailureStoreIndexName(definition.stream.name)
+        ? getFailureStoreIndexName(definition)
         : definition.stream.name;
 
       const {
@@ -313,9 +313,7 @@ export const getAggregations = async ({
 
   const { interval, intervalType } = intervalData;
 
-  const indexName = isFailureStore
-    ? getFailureStoreIndexName(definition.stream.name)
-    : definition.stream.name;
+  const indexName = isFailureStore ? getFailureStoreIndexName(definition) : definition.stream.name;
 
   const {
     rawResponse: { aggregations },

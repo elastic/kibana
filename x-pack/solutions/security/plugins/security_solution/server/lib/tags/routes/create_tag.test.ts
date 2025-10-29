@@ -13,12 +13,10 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 import { mockGetTagsResult } from '../__mocks__';
 import { createTagRoute } from './create_tag';
-import type { SecuritySolutionRequestHandlerContextMock } from '../../detection_engine/routes/__mocks__/request_context';
 
 describe('createTagRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let context: SecuritySolutionRequestHandlerContextMock;
-
+  const { context } = requestContextMock.createTools();
   const logger = { error: jest.fn() } as unknown as Logger;
 
   const mockPutRequest = requestMock.create({
@@ -32,14 +30,8 @@ describe('createTagRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     server = serverMock.create();
-    ({ context } = requestContextMock.createTools());
 
     createTagRoute(server.router, logger);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('should return tags with the exact name', async () => {

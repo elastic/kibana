@@ -18,7 +18,6 @@
     "@kbn/securitysolution-utils",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-http-browser",
-    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

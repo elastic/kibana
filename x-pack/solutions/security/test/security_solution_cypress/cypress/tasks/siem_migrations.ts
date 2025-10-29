@@ -7,7 +7,6 @@
 
 import { MIGRATIONS_PANEL_BTN, TRANSLATED_RULES_PAGE } from '../screens/security_header';
 import {
-  FOOTER_LAUNCHPAD,
   openNavigationPanel,
   RULES_PANEL_BTN as RULES_PANEL_BTN_SERVERLESS,
   TRANSLATED_RULES_PAGE as TRANSLATED_RULES_PAGE_SERVERLESS,
@@ -18,7 +17,6 @@ import { bedrockConnectorAPIPayload } from './api_calls/connectors';
 export const navigateToTranslatedRulesPage = () => {
   if (Cypress.env('IS_SERVERLESS')) {
     openNavigationPanel(RULES_PANEL_BTN_SERVERLESS);
-    cy.get(FOOTER_LAUNCHPAD).click();
     cy.get(TRANSLATED_RULES_PAGE_SERVERLESS).click();
   } else {
     openNavigationPanel(MIGRATIONS_PANEL_BTN);

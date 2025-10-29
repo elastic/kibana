@@ -7,7 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { EditorFrameSetup } from '@kbn/lens-common';
+import type { EditorFrameSetup } from '../../types';
 
 export interface GaugeVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;

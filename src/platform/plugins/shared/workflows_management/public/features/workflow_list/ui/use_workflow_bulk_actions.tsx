@@ -12,17 +12,16 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { EuiConfirmModal, EuiIcon, EuiTextColor, useGeneratedHtmlId } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 
 interface UseWorkflowBulkActionsProps {
   selectedWorkflows: WorkflowListItemDto[];
   onAction: () => void;
   onActionSuccess: () => void;
-  deselectWorkflows: () => void;
 }
 
 interface UseWorkflowBulkActionsReturn {
@@ -34,9 +33,8 @@ export const useWorkflowBulkActions = ({
   selectedWorkflows,
   onAction,
   onActionSuccess,
-  deselectWorkflows,
 }: UseWorkflowBulkActionsProps): UseWorkflowBulkActionsReturn => {
-  const { application, notifications } = useKibana().services;
+  const { application } = useKibana().services;
   const { deleteWorkflows, updateWorkflow } = useWorkflowActions();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
@@ -53,31 +51,19 @@ export const useWorkflowBulkActions = ({
 
   const confirmDelete = useCallback(() => {
     const ids = selectedWorkflows.map((workflow) => workflow.id);
-    const count = ids.length;
-
-    setShowDeleteModal(false);
-    deselectWorkflows();
-
     deleteWorkflows.mutate(
       { ids },
       {
         onSuccess: () => {
+          setShowDeleteModal(false);
           onActionSuccess();
         },
-        onError: (err) => {
-          onActionSuccess();
-          notifications?.toasts.addError(err as Error, {
-            title: i18n.translate('workflows.bulkActions.deleteError', {
-              defaultMessage:
-                'Failed to delete {count} {count, plural, one {workflow} other {workflows}}',
-              values: { count },
-            }),
-            toastLifeTimeMs: 3000,
-          });
+        onError: () => {
+          setShowDeleteModal(false);
         },
       }
     );
-  }, [selectedWorkflows, deleteWorkflows, onActionSuccess, deselectWorkflows, notifications]);
+  }, [selectedWorkflows, deleteWorkflows, onActionSuccess]);
 
   const cancelDelete = useCallback(() => {
     setShowDeleteModal(false);
@@ -86,61 +72,29 @@ export const useWorkflowBulkActions = ({
   const bulkUpdateWorkflows = useCallback(
     (workflowsToUpdate: WorkflowListItemDto[], updateData: { enabled: boolean }) => {
       onAction();
-      deselectWorkflows();
 
-      const totalCount = workflowsToUpdate.length;
-      let completedCount = 0;
-      let failedCount = 0;
-
-      const actionType = updateData.enabled ? 'enable' : 'disable';
-      const actionLabel = updateData.enabled ? 'enabled' : 'disabled';
-
-      workflowsToUpdate.forEach((workflow) => {
-        updateWorkflow.mutate(
-          {
-            id: workflow.id,
-            workflow: updateData,
-          },
-          {
-            onSettled: (data, error) => {
-              completedCount++;
-              if (error) {
-                failedCount++;
+      const updatePromises = workflowsToUpdate.map(
+        (workflow) =>
+          new Promise<void>((resolve) => {
+            updateWorkflow.mutate(
+              {
+                id: workflow.id,
+                workflow: updateData,
+              },
+              {
+                onSettled: () => {
+                  resolve();
+                },
               }
+            );
+          })
+      );
 
-              if (completedCount === totalCount) {
-                onActionSuccess();
-
-                const successCount = totalCount - failedCount;
-
-                if (failedCount > 0) {
-                  if (successCount === 0) {
-                    notifications?.toasts.addDanger(
-                      i18n.translate(`workflows.bulkActions.${actionType}Error`, {
-                        defaultMessage:
-                          'Failed to {actionType} {count} {count, plural, one {workflow} other {workflows}}',
-                        values: { count: totalCount, actionType },
-                      }),
-                      { toastLifeTimeMs: 3000 }
-                    );
-                  } else {
-                    notifications?.toasts.addWarning(
-                      i18n.translate(`workflows.bulkActions.${actionType}PartialSuccess`, {
-                        defaultMessage:
-                          '{successCount} of {totalCount} workflows {actionLabel}. {failedCount} failed.',
-                        values: { successCount, totalCount, failedCount, actionLabel },
-                      }),
-                      { toastLifeTimeMs: 3000 }
-                    );
-                  }
-                }
-              }
-            },
-          }
-        );
+      Promise.allSettled(updatePromises).then(() => {
+        onActionSuccess();
       });
     },
-    [updateWorkflow, onAction, onActionSuccess, deselectWorkflows, notifications]
+    [updateWorkflow, onAction, onActionSuccess]
   );
 
   const handleEnableWorkflows = useCallback(() => {

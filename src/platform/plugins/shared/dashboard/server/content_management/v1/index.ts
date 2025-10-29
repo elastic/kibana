@@ -11,7 +11,7 @@ export type {
   GridData,
   DashboardPanel,
   DashboardSection,
-  DashboardState,
+  DashboardAttributes,
   DashboardItem,
   DashboardGetIn,
   DashboardAPIGetOut,

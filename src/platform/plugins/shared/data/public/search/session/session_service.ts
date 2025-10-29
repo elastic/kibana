@@ -70,11 +70,9 @@ interface TrackSearchDescriptor {
   abort: () => void;
 
   /**
-   * Used for polling after running in background (to ensure the search makes it into the background search saved
-   * object) and also to keep the search alive while other search requests in the session are still in progress
-   * @param abortSignal - signal that can be used to cancel the polling - otherwise the `searchAbortController.getSignal()` is used
+   * Keep polling the search to keep it alive
    */
-  poll: (abortSignal?: AbortSignal) => Promise<void>;
+  poll: () => Promise<void>;
 
   /**
    * Notify search that session is being saved, could be used to restart the search with different params
@@ -450,15 +448,6 @@ export class SessionService {
   }
 
   /**
-   * Is current session in process of saving
-   */
-  public isSaving(
-    state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta> = this.state
-  ) {
-    return state.get().isSaving;
-  }
-
-  /**
    * Is current session already saved as SO (send to background)
    */
   public isStored(
@@ -611,8 +600,6 @@ export class SessionService {
       appendStartTime: currentSessionInfoProvider.appendSessionStartTimeToName,
     });
 
-    this.state.transitions.save();
-
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
       appId: currentSessionApp,
@@ -635,7 +622,7 @@ export class SessionService {
 
       const extendSearchesPromise = Promise.all(
         searchesToExtend.map((s) =>
-          s.searchDescriptor.poll(new AbortController().signal).catch((e) => {
+          s.searchDescriptor.poll().catch((e) => {
             // eslint-disable-next-line no-console
             console.warn('Failed to extend search after session was saved', e);
           })

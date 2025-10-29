@@ -1597,7 +1597,7 @@
             "section": "def-public.StateComparators",
             "text": "StateComparators"
           },
-          "<StateType>, lastSavedState?: Partial<StateType> | undefined, latestState?: Partial<StateType> | undefined, defaultState?: Partial<StateType> | undefined) => Partial<StateType>"
+          "<StateType>, lastSavedState?: StateType | undefined, latestState?: StateType | undefined) => Partial<StateType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
         "deprecated": false,
@@ -1628,12 +1628,12 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.diffComparators.$2",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "lastSavedState",
             "description": [],
             "signature": [
-              "Partial<StateType> | undefined"
+              "StateType | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
             "deprecated": false,
@@ -1643,27 +1643,12 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.diffComparators.$3",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "latestState",
             "description": [],
             "signature": [
-              "Partial<StateType> | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.diffComparators.$4",
-            "type": "Object",
-            "tags": [],
-            "label": "defaultState",
-            "description": [],
-            "signature": [
-              "Partial<StateType> | undefined"
+              "StateType | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
             "deprecated": false,
@@ -2105,7 +2090,7 @@
           "\nInitializes a composable state manager instance for a given state type."
         ],
         "signature": [
-          "<StateType extends object>(initialState: Partial<StateType>, defaultState: ",
+          "<StateType extends object>(initialState: StateType, defaultState: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2132,14 +2117,14 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.initializeStateManager.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "initialState",
             "description": [
               "- The initial state of the state manager."
             ],
             "signature": [
-              "Partial<StateType>"
+              "StateType"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts",
             "deprecated": false,

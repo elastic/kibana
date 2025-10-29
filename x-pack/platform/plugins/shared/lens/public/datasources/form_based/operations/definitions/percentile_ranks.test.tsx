@@ -16,12 +16,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
 import { percentileRanksOperation } from '.';
-import type {
-  FormBasedLayer,
-  IndexPattern,
-  PercentileRanksIndexPatternColumn,
-  TermsIndexPatternColumn,
-} from '@kbn/lens-common';
+import type { FormBasedLayer } from '../../types';
+import type { PercentileRanksIndexPatternColumn } from './percentile_ranks';
+import type { TermsIndexPatternColumn } from './terms';
+import type { IndexPattern } from '../../../../types';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 

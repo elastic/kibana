@@ -26,8 +26,6 @@ import {
   tap,
   startWith,
   shareReplay,
-  retry,
-  timer,
 } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -35,20 +33,15 @@ import {
   esVersionCompatibleWithKibana,
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
-import { HEALTH_CHECK_REQUEST_TIMEOUT } from './constants';
 
 /** @public */
 export interface PollEsNodesVersionOptions {
   internalClient: ElasticsearchClient;
   log: Logger;
   kibanaVersion: string;
-  /** @default false */
   ignoreVersionMismatch: boolean;
-  /** @default 2500ms */
   healthCheckInterval: number;
   healthCheckStartupInterval?: number;
-  /** @default 3 */
-  healthCheckRetry: number;
 }
 
 /** @public */
@@ -173,7 +166,6 @@ export const pollEsNodesVersion = ({
   ignoreVersionMismatch,
   healthCheckInterval,
   healthCheckStartupInterval,
-  healthCheckRetry,
 }: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
   log.debug('Checking Elasticsearch version');
 
@@ -182,13 +174,11 @@ export const pollEsNodesVersion = ({
 
   const isStartup$ = new BehaviorSubject(hasStartupInterval);
 
-  let currentInterval = 0;
   const checkInterval$ = isStartup$.pipe(
     distinctUntilChanged(),
     map((useStartupInterval) =>
       useStartupInterval ? healthCheckStartupInterval! : healthCheckInterval
-    ),
-    tap((ms) => (currentInterval = ms))
+    )
   );
 
   return checkInterval$.pipe(
@@ -196,24 +186,10 @@ export const pollEsNodesVersion = ({
     startWith(0),
     exhaustMap(() => {
       return from(
-        internalClient.nodes.info(
-          {
-            node_id: '_all',
-            metric: '_none',
-            filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
-          },
-          { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
-        )
+        internalClient.nodes.info({
+          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+        })
       ).pipe(
-        retry({
-          count: healthCheckRetry,
-          delay: (e) => {
-            log.debug(
-              () => `Error checking Elasticsearch version, retrying in ${currentInterval}ms: ${e}`
-            );
-            return timer(currentInterval);
-          },
-        }),
         catchError((nodesInfoRequestError) => {
           return of({ nodes: {}, nodesInfoRequestError });
         })

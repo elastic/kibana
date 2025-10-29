@@ -11,14 +11,15 @@ import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map } from 'rxjs';
-import type { DashboardState, DashboardOptions } from '../../server/content_management';
+import type { DashboardState } from '../../common';
+import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
 
 export type DashboardSettings = Required<DashboardOptions> & {
-  description?: DashboardState['description'];
-  tags: DashboardState['tags'];
-  timeRestore: DashboardState['timeRestore'];
-  title: DashboardState['title'];
+  description?: DashboardAttributes['description'];
+  tags: DashboardAttributes['tags'];
+  timeRestore: DashboardAttributes['timeRestore'];
+  title: DashboardAttributes['description'];
 };
 
 const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {

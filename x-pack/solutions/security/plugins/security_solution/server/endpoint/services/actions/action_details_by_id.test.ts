@@ -176,6 +176,8 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should not validate against spaces when `bypassSpaceValidation` is `true`', async () => {
+    // @ts-expect-error
+    endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
     (
       endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
     ).mockResolvedValue(undefined);

@@ -16,14 +16,11 @@ import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
-import type {
-  LastValueIndexPatternColumn,
-  PercentileIndexPatternColumn,
-  TermsIndexPatternColumn,
-  IndexPattern,
-  FormBasedLayer,
-} from '@kbn/lens-common';
+import type { LastValueIndexPatternColumn } from '.';
 import { percentileOperation } from '.';
+import type { FormBasedLayer } from '../../types';
+import type { PercentileIndexPatternColumn } from './percentile';
+import type { TermsIndexPatternColumn } from './terms';
 import type { ExpressionAstExpressionBuilder } from '@kbn/expressions-plugin/public';
 import {
   buildExpressionFunction,
@@ -31,6 +28,7 @@ import {
   parseExpression,
 } from '@kbn/expressions-plugin/public';
 import type { OriginalColumn } from '../../to_expression';
+import type { IndexPattern } from '../../../../types';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 

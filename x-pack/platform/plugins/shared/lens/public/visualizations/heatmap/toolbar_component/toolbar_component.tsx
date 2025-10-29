@@ -10,10 +10,10 @@ import type { IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { LegendSize } from '@kbn/chart-expressions-common';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { EuiIconAxisLeft, EuiIconAxisBottom } from '@kbn/chart-icons';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { VisualizationToolbarProps } from '@kbn/lens-common';
+import type { VisualizationToolbarProps } from '../../../types';
 import { LegendSettingsPopover, ToolbarPopover } from '../../../shared_components';
 
 import type { HeatmapVisualizationState } from '../types';
@@ -23,11 +23,27 @@ import {
   HeatmapTitlesAndTextSettings,
   HeatmapVerticalAxisSettings,
 } from './style_settings';
-import { legendOptions } from './legend_settings';
 
 const PANEL_STYLE = {
   width: '500px',
 };
+
+const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
+  {
+    id: `heatmap_legend_show`,
+    value: 'show',
+    label: i18n.translate('xpack.lens.heatmapChart.legendVisibility.show', {
+      defaultMessage: 'Show',
+    }),
+  },
+  {
+    id: `heatmap_legend_hide`,
+    value: 'hide',
+    label: i18n.translate('xpack.lens.heatmapChart.legendVisibility.hide', {
+      defaultMessage: 'Hide',
+    }),
+  },
+];
 
 export const HeatmapToolbar = memo(
   (props: VisualizationToolbarProps<HeatmapVisualizationState>) => {

@@ -103,8 +103,6 @@ function UnoptimizedManagedTable<T extends object>(props: {
   tableLayout?: 'auto' | 'fixed';
   tableSearchBar?: TableSearchBar<T>;
   saveTableOptionsToUrl?: boolean;
-
-  tableCaption?: string;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
@@ -335,7 +333,6 @@ function UnoptimizedManagedTable<T extends object>(props: {
           rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
           sorting={sorting}
           onChange={onTableChange}
-          tableCaption={props.tableCaption}
           {...(paginationProps ? { pagination: paginationProps } : {})}
         />
       </EuiFlexItem>

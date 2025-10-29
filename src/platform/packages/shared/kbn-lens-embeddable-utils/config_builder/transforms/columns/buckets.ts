@@ -12,7 +12,7 @@ import type {
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
-} from '@kbn/lens-common';
+} from '@kbn/lens-plugin/public';
 import type {
   LensApiBucketOperations,
   LensApiDateHistogramOperation,

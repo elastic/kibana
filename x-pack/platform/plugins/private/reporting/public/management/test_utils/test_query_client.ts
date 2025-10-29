@@ -7,7 +7,7 @@
 
 /* eslint-disable no-console */
 
-import { QueryClient } from '@kbn/react-query';
+import { QueryClient } from '@tanstack/react-query';
 
 export const testQueryClient = new QueryClient({
   defaultOptions: {

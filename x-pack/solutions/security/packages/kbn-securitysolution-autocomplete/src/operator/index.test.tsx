@@ -6,32 +6,17 @@
  */
 
 import React from 'react';
-import type { ByRoleMatcher, Matcher } from '@testing-library/react';
-import { render, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { mount } from 'enzyme';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import { isNotOperator, isOperator } from '@kbn/securitysolution-list-utils';
 
 import { OperatorComponent } from '.';
 import { getField } from '../fields/index.mock';
-import { isNotOperator, isOperator } from '@kbn/securitysolution-list-utils';
 
-const clickComboBox = async (getByTestId: (id: Matcher) => HTMLElement) => {
-  const comboBox = getByTestId('operatorAutocompleteComboBox');
-  const button = within(comboBox).getByRole('button');
-  await userEvent.click(button);
-};
-const displayAndGetOperators = async (
-  getByTestId: (id: Matcher) => HTMLElement,
-  findAllByRole: (role: ByRoleMatcher) => Promise<HTMLElement[]>
-) => {
-  await clickComboBox(getByTestId);
-
-  const options = await findAllByRole('option');
-  return options.map((opt) => opt.textContent);
-};
-
-describe('OperatorComponent', () => {
+describe('operator', () => {
   test('it renders disabled if "isDisabled" is true', () => {
-    const { getByRole } = render(
+    const wrapper = mount(
       <OperatorComponent
         isClearable={false}
         isDisabled={true}
@@ -43,12 +28,13 @@ describe('OperatorComponent', () => {
       />
     );
 
-    const input = getByRole('combobox');
-    expect(input).toBeDisabled();
+    expect(
+      wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"] input`).prop('disabled')
+    ).toBeTruthy();
   });
 
-  test('it renders loading if "isLoading" is true', async () => {
-    const { getByTestId } = render(
+  test('it renders loading if "isLoading" is true', () => {
+    const wrapper = mount(
       <OperatorComponent
         isClearable={false}
         isDisabled={false}
@@ -59,16 +45,16 @@ describe('OperatorComponent', () => {
         selectedField={getField('machine.os.raw')}
       />
     );
-
-    await clickComboBox(getByTestId);
-
-    const optionsList = getByTestId('comboBoxOptionsList operatorAutocompleteComboBox-optionsList');
-
-    expect(optionsList).toHaveTextContent('Loading options');
+    wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"] button`).at(0).simulate('click');
+    expect(
+      wrapper
+        .find(`EuiComboBoxOptionsList[data-test-subj="operatorAutocompleteComboBox-optionsList"]`)
+        .prop('isLoading')
+    ).toBeTruthy();
   });
 
   test('it allows user to clear values if "isClearable" is true', () => {
-    const { getByTestId } = render(
+    const wrapper = mount(
       <OperatorComponent
         isClearable={true}
         isDisabled={false}
@@ -80,11 +66,11 @@ describe('OperatorComponent', () => {
       />
     );
 
-    expect(getByTestId('comboBoxClearButton')).toBeInTheDocument();
+    expect(wrapper.find(`button[data-test-subj="comboBoxClearButton"]`).exists()).toBeTruthy();
   });
 
-  test('it displays "operatorOptions" if param is passed in with items', async () => {
-    const { getByTestId, findAllByRole } = render(
+  test('it displays "operatorOptions" if param is passed in with items', () => {
+    const wrapper = mount(
       <OperatorComponent
         isClearable={false}
         isDisabled={false}
@@ -97,12 +83,13 @@ describe('OperatorComponent', () => {
       />
     );
 
-    const options = await displayAndGetOperators(getByTestId, findAllByRole);
-    expect(options).toEqual(['is not']);
+    expect(
+      wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"]`).at(0).prop('options')
+    ).toEqual([{ label: 'is not' }]);
   });
 
-  test('it displays operators according to the field if the "operatorOptions" param is passed in with no items', async () => {
-    const { getByTestId, findAllByRole } = render(
+  test('it does not display "operatorOptions" if param is passed in with no items', () => {
+    const wrapper = mount(
       <OperatorComponent
         isClearable={false}
         isDisabled={false}
@@ -111,19 +98,48 @@ describe('OperatorComponent', () => {
         operator={isOperator}
         operatorOptions={[]}
         placeholder="Placeholder text"
-        // This is a boolean field
-        selectedField={getField('ssl')}
+        selectedField={getField('machine.os.raw')}
       />
     );
 
-    const options = await displayAndGetOperators(getByTestId, findAllByRole);
-
-    // it should fall back to displaying boolean operator options
-    expect(options).toEqual(['is', 'is not', 'exists', 'does not exist']);
+    expect(
+      wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"]`).at(0).prop('options')
+    ).toEqual([
+      {
+        label: 'is',
+      },
+      {
+        label: 'is not',
+      },
+      {
+        label: 'is one of',
+      },
+      {
+        label: 'is not one of',
+      },
+      {
+        label: 'exists',
+      },
+      {
+        label: 'does not exist',
+      },
+      {
+        label: 'is in list',
+      },
+      {
+        label: 'is not in list',
+      },
+      {
+        label: 'matches',
+      },
+      {
+        label: 'does not match',
+      },
+    ]);
   });
 
   test('it correctly displays selected operator', () => {
-    const { getByRole } = render(
+    const wrapper = mount(
       <OperatorComponent
         isClearable={false}
         isDisabled={false}
@@ -135,12 +151,13 @@ describe('OperatorComponent', () => {
       />
     );
 
-    const input = getByRole('combobox') as HTMLInputElement;
-    expect(input.value).toEqual('is');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
+    ).toEqual('is');
   });
 
-  test('it tells the user that all available options are selected when field type is nested', async () => {
-    const { getByTestId } = render(
+  test('it only displays subset of operators if field type is nested', () => {
+    const wrapper = mount(
       <OperatorComponent
         isClearable={false}
         isDisabled={false}
@@ -157,15 +174,13 @@ describe('OperatorComponent', () => {
       />
     );
 
-    await clickComboBox(getByTestId);
-
-    const optionsList = getByTestId('comboBoxOptionsList operatorAutocompleteComboBox-optionsList');
-
-    expect(optionsList).toHaveTextContent("You've selected all available options");
+    expect(
+      wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"]`).at(0).prop('options')
+    ).toEqual([{ label: 'is' }]);
   });
 
-  test('it only displays subset of operators if field type is boolean', async () => {
-    const { getByTestId, findAllByRole } = render(
+  test('it only displays subset of operators if field type is boolean', () => {
+    const wrapper = mount(
       <OperatorComponent
         isClearable={false}
         isDisabled={false}
@@ -177,14 +192,18 @@ describe('OperatorComponent', () => {
       />
     );
 
-    const options = await displayAndGetOperators(getByTestId, findAllByRole);
-
-    // it should fall back to displaying boolean operator options
-    expect(options).toEqual(['is', 'is not', 'exists', 'does not exist']);
+    expect(
+      wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"]`).at(0).prop('options')
+    ).toEqual([
+      { label: 'is' },
+      { label: 'is not' },
+      { label: 'exists' },
+      { label: 'does not exist' },
+    ]);
   });
 
-  test('it only displays subset of operators if field name is "file.path.text"', async () => {
-    const { getByTestId, findAllByRole } = render(
+  test('it only displays subset of operators if field name is "file.path.text"', () => {
+    const wrapper = mount(
       <OperatorComponent
         isClearable={false}
         isDisabled={false}
@@ -196,41 +215,40 @@ describe('OperatorComponent', () => {
       />
     );
 
-    const options = await displayAndGetOperators(getByTestId, findAllByRole);
-
-    // it should fall back to displaying boolean operator options
-    expect(options).toEqual([
-      'is',
-      'is not',
-      'is one of',
-      'is not one of',
-      'matches',
-      'does not match',
+    expect(
+      wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"]`).at(0).prop('options')
+    ).toEqual([
+      { label: 'is' },
+      { label: 'is not' },
+      { label: 'is one of' },
+      { label: 'is not one of' },
+      { label: 'matches' },
+      { label: 'does not match' },
     ]);
   });
 
-  test('it invokes "onChange" when option selected', async () => {
+  test('it invokes "onChange" when option selected', () => {
     const mockOnChange = jest.fn();
-
-    const { getByTestId, findAllByRole } = render(
+    const wrapper = mount(
       <OperatorComponent
         isClearable={false}
         isDisabled={false}
         isLoading={false}
         onChange={mockOnChange}
-        operator={isNotOperator}
+        operator={isOperator}
         placeholder="Placeholder text"
-        selectedField={getField('ssl')}
+        selectedField={getField('machine.os.raw')}
       />
     );
 
-    await clickComboBox(getByTestId);
-    const options = await findAllByRole('option');
-
-    await userEvent.click(options[0]);
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith([
-      { message: 'is', operator: 'included', type: 'match', value: 'is' },
+      { message: 'is not', operator: 'excluded', type: 'match', value: 'is_not' },
     ]);
   });
 });

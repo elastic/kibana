@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import type { Meta, StoryObj } from '@storybook/react';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
+import { MemoryRouter } from 'react-router-dom';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 
 const meta: Meta<typeof WorkflowStepExecutionDetails> = {
   component: WorkflowStepExecutionDetails,

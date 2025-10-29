@@ -43,7 +43,7 @@ export class WorkflowGraph {
 
   public get topologicalOrder(): string[] {
     if (!this.__topologicalOrder) {
-      this.__topologicalOrder = graphlib.alg.topsort(this.graph);
+      this.__topologicalOrder = graphlib.alg.topsort(this.graph!);
     }
     return this.__topologicalOrder;
   }

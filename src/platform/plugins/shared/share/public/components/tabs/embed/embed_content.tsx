@@ -27,7 +27,7 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import type { AnonymousAccessState } from '../../../../common';
 
-import { useShareContext, type IShareContext } from '../../context';
+import type { IShareContext } from '../../context';
 import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
 import type { DraftModeCalloutProps } from '../../common/draft_mode_callout';
 import { DraftModeCallout } from '../../common/draft_mode_callout';
@@ -51,10 +51,12 @@ interface UrlParams {
   };
 }
 
-const draftModeCalloutMessage = i18n.translate('share.embed.draftModeCallout.message', {
-  defaultMessage:
-    'This code might not work properly. Save your changes to ensure it works as expected.',
-});
+const draftModeCalloutMessage = (
+  <FormattedMessage
+    id="share.embed.draftModeCallout.message"
+    defaultMessage="This code might not work properly. Save your changes to ensure it works as expected."
+  />
+);
 
 export const EmbedContent = ({
   shareableUrlForSavedObject,
@@ -68,7 +70,6 @@ export const EmbedContent = ({
   anonymousAccess,
 }: EmbedProps) => {
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
-  const { onSave, isSaving } = useShareContext();
   const [isLoading, setIsLoading] = useState(false);
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
@@ -329,16 +330,7 @@ export const EmbedContent = ({
         {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            <DraftModeCallout
-              message={draftModeCalloutMessage}
-              {...draftModeCalloutContent}
-              {...(onSave && {
-                saveButtonProps: {
-                  onSave,
-                  isSaving,
-                },
-              })}
-            />
+            <DraftModeCallout message={draftModeCalloutMessage} {...draftModeCalloutContent} />
           </>
         )}
         <EuiSpacer />

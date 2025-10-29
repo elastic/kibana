@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { Streams } from '@kbn/streams-schema';
 import { formatNumber } from '@elastic/eui';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
 import { BaseMetricCard } from '../../common/base_metric_card';
@@ -13,14 +14,16 @@ import { formatBytes } from '../../helpers/format_bytes';
 import type { EnhancedFailureStoreStats } from '../../hooks/use_data_stream_stats';
 
 export const StorageSizeCard = ({
-  hasPrivileges,
+  definition,
   stats,
   statsError,
 }: {
-  hasPrivileges: boolean;
+  definition: Streams.ingest.all.GetResponse;
   stats?: EnhancedFailureStoreStats;
   statsError?: Error;
 }) => {
+  const hasPrivileges = definition.privileges?.manage_failure_store;
+
   const title = i18n.translate(
     'xpack.streams.streamDetailView.failureStoreEnabled.failureStorageCard.title',
     {
@@ -31,14 +34,8 @@ export const StorageSizeCard = ({
   const metric = [
     {
       data: (
-        <PrivilegesWarningIconWrapper
-          hasPrivileges={hasPrivileges}
-          title={i18n.translate(
-            'xpack.streams.storageSizeCard.privilegesWarningIconWrapper.storagesizeLabel',
-            { defaultMessage: 'storageSize' }
-          )}
-        >
-          {statsError || !stats || stats.size === undefined ? '-' : formatBytes(stats.size)}
+        <PrivilegesWarningIconWrapper hasPrivileges={hasPrivileges} title="storageSize">
+          {statsError || !stats || !stats.size ? '-' : formatBytes(stats.size)}
         </PrivilegesWarningIconWrapper>
       ),
       subtitle: hasPrivileges
@@ -48,9 +45,7 @@ export const StorageSizeCard = ({
               defaultMessage: '{docsCount} documents',
               values: {
                 docsCount:
-                  statsError || !stats || stats.count === undefined
-                    ? '-'
-                    : formatNumber(stats.count, '0,0'),
+                  statsError || !stats || !stats.count ? '-' : formatNumber(stats.count, '0,0'),
               },
             }
           )
@@ -59,5 +54,5 @@ export const StorageSizeCard = ({
     },
   ];
 
-  return <BaseMetricCard title={title} metrics={metric} data-test-subj="failureStoreStorageSize" />;
+  return <BaseMetricCard title={title} metrics={metric} />;
 };

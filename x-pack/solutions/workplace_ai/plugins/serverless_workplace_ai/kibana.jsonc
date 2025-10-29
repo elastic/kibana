@@ -19,8 +19,6 @@
     ],
     "requiredPlugins": [
       "serverless",
-      "onechat",
-      "workflowsManagement"
     ],
     "optionalPlugins": [],
     "requiredBundles": []

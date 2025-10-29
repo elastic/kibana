@@ -228,10 +228,6 @@ describe('single line query', () => {
 
         expect(text).toBe('FROM employees | LEFT JOIN a ON b, c, d.e.f');
       });
-
-      test('supports binary expressions', () => {
-        reprint('FROM employees | LEFT JOIN a ON b, c > d, d.e.f == 42 AND NOT MATCH(g, "hallo")');
-      });
     });
 
     describe('ENRICH', () => {

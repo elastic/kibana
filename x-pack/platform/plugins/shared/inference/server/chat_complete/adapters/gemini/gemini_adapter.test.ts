@@ -131,8 +131,7 @@ describe('geminiAdapter', () => {
                 properties: {
                   foo: {
                     description: 'foo',
-                    enum: [],
-                    format: 'enum',
+                    enum: undefined,
                     type: 'string',
                   },
                 },

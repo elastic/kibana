@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
 import type {
   TheHiveConfigSchema,
   TheHiveSecretsSchema,
@@ -16,16 +16,16 @@ import type {
   TheHiveIncidentResponseSchema,
 } from './schema';
 
-export type TheHiveConfig = z.input<typeof TheHiveConfigSchema>;
-export type TheHiveSecrets = z.infer<typeof TheHiveSecretsSchema>;
+export type TheHiveConfig = TypeOf<typeof TheHiveConfigSchema>;
+export type TheHiveSecrets = TypeOf<typeof TheHiveSecretsSchema>;
 
-export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
-export type ExecutorSubActionPushParams = z.infer<typeof ExecutorSubActionPushParamsSchema>;
-export type ExecutorSubActionCreateAlertParams = z.infer<
+export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
+export type ExecutorSubActionCreateAlertParams = TypeOf<
   typeof ExecutorSubActionCreateAlertParamsSchema
 >;
 
-export type TheHiveFailureResponse = z.infer<typeof TheHiveFailureResponseSchema>;
+export type TheHiveFailureResponse = TypeOf<typeof TheHiveFailureResponseSchema>;
 
 export interface ExternalServiceIncidentResponse {
   id: string;
@@ -36,4 +36,4 @@ export interface ExternalServiceIncidentResponse {
 
 export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
-export type GetIncidentResponse = z.input<typeof TheHiveIncidentResponseSchema>;
+export type GetIncidentResponse = TypeOf<typeof TheHiveIncidentResponseSchema>;

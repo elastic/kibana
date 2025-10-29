@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { buildKibanaRequestFromAction } from '@kbn/workflows';
-import type { BaseStep, RunStepResult } from './node_implementation';
-import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { RunStepResult, BaseStep } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 
 // Extend BaseStep for kibana-specific properties
 export interface KibanaActionStep extends BaseStep {
@@ -34,9 +31,33 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
   }
 
   public getInput() {
+    // Get current context for templating
+    const context = this.stepExecutionRuntime.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.with || (this.step as any).configuration?.with || {};
-    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
+    return this.renderObjectTemplate(stepWith, context);
+  }
+
+  /**
+   * Recursively render the object template.
+   * @param obj - The object to render.
+   * @param context - The context to use for rendering.
+   * @returns The rendered object.
+   */
+  private renderObjectTemplate(obj: any, context: any): any {
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this.renderObjectTemplate(item, context));
+    }
+    if (obj && typeof obj === 'object') {
+      return Object.entries(obj).reduce((acc, [key, value]) => {
+        acc[key] = this.renderObjectTemplate(value, context);
+        return acc;
+      }, {} as any);
+    }
+    if (typeof obj === 'string') {
+      return this.templatingEngine.render(obj, context);
+    }
+    return obj;
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -87,7 +108,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
           action_type: 'kibana',
         },
       });
-      return this.handleFailure(stepWith, error);
+      return await this.handleFailure(stepWith, error);
     }
   }
 
@@ -150,7 +171,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     if (params.request) {
       // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
       const { method = 'GET', path, body, query, headers: customHeaders } = params.request;
-      return this.makeHttpRequest(kibanaUrl, {
+      return await this.makeHttpRequest(kibanaUrl, {
         method,
         path,
         body,
@@ -167,7 +188,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         headers: connectorHeaders,
       } = buildKibanaRequestFromAction(stepType, params);
 
-      return this.makeHttpRequest(kibanaUrl, {
+      return await this.makeHttpRequest(kibanaUrl, {
         method,
         path,
         body,

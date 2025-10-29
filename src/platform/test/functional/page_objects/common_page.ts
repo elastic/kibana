@@ -56,7 +56,6 @@ export class CommonPageObject extends FtrService {
       await this.browser.setLocalStorageItem(key, JSON.stringify(tourConfig));
     }
 
-    // TODO: remove in https://github.com/elastic/kibana/issues/239313
     const OTHER_TOUR_STORAGE_ENTRIES = [['solutionNavigationTour:completed', 'true']];
 
     for (const [key, value] of OTHER_TOUR_STORAGE_ENTRIES) {

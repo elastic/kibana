@@ -8,12 +8,12 @@
  */
 
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
-import type { DashboardState } from '../../types';
+import type { DashboardAttributes } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState: DashboardAttributes = {
       controlGroupInput: {
         chainingSystem: 'NONE',
         labelPosition: 'twoLine',
@@ -100,7 +100,7 @@ describe('transformDashboardIn', () => {
   });
 
   it('should handle missing optional state keys', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState: DashboardAttributes = {
       title: 'title',
       description: 'my description',
       timeRestore: false,

@@ -96,7 +96,6 @@ describe('getConfiguration', () => {
       fittingFunction: undefined,
       gridlinesVisibilitySettings: { x: false, yLeft: false, yRight: true },
       labelsOrientation: { x: -0, yLeft: -0, yRight: -90 },
-      preferredSeriesType: 'bar',
       layers: [
         {
           accessors: ['1'],

@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-continue */
 
+import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { ZodError } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import type { Node, Pair, Scalar, YAMLMap } from 'yaml';
 import {
   Document,
@@ -22,14 +23,10 @@ import {
   parseDocument,
   visit,
 } from 'yaml';
-import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import type { ZodError } from '@kbn/zod';
-import { z } from '@kbn/zod';
+import { getSchemaAtPath } from './zod/zod_utils';
+import { getCompactTypeDescription, getDetailedTypeDescription } from './zod/zod_type_description';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
 import type { FormattedZodError, MockZodError } from './errors/invalid_yaml_schema';
-import { getCompactTypeDescription, getDetailedTypeDescription } from './zod/zod_type_description';
-import { getSchemaAtPath } from './zod/zod_utils';
-import type { WorkflowZodSchemaLooseType } from '../schema';
 
 interface FormatValidationErrorResult {
   message: string;
@@ -193,7 +190,7 @@ function analyzeUnionErrorForOption(issues: any[]): { name: string; description:
   }
 
   if (discriminatorInfo) {
-    const otherProps = requiredFields.filter((field) => field !== discriminatorInfo.key).sort();
+    const otherProps = requiredFields.filter((field) => field !== discriminatorInfo!.key).sort();
     const propsText = otherProps.length > 0 ? `, other props: ${otherProps.join(', ')}` : '';
 
     // Try to get a better schema name if this looks like a connector type
@@ -251,7 +248,7 @@ const schemaCache = new Map<string, any>();
  * or by looking up the connector schema directly
  */
 function generateUnionErrorMessage(
-  schema: WorkflowZodSchemaLooseType,
+  schema: z.ZodType,
   path: (string | number)[],
   fieldName: string,
   yamlDocument?: any
@@ -760,7 +757,7 @@ const WORKFLOW_DEFINITION_KEYS_ORDER: Array<keyof WorkflowYaml> = [
 function _getDiagnosticMessage(workflowDefinition: Record<string, any>) {
   try {
     const serialized = JSON.stringify(workflowDefinition);
-    return serialized.length > 300 ? `${serialized.substring(0, 300)}...` : serialized;
+    return serialized.length > 300 ? serialized.substring(0, 300) + '...' : serialized;
   } catch {
     return `[object ${workflowDefinition?.constructor?.name ?? typeof workflowDefinition}]`;
   }

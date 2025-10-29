@@ -18,8 +18,9 @@ import {
 import { LayerHeader } from './layer_header';
 import { renderWithReduxStore } from '../../../mocks';
 import userEvent from '@testing-library/user-event';
-import type { DatasourceMap, LensAppState, VisualizationMap } from '@kbn/lens-common';
+import type { LensAppState } from '../../../state_management';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
+import type { DatasourceMap, VisualizationMap } from '../../../types';
 
 interface RenderLayerSettingsOptions {
   propsOverrides?: Partial<React.ComponentProps<typeof LayerHeader>>;

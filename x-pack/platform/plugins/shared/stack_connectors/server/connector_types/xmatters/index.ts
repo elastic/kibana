@@ -7,7 +7,8 @@
 
 import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -30,34 +31,32 @@ export type XmattersConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
 >;
 
 const configSchemaProps = {
-  configUrl: z.string().nullable().default(null),
-  usesBasic: z.boolean().default(true),
+  configUrl: schema.nullable(schema.string()),
+  usesBasic: schema.boolean({ defaultValue: true }),
 };
-const ConfigSchema = z.object(configSchemaProps).strict();
-export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
+const ConfigSchema = schema.object(configSchemaProps);
+export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 // secrets definition
-export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
+export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
-  user: z.string().nullable().default(null),
-  password: z.string().nullable().default(null),
-  secretsUrl: z.string().nullable().default(null),
+  user: schema.nullable(schema.string()),
+  password: schema.nullable(schema.string()),
+  secretsUrl: schema.nullable(schema.string()),
 };
-const SecretsSchema = z.object(secretSchemaProps).strict();
+const SecretsSchema = schema.object(secretSchemaProps);
 
 // params definition
-export type ActionParamsType = z.infer<typeof ParamsSchema>;
-const ParamsSchema = z
-  .object({
-    alertActionGroupName: z.string().optional(),
-    signalId: z.string().optional(),
-    ruleName: z.string().optional(),
-    date: z.string().optional(),
-    severity: z.string(),
-    spaceId: z.string().optional(),
-    tags: z.string().optional(),
-  })
-  .strict();
+export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+const ParamsSchema = schema.object({
+  alertActionGroupName: schema.maybe(schema.string()),
+  signalId: schema.maybe(schema.string()),
+  ruleName: schema.maybe(schema.string()),
+  date: schema.maybe(schema.string()),
+  severity: schema.string(),
+  spaceId: schema.maybe(schema.string()),
+  tags: schema.maybe(schema.string()),
+});
 
 export const ConnectorTypeId = '.xmatters';
 // connector type definition

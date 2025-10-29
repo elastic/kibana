@@ -724,10 +724,19 @@ export const globalArtifactManagementSubFeature = (
     { defaultMessage: 'Global Artifact Management' }
   );
 
+  const COMING_SOON = i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.comingSoon',
+    { defaultMessage: '(coming soon)' }
+  );
+
+  const name = experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+    ? GLOBAL_ARTIFACT_MANAGEMENT
+    : `${GLOBAL_ARTIFACT_MANAGEMENT} ${COMING_SOON}`;
+
   return {
     requireAllSpaces: false,
     privilegesTooltip: undefined,
-    name: GLOBAL_ARTIFACT_MANAGEMENT,
+    name,
     description: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.description',
       {

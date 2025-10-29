@@ -10,18 +10,12 @@
 import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/types';
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { Right } from '@kbn/core-saved-objects-api-server';
-import {
-  type SavedObjectsBulkResolveObject,
-  type SavedObjectsResolveOptions,
-  type SavedObjectsResolveResponse,
-  type SavedObjectsIncrementCounterField,
-  type SavedObjectsIncrementCounterOptions,
-  type Either,
-  isLeft,
-  left,
-  right,
-  isRight,
+import type {
+  SavedObjectsBulkResolveObject,
+  SavedObjectsResolveOptions,
+  SavedObjectsResolveResponse,
+  SavedObjectsIncrementCounterField,
+  SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -47,6 +41,12 @@ import {
   getSavedObjectFromSource,
   normalizeNamespace,
   rawDocExistsInNamespace,
+  type Either,
+  type Right,
+  isLeft,
+  isRight,
+  left,
+  right,
 } from '../utils';
 import type { ApiExecutionContext } from '../types';
 import type { RepositoryEsClient } from '../../repository_es_client';

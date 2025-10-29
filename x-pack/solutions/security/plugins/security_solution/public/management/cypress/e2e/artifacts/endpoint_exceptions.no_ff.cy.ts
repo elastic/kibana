@@ -9,8 +9,7 @@ import * as serverlessSecurityHeaders from '@kbn/test-suites-xpack-security/secu
 import { APP_ENDPOINT_EXCEPTIONS_PATH, APP_PATH } from '../../../../../common/constants';
 import { login, ROLE } from '../../tasks/login';
 
-// Failing: See https://github.com/elastic/kibana/issues/240815
-describe.skip('Endpoint exceptions - preserving behaviour without `endpointExceptionsMovedUnderManagement` feature flag', () => {
+describe('Endpoint exceptions - preserving behaviour without `endpointExceptionsMovedUnderManagement` feature flag', () => {
   describe('ESS', { tags: ['@ess'] }, () => {
     it('should not display Endpoint Exceptions in Administration page', () => {
       login(ROLE.t1_analyst);
@@ -40,7 +39,6 @@ describe.skip('Endpoint exceptions - preserving behaviour without `endpointExcep
       login(ROLE.t1_analyst);
       cy.visit(APP_PATH);
 
-      serverlessSecurityHeaders.showMoreItems();
       serverlessSecurityHeaders.openNavigationPanelFor(
         serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS
       );

@@ -23,7 +23,6 @@ import {
   RECURRING_SCHEDULE_FORM_OCURRENCES_SUMMARY,
   RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY,
   RECURRING_SCHEDULE_FORM_TIME_SUMMARY,
-  RECURRING_SCHEDULE_FORM_HOURLY_SUMMARY,
 } from '../translations';
 import type { RecurrenceFrequency, RecurringSchedule } from '../types';
 
@@ -116,11 +115,7 @@ export const recurringSummary = ({
         ? moment().hour(schedule.byhour).minute(schedule.byminute)
         : null);
     if (date) {
-      if (frequency === Frequency.HOURLY) {
-        time = RECURRING_SCHEDULE_FORM_HOURLY_SUMMARY(date.format('HH:mm'));
-      } else {
-        time = RECURRING_SCHEDULE_FORM_TIME_SUMMARY(date.format('HH:mm'));
-      }
+      time = RECURRING_SCHEDULE_FORM_TIME_SUMMARY(date.format('HH:mm'));
     }
   }
 

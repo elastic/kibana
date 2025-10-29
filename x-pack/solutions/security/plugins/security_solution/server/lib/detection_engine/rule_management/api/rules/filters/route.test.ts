@@ -13,10 +13,6 @@ import {
   getRuleManagementFiltersRequest,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../../../../routes/__mocks__';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../../routes/__mocks__/request_context';
 
 const emptyTagAggregationResult = {
   tags: {
@@ -26,8 +22,7 @@ const emptyTagAggregationResult = {
 
 describe('Rule management filters route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let clients: MockClients;
-  let context: SecuritySolutionRequestHandlerContextMock;
+  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,11 +32,6 @@ describe('Rule management filters route', () => {
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
     getRuleManagementFilters(server.router);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {

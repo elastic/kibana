@@ -13,7 +13,6 @@ const creatAlertsServiceMock = () => {
       getContextInitializationPromise: jest.fn(),
       createAlertsClient: jest.fn(),
       setAlertsToUntracked: jest.fn(),
-      clearAlertFlappingHistory: jest.fn(),
     };
   });
 };

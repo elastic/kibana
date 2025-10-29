@@ -56,7 +56,6 @@
     "@kbn/spaces-utils",
     "@kbn/css-utils",
     "@kbn/licensing-types",
-    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

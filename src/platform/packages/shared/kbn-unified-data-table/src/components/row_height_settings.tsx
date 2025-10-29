@@ -17,19 +17,16 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-export const RowHeightMode = {
-  auto: 'auto',
-  custom: 'custom',
-} as const;
-
-export type RowHeightModeType = keyof typeof RowHeightMode;
-
+export enum RowHeightMode {
+  auto = 'auto',
+  custom = 'custom',
+}
 export interface RowHeightSettingsProps {
   lineCountInput: number | undefined;
-  rowHeight?: RowHeightModeType;
+  rowHeight?: RowHeightMode;
   maxRowHeight?: number;
   label: string;
-  onChangeRowHeight: (newHeightMode: RowHeightModeType | undefined) => void;
+  onChangeRowHeight: (newHeightMode: RowHeightMode | undefined) => void;
   onChangeLineCountInput: (newRowHeightLines: number, isValid: boolean) => void;
   'data-test-subj'?: string;
   fullWidth?: boolean;

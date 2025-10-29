@@ -826,28 +826,16 @@
           },
           ">, \"params\"> & { params: {} | ",
           {
-            "pluginId": "@kbn/chart-expressions-common",
+            "pluginId": "visualizations",
             "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "docId": "kibVisualizationsPluginApi",
             "section": "def-common.DateHistogramParams",
             "text": "DateHistogramParams"
           },
           " | ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.HistogramParams",
-            "text": "HistogramParams"
-          },
+          "HistogramParams",
           " | ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.FakeParams",
-            "text": "FakeParams"
-          },
+          "FakeParams",
           "; }"
         ],
         "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",

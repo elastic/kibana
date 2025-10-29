@@ -6,7 +6,8 @@
  */
 
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { TimeScaleUnit } from '@kbn/lens-common';
+
+export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
 
 export interface TimeScaleArgs {
   inputColumnId: string;

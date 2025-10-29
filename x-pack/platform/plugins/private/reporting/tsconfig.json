@@ -67,8 +67,7 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-capabilities-common",
     "@kbn/core-ui-settings-common",
-    "@kbn/licensing-types",
-    "@kbn/react-query"
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*"]
 }

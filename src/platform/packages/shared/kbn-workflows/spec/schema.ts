@@ -78,6 +78,7 @@ export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean 
 /* --- Triggers --- */
 export const AlertRuleTriggerSchema = z.object({
   type: z.literal('alert'),
+  enabled: z.boolean().optional().default(true),
   with: z
     .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
     .optional(),
@@ -85,6 +86,7 @@ export const AlertRuleTriggerSchema = z.object({
 
 export const ScheduledTriggerSchema = z.object({
   type: z.literal('scheduled'),
+  enabled: z.boolean().optional().default(true),
   with: z.union([
     // New format: every: "5m", "2h", "1d", "30s"
     z.object({
@@ -109,6 +111,7 @@ export const ScheduledTriggerSchema = z.object({
 
 export const ManualTriggerSchema = z.object({
   type: z.literal('manual'),
+  enabled: z.boolean().optional().default(true),
 });
 
 export const TriggerSchema = z.discriminatedUnion('type', [
@@ -358,7 +361,7 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 /* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
+export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice']);
 
 const WorkflowInputBaseSchema = z.object({
   name: z.string(),
@@ -367,40 +370,32 @@ const WorkflowInputBaseSchema = z.object({
   required: z.boolean().optional(),
 });
 
-export const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
+const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('string'),
   default: z.string().optional(),
 });
 
-export const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
+const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('number'),
   default: z.number().optional(),
 });
 
-export const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
+const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('boolean'),
   default: z.boolean().optional(),
 });
 
-export const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
+const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
   type: z.literal('choice'),
   default: z.string().optional(),
   options: z.array(z.string()),
 });
 
-export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('array'),
-  minItems: z.number().int().nonnegative().optional(),
-  maxItems: z.number().int().nonnegative().optional(),
-  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
-});
-
-export const WorkflowInputSchema = z.union([
+export const WorkflowInputSchema = z.discriminatedUnion('type', [
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
-  WorkflowInputArraySchema,
 ]);
 
 /* --- Consts --- */
@@ -512,16 +507,7 @@ export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
-  inputs: z
-    .record(
-      z.union([
-        z.string(),
-        z.number(),
-        z.boolean(),
-        z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
-      ])
-    )
-    .optional(),
+  inputs: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
 });

@@ -28,7 +28,10 @@ export async function runAndValidateEsqlQuery({
 }> {
   const queryWithoutLineBreaks = query.replaceAll(/\n/g, '');
 
-  const { errors } = await validateQuery(queryWithoutLineBreaks);
+  const { errors } = await validateQuery(queryWithoutLineBreaks, {
+    // setting this to true, we don't want to validate the index / fields existence
+    ignoreOnMissingCallbacks: true,
+  });
 
   const asCommands = splitIntoCommands(queryWithoutLineBreaks);
 

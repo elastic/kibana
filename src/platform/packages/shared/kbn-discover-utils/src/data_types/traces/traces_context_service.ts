@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { APMIndices, ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { containsIndexPattern } from '../../utils';
 
@@ -28,22 +28,30 @@ export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP = createRegExpPatternFr
   'data'
 );
 
-export const createTracesContextService = ({
-  indices,
-}: {
-  indices: APMIndices | null;
-}): TracesContextService => {
-  if (!indices) {
+export const createTracesContextService = async ({
+  apmSourcesAccess,
+}: TracesContextServiceDeps): Promise<TracesContextService> => {
+  if (!apmSourcesAccess) {
     return defaultTracesContextService;
   }
 
-  const { transaction, span } = indices;
-  const allTraceIndices = getAllIndices(transaction, span);
+  try {
+    const indices = await apmSourcesAccess.getApmIndices();
 
-  const tracesIndexPattern = allTraceIndices.join();
-  const allowedDataSources = [...allTraceIndices, DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
+    if (!indices) {
+      return defaultTracesContextService;
+    }
 
-  return getTracesContextService({ tracesIndexPattern, allowedDataSources });
+    const { transaction, span } = indices;
+    const allTraceIndices = getAllIndices(transaction, span);
+
+    const tracesIndexPattern = allTraceIndices.join();
+    const allowedDataSources = [...allTraceIndices, DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
+
+    return getTracesContextService({ tracesIndexPattern, allowedDataSources });
+  } catch (error) {
+    return defaultTracesContextService;
+  }
 };
 
 function getAllIndices(transaction: string, span: string) {

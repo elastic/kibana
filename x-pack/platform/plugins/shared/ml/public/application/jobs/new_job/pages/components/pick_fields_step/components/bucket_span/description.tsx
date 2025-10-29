@@ -9,17 +9,16 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormErrorText, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import type { Validation } from '../../../../../common/job_validator';
 
 interface Props {
   validation: Validation;
   titleId: string;
-  errorId: string;
 }
 
 export const Description: FC<PropsWithChildren<Props>> = memo(
-  ({ children, validation, titleId, errorId }) => {
+  ({ children, validation, titleId }) => {
     const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.bucketSpan.title', {
       defaultMessage: 'Bucket span',
     });
@@ -33,12 +32,9 @@ export const Description: FC<PropsWithChildren<Props>> = memo(
           />
         }
       >
-        <EuiFormRow isInvalid={validation.valid === false}>
+        <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
           <>{children}</>
         </EuiFormRow>
-        {validation.valid === false && validation.message && (
-          <EuiFormErrorText id={errorId}>{validation.message}</EuiFormErrorText>
-        )}
       </EuiDescribedFormGroup>
     );
   }

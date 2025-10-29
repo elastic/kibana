@@ -10,8 +10,8 @@
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type {
   NavigateToLensContext,
-  DatatableVisualizationState as TableVisConfiguration,
-} from '@kbn/lens-common';
+  TableVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { TableVisParams } from '../../common';
 

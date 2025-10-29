@@ -8,58 +8,72 @@
  */
 
 import React from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
-import type { ScopedHistory } from '@kbn/core-application-browser';
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { useCapabilities } from './hooks/use_capabilities';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { ScopedHistory } from '@kbn/core-application-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WorkflowDetailPage } from './pages/workflow_detail';
 import { WorkflowsPage } from './pages/workflows';
-import { WorkflowDetailStoreProvider } from './widgets/workflow_yaml_editor/lib/store/provider';
 import { AccessDenied } from '../common/components/access_denied';
 
-const ReadWorkflowPermissionText = i18n.translate(
-  'platform.plugins.shared.workflows_management.readWorkflowPermissionText',
-  { defaultMessage: 'Workflows: Read' }
-);
+interface WorkflowsAppDeps {
+  history: ScopedHistory;
+}
 
-/** Wrapper component to check if the user has the required permissions to access the workflows management page */
-const WorkflowsReadPermissionsWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const capabilities = useCapabilities();
-  if (!capabilities.canReadWorkflow) {
-    return <AccessDenied requirements={[ReadWorkflowPermissionText]} />;
+interface WorkflowsPermissionsWrapperParams {
+  permissions: string[];
+  children: React.ReactNode;
+}
+
+const WorkflowsPermissionsWrapper = ({
+  permissions,
+  children,
+}: WorkflowsPermissionsWrapperParams) => {
+  const { services } = useKibana();
+  const capabilities = services.application?.capabilities?.workflowsManagement;
+
+  let havePermissions: boolean;
+  if (!capabilities) {
+    havePermissions = false;
+  } else {
+    havePermissions = permissions.some((permission) => {
+      return !!capabilities[permission];
+    });
+  }
+
+  if (!havePermissions) {
+    return <AccessDenied requirements={permissions} />;
   }
 
   return children;
 };
-WorkflowsReadPermissionsWrapper.displayName = 'WorkflowsReadPermissionsWrapper';
 
-/** Route component to display the workflow detail page to edit or create a workflow */
-type WorkflowDetailPageRouteProps = RouteComponentProps<{ id?: string }>;
-const WorkflowDetailPageRoute = React.memo<WorkflowDetailPageRouteProps>((props) => {
+export function WorkflowsRoutes({ history }: WorkflowsAppDeps) {
+  // Render the application DOM.
+  // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
-    <WorkflowDetailStoreProvider>
-      <WorkflowDetailPage id={props.match.params.id} />
-    </WorkflowDetailStoreProvider>
-  );
-});
-WorkflowDetailPageRoute.displayName = 'WorkflowDetailPageRoute';
-
-// The exported router component
-interface WorkflowsAppDeps {
-  history: ScopedHistory;
-}
-export const WorkflowsRoutes = React.memo<WorkflowsAppDeps>(({ history }) => (
-  <Router history={history}>
-    <I18nProvider>
-      <WorkflowsReadPermissionsWrapper>
+    <Router history={history}>
+      <I18nProvider>
         <Routes>
-          <Route path={['/create', '/:id']} component={WorkflowDetailPageRoute} />
-          <Route path="/" exact component={WorkflowsPage} />
+          <Route
+            path="/:id"
+            render={(props) => (
+              <WorkflowsPermissionsWrapper permissions={['read', 'readWorkflow']}>
+                <WorkflowDetailPage id={props.match.params.id} />
+              </WorkflowsPermissionsWrapper>
+            )}
+          />
+          <Route
+            path="/"
+            exact
+            render={() => (
+              <WorkflowsPermissionsWrapper permissions={['read', 'readWorkflow']}>
+                <WorkflowsPage />
+              </WorkflowsPermissionsWrapper>
+            )}
+          />
         </Routes>
-      </WorkflowsReadPermissionsWrapper>
-    </I18nProvider>
-  </Router>
-));
-WorkflowsRoutes.displayName = 'WorkflowsRoutes';
+      </I18nProvider>
+    </Router>
+  );
+}

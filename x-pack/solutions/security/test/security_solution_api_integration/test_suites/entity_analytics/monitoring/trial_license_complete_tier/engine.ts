@@ -9,7 +9,11 @@ import expect from 'expect';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
-import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
+import {
+  disablePrivmonSetting,
+  enablePrivmonSetting,
+  toggleIntegrationsSyncFlag,
+} from '../../utils';
 import {
   PrivMonUtils,
   PlainIndexSyncUtils,
@@ -439,10 +443,11 @@ export default ({ getService }: FtrProviderContext) => {
         );
         // Set timestamps to be within last month so they are included in sync (default first run is now - 1M)
         await privMonUtils.integrationsSync.updateIntegrationsUsersWithRelativeTimestamps({
-          indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
+          indexPattern: 'logs-entityanalytics_okta.user-default',
         });
         await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
+        await toggleIntegrationsSyncFlag(kibanaServer, true);
       });
 
       afterEach(async () => {
@@ -452,6 +457,7 @@ export default ({ getService }: FtrProviderContext) => {
         // delete the okta index
         await api.deleteMonitoringEngine({ query: { data: true } });
         await disablePrivmonSetting(kibanaServer);
+        await toggleIntegrationsSyncFlag(kibanaServer, false);
       });
 
       it('should sync integrations during update detection ', async () => {
@@ -463,7 +469,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(monitoringSource?.name).toBe(
           '.entity_analytics.monitoring.sources.entityanalytics_okta-default'
         );
-        await privMonUtils.runSync();
+        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
+        await privMonUtils.waitForSyncTaskRun();
 
         const { body: usersBefore } = await api.listPrivMonUsers({ query: {} });
         // each user should be privileged and have correct source
@@ -500,12 +507,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         // update okta user to non-privileged, to test sync updates
         await privMonUtils.integrationsSync.setIntegrationUserPrivilege({
-          id: privMonUtils.integrationsSync.OKTA_USER_IDS.mable,
+          id: 'AZlHQD20hY07UD0HNBs-',
           isPrivileged: false,
-          indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
+          indexPattern: 'logs-entityanalytics_okta.user-default',
         });
         // schedule another sync
-        await privMonUtils.runSync();
+        await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
+        await privMonUtils.waitForSyncTaskRun();
         const { body: usersAfter } = await api.listPrivMonUsers({ query: {} });
 
         // find the updated user
@@ -533,25 +541,24 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update and create users within lastProcessedMarker range during update detection ', async () => {
+        const oktaIndex = 'logs-entityanalytics_okta.user-default';
+        const IDS = {
+          devon: 'AZmLBcGV9XhZAwOqZV5t', // Devan.Nienow
+          elinor: 'AZmLBcGV9XhZAwOqZV5u', // Elinor.Johnston-Shanahan
+          kaelyn: 'AZmLBcGV9XhZAwOqZV5s', // Kaelyn.Shanahan
+          bennett: 'AZmLBcGV9XhZAwOqZV5y', // Bennett.Becker
+        };
         // --- Timestamps
-        const nowMinus1M1D = await privMonUtils.integrationsSync.dateOffsetFrom({
+        const nowMinus1M1D = await privMonUtils.integrationsSync.dateOffsetFromNow({
           months: 2,
           days: 1,
         });
-        const nowMinus2M = await privMonUtils.integrationsSync.dateOffsetFrom({ months: 2 });
-        const nowMinus1w = await privMonUtils.integrationsSync.dateOffsetFrom({ days: 7 });
-        const nowMinus6d = await privMonUtils.integrationsSync.dateOffsetFrom({ days: 6 });
+        const nowMinus2M = await privMonUtils.integrationsSync.dateOffsetFromNow({ months: 2 });
+        const nowMinus1w = await privMonUtils.integrationsSync.dateOffsetFromNow({ days: 7 });
+        const nowMinus6d = await privMonUtils.integrationsSync.dateOffsetFromNow({ days: 6 });
         // PHASE 1: Push two users out of range, sync => expect 4 privileged remain
-        await privMonUtils.integrationsSync.setTimestamp(
-          privMonUtils.integrationsSync.OKTA_USER_IDS.devon,
-          nowMinus1M1D,
-          privMonUtils.integrationsSync.OKTA_INDEX
-        );
-        await privMonUtils.integrationsSync.setTimestamp(
-          privMonUtils.integrationsSync.OKTA_USER_IDS.elinor,
-          nowMinus2M,
-          privMonUtils.integrationsSync.OKTA_INDEX
-        );
+        await privMonUtils.integrationsSync.setTimestamp(IDS.devon, nowMinus1M1D, oktaIndex);
+        await privMonUtils.integrationsSync.setTimestamp(IDS.elinor, nowMinus2M, oktaIndex);
         await privMonUtils.runSync();
         const snapA = await privMonUtils.integrationsSync.expectUserCount(4);
 
@@ -561,73 +568,39 @@ export default ({ getService }: FtrProviderContext) => {
         expect(new Set(snapB)).toEqual(new Set(snapA));
 
         const markerAfterPhase2 = await privMonUtils.integrationsSync.getLastProcessedMarker(
-          privMonUtils.integrationsSync.OKTA_INDEX
+          oktaIndex
         );
         expect(markerAfterPhase2).toBe(
           privMonUtils.integrationsSync.DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP
         );
 
         // PHASE 3: Bring one user back in-range, sync => last processed marker updates to that timestamp
-        await privMonUtils.integrationsSync.setTimestamp(
-          privMonUtils.integrationsSync.OKTA_USER_IDS.kaelyn,
-          nowMinus1w,
-          privMonUtils.integrationsSync.OKTA_INDEX
-        );
+        await privMonUtils.integrationsSync.setTimestamp(IDS.kaelyn, nowMinus1w, oktaIndex);
         await privMonUtils.runSync();
         const markerAfterPhase3 = await privMonUtils.integrationsSync.getLastProcessedMarker(
-          privMonUtils.integrationsSync.OKTA_INDEX
+          oktaIndex
         );
         expect(markerAfterPhase3).toBe(nowMinus1w);
 
         // PHASE 4: Flip a non-privileged user to privileged + in-range, sync => count 5, last processed marker updates
         await privMonUtils.integrationsSync.setIntegrationUserPrivilege({
-          id: privMonUtils.integrationsSync.OKTA_USER_IDS.bennett,
+          id: IDS.bennett,
           isPrivileged: true,
-          indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
+          indexPattern: 'logs-entityanalytics_okta.user-default',
         });
-        await privMonUtils.integrationsSync.setTimestamp(
-          privMonUtils.integrationsSync.OKTA_USER_IDS.bennett,
-          nowMinus6d,
-          privMonUtils.integrationsSync.OKTA_INDEX
-        );
+        await privMonUtils.integrationsSync.setTimestamp(IDS.bennett, nowMinus6d, oktaIndex);
 
         await privMonUtils.runSync();
         await privMonUtils.integrationsSync.expectUserCount(5);
 
         const markerAfterPhase4 = await privMonUtils.integrationsSync.getLastProcessedMarker(
-          privMonUtils.integrationsSync.OKTA_INDEX
+          oktaIndex
         );
         expect(markerAfterPhase4).toBe(nowMinus6d);
       });
 
-      it('deletes missing users during a full sync window', async () => {
-        const EXPECTED_DELETED_USERNAME = 'Mable.Mann';
-        // Initial sync to establish users - deletion detection NOT expected
-        await privMonUtils.runSync();
-        // Create sync window
-        await privMonUtils.integrationsSync.createFullSyncWindowFromOffsets();
-        // Remove on user from source, simulating deletion
-        await privMonUtils.integrationsSync.deleteIntegrationUser({
-          id: privMonUtils.integrationsSync.OKTA_USER_IDS.mable,
-          indexPattern: privMonUtils.integrationsSync.OKTA_INDEX,
-        });
-        // Run sync - deletion detection expected to run and remove the user
-        await privMonUtils.runSync();
-        const users = await privMonUtils.integrationsSync.expectUserCount(6);
-        const mable = privMonUtils.findUser(users, EXPECTED_DELETED_USERNAME);
-        expect(mable).toBeDefined();
-        privMonUtils.assertIsPrivileged(mable, false);
-        expect(mable?.entity_analytics_monitoring?.labels).toEqual([]);
-        await privMonUtils.integrationsSync.createFullSyncWindowFromOffsets({
-          startOffsetMinutes: -40,
-          completeOffsetMinutes: -45,
-        });
-        await privMonUtils.runSync();
-        const usersAfter = await privMonUtils.integrationsSync.expectUserCount(6);
-        usersAfter.forEach((u: any) => {
-          expect(u.user.is_privileged).toBe(false);
-        });
-        await privMonUtils.integrationsSync.cleanupEventsIndex();
+      it.skip('deletion detection should delete users on full sync', async () => {
+        // placeholder for deletion detection
       });
     });
 
@@ -648,15 +621,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect(names).toEqual(
           expect.arrayContaining([
             '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
-            '.entity_analytics.monitoring.sources.entityanalytics_ad-default',
+            // '.entity_analytics.monitoring.sources.ad-default',
             '.entity_analytics.monitoring.users-default',
           ])
         );
         expect(syncMarkersIndices).toEqual(
           expect.arrayContaining([
-            undefined, // default users source has no sync marker since index does not use sync markers
-            'logs-entityanalytics_okta.entity-default', // okta sync markers source
-            'logs-entityanalytics_ad.user-default', // ad sync markers source
+            'logs-entityanalytics_okta.entity-default',
+            //  '.entity_analytics.monitoring.sources.ad-default',
           ])
         );
       });

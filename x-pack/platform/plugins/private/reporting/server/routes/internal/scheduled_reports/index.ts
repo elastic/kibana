@@ -9,9 +9,8 @@ import type { Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../../..';
 import { registerInternalListRoute } from './list';
 import { registerInternalBulkDisableRoute } from './bulk_disable';
-import { registerInternalCreateScheduledReportRoute } from './create';
+import { registerInternalPostScheduleRoute } from './post';
 import { registerInternalBulkDeleteRoute } from './bulk_delete';
-import { registerInternalUpdateScheduledReportRoute } from './update';
 
 export function registerScheduledReportsRoutesInternal(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
@@ -19,7 +18,6 @@ export function registerScheduledReportsRoutesInternal(reporting: ReportingCore,
 
   registerInternalListRoute({ logger, router, reporting });
   registerInternalBulkDisableRoute({ logger, router, reporting });
-  registerInternalCreateScheduledReportRoute({ logger, router, reporting });
+  registerInternalPostScheduleRoute({ logger, router, reporting });
   registerInternalBulkDeleteRoute({ logger, router, reporting });
-  registerInternalUpdateScheduledReportRoute({ logger, router, reporting });
 }

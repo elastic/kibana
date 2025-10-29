@@ -8,8 +8,6 @@
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import { isSpaceAwarenessEnabled } from './helpers';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
 export async function addNamespaceFilteringToQuery(query: any, namespace?: string) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
@@ -26,7 +24,7 @@ export async function addNamespaceFilteringToQuery(query: any, namespace?: strin
             should: [
               {
                 terms: {
-                  namespaces: [DEFAULT_SPACE_ID, ALL_SPACES_ID],
+                  namespaces: ['default'],
                 },
               },
               {
@@ -45,7 +43,7 @@ export async function addNamespaceFilteringToQuery(query: any, namespace?: strin
         }
       : {
           terms: {
-            namespaces: [namespace, ALL_SPACES_ID],
+            namespaces: [namespace],
           },
         };
 

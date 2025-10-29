@@ -14,11 +14,7 @@ import { stringify } from 'query-string';
 import rison from '@kbn/rison';
 import { isFilterPinned } from '@kbn/es-query';
 import { url } from '@kbn/kibana-utils-plugin/common';
-import {
-  GLOBAL_STATE_STORAGE_KEY,
-  STATE_STORAGE_KEY,
-  VisualizeConstants,
-} from '@kbn/visualizations-common';
+import { GLOBAL_STATE_STORAGE_KEY, STATE_STORAGE_KEY, VisualizeConstants } from './constants';
 import type { VisualizeLocatorParams } from './locator';
 
 const removeEmptyKeys = (o: Record<string, Serializable>): Record<string, Serializable> =>

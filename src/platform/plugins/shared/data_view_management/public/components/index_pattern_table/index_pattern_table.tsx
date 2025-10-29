@@ -30,11 +30,7 @@ import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/c
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { NoDataViewsPromptComponent, useOnTryESQL } from '@kbn/shared-ux-prompt-no-data-views';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import {
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  DataViewType,
-  type DataView,
-} from '@kbn/data-views-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewType } from '@kbn/data-views-plugin/public';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
@@ -89,18 +85,16 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     spaces,
     docLinks,
     noDataPage,
-    IndexPatternEditor,
     savedObjectsManagement,
   } = useKibana<IndexPatternManagmentContext>().services;
 
   const [query, setQuery] = useState('');
   const [selectedItems, setSelectedItems] = useState<RemoveDataViewProps[]>([]);
   const [selectedDataView, setSelectedDataView] = useState<RemoveDataViewProps>();
-  const [editDataView, setEditDataView] = useState<DataView>();
   const [selectedRelationships, setSelectedRelationships] = useState<
     Record<string, SavedObjectRelation[]>
   >({});
-  const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false);
+  const [flyoutOpen, setFlyoutOpen] = React.useState(false);
   const [dataViewController] = useState(
     () =>
       new DataViewTableController({
@@ -139,15 +133,11 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     }
   };
 
-  const onDeleteFlyoutClose = () => {
-    setDeleteFlyoutOpen(false);
+  const onFlyoutClose = () => {
+    setFlyoutOpen(false);
     setSelectedItems([]);
     setSelectedDataView(undefined);
     setSelectedRelationships({});
-  };
-
-  const onEditFlyoutClose = () => {
-    setEditDataView(undefined);
   };
 
   const dataViewArray = useMemo(() => {
@@ -197,7 +187,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
               SavedObjectRelation[]
             >) || {};
           setSelectedRelationships(relationships);
-          setDeleteFlyoutOpen(true);
+          setFlyoutOpen(true);
         }}
       >
         <FormattedMessage
@@ -241,22 +231,6 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     width: '10%',
     actions: [
       {
-        name: i18n.translate('indexPatternManagement.dataViewTable.columnEdit', {
-          defaultMessage: 'Edit',
-        }),
-        description: i18n.translate('indexPatternManagement.dataViewTable.columnEditDescription', {
-          defaultMessage: 'Edit this data view',
-        }),
-        icon: 'pencil',
-        color: 'primary',
-        type: 'icon',
-        onClick: async (dataView: RemoveDataViewProps) => {
-          const fullDataView = await dataViews.get(dataView.id);
-          setEditDataView(fullDataView);
-        },
-        'data-test-subj': 'action-edit',
-      },
-      {
         name: i18n.translate('indexPatternManagement.dataViewTable.columnDelete', {
           defaultMessage: 'Delete',
         }),
@@ -276,7 +250,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
           >;
           setSelectedDataView(dataView);
           setSelectedRelationships(relationships);
-          setDeleteFlyoutOpen(true);
+          setFlyoutOpen(true);
         },
         isPrimary: true,
         'data-test-subj': 'action-delete',
@@ -420,7 +394,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
           selection={dataViews.getCanSaveSync() ? selection : undefined}
         />
       </ContextWrapper>
-      {deleteFlyoutOpen && (
+      {flyoutOpen && (
         <DeleteDataViewFlyout
           dataViews={dataViews}
           dataViewArray={dataViewArray}
@@ -428,19 +402,9 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
           hasSpaces={!!spaces}
           onDelete={async () => {
             dataViewController.loadDataViews();
-            onDeleteFlyoutClose();
+            onFlyoutClose();
           }}
-          onClose={onDeleteFlyoutClose}
-        />
-      )}
-      {!!editDataView && (
-        <IndexPatternEditor
-          onSave={() => {
-            dataViewController.loadDataViews();
-            onEditFlyoutClose();
-          }}
-          onCancel={onEditFlyoutClose}
-          editData={editDataView}
+          onClose={onFlyoutClose}
         />
       )}
     </>
