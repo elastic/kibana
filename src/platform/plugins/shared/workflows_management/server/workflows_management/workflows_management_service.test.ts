@@ -647,23 +647,32 @@ describe('WorkflowsService', () => {
       } as any;
 
       const workflowCommand = {
-        yaml: 'name: New Workflow\nenabled: true\ndefinition:\n  triggers: []',
+        yaml: `
+name: dummy workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: first-step
+    with:
+      message: "Hello, world!"
+`,
       };
 
       mockEsClient.index.mockResolvedValue({ _id: 'new-workflow-id' } as any);
 
       const result = await service.createWorkflow(workflowCommand, 'default', mockRequest);
 
-      expect(result.name).toBe('New Workflow');
+      expect(result.name).toBe('dummy workflow');
       expect(result.enabled).toBe(true);
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           id: expect.any(String),
           index: '.workflows-workflows',
           document: expect.objectContaining({
-            name: 'New Workflow',
+            name: 'dummy workflow',
             enabled: true,
-            yaml: 'name: New Workflow\nenabled: true\ndefinition:\n  triggers: []',
+            yaml: workflowCommand.yaml,
             createdBy: 'test-user',
             lastUpdatedBy: 'test-user',
             spaceId: 'default',
