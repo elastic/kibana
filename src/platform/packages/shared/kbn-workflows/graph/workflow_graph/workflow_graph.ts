@@ -10,7 +10,7 @@
 import type { GraphEdge } from '@dagrejs/dagre';
 import { graphlib } from '@dagrejs/dagre';
 import { createTypedGraph } from './create_typed_graph';
-import type { WorkflowYaml } from '../..';
+import type { WorkflowSettings, WorkflowYaml } from '../..';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import type { GraphNodeUnion } from '../types';
 
@@ -37,8 +37,11 @@ export class WorkflowGraph {
     this.graph = graph;
   }
 
-  public static fromWorkflowDefinition(workflowDefinition: Record<string, unknown>): WorkflowGraph {
-    return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition as WorkflowYaml)); // TODO: use the correct type in the parameter
+  public static fromWorkflowDefinition(
+    workflowDefinition: WorkflowYaml,
+    defaultSettings?: WorkflowSettings
+  ): WorkflowGraph {
+    return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition, defaultSettings));
   }
 
   public get topologicalOrder(): string[] {
