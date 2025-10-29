@@ -25,8 +25,12 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
     await kbnClient.uiSettings.update(defaultSettings);
   });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
+    await uiSettings.setDefaultTime({
+      from: pageObjects.datePicker.defaultStartTime,
+      to: pageObjects.datePicker.defaultEndTime,
+    });
     await pageObjects.discover.goto();
   });
 
@@ -51,30 +55,19 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
       expect(rowData).toContain('Sep 22, 2015 @ 23:50:13.253');
     });
 
-    test('save query should show toast message and display query name', async ({
-      pageObjects,
-      uiSettings,
-    }) => {
-      await uiSettings.setDefaultTime({
-        from: pageObjects.datePicker.defaultStartTime,
-        to: pageObjects.datePicker.defaultEndTime,
-      });
+    test('save query should show toast message and display query name', async ({ pageObjects }) => {
       await pageObjects.discover.saveSearch(queryName1);
       const actualQueryNameString = await pageObjects.discover.getCurrentQueryName();
       expect(actualQueryNameString).toBe(queryName1);
     });
 
-    test('should refetch when autofresh is enabled', async ({ pageObjects, uiSettings }) => {
+    test('should refetch when autofresh is enabled', async ({ pageObjects }) => {
       const interval = 5;
-      await uiSettings.setDefaultTime({
-        from: pageObjects.datePicker.defaultStartTime,
-        to: pageObjects.datePicker.defaultEndTime,
-      });
       await pageObjects.datePicker.startAutoRefresh(interval);
-
       const getRequestTimestamp = async () => {
         await pageObjects.inspector.open();
         const requestTimestamp = await pageObjects.inspector.getRequestTimestamp();
+        await pageObjects.inspector.close();
         return requestTimestamp;
       };
 
@@ -88,16 +81,12 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
               Boolean(requestTimestampAfter) && requestTimestampBefore !== requestTimestampAfter
             );
           },
-          { timeout: 8000 }
+          { timeout: 7000 }
         )
         .toBe(true);
     });
 
-    test('load query should show query name', async ({ pageObjects, uiSettings }) => {
-      await uiSettings.setDefaultTime({
-        from: pageObjects.datePicker.defaultStartTime,
-        to: pageObjects.datePicker.defaultEndTime,
-      });
+    test('load query should show query name', async ({ pageObjects }) => {
       await pageObjects.discover.saveSearch(queryName2);
       await pageObjects.discover.loadSavedSearch(queryName2);
       await expect
@@ -105,35 +94,18 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
         .toBe(queryName2);
     });
 
-    test('should show the correct hit count', async ({ pageObjects, uiSettings }) => {
+    test('should show the correct hit count', async ({ pageObjects }) => {
       const expectedHitCount = '14,004';
-      await uiSettings.setDefaultTime({
-        from: pageObjects.datePicker.defaultStartTime,
-        to: pageObjects.datePicker.defaultEndTime,
-      });
-      await expect
-        .poll(async () => await pageObjects.discover.getHitCount())
-        .toBe(expectedHitCount);
+      expect(await pageObjects.discover.getHitCount()).toBe(expectedHitCount);
     });
 
-    test('should show correct time range string in chart', async ({ pageObjects, uiSettings }) => {
-      await uiSettings.setDefaultTime({
-        from: pageObjects.datePicker.defaultStartTime,
-        to: pageObjects.datePicker.defaultEndTime,
-      });
+    test('should show correct time range string in chart', async ({ pageObjects }) => {
       const actualTimeString = await pageObjects.discover.getChartTimespan();
       const expectedTimeString = `${pageObjects.datePicker.defaultStartTime} - ${pageObjects.datePicker.defaultEndTime} (interval: Auto - 3 hours)`;
       expect(actualTimeString).toBe(expectedTimeString);
     });
 
-    test('should modify the time range when a bar is clicked', async ({
-      pageObjects,
-      uiSettings,
-    }) => {
-      await uiSettings.setDefaultTime({
-        from: pageObjects.datePicker.defaultStartTime,
-        to: pageObjects.datePicker.defaultEndTime,
-      });
+    test('should modify the time range when a bar is clicked', async ({ pageObjects }) => {
       await pageObjects.discover.clickHistogramBar();
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
@@ -152,29 +124,18 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
         .toBe(true);
     });
 
-    test('should show correct initial chart interval of Auto', async ({
-      page,
-      pageObjects,
-      uiSettings,
-    }) => {
-      await uiSettings.setDefaultTime({
-        from: pageObjects.datePicker.defaultStartTime,
-        to: pageObjects.datePicker.defaultEndTime,
-      });
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+    test('should show correct initial chart interval of Auto', async ({ page, pageObjects }) => {
       await page.testSubj.click('discoverQueryHits'); // cancel out tooltips
-
       const actualInterval = await pageObjects.discover.getChartInterval();
       const expectedInterval = 'auto';
       expect(actualInterval).toBe(expectedInterval);
     });
 
-    test('should show "no results"', async ({ pageObjects, uiSettings }) => {
-      await uiSettings.setDefaultTime({
+    test('should show "no results"', async ({ pageObjects }) => {
+      await pageObjects.datePicker.setAbsoluteRange({
         from: pageObjects.datePicker.defaultStartTime,
         to: pageObjects.datePicker.endTimeNoResults,
       });
-      await pageObjects.datePicker.clickSubmitButton();
       await expect.poll(async () => await pageObjects.discover.hasNoResults()).toBe(true);
     });
 
@@ -183,9 +144,8 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
         from: pageObjects.datePicker.defaultStartTime,
         to: pageObjects.datePicker.endTimeNoResults,
       });
-      await pageObjects.datePicker.clickSubmitButton();
-      const isVisible = await pageObjects.discover.hasNoResultsTimepicker();
-      expect(isVisible).toBe(true);
+      await pageObjects.discover.goto();
+      await expect.poll(async () => await pageObjects.discover.hasNoResultsTimepicker()).toBe(true);
     });
 
     test('should show matches when time range is expanded', async ({ pageObjects, uiSettings }) => {
@@ -193,7 +153,7 @@ test.describe('discover test', { tag: ['@ess'] }, () => {
         from: pageObjects.datePicker.defaultStartTime,
         to: pageObjects.datePicker.endTimeNoResults,
       });
-      await pageObjects.datePicker.clickSubmitButton();
+      await pageObjects.discover.goto();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
       await expect.poll(async () => await pageObjects.discover.hasNoResults()).toBe(false);

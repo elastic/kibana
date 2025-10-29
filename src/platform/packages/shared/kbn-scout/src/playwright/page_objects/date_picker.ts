@@ -21,7 +21,7 @@ export class DatePicker {
 
   public readonly defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
   public readonly defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
-  public readonly endTimeNoResults = 'Sep 19, 2015 @ 20:45:00.000';
+  public readonly endTimeNoResults = 'Sep 19, 2015 @ 18:45:00.000';
 
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
