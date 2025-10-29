@@ -8,7 +8,7 @@
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID, addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 
 export function getKibanaUrl(
   coreSetup: CoreSetup,
@@ -25,12 +25,9 @@ export function getKibanaUrl(
   const serverBasePath = coreSetup.http.basePath.serverBasePath;
   const { pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(pathname, serverBasePath);
 
-  // If URL doesn't have a space and we have a non-default space, add it
   if (!pathHasExplicitSpaceIdentifier && request && spaces) {
     const spaceId = spaces.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
-    if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-      return `${baseUrl}/s/${spaceId}`;
-    }
+    return addSpaceIdToPath(baseUrl, spaceId);
   }
 
   return baseUrl;
