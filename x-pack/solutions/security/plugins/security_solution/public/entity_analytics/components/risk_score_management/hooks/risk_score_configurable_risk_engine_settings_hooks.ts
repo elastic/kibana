@@ -57,3 +57,4 @@ export { useRiskEngineSettingsQuery } from './use_risk_engine_settings_query';
 export { useRiskEngineSettingsMutations } from './use_risk_engine_settings_mutations';
 export { useRiskEngineSettingsState } from './use_risk_engine_settings_state';
 export { useInvalidateRiskEngineSettingsQuery } from './use_risk_engine_settings_query';
+export type { RiskScoreConfiguration } from '../common';

@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
+import { useMutation } from '@tanstack/react-query';
 import { RiskScorePreviewSection } from '../components/risk_score_management/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_management/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
@@ -71,6 +72,13 @@ export const EntityAnalyticsManagementPage = () => {
   const riskScoreResetToZeroIsEnabled = useIsExperimentalFeatureEnabled(
     'enableRiskScoreResetToZero'
   );
+
+  // Create a wrapper mutation that takes no parameters for RiskScoreEnableSection
+  const saveSettingsWrapperMutation = useMutation(async () => {
+    if (selectedRiskEngineSettings) {
+      await saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
+    }
+  });
 
   const handleRunEngineClick = async () => {
     setIsLoadingRunRiskEngine(true);
@@ -141,7 +149,7 @@ export const EntityAnalyticsManagementPage = () => {
                 )}
                 <RiskScoreEnableSection
                   selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
-                  saveSelectedSettingsMutation={saveSelectedSettingsMutation}
+                  saveSelectedSettingsMutation={saveSettingsWrapperMutation}
                   privileges={privileges}
                 />
               </EuiFlexGroup>
