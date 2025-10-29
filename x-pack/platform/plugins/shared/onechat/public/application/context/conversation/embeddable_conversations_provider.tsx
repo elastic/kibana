@@ -49,27 +49,25 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
+  const validateAndSetConversationId = useCallback(
+    async (id: string) => {
+      try {
+        const conversation = await services.conversationsService.get({ conversationId: id });
+        setConversationId(conversation ? id : undefined);
+      } catch {
+        setConversationId(undefined);
+      }
+    },
+    [services.conversationsService]
+  );
+
   useEffect(() => {
     if (!resolvedConversationId) {
       setConversationId(undefined);
       return;
     }
-
-    services.conversationsService
-      .get({
-        conversationId: resolvedConversationId,
-      })
-      .then((conversation) => {
-        if (conversation) {
-          setConversationId(resolvedConversationId);
-        } else {
-          setConversationId(undefined);
-        }
-      })
-      .catch(() => {
-        setConversationId(undefined);
-      });
-  }, [resolvedConversationId, contextProps.sessionTag, contextProps.agentId, services]);
+    validateAndSetConversationId(resolvedConversationId);
+  }, [resolvedConversationId, validateAndSetConversationId]);
 
   useSaveLastConversationId({
     conversationId,
