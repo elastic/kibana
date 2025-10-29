@@ -276,6 +276,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     toggleLanguageComponent,
     solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
     categorizationField,
+    telemetryService,
   ]);
 
   const esqlMenuPopoverStyles = css`
