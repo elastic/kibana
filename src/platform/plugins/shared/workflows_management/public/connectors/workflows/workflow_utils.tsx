@@ -7,22 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import type { WorkflowListDto } from '@kbn/workflows';
 import { TagsBadge } from './tags_badge';
-import { IconDisabledWorkflow } from '../../assets/icons';
 
 export interface WorkflowOption {
   id: string;
   name: string;
   description: string;
-  enabled: boolean;
   tags: string[];
   label: string;
   disabled?: boolean;
   checked?: 'on' | 'off';
-  namePrepend?: React.ReactNode;
   prepend?: React.ReactNode;
   append?: React.ReactNode;
   data?: {
@@ -78,32 +74,14 @@ export function processWorkflowsToOptions(
 
   // Convert to WorkflowOption format
   return filteredWorkflows.map((workflow) => {
-    const isSelected = workflow.id === selectedWorkflowId;
-    const isDisabled = !workflow.enabled;
-    const wasSelectedButNowDisabled = isSelected && isDisabled;
-
-    // Determine what to show in prepend based on config
-    let prependNameElement: React.ReactNode;
-    if (wasSelectedButNowDisabled) {
-      prependNameElement = (
-        <EuiIcon type="alert" color="warning" aria-label="Workflow disabled warning" />
-      );
-    } else if (isDisabled) {
-      prependNameElement = (
-        <IconDisabledWorkflow size="m" style={{ marginRight: '8px' }} aria-label="Disabled" />
-      );
-    }
-
     return {
       id: workflow.id,
       name: workflow.name,
       description: workflow.description,
-      enabled: workflow.enabled,
       tags: workflow.definition?.tags || [],
       label: workflow.name,
-      disabled: isDisabled,
-      checked: isSelected ? 'on' : undefined,
-      namePrepend: prependNameElement,
+      disabled: !workflow.enabled,
+      checked: workflow.id === selectedWorkflowId ? 'on' : undefined,
       append: <TagsBadge tags={workflow.definition?.tags || []} />,
       data: {
         secondaryContent: workflow.description || 'No description',

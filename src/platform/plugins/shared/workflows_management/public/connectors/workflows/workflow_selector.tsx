@@ -27,6 +27,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
 import { getSelectedWorkflowDisabledError, processWorkflowsToOptions } from './workflow_utils';
 import type { WorkflowOption, WorkflowSelectorConfig } from './workflow_utils';
+import { IconDisabledWorkflow } from '../../assets/icons';
 import { useWorkflows } from '../../entities/workflows/model/use_workflows';
 
 interface WorkflowSelectorProps {
@@ -100,10 +101,27 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
 
   // Custom render function for workflow options
   const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
+    // Prepare the namePrepend content based on the WorkflowOption properties
+    const getPrependContent = (workflowOption: WorkflowOption) => {
+      const isSelected = workflowOption.checked === 'on';
+      const isDisabled = workflowOption.disabled;
+      const wasSelectedButNowDisabled = isSelected && isDisabled;
+
+      if (wasSelectedButNowDisabled) {
+        return <EuiIcon type="alert" color="warning" aria-label="Workflow disabled warning" />;
+      } else if (isDisabled) {
+        return (
+          <IconDisabledWorkflow size="m" style={{ marginRight: '8px' }} aria-label="Disabled" />
+        );
+      }
+
+      return null;
+    };
+
     const content = (
       <>
         <>
-          {option.namePrepend}
+          {getPrependContent(option)}
           <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
         </>
         {option.secondaryContent && (
