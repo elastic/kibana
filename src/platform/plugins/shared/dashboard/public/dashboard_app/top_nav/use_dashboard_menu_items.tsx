@@ -170,12 +170,9 @@ export const useDashboardMenuItems = ({
             showSaveMenu({
               dashboardApi,
               anchorElement,
-              coreServices,
               resetChanges,
               isResetting,
-              setIsResetting,
               isSaveInProgress,
-              setIsSaveInProgress,
               dashboardInteractiveSave,
             });
           },

@@ -11,7 +11,6 @@ import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 
 import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import type { DashboardApi } from '../../../dashboard_api/types';
