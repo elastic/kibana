@@ -28,7 +28,7 @@ export default function (providerContext: FtrProviderContext) {
   let TEST_SPACE_1: string;
 
   // Failing: See https://github.com/elastic/kibana/issues/236306
-  describe.skip('actions', function () {
+  describe('actions', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
