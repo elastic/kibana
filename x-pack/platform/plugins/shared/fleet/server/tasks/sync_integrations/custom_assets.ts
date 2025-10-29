@@ -306,9 +306,8 @@ async function updateIngestPipeline(
       created_date_millis: createdDateMillis,
       modified_date: modifiedDate,
       modified_date_millis: modifiedDateMillis,
-      ...ingestPipeline
+      ...updatedIngestPipeline
     } = customAsset.pipeline as IngestPipelineWithDateFields;
-    const updatedIngestPipeline = ingestPipeline;
     return retryTransientEsErrors(
       () =>
         esClient.ingest.putPipeline(
