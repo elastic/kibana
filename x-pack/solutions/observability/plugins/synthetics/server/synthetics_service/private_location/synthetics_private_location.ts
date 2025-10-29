@@ -268,7 +268,9 @@ export class SyntheticsPrivateLocation {
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string,
-    maintenanceWindows: MaintenanceWindow[]
+    maintenanceWindows: MaintenanceWindow[],
+    wrapInCache = true,
+    asyncDeploy = true
   ) {
     if (configs.length === 0) {
       return {
@@ -335,7 +337,7 @@ export class SyntheticsPrivateLocation {
 
       const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
         this.createPolicyBulk(policiesToCreate),
-        this.updatePolicyBulk(policiesToUpdate),
+        this.updatePolicyBulk(policiesToUpdate, asyncDeploy),
         this.deletePolicyBulk(policiesToDelete),
       ]);
 
@@ -359,7 +361,7 @@ export class SyntheticsPrivateLocation {
       return {
         failedUpdates,
       };
-    });
+    }, wrapInCache);
   }
 
   async getExistingPolicies(
@@ -398,7 +400,7 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[]) {
+  async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[], asyncDeploy = true) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
     if (policiesToUpdate.length > 0) {
@@ -408,7 +410,7 @@ export class SyntheticsPrivateLocation {
         policiesToUpdate,
         {
           force: true,
-          asyncDeploy: true,
+          asyncDeploy,
         }
       );
       return failedPolicies;
@@ -482,7 +484,10 @@ export class SyntheticsPrivateLocation {
     return undefined;
   }
 
-  async runWithCache<T>(fn: () => Promise<T>): Promise<T> {
+  async runWithCache<T>(fn: () => Promise<T>, wrapInCache = true): Promise<T> {
+    if (!wrapInCache) {
+      return await fn();
+    }
     return await this.server.fleet.runWithCache(fn);
   }
 }

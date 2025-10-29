@@ -244,7 +244,9 @@ export class SyncPrivateLocationMonitorsTask {
             privateConfigs,
             allPrivateLocations,
             spaceId,
-            maintenanceWindows
+            maintenanceWindows,
+            false,
+            false
           );
         } else {
           this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
