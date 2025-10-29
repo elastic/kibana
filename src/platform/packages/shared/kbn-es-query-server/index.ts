@@ -9,7 +9,8 @@
 
 export { timeRangeSchema } from './src/time_range';
 export { querySchema } from './src/query';
-export { filterSchema } from './src/filter';
+export { appStateSchema, globalStateSchema, filterSchema } from './src/filter/stored_filter';
+export { simplifiedFilterSchema } from './src/filter/simplified_filter';
 
 export type {
   TimeRange,
@@ -19,4 +20,12 @@ export type {
   FilterMeta,
   AggregateQuery,
   Query,
+  SimplifiedFilter,
+  SimpleFilterCondition,
+  FilterGroup,
+  RawDSLFilter,
+  FilterOperator,
+  FilterValue,
+  RangeValue,
+  StoredFilterState,
 } from './src/types';
