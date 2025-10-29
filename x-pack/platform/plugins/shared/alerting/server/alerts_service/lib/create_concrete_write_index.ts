@@ -9,7 +9,7 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { sortBy } from 'lodash';
 import type { IIndexPatternString } from '../resource_installer_utils';
-import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';
 import { updateIndexTemplateFieldsLimit } from './update_index_template_fields_limit';
 

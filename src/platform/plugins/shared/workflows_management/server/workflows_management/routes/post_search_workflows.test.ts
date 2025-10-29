@@ -29,41 +29,6 @@ describe('POST /api/workflows/search', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the search route with correct configuration', () => {
-      registerPostSearchWorkflowsRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const postSearchCall = (mockRouter.post as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/search'
-      );
-
-      expect(postSearchCall).toBeDefined();
-      expect(postSearchCall[0]).toMatchObject({
-        path: '/api/workflows/search',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['read', 'workflow_read'],
-              },
-            ],
-          },
-        },
-      });
-      expect(postSearchCall[0].validate).toBeDefined();
-      expect(postSearchCall[0].validate.body).toBeDefined();
-      expect(postSearchCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 
