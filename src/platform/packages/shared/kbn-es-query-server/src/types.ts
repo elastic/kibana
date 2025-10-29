@@ -26,7 +26,6 @@ import type {
   simpleFilterConditionSchema,
   filterGroupSchema,
   rawDSLFilterSchema,
-  filterOperatorSchema,
   filterValueSchema,
   rangeValueSchema,
 } from './filter/simplified_filter';
@@ -50,7 +49,6 @@ export type SimplifiedFilter = Writable<TypeOf<typeof simplifiedFilterSchema>>;
 export type SimpleFilterCondition = Writable<TypeOf<typeof simpleFilterConditionSchema>>;
 export type FilterGroup = Writable<TypeOf<typeof filterGroupSchema>>;
 export type RawDSLFilter = Writable<TypeOf<typeof rawDSLFilterSchema>>;
-export type FilterOperator = Writable<TypeOf<typeof filterOperatorSchema>>;
 export type FilterValue = Writable<TypeOf<typeof filterValueSchema>>;
 export type RangeValue = Writable<TypeOf<typeof rangeValueSchema>>;
 export type StoredFilterState = TypeOf<typeof appStateSchema> | TypeOf<typeof globalStateSchema>;

@@ -24,7 +24,6 @@ export type {
   SimpleFilterCondition,
   FilterGroup,
   RawDSLFilter,
-  FilterOperator,
   FilterValue,
   RangeValue,
   StoredFilterState,
