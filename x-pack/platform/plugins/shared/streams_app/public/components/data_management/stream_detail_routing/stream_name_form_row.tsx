@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiIcon,
+  EuiFormLabel,
+  EuiScreenReaderOnly,
+  EuiTextTruncate,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 interface StreamNameFormRowProps {
   value: string;
@@ -17,6 +26,7 @@ interface StreamNameFormRowProps {
 }
 
 const MAX_NAME_LENGTH = 200;
+const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 
 export function StreamNameFormRow({
   value,
@@ -24,6 +34,8 @@ export function StreamNameFormRow({
   disabled = false,
   autoFocus = false,
 }: StreamNameFormRowProps) {
+  const descriptionId = useGeneratedHtmlId();
+
   const helpText =
     value.length >= MAX_NAME_LENGTH && !disabled
       ? i18n.translate('xpack.streams.streamDetailRouting.nameHelpText', {
@@ -34,6 +46,19 @@ export function StreamNameFormRow({
         })
       : undefined;
 
+  const { prefix, partitionName } = useMemo(() => {
+    const parts = value.split('.');
+    return {
+      prefix: parts.slice(0, -1).join('.').concat('.'),
+      partitionName: parts[parts.length - 1],
+    };
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPartitionName = e.target.value;
+    onChange(`${prefix}${newPartitionName}`);
+  };
+
   return (
     <EuiFormRow
       fullWidth
@@ -41,16 +66,37 @@ export function StreamNameFormRow({
         defaultMessage: 'Stream name',
       })}
       helpText={helpText}
+      describedByIds={[descriptionId]}
     >
       <EuiFieldText
         data-test-subj="streamsAppRoutingStreamEntryNameField"
-        value={value}
+        value={partitionName}
         fullWidth
         compressed
         disabled={disabled}
         autoFocus={autoFocus}
-        onChange={(e) => onChange(e.target.value)}
-        maxLength={200}
+        onChange={handleChange}
+        maxLength={MAX_NAME_LENGTH - prefix.length}
+        prepend={
+          <>
+            <EuiIcon type="streamsWired" />
+            <EuiFormLabel
+              css={css`
+                inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
+              `}
+              id={descriptionId}
+            >
+              <EuiScreenReaderOnly>
+                <span>
+                  {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
+                    defaultMessage: 'Stream prefix:',
+                  })}
+                </span>
+              </EuiScreenReaderOnly>
+              <EuiTextTruncate text={prefix} truncation="start" />
+            </EuiFormLabel>
+          </>
+        }
       />
     </EuiFormRow>
   );
