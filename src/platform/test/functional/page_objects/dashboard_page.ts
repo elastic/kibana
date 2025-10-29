@@ -642,12 +642,12 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async openSaveSplitMenu() {
-    this.testSubjects.click('dashboardQuickSaveMenuItem-secondary-button');
+    await this.testSubjects.click('dashboardQuickSaveMenuItem-secondary-button');
   }
 
   public async clickInteractiveSave() {
-    if (!this.testSubjects.exists('dashboardInteractiveSaveMenuItem')) {
-      this.openSaveSplitMenu();
+    if (await !this.testSubjects.exists('dashboardInteractiveSaveMenuItem')) {
+      await this.openSaveSplitMenu();
     }
     await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
   }
