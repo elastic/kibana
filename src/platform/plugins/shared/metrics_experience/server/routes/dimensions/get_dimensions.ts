@@ -79,9 +79,13 @@ export const getDimensions = async ({
         agg?.buckets?.map((bucket) => ({
           value: String(bucket.key ?? ''),
           field: dimension,
-          valueMetrics: metrics
-            .filter((metric) => bucket[metric.name]?.doc_count > 0)
-            .map((metric) => metric.name),
+          valueMetrics: [
+            ...new Set(
+              metrics
+                .filter((metric) => bucket[metric.name]?.doc_count > 0)
+                .map((metric) => metric.name)
+            ),
+          ],
         })) ?? []
       );
     });
