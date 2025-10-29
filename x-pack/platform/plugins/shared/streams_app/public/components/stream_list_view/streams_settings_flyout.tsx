@@ -147,7 +147,7 @@ export function StreamsSettingsFlyout({
     },
     {
       id: `${shipperButtonGroupPrefix}__curl`,
-      label: 'Curl',
+      label: 'curl/HTTP',
     },
   ];
   const [selectedShipperId, setSelectedShipperId] = React.useState(
