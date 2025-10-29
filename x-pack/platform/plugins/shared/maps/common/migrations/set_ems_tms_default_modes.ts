@@ -9,7 +9,7 @@ import type { Writable } from '@kbn/utility-types';
 import { DEFAULT_EMS_ROADMAP_ID } from '@kbn/maps-ems-plugin/common';
 import { SOURCE_TYPES } from '../constants';
 import type { LayerDescriptor, EMSTMSSourceDescriptor } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
+import type { StoredMapAttributes } from '../../server';
 
 // LightModeDefault added to EMSTMSSourceDescriptor in 8.0.0
 // to avoid changing auto selected light mode tiles for maps created < 8.0.0
@@ -18,8 +18,8 @@ import type { MapAttributes } from '../content_management';
 export function setEmsTmsDefaultModes({
   attributes,
 }: {
-  attributes: MapAttributes;
-}): MapAttributes {
+  attributes: StoredMapAttributes;
+}): StoredMapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

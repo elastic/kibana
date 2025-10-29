@@ -9,9 +9,9 @@ import type { FC } from 'react';
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSecurityContext } from '../../../hooks/use_security_context';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useBlockListContext } from '../../indicators/hooks/use_block_list_context';
-import { useSetUrlParams } from '../hooks/use_set_url_params';
+import { useSetUrlParams } from '../../../../management/components/artifact_list_page/hooks/use_set_url_params';
 
 export interface AddToBlockListProps {
   /**
@@ -39,11 +39,9 @@ export const AddToBlockListContextMenu: FC<AddToBlockListProps> = ({
   'data-test-subj': dataTestSub,
   onClick,
 }) => {
-  const {
-    blockList: { canWriteBlocklist },
-  } = useSecurityContext();
+  const canWriteBlocklist = useUserPrivileges().endpointPrivileges.canWriteBlocklist;
   const { setBlockListIndicatorValue } = useBlockListContext();
-  const { setUrlParams } = useSetUrlParams();
+  const setUrlParams = useSetUrlParams();
 
   const menuItemClicked = () => {
     onClick();

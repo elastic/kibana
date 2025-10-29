@@ -65,6 +65,7 @@ describe('Jira Fields: Preview', () => {
   const fields = {
     incidentTypes: ['19', '21'],
     severityCode: '5',
+    additionalFields: '{"testField":"testValue"}',
   };
 
   beforeEach(() => {
@@ -80,5 +81,6 @@ describe('Jira Fields: Preview', () => {
 
     expect(getByTextWithMarkup('Incident types: Malware, Denial of Service')).toBeInTheDocument();
     expect(getByTextWithMarkup('Severity: Medium')).toBeInTheDocument();
+    expect(getByTextWithMarkup('{"testField":"testValue"}')).toBeInTheDocument();
   });
 });

@@ -126,8 +126,8 @@ export const FileContents: FC<Props> = ({
   }, [fileContents, semiStructureTextData, grokHighlighter, isSemiStructureTextData, isMounted]);
 
   return (
-    <>
-      <EuiFlexGroup data-test-subj={`dataVisualizerFileContentsPanel_${index}`}>
+    <div data-test-subj={`dataVisualizerFileContentsPanel-${index}`}>
+      <EuiFlexGroup>
         <EuiFlexItem>
           {showTitle ? (
             <EuiTitle size="s">
@@ -176,19 +176,21 @@ export const FileContents: FC<Props> = ({
 
       <EuiSpacer size="s" />
 
-      {highlightedLines === null || showHighlights === false ? (
-        <JsonEditor mode={mode} readOnly={true} value={formattedData} height="200px" />
-      ) : (
-        <>
-          {highlightedLines.map((line, i) => (
-            <React.Fragment key={`line-${i}`}>
-              {line}
-              {i === highlightedLines.length - 1 ? null : <EuiHorizontalRule margin="s" />}
-            </React.Fragment>
-          ))}
-        </>
-      )}
-    </>
+      <div data-test-subj={`dataVisualizerFileContents-${index}`}>
+        {highlightedLines === null || showHighlights === false ? (
+          <JsonEditor mode={mode} readOnly={true} value={formattedData} height="200px" />
+        ) : (
+          <>
+            {highlightedLines.map((line, i) => (
+              <React.Fragment key={`line-${i}`}>
+                {line}
+                {i === highlightedLines.length - 1 ? null : <EuiHorizontalRule margin="s" />}
+              </React.Fragment>
+            ))}
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 

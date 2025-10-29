@@ -35,6 +35,12 @@
       "end": {
         "type": "date"
       },
+      "initiator": {
+        "type": "keyword"
+      },
+      "initiatorId": {
+        "type": "keyword"
+      },
       "rule": {
         "properties": {
           "alertTypeId": {
@@ -638,6 +644,9 @@
           },
           "value": {
             "type": "keyword"
+          },
+          "description": {
+            "type": "keyword"
           }
         },
         "type": "nested"
@@ -647,10 +656,10 @@
       },
       "settings": {
         "properties": {
-          "syncAlerts": {
+          "extractObservables": {
             "type": "boolean"
           },
-          "extractObservables": {
+          "syncAlerts": {
             "type": "boolean"
           }
         }
@@ -676,6 +685,9 @@
         "type": "integer"
       },
       "total_comments": {
+        "type": "integer"
+      },
+      "total_events": {
         "type": "integer"
       },
       "updated_at": {
@@ -3128,6 +3140,9 @@
       },
       "dataViewId": {
         "type": "keyword"
+      },
+      "enableResetToZero": {
+        "type": "boolean"
       },
       "enabled": {
         "type": "boolean"

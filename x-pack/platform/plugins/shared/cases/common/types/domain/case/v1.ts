@@ -151,7 +151,7 @@ export const CaseRt = rt.intersection([
     id: rt.string,
     totalComment: rt.number,
     totalAlerts: rt.number,
-    totalEvents: rt.number,
+    totalEvents: rt.union([rt.number, rt.undefined]),
     version: rt.string,
   }),
   rt.exact(

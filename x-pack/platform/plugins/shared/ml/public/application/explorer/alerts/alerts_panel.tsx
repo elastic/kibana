@@ -36,7 +36,7 @@ import type { AlertsTableSortCombinations } from '@kbn/response-ops-alerts-table
 import { ML_RULE_TYPE_IDS } from '../../../../common';
 import { ML_VALID_CONSUMERS } from '../../../../common/constants/alerts';
 import { AlertActions } from '../../../alerting/anomaly_detection_alerts_table/alert_actions';
-import { AlertsTableFlyoutBody } from '../../../alerting/anomaly_detection_alerts_table/flyout_body';
+import { AlertsTableFlyout } from '../../../alerting/anomaly_detection_alerts_table/alerts_table_flyout';
 import { CollapsiblePanel } from '../../components/collapsible_panel';
 import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
@@ -200,6 +200,7 @@ export const AlertsPanel: FC = () => {
           options={toggleButtons}
           idSelected={toggleSelected}
           onChange={setToggleSelected}
+          data-test-subj="mlAlertsPanelToggle"
         />
         <EuiSpacer size="m" />
 
@@ -210,15 +211,16 @@ export const AlertsPanel: FC = () => {
             consumers={ML_VALID_CONSUMERS}
             query={alertsQuery}
             columns={columns}
-            initialSort={sort}
+            sort={sort}
             renderCellValue={AlertsTableCellValue}
-            renderFlyoutBody={AlertsTableFlyoutBody}
+            renderExpandedAlertView={AlertsTableFlyout}
             renderActionsCell={AlertActions}
             casesConfiguration={{
               appId: MANAGEMENT_APP_ID,
               featureId: CASE_GENERAL_ID,
               owner: [CASE_APP_ID],
               syncAlerts: false,
+              extractObservables: false,
             }}
             showAlertStatusWithFlapping
             services={{

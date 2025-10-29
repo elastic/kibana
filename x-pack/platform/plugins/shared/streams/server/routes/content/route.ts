@@ -9,7 +9,6 @@ import { Readable } from 'stream';
 import { z } from '@kbn/zod';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
-import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
@@ -24,8 +23,8 @@ import {
   prepareStreamsForImport,
   scopeContentPackStreams,
   scopeIncludedObjects,
+  withoutBaseFields,
 } from '../../lib/content/stream';
-import { baseFields } from '../../lib/streams/component_templates/logs_layer';
 import { asTree } from '../../lib/content/stream/tree';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
@@ -82,14 +81,11 @@ const exportContentRoute = createServerRoute({
       }),
       streams: [root, ...descendants].map((stream) => {
         if (stream.name === params.path.name) {
-          // merge inherited mappings into the exported root
-          const mergedFields = { ...inheritedFields, ...stream.ingest.wired.fields };
-          stream.ingest.wired.fields = Object.keys(mergedFields)
-            .filter((key) => !baseFields[key])
-            .reduce((fields, key) => {
-              fields[key] = omit(mergedFields[key], 'from');
-              return fields;
-            }, {} as FieldDefinition);
+          // merge non-base inherited mappings into the exported root
+          stream.ingest.wired.fields = withoutBaseFields({
+            ...inheritedFields,
+            ...stream.ingest.wired.fields,
+          });
         }
 
         return asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] });

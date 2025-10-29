@@ -8,26 +8,40 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MetricsGridProps } from './metrics_grid';
 import { MetricsGrid } from './metrics_grid';
 import { Chart } from './chart';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import type { UnifiedHistogramFetchMessage } from '@kbn/unified-histogram/types';
 
 jest.mock('./chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
 }));
 
 describe('MetricsGrid', () => {
+  let discoverFetch$: BehaviorSubject<UnifiedHistogramFetchMessage>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    discoverFetch$ = new BehaviorSubject({ type: 'fetch' });
+  });
+
+  afterEach(() => {
+    discoverFetch$.complete();
+  });
+
   const requestParams: MetricsGridProps['requestParams'] = {
     filters: [],
     getTimeRange: () => ({ from: 'now-1h', to: 'now' }),
     query: {
       esql: 'FROM metrics-*',
     },
+    esqlVariables: [],
     relativeTimeRange: { from: 'now-1h', to: 'now' },
     updateTimeRange: () => {},
   };
@@ -39,13 +53,13 @@ describe('MetricsGrid', () => {
   const fields: MetricsGridProps['fields'] = [
     {
       name: 'system.cpu.utilization',
-      dimensions: [{ name: 'host.name', type: 'keyword' }],
+      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       index: 'metrics-*',
       type: 'long',
     },
     {
       name: 'system.memory.utilization',
-      dimensions: [{ name: 'host.name', type: 'keyword' }],
+      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       index: 'metrics-*',
       type: 'long',
     },
@@ -56,8 +70,7 @@ describe('MetricsGrid', () => {
       <MetricsGrid
         columns={3}
         dimensions={[]}
-        pivotOn="metric"
-        discoverFetch$={new Subject()}
+        discoverFetch$={discoverFetch$}
         fields={fields}
         requestParams={requestParams}
         services={services}
@@ -74,8 +87,7 @@ describe('MetricsGrid', () => {
       <MetricsGrid
         columns={3}
         dimensions={['host.name']}
-        pivotOn="metric"
-        discoverFetch$={new Subject()}
+        discoverFetch$={discoverFetch$}
         fields={fields}
         requestParams={requestParams}
         services={services}
@@ -89,8 +101,7 @@ describe('MetricsGrid', () => {
       <MetricsGrid
         columns={4}
         dimensions={['host.name']}
-        pivotOn="metric"
-        discoverFetch$={new Subject()}
+        discoverFetch$={discoverFetch$}
         fields={fields}
         requestParams={requestParams}
         services={services}
@@ -104,6 +115,11 @@ describe('MetricsGrid', () => {
   describe('MetricsGrid keyboard navigation', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     it('renders with proper ARIA grid attributes', () => {
@@ -111,8 +127,7 @@ describe('MetricsGrid', () => {
         <MetricsGrid
           columns={2}
           dimensions={[]}
-          pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
           requestParams={requestParams}
           services={services}
@@ -136,8 +151,7 @@ describe('MetricsGrid', () => {
         <MetricsGrid
           columns={2}
           dimensions={[]}
-          pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
           requestParams={requestParams}
           services={services}
@@ -160,14 +174,13 @@ describe('MetricsGrid', () => {
     });
 
     it('should handle arrow key navigation correctly', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <MetricsGrid
           columns={2}
           dimensions={[]}
-          pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
           requestParams={requestParams}
           services={services}
@@ -193,14 +206,13 @@ describe('MetricsGrid', () => {
     });
 
     it('should handle clicking on cells to focus them', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <MetricsGrid
           columns={2}
           dimensions={[]}
-          pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
           requestParams={requestParams}
           services={services}
@@ -218,18 +230,18 @@ describe('MetricsGrid', () => {
     });
 
     it('should handle vertical arrow navigation in multi-row grid', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const multipleFields = [
         ...fields,
         {
           name: 'system.disk.utilization',
-          dimensions: [{ name: 'host.name', type: 'keyword' }],
+          dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
           index: 'metrics-*',
           type: 'long',
         },
         {
           name: 'system.network.utilization',
-          dimensions: [{ name: 'host.name', type: 'keyword' }],
+          dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
           index: 'metrics-*',
           type: 'long',
         },
@@ -239,8 +251,7 @@ describe('MetricsGrid', () => {
         <MetricsGrid
           columns={2}
           dimensions={[]}
-          pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={multipleFields}
           requestParams={requestParams}
           services={services}
@@ -263,6 +274,123 @@ describe('MetricsGrid', () => {
       await user.keyboard('{ArrowUp}');
       expect(gridCells[2]).toHaveAttribute('tabindex', '-1');
       expect(gridCells[0]).toHaveAttribute('tabindex', '0');
+    });
+  });
+
+  describe('MetricsGrid focus management', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // Mock setTimeout to run synchronously in tests
+      jest.spyOn(global, 'setTimeout').mockImplementation((callback: any) => {
+        callback();
+        return 0 as any;
+      });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    describe('Chart ref management', () => {
+      it('should generate unique chart IDs for each metric', () => {
+        render(
+          <MetricsGrid
+            columns={2}
+            dimensions={[]}
+            discoverFetch$={discoverFetch$}
+            fields={fields}
+            requestParams={requestParams}
+            services={services}
+            filters={[]}
+          />
+        );
+
+        const chartDiv1 = document.getElementById('system.cpu.utilization-0');
+        const chartDiv2 = document.getElementById('system.memory.utilization-1');
+
+        expect(chartDiv1).toBeTruthy();
+        expect(chartDiv2).toBeTruthy();
+      });
+
+      it('should store chart refs with proper data attributes', () => {
+        render(
+          <MetricsGrid
+            columns={2}
+            dimensions={[]}
+            discoverFetch$={discoverFetch$}
+            fields={fields}
+            requestParams={requestParams}
+            services={services}
+            filters={[]}
+          />
+        );
+
+        const gridCells = screen.getAllByRole('gridcell');
+
+        // Verify grid cells have proper tracking attributes
+        expect(gridCells[0]).toHaveAttribute('data-grid-cell', '0-0');
+        expect(gridCells[1]).toHaveAttribute('data-grid-cell', '0-1');
+      });
+    });
+
+    describe('Focus state management', () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('should update focus state when cell receives focus', async () => {
+        const user = userEvent.setup({ delay: null });
+
+        render(
+          <MetricsGrid
+            columns={2}
+            dimensions={[]}
+            discoverFetch$={discoverFetch$}
+            fields={fields}
+            requestParams={requestParams}
+            services={services}
+            filters={[]}
+          />
+        );
+
+        const gridCells = screen.getAllByRole('gridcell');
+
+        // Focus the second cell
+        await user.click(gridCells[1]);
+
+        // Verify focus state updated correctly
+        expect(gridCells[0]).toHaveAttribute('tabindex', '-1');
+        expect(gridCells[1]).toHaveAttribute('tabindex', '0');
+      });
+
+      it('should handle programmatic focus correctly', () => {
+        render(
+          <MetricsGrid
+            columns={2}
+            dimensions={[]}
+            discoverFetch$={discoverFetch$}
+            fields={fields}
+            requestParams={requestParams}
+            services={services}
+            filters={[]}
+          />
+        );
+
+        const gridCells = screen.getAllByRole('gridcell');
+
+        // Simulate programmatic focus (like from flyout closing)
+        act(() => gridCells[1].focus());
+        act(() => fireEvent.focus(gridCells[1]));
+
+        // Verify focus state and DOM focus
+        expect(document.activeElement).toBe(gridCells[1]);
+        expect(gridCells[1]).toHaveAttribute('tabindex', '0');
+        expect(gridCells[0]).toHaveAttribute('tabindex', '-1');
+      });
     });
   });
 });

@@ -13,7 +13,8 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { estypes } from '@elastic/elasticsearch';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import { semconvFlat } from '@kbn/otel-semantic-conventions';
-import type { DataStreamFieldCapsMap } from '../../types';
+import { dateRangeQuery } from '@kbn/es-query';
+import type { DataStreamFieldCapsMap, EpochTimeRange } from '../../types';
 import type { Dimension, MetricField } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import { normalizeUnit } from './normalize_unit';
@@ -28,8 +29,8 @@ function isErrorResponseBase(subject: unknown): subject is ErrorResponseBase {
   return typeof subject === 'object' && subject !== null && 'error' in subject;
 }
 
-function generateMapKey(indexName: string, fieldName: string) {
-  return `${indexName}>${fieldName}`;
+export function generateMapKey(indexName: string, fieldName: string) {
+  return `${fieldName}>${indexName}`;
 }
 
 function buildMetricMetadataMap(
@@ -94,10 +95,12 @@ export async function sampleMetricMetadata({
   esClient,
   metricFields,
   logger,
+  timerange: { from, to },
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   logger: Logger;
+  timerange: EpochTimeRange;
 }): Promise<MetricMetadataMap> {
   if (metricFields.length === 0) {
     return new Map();
@@ -112,8 +115,15 @@ export async function sampleMetricMetadata({
         size: 1,
         terminate_after: 1,
         query: {
-          exists: {
-            field,
+          bool: {
+            filter: [
+              {
+                exists: {
+                  field,
+                },
+              },
+              ...dateRangeQuery(from, to),
+            ],
           },
         },
         _source: false,
@@ -141,11 +151,13 @@ export async function enrichMetricFields({
   metricFields,
   dataStreamFieldCapsMap,
   logger,
+  timerange,
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   dataStreamFieldCapsMap: DataStreamFieldCapsMap;
   logger: Logger;
+  timerange: EpochTimeRange;
 }) {
   if (metricFields.length === 0) {
     return metricFields;
@@ -155,6 +167,7 @@ export async function enrichMetricFields({
     esClient,
     metricFields,
     logger,
+    timerange,
   });
 
   const uniqueDimensionSets = new Map<string, Array<Dimension>>();

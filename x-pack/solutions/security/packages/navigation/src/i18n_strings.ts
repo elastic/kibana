@@ -37,11 +37,6 @@ export const i18nStrings = {
         'This functionality is experimental and not supported. It may change or be removed at any time.',
     }),
   },
-  launchpad: {
-    title: i18n.translate('securitySolutionPackages.navLinks.launchpad', {
-      defaultMessage: 'Security launchpad',
-    }),
-  },
   assets: {
     title: i18n.translate('securitySolutionPackages.navLinks.assets', {
       defaultMessage: 'Assets',
@@ -249,8 +244,8 @@ export const i18nStrings = {
   // also used in sidenav v2
   // for serverless tiers (EASE (search_ai_lake|ai_soc_engine) | essential | complete)
   ingestAndManageData: {
-    title: i18n.translate('securitySolutionPackages.navLinks.ingestAndManageData', {
-      defaultMessage: 'Ingest and Manage Data',
+    title: i18n.translate('securitySolutionPackages.navLinks.dataManagement', {
+      defaultMessage: 'Data management',
     }),
     ingestAndIntegrations: {
       title: i18n.translate(
@@ -260,11 +255,11 @@ export const i18nStrings = {
         }
       ),
     },
-    indicesDsAndRollups: {
+    indicesAndDataStreams: {
       title: i18n.translate(
-        'securitySolutionPackages.navLinks.ingestAndManageData.indicesDsAndRollups',
+        'securitySolutionPackages.navLinks.ingestAndManageData.indicesAndDataStreams',
         {
-          defaultMessage: 'Indices, Data Streams, and roll ups',
+          defaultMessage: 'Indices and data streams',
         }
       ),
     },

@@ -58,6 +58,7 @@ export const renderApp = ({
 
   const appWrapperClassName = css`
     overflow: auto;
+    height: 0;
   `;
   const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
   appWrapperElement.classList.add(appWrapperClassName);

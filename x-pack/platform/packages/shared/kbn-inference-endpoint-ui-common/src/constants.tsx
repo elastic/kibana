@@ -31,6 +31,7 @@ export enum ServiceProviderKeys {
   watsonxai = 'watsonxai',
   ai21 = 'ai21',
   llama = 'llama',
+  contextualai = 'contextualai',
 }
 
 export const GEMINI_REGION_DOC_LINK = (

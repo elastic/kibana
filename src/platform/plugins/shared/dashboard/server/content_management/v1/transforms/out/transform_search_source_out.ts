@@ -10,14 +10,14 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import type { DashboardAttributes, DashboardQuery } from '../../types';
+import type { DashboardState } from '../../types';
 import { migrateLegacyQuery, cleanFiltersForSerialize } from '../../../../../common';
 import { logger } from '../../../../kibana_services';
 
 export function transformSearchSourceOut(
-  kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta'],
+  kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta'] = {},
   references: SavedObjectReference[] = []
-): DashboardAttributes['kibanaSavedObjectMeta'] {
+): Pick<DashboardState, 'filters' | 'query'> {
   const { searchSourceJSON } = kibanaSavedObjectMeta;
   if (!searchSourceJSON) {
     return {};
@@ -27,7 +27,7 @@ export function transformSearchSourceOut(
     parsedSearchSource = parseSearchSourceJSON(searchSourceJSON);
   } catch (parseError) {
     logger.warn(`Unable to parse searchSourceJSON. Error: ${parseError.message}`);
-    return { searchSource: {} };
+    return {};
   }
 
   let searchSource;
@@ -44,16 +44,11 @@ export function transformSearchSourceOut(
   try {
     const filters = cleanFiltersForSerialize(searchSource.filter);
     const query = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
-    return { searchSource: { filters, query } };
+    return { filters, query };
   } catch (error) {
     logger.warn(
       `Unexpected error transforming filter and query state on read. Error: ${error.message}`
     );
-    return {
-      searchSource: {
-        filters: searchSource.filter,
-        query: searchSource.query as DashboardQuery,
-      },
-    };
+    return {};
   }
 }

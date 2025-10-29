@@ -81,6 +81,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
           config,
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -99,8 +100,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [url]: expected value of type [string] but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"url\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -142,8 +142,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [token]: expected value of type [string] but got [undefined]',
+              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"token\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -179,8 +178,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: d3SecurityActionId,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -307,8 +305,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: d3SecurityActionId,
-              message:
-                'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+              message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

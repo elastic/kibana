@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
@@ -41,7 +42,7 @@ export const CertStatusColumn: React.FC<Props> = ({ expiry, boldStyle = false })
   const CertStatus = ({ color, text }: { color: string; text: string }) => {
     return (
       <EuiToolTip content={moment(notAfter).format('L LT')}>
-        <EuiText size="s">
+        <EuiText size="s" tabIndex={0}>
           <EuiIcon color={color} type="lock" size="s" />
           {boldStyle ? (
             <H4Text>
@@ -64,5 +65,11 @@ export const CertStatusColumn: React.FC<Props> = ({ expiry, boldStyle = false })
     return <CertStatus color="danger" text={EXPIRED} />;
   }
 
-  return certStatus ? <CertStatus color="success" text={EXPIRES} /> : <span>--</span>;
+  return certStatus ? (
+    <CertStatus color="success" text={EXPIRES} />
+  ) : (
+    <span>
+      {i18n.translate('xpack.uptime.certStatusColumn.span.Label', { defaultMessage: '--' })}
+    </span>
+  );
 };

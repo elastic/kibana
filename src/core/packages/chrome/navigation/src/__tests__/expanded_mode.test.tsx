@@ -12,6 +12,7 @@ import { render, screen, within, waitFor, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import { TestComponent } from './test_component';
+import { flushPopoverTimers } from './flush_popover_timers';
 import { basicMock } from '../mocks/basic_navigation';
 import { observabilityMock } from '../mocks/observability';
 import { securityMock } from '../mocks/security';
@@ -27,6 +28,8 @@ const appsItemId = basicMock.navItems.primaryItems[2].id;
 const resultExplorerItemId = securityMock.navItems.primaryItems[11].sections?.[2].items[0].id;
 
 describe('Expanded mode', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+
   beforeAll(() => {
     // Mock the client height for the primary menu item
     mockClientHeight(mockMenuItemHeight);
@@ -34,6 +37,13 @@ describe('Expanded mode', () => {
     jest.mock('../utils/get_style_property', () => ({
       getStyleProperty: jest.fn(() => mockExpandedMenuGap),
     }));
+  });
+
+  beforeEach(() => {
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
   });
 
   it('should render the side navigation', () => {
@@ -82,7 +92,8 @@ describe('Expanded mode', () => {
           name: 'Apps',
         });
 
-        await userEvent.hover(appsLink);
+        await user.hover(appsLink);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'Apps',
@@ -114,7 +125,8 @@ describe('Expanded mode', () => {
         expect(appsLink).toHaveAttribute('aria-current', 'page');
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.hover(appsLink);
+        await user.hover(appsLink);
+        flushPopoverTimers();
 
         const popover = screen.queryByRole('dialog', {
           name: 'Apps',
@@ -147,7 +159,7 @@ describe('Expanded mode', () => {
 
         expect(appsLink).toHaveAttribute('href', expectedHref);
 
-        await userEvent.click(appsLink);
+        await user.click(appsLink);
 
         const sidePanel = await screen.findByRole('region', {
           name: 'Side panel for Apps',
@@ -175,11 +187,13 @@ describe('Expanded mode', () => {
           appsLink.focus();
         });
 
-        await userEvent.keyboard('{enter}');
-
         const popover = await screen.findByRole('dialog', {
           name: 'Apps',
         });
+
+        expect(popover).toBeInTheDocument();
+
+        await user.keyboard('{Enter}');
 
         const overviewLink = within(popover).getByRole('link', {
           name: 'Overview',
@@ -203,7 +217,8 @@ describe('Expanded mode', () => {
           name: 'Dashboards',
         });
 
-        await userEvent.hover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
 
         const popover = screen.queryByRole('dialog');
 
@@ -229,7 +244,7 @@ describe('Expanded mode', () => {
 
         expect(dashboardsLink).toHaveAttribute('href', expectedHref);
 
-        await userEvent.click(dashboardsLink);
+        await user.click(dashboardsLink);
 
         const sidePanel = screen.queryByRole('region', {
           name: /Side panel/,
@@ -260,7 +275,7 @@ describe('Expanded mode', () => {
           dashboardsLink.focus();
         });
 
-        await userEvent.keyboard('{enter}');
+        await user.keyboard('{enter}');
 
         const sidePanel = screen.queryByRole('region', {
           name: /Side panel/,
@@ -289,7 +304,8 @@ describe('Expanded mode', () => {
           name: 'Dashboards',
         });
 
-        await userEvent.hover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip');
         const betaIcon = tooltip.querySelector('[data-euiicon-type="beta"]');
@@ -319,7 +335,8 @@ describe('Expanded mode', () => {
           name: 'Cases',
         });
 
-        await userEvent.hover(casesLink);
+        await user.hover(casesLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip');
         const flaskIcon = tooltip.querySelector('[data-euiicon-type="flask"]');
@@ -368,11 +385,12 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -394,8 +412,7 @@ describe('Expanded mode', () => {
        * - AND I should be redirected to that item’s href
        * AND I should see a side panel with that submenu
        */
-      // TODO: fix; fails in CI
-      it.skip('should open side panel when clicking submenu item inside "More" popover', async () => {
+      it('should open side panel when clicking submenu item inside "More" popover', async () => {
         render(
           <TestComponent
             isCollapsed={false}
@@ -404,11 +421,12 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -418,7 +436,7 @@ describe('Expanded mode', () => {
           name: 'Machine learning',
         });
 
-        await userEvent.click(mlButton);
+        await user.click(mlButton);
 
         expect(popover).toBeInTheDocument();
 
@@ -432,7 +450,7 @@ describe('Expanded mode', () => {
           name: 'Anomaly explorer',
         });
 
-        await userEvent.click(anomalyExplorerLink);
+        await user.click(anomalyExplorerLink);
 
         const sidePanel = await screen.findByRole('region', {
           name: 'Side panel for Machine learning',
@@ -472,11 +490,12 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -486,7 +505,11 @@ describe('Expanded mode', () => {
           name: 'Coverage',
         });
 
-        await userEvent.click(coverageLink);
+        await user.click(coverageLink);
+
+        await waitFor(() => {
+          expect(popover).not.toBeInTheDocument();
+        });
 
         const sidePanel = screen.queryByRole('region', {
           name: /Side panel/,
@@ -515,13 +538,13 @@ describe('Expanded mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
         expect(moreButton).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -535,7 +558,7 @@ describe('Expanded mode', () => {
 
         expect(mlButton).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.click(mlButton);
+        await user.click(mlButton);
 
         const mlHeader = await within(popover).findByText('Machine learning');
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { NULL_LABEL } from '@kbn/field-formats-common';
+
 /**
  * Convert a value to a presentable string
  */
@@ -14,7 +16,7 @@ export function asPrettyString(
   val: unknown,
   options?: { skipFormattingInStringifiedJSON?: boolean }
 ): string {
-  if (val === null || val === undefined) return ' - ';
+  if (val === null || val === undefined) return NULL_LABEL;
   switch (typeof val) {
     case 'string':
       return val;

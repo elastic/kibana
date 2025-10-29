@@ -51,7 +51,7 @@ import type {
   RolloverAction,
   UpdateDefaultIngestPipelineAction,
   UnlinkAssetsAction,
-  UnlinkSystemsAction,
+  UnlinkFeaturesAction,
   UpdateIngestSettingsAction,
 } from './types';
 
@@ -87,7 +87,7 @@ export class ExecutionPlan {
       update_data_stream_mappings: [],
       delete_queries: [],
       unlink_assets: [],
-      unlink_systems: [],
+      unlink_features: [],
       update_ingest_settings: [],
     };
   }
@@ -177,7 +177,7 @@ export class ExecutionPlan {
         update_data_stream_mappings,
         delete_queries,
         unlink_assets,
-        unlink_systems,
+        unlink_features,
         update_ingest_settings,
         ...rest
       } = this.actionsByType;
@@ -218,7 +218,7 @@ export class ExecutionPlan {
         this.deleteIngestPipelines(delete_ingest_pipeline),
         this.deleteQueries(delete_queries),
         this.unlinkAssets(unlink_assets),
-        this.unlinkSystems(unlink_systems),
+        this.unlinkFeatures(unlink_features),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
@@ -256,14 +256,14 @@ export class ExecutionPlan {
     );
   }
 
-  private async unlinkSystems(actions: UnlinkSystemsAction[]) {
+  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
     if (actions.length === 0) {
       return;
     }
 
     return Promise.all(
       actions.map((action) =>
-        this.dependencies.systemClient.syncSystemList(action.request.name, [])
+        this.dependencies.featureClient.syncFeatureList(action.request.name, [])
       )
     );
   }

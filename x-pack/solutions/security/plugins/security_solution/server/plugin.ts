@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { LogMeta, Logger } from '@kbn/core/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -70,12 +70,12 @@ import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import type { ITelemetryEventsSender } from './lib/telemetry/sender';
-import { type IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
+import { type IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
 import {
+  AsyncTelemetryEventsSender,
   DEFAULT_QUEUE_CONFIG,
   DEFAULT_RETRY_CONFIG,
-  AsyncTelemetryEventsSender,
 } from './lib/telemetry/async_sender';
 import type { ITelemetryReceiver } from './lib/telemetry/receiver';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
@@ -108,7 +108,7 @@ import type {
 } from './plugin_contract';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
-import { type CdnConfig, artifactService } from './lib/telemetry/artifact';
+import { artifactService, type CdnConfig } from './lib/telemetry/artifact';
 import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import {
@@ -126,8 +126,8 @@ import {
 } from './lib/entity_analytics/entity_store/tasks';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
-  latestRiskScoreIndexPattern,
   allRiskScoreIndexPattern,
+  latestRiskScoreIndexPattern,
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { assistantTools } from './assistant/tools';
@@ -251,18 +251,16 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
-    if (experimentalFeatures.riskScoringPersistence) {
-      registerRiskScoringTask({
-        getStartServices: core.getStartServices,
-        kibanaVersion: pluginContext.env.packageInfo.version,
-        logger: this.logger,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        taskManager: plugins.taskManager,
-        telemetry: core.analytics,
-        entityAnalyticsConfig: config.entityAnalytics,
-        experimentalFeatures,
-      });
-    }
+    registerRiskScoringTask({
+      getStartServices: core.getStartServices,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      logger: this.logger,
+      auditLogger: plugins.security?.audit.withoutRequest,
+      taskManager: plugins.taskManager,
+      telemetry: core.analytics,
+      entityAnalyticsConfig: config.entityAnalytics,
+      experimentalFeatures,
+    });
 
     scheduleEntityAnalyticsMigration({
       getStartServices: core.getStartServices,
@@ -309,6 +307,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       telemetry: core.analytics,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      config: this.config,
     });
 
     const requestContextFactory = new RequestContextFactory({
@@ -646,9 +645,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
 
     // Assistant Tool and Feature Registration
-    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolEnabled
-      ? assistantTools
-      : assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID);
+    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolDisabled
+      ? assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID)
+      : assistantTools;
 
     plugins.elasticAssistant.registerTools(APP_UI_ID, filteredTools);
     const features = {

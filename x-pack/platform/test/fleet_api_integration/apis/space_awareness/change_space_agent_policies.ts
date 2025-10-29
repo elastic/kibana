@@ -19,6 +19,7 @@ import { SpaceTestApiClient } from './api_helper';
 import {
   cleanFleetIndices,
   createFleetAgent,
+  createTestSpace,
   expectToRejectWithError,
   expectToRejectWithNotFound,
   getFleetAgentDoc,
@@ -113,7 +114,7 @@ export default function (providerContext: FtrProviderContext) {
         inputs: {},
       });
       defaultPackagePolicy1 = packagePolicyRes;
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     after(async () => {
@@ -289,7 +290,7 @@ export default function (providerContext: FtrProviderContext) {
               description: 'tata',
               space_ids: ['default', TEST_SPACE_1],
             }),
-          /400 Bad Request Not enough permissions to create policies in space test1/
+          /400 "Bad Request" Not enough permissions to create policies in space test1/
         );
       });
 
@@ -314,7 +315,7 @@ export default function (providerContext: FtrProviderContext) {
               description: 'tata',
               space_ids: ['default'],
             }),
-          /400 Bad Request Not enough permissions to remove policies from space test1/
+          /400 "Bad Request" Not enough permissions to remove policies from space test1/
         );
       });
     });

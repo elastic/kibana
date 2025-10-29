@@ -77,7 +77,13 @@ describe('calculateAndPersistRiskScores', () => {
       it('returns an appropriate response', async () => {
         const results = await calculate();
 
-        expect(results).toEqual({ after_keys: {}, errors: [], scores_written: 0 });
+        const entities = {
+          host: ['hostname'],
+          user: [],
+          service: [],
+          generic: [],
+        };
+        expect(results).toEqual({ after_keys: {}, errors: [], scores_written: 0, entities });
       });
     });
     describe('with risk scores to persist', () => {
@@ -119,7 +125,13 @@ describe('calculateAndPersistRiskScores', () => {
       it('returns an appropriate response', async () => {
         const results = await calculate();
 
-        expect(results).toEqual({ after_keys: {}, errors: [], scores_written: 0 });
+        const entities = {
+          host: ['hostname'],
+          user: [],
+          service: [],
+          generic: [],
+        };
+        expect(results).toEqual({ after_keys: {}, errors: [], scores_written: 0, entities });
       });
     });
     describe('with risk scores to persist', () => {

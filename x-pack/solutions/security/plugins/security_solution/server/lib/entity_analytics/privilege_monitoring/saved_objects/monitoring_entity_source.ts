@@ -36,7 +36,8 @@ export class MonitoringEntitySourceDescriptorClient {
     const { id, attributes: created } =
       await this.dependencies.soClient.create<CreateMonitoringEntitySource>(
         monitoringEntitySourceTypeName,
-        { ...attributes, managed: attributes.managed ?? false } // Ensure managed is set to true on creation
+        { ...attributes, managed: attributes.managed ?? false }, // Ensure managed is set to true on creation
+        { refresh: 'wait_for' }
       );
 
     return { ...created, id };
@@ -47,7 +48,8 @@ export class MonitoringEntitySourceDescriptorClient {
       sources.map((source) => ({
         type: monitoringEntitySourceTypeName,
         attributes: { ...source },
-      }))
+      })),
+      { refresh: 'wait_for' }
     );
     return createdSources;
   }
@@ -151,6 +153,17 @@ export class MonitoringEntitySourceDescriptorClient {
       .map((so) => ({ ...so.attributes, id: so.id }));
   }
 
+  public async findByQuery(query: string): Promise<MonitoringEntitySource[]> {
+    const scopedSoClient = this.dependencies.soClient;
+
+    const results = await scopedSoClient.find<MonitoringEntitySource>({
+      type: monitoringEntitySourceTypeName,
+      filter: query,
+      namespaces: [this.dependencies.namespace],
+    });
+    return results.saved_objects.map((so) => ({ ...so.attributes, id: so.id }));
+  }
+
   private async assertNameUniqueness(attributes: Partial<MonitoringEntitySource>): Promise<void> {
     if (attributes.name) {
       const { saved_objects: savedObjects } = await this.find({
@@ -168,5 +181,44 @@ export class MonitoringEntitySourceDescriptorClient {
         );
       }
     }
+  }
+
+  /**
+   * Integrations Specific Methods
+   */
+  async updateLastProcessedMarker(
+    source: MonitoringEntitySource,
+    lastProcessedMarker: string
+  ): Promise<void> {
+    await this.update({
+      ...source,
+      integrations: {
+        syncData: {
+          lastUpdateProcessed: lastProcessedMarker,
+        },
+      },
+    });
+  }
+
+  async getLastProcessedMarker(source: MonitoringEntitySource): Promise<string | undefined> {
+    return source.integrations?.syncData?.lastUpdateProcessed;
+  }
+
+  async getLastFullSyncMarker(source: MonitoringEntitySource): Promise<string | undefined> {
+    return source.integrations?.syncData?.lastFullSync;
+  }
+
+  async updateLastFullSyncMarker(
+    source: MonitoringEntitySource,
+    lastFullSyncMarker: string
+  ): Promise<void> {
+    await this.update({
+      ...source,
+      integrations: {
+        syncData: {
+          lastFullSync: lastFullSyncMarker,
+        },
+      },
+    });
   }
 }

@@ -27,12 +27,24 @@ interface Props {
 
 export const FileClashResult: FC<Props> = ({ fileClash }) => {
   if (fileClash.clash === CLASH_ERROR_TYPE.ERROR) {
-    return <EuiCallOut color="danger" iconType="warning" title={getClashText(fileClash)} />;
+    return (
+      <EuiCallOut
+        announceOnMount
+        color="danger"
+        iconType="warning"
+        title={getClashText(fileClash)}
+      />
+    );
   }
 
   if (fileClash.clash === CLASH_ERROR_TYPE.WARNING) {
     return (
-      <EuiCallOut color="warning" iconType="warning" title={getClashText(fileClash)}>
+      <EuiCallOut
+        announceOnMount
+        color="warning"
+        iconType="warning"
+        title={getClashText(fileClash)}
+      >
         {fileClash.newFields?.length || fileClash.missingFields?.length ? (
           <EuiSpacer size="s" />
         ) : null}
@@ -120,7 +132,7 @@ export const FileClashIcon: FC<Props> = ({ fileClash }) => {
     case CLASH_ERROR_TYPE.ERROR:
       return (
         <EuiToolTip content={getClashText(fileClash)}>
-          <EuiBadge color={euiTheme.colors.backgroundBaseDanger}>
+          <EuiBadge tabIndex={0} color={euiTheme.colors.backgroundBaseDanger}>
             <EuiIcon type="alert" color="danger" size="m" />
           </EuiBadge>
         </EuiToolTip>
@@ -128,7 +140,7 @@ export const FileClashIcon: FC<Props> = ({ fileClash }) => {
     case CLASH_ERROR_TYPE.WARNING:
       return (
         <EuiToolTip content={getClashText(fileClash)}>
-          <EuiBadge color={euiTheme.colors.backgroundBaseWarning}>
+          <EuiBadge tabIndex={0} color={euiTheme.colors.backgroundBaseWarning}>
             <EuiIcon type="warning" color="warning" size="m" />
           </EuiBadge>
         </EuiToolTip>

@@ -53,6 +53,12 @@ export const DOCUMENT_TYPE_ENTITY = 'entity' as const;
 export const entitySchema = schema.object({
   name: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
+  sub_type: schema.maybe(schema.string()),
+  host: schema.maybe(
+    schema.object({
+      ip: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export const nodeDocumentDataSchema = schema.object({
@@ -149,6 +155,9 @@ export const labelNodeDataSchema = schema.allOf([
     parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
     ips: schema.maybe(schema.arrayOf(schema.string())),
+    count: schema.maybe(schema.number()),
+    uniqueEventsCount: schema.maybe(schema.number()),
+    uniqueAlertsCount: schema.maybe(schema.number()),
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),

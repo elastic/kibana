@@ -23,7 +23,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { DashboardAttributes } from '../../server/content_management';
+import type { DashboardState } from '../../server';
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
   getDashboardBackupService,
@@ -130,7 +130,7 @@ const DashboardUnsavedItem = ({
 };
 
 interface UnsavedItemMap {
-  [key: string]: DashboardAttributes;
+  [key: string]: DashboardState;
 }
 
 export interface DashboardUnsavedListingProps {
@@ -209,6 +209,7 @@ export const DashboardUnsavedListing = ({
   return unsavedDashboardIds.length === 0 ? null : (
     <>
       <EuiCallOut
+        announceOnMount
         heading="h3"
         data-test-subj="unsavedDashboardsCallout"
         title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(

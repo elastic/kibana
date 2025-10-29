@@ -5,35 +5,36 @@
  * 2.0.
  */
 
-import type { Condition } from '@kbn/streamlang';
-import {
-  type FilterCondition,
-  getDefaultFormValueForOperator,
-  getFilterOperator,
-  getFilterValue,
-  isCondition,
-  isFilterConditionObject,
-  type OperatorKeys,
-  operatorToHumanReadableNameMap,
-} from '@kbn/streamlang';
-import type { RoutingStatus } from '@kbn/streams-schema';
-import { isPlainObject } from 'lodash';
-import useToggle from 'react-use/lib/useToggle';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
-  type EuiSelectOption,
   EuiSwitch,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
+import type { Condition } from '@kbn/streamlang';
+import {
+  type FilterCondition,
+  getFilterOperator,
+  getFilterValue,
+  isCondition,
+  type OperatorKeys,
+} from '@kbn/streamlang';
+import type { RoutingStatus } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
-import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
+import useToggle from 'react-use/lib/useToggle';
+import {
+  alwaysToEmptyEquals,
+  conditionNeedsValueField,
+  emptyEqualsToAlways,
+  isConditionEditableInUi,
+} from '../../../util/condition';
 import type { Suggestion } from './autocomplete_selector';
 import { AutocompleteSelector } from './autocomplete_selector';
+import { OperatorSelector } from './operator_selector';
 
 export interface ConditionEditorProps {
   condition: Condition;
@@ -43,13 +44,6 @@ export interface ConditionEditorProps {
   valueSuggestions?: Suggestion[];
 }
 
-const operatorOptions: EuiSelectOption[] = Object.entries(operatorToHumanReadableNameMap).map(
-  ([value, text]) => ({
-    value,
-    text,
-  })
-);
-
 export function ConditionEditor(props: ConditionEditorProps) {
   const { status, onConditionChange, fieldSuggestions = [], valueSuggestions = [] } = props;
 
@@ -57,9 +51,9 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const condition = alwaysToEmptyEquals(props.condition);
 
-  const isFilterCondition = isPlainObject(condition) && isFilterConditionObject(condition);
+  const conditionEditableInUi = useMemo(() => isConditionEditableInUi(condition), [condition]);
 
-  const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
+  const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!conditionEditableInUi);
 
   const handleConditionChange = (updatedCondition: Condition) => {
     onConditionChange(emptyEqualsToAlways(updatedCondition));
@@ -109,10 +103,10 @@ export function ConditionEditor(props: ConditionEditorProps) {
             automaticLayout: true,
           }}
         />
-      ) : isFilterCondition ? (
-        <FilterForm
+      ) : conditionEditableInUi ? (
+        <FilterConditionForm
           disabled={status === 'disabled'}
-          condition={condition}
+          condition={condition as FilterCondition}
           onConditionChange={handleConditionChange}
           fieldSuggestions={fieldSuggestions}
           valueSuggestions={valueSuggestions}
@@ -126,7 +120,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
   );
 }
 
-function FilterForm(props: {
+function FilterConditionForm(props: {
   condition: FilterCondition;
   disabled: boolean;
   onConditionChange: (condition: FilterCondition) => void;
@@ -157,20 +151,7 @@ function FilterForm(props: {
     } as FilterCondition);
   };
 
-  const handleOperatorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newOperator = event.target.value;
-
-    const existingValue = getFilterValue(condition);
-
-    const defaultValue = getDefaultFormValueForOperator(newOperator as OperatorKeys);
-
-    const typeChanged = typeof existingValue !== typeof defaultValue;
-
-    onConditionChange({
-      field: condition.field,
-      [newOperator]: existingValue !== undefined && !typeChanged ? existingValue : defaultValue,
-    } as FilterCondition);
-  };
+  const showValueField = useMemo(() => conditionNeedsValueField(condition), [condition]);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="streamsAppConditionEditor">
@@ -185,20 +166,15 @@ function FilterForm(props: {
           compressed
           disabled={disabled}
           dataTestSubj="streamsAppConditionEditorFieldText"
-          autoFocus={true}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <EuiSelect
-          aria-label={i18n.translate('xpack.streams.filter.operator', {
-            defaultMessage: 'Operator',
-          })}
-          data-test-subj="streamsAppConditionEditorOperator"
-          options={operatorOptions}
-          value={operator}
+      <EuiFlexItem grow={showValueField ? 1 : 2}>
+        <OperatorSelector
+          condition={condition}
+          onConditionChange={onConditionChange}
           compressed
-          onChange={handleOperatorChange}
           disabled={disabled}
+          dataTestSubj="streamsAppConditionEditorOperator"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
@@ -238,7 +214,7 @@ function FilterForm(props: {
             value={String(value)}
             data-test-subj="streamsAppFilterFormValueBoolean"
             onChange={(e) => {
-              const nextValue = e.target.value === 'true' ? true : false;
+              const nextValue = e.target.value === 'true';
               handleValueChange(nextValue);
             }}
             disabled={disabled}

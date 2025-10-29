@@ -29,7 +29,7 @@ import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type {
-  AttackDiscoveryPostRequestBody,
+  AttackDiscoveryPostInternalRequestBody,
   DefendInsightsPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
@@ -44,7 +44,6 @@ import type {
 import type {
   ActionsClientChatVertexAI,
   ActionsClientChatOpenAI,
-  ActionsClientGeminiChatModel,
   ActionsClientChatBedrockConverse,
   ActionsClientLlm,
 } from '@kbn/langchain/server';
@@ -177,6 +176,10 @@ export interface ElasticAssistantApiRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
+  /**
+   * Test purpose only.
+   */
+  updateAnonymizationFields: () => Promise<void>;
   userProfile: UserProfileServiceStart;
 }
 /**
@@ -267,7 +270,6 @@ export interface AssistantTool {
 export type AssistantToolLlm =
   | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
-  | ActionsClientGeminiChatModel
   | ActionsClientChatVertexAI
   | InferenceChatModel;
 
@@ -292,7 +294,9 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+    | ExecuteConnectorRequestBody
+    | AttackDiscoveryPostInternalRequestBody
+    | DefendInsightsPostRequestBody
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;

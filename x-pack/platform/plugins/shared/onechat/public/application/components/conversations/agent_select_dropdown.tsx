@@ -40,6 +40,7 @@ const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({ selectedAgentName
     onClick={onClick}
     aria-haspopup="menu"
     aria-labelledby={agentSelectId}
+    data-test-subj="agentBuilderAgentSelectorButton"
   >
     {selectedAgentName}
   </EuiButtonEmpty>

@@ -50,6 +50,15 @@ import {
 } from './translations';
 import { DiscoverBadgeButton } from '../stream_badges';
 
+const datePickerStyle = css`
+  .euiFormControlLayout {
+    height: 40px;
+  }
+  .euiButton {
+    height: 40px;
+  }
+`;
+
 export function StreamsTreeTable({
   loading,
   streams = [],
@@ -246,17 +255,9 @@ export function StreamsTreeTable({
                       data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
                         item.stream.name
                       }`}
-                      aria-label={i18n.translate(
-                        isCollapsed
-                          ? 'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel'
-                          : 'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
-                        {
-                          defaultMessage: isCollapsed
-                            ? 'Collapsed node with {childCount} children'
-                            : 'Expanded node with {childCount} children',
-                          values: { childCount: item.children.length },
-                        }
-                      )}
+                      aria-label={i18n.translate('xpack.streams.streamsTreeTable.', {
+                        defaultMessage: '',
+                      })}
                       onClick={(e: React.MouseEvent) => {
                         handleToggleCollapse(item.stream.name);
                       }}
@@ -293,14 +294,15 @@ export function StreamsTreeTable({
           field: 'documentsCount',
           name: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
+              {DOCUMENTS_COLUMN_HEADER}
               {!canReadFailureStore && (
                 <EuiIconTip
                   content={FAILURE_STORE_PERMISSIONS_ERROR}
                   type="warning"
                   color="warning"
+                  size="s"
                 />
               )}
-              {DOCUMENTS_COLUMN_HEADER}
             </EuiFlexGroup>
           ),
           width: '180px',
@@ -321,14 +323,15 @@ export function StreamsTreeTable({
           field: 'dataQuality',
           name: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
+              {DATA_QUALITY_COLUMN_HEADER}
               {!canReadFailureStore && (
                 <EuiIconTip
                   content={FAILURE_STORE_PERMISSIONS_ERROR}
                   type="warning"
                   color="warning"
+                  size="s"
                 />
               )}
-              {DATA_QUALITY_COLUMN_HEADER}
             </EuiFlexGroup>
           ),
           width: '150px',
@@ -336,7 +339,10 @@ export function StreamsTreeTable({
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
-              <DataQualityColumn histogramQueryFetch={getStreamDocCounts(item.stream.name)} />
+              <DataQualityColumn
+                histogramQueryFetch={getStreamDocCounts(item.stream.name)}
+                streamName={item.stream.name}
+              />
             ) : null,
         },
         {
@@ -355,6 +361,7 @@ export function StreamsTreeTable({
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },
               })}
+              dataTestSubj={`retentionColumn-${item.stream.name}`}
             />
           ),
         },
@@ -396,7 +403,11 @@ export function StreamsTreeTable({
           incremental: true,
           'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
         },
-        toolsRight: <StreamsAppSearchBar showDatePicker />,
+        toolsRight: (
+          <div className={datePickerStyle}>
+            <StreamsAppSearchBar showDatePicker />
+          </div>
+        ),
       }}
       tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
     />

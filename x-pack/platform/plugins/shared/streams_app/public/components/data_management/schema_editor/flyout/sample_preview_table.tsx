@@ -95,12 +95,16 @@ const SamplePreviewTableContent = ({
     (value.status === 'unknown' || value.documentsWithRuntimeFieldsApplied?.length === 0)
   ) {
     return (
-      <EuiCallOut>
-        {i18n.translate('xpack.streams.samplePreviewTable.unknownStatus', {
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        color="warning"
+        iconType="warning"
+        title={i18n.translate('xpack.streams.samplePreviewTable.unknownStatus', {
           defaultMessage:
             "Couldn't simulate changes due to a lack of indexed documents with this field",
         })}
-      </EuiCallOut>
+      />
     );
   }
 
@@ -108,6 +112,7 @@ const SamplePreviewTableContent = ({
     const formattedError = error && getFormattedError(error);
     return (
       <EuiCallOut
+        announceOnMount
         color="danger"
         title={i18n.translate('xpack.streams.samplePreviewTable.errorTitle', {
           defaultMessage:

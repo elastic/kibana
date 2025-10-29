@@ -21,7 +21,7 @@ const SEVERITY_DONUT_CHART_ID = 'alerts-summary-severity-donut';
 
 /**
  * Renders a table and a donut chart showing alerts grouped by severity levels.
- * The component is used in the alerts page as well as in the AI for SOC alert summary page.
+ * The component is used in the alerts page as well as in EASE alert summary page.
  */
 export const SeverityLevelPanel: React.FC<ChartsPanelProps> = ({
   filters,

@@ -43,6 +43,8 @@ interface ApiKeysTableState {
   filters: QueryFilters;
 }
 
+type KueryNode = any;
+
 const DEFAULT_TABLE_STATE = {
   query: EuiSearchBar.Query.MATCH_ALL,
   sort: {
@@ -53,6 +55,8 @@ const DEFAULT_TABLE_STATE = {
   size: 25,
   filters: {},
 };
+
+const PLUS_SIGN_REGEX = /[+]/g;
 
 export const APIKeysGridPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
@@ -67,6 +71,41 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn((tableStateArgs: ApiKeysTableState) => {
     const queryContainer = EuiSearchBar.Query.toESQuery(tableStateArgs.query);
+
+    // Enhance the query to support partial matches for name and owner field
+    if (queryContainer.bool?.must) {
+      queryContainer.bool.must = queryContainer.bool.must.map((clause: KueryNode) => {
+        if (clause.simple_query_string) {
+          // Add wildcard to support partial matches
+          const rawQuery = String(clause.simple_query_string.query ?? '');
+          const wildCardQuery = rawQuery.replace(PLUS_SIGN_REGEX, '');
+          return {
+            bool: {
+              should: [
+                clause,
+                {
+                  wildcard: {
+                    name: {
+                      value: `*${wildCardQuery}*`,
+                      case_insensitive: true,
+                    },
+                  },
+                },
+                {
+                  wildcard: {
+                    username: {
+                      value: `*${wildCardQuery}*`,
+                      case_insensitive: true,
+                    },
+                  },
+                },
+              ],
+            },
+          };
+        }
+        return clause;
+      });
+    }
 
     const requestBody = {
       ...tableStateArgs,
@@ -280,6 +319,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             {canManageOwnApiKeys && !canManageApiKeys ? (
               <>
                 <EuiCallOut
+                  announceOnMount
                   title={
                     <FormattedMessage
                       id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"

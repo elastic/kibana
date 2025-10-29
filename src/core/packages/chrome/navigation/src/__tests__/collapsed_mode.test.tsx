@@ -12,6 +12,7 @@ import { render, screen, waitFor, within, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import { TestComponent } from './test_component';
+import { flushPopoverTimers } from './flush_popover_timers';
 import { basicMock } from '../mocks/basic_navigation';
 import { observabilityMock } from '../mocks/observability';
 import { securityMock } from '../mocks/security';
@@ -24,7 +25,13 @@ const mockMenuItemHeight = 32;
 const mlAnomalyExplorerItemId = securityMock.navItems.primaryItems[11].sections?.[1].items[0].id;
 
 describe('Collapsed mode', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+
   beforeEach(() => {
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
     mockClientHeight(mockMenuItemHeight);
   });
 
@@ -78,7 +85,8 @@ describe('Collapsed mode', () => {
         name: 'Solution homepage',
       });
 
-      await userEvent.hover(solutionLogo);
+      await user.hover(solutionLogo);
+      flushPopoverTimers();
 
       const tooltip = await screen.findByRole('tooltip', {
         name: 'Solution',
@@ -86,8 +94,8 @@ describe('Collapsed mode', () => {
 
       expect(tooltip).toBeInTheDocument();
 
-      await userEvent.click(solutionLogo);
-      await userEvent.unhover(solutionLogo);
+      await user.click(solutionLogo);
+      await user.unhover(solutionLogo);
 
       // Even after clicking on the trigger which makes the `EuiToolTip` persistent by default
       // See: https://eui.elastic.co/docs/components/display/tooltip/
@@ -112,7 +120,8 @@ describe('Collapsed mode', () => {
           name: 'Apps',
         });
 
-        await userEvent.hover(appsLink);
+        await user.hover(appsLink);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'Apps',
@@ -159,7 +168,7 @@ describe('Collapsed mode', () => {
         });
         const expectedHref = basicMock.navItems.primaryItems[2].href; // Apps
 
-        await userEvent.click(appsLink);
+        await user.click(appsLink);
 
         expect(appsLink).toHaveAttribute('href', expectedHref);
 
@@ -187,11 +196,13 @@ describe('Collapsed mode', () => {
           appsLink.focus();
         });
 
-        await userEvent.keyboard('{enter}');
-
         const popover = await screen.findByRole('dialog', {
           name: 'Apps',
         });
+
+        expect(popover).toBeInTheDocument();
+
+        await user.keyboard('{Enter}');
 
         const overviewLink = within(popover).getByRole('link', {
           name: 'Overview',
@@ -213,7 +224,8 @@ describe('Collapsed mode', () => {
           name: 'Dashboards',
         });
 
-        await userEvent.hover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
 
         const popover = screen.queryByRole('dialog');
 
@@ -236,7 +248,7 @@ describe('Collapsed mode', () => {
 
         const expectedHref = basicMock.navItems.primaryItems[0].href;
 
-        await userEvent.click(dashboardsLink);
+        await user.click(dashboardsLink);
 
         expect(dashboardsLink).toHaveAttribute('href', expectedHref);
 
@@ -265,7 +277,7 @@ describe('Collapsed mode', () => {
           dashboardsLink.focus();
         });
 
-        await userEvent.keyboard('{enter}');
+        await user.keyboard('{enter}');
 
         expect(dashboardsLink).toHaveAttribute('href', expectedHref);
       });
@@ -285,7 +297,8 @@ describe('Collapsed mode', () => {
           name: 'Dashboards',
         });
 
-        await userEvent.hover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip', {
           name: 'Dashboards',
@@ -293,8 +306,8 @@ describe('Collapsed mode', () => {
 
         expect(tooltip).toBeInTheDocument();
 
-        await userEvent.click(dashboardsLink);
-        await userEvent.unhover(dashboardsLink);
+        await user.click(dashboardsLink);
+        await user.unhover(dashboardsLink);
 
         // Even after clicking on the trigger which makes the `EuiToolTip` persistent by default
         // See: https://eui.elastic.co/docs/components/display/tooltip/
@@ -323,7 +336,8 @@ describe('Collapsed mode', () => {
           name: 'Dashboards',
         });
 
-        await userEvent.hover(dashboardsLink);
+        await user.hover(dashboardsLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip');
         const betaIcon = tooltip.querySelector('[data-euiicon-type="beta"]');
@@ -353,7 +367,8 @@ describe('Collapsed mode', () => {
           name: 'Cases',
         });
 
-        await userEvent.hover(casesLink);
+        await user.hover(casesLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip');
         const flaskIcon = tooltip.querySelector('[data-euiicon-type="flask"]');
@@ -371,13 +386,13 @@ describe('Collapsed mode', () => {
        * WHEN the navigation renders
        * THEN I should see a "More" primary menu item
        */
-      it('should render the "More" primary menu item when items overflow', () => {
+      it('should render the "More" primary menu item when items overflow', async () => {
         // Renders 10 primary menu items + "More" item
         render(
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -395,11 +410,12 @@ describe('Collapsed mode', () => {
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -424,11 +440,12 @@ describe('Collapsed mode', () => {
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        await userEvent.click(moreButton);
+        await user.click(moreButton);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -438,28 +455,26 @@ describe('Collapsed mode', () => {
           name: 'Machine learning',
         });
 
-        await userEvent.click(mlButton);
+        await user.click(mlButton);
+        flushPopoverTimers();
 
-        expect(popover).toBeInTheDocument();
-
-        const mlAnomalyExplorerLink = await within(popover).findByRole('link', {
+        const anomalyExplorerLink = await within(popover).findByRole('link', {
           name: 'Anomaly explorer',
         });
 
-        expect(mlAnomalyExplorerLink).toBeInTheDocument();
-
-        await userEvent.click(mlAnomalyExplorerLink);
-        await userEvent.hover(document.body);
+        await user.click(anomalyExplorerLink);
 
         await waitFor(() => {
           expect(popover).not.toBeInTheDocument();
         });
 
         const sidePanel = screen.queryByRole('region', {
-          name: /Side panel/,
+          name: 'Side panel for Machine learning',
         });
 
-        expect(sidePanel).not.toBeInTheDocument();
+        await waitFor(() => {
+          expect(sidePanel).not.toBeInTheDocument();
+        });
       });
 
       /**
@@ -471,17 +486,17 @@ describe('Collapsed mode', () => {
        * - AND I should be redirected to that item’s href
        * AND I shouldn’t see a side panel
        */
-      // TODO: fix; fails in CI
-      it.skip('should close popover, redirect, and NOT open side panel after clicking on an item without submenu from "More"', async () => {
+      it('should close popover, redirect, and NOT open side panel after clicking on an item without submenu from "More"', async () => {
         render(
           <TestComponent isCollapsed items={securityMock.navItems} logo={securityMock.logo} />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -491,7 +506,7 @@ describe('Collapsed mode', () => {
           name: 'Coverage',
         });
 
-        await userEvent.click(coverageLink);
+        await user.click(coverageLink);
 
         await waitFor(() => {
           expect(popover).not.toBeInTheDocument();
@@ -524,13 +539,14 @@ describe('Collapsed mode', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
         expect(moreButton).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
         const popover = await screen.findByRole('dialog', {
           name: 'More',
@@ -542,7 +558,7 @@ describe('Collapsed mode', () => {
 
         expect(mlButton).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.click(mlButton);
+        await user.click(mlButton);
 
         const mlAnomalyExplorerLink = within(popover).getByRole('link', {
           name: 'Anomaly explorer',

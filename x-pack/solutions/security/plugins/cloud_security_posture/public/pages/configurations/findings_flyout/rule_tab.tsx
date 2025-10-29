@@ -14,7 +14,7 @@ import { RulesDetectionRuleCounter } from '../../rules/rules_detection_rule_coun
 import { BenchmarkIcons, CspFlyoutMarkdown, EMPTY_VALUE, RuleNameLink } from './findings_flyout';
 
 const getReferenceFromRule = (rule?: CspFinding['rule']) => {
-  return rule?.reference || rule?.references;
+  return rule?.reference;
 };
 
 export const getRuleList = (

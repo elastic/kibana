@@ -56,6 +56,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(customizedResponse.rule_source).toMatchObject({
         type: 'external',
         is_customized: true,
+        customized_fields: [{ field_name: fieldName }],
+        has_base_version: true,
       });
 
       // Assert that patching the "fieldName" to its original value reverts the customization

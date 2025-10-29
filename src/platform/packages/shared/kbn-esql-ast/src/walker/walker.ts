@@ -8,6 +8,7 @@
  */
 
 import type * as types from '../types';
+import { resolveItem } from '../visitor/utils';
 import type { NodeMatchTemplate } from './helpers';
 import { replaceProperties, templateToPredicate } from './helpers';
 
@@ -16,6 +17,11 @@ type Node = types.ESQLAstNode | types.ESQLAstNode[];
 export interface WalkerOptions {
   visitCommand?: (
     node: types.ESQLCommand,
+    parent: types.ESQLAstQueryExpression | undefined,
+    walker: WalkerVisitorApi
+  ) => void;
+  visitHeaderCommand?: (
+    node: types.ESQLAstHeaderCommand,
     parent: types.ESQLAstQueryExpression | undefined,
     walker: WalkerVisitorApi
   ) => void;
@@ -115,6 +121,14 @@ export interface WalkerOptions {
    * @default 'forward'
    */
   order?: 'forward' | 'backward';
+
+  /**
+   * If true, skip traversal of header commands (e.g., SET statements).
+   * This allows processing only the main query commands without the header.
+   *
+   * @default false
+   */
+  skipHeader?: boolean;
 }
 
 export type WalkerAstNode = types.ESQLAstNode | types.ESQLAstNode[];
@@ -532,6 +546,11 @@ export class Walker {
         tree as types.ESQLAstCommand,
         parent as types.ESQLAstQueryExpression | undefined
       );
+    } else if (tree.type === 'header-command') {
+      this.walkHeaderCommand(
+        tree as types.ESQLAstHeaderCommand,
+        parent as types.ESQLAstQueryExpression | undefined
+      );
     } else {
       this.walkExpression(tree as types.ESQLAstExpression, parent);
     }
@@ -562,6 +581,17 @@ export class Walker {
 
     const { options } = this;
     (options.visitCommand ?? options.visitAny)?.(node, parent, this);
+    this.walkList(node.args, node);
+  }
+
+  public walkHeaderCommand(
+    node: types.ESQLAstHeaderCommand,
+    parent: types.ESQLAstQueryExpression | undefined
+  ): void {
+    if (this.aborted) return;
+
+    const { options } = this;
+    (options.visitHeaderCommand ?? options.visitAny)?.(node, parent, this);
     this.walkList(node.args, node);
   }
 
@@ -665,11 +695,11 @@ export class Walker {
     (options.visitMapEntry ?? options.visitAny)?.(node, parent, this);
 
     if (options.order === 'backward') {
-      this.walkSingleAstItem(node.value, node);
-      this.walkSingleAstItem(node.key, node);
+      this.walkSingleAstItem(resolveItem(node.value), node);
+      this.walkSingleAstItem(resolveItem(node.key), node);
     } else {
-      this.walkSingleAstItem(node.key, node);
-      this.walkSingleAstItem(node.value, node);
+      this.walkSingleAstItem(resolveItem(node.key), node);
+      this.walkSingleAstItem(resolveItem(node.value), node);
     }
   }
 
@@ -679,6 +709,11 @@ export class Walker {
   ): void {
     const { options } = this;
     (options.visitQuery ?? options.visitAny)?.(node, parent, this);
+
+    if (node.header && !options.skipHeader) {
+      this.walkList(node.header, node);
+    }
+
     this.walkList(node.commands, node);
   }
 
