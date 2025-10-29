@@ -54,7 +54,6 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
-import { confirmDiscardOrSaveUnsavedChanges } from '../dashboard_listing/confirm_overlays';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -79,7 +78,6 @@ export function InternalDashboardTopNav({
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
   const { showWriteControls } = getDashboardCapabilities();
 
@@ -260,8 +258,6 @@ export function InternalDashboardTopNav({
     setIsLabsShown,
     maybeRedirect,
     showResetChange,
-    isResetting,
-    setIsResetting,
   });
 
   UseUnmount(() => {

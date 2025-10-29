@@ -34,16 +34,13 @@ export const useDashboardMenuItems = ({
   setIsLabsShown,
   maybeRedirect,
   showResetChange,
-  isResetting,
-  setIsResetting,
 }: {
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
-  isResetting: boolean;
-  setIsResetting: (isResetting: boolean) => void;
 }) => {
+  const [isResetting, setIsResetting] = useState(false);
   const isMounted = useMountedState();
   const appId = useObservable(coreServices.application.currentAppId$);
 
