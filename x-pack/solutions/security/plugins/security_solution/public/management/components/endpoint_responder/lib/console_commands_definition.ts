@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { wrapWithNotice } from './get_not_supported_arg_about_info';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { isCancelFeatureAvailable } from '../../../../../common/endpoint/service/authz/cancel_authz_utils';
@@ -192,6 +193,7 @@ export const getEndpointConsoleCommands = ({
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
+    responseActionsEndpointMemoryDump,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
@@ -578,6 +580,129 @@ export const getEndpointConsoleCommands = ({
       helpDisabled: !isSupported,
       helpHidden: !isSupported,
       validate: capabilitiesAndPrivilegesValidator(agentType),
+    });
+  }
+
+  if (responseActionsEndpointMemoryDump) {
+    const endpointSupportsKernelDump = (endpointCapabilities as EndpointCapabilities[]).includes(
+      'memdump_kernel'
+    );
+    const memoryDumpKernelNotSupportedMessage = i18n.translate(
+      'xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported',
+      {
+        defaultMessage:
+          '"kernel" memory dump type is not currently supported for this host OS type ({osType})',
+        values: { osType: platform },
+      }
+    );
+
+    consoleCommands.push({
+      name: 'memory-dump',
+      about: getCommandAboutInfo({
+        aboutInfo: CONSOLE_COMMANDS.memoryDump.about,
+        isSupported: doesEndpointSupportCommand('memory-dump'),
+      }),
+      RenderComponent: () => {
+        return '';
+      }, // FIXME:PT implement
+      meta: commandMeta,
+      exampleUsage: 'memory-dump --type="process" --pid=123 --comment="dump process 123"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: (enteredCommand) => {
+        const standardValidation = capabilitiesAndPrivilegesValidator(agentType)(enteredCommand);
+
+        if (standardValidation !== true) {
+          return standardValidation;
+        }
+
+        const argsInterface = enteredCommand.args;
+        const memoryDumpType = argsInterface.args.type.at(0);
+
+        // Nothing to do if all the user did was `--help`
+        if (argsInterface.hasArg('help')) {
+          return true;
+        }
+
+        // PID and Entity ID are only supported for process memory dumps
+        if (
+          memoryDumpType === 'kernel' &&
+          (argsInterface.hasArg('pid') || argsInterface.hasArg('entityId'))
+        ) {
+          return i18n.translate(
+            'xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdNotSupportedForKernel',
+            {
+              defaultMessage:
+                '"pid" and "entityId" arguments are not supported for "kernel" memory dumps',
+            }
+          );
+        }
+
+        // Process memory dump requires either pid or entityId
+        if (
+          memoryDumpType === 'process' &&
+          !argsInterface.hasArg('pid') &&
+          !argsInterface.hasArg('entityId')
+        ) {
+          return i18n.translate(
+            'xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdRequiredForProcess',
+            {
+              defaultMessage: '"pid" or "entityId argument is required for "process" memory dumps',
+            }
+          );
+        }
+
+        return true;
+      },
+      mustHaveArgs: true,
+      args: {
+        type: {
+          required: true,
+          allowMultiples: false,
+          mustHaveValue: 'truthy',
+          about: !endpointSupportsKernelDump
+            ? wrapWithNotice(
+                CONSOLE_COMMANDS.memoryDump.typeArgAbout,
+                memoryDumpKernelNotSupportedMessage
+              )
+            : CONSOLE_COMMANDS.memoryDump.typeArgAbout,
+          validate: (argValue) => {
+            if (
+              argValue.some((memDumpType) => {
+                return memDumpType !== 'kernel' && memDumpType !== 'process';
+              })
+            ) {
+              return i18n.translate(
+                'xpack.securitySolution.consoleCommandsDefinition.memoryDumpTypeInvalidMessage',
+                { defaultMessage: 'Valid types are: kernel, process' }
+              );
+            }
+
+            if (argValue.at(0) === 'kernel' && !endpointSupportsKernelDump) {
+              return memoryDumpKernelNotSupportedMessage;
+            }
+
+            return true;
+          },
+        },
+        pid: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'number-greater-than-zero',
+          about: CONSOLE_COMMANDS.memoryDump.pidArgAbout,
+        },
+        entityId: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: CONSOLE_COMMANDS.memoryDump.entityIdArgAbout,
+        },
+        ...commandCommentArgument(),
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 7,
+      helpDisabled: !doesEndpointSupportCommand('memory-dump'),
+      helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
     });
   }
 
