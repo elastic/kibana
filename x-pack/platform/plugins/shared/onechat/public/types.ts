@@ -78,5 +78,7 @@ export interface OnechatPluginStart {
    * flyoutRef.close();
    * ```
    */
-  openConversationFlyout: (options: OpenConversationFlyoutOptions) => OpenConversationFlyoutReturn;
+  openConversationFlyout: (options?: OpenConversationFlyoutOptions) => OpenConversationFlyoutReturn;
+  setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
+  clearConversationFlyoutActiveConfig: () => void;
 }
