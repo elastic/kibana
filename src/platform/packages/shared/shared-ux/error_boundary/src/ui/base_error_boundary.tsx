@@ -30,21 +30,16 @@ export abstract class BaseErrorBoundary<
   P extends BaseErrorBoundaryProps,
   S extends BaseErrorBoundaryState
 > extends React.Component<P, S> {
-  private beforeUnloadHandler: (() => void) | null = null;
+  private beforeUnloadHandler = () => {
+    const errorId = this.state.errorId;
+    if (errorId) {
+      this.props.services.errorService.commitError(errorId);
+    }
+  };
 
-  constructor(props: P) {
-    super(props);
-
-    // Set up beforeunload handler to commit errors when page unloads
-    this.beforeUnloadHandler = () => {
-      const errorId = this.state.errorId;
-      if (errorId) {
-        this.props.services.errorService.commitError(errorId);
-      }
-    };
-
-    // Listen for page unload events (refresh, tab close, navigation away)
+  componentDidMount() {
     if (typeof window !== 'undefined') {
+      // Listen for page unload events (refresh, tab close, navigation away)
       window.addEventListener('beforeunload', this.beforeUnloadHandler);
     }
   }
@@ -54,11 +49,8 @@ export abstract class BaseErrorBoundary<
    */
   componentWillUnmount() {
     // Remove beforeunload event listener
-    if (this.beforeUnloadHandler) {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('beforeunload', this.beforeUnloadHandler);
-      }
-      this.beforeUnloadHandler = null;
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
     }
 
     // Commit the error when cleaning up
