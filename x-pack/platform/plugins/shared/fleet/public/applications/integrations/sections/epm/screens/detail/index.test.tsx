@@ -124,7 +124,7 @@ describe('When on integration detail', () => {
 
       const calloutTitle = renderResult.getByTestId('prereleaseCallout');
       expect(calloutTitle).toBeInTheDocument();
-      const calloutGABtn = renderResult.getByTestId('switchToGABtn');
+      const calloutGABtn = renderResult.getAllByTestId('switchToGABtn')[0];
       expect((calloutGABtn as any)?.href).toEqual(
         'http://localhost/mock/app/integrations/detail/nginx-1.0.0/overview'
       );
