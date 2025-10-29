@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.expectOnDashboard('[8.0.0] Controls Dashboard');
       await dashboard.waitForRenderComplete();
 
-      // There should be 0 error embeddables on the dashboard
+      // There should be 0 error embeddables on the dashboard - run in Flaky Test Runner Pipeline
       const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
       expect(errorEmbeddables.length).to.be(0);
 
