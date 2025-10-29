@@ -7,13 +7,23 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import { getSegments } from '@kbn/streams-schema';
-import { baseFields } from './component_templates/logs_layer';
+import {
+  baseFields as logsBaseFields,
+  baseMappings as logsBaseMappings,
+  logsSettings,
+  otelEquivalentLookupMap,
+} from './component_templates/logs_layer';
+import { baseFields as alertsBaseFields } from './component_templates/alerts_layer';
 
 export const LOGS_ROOT_STREAM_NAME = 'logs';
+export const ALERTS_ROOT_STREAM_NAME = 'alerts';
 
-export const rootStreamDefinition: Streams.WiredStream.Definition = {
+export const logsRootStreamDefinition: Streams.WiredStream.Definition = {
   name: LOGS_ROOT_STREAM_NAME,
-  description: 'Root stream',
+  description: 'Root stream for logs',
+  baseSettings: logsSettings,
+  baseMappings: logsBaseMappings,
+  otelEquivalentLookupMap,
   ingest: {
     lifecycle: { dsl: {} },
     settings: {},
@@ -21,13 +31,33 @@ export const rootStreamDefinition: Streams.WiredStream.Definition = {
     wired: {
       routing: [],
       fields: {
-        ...baseFields,
+        ...logsBaseFields,
       },
     },
   },
 };
 
+export const alertsRootStreamDefinition: Streams.WiredStream.Definition = {
+  name: ALERTS_ROOT_STREAM_NAME,
+  description: 'Root stream for alerts',
+  baseSettings: {},
+  baseMappings: {},
+  ingest: {
+    lifecycle: { dsl: {} },
+    settings: {},
+    processing: { steps: [] },
+    wired: {
+      routing: [],
+      fields: {
+        ...alertsBaseFields,
+      },
+    },
+  },
+};
+
+export const ROOT_STREAM_DEFINITIONS = [logsRootStreamDefinition, alertsRootStreamDefinition];
+
 export function hasSupportedStreamsRoot(streamName: string) {
   const root = getSegments(streamName)[0];
-  return [LOGS_ROOT_STREAM_NAME].includes(root);
+  return [LOGS_ROOT_STREAM_NAME, ALERTS_ROOT_STREAM_NAME].includes(root);
 }

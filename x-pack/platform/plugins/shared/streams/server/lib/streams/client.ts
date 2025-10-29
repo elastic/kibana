@@ -28,7 +28,7 @@ import {
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
-import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
+import { ROOT_STREAM_DEFINITIONS } from './root_stream_definition';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
@@ -96,27 +96,33 @@ export class StreamsClient {
   }
 
   public async checkStreamStatus(): Promise<boolean | 'conflict'> {
-    const rootLogsStreamExists = await this.checkRootLogsStreamExists();
+    const rootStreamsExist = await this.checkRootStreamsExist();
     if (this.dependencies.isServerless) {
       // in serverless, Elasticsearch doesn't natively support streams yet
-      return rootLogsStreamExists;
+      return rootStreamsExist;
     }
     const isEnabledOnElasticsearch = await this.checkElasticsearchStreamStatus();
-    if (isEnabledOnElasticsearch !== rootLogsStreamExists) {
+    if (isEnabledOnElasticsearch !== rootStreamsExist) {
       return 'conflict';
     }
-    return rootLogsStreamExists;
+    return rootStreamsExist;
   }
 
-  private async checkRootLogsStreamExists() {
-    return await this.getStream(LOGS_ROOT_STREAM_NAME)
-      .then((definition) => Streams.WiredStream.Definition.is(definition))
-      .catch((error) => {
-        if (isDefinitionNotFoundError(error)) {
-          return false;
-        }
-        throw error;
-      });
+  private async checkRootStreamsExist() {
+    const results = await Promise.all(
+      ROOT_STREAM_DEFINITIONS.map((definition) =>
+        this.getStoredStreamDefinition(definition.name)
+          .then((stream) => Streams.WiredStream.Definition.is(stream))
+          .catch((error) => {
+            if (isDefinitionNotFoundError(error) || isNotFoundError(error)) {
+              return false;
+            }
+            throw error;
+          })
+      )
+    );
+
+    return results.every((result) => result === true);
   }
 
   /**
@@ -136,21 +142,30 @@ export class StreamsClient {
       }
     }
 
-    const rootStreamExists = await this.checkRootLogsStreamExists();
+    const changes: Parameters<typeof State.attemptChanges>[0] = [];
+    for (const definition of ROOT_STREAM_DEFINITIONS) {
+      const streamExists = await this.getStoredStreamDefinition(definition.name)
+        .then(() => true)
+        .catch((error) => {
+          if (isDefinitionNotFoundError(error) || isNotFoundError(error)) {
+            return false;
+          }
+          throw error;
+        });
 
-    if (!rootStreamExists) {
-      await State.attemptChanges(
-        [
-          {
-            type: 'upsert',
-            definition: rootStreamDefinition,
-          },
-        ],
-        {
-          ...this.dependencies,
-          streamsClient: this,
-        }
-      );
+      if (!streamExists) {
+        changes.push({
+          type: 'upsert',
+          definition,
+        });
+      }
+    }
+
+    if (changes.length > 0) {
+      await State.attemptChanges(changes, {
+        ...this.dependencies,
+        streamsClient: this,
+      });
     }
 
     if (!this.dependencies.isServerless) {
@@ -168,51 +183,39 @@ export class StreamsClient {
     return { acknowledged: true, result: 'created' };
   }
 
-  /**
-   * Disabling streams means deleting the logs root stream
-   * AND its descendants, including any Elasticsearch objects,
-   * such as data streams. That means it deletes all data
-   * belonging to wired and group streams.
-   *
-   * It does NOT delete classic streams.
-   */
   async disableStreams(): Promise<DisableStreamsResponse> {
-    try {
-      const isEnabled = await this.isStreamsEnabled();
+    const streams = await this.getManagedStreams();
+    const groupStreams = streams.filter((stream) => Streams.GroupStream.Definition.is(stream));
+    const rootStreamNames = ROOT_STREAM_DEFINITIONS.map((d) => d.name);
+    const existingRootStreams = streams.filter((stream) => rootStreamNames.includes(stream.name));
 
-      if (!isEnabled) {
-        return { acknowledged: true, result: 'noop' };
-      }
-    } catch (error) {
-      if (error.name !== 'StreamsStatusConflictError') {
-        throw error;
-      }
-    }
-
-    const rootStreamExists = await this.checkRootLogsStreamExists();
     const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
-    if (rootStreamExists) {
-      const streams = await this.getManagedStreams();
-      const groupStreams = streams.filter((stream) => Streams.GroupStream.Definition.is(stream));
+    if (
+      existingRootStreams.length === 0 &&
+      groupStreams.length === 0 &&
+      !elasticsearchStreamsEnabled
+    ) {
+      return { acknowledged: true, result: 'noop' };
+    }
 
-      await State.attemptChanges(
-        [
-          {
-            type: 'delete' as const,
-            name: rootStreamDefinition.name,
-          },
-        ].concat(
-          groupStreams.map((stream) => ({
-            type: 'delete' as const,
-            name: stream.name,
-          }))
-        ),
-        {
-          ...this.dependencies,
-          streamsClient: this,
-        }
+    const changes: Parameters<typeof State.attemptChanges>[0] = existingRootStreams
+      .map((stream) => ({
+        type: 'delete' as const,
+        name: stream.name,
+      }))
+      .concat(
+        groupStreams.map((stream) => ({
+          type: 'delete' as const,
+          name: stream.name,
+        }))
       );
+
+    if (changes.length > 0) {
+      await State.attemptChanges(changes, {
+        ...this.dependencies,
+        streamsClient: this,
+      });
 
       const { assetClient, storageClient } = this.dependencies;
       await Promise.all([assetClient.clean(), storageClient.clean()]);
@@ -419,52 +422,35 @@ export class StreamsClient {
    * - the user does not have access to the stream
    */
   async getStream(name: string): Promise<Streams.all.Definition> {
-    try {
-      const response = await this.dependencies.storageClient.get({ id: name });
-
-      const streamDefinition = this.getStreamDefinitionFromSource(response._source);
-
-      if (Streams.ingest.all.Definition.is(streamDefinition)) {
-        const privileges = await checkAccess({
-          name,
-          scopedClusterClient: this.dependencies.scopedClusterClient,
-        });
-        if (!privileges.read) {
-          throw new SecurityError(`Cannot read stream, insufficient privileges`);
-        }
-      }
-      return streamDefinition;
-    } catch (error) {
-      try {
-        if (isNotFoundError(error)) {
-          const dataStream = await this.getDataStream(name);
-          return this.getDataStreamAsIngestStream(dataStream);
+    const rootStreamDefinition = ROOT_STREAM_DEFINITIONS.find(
+      (definition) => definition.name === name
+    );
+    if (rootStreamDefinition) {
+      const stored = await this.getStoredStreamDefinition(name).catch((error) => {
+        if (isDefinitionNotFoundError(error) || isNotFoundError(error)) {
+          return undefined;
         }
         throw error;
-      } catch (e) {
-        if (isNotFoundError(e)) {
-          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
-        }
-        throw e;
-      }
+      });
+      return stored ?? rootStreamDefinition;
     }
+
+    return this.getStoredStreamDefinition(name);
   }
 
   private async getStoredStreamDefinition(name: string): Promise<Streams.all.Definition> {
-    return await Promise.all([
-      this.dependencies.storageClient.get({ id: name }).then((response) => {
-        return this.getStreamDefinitionFromSource(response._source);
-      }),
-      checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
-        (privileges) => {
-          if (!privileges.read) {
-            throw new SecurityError(`Cannot read stream, insufficient privileges`);
-          }
-        }
-      ),
-    ]).then(([wiredDefinition]) => {
-      return wiredDefinition;
+    const response = await this.dependencies.storageClient.get({ id: name });
+    const wiredDefinition = this.getStreamDefinitionFromSource(response._source);
+
+    const privileges = await checkAccess({
+      name,
+      scopedClusterClient: this.dependencies.scopedClusterClient,
     });
+    if (!privileges.read) {
+      throw new SecurityError(`Cannot read stream, insufficient privileges`);
+    }
+
+    return wiredDefinition;
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
