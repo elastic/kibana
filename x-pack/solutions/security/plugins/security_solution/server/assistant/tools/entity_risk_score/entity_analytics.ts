@@ -9,8 +9,7 @@ import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
-import type { StartServicesAccessor } from '@kbn/core/public';
-import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
 import {
   getPrivilegedMonitorUsersIndex,
   getPrivilegedMonitorUsersJoin,
@@ -102,8 +101,8 @@ const MAP_DOMAIN_TO_INFO_BUILDER = {
   privileged_user_monitoring: getPrivilegedUserMonitoringInformation,
 } as const;
 
-export const entityRiskScoreToolInternal = (
-  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
+export const entityAnalyticsToolInternal = (
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ): BuiltinToolDefinition<typeof entityRiskScoreInternalSchema> => {
   return {
     id: ENTITY_ANALYTICS_TOOL_INTERNAL_ID,

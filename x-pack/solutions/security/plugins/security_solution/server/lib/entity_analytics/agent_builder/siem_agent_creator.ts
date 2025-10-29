@@ -8,8 +8,8 @@
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 
 const DEFAULT_SYSTEM_PROMPT = `You are a security analyst and expert in entity analytics. Your role is to assist by answering questions about Elastic Security. Do not answer questions unrelated to Elastic Security.
-* Use the following index patterns to retrieve information from logs: apm-*-transaction*, auditbeat-*, endgame-*, filebeat-*, logs-*, packetbeat-*, traces-apm*, winlogbeat-*, -*elastic-cloud-logs-*
-`; // TODO: remove hard coded index patterns
+* Always call the security-solution-tool first to get information about the security solution and indices.
+`;
 
 /**
  * Creates the SIEM Security Analyst agent definition for the new registry mechanism.
@@ -25,12 +25,19 @@ export const entityAnalyticsAgentCreator = (): BuiltInAgentDefinition => {
     avatar_symbol: '🛡️',
     configuration: {
       instructions: `${DEFAULT_SYSTEM_PROMPT}`,
-      // TODO general security solution information, like the dataviews and index patterns, but at this point we don't have access to the space.
 
       tools: [
+        { tool_ids: ['security-solution-tool'] },
         { tool_ids: ['entity-analytics-tool'] },
+        // { tool_ids: ['platform.core.get_document_by_id'] },
+        { tool_ids: ['platform.core.execute_esql'] },
+        { tool_ids: ['platform.core.generate_esql'] },
+        { tool_ids: ['platform.core.get_index_mapping'] },
+        { tool_ids: ['platform.core.list_indices'] },
+        // { tool_ids: ['platform.core.index_explorer'] },
+        // { tool_ids: ['platform.core.search'] },
         // Include all built-in tools for comprehensive security analysis
-        { tool_ids: ['*'] },
+        // { tool_ids: ['*'] },
       ],
     },
   };
