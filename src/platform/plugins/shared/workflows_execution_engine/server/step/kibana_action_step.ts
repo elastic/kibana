@@ -146,6 +146,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     stepType: string,
     params: any
   ): Promise<any> {
+    // Get current space ID from workflow context
+    const spaceId = this.stepExecutionRuntime.contextManager.getContext().workflow.spaceId;
+
     // Support both raw API format and connector-driven syntax
     if (params.request) {
       // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
@@ -165,7 +168,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         body,
         query,
         headers: connectorHeaders,
-      } = buildKibanaRequestFromAction(stepType, params);
+      } = buildKibanaRequestFromAction(stepType, params, spaceId);
 
       return this.makeHttpRequest(kibanaUrl, {
         method,
