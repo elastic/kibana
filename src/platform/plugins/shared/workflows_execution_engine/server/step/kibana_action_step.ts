@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { buildKibanaRequestFromAction } from '@kbn/workflows';
+import type { BaseStep, RunStepResult } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './node_implementation';
-import { BaseAtomicNodeImplementation } from './node_implementation';
 
 // Extend BaseStep for kibana-specific properties
 export interface KibanaActionStep extends BaseStep {
@@ -31,33 +34,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
   }
 
   public getInput() {
-    // Get current context for templating
-    const context = this.stepExecutionRuntime.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.with || (this.step as any).configuration?.with || {};
-    return this.renderObjectTemplate(stepWith, context);
-  }
-
-  /**
-   * Recursively render the object template.
-   * @param obj - The object to render.
-   * @param context - The context to use for rendering.
-   * @returns The rendered object.
-   */
-  private renderObjectTemplate(obj: any, context: any): any {
-    if (Array.isArray(obj)) {
-      return obj.map((item) => this.renderObjectTemplate(item, context));
-    }
-    if (obj && typeof obj === 'object') {
-      return Object.entries(obj).reduce((acc, [key, value]) => {
-        acc[key] = this.renderObjectTemplate(value, context);
-        return acc;
-      }, {} as any);
-    }
-    if (typeof obj === 'string') {
-      return this.templatingEngine.render(obj, context);
-    }
-    return obj;
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -108,15 +87,30 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
           action_type: 'kibana',
         },
       });
-      return await this.handleFailure(stepWith, error);
+      return this.handleFailure(stepWith, error);
     }
   }
 
   private getKibanaUrl(): string {
-    // Get Kibana URL from CoreStart if available
+    // Get Kibana URL from server.publicBaseUrl config if available
     const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
     if (coreStart?.http?.basePath?.publicBaseUrl) {
       return coreStart.http.basePath.publicBaseUrl;
+    }
+    // Get Kibana URL from cloud.kibanaUrl config if available
+    const { cloudSetup } = this.stepExecutionRuntime.contextManager.getDependencies();
+    if (cloudSetup?.kibanaUrl) {
+      return cloudSetup.kibanaUrl;
+    }
+
+    // Fallback to local network binding
+    const http = coreStart?.http;
+    if (http) {
+      const { protocol, hostname, port } = http.getServerInfo();
+      return `${protocol}://${hostname}:${port}${http.basePath
+        // Prepending on '' removes the serverBasePath
+        .prepend('/')
+        .slice(0, -1)}`;
     }
 
     // Fallback to localhost for development
@@ -152,11 +146,14 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     stepType: string,
     params: any
   ): Promise<any> {
+    // Get current space ID from workflow context
+    const spaceId = this.stepExecutionRuntime.contextManager.getContext().workflow.spaceId;
+
     // Support both raw API format and connector-driven syntax
     if (params.request) {
       // Raw API format: { request: { method, path, body, query, headers } } - like Dev Console
       const { method = 'GET', path, body, query, headers: customHeaders } = params.request;
-      return await this.makeHttpRequest(kibanaUrl, {
+      return this.makeHttpRequest(kibanaUrl, {
         method,
         path,
         body,
@@ -171,9 +168,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         body,
         query,
         headers: connectorHeaders,
-      } = buildKibanaRequestFromAction(stepType, params);
+      } = buildKibanaRequestFromAction(stepType, params, spaceId);
 
-      return await this.makeHttpRequest(kibanaUrl, {
+      return this.makeHttpRequest(kibanaUrl, {
         method,
         path,
         body,

@@ -12,6 +12,7 @@ import type { TaskTypeDictionary } from './task_type_dictionary';
 import type { TaskInstance, ConcreteTaskInstance, TaskDefinition } from './task';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';
+import { rruleScheduleV3 } from './saved_objects/schemas/rrule';
 
 interface TaskValidatorOpts {
   allowReadingInvalidState: boolean;
@@ -102,7 +103,8 @@ export class TaskValidator {
     options: { validate: boolean } = { validate: true }
   ): T {
     const taskWithValidatedInterval = this.validateInterval(task);
-    const taskWithValidatedTimeout = this.validateTimeoutOverride(taskWithValidatedInterval);
+    const taskWithValidatedRrule = this.validateRrule(taskWithValidatedInterval);
+    const taskWithValidatedTimeout = this.validateTimeoutOverride(taskWithValidatedRrule);
 
     if (!options.validate) {
       return taskWithValidatedTimeout;
@@ -168,6 +170,20 @@ export class TaskValidator {
       throw new Error(
         `[TaskValidator] Invalid interval "${task.schedule.interval}". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
       );
+    }
+    return task;
+  }
+
+  public validateRrule<T extends TaskInstance>(task: T): T {
+    if (task.schedule?.rrule) {
+      try {
+        rruleScheduleV3.validate(task.schedule?.rrule);
+        return task;
+      } catch (e) {
+        throw new Error(
+          `[TaskValidator] Invalid rrule "${task.schedule.rrule}". Value does not match the schema: ${e.message}.`
+        );
+      }
     }
     return task;
   }

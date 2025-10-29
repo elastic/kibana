@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ESQLMessage, ESQLCommand, ESQLAst, ESQLAstAllCommands } from '../types';
+import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '../types';
 import type {
   ISuggestionItem,
   ICommandCallbacks,
@@ -30,8 +30,8 @@ export interface ICommandMethods<TContext = any> {
    * @returns Return an array of validation errors/warnings.
    */
   validate?: (
-    command: ESQLCommand,
-    ast: ESQLAst,
+    command: ESQLAstAllCommands,
+    ast: ESQLCommand[],
     context?: TContext,
     callbacks?: ICommandCallbacks
   ) => ESQLMessage[];

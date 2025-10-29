@@ -82,6 +82,8 @@
     "@kbn/core-http-server-utils",
     "@kbn/spaces-utils",
     "@kbn/core-http-server",
-    "@kbn/setup-node-env"
+    "@kbn/setup-node-env",
+    "@kbn/core-http-server",
+    "@kbn/react-query"
   ]
 }
