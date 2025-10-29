@@ -44,9 +44,7 @@ export type SearchEmbeddableByReferenceState = SearchEmbeddableBaseState & {
 
 export type SearchEmbeddableState = SearchEmbeddableByValueState | SearchEmbeddableByReferenceState;
 
-export type StoredSearchEmbeddableByValueState = SearchEmbeddableBaseState & {
-  attributes: SavedSearchByValueAttributes;
-};
+export type StoredSearchEmbeddableByValueState = SearchEmbeddableByValueState;
 
 export type StoredSearchEmbeddableByReferenceState = Omit<
   SearchEmbeddableByReferenceState,

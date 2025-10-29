@@ -39,13 +39,18 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       return {
         state: {
           ...rest,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-        } as StoredSearchEmbeddableByReferenceState,
+          ...(enhancementsState
+            ? {
+                enhancements:
+                  enhancementsState as StoredSearchEmbeddableByReferenceState['enhancements'],
+              }
+            : {}),
+        },
         references: [
           {
             name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
             type: SavedSearchType,
-            id: savedObjectId!,
+            id: savedObjectId,
           },
           ...enhancementsReferences,
         ],
@@ -54,21 +59,25 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
 
     // by value
     const { state: extractedState, references } = extract({
-      type: 'search',
+      type: SavedSearchType,
       attributes: state.attributes,
     });
 
     return {
       state: {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+        ...(enhancementsState
+          ? {
+              enhancements: enhancementsState as StoredSearchEmbeddableByValueState['enhancements'],
+            }
+          : {}),
         attributes: {
           ...state.attributes,
           ...extractedState.attributes,
           // discover session stores references as part of attributes
           references,
         },
-      } as StoredSearchEmbeddableByValueState,
+      },
       references: [...references, ...enhancementsReferences],
     };
   }

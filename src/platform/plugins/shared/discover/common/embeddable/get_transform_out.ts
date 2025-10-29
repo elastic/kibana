@@ -39,9 +39,9 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
     if (isByValue(state)) {
       const tabsState = {
         ...state,
-        attributes: extractTabs((state as StoredSearchEmbeddableByValueState).attributes),
+        attributes: extractTabs(state.attributes),
       };
-      const { attributes } = inject({ type: 'search', ...tabsState }, references ?? []);
+      const { attributes } = inject({ type: SavedSearchType, ...tabsState }, references ?? []);
       return {
         ...state,
         attributes,
