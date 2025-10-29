@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
@@ -35,12 +35,17 @@ import type { ApiStatus, FollowerIndexWithPausedStatus } from '../../../../../..
 import { routing } from '../../../../../services/routing';
 import { API_STATUS } from '../../../../../constants';
 import { ContextMenu } from '../context_menu';
+import { usePolling } from '../../../../../hooks';
+
+const POLL_INTERVAL_MS = 1000;
+const POLL_TIMEOUT_MS = 5000;
 
 interface FollowerIndexDetailsProps {
   followerIndex: FollowerIndexWithPausedStatus;
+  isPollingStatus: boolean;
 }
 
-const FollowerIndexDetails = ({ followerIndex }: FollowerIndexDetailsProps) => {
+const FollowerIndexDetails = ({ followerIndex, isPollingStatus }: FollowerIndexDetailsProps) => {
   const {
     remoteCluster,
     leaderIndex,
@@ -76,12 +81,24 @@ const FollowerIndexDetails = ({ followerIndex }: FollowerIndexDetailsProps) => {
 
                 <EuiDescriptionListDescription data-test-subj="status">
                   {isPaused ? (
-                    <EuiHealth color="subdued">
-                      <FormattedMessage
-                        id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedStatus"
-                        defaultMessage="Paused"
-                      />
-                    </EuiHealth>
+                    isPollingStatus ? (
+                      <EuiFlexGroup gutterSize="xs" alignItems="center">
+                        <EuiLoadingSpinner size="s" />
+                        <EuiText size="s" color="subdued">
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexDetailPanel.checkingStatus"
+                            defaultMessage="Checking status..."
+                          />
+                        </EuiText>
+                      </EuiFlexGroup>
+                    ) : (
+                      <EuiHealth color="subdued">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedStatus"
+                          defaultMessage="Paused"
+                        />
+                      </EuiHealth>
+                    )
                   ) : (
                     <EuiHealth color="success">
                       <FormattedMessage
@@ -389,10 +406,75 @@ export interface DetailPanelProps {
   followerIndexId?: string;
   followerIndex?: FollowerIndexWithPausedStatus;
   closeDetailPanel: () => void;
+  getFollowerIndex: (id: string) => void;
 }
 
-export const DetailPanel = (props: DetailPanelProps) => {
-  const { followerIndexId, closeDetailPanel, followerIndex, apiStatus } = props;
+export const DetailPanel = ({
+  followerIndexId,
+  closeDetailPanel,
+  followerIndex,
+  apiStatus,
+  getFollowerIndex,
+}: DetailPanelProps) => {
+  const [isInitialLoad, setInitialLoad] = useState(true);
+  const { isPolling, startPolling, stopPolling } = usePolling();
+
+  const shouldPollStatus = useCallback((): boolean => {
+    const params = new URLSearchParams(window.location.search);
+    return !isPolling && params.get('waitForActive') === 'true';
+  }, [isPolling]);
+
+  const clearWaitForActiveParam = useCallback(() => {
+    if (followerIndexId) {
+      routing.navigate(`/follower_indices`, {
+        name: encodeURIComponent(followerIndexId),
+      });
+    }
+  }, [followerIndexId]);
+
+  // Start polling once data is loaded
+  useEffect(() => {
+    const shouldPoll =
+      isInitialLoad &&
+      followerIndexId &&
+      followerIndex &&
+      !!followerIndex?.isPaused &&
+      shouldPollStatus();
+
+    if (shouldPoll) {
+      const onPoll = () => {
+        getFollowerIndex(followerIndexId);
+      };
+
+      const onTimeout = () => {
+        stopPolling();
+        clearWaitForActiveParam();
+      };
+
+      startPolling(POLL_INTERVAL_MS, onPoll, POLL_TIMEOUT_MS, onTimeout);
+      setInitialLoad(false);
+    }
+  }, [
+    clearWaitForActiveParam,
+    followerIndex,
+    followerIndexId,
+    getFollowerIndex,
+    isInitialLoad,
+    isPolling,
+    shouldPollStatus,
+    startPolling,
+    stopPolling,
+  ]);
+
+  // Stop polling when status becomes active
+  useEffect(() => {
+    const shouldStopPolling = isPolling && followerIndex && !followerIndex.isPaused;
+
+    if (shouldStopPolling) {
+      stopPolling();
+      clearWaitForActiveParam();
+    }
+  }, [followerIndex, isPolling, stopPolling, clearWaitForActiveParam]);
 
   const renderContent = () => {
     if (apiStatus === API_STATUS.LOADING) {
@@ -441,7 +523,7 @@ export const DetailPanel = (props: DetailPanelProps) => {
       );
     }
 
-    return <FollowerIndexDetails followerIndex={followerIndex} />;
+    return <FollowerIndexDetails followerIndex={followerIndex} isPollingStatus={isPolling} />;
   };
 
   const renderFooter = () => {
@@ -495,6 +577,7 @@ export const DetailPanel = (props: DetailPanelProps) => {
                     }
                     followerIndices={[followerIndex]}
                     testSubj="manageButton"
+                    isPollingStatus={isPolling}
                   />
                 </EuiFlexItem>
               )}
