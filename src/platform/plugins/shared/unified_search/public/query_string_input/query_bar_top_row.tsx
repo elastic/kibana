@@ -327,6 +327,7 @@ export const QueryBarTopRow = React.memo(
       docLinks,
       http,
       dataViews,
+      cps,
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
@@ -781,6 +782,11 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderProjectPicker() {
+      // Only show project picker in serverless environments
+      if (!cps?.cpsManager) {
+        return null;
+      }
+
       // temporarily adding a local storage key to toggle the project picker visibility
       if (localStorage.getItem(SHOW_PROJECT_PICKER_KEY) === 'true') {
         const { projectRouting, onProjectRoutingChange } = props;

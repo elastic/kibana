@@ -91,7 +91,7 @@ export const ProjectListItem = ({ project, index, originProjectId }: ProjectList
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {`${getCSPLabel(project._csp)}, ${project._region}`}
+                {`${getCSPLabel(project._csp || project._id)}, ${project._region}`}
               </EuiText>
             </EuiFlexItem>
             {tags.length ? (

@@ -12,6 +12,6 @@ export interface CPSServerSetup {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CPSServerStart {}
+export interface CpsPluginStart {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CPSServerStop {}

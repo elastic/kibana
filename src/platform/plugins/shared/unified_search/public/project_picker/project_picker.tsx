@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IUnifiedSearchPluginServices } from '../types';
 import { ProjectListItem } from './project_list_item';
 
 export const strings = {
@@ -64,123 +66,6 @@ export interface Project {
   [key: string]: string;
 }
 
-const response: { origin: Record<string, Project>; linked_projects: Record<string, Project> } = {
-  origin: {
-    c56c4f8849c64cc6ae59c261f40bd195: {
-      _id: 'c56c4f8849c64cc6ae59c261f40bd195',
-      _csp: 'aws',
-      _alias: 'my-project-b72b95',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'security',
-      mytag1: 'foo',
-      mytag2: 'bar',
-      mytag3: 'baz',
-      mytag4: 'qux',
-    },
-  },
-  linked_projects: {
-    a3b88ea3f195a336ae59c261f40bd195: {
-      _id: 'a3b88ea3f195a336ae59c261f40bd195',
-      _alias: 'customer-alias-a3b88e',
-      _type: 'security',
-      _csp: 'azure',
-      _region: 'eu-central-2',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    f40bd195389s3761023ca7aa8a3r0932: {
-      _id: 'f40bd195389s3761023ca7aa8a3r0932',
-      _alias: 'customer-alias-f40bd',
-      _type: 'observability',
-      _csp: 'aws',
-      _region: 'us-west-1',
-    },
-    g023ca7aa8a3r0932f40bd195389s376: {
-      _id: 'g023ca7aa8a3r0932f40bd195389s376',
-      _alias: 'big-query-analytics-616b96',
-      _csp: 'azure',
-      _region: 'Virginia (eastus2)',
-      _type: 'observability',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    h8a3r0932f40bd195389s3761023ca7aa: {
-      _id: 'h8a3r0932f40bd195389s3761023ca7aa',
-      _alias: 'cloud-backup-c91q12',
-      _csp: 'azure',
-      _region: 'Virginia (eastus2)',
-      _type: 'security',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    r0932f40bd195389s3761023ca7aa8a3: {
-      _id: 'r0932f40bd195389s3761023ca7aa8a3',
-      _alias: 'customer-portal-p61068',
-      _csp: 'aws',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'observability',
-    },
-    j023ca7aa8a3r0932f40bd195389s376: {
-      _id: 'j023ca7aa8a3r0932f40bd195389s376',
-      _alias: 'data-analysis-platform-j4962a',
-      _csp: 'azure',
-      _region: 'Virginia (eastus2)',
-      _type: 'observability',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    k40bd195389s3761023ca7aa8a3r0932: {
-      _id: 'k40bd195389s3761023ca7aa8a3r0932',
-      _alias: 'dev-environment-b19a81',
-      _csp: 'azure',
-      _region: 'Virginia (eastus2)',
-      _type: 'security',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    eaa8a3r0932f40bd195389s3761023ca: {
-      _id: 'eaa8a3r0932f40bd195389s3761023ca',
-      _alias: 'engineering-dev-ops-k416e1',
-      _csp: 'gcp',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'elasticsearch',
-    },
-    t40bd195389s3761023ca7aa8a3r0932: {
-      _id: 't40bd195389s3761023ca7aa8a3r0932',
-      _alias: 'feature-beta-t149a4',
-      _csp: 'gcp',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'elasticsearch',
-      mytag1: 'foo',
-      mytag2: 'bar',
-      mytag3: 'baz',
-    },
-    y023ca7aa8a3r0932f40bd195389s376: {
-      _id: 'y023ca7aa8a3r0932f40bd195389s376',
-      _alias: 'marketing-site-y7021b',
-      _csp: 'gcp',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'elasticsearch',
-    },
-    u8a3r0932f40bd195389s3761023ca7aa: {
-      _id: 'u8a3r0932f40bd195389s3761023ca7aa',
-      _alias: 'customer-data-u7021b',
-      _csp: 'azure',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'security',
-      mytag1: 'foo',
-      mytag2: 'bar',
-    },
-    p0932f40bd195389s3761023ca7aa8a3: {
-      _id: 'p0932f40bd195389s3761023ca7aa8a3',
-      _alias: 'customer-analytics-p7021b',
-      _csp: 'aws',
-      _region: 'N. Virginia (us-east-1)',
-      _type: 'observability',
-    },
-  },
-};
-
 export interface ProjectPickerProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
@@ -188,21 +73,31 @@ export interface ProjectPickerProps {
 
 export const ProjectPicker = ({ projectRouting, onProjectRoutingChange }: ProjectPickerProps) => {
   const [showProjectPickerPopover, setShowProjectPickerPopover] = useState(false);
-  const [linkedProjects, setProjects] = useState<Project[]>([]);
+  const [originProject, setOriginProject] = useState<Project | null>(null);
+  const [linkedProjects, setLinkedProjects] = useState<Project[]>([]);
 
   const { euiTheme } = useEuiTheme();
+  const { cps } = useKibana<IUnifiedSearchPluginServices>().services;
 
-  const originProject: Project = Object.values(response.origin)[0];
+  let projects: Project[] = [];
 
-  const projects =
-    projectRouting === '_alias:_origin' ? [originProject] : [originProject, ...linkedProjects];
+  if (!originProject) {
+  } else {
+    projects = projectRouting === '_alias:_origin' ? [originProject] : [originProject, ...linkedProjects];
+  }
+  console.log('Projects to display in picker:', projects);
 
   useEffect(() => {
-    // TODO: replace with fetch linked projects from cross project API
-    setProjects(
-      Object.values(response.linked_projects).sort((a, b) => a._alias.localeCompare(b._alias))
-    );
-  }, []);
+    // Only fetch projects in serverless environments where cpsManager is available
+    if (!cps?.cpsManager) return;
+
+    const subscription = cps.cpsManager.projects$.subscribe((projectsData: { origin: Project | null; linkedProjects: Project[] }) => {
+      setOriginProject(projectsData.origin);
+      setLinkedProjects(projectsData.linkedProjects);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [cps]);
 
   const button = (
     <EuiToolTip
@@ -235,7 +130,7 @@ export const ProjectPicker = ({ projectRouting, onProjectRoutingChange }: Projec
           key={project._id}
           project={project}
           index={index}
-          originProjectId={originProject._id}
+          originProjectId={originProject?._id ?? ''}
         />
       );
     });
