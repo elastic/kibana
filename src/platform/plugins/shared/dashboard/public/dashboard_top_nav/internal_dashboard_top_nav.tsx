@@ -280,19 +280,6 @@ export function InternalDashboardTopNav({
           content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
           position: 'bottom',
         } as EuiToolTipProps,
-        onClick: () => {
-          confirmDiscardOrSaveUnsavedChanges({
-            discardCallback: async () => {
-              setIsResetting(true);
-              await dashboardApi.asyncResetToLastSavedState();
-              setIsResetting(false);
-            },
-            saveCallback: async () => {
-              await dashboardApi.runQuickSave();
-            },
-          });
-        },
-        onClickAriaLabel: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
       });
     }
 
