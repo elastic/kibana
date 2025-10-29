@@ -380,6 +380,12 @@ const extractStepActionFromError = (errorMessage: string): string | undefined =>
     return stepMatch[1].trim();
   }
 
+  // Fallback to find a pattern like `locator.click`
+  const actionMatch = errorMessage.match(/\b\w+\.\w+\b/);
+  if (actionMatch) {
+    return actionMatch[0];
+  }
+
   return undefined;
 };
 
@@ -418,11 +424,13 @@ export const formatStepInformation = (
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
+      timeZone: 'UTC',
     });
     const dateStr = date.toLocaleDateString('en-GB', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
+      timeZone: 'UTC',
     });
 
     parts.push(

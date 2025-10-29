@@ -400,7 +400,7 @@ export class StatusRuleExecutor {
       for (const [idWithLocation, statusConfig] of Object.entries(downConfigs)) {
         // Skip scheduling if recoveryStrategy is 'firstUp' and latest ping is up
         if (recoveryStrategy === 'firstUp' && (statusConfig.latestPing.summary?.up ?? 0) > 0) {
-          return;
+          continue;
         }
 
         const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
@@ -430,7 +430,7 @@ export class StatusRuleExecutor {
     } else {
       const downConfigsById = getConfigsByIds(downConfigs);
 
-      for (const [configId, locationConfigs] of Object.entries(downConfigsById)) {
+      for (const [configId, locationConfigs] of downConfigsById) {
         // If recoveryStrategy is 'firstUp', we only consider configs that are not up
         const configs =
           recoveryStrategy === 'firstUp'
@@ -459,7 +459,11 @@ export class StatusRuleExecutor {
             idWithLocation: configId,
             alertId,
             monitorSummary,
-            statusConfig: configs[0],
+            downConfigs: configs.reduce(
+              (acc, conf) => ({ ...acc, [`${conf.configId}-${conf.locationId}`]: conf }),
+              {}
+            ),
+            configId,
             downThreshold,
             useLatestChecks,
             locationNames: configs.map(
@@ -564,18 +568,20 @@ export class StatusRuleExecutor {
     } & (
       | { statusConfig: AlertPendingStatusMetaData }
       | { statusConfig: AlertStatusMetaData; downThreshold: number }
+      | { downConfigs: AlertStatusConfigs; downThreshold: number; configId: string }
     )
   ) {
     const {
       idWithLocation,
       alertId,
       monitorSummary,
-      statusConfig,
       useLatestChecks = false,
       locationNames,
       locationIds,
     } = params;
-    const { configId, locationId } = statusConfig;
+    const { configId } = 'statusConfig' in params ? params.statusConfig : params;
+    const locationId = 'statusConfig' in params ? params.statusConfig.locationId : undefined;
+
     const { spaceId, startedAt } = this.options;
     const { alertsClient } = this.options.services;
     const { basePath } = this.server;
@@ -588,7 +594,7 @@ export class StatusRuleExecutor {
     const errorStartedAt = start ?? startedAt.toISOString() ?? monitorSummary.timestamp;
 
     let relativeViewInAppUrl = '';
-    if (monitorSummary.stateId) {
+    if (monitorSummary.stateId && locationId) {
       relativeViewInAppUrl = getRelativeViewInAppUrl({
         configId,
         locationId,
@@ -623,33 +629,41 @@ export class StatusRuleExecutor {
       context.downThreshold = params.downThreshold;
     }
 
-    if ('checks' in statusConfig) {
-      context.checks = statusConfig.checks;
+    if ('statusConfig' in params && 'checks' in params.statusConfig) {
+      context.checks = params.statusConfig.checks;
     }
 
     // Fetch step information for browser monitors synchronously before creating alert
     let stepInfo = '';
-    if (
-      monitorSummary.monitorType === 'browser' &&
-      'latestPing' in statusConfig &&
-      statusConfig.latestPing
-    ) {
-      const checkGroup = statusConfig.latestPing.monitor?.check_group;
-      if (checkGroup) {
-        try {
-          // Prepare context for enhanced step information
-          const stepContext = {
-            monitorName: monitorSummary.monitorName,
-            locationName: monitorSummary.locationName,
-            timestamp: statusConfig.latestPing['@timestamp'],
-          };
-
-          stepInfo = await this.getStepInfoForBrowserMonitor(checkGroup, 'browser', stepContext);
-          this.debug(`Step information for alert ${alertId}: "${stepInfo}"`);
-        } catch (error) {
-          this.debug(`Failed to fetch step information for alert ${alertId}: ${error}`);
-        }
+    if (monitorSummary.monitorType === 'browser') {
+      let allConfigs: Array<AlertStatusMetaData | AlertPendingStatusMetaData> = [];
+      if ('statusConfig' in params) {
+        allConfigs = [params.statusConfig];
+      } else if ('downConfigs' in params) {
+        allConfigs = getConfigsByIds(params.downConfigs).get(params.configId) || [];
       }
+
+      const stepInfoPromises = allConfigs.map(async (config) => {
+        if ('latestPing' in config && config.latestPing) {
+          const checkGroup = config.latestPing.monitor?.check_group;
+          if (checkGroup) {
+            try {
+              const stepContext = {
+                monitorName: monitorSummary.monitorName,
+                locationName: config.latestPing.observer.geo?.name ?? config.locationId,
+                timestamp: config.latestPing['@timestamp'],
+              };
+              return await this.getStepInfoForBrowserMonitor(checkGroup, 'browser', stepContext);
+            } catch (error) {
+              this.debug(`Failed to fetch step information for alert ${alertId}: ${error}`);
+            }
+          }
+        }
+        return '';
+      });
+      const stepInfos = await Promise.all(stepInfoPromises);
+      stepInfo = stepInfos.filter((info) => info).join('\n');
+      this.debug(`Step information for alert ${alertId}: "${stepInfo}"`);
     }
 
     // Update monitor summary with step info

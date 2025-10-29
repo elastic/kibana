@@ -93,6 +93,11 @@ describe('StatusRuleExecutor', () => {
   } as any);
   const configRepo = statusRule.monitorConfigRepository;
 
+  afterEach(() => {
+    statusRule.params = {};
+    jest.clearAllMocks();
+  });
+
   describe('DefaultRule', () => {
     it('should only query enabled monitors', async () => {
       const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
@@ -324,10 +329,9 @@ describe('StatusRuleExecutor', () => {
   });
 
   describe('handleDownMonitorThresholdAlert', () => {
-    afterEach(() => {
+    beforeEach(() => {
       jest.clearAllMocks();
     });
-
     it('should alert if monitor meet location threshold', async () => {
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
       await statusRule.handleDownMonitorThresholdAlert({
@@ -358,7 +362,9 @@ describe('StatusRuleExecutor', () => {
           configId: 'id1',
           downThreshold: 1,
           hostName: undefined,
+          labels: undefined,
           lastErrorMessage: undefined,
+          lastErrorStack: undefined,
           locationId: 'us_central_qa',
           locationName: 'Test location',
           locationNames: 'Test location',
@@ -370,8 +376,10 @@ describe('StatusRuleExecutor', () => {
           monitorUrlLabel: 'URL',
           reason:
             'Monitor "test monitor" from Test location is down. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.',
+          serviceName: undefined,
           stateId: undefined,
           status: 'down',
+          stepInfo: '',
           timestamp: '2024-05-13T12:33:37.000Z',
         },
         statusConfig: {
@@ -513,7 +521,9 @@ describe('StatusRuleExecutor', () => {
           configId: 'id1',
           downThreshold: 1,
           hostName: undefined,
+          labels: undefined,
           lastErrorMessage: undefined,
+          lastErrorStack: undefined,
           locationId: 'test and test',
           locationName: 'Test location',
           locationNames: 'Test location and Test location',
@@ -525,17 +535,37 @@ describe('StatusRuleExecutor', () => {
           monitorUrlLabel: 'URL',
           reason:
             'Monitor "test monitor" is down 1 time from Test location and 1 time from Test location. Alert when down 1 time out of the last 1 checks from at least 1 location.',
+          serviceName: undefined,
           status: 'down',
+          stepInfo: '',
           timestamp: '2024-05-13T12:33:37.000Z',
         },
-        statusConfig: {
-          checks: { down: 1, downWithinXChecks: 1 },
-          configId: 'id1',
-          locationId: 'us_central_qa',
-          monitorQueryId: 'test',
-          latestPing: testPing,
-          status: 'down',
-          timestamp: '2021-06-01T00:00:00.000Z',
+        configId: 'id1',
+        downConfigs: {
+          'id1-us_central_qa': {
+            locationId: 'us_central_qa',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            latestPing: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
+          'id1-us_central_dev': {
+            locationId: 'us_central_dev',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            latestPing: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
         },
         useLatestChecks: true,
       });
@@ -740,10 +770,6 @@ describe('StatusRuleExecutor', () => {
       );
     });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('should call schedulePendingAlertPerConfigId when alertOnNoData is true and groupBy is not locationId', async () => {
       // Set up params with alertOnNoData=true and groupBy='monitor'
       statusRule.params = {
@@ -875,6 +901,16 @@ describe('StatusRuleExecutor', () => {
             monitorUrlLabel: 'URL',
             reason: `Monitor "${MOCK_FIRST_MONITOR.name}" from ${MOCK_FIRST_LOCATION.name} is pending.`,
             status: 'pending',
+            checkedAt: undefined,
+            checks: undefined,
+            hostName: undefined,
+            labels: undefined,
+            lastErrorMessage: undefined,
+            lastErrorStack: undefined,
+            serviceName: undefined,
+            stateId: undefined,
+            stepInfo: '',
+            timestamp: undefined,
           },
         });
         expect(scheduleAlertSpy).toHaveBeenNthCalledWith(2, {
@@ -897,6 +933,16 @@ describe('StatusRuleExecutor', () => {
             monitorUrlLabel: 'URL',
             reason: `Monitor "${MOCK_SECOND_MONITOR.name}" from ${MOCK_SECOND_LOCATION.name} is pending.`,
             status: 'pending',
+            checkedAt: undefined,
+            checks: undefined,
+            hostName: undefined,
+            labels: undefined,
+            lastErrorMessage: undefined,
+            lastErrorStack: undefined,
+            serviceName: undefined,
+            stateId: undefined,
+            stepInfo: '',
+            timestamp: undefined,
           },
         });
       });
@@ -957,6 +1003,16 @@ describe('StatusRuleExecutor', () => {
             monitorUrlLabel: 'URL',
             reason: `Monitor "${MOCK_FIRST_MONITOR.name}" is pending 1 time from ${MOCK_FIRST_LOCATION.name}.`,
             status: 'pending',
+            checkedAt: undefined,
+            checks: undefined,
+            hostName: undefined,
+            labels: undefined,
+            lastErrorMessage: undefined,
+            lastErrorStack: undefined,
+            serviceName: undefined,
+            stateId: undefined,
+            stepInfo: '',
+            timestamp: undefined,
           },
         });
         expect(scheduleAlertSpy).toHaveBeenNthCalledWith(2, {
@@ -979,6 +1035,16 @@ describe('StatusRuleExecutor', () => {
             monitorUrlLabel: 'URL',
             reason: `Monitor "${MOCK_SECOND_MONITOR.name}" is pending 1 time from ${MOCK_SECOND_LOCATION.name}.`,
             status: 'pending',
+            checkedAt: undefined,
+            checks: undefined,
+            hostName: undefined,
+            labels: undefined,
+            lastErrorMessage: undefined,
+            lastErrorStack: undefined,
+            serviceName: undefined,
+            stateId: undefined,
+            stepInfo: '',
+            timestamp: undefined,
           },
         });
       });

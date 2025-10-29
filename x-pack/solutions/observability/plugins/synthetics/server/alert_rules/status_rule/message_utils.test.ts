@@ -86,6 +86,14 @@ describe('message_utils', () => {
         locationNames: locationName,
         status: 'down',
         monitorUrlLabel: 'URL',
+        lastErrorMessage: undefined,
+        lastErrorStack: undefined,
+        serviceName: undefined,
+        labels: undefined,
+        stateId: undefined,
+        checks: undefined,
+        monitorTags: undefined,
+        stepInfo: '',
       });
     });
 
@@ -128,6 +136,17 @@ describe('message_utils', () => {
         locationNames: locationName,
         monitorUrlLabel: 'URL',
         reason: 'Monitor "Test Monitor" from Test Location is pending.',
+        checkedAt: undefined,
+        timestamp: undefined,
+        hostName: undefined,
+        lastErrorMessage: undefined,
+        lastErrorStack: undefined,
+        serviceName: undefined,
+        labels: undefined,
+        stateId: undefined,
+        checks: undefined,
+        monitorTags: undefined,
+        stepInfo: '',
       });
     });
   });

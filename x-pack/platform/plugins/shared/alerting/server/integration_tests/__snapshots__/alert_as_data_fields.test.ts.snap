@@ -11230,6 +11230,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "monitor.step_info": Object {
+      "required": false,
+      "type": "text",
+    },
     "monitor.tags": Object {
       "array": true,
       "required": false,
@@ -11391,6 +11395,10 @@ Object {
     "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
+    },
+    "monitor.step_info": Object {
+      "required": false,
+      "type": "text",
     },
     "monitor.tags": Object {
       "array": true,
@@ -11554,6 +11562,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "monitor.step_info": Object {
+      "required": false,
+      "type": "text",
+    },
     "monitor.tags": Object {
       "array": true,
       "required": false,
@@ -11715,6 +11727,10 @@ Object {
     "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
+    },
+    "monitor.step_info": Object {
+      "required": false,
+      "type": "text",
     },
     "monitor.tags": Object {
       "array": true,
@@ -11883,6 +11899,10 @@ Object {
     "monitor.state.id": Object {
       "required": false,
       "type": "keyword",
+    },
+    "monitor.step_info": Object {
+      "required": false,
+      "type": "text",
     },
     "monitor.tags": Object {
       "array": true,
