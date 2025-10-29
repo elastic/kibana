@@ -528,7 +528,7 @@
             },
             "; name: string; description: string; } | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; path: { name: string; }; body: { feature?: { filter: ",
+            ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; body: { feature?: { filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -536,7 +536,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; description: string; } | undefined; }; }, { query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; path: { name: string; }; body: { feature?: { filter: ",
+            "; name: string; description: string; } | undefined; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; body: { feature?: { filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -678,7 +678,7 @@
             },
             "; name: string; } | undefined; }; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+            ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -686,7 +686,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+            "; name: string; } | undefined; }; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -736,7 +736,7 @@
             "ZodTypeAny",
             ", { from: Date; to: Date; bucketSize: string; }, { from: string; to: string; bucketSize: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; }>, ",
+            ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             {
@@ -1526,7 +1526,7 @@
             "ZodTypeAny",
             ", { tags?: string[] | undefined; }, { tags?: string[] | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }, { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }>, ",
+            ", { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }, { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "SuggestDashboardResponse",
@@ -1654,7 +1654,7 @@
             "ZodTypeAny",
             ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
+            ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "Observable",
@@ -1690,7 +1690,7 @@
             "ZodTypeAny",
             ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
+            ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", { features: ",
             {
@@ -2438,7 +2438,7 @@
             "ZodTypeAny",
             ", { start: string; end: string; }, { start: string; end: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { start: string; end: string; }; path: { name: string; }; }, { query: { start: string; end: string; }; path: { name: string; }; }>, ",
+            ", { path: { name: string; }; query: { start: string; end: string; }; }, { path: { name: string; }; query: { start: string; end: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "StreamDetailsResponse",
@@ -3225,7 +3225,7 @@
           },
           "; name: string; description: string; } | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; path: { name: string; }; body: { feature?: { filter: ",
+          ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; body: { feature?: { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3233,7 +3233,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; description: string; } | undefined; }; }, { query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; path: { name: string; }; body: { feature?: { filter: ",
+          "; name: string; description: string; } | undefined; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; body: { feature?: { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3375,7 +3375,7 @@
           },
           "; name: string; } | undefined; }; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+          ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3383,7 +3383,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+          "; name: string; } | undefined; }; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3433,7 +3433,7 @@
           "ZodTypeAny",
           ", { from: Date; to: Date; bucketSize: string; }, { from: string; to: string; bucketSize: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; }>, ",
+          ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           {
@@ -4223,7 +4223,7 @@
           "ZodTypeAny",
           ", { tags?: string[] | undefined; }, { tags?: string[] | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }, { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }>, ",
+          ", { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }, { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "SuggestDashboardResponse",
@@ -4351,7 +4351,7 @@
           "ZodTypeAny",
           ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
+          ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "Observable",
@@ -4387,7 +4387,7 @@
           "ZodTypeAny",
           ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
+          ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", { features: ",
           {
@@ -5135,7 +5135,7 @@
           "ZodTypeAny",
           ", { start: string; end: string; }, { start: string; end: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { start: string; end: string; }; path: { name: string; }; }, { query: { start: string; end: string; }; path: { name: string; }; }>, ",
+          ", { path: { name: string; }; query: { start: string; end: string; }; }, { path: { name: string; }; query: { start: string; end: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "StreamDetailsResponse",
