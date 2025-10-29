@@ -13,10 +13,15 @@ import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type { ChartSizeUnit } from '@kbn/chart-expressions-common/types';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
-import type { FramePublicAPI, UserMessagesGetter, Visualization } from '../../../types';
+import type {
+  FramePublicAPI,
+  UserMessagesGetter,
+  Visualization,
+  DatasourceStates,
+  LensInspector,
+} from '@kbn/lens-common';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
-import type { DatasourceStates } from '../../../state_management';
 import {
   useLensDispatch,
   updateVisualizationState,
@@ -27,7 +32,6 @@ import {
   selectVisualization,
   selectVisualizationState,
 } from '../../../state_management';
-import type { LensInspector } from '../../../lens_inspector_service';
 import { WorkspaceTitle } from './title';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 
