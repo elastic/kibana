@@ -215,7 +215,7 @@ describe('getRRuleSchedulingSuggestions', () => {
       const result = getRRuleSchedulingSuggestions(largeEndColumnRange);
 
       result.forEach((suggestion) => {
-        expect(suggestion.range?.endColumn).toBe(2000);
+        expect((suggestion.range as monaco.IRange).endColumn).toBe(2000);
       });
     });
   });
