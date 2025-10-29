@@ -199,8 +199,14 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
     </EuiFlyoutFooter>
   );
 
+  // ref={null} is needed to fix styled-components' ref prop type
   return (
-    <FlyoutWithHigherZIndex onClose={() => onClose()} {...restOfProps} maxWidth={MAX_FLYOUT_WIDTH}>
+    <FlyoutWithHigherZIndex
+      onClose={() => onClose()}
+      {...restOfProps}
+      maxWidth={MAX_FLYOUT_WIDTH}
+      ref={null}
+    >
       {header}
       {body}
       {footer}
