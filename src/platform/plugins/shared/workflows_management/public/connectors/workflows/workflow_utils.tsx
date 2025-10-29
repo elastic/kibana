@@ -11,6 +11,10 @@ import React from 'react';
 import type { WorkflowListDto } from '@kbn/workflows';
 import { TagsBadge } from './tags_badge';
 
+export interface WorkflowValidationResult {
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+}
 export interface WorkflowOption {
   id: string;
   name: string;
@@ -21,6 +25,7 @@ export interface WorkflowOption {
   checked?: 'on' | 'off';
   prepend?: React.ReactNode;
   append?: React.ReactNode;
+  validationResult?: WorkflowValidationResult | null;
   data?: {
     secondaryContent?: string;
   };
@@ -33,6 +38,11 @@ export interface WorkflowSelectorConfig {
 
   // Sorting
   sortFunction?: (workflows: WorkflowListDto['results']) => WorkflowListDto['results'];
+
+  // Validation - runs over each workflow, returns validation result or null
+  validationFunction?: (
+    workflow: WorkflowListDto['results'][number]
+  ) => WorkflowValidationResult | null;
 
   // UI Configuration
   label?: string;
@@ -62,6 +72,7 @@ export function processWorkflowsToOptions(
 
   // Convert to WorkflowOption format
   return processedWorkflows.map((workflow) => {
+    const validationResult = config.validationFunction ? config.validationFunction(workflow) : null;
     return {
       id: workflow.id,
       name: workflow.name,
@@ -71,6 +82,7 @@ export function processWorkflowsToOptions(
       disabled: !workflow.enabled,
       checked: workflow.id === selectedWorkflowId ? 'on' : undefined,
       append: <TagsBadge tags={workflow.definition?.tags || []} />,
+      validationResult,
       data: {
         secondaryContent: workflow.description || 'No description',
       },

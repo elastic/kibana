@@ -109,10 +109,26 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       const wasSelectedButNowDisabled = isSelected && isDisabled;
 
       if (wasSelectedButNowDisabled) {
-        return <EuiIcon type="alert" color="warning" aria-label="Workflow disabled warning" />;
+        return (
+          <EuiIcon
+            type="alert"
+            color="warning"
+            style={{ marginRight: '8px' }}
+            aria-label="Workflow disabled warning"
+          />
+        );
       } else if (isDisabled) {
         return (
           <IconDisabledWorkflow size="m" style={{ marginRight: '8px' }} aria-label="Disabled" />
+        );
+      } else if (workflowOption.validationResult) {
+        return (
+          <EuiIcon
+            type="warning"
+            style={{ marginRight: '8px' }}
+            color={workflowOption.validationResult.severity === 'error' ? 'danger' : 'warning'}
+            aria-label={workflowOption.validationResult.message}
+          />
         );
       }
 
@@ -135,8 +151,14 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       </>
     );
 
-    if (option.disabled) {
-      return <EuiToolTip content={i18n.DISABLED_WORKFLOW_TOOLTIP}>{content}</EuiToolTip>;
+    const tooltipContent = option.disabled
+      ? i18n.DISABLED_WORKFLOW_TOOLTIP
+      : option.validationResult
+      ? option.validationResult.message
+      : undefined;
+
+    if (tooltipContent) {
+      return <EuiToolTip content={tooltipContent}>{content}</EuiToolTip>;
     }
 
     return content;
