@@ -20,6 +20,7 @@ import React, { useMemo, useCallback } from 'react';
 import type { Filter, FilterKey } from '../../../../../../common/custom_link/custom_link_types';
 import { DEFAULT_OPTION, FILTER_SELECT_OPTIONS, getSelectOptions } from './helper';
 import { SuggestionsSelect } from '../../../../shared/suggestions_select';
+import eventEmitter from './event-emmiter';
 
 export function FiltersSection({
   filters,
@@ -45,10 +46,12 @@ export function FiltersSection({
     const newFilters = [...filters];
     newFilters.splice(idx, 1);
 
+ 
     // if there is only one item left it should not be removed
     // but reset to empty
     if (isEmpty(newFilters)) {
       onChangeFilters([{ key: '', value: '' }]);
+      eventEmitter.emit('clear-selected-suggestions', []);
     } else {
       onChangeFilters(newFilters);
     }

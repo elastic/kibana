@@ -8,9 +8,10 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { throttle } from 'lodash';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import eventEmitter from '../../app/settings/custom_link/create_edit_custom_link_flyout/event-emmiter';
 
 interface SuggestionsSelectProps {
   customOptions?: Array<EuiComboBoxOptionOption<string>>;
@@ -71,6 +72,16 @@ export function SuggestionsSelect({
     [fieldName, searchValue, start, end, serviceName],
     { preservePreviousData: false }
   );
+
+    useEffect(() => {
+    const removerCallback = (newState: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedOptions(newState);
+    };
+    eventEmitter.addListener('clear-selected-suggestions', removerCallback);
+    return () => {
+      eventEmitter.removeListener('clear-selected-suggestions', removerCallback);
+    };
+  }, []);
 
   const handleChange = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
