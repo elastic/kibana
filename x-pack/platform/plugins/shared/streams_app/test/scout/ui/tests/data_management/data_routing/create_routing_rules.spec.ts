@@ -28,9 +28,10 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     // Verify we're in the creating new rule state
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
     await expect(page.getByText('Stream name')).toBeVisible();
+    await expect(page.getByText('logs.')).toBeVisible();
 
     // Fill in the stream name
-    await page.getByTestId('streamsAppRoutingStreamEntryNameField').fill('logs.nginx');
+    await page.getByTestId('streamsAppRoutingStreamEntryNameField').fill('nginx');
 
     // Set up routing condition
     await pageObjects.streams.fillConditionEditor({
@@ -53,7 +54,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     await pageObjects.streams.clickCreateRoutingRule();
 
     // Fill in some data
-    await pageObjects.streams.fillRoutingRuleName('logs.test');
+    await pageObjects.streams.fillRoutingRuleName('test');
 
     // Cancel the operation
     await pageObjects.streams.cancelRoutingRule();
