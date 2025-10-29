@@ -1728,6 +1728,7 @@
                     "type": "string"
                   },
                   "attachments": {
+                    "description": "Optional attachments to send with the message.",
                     "items": {
                       "additionalProperties": false,
                       "properties": {
@@ -1735,8 +1736,14 @@
                           "additionalProperties": {},
                           "type": "object"
                         },
+                        "hidden": {
+                          "type": "boolean"
+                        },
                         "id": {
                           "type": "string"
+                        },
+                        "transient": {
+                          "type": "boolean"
                         },
                         "type": {
                           "type": "string"
@@ -1874,6 +1881,7 @@
                     "type": "string"
                   },
                   "attachments": {
+                    "description": "Optional attachments to send with the message.",
                     "items": {
                       "additionalProperties": false,
                       "properties": {
@@ -1881,8 +1889,14 @@
                           "additionalProperties": {},
                           "type": "object"
                         },
+                        "hidden": {
+                          "type": "boolean"
+                        },
                         "id": {
                           "type": "string"
+                        },
+                        "transient": {
+                          "type": "boolean"
                         },
                         "type": {
                           "type": "string"
