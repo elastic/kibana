@@ -230,7 +230,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
             existsSelected,
             exclude,
           });
-          if (newFilter) dataControlManager.internalApi.setOutputFilter(newFilter);
+          dataControlManager.internalApi.setOutputFilter(newFilter);
         });
 
       function serializeState(): SerializedPanelState<OptionsListControlState> {
