@@ -3,7 +3,7 @@ navigation_title: Third-party
 ---
 # Third-party connectors
 
-Third-party connectors enable you to integrate with external services and systems.
+Use these connectors to integrate with various third-party services for alerting and case management use cases.
 
 ## Available connectors
 
