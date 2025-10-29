@@ -47,9 +47,15 @@ export const UserPanelContent = ({
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
 
+  const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
+    'entityDetailsHighlightsEnabled'
+  );
+
   return (
     <FlyoutBody>
-      <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
+      {isEntityDetailsHighlightsAIEnabled && (
+        <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
+      )}
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
