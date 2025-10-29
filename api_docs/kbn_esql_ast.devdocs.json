@@ -11795,6 +11795,22 @@
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.FunctionParameter.supportsMultiValues",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "supportsMultiValues",
+            "description": [
+              "If true, this parameter supports multiple values (arrays). Default is false.\nThis indicates that the parameter can accept multiple values, which will be passed as an array."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12602,6 +12618,20 @@
             "type": "Object",
             "tags": [],
             "label": "forkTooFewBranches",
+            "description": [],
+            "signature": [
+              "{ message: string; type: {}; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.joinOnSingleExpression",
+            "type": "Object",
+            "tags": [],
+            "label": "joinOnSingleExpression",
             "description": [],
             "signature": [
               "{ message: string; type: {}; }"

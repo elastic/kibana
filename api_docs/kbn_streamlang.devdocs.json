@@ -795,7 +795,7 @@
           "\nGet the processor type (action) from a processor definition"
         ],
         "signature": [
-          "(processor: TProcessorDefinition) => \"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"manual_ingest_pipeline\""
+          "(processor: TProcessorDefinition) => \"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"convert\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -1898,6 +1898,92 @@
             "type": "CompoundType",
             "tags": [],
             "label": "allow_duplicates",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.BaseConvertProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseConvertProcessor",
+        "description": [
+          "\nConvert processor"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.BaseConvertProcessor",
+            "text": "BaseConvertProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBase",
+            "text": "ProcessorBase"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.BaseConvertProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"convert\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.BaseConvertProcessor.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.BaseConvertProcessor.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"string\" | \"boolean\" | \"integer\" | \"long\" | \"double\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.BaseConvertProcessor.ignore_missing",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_missing",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -3294,6 +3380,51 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.ConvertProcessor",
+        "type": "Type",
+        "tags": [],
+        "label": "ConvertProcessor",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.BaseConvertProcessor",
+            "text": "BaseConvertProcessor"
+          },
+          " & ({ to?: string | undefined; } | { to: string; where: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; })"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.convertProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "convertProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.dateProcessorSchema",
         "type": "Any",
         "tags": [],
@@ -3330,7 +3461,7 @@
         "label": "ElasticsearchProcessor",
         "description": [],
         "signature": [
-          "{ sort?: unknown; split?: unknown; trim?: unknown; date?: unknown; join?: unknown; enrich?: unknown; inference?: unknown; append?: unknown; set?: unknown; lowercase?: unknown; script?: unknown; circle?: unknown; user_agent?: unknown; pipeline?: unknown; json?: unknown; csv?: unknown; attachment?: unknown; rename?: unknown; drop?: unknown; bytes?: unknown; uppercase?: unknown; remove?: unknown; geo_grid?: unknown; fail?: unknown; foreach?: unknown; grok?: unknown; reroute?: unknown; fingerprint?: unknown; dissect?: unknown; community_id?: unknown; convert?: unknown; date_index_name?: unknown; dot_expander?: unknown; ip_location?: unknown; geoip?: unknown; gsub?: unknown; html_strip?: unknown; kv?: unknown; network_direction?: unknown; redact?: unknown; registered_domain?: unknown; set_security_user?: unknown; terminate?: unknown; urldecode?: unknown; uri_parts?: unknown; }"
+          "{ sort?: unknown; split?: unknown; trim?: unknown; date?: unknown; join?: unknown; enrich?: unknown; inference?: unknown; append?: unknown; set?: unknown; lowercase?: unknown; script?: unknown; circle?: unknown; user_agent?: unknown; pipeline?: unknown; json?: unknown; csv?: unknown; attachment?: unknown; rename?: unknown; drop?: unknown; bytes?: unknown; uppercase?: unknown; remove?: unknown; geo_grid?: unknown; fail?: unknown; foreach?: unknown; grok?: unknown; reroute?: unknown; fingerprint?: unknown; dissect?: unknown; convert?: unknown; community_id?: unknown; date_index_name?: unknown; dot_expander?: unknown; ip_location?: unknown; geoip?: unknown; gsub?: unknown; html_strip?: unknown; kv?: unknown; network_direction?: unknown; redact?: unknown; registered_domain?: unknown; set_security_user?: unknown; terminate?: unknown; urldecode?: unknown; uri_parts?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -3421,7 +3552,7 @@
           "\nProcessorType is the union of all possible 'action' values"
         ],
         "signature": [
-          "\"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"manual_ingest_pipeline\""
+          "\"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"convert\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -3438,7 +3569,7 @@
           "\nGet all processor types as a string array (derived from the Zod schema)"
         ],
         "signature": [
-          "(\"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"manual_ingest_pipeline\")[]"
+          "(\"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"convert\" | \"manual_ingest_pipeline\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -3559,6 +3690,14 @@
             "docId": "kibKbnStreamlangPluginApi",
             "section": "def-common.AppendProcessor",
             "text": "AppendProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ConvertProcessor",
+            "text": "ConvertProcessor"
           },
           " | ",
           {

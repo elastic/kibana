@@ -4755,6 +4755,8 @@
             "text": "QueryResult"
           },
           " | ",
+          "VisualizationResult",
+          " | ",
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
@@ -5274,7 +5276,7 @@
           "\nIds of built-in onechat tools"
         ],
         "signature": [
-          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; }"
+          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; readonly createVisualization: string; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
         "deprecated": false,

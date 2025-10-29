@@ -2942,7 +2942,15 @@
         "signature": [
           "{ Component: React.ComponentType<",
           "ChartSectionProps",
-          ">; replaceDefaultChart: true; localStorageKeyPrefix?: string | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; } | { replaceDefaultChart: false; }"
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<T>>; replaceDefaultChart: true; localStorageKeyPrefix?: string | undefined; defaultTopPanelHeight?: number | \"max-content\" | undefined; } | { replaceDefaultChart: false; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
         "deprecated": false,

@@ -904,7 +904,7 @@
             "tags": [],
             "label": "getDefaultModel",
             "description": [
-              "\nReturns the default model to be used for LLM tasks.\n\nWill use Elasticsearch LLMs by default if present, otherwise will pick\nthe first GenAI compatible connector."
+              "\nReturns the model used for LLM tasks in the current round."
             ],
             "signature": [
               "() => Promise<",
