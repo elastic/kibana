@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import pRetry from 'p-retry';
 
-
 import {
   AGENT_ACTIONS_INDEX,
   AGENT_ACTIONS_RESULTS_INDEX,
@@ -41,26 +40,6 @@ export async function expectToRejectWithError(fn: any, errRegexp: RegExp) {
 
 export async function cleanFleetIndices(esClient: Client) {
   await Promise.all([
-<<<<<<< HEAD
-    esClient.deleteByQuery({
-      index: ENROLLMENT_API_KEYS_INDEX,
-      q: '*',
-      ignore_unavailable: true,
-      refresh: true,
-    }),
-    esClient.deleteByQuery({
-      index: AGENTS_INDEX,
-      q: '*',
-      ignore_unavailable: true,
-      refresh: true,
-    }),
-    esClient.deleteByQuery({
-      index: AGENT_ACTIONS_INDEX,
-      q: '*',
-      ignore_unavailable: true,
-      refresh: true,
-    }),
-=======
     pRetry(
       () =>
         esClient.deleteByQuery({
@@ -91,28 +70,10 @@ export async function cleanFleetIndices(esClient: Client) {
         }),
       { retries: DELETE_RETRIES }
     ),
->>>>>>> 1109b60f11d ([Fleet] Fix delete by query conflict (#241001))
   ]);
 }
 
 export async function cleanFleetAgents(esClient: Client) {
-<<<<<<< HEAD
-  await esClient.deleteByQuery({
-    index: AGENTS_INDEX,
-    q: '*',
-    ignore_unavailable: true,
-    refresh: true,
-  });
-}
-
-export async function cleanFleetAgentPolicies(esClient: Client) {
-  await esClient.deleteByQuery({
-    index: AGENT_POLICY_INDEX,
-    q: '*',
-    refresh: true,
-    ignore_unavailable: true,
-  });
-=======
   await pRetry(
     () =>
       esClient.deleteByQuery({
@@ -136,27 +97,11 @@ export async function cleanFleetAgentPolicies(esClient: Client) {
       }),
     { retries: DELETE_RETRIES }
   );
->>>>>>> 1109b60f11d ([Fleet] Fix delete by query conflict (#241001))
 }
 
 export async function cleanFleetActionIndices(esClient: Client) {
   try {
     await Promise.all([
-<<<<<<< HEAD
-      esClient.deleteByQuery({
-        index: AGENT_ACTIONS_INDEX,
-        q: '*',
-        ignore_unavailable: true,
-        refresh: true,
-      }),
-      esClient.deleteByQuery(
-        {
-          index: AGENT_ACTIONS_RESULTS_INDEX,
-          q: '*',
-          refresh: true,
-        },
-        ES_INDEX_OPTIONS
-=======
       pRetry(
         () =>
           esClient.deleteByQuery({
@@ -178,7 +123,6 @@ export async function cleanFleetActionIndices(esClient: Client) {
             ES_INDEX_OPTIONS
           ),
         { retries: DELETE_RETRIES }
->>>>>>> 1109b60f11d ([Fleet] Fix delete by query conflict (#241001))
       ),
     ]);
   } catch (error) {
