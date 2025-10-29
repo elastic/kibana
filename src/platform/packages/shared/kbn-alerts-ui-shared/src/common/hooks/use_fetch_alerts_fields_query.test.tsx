@@ -8,7 +8,7 @@
  */
 
 import React, { FC } from 'react';
-import * as ReactQuery from '@tanstack/react-query';
+import * as ReactQuery from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';

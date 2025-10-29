@@ -16,7 +16,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import TriggersActionsUIHome, { MatchParams } from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 jest.mock('../common/lib/kibana');
 jest.mock('../common/get_experimental_features');

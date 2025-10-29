@@ -23,7 +23,7 @@ import {
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
 import { UserProfileAvatarData } from '@kbn/user-profile-components';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';

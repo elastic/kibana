@@ -12,7 +12,7 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AssistantSettingsManagement } from './assistant_settings_management';
 
 import {

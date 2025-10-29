@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

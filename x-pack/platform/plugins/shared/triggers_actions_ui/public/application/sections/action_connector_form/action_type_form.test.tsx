@@ -6,7 +6,7 @@
  */
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
