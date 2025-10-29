@@ -30401,6 +30401,10 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                successResponse:
+                  value:
+                    taskId: taskId
               schema:
                 additionalProperties: false
                 type: object
@@ -30409,10 +30413,14 @@ paths:
                     type: string
                 required:
                   - taskId
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -30430,7 +30438,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Bulk rollback packages
       tags:
         - Elastic Package Manager (EPM)
@@ -30451,6 +30459,10 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                successResponse:
+                  value:
+                    status: success
               schema:
                 additionalProperties: false
                 type: object
@@ -30488,10 +30500,14 @@ paths:
                     type: string
                 required:
                   - status
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -30509,7 +30525,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Get Bulk rollback packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -32559,7 +32575,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name to roll back
+          in: path
           name: pkgName
           required: true
           schema:
@@ -32568,6 +32585,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                successResponse:
+                  value:
+                    success: true
+                    version: 1.0.0
               schema:
                 additionalProperties: false
                 type: object
@@ -32579,10 +32601,14 @@ paths:
                 required:
                   - version
                   - success
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -32600,7 +32626,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Rollback a package to previous version
       tags:
         - Elastic Package Manager (EPM)
