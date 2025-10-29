@@ -40,7 +40,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     [coreStart, services.startDependencies]
   );
 
-  const { resolvedConversationId, isLoading: isResolvingConversation } = useResolveConversationId({
+  const resolvedConversationId = useResolveConversationId({
     newConversation: contextProps.newConversation,
     conversationId: contextProps.conversationId,
     sessionTag: contextProps.sessionTag,
@@ -49,17 +49,33 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
+  useEffect(() => {
+    if (!resolvedConversationId) {
+      setConversationId(undefined);
+      return;
+    }
+
+    services.conversationsService
+      .get({
+        conversationId: resolvedConversationId,
+      })
+      .then((conversation) => {
+        if (conversation) {
+          setConversationId(resolvedConversationId);
+        } else {
+          setConversationId(undefined);
+        }
+      })
+      .catch(() => {
+        setConversationId(undefined);
+      });
+  }, [resolvedConversationId, contextProps.sessionTag, contextProps.agentId, services]);
+
   useSaveLastConversationId({
     conversationId,
     sessionTag: contextProps.sessionTag,
     agentId: contextProps.agentId,
   });
-
-  useEffect(() => {
-    if (!isResolvingConversation) {
-      setConversationId(resolvedConversationId);
-    }
-  }, [resolvedConversationId, isResolvingConversation]);
 
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
 

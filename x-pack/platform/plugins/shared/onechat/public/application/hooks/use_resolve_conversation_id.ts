@@ -20,27 +20,18 @@ export const useResolveConversationId = ({
   sessionTag,
   agentId,
 }: UseResolveConversationIdParams) => {
-  const { lastConversationId, isLoading } = useLastConversationId({
+  const lastConversationId = useLastConversationId({
     sessionTag,
     agentId,
   });
 
   if (newConversation === true) {
-    return {
-      resolvedConversationId: undefined,
-      isLoading: false,
-    };
+    return undefined;
   }
 
   if (conversationId) {
-    return {
-      resolvedConversationId: conversationId,
-      isLoading: false,
-    };
+    return conversationId;
   }
 
-  return {
-    resolvedConversationId: lastConversationId,
-    isLoading,
-  };
+  return lastConversationId;
 };
