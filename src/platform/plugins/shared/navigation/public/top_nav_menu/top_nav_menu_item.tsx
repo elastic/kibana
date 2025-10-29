@@ -91,7 +91,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
 
   const routerLinkProps = props.href
     ? getRouterLinkProps({ href: props.href, onClick: handleClick })
-    : { href: undefined, onClick: handleClick };
+    : { onClick: handleClick };
 
   const commonButtonProps: EuiButtonProps & { id?: string } = {
     id: props.htmlId,
