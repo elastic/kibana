@@ -29,7 +29,7 @@ import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_log
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 const defaultWorkflowSettings: WorkflowSettings = {
-  timeout: '10m',
+  timeout: '6h',
 };
 
 export async function setupDependencies(
