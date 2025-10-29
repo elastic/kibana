@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments
+/* eslint-disable @typescript-eslint/no-explicit-any,  */
+
 import { buildRequestFromConnector } from '@kbn/workflows';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { BaseStep, RunStepResult } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './step_base';
-import { StepBase } from './step_base';
 
 // Extend BaseStep for elasticsearch-specific properties
 export interface ElasticsearchActionStep extends BaseStep {
@@ -20,10 +23,10 @@ export interface ElasticsearchActionStep extends BaseStep {
   with?: Record<string, any>;
 }
 
-export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionStep> {
+export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<ElasticsearchActionStep> {
   constructor(
     step: ElasticsearchActionStep,
-    contextManager: WorkflowContextManager,
+    contextManager: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
@@ -31,18 +34,9 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
   }
 
   public getInput() {
-    // Get current context for templating
-    const context = this.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.with || (this.step as any).configuration?.with || {};
-    return Object.entries(stepWith).reduce((acc: Record<string, any>, [key, value]) => {
-      if (typeof value === 'string') {
-        acc[key] = this.templatingEngine.render(value, context);
-      } else {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(stepWith);
   }
 
   public async _run(withInputs?: any): Promise<RunStepResult> {
@@ -63,7 +57,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
       });
 
       // Get ES client (user-scoped if available, fallback otherwise)
-      const esClient = this.contextManager.getEsClientAsUser();
+      const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
 
       // Generic approach like Dev Console - just forward the request to ES
       const result = await this.executeElasticsearchRequest(esClient, stepType, stepWith);
@@ -92,7 +86,7 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
           action_type: 'elasticsearch',
         },
       });
-      return await this.handleFailure(stepWith, error);
+      return this.handleFailure(stepWith, error);
     }
   }
 
@@ -105,11 +99,11 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
     if (params.request) {
       // Raw API format: { request: { method, path, body } } - like Dev Console
       const { method = 'GET', path, body } = params.request;
-      return await esClient.transport.request({
-        method,
-        path,
-        body,
-      });
+      return esClient.transport.request({ method, path, body });
+    } else if (stepType === 'elasticsearch.request') {
+      // Special case: elasticsearch.request type uses raw API format at top level
+      const { method = 'GET', path, body } = params;
+      return esClient.transport.request({ method, path, body });
     } else {
       // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
       const {
@@ -132,12 +126,11 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         body: requestBody,
       };
 
-      // console.log('DEBUG - Sending to ES client:', JSON.stringify(requestOptions, null, 2));
+      // TODO: This is a hack to handle bulk requests. We should refactor this to use the bulk API properly.
       if (requestOptions.path.endsWith('/_bulk')) {
-        // console.log('DEBUG - Bulk request detected:', JSON.stringify(requestOptions.body, null, 2));
         // Further processing for bulk requests can be added here
         // SG: ugly hack cuz _bulk is special
-        const docs = requestOptions.body.operations; // your 3 doc objects
+        const docs = requestOptions.body?.operations as Array<Record<string, unknown>> | undefined; // your 3 doc objects
         // If the index is in the path `/tin-workflows/_bulk`, pass it explicitly:
         const pathIndex = requestOptions.path.split('/')[1]; // "tin-workflows"
 
@@ -145,33 +138,20 @@ export class ElasticsearchActionStepImpl extends StepBase<ElasticsearchActionSte
         const refresh = queryParams?.refresh ?? false;
 
         // Turn each doc into an action+doc pair
-        const bulkBody = docs.flatMap((doc: any, i: number) => {
+        const bulkBody = docs?.flatMap((doc) => {
           // If you have ids, use: { index: { _id: doc._id } }
           return [{ index: {} }, doc];
         });
 
-        const resp = await esClient.bulk({
-          index: pathIndex, // default index for all actions
-          refresh, // true | false | 'wait_for'
-          body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
-        });
-
-        // Helpful: surface per-item errors if any
-        if (resp.errors) {
-          /*
-          const itemsWithErrors = resp.items
-            .map((it: any, idx: number) => ({
-              idx,
-              action: Object.keys(it)[0],
-              result: it[Object.keys(it)[0]],
-            }))
-            .filter((x: any) => x.result.error);
-          */
-          // console.error('Bulk had item errors:', itemsWithErrors);
+        if (bulkBody?.length) {
+          return esClient.bulk({
+            index: pathIndex, // default index for all actions
+            refresh, // true | false | 'wait_for'
+            body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
+          });
         }
-        return resp;
       }
-      return await esClient.transport.request(requestOptions);
+      return esClient.transport.request(requestOptions);
     }
   }
 }

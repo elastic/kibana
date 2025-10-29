@@ -191,6 +191,14 @@ export class SettingsPageObject extends FtrService {
     await field.type(dataViewName);
   }
 
+  async expectDisabledDataViewEditor() {
+    const nameField = await this.getNameField();
+    expect(await nameField.getAttribute('disabled')).to.equal('true');
+
+    const titleField = await this.getIndexPatternField();
+    expect(await titleField.getAttribute('disabled')).to.equal('true');
+  }
+
   async getSaveIndexPatternButton() {
     return await this.testSubjects.find('saveIndexPatternButton');
   }
@@ -216,11 +224,16 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDeletePattern() {
+    await this.testSubjects.click('moreActionsButton');
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
   async getIndexPageHeading() {
     return await this.testSubjects.getVisibleText('indexPatternTitle');
+  }
+
+  async getManagedTag() {
+    return await this.testSubjects.getVisibleText('managed-tag');
   }
 
   async getTableHeader() {
@@ -884,6 +897,11 @@ export class SettingsPageObject extends FtrService {
     this.log.debug('click Save');
     await this.testSubjects.click('fieldSaveButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async expectDisabledFieldEditor() {
+    expect(await this.testSubjects.getAttribute('input', 'disabled')).to.eql('true');
+    expect(await this.testSubjects.getAttribute('typeField', 'disabled')).to.eql('true');
   }
 
   async setFieldName(name: string) {

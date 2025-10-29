@@ -31,6 +31,7 @@ import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionContrib
 // import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionKeybindingResolver.js';
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionMenu.js';
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionModel.js';
+import 'monaco-editor/esm/vs/editor/contrib/comment/browser/comment.js'; // Needed for CMD+/ comment toggling
 
 import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController'; // Needed for Search bar functionality
 import 'monaco-editor/esm/vs/editor/standalone/browser/inspectTokens/inspectTokens.js'; // Needed for inspect tokens functionality

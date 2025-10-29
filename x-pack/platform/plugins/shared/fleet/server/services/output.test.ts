@@ -6,13 +6,11 @@
  */
 
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-
 import type { Logger } from '@kbn/logging';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
-
 import type { OutputSOAttributes } from '../types';
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -166,6 +164,7 @@ function getMockedSoClient(
         return mockOutputSO('existing-es-output', {
           type: 'elasticsearch',
           is_default: false,
+          write_to_logs_streams: false,
         });
       }
 
@@ -255,8 +254,102 @@ function getMockedSoClient(
   return soClient;
 }
 
+function getMockedEncryptedSoClient() {
+  const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+    getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  };
+
+  esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type: string, id: string) => {
+    switch (id) {
+      case outputIdToUuid('output-test'): {
+        return mockOutputSO('output-test');
+      }
+      case outputIdToUuid('existing-default-output'): {
+        return mockOutputSO('existing-default-output');
+      }
+      case outputIdToUuid('existing-default-monitoring-output'): {
+        return mockOutputSO('existing-default-monitoring-output', {
+          is_default: true,
+          type: 'elasticsearch',
+        });
+      }
+      case outputIdToUuid('existing-default-and-default-monitoring-output'): {
+        return mockOutputSO('existing-default-and-default-monitoring-output', {
+          is_default: true,
+          is_default_monitoring: true,
+        });
+      }
+      case outputIdToUuid('existing-preconfigured-default-output'): {
+        return mockOutputSO('existing-preconfigured-default-output', {
+          is_default: true,
+          is_preconfigured: true,
+        });
+      }
+      case outputIdToUuid('existing-preconfigured-default-output-allow-edit-name'): {
+        return mockOutputSO('existing-preconfigured-default-output-allow-edit-name', {
+          name: 'test',
+          allow_edit: ['name'],
+        });
+      }
+      case outputIdToUuid('existing-logstash-output'): {
+        return mockOutputSO('existing-logstash-output', {
+          type: 'logstash',
+          is_default: false,
+        });
+      }
+      case outputIdToUuid('existing-logstash-output-with-ssl'): {
+        return mockOutputSO('existing-logstash-output-with-ssl', {
+          type: 'logstash',
+          is_default: false,
+          ssl: {
+            certificate: 'cert-value',
+            certificate_authorities: ['/path/to/CAs'],
+          },
+          secrets: {
+            ssl: {
+              key: {
+                id: 'wnES3pUBqsj3cVixODPG',
+              },
+            },
+          },
+        });
+      }
+      case outputIdToUuid('existing-kafka-output'): {
+        return mockOutputSO('existing-kafka-output', {
+          type: 'kafka',
+          is_default: false,
+        });
+      }
+      case outputIdToUuid('existing-es-output'): {
+        return mockOutputSO('existing-es-output', {
+          type: 'elasticsearch',
+          is_default: false,
+          write_to_logs_streams: false,
+        });
+      }
+      case outputIdToUuid('existing-remote-es-output'): {
+        return mockOutputSO('existing-remote-es-output', {
+          type: 'remote_elasticsearch',
+          is_default: false,
+          service_token: 'plain',
+        });
+      }
+      default:
+        return mockOutputSO(id, {
+          type: 'remote_elasticsearch',
+        });
+    }
+  });
+
+  mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
+
+  return esoClientMock;
+}
+
 describe('Output Service', () => {
   const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+  const esoClientMock = getMockedEncryptedSoClient();
 
   const mockedAgentPolicyWithFleetServerResolvedValue = {
     items: [
@@ -391,6 +484,7 @@ describe('Output Service', () => {
           canEncrypt: true,
         } as any);
       });
+
       it('should throw if encryptedSavedObject is not configured', async () => {
         const soClient = getMockedSoClient();
         mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
@@ -1286,6 +1380,15 @@ describe('Output Service', () => {
       );
     });
 
+    it('should allow to update write_to_logs_streams field in preconfigured output outside from preconfiguration', async () => {
+      const soClient = getMockedSoClient();
+      await outputService.update(soClient, esClientMock, 'existing-preconfigured-default-output', {
+        write_to_logs_streams: true,
+        ssl: { certificate: '', certificate_authorities: [] },
+      });
+      expect(soClient.update).toBeCalled();
+    });
+
     it('Allow to update a preconfigured output from preconfiguration', async () => {
       const soClient = getMockedSoClient();
       await outputService.update(
@@ -1497,6 +1600,7 @@ describe('Output Service', () => {
       await outputService.update(soClient, esClientMock, 'existing-es-output', {
         type: 'logstash',
         hosts: ['test:4343'],
+        write_to_logs_streams: false,
       });
 
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
@@ -1504,6 +1608,7 @@ describe('Output Service', () => {
         hosts: ['test:4343'],
         ca_sha256: null,
         ca_trusted_fingerprint: null,
+        write_to_logs_streams: null,
       });
     });
 
@@ -1878,6 +1983,7 @@ describe('Output Service', () => {
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
+        write_to_logs_streams: null,
       });
     });
 
@@ -2367,17 +2473,14 @@ describe('Output Service', () => {
   describe('delete', () => {
     // Preconfigured output
     it('Do not allow to delete a preconfigured output outisde from preconfiguration', async () => {
-      const soClient = getMockedSoClient();
-      await expect(
-        outputService.delete(soClient, 'existing-preconfigured-default-output')
-      ).rejects.toThrow(
+      await expect(outputService.delete('existing-preconfigured-default-output')).rejects.toThrow(
         'Preconfigured output existing-preconfigured-default-output cannot be deleted outside of kibana config file.'
       );
     });
 
     it('Allow to delete a preconfigured output from preconfiguration', async () => {
       const soClient = getMockedSoClient();
-      await outputService.delete(soClient, 'existing-preconfigured-default-output', {
+      await outputService.delete('existing-preconfigured-default-output', {
         fromPreconfiguration: true,
       });
 
@@ -2386,7 +2489,7 @@ describe('Output Service', () => {
 
     it('Call removeOutputFromAll before deleting the output', async () => {
       const soClient = getMockedSoClient();
-      await outputService.delete(soClient, 'output-test');
+      await outputService.delete('output-test');
       expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalledWith(
         undefined,
         'output-test',
@@ -2406,7 +2509,7 @@ describe('Output Service', () => {
 
     it('Call removeOutputFromAll with with force before deleting the output, if deleted from preconfiguration', async () => {
       const soClient = getMockedSoClient();
-      await outputService.delete(soClient, 'existing-preconfigured-default-output', {
+      await outputService.delete('existing-preconfigured-default-output', {
         fromPreconfiguration: true,
       });
       expect(mockedAgentPolicyService.removeOutputFromAll).toBeCalledWith(
@@ -2428,7 +2531,7 @@ describe('Output Service', () => {
 
     it('should call audit logger', async () => {
       const soClient = getMockedSoClient();
-      await outputService.delete(soClient, 'existing-es-output');
+      await outputService.delete('existing-es-output');
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'delete',
@@ -2436,22 +2539,24 @@ describe('Output Service', () => {
         id: outputIdToUuid('existing-es-output'),
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
+      expect(soClient.delete).toBeCalled();
     });
   });
 
   describe('get', () => {
     it('work with a predefined id', async () => {
-      const soClient = getMockedSoClient();
-      const output = await outputService.get(soClient, 'output-test');
+      const output = await outputService.get('output-test');
 
-      expect(soClient.get).toHaveBeenCalledWith('ingest-outputs', outputIdToUuid('output-test'));
+      expect(esoClientMock.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        'ingest-outputs',
+        outputIdToUuid('output-test')
+      );
 
       expect(output.id).toEqual('output-test');
     });
 
     it('should call audit logger', async () => {
-      const soClient = getMockedSoClient();
-      await outputService.get(soClient, 'existing-es-output');
+      await outputService.get('existing-es-output');
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
@@ -2467,7 +2572,7 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'output-test',
       });
-      const defaultId = await outputService.getDefaultDataOutputId(soClient);
+      const defaultId = await outputService.getDefaultDataOutputId();
 
       expect(soClient.find).toHaveBeenCalled();
 
@@ -2480,7 +2585,7 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient({
         defaultOutputMonitoringId: 'output-test',
       });
-      const defaultId = await outputService.getDefaultMonitoringOutputId(soClient);
+      const defaultId = await outputService.getDefaultMonitoringOutputId();
 
       expect(soClient.find).toHaveBeenCalled();
 
@@ -2633,62 +2738,32 @@ describe('Output Service', () => {
     it('should update non-preconfigured output', async () => {
       mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
       const soClient = getMockedSoClient({});
-
-      soClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            ...mockOutputSO('non-preconfigured-output', {
-              is_preconfigured: false,
-              type: 'elasticsearch',
-            }),
-            score: 0,
-          },
-        ],
-        total: 1,
-        per_page: 1,
-        page: 1,
-      });
-
-      soClient.get.mockResolvedValue({
-        ...mockOutputSO('non-preconfigured-output', {
-          is_preconfigured: false,
-          type: 'elasticsearch',
-        }),
+      const savedObjects = [
+        {
+          ...mockOutputSO('non-preconfigured-output', {
+            is_preconfigured: false,
+            type: 'elasticsearch',
+          }),
+          score: 0,
+        },
+      ];
+      esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield {
+            saved_objects: savedObjects,
+          };
+        },
       });
 
       const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
-
       await expect(promise).resolves.not.toThrow();
     });
 
     it('should update preconfigured output', async () => {
       mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
       const soClient = getMockedSoClient({});
-
-      soClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            ...mockOutputSO('preconfigured-output', {
-              is_preconfigured: true,
-              type: 'elasticsearch',
-            }),
-            score: 0,
-          },
-        ],
-        total: 1,
-        per_page: 1,
-        page: 1,
-      });
-
-      soClient.get.mockResolvedValue({
-        ...mockOutputSO('preconfigured-output', {
-          is_preconfigured: true,
-          type: 'elasticsearch',
-        }),
-      });
-
       const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
-
       await expect(promise).resolves.not.toThrow();
     });
   });

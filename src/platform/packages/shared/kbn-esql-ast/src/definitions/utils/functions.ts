@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -25,12 +24,14 @@ import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_f
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import type { ESQLColumnData, ISuggestionItem } from '../../commands_registry/types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
+import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import type { ESQLAstItem, ESQLFunction } from '../../types';
-import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
+import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
+import { getMatchingSignatures } from './expressions';
+import { isLiteral } from '../../ast/is';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -66,16 +67,18 @@ export const buildFieldsDefinitions = (
   fields: string[],
   openSuggestions = true
 ): ISuggestionItem[] => {
-  return fields.map((label) => ({
-    label,
-    text: getSafeInsertText(label),
-    kind: 'Variable',
-    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fieldDefinition', {
-      defaultMessage: `Field specified by the input table`,
-    }),
-    sortText: 'D',
-    command: openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
-  }));
+  return fields.map((label) => {
+    const suggestion: ISuggestionItem = {
+      label,
+      text: getSafeInsertText(label),
+      kind: 'Variable',
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fieldDefinition', {
+        defaultMessage: `Field specified by the input table`,
+      }),
+      sortText: 'D',
+    };
+    return openSuggestions ? withAutoSuggest(suggestion) : suggestion;
+  });
 };
 
 export function getFunctionDefinition(name: string) {
@@ -105,7 +108,7 @@ export const filterFunctionDefinitions = (
   if (!predicates) {
     return functions;
   }
-  const { location, returnTypes, ignored = [] } = predicates;
+  const { location, returnTypes, ignored = [], allowed = [] } = predicates;
 
   return functions.filter(
     ({ name, locationsAvailable, ignoreAsSuggestion, signatures, license, observabilityTier }) => {
@@ -128,6 +131,10 @@ export const filterFunctionDefinitions = (
         return false;
       }
 
+      if (allowed.length > 0 && !allowed.includes(name)) {
+        return false;
+      }
+
       if (ignored.includes(name)) {
         return false;
       }
@@ -145,14 +152,35 @@ export const filterFunctionDefinitions = (
 };
 
 export function getAllFunctions(options?: {
-  type: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+  type?: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+  includeOperators?: boolean;
 }) {
+  const { type, includeOperators = true } = options ?? {};
+
   const fns = buildFunctionLookup();
-  if (!options?.type) {
-    return Array.from(fns.values());
+  const seen = new Set<string>();
+  const uniqueFunctions: FunctionDefinition[] = [];
+
+  for (const fn of fns.values()) {
+    if (!seen.has(fn.name)) {
+      seen.add(fn.name);
+      uniqueFunctions.push(fn);
+    }
   }
-  const types = new Set(Array.isArray(options.type) ? options.type : [options.type]);
-  return Array.from(fns.values()).filter((fn) => types.has(fn.type));
+
+  let result = uniqueFunctions;
+
+  if (!includeOperators) {
+    result = result.filter((fn) => fn.type !== FunctionDefinitionTypes.OPERATOR);
+  }
+
+  if (!type) {
+    return result;
+  }
+
+  const types = new Set(Array.isArray(type) ? type : [type]);
+
+  return result.filter((fn) => types.has(fn.type));
 }
 
 export function printArguments(
@@ -219,16 +247,6 @@ export function getFunctionSignatures(
   });
 }
 
-const allFunctions = memoize(
-  () =>
-    aggFunctionDefinitions
-      .concat(scalarFunctionDefinitions)
-      .concat(groupingFunctionDefinitions)
-      .concat(getTestFunctions())
-      .concat(timeSeriesAggFunctionDefinitions),
-  () => getTestFunctions()
-);
-
 export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   let detail = fn.description;
   const labels = [];
@@ -254,7 +272,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
     functionsPriority = '1A';
   }
-  return {
+  return withAutoSuggest({
     label: fn.name.toUpperCase(),
     text,
     asSnippet: true,
@@ -274,29 +292,8 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     },
     // time_series_agg functions have priority over everything else
     sortText: functionsPriority,
-    // trigger a suggestion follow up on selection
-    command: TRIGGER_SUGGESTION_COMMAND,
-  };
+  });
 }
-
-/**
- * Builds suggestions for functions based on the provided predicates.
- *
- * @param predicates a set of conditions that must be met for a function to be included in the suggestions
- * @returns
- */
-export const getFunctionSuggestions = (
-  predicates?: FunctionFilterPredicates,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
-  activeProduct?: PricingProduct | undefined
-): ISuggestionItem[] => {
-  return filterFunctionDefinitions(
-    allFunctions(),
-    predicates,
-    hasMinimumLicenseRequired,
-    activeProduct
-  ).map(getFunctionSuggestion);
-};
 
 export function checkFunctionInvocationComplete(
   func: ESQLFunction,
@@ -316,14 +313,22 @@ export function checkFunctionInvocationComplete(
     if (def.minParams && cleanedArgs.length >= def.minParams) {
       return true;
     }
+
     if (cleanedArgs.length === def.params.length) {
       return true;
     }
+
     return cleanedArgs.length >= def.params.filter(({ optional }) => !optional).length;
   });
+
   if (!argLengthCheck) {
     return { complete: false, reason: 'tooFewArgs' };
   }
+
+  if (func.incomplete && (fnDefinition.name === 'is null' || fnDefinition.name === 'is not null')) {
+    return { complete: false, reason: 'tooFewArgs' };
+  }
+
   if (
     (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
     Array.isArray(func.args[1]) &&
@@ -333,18 +338,16 @@ export function checkFunctionInvocationComplete(
   }
 
   // If the function is complete, check that the types of the arguments match the function definition
-  const hasCorrectTypes = fnDefinition.signatures.some((def) => {
-    return func.args.every((a, index) => {
-      return (
-        fnDefinition.name.endsWith('null') ||
-        def.params[index].type === 'any' ||
-        def.params[index].type === getExpressionType(a) ||
-        // this is a special case for expressions with named parameters
-        // e.g. "WHERE field == ?value"
-        isParamExpressionType(getExpressionType(a))
-      );
-    });
-  });
+  const givenTypes = func.args.map((arg) => getExpressionType(arg));
+  const literalMask = func.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
+
+  const hasCorrectTypes = !!getMatchingSignatures(
+    fnDefinition.signatures,
+    givenTypes,
+    literalMask,
+    true
+  ).length;
+
   if (!hasCorrectTypes) {
     return { complete: false, reason: 'wrongTypes' };
   }
@@ -383,6 +386,7 @@ export const buildColumnSuggestions = (
     addComma?: boolean;
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
+    supportsMultiValue?: boolean;
   },
   variables?: ESQLControlVariable[]
 ): ISuggestionItem[] => {
@@ -399,7 +403,7 @@ export const buildColumnSuggestions = (
       !column.userDefined && Boolean(column.isEcs),
       Boolean(fieldIsRecommended)
     );
-    return {
+    const suggestion: ISuggestionItem = {
       label: column.name,
       text:
         getSafeInsertText(column.name) +
@@ -408,9 +412,10 @@ export const buildColumnSuggestions = (
       kind: 'Variable',
       detail: titleCaseType,
       sortText,
-      command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
-  }) as ISuggestionItem[];
+
+    return options?.openSuggestions ? withAutoSuggest(suggestion) : suggestion;
+  });
 
   const suggestions = [...fieldsSuggestions];
   if (options?.supportsControls) {
@@ -429,51 +434,3 @@ export const buildColumnSuggestions = (
 
   return [...suggestions];
 };
-
-export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionItem {
-  return {
-    label: indexName
-      ? i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexWithName',
-
-          {
-            defaultMessage: 'Create lookup index "{indexName}"',
-
-            values: { indexName },
-          }
-        )
-      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndex', {
-          defaultMessage: 'Create lookup index',
-        }),
-
-    text: indexName,
-
-    kind: 'Issue',
-
-    filterText: indexName,
-
-    detail: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
-
-      {
-        defaultMessage: 'Click to create',
-      }
-    ),
-
-    sortText: '1A',
-
-    command: {
-      id: `esql.lookup_index.create`,
-
-      title: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
-
-        {
-          defaultMessage: 'Click to create',
-        }
-      ),
-
-      arguments: [{ indexName }],
-    },
-  } as ISuggestionItem;
-}

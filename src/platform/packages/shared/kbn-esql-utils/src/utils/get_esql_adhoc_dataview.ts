@@ -33,16 +33,32 @@ async function sha256(str: string) {
 export async function getESQLAdHocDataview(
   query: string,
   dataViewsService: DataViewsPublicPluginStart,
-  allowNoIndex?: boolean
+  options?: {
+    allowNoIndex?: boolean;
+    createNewInstanceEvenIfCachedOneAvailable?: boolean;
+    skipFetchFields?: boolean;
+  }
 ) {
   const timeField = getTimeFieldFromESQLQuery(query);
   const indexPattern = getIndexPatternFromESQLQuery(query);
-  const dataView = await dataViewsService.create({
-    title: indexPattern,
-    type: ESQL_TYPE,
-    id: await sha256(`esql-${indexPattern}`),
-    allowNoIndex,
-  });
+  const dataViewId = await sha256(`esql-${indexPattern}`);
+
+  if (options?.createNewInstanceEvenIfCachedOneAvailable) {
+    // overwise it might return a cached data view with a different time field
+    dataViewsService.clearInstanceCache(dataViewId);
+  }
+  const skipFetchFields = options?.skipFetchFields ?? false;
+
+  const dataView = await dataViewsService.create(
+    {
+      title: indexPattern,
+      type: ESQL_TYPE,
+      id: dataViewId,
+      allowNoIndex: options?.allowNoIndex,
+    },
+    // important to skip if you just need the dataview without the fields for performance reasons
+    skipFetchFields
+  );
 
   dataView.timeFieldName = timeField;
 

@@ -7,22 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  validateQuery,
-  type ESQLCallbacks,
-  suggest,
-  inlineSuggest,
-} from '@kbn/esql-validation-autocomplete';
 import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
+import {
+  suggest,
+  validateQuery,
+  getHoverItem,
+  inlineSuggest,
+  type ESQLCallbacks,
+} from '@kbn/esql-validation-autocomplete';
+import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
 import { wrapAsMonacoMessages } from './lib/converters/positions';
 import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
-import { getHoverItem } from './lib/hover/hover';
-import { monacoPositionToOffset } from './lib/shared/utils';
+import {
+  getDecorationHoveredMessages,
+  filterSuggestionsWithCustomCommands,
+  monacoPositionToOffset,
+} from './lib/shared/utils';
 import { buildEsqlTheme } from './lib/theme';
 
 const removeKeywordSuffix = (name: string) => {
@@ -38,7 +43,12 @@ const globalLLMTriggerState = {
 
 export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
 
-export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
+export type ESQLDependencies = ESQLCallbacks &
+  Partial<{
+    telemetry: ESQLTelemetryCallbacks;
+  }>;
+
+export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
     const language = monarch.create({
@@ -70,19 +80,40 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
   },
   validate: async (model: monaco.editor.ITextModel, code: string, callbacks?: ESQLCallbacks) => {
     const text = code ?? model.getValue();
-    const { errors, warnings } = await validateQuery(text, undefined, callbacks);
+    const { errors, warnings } = await validateQuery(text, callbacks);
     const monacoErrors = wrapAsMonacoMessages(text, errors);
     const monacoWarnings = wrapAsMonacoMessages(text, warnings);
     return { errors: monacoErrors, warnings: monacoWarnings };
   },
-  getHoverProvider: (callbacks?: ESQLCallbacks): monaco.languages.HoverProvider => {
+  getHoverProvider: (deps?: ESQLDependencies): monaco.languages.HoverProvider => {
+    let lastHoveredWord: string;
+
     return {
       async provideHover(
         model: monaco.editor.ITextModel,
         position: monaco.Position,
         token: monaco.CancellationToken
       ) {
-        return getHoverItem(model, position, callbacks);
+        const fullText = model.getValue();
+        const offset = monacoPositionToOffset(fullText, position);
+        const hoveredWord = model.getWordAtPosition(position);
+
+        // Monaco triggers the hover event on each char of the word,
+        // we only want to track the Hover if the word changed.
+        if (
+          hoveredWord &&
+          hoveredWord.word !== lastHoveredWord &&
+          deps?.telemetry?.onDecorationHoverShown
+        ) {
+          lastHoveredWord = hoveredWord.word;
+
+          const hoverMessages = getDecorationHoveredMessages(hoveredWord, position, model);
+          if (hoverMessages.length) {
+            deps?.telemetry?.onDecorationHoverShown(hoverMessages.join(', '));
+          }
+        }
+
+        return getHoverItem(fullText, offset, deps);
       },
     };
   },
@@ -107,16 +138,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
           position.column
         );
 
-        const triggerKind = globalLLMTriggerState.isTriggered
-          ? ('manual' as const)
-          : ('automatic' as const);
-
-        // Reset flag after window expires naturally
-        if (globalLLMTriggerState.isTriggered) {
-          globalLLMTriggerState.isTriggered = false;
-        }
-
-        return await inlineSuggest(fullText, textBeforeCursor, range, callbacks, triggerKind);
+        return await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
       },
       freeInlineCompletions: () => {},
       triggerLLMSuggestions: () => {
@@ -126,7 +148,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
 
     return provider;
   },
-  getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
+  getSuggestionProvider: (deps?: ESQLDependencies): monaco.languages.CompletionItemProvider => {
     return {
       triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
       async provideCompletionItems(
@@ -135,15 +157,18 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks, MonacoMessage> = {
       ): Promise<monaco.languages.CompletionList> {
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
-        const suggestions = await suggest(fullText, offset, callbacks);
-        return {
-          // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
-          suggestions: wrapAsMonacoSuggestions(suggestions, fullText),
-        };
+        const suggestions = await suggest(fullText, offset, deps);
+
+        const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
+        if (suggestionsWithCustomCommands.length) {
+          deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
+        }
+
+        return wrapAsMonacoSuggestions(suggestions, fullText);
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
-        if (!callbacks?.getFieldsMetadata) return item;
-        const fieldsMetadataClient = await callbacks?.getFieldsMetadata;
+        if (!deps?.getFieldsMetadata) return item;
+        const fieldsMetadataClient = await deps?.getFieldsMetadata;
 
         const fullEcsMetadataList = await fieldsMetadataClient?.find({
           attributes: ['type'],

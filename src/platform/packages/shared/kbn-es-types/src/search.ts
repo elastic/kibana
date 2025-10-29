@@ -682,9 +682,14 @@ export interface ESQLSearchParams {
   query: string;
   filter?: unknown;
   locale?: string;
-  include_ccs_metadata?: boolean;
+  include_execution_metadata?: boolean;
   dropNullColumns?: boolean;
   params?:
     | estypes.ScalarValue[]
-    | Array<Record<string, string | number | Record<string, string | number> | undefined>>;
+    | Array<
+        Record<
+          string,
+          string | number | (string | number)[] | Record<string, string | number> | undefined
+        >
+      >;
 }

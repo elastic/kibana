@@ -44,9 +44,9 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'grok',
   },
-  inlinestats: {
+  inline_stats: {
     type: 'command',
-    name: 'inlinestats',
+    name: 'inline_stats',
   },
   insist: {
     type: 'command',

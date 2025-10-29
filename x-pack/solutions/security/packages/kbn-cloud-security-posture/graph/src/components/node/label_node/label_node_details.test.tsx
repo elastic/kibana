@@ -14,12 +14,12 @@ import { GRAPH_IPS_TEXT_ID, GRAPH_IPS_PLUS_COUNT_ID, GRAPH_FLAGS_BADGE_ID } from
 describe('LabelNodeDetails', () => {
   test('renders empty div when no props are provided', () => {
     const { container } = render(<LabelNodeDetails />);
-    expect(container.firstChild).toBeEmptyDOMElement();
+    expect(container.firstChild).toBeNull();
   });
 
   test('renders empty div when empty arrays are provided', () => {
     const { container } = render(<LabelNodeDetails ips={[]} countryCodes={[]} />);
-    expect(container.firstChild).toBeEmptyDOMElement();
+    expect(container.firstChild).toBeNull();
   });
 
   test('renders Ips component when ips are provided', () => {
@@ -29,7 +29,7 @@ describe('LabelNodeDetails', () => {
     // Check that the IPs text is shown
     const ipsElement = screen.getByTestId(GRAPH_IPS_TEXT_ID);
     expect(ipsElement).toBeInTheDocument();
-    expect(ipsElement.textContent).toContain(ips[0]); // Only first IP is shown by default
+    expect(screen.getByText(ips[0])).toBeInTheDocument();
 
     // If there are multiple IPs, there should be a "+1" indicator
     if (ips.length > 1) {
@@ -64,7 +64,7 @@ describe('LabelNodeDetails', () => {
     // Check that the IPs text is shown
     const ipsElement = screen.getByTestId(GRAPH_IPS_TEXT_ID);
     expect(ipsElement).toBeInTheDocument();
-    expect(ipsElement.textContent).toContain(ips[0]); // Only first IP is shown by default
+    expect(screen.getByText(ips[0])).toBeInTheDocument(); // Only first IP is shown by default
 
     // Check that the country flags badge is shown
     const flagsElement = screen.getByTestId(GRAPH_FLAGS_BADGE_ID);

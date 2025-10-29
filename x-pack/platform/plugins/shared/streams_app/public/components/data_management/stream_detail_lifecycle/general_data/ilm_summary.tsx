@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { capitalize, last } from 'lodash';
+import { capitalize, first } from 'lodash';
 import React, { useMemo } from 'react';
 import type { IlmPolicyDeletePhase, IlmPolicyPhase, Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
@@ -57,17 +57,17 @@ export function IlmSummary({
   const phasesWithGrow = useMemo(() => {
     if (!value) return undefined;
 
-    const orderedPhases = orderIlmPhases(value.phases);
-    const totalDuration = parseDurationInSeconds(last(orderedPhases)!.min_age);
+    const orderedPhases = orderIlmPhases(value.phases).reverse();
+    const totalDuration = parseDurationInSeconds(first(orderedPhases)!.min_age);
 
     return orderedPhases.map((phase, index, phases) => {
-      const nextPhase = phases[index + 1];
-      if (!nextPhase) {
+      const prevPhase = phases[index - 1];
+      if (!prevPhase) {
         return { ...phase, grow: phase.name === 'delete' ? false : 2 };
       }
 
       const phaseDuration =
-        parseDurationInSeconds(nextPhase!.min_age) - parseDurationInSeconds(phase!.min_age);
+        parseDurationInSeconds(prevPhase!.min_age) - parseDurationInSeconds(phase!.min_age);
       return {
         ...phase,
         grow: Math.max(2, Math.round((phaseDuration / totalDuration) * 10)),
@@ -78,14 +78,20 @@ export function IlmSummary({
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
-        <EuiText>
-          <h5>
-            {i18n.translate('xpack.streams.streamDetailLifecycle.ilmDataTiers', {
-              defaultMessage: 'ILM policy data tiers',
-            })}
-          </h5>
-        </EuiText>
-        {loading && <EuiLoadingSpinner size="s" />}
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h5 data-test-subj="ilmSummary-title">
+                {i18n.translate('xpack.streams.streamDetailLifecycle.ilmDataTiers', {
+                  defaultMessage: 'ILM policy data tiers',
+                })}
+              </h5>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {loading && <EuiLoadingSpinner size="s" data-test-subj="ilmSummary-loading" />}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
 
       <EuiPanel grow={true} hasShadow={false} hasBorder={false} paddingSize="s">
@@ -96,7 +102,7 @@ export function IlmSummary({
                 key={`${phase.name}-timeline`}
                 grow={phase.grow as false | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}
               >
-                <IlmPhase phase={phase} minAge={phasesWithGrow[index + 1]?.min_age} />
+                <IlmPhase phase={phase} minAge={phasesWithGrow[index - 1]?.min_age} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
@@ -116,15 +122,15 @@ function IlmPhase({
   const borderRadius =
     phase.name === 'delete'
       ? minAge
-        ? '0px'
-        : '0px 4px 4px 0px'
+        ? '4px 4px 4px 4px'
+        : '4px 0px 0px 4px'
       : phase.name === 'hot'
       ? minAge
-        ? '4px 0px 0px 4px'
-        : '4px 4px 4px 4px'
+        ? '0px 4px 4px 0px'
+        : '0px'
       : minAge
       ? '0px'
-      : '0px 4px 4px 0px';
+      : '4px 0px 0px 4px';
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const { euiTheme } = useEuiTheme();
 
@@ -151,6 +157,7 @@ function IlmPhase({
         >
           {phase.name === 'delete' ? (
             <EuiText
+              data-test-subj={`ilmPhase-${phase.name}-icon`}
               css={{
                 height: '100%',
                 textAlign: 'center',
@@ -164,11 +171,21 @@ function IlmPhase({
             </EuiText>
           ) : (
             <>
-              <EuiText size="xs" color={euiTheme.colors.plainDark}>
+              <EuiText
+                size="xs"
+                color={euiTheme.colors.plainDark}
+                textAlign="right"
+                data-test-subj={`ilmPhase-${phase.name}-name`}
+              >
                 <b>{capitalize(phase.name)}</b>
               </EuiText>
               {'size_in_bytes' in phase && (
-                <EuiText size="xs" color={euiTheme.colors.plainDark}>
+                <EuiText
+                  size="xs"
+                  color={euiTheme.colors.plainDark}
+                  textAlign="right"
+                  data-test-subj={`ilmPhase-${phase.name}-size`}
+                >
                   {formatBytes(phase.size_in_bytes)}
                 </EuiText>
               )}
@@ -184,26 +201,26 @@ function IlmPhase({
           css={{
             paddingBottom: '5px',
             ...(phase.name !== 'delete' && {
-              borderRight: `1px solid ${ilmPhases.delete.color}`,
+              borderLeft: `1px solid ${ilmPhases.delete.color}`,
             }),
           }}
         />
       </EuiFlexGroup>
 
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="flexStart">
         {phase.name !== 'delete' ? (
           <EuiPanel
             paddingSize="xs"
             css={{
-              marginRight: '-40px',
-              width: '80px',
+              marginLeft: minAge ? '-40px' : '-10px',
+              width: minAge ? '80px' : '20px',
             }}
             grow={false}
             hasBorder={false}
             hasShadow={false}
           >
             <EuiText textAlign="center" size="xs" color="subdued">
-              {minAge ? getTimeSizeAndUnitLabel(minAge) + (phase.name === 'hot' ? '*' : '') : '∞'}
+              {minAge ? getTimeSizeAndUnitLabel(minAge) : '∞'}
             </EuiText>
           </EuiPanel>
         ) : undefined}

@@ -62,7 +62,7 @@
           "\nA group of buttons each performing an action, represented by an icon."
         ],
         "signature": [
-          "({ buttons, legend, buttonSize, \"data-test-subj\": dataTestSubj, }: ",
+          "({ buttons, legend, buttonSize, \"data-test-subj\": dataTestSubj, css: buttonGroupCss, }: ",
           {
             "pluginId": "@kbn/shared-ux-button-toolbar",
             "scope": "public",
@@ -81,7 +81,7 @@
             "id": "def-public.IconButtonGroup.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  buttons,\n  legend,\n  buttonSize = 'm',\n  'data-test-subj': dataTestSubj,\n}",
+            "label": "{\n  buttons,\n  legend,\n  buttonSize = 'm',\n  'data-test-subj': dataTestSubj,\n  css: buttonGroupCss,\n}",
             "description": [],
             "signature": [
               {
@@ -390,6 +390,23 @@
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-public.IconButton.css",
+            "type": "Object",
+            "tags": [],
+            "label": "css",
+            "description": [
+              "CSS for the button"
+            ],
+            "signature": [
+              "SerializedStyles",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -470,6 +487,23 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-public.Props.css",
+            "type": "Object",
+            "tags": [],
+            "label": "css",
+            "description": [
+              "CSS for the button group"
+            ],
+            "signature": [
+              "SerializedStyles",
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,

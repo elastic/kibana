@@ -6,79 +6,139 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createESQLQuery } from './create_esql_query';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+
+const mockMetric: MetricField = {
+  name: 'cpu.usage',
+  type: 'gauge',
+  index: 'metrics-*',
+  dimensions: [
+    { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+    { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
+    { name: 'host.ip', type: ES_FIELD_TYPES.IP },
+    { name: 'cpu.cores', type: ES_FIELD_TYPES.LONG },
+    { name: 'region', type: ES_FIELD_TYPES.KEYWORD },
+  ],
+};
+
+const mockCounterMetric: MetricField = {
+  ...mockMetric,
+  name: 'requests.count',
+  instrument: 'counter',
+};
 
 describe('createESQLQuery', () => {
-  const baseTimeRange = { from: '2025-09-04T00:00:00Z', to: '2025-09-04T01:00:00Z' };
-
   it('should generate a basic AVG query for a metric field', () => {
-    const query = createESQLQuery({ metricField: 'cpu.usage', timeRange: baseTimeRange });
+    const query = createESQLQuery({ metric: mockMetric });
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, "2025-09-04T00:00:00Z", "2025-09-04T01:00:00Z")
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
   });
 
   it('should generate a SUM query for counter instrument', () => {
     const query = createESQLQuery({
-      metricField: 'requests.count',
-      instrument: 'counter',
-      timeRange: baseTimeRange,
+      metric: mockCounterMetric,
     });
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS SUM(RATE(requests.count)) BY BUCKET(@timestamp, 100, "2025-09-04T00:00:00Z", "2025-09-04T01:00:00Z")
+  | STATS SUM(RATE(requests.count)) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
   });
 
   it('should handle single dimension', () => {
     const query = createESQLQuery({
-      metricField: 'cpu.usage',
+      metric: mockMetric,
       dimensions: ['host.name'],
-      timeRange: baseTimeRange,
     });
     expect(query).toBe(
       `
 TS metrics-*
   | WHERE host.name IS NOT NULL
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, "2025-09-04T00:00:00Z", "2025-09-04T01:00:00Z"), host.name
-  | RENAME host.name AS ${DIMENSIONS_COLUMN}
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name
 `.trim()
     );
   });
 
-  it('should handle multiple dimensions', () => {
+  it('should handle multiple keyword dimensions without casting', () => {
     const query = createESQLQuery({
-      metricField: 'cpu.usage',
+      metric: mockMetric,
       dimensions: ['host.name', 'container.id'],
-      timeRange: baseTimeRange,
     });
     expect(query).toBe(
       `
 TS metrics-*
   | WHERE host.name IS NOT NULL AND container.id IS NOT NULL
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, "2025-09-04T00:00:00Z", "2025-09-04T01:00:00Z"), host.name, container.id
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name, container.id
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.name, " › ", container.id)
   | DROP host.name, container.id
 `.trim()
     );
   });
 
+  it('should cast non-keyword fields in multiple dimensions', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      dimensions: ['host.ip', 'host.name'],
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE host.ip IS NOT NULL AND host.name IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.ip, host.name
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.ip::STRING, " › ", host.name)
+  | DROP host.ip, host.name
+`.trim()
+    );
+  });
+
+  it('should cast numeric fields in multiple dimensions', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      dimensions: ['cpu.cores', 'host.name'],
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE cpu.cores IS NOT NULL AND host.name IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), cpu.cores, host.name
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(cpu.cores::STRING, " › ", host.name)
+  | DROP cpu.cores, host.name
+`.trim()
+    );
+  });
+
+  it('should handle a mix of cast and non-cast fields', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      dimensions: ['host.ip', 'host.name', 'cpu.cores'],
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE host.ip IS NOT NULL AND host.name IS NOT NULL AND cpu.cores IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.ip, host.name, cpu.cores
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.ip::STRING, " › ", host.name, " › ", cpu.cores::STRING)
+  | DROP host.ip, host.name, cpu.cores
+`.trim()
+    );
+  });
+
   it('should handle filters', () => {
     const query = createESQLQuery({
-      metricField: 'cpu.usage',
+      metric: mockMetric,
       filters: [
         { field: 'host.name', value: 'host-1' },
         { field: 'host.name', value: 'host-2' },
         { field: 'region', value: 'us-east' },
       ],
-      timeRange: baseTimeRange,
     });
 
     expect(query).toBe(
@@ -86,41 +146,77 @@ TS metrics-*
 TS metrics-*
   | WHERE host.name IN ("host-1", "host-2")
   | WHERE region IN ("us-east")
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, "2025-09-04T00:00:00Z", "2025-09-04T01:00:00Z")
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
   });
 
-  it('should apply default index if none is provided', () => {
-    const query = createESQLQuery({ metricField: 'cpu.usage', timeRange: baseTimeRange });
-    expect(query).toBe(
-      `
-TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, "2025-09-04T00:00:00Z", "2025-09-04T01:00:00Z")
-`.trim()
-    );
-  });
-
-  it('should override index if provided', () => {
+  it('should override index if provided in metric', () => {
     const query = createESQLQuery({
-      metricField: 'cpu.usage',
-      index: 'custom-metrics-*',
-      timeRange: baseTimeRange,
+      metric: { ...mockMetric, index: 'custom-metrics-*' },
     });
     expect(query).toBe(
       `
 TS custom-metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, "2025-09-04T00:00:00Z", "2025-09-04T01:00:00Z")
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
   });
 
-  it('should use default time range if none provided', () => {
-    const query = createESQLQuery({ metricField: 'cpu.usage' });
+  it('should handle undefined dimensions without throwing error', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      dimensions: undefined,
+    });
+
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, NOW() - 15 minute, NOW())
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+  it('should handle undefined both dimensions and metrics dimensions without throwing error', () => {
+    const query = createESQLQuery({
+      metric: { ...mockMetric, dimensions: undefined as unknown as Dimension[] },
+      dimensions: undefined,
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+
+  it('should handle undefined dimensions with filters', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      dimensions: undefined,
+      filters: [{ field: 'host.name', value: 'host-1' }],
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE host.name IN ("host-1")
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+  it('should handle undefined metrics dimensions with dimensions and filters', () => {
+    const query = createESQLQuery({
+      metric: { ...mockMetric, dimensions: undefined as unknown as Dimension[] },
+      dimensions: ['host.name'],
+      filters: [{ field: 'host.name', value: 'host-1' }],
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE host.name IN ("host-1")
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name
 `.trim()
     );
   });

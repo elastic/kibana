@@ -161,15 +161,11 @@ $$$shortdots-enable$$$`shortDots:enable`
 $$$sort-options$$$`sort:options`
 :   Options for the Elasticsearch [sort](elasticsearch://reference/elasticsearch/rest-apis/sort-search-results.md) parameter.
 
-$$$state-storeinsessionstorage$$$`state:storeInSessionStorage`
-:   [preview] Kibana tracks UI state in the URL, which can lead to problems when there is a lot of state information, and the URL gets very long. Enabling this setting stores part of the URL in your browser session to keep the URL short.
+$$$state-storeinsessionstorage$$$`state:storeInSessionStorage` {applies_to}`stack: preview`
+:   Kibana tracks UI state in the URL, which can lead to problems when there is a lot of state information, and the URL gets very long. Enabling this setting stores part of the URL in your browser session to keep the URL short.
 
-$$$theme-darkmode$$$`theme:darkMode`
-:   :::{admonition} Deprecated in 9.0.0
-    This setting was deprecated in 9.0.0.
-    :::
-
-    The UI theme that the {{kib}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{kib}} UI theme follow the system theme. You must refresh the page to apply the setting.
+$$$theme-darkmode$$$`theme:darkMode` {applies_to}`stack: deprecated 9.0`
+:   The UI theme that the {{kib}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{kib}} UI theme follow the system theme. You must refresh the page to apply the setting.
 
 $$$theme-version$$$`theme:version`
 :   Kibana only ships with the v8 theme now, so this setting can no longer be edited.
@@ -185,6 +181,14 @@ $$$timepicker-timedefaults$$$`timepicker:timeDefaults`
 
 $$$enableESQL$$$`enableESQL`
 :   This setting enables ES|QL in Kibana.
+
+$$$aiAssistant:preferredAIAssistantType$$$`aiAssistant:preferredAIAssistantType` {applies_to}`stack: ga 9.1`
+:   This setting allows you to choose which AI Assistants are available to use and where. You can choose to only show the AI Assistants in their solutions, in other Kibana applications (for example, Discover, Dashboards, and Stack Management pages), or nowhere.
+
+      ::::{note}
+      :applies_to: stack: ga 9.2
+      Configure the `aiAssistant:preferredAIAssistantType` setting from the **GenAI Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Note that this setting is unavailable from the **GenAI Settings** page when using a [solution view](docs-content://deploy-manage/manage-spaces.md). 
+      ::::
 
 
 ### Presentation Labs [presentation-labs]
@@ -271,8 +275,8 @@ $$$discover-sample-size$$$`discover:sampleSize`
 $$$discover-searchonpageload$$$`discover:searchOnPageLoad`
 :   Controls whether a search is executed when **Discover** first loads. This setting does not have an effect when loading a saved Discover session.
 
-$$$discover:showFieldStatistics$$$`discover:showFieldStatistics`
-:   [beta] Enables the Field statistics view. Examine details such as the minimum and maximum values of a numeric field or a map of a geo field.
+$$$discover:showFieldStatistics$$$`discover:showFieldStatistics` {applies_to}`stack: beta`
+:   Enables the Field statistics view. Examine details such as the minimum and maximum values of a numeric field or a map of a geo field.
 
 $$$discover:showMultiFields$$$`discover:showMultiFields`
 :   Controls the display of multi-fields in the expanded document view.
@@ -335,7 +339,7 @@ $$$apm-enable-service-metrics$$$`observability:apmEnableServiceMetrics` {applies
 :   Enable the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.
 
 $$$observability-apm-labs$$$`observability:apmLabsButton` {applies_to}`stack: removed 9.1`
-:   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
+:   Enable or disable the APM Labs button, a quick way to enable and disable technical preview features in APM.
 
 $$$observability-apm-critical-path$$$`observability:apmEnableCriticalPath` {applies_to}`stack: removed 9.1`
 :   When enabled, displays the critical path of a trace.
@@ -358,8 +362,11 @@ $$$observability-apm-enable-profiling$$$`observability:apmEnableProfilingIntegra
 $$$observability-profiling-show-error-frames$$$`observability:profilingShowErrorFrames`
 :   Show error frames in the Universal Profiling views to indicate stack unwinding failures.
 
-$$$observability-apm-enable-table-search-bar$$$`observability:apmEnableTableSearchBar`
-:   [beta] Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions, and Errors.
+$$$observability-apm-enable-table-search-bar$$$`observability:apmEnableTableSearchBar` {applies_to}`stack: preview`
+:   Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions, and Errors.
+
+$$$observability-apm-enable-service-inventory-table-search-bar$$$`observability:apmEnableServiceInventoryTableSearchBar` {applies_to}`stack: preview`
+:   Enables faster searching in the APM Service inventory table by adding a handy search bar with live filtering.
 
 $$$observability-enable-aws-lambda-metrics$$$`observability:enableAwsLambdaMetrics` {applies_to}`stack: preview 9.0, removed 9.1`
 :   Display Amazon Lambda metrics in the service metrics tab.

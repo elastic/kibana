@@ -10,35 +10,12 @@ import { i18n } from '@kbn/i18n';
 import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
 import { METADATA_FIELDS } from '../metadata';
+import { prettifyQueryTemplate, prettifyQuery } from './utils';
 
 export interface EditorExtensions {
   recommendedQueries: RecommendedQuery[];
   recommendedFields: RecommendedField[];
 }
-
-const prettifyQuery = (src: string): string => {
-  // Split by pipes and format each command on its own line with indentation
-  const parts = src.split('|').map((part) => part.trim());
-
-  return parts
-    .map((part, index) => {
-      if (index === 0) {
-        // First part (FROM command) - no leading pipe or indentation
-        return part;
-      } else {
-        // All subsequent commands start with pipe and have 2-space indentation
-        return `  | ${part}`;
-      }
-    })
-    .join('\n');
-};
-
-const prettifyQueryTemplate = (query: string) => {
-  const formattedQuery = prettifyQuery(query);
-  // remove the FROM command if it exists
-  const queryParts = formattedQuery.split('|');
-  return `\n|${queryParts.slice(1).join('|')}`;
-};
 
 // Order starts with the simple ones and goes to more complex ones
 
@@ -164,7 +141,9 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Use the CATEGORIZE function to identify patterns in your logs',
               }
             ),
-            queryString: `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
+            queryString: timeField
+              ? `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`
+              : `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
           },
         ]
       : []),
@@ -260,13 +239,20 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
 // Function returning suggestions from static templates and editor extensions
 export const getRecommendedQueriesSuggestions = async (
   editorExtensions: EditorExtensions,
-  getColumnsByType: GetColumnsByTypeFn,
+  // Optional function to get fields by type, if not provided only the extensions will be used
+  getColumnsByType?: GetColumnsByTypeFn,
   prefix: string = ''
 ) => {
   const recommendedQueriesFromExtensions = getRecommendedQueriesTemplatesFromExtensions(
     editorExtensions.recommendedQueries
   );
 
+  // If getColumnsByType is not provided, we cannot get the static templates
+  // so we return only the extensions. For example in timeseries command the majority of
+  // the static templates are not relevant as the count() aggregation is not supported there.
+  if (!getColumnsByType) {
+    return recommendedQueriesFromExtensions;
+  }
   const recommendedQueriesFromTemplates = await getRecommendedQueriesSuggestionsFromStaticTemplates(
     getColumnsByType,
     prefix

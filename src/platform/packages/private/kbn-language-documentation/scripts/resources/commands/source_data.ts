@@ -76,6 +76,80 @@ FROM employees METADATA _index, _id
     openLinksInNewTab: true,
   },
   {
+    name: 'fuse',
+    labelDefaultMessage: 'FUSE',
+    descriptionDefaultMessage: `### FUSE
+
+The \`FUSE\` [processing command](https://www.elastic.co/docs/reference/query-languages/esql/commands/processing-commands) merges rows from multiple result sets and assigns new relevance scores. \`FUSE\` is for search use cases. Learn more about [how search works in ES|QL](https://www.elastic.co/docs/solutions/search/esql-for-search#how-search-works-in-esql).
+
+Together with \`FORK\`, \`FUSE\` enables [hybrid search](https://www.elastic.co/docs/reference/query-languages/esql/esql-search-tutorial#perform-hybrid-search) to combine and score results from multiple queries.
+
+\`FUSE\` works by:
+
+1. Merging rows with matching \`<key_columns>\` values
+2. Assigning new relevance scores using the specified \`<fuse_method>\` algorithm and the values from the \`<group_column>\` and \`<score_column>\`
+#### Syntax
+
+Use default parameters:
+
+\`\`\` esql
+FUSE
+\`\`\`
+
+Specify custom parameters:
+
+\`\`\` esql
+FUSE <fuse_method> SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
+\`\`\`
+
+#### Parameters
+
+\`fuse_method\`
+:   Defaults to \`RRF\`. Can be one of \`RRF\` (for [Reciprocal Rank Fusion](https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf)) or \`LINEAR\` (for linear combination of scores). Designates which method to use to assign new relevance scores.
+
+\`score_column\`
+:   Defaults to \`_score\`. Designates which column to use to retrieve the relevance scores of the input row and where to output the new relevance scores of the merged rows.
+
+\`group_column\`
+:   Defaults to \`_fork\`. Designates which column represents the result set.
+
+\`key_columns\`
+:   Defaults to \`_id, _index\`. Rows with matching values for these columns are merged.
+
+\`options\`
+:   Options for the \`fuse_method\`.
+
+\`rank_constant\`
+:   Defaults to \`60\`. Represents the \`rank_constant\` used in the RRF formula.
+
+\`weights\`
+:   Defaults to \'\{\}\' (empty object). Allows you to set different weights based on \`group_column\` values.
+
+\`normalizer\`
+:   Defaults to \`none\`. Can be one of \`none\` or \`minmax\`. Specifies which score normalization method to apply.
+
+#### Examples
+
+- Use RRF to merge two ranked result sets.
+
+\`\`\` esql
+FROM books METADATA _id, _index, _score
+| FORK (WHERE title:"Shakespeare" | SORT _score DESC)
+       (WHERE semantic_title:"Shakespeare" | SORT _score DESC)
+| FUSE
+\`\`\`
+
+Refer to the [reference documentation](https://www.elastic.co/docs/reference/query-languages/esql/commands/fuse) for more information, including additional examples and limitations.
+            `,
+    descriptionOptions: {
+      description:
+        'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+      ignoreTag: true,
+    },
+    openLinksInNewTab: true,
+    preview: true,
+  },
+  {
     name: 'row',
     labelDefaultMessage: 'ROW',
     descriptionDefaultMessage: `### ROW
@@ -113,5 +187,124 @@ The \`SHOW INFO\` source command returns the deployment's version, build date an
       description:
         'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
     },
+  },
+  {
+    name: 'ts',
+    labelDefaultMessage: 'TS',
+    descriptionDefaultMessage: `### TS
+\`TS\` is similar to [\`FROM\`](/reference/query-languages/esql/commands/from.md), with the following key differences:
+
+ - It targets only [time series data streams](https://www.elastic.co/docs/manage-data/data-store/data-streams/time-series-data-stream-tsds).
+ - It enables the use of [time series aggregation functions](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/time-series-aggregation-functions) inside the
+   \`STATS\` command.
+
+[time series aggregation functions](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/time-series-aggregation-functions) to the \`STATS\` command.
+
+\`\`\` esql
+TS index_pattern [METADATA fields]
+\`\`\`
+
+**Parameters**
+
+\`index_pattern\`
+:   A list of indices, data streams or aliases. Supports wildcards and date math.
+
+\`fields\`
+:   A comma-separated list of [metadata fields](https://www.elastic.co/docs/reference/query-languages/esql/esql-metadata-fields) to retrieve.
+
+**Description**
+
+The \`TS\` source command enables time series semantics and adds support for
+[time series aggregation functions](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/time-series-aggregation-functions) to the \`STATS\` command, such as
+[\`AVG_OVER_TIME()\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/time-series-aggregation-functions#esql-avg_over_time),
+or [\`RATE()\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/time-series-aggregation-functions#esql-rate).
+These functions are implicitly evaluated per time series, then aggregated by group using a secondary aggregation
+function. For example:
+
+\`\`\`esql
+TS metrics
+  | WHERE @timestamp >= now() - 1 hour
+  | STATS SUM(RATE(search_requests)) BY TBUCKET(1 hour), host
+\`\`\`
+
+This query calculates the total rate of search requests (tracked by the \`search_requests\` counter) per host and hour. The \`RATE()\`
+function is applied per time series in hourly buckets. These rates are summed for each
+host and hourly bucket (since each host can map to multiple time series).
+
+This paradigm—a pair of aggregation functions—is standard for time series
+querying. For supported inner (time series) functions per
+[metric type](https://www.elastic.co/docs/manage-data/data-store/data-streams/time-series-data-stream-tsds#time-series-metric), refer to
+[time series aggregation functions](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/time-series-aggregation-functions). These functions also
+apply to downsampled data, with the same semantics as for raw data.
+
+NOTE:
+If a query is missing an inner (time series) aggregation function,
+[\`LAST_OVER_TIME()\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/time-series-aggregation-functions#esql-last_over_time)
+is assumed and used implicitly. For instance, the following two queries are
+equivalent, returning the average of the last memory usage values per time series:
+
+\`\`\`esql
+TS metrics | STATS AVG(memory_usage)
+
+TS metrics | STATS AVG(LAST_OVER_TIME(memory_usage))
+\`\`\`
+
+To calculate the average memory usage across per-time-series averages, use
+the following query:
+
+\`\`\`esql
+TS metrics | STATS AVG(AVG_OVER_TIME(memory_usage))
+\`\`\`
+
+Use regular (non-time-series)
+[aggregation functions](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions),
+such as \`SUM()\`, as outer aggregation functions. Using a time series aggregation
+in combination with an inner function causes an error. For example, the
+following query is invalid:
+
+\`\`\`esql
+TS metrics | STATS AVG_OVER_TIME(RATE(memory_usage))
+\`\`\`
+
+NOTE:
+A [time series](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/time-series-aggregation-functions)
+aggregation function must be wrapped inside a
+[regular](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions)
+aggregation function. For instance, the following query is invalid:
+
+\`\`\`esql
+TS metrics | STATS RATE(search_requests)
+\`\`\`
+
+**Best practices**
+
+- Avoid aggregating multiple metrics in the same query when those metrics have different dimensional cardinalities.
+  For example, in \`STATS max(rate(foo)) + rate(bar))\`, if \`foo\` and \`bar\` don't share the same dimension values, the rate
+  for one metric will be null for some dimension combinations. Because the + operator returns null when either input
+  is null, the entire result becomes null for those dimensions. Additionally, queries that aggregate a single metric
+  can filter out null values more efficiently.
+- Use the \`TS\` command for aggregations on time series data, rather than \`FROM\`. The \`FROM\` command is still available
+  (for example, for listing document contents), but it's not optimized for procesing time series data and may produce
+  unexpected results.
+- The \`TS\` command can't be combined with certain operations (such as
+  [\`FORK\`](https://www.elastic.co/docs/reference/query-languages/esql/commands/fork)) before the \`STATS\` command is applied. Once \`STATS\` is
+  applied, you can process the tabular output with any applicable ES|QL operations.
+- Add a time range filter on \`@timestamp\` to limit the data volume scanned and improve query performance.
+
+**Examples**
+
+\`\`\`esql
+TS metrics
+| WHERE @timestamp >= now() - 1 day
+| STATS SUM(AVG_OVER_TIME(memory_usage)) BY host, TBUCKET(1 hour)
+\`\`\`
+            `,
+    descriptionOptions: {
+      description:
+        'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+      ignoreTag: true,
+    },
+    openLinksInNewTab: true,
+    preview: true,
   },
 ];

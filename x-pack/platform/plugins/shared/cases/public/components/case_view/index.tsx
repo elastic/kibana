@@ -37,6 +37,7 @@ export const CaseView = React.memo(
     onAlertsTableLoaded,
     refreshRef,
     renderAlertsTable,
+    renderEventsTable,
   }: CaseViewProps) => {
     const { spaces: spacesApi } = useKibana().services;
     const { detailName: caseId } = useCaseViewParams();
@@ -92,6 +93,7 @@ export const CaseView = React.memo(
           onAlertsTableLoaded={onAlertsTableLoaded}
           refreshRef={refreshRef}
           renderAlertsTable={renderAlertsTable}
+          renderEventsTable={renderEventsTable}
         />
       </CasesTimelineIntegrationProvider>
     ) : null;

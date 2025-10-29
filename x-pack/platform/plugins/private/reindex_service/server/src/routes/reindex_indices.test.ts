@@ -39,8 +39,8 @@ jest.mock('../lib/reindex_service', () => ({
   reindexServiceFactory: () => mockReindexService,
 }));
 
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexSavedObject } from '../lib/types';
-import { ReindexStatus } from '../../../common';
 import { credentialStoreFactory } from '../lib/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 
@@ -81,6 +81,7 @@ describe('reindex API', () => {
           licensing: licensingMockInstance,
           security: securityMockInstance,
           version,
+          rollupsEnabled: true,
         });
       },
     };

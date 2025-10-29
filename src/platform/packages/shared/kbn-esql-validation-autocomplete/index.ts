@@ -25,8 +25,6 @@ export { inlineSuggest } from './src/inline_suggestions/inline_suggest';
  * Some utility functions that can be useful to build more feature
  * for the ES|QL language
  */
-export {
-  getColumnsByTypeHelper as getFieldsByTypeHelper,
-  getPolicyHelper,
-  getSourcesHelper,
-} from './src/shared/resources_helpers';
+export { getPolicyHelper, getSourcesHelper } from './src/shared/resources_helpers';
+// Hover function
+export { getHoverItem } from './src/hover';

@@ -266,6 +266,68 @@
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.featureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [],
+            "signature": [
+              "FeatureFlagsStart"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.observability",
+            "type": "Object",
+            "tags": [],
+            "label": "observability",
+            "description": [],
+            "signature": [
+              "{ config: ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ConfigSchema",
+                "text": "ConfigSchema"
+              },
+              "; observabilityRuleTypeRegistry: { register: (type: ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityRuleTypeModel",
+                "text": "ObservabilityRuleTypeModel"
+              },
+              "<any>) => void; getFormatter: (typeId: string) => ",
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.ObservabilityRuleTypeFormatter",
+                "text": "ObservabilityRuleTypeFormatter"
+              },
+              " | undefined; list: () => string[]; }; useRulesLink: (options?: ",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.Options",
+                "text": "Options"
+              },
+              ") => ",
+              "LinkProps",
+              "; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

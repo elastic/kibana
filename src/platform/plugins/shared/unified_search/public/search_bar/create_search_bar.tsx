@@ -278,7 +278,8 @@ export function createSearchBar({
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             esqlEditorInitialState={props.esqlEditorInitialState}
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
-            isNLToESQLConversionEnabled={props.isNLToESQLConversionEnabled}
+            esqlVariablesConfig={props.esqlVariablesConfig}
+            useBackgroundSearchButton={props.useBackgroundSearchButton}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

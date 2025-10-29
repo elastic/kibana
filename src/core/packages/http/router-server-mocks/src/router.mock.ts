@@ -23,11 +23,12 @@ import {
 } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { createVersionedRouterMock, type MockedVersionedRouter } from './versioned_router.mock';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type RouterMock = jest.Mocked<IRouter<any>> & { versioned: MockedVersionedRouter };
 
 function createRouterMock({ routerPath = '' }: { routerPath?: string } = {}): RouterMock {
-  return {
+  return lazyObject({
     routerPath,
     get: jest.fn(),
     post: jest.fn(),
@@ -37,7 +38,7 @@ function createRouterMock({ routerPath = '' }: { routerPath?: string } = {}): Ro
     getRoutes: jest.fn(),
     handleLegacyErrors: jest.fn().mockImplementation((handler) => handler),
     versioned: createVersionedRouterMock(),
-  };
+  });
 }
 
 /**
@@ -78,6 +79,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   kibanaRequestState = {
     requestId: '123',
     requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+    startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
   },
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> {
@@ -131,24 +133,25 @@ function createFakeKibanaRequestMock({
   return kibanaRequestFactory(fakeRequest);
 }
 
-const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
-  ok: jest.fn(),
-  created: jest.fn(),
-  accepted: jest.fn(),
-  noContent: jest.fn(),
-  multiStatus: jest.fn(),
-  notModified: jest.fn(),
-  custom: jest.fn(),
-  redirected: jest.fn(),
-  badRequest: jest.fn(),
-  unauthorized: jest.fn(),
-  forbidden: jest.fn(),
-  notFound: jest.fn(),
-  conflict: jest.fn(),
-  unprocessableContent: jest.fn(),
-  customError: jest.fn(),
-  file: jest.fn(),
-});
+const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> =>
+  lazyObject({
+    ok: jest.fn(),
+    created: jest.fn(),
+    accepted: jest.fn(),
+    noContent: jest.fn(),
+    multiStatus: jest.fn(),
+    notModified: jest.fn(),
+    custom: jest.fn(),
+    redirected: jest.fn(),
+    badRequest: jest.fn(),
+    unauthorized: jest.fn(),
+    forbidden: jest.fn(),
+    notFound: jest.fn(),
+    conflict: jest.fn(),
+    unprocessableContent: jest.fn(),
+    customError: jest.fn(),
+    file: jest.fn(),
+  });
 
 export const mockRouter = {
   create: createRouterMock,

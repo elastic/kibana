@@ -184,8 +184,7 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
 
       navigateToFlyoutJsonTab();
 
-      cy.get(FLYOUT_JSON).should('contain.text', 'threat.indicator.type');
-      cy.get(FLYOUT_JSON).should('contain.text', '"@timestamp": "2022-06-02T13:29:47.677Z",');
+      cy.get(FLYOUT_JSON).should('contain.text', '2022-06-02T13:29:47.677Z');
     });
   });
 

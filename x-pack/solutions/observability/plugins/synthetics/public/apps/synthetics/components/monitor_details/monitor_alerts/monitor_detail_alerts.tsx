@@ -61,7 +61,7 @@ export function MonitorDetailsAlerts() {
                 ],
               },
             }}
-            initialPageSize={100}
+            pageSize={100}
             data-test-subj="monitorAlertsTable"
             renderActionsCell={AlertActions}
             showInspectButton

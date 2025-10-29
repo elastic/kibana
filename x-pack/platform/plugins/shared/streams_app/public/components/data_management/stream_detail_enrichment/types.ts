@@ -7,14 +7,16 @@
 
 import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
+  ConvertProcessor,
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
   SetProcessor,
+  StreamlangWhereBlockWithUIAttributes,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
-import type { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
+import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
 
 /**
  * Processors' types
@@ -27,6 +29,7 @@ export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
 export type DissectFormState = DissectProcessor;
 export type DateFormState = DateProcessor;
 export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
+export type ConvertFormState = ConvertProcessor;
 
 export type SetFormState = SetProcessor;
 
@@ -35,9 +38,11 @@ export type SpecialisedFormState =
   | DissectFormState
   | DateFormState
   | ManualIngestPipelineFormState
+  | ConvertFormState
   | SetFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
+export type WhereBlockFormState = StreamlangWhereBlockWithUIAttributes;
 
 export type ExtractBooleanFields<TInput> = NonNullable<
   TInput extends Record<string, unknown>

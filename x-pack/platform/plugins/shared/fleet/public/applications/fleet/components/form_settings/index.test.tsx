@@ -49,7 +49,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'agent.limits.go_max_procs',
         title: 'GO_MAX_PROCS',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_limits_go_max_procs',
@@ -78,7 +78,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'test',
         title: 'TEST',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'test',
@@ -111,7 +111,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'test',
         title: 'TEST',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'test',
@@ -153,7 +153,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'agent.download.timeout',
         title: 'Agent binary download timeout',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_download_timeout',
@@ -180,7 +180,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'agent.logging.to_files',
         title: 'Agent logging to files',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_logging_to_files',
@@ -210,7 +210,7 @@ describe('ConfiguredSettings', () => {
         name: 'agent.limits.go_max_procs',
         hidden: true,
         title: 'GO_MAX_PROCS',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_limits_go_max_procs',

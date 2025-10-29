@@ -9,9 +9,9 @@
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowExecutionState } from '../workflow_execution_state';
-import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
+import { WorkflowExecutionState } from '../workflow_execution_state';
 
 describe('WorkflowExecutionState', () => {
   let underTest: WorkflowExecutionState;
@@ -100,7 +100,8 @@ describe('WorkflowExecutionState', () => {
       stepId: 'test-step-execution-id',
       status: ExecutionStatus.RUNNING,
       startedAt: '2025-08-05T20:00:00.000Z',
-      executionIndex: 0,
+      stepExecutionIndex: 0,
+      globalExecutionIndex: 0,
     } as EsWorkflowStepExecution);
     expect(stepExecutionRepository.createStepExecution).not.toHaveBeenCalled();
   });
@@ -121,7 +122,29 @@ describe('WorkflowExecutionState', () => {
 
     expect(underTest.getLatestStepExecution('test-step-execution-id')).toEqual(
       expect.objectContaining({
-        executionIndex: 2,
+        stepExecutionIndex: 2,
+      } as EsWorkflowStepExecution)
+    );
+    expect(stepExecutionRepository.createStepExecution).not.toHaveBeenCalled();
+  });
+
+  it('should create step execution with globalExecutionIndex', () => {
+    underTest.upsertStep({
+      id: 'fake-id-1',
+      stepId: 'test-step-execution-id',
+    });
+    underTest.upsertStep({
+      id: 'fake-id-2',
+      stepId: 'test-step-execution-id-2',
+    });
+    underTest.upsertStep({
+      id: 'fake-id-3',
+      stepId: 'test-step-execution-id-3',
+    });
+
+    expect(underTest.getLatestStepExecution('test-step-execution-id-3')).toEqual(
+      expect.objectContaining({
+        globalExecutionIndex: 2,
       } as EsWorkflowStepExecution)
     );
     expect(stepExecutionRepository.createStepExecution).not.toHaveBeenCalled();
@@ -434,22 +457,22 @@ describe('WorkflowExecutionState', () => {
         {
           id: '11',
           stepId: 'testStep',
-          executionIndex: 1,
+          stepExecutionIndex: 1,
         } as EsWorkflowStepExecution,
         {
           id: '44',
           stepId: 'testStep',
-          executionIndex: 4,
+          stepExecutionIndex: 4,
         } as EsWorkflowStepExecution,
         {
           id: '33',
           stepId: 'testStep',
-          executionIndex: 3,
+          stepExecutionIndex: 3,
         } as EsWorkflowStepExecution,
         {
           id: '22',
           stepId: 'testStep',
-          executionIndex: 2,
+          stepExecutionIndex: 2,
         } as EsWorkflowStepExecution,
       ]);
       await underTest.load();

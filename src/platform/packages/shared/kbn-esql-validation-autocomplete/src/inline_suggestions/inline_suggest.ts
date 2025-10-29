@@ -13,7 +13,7 @@ import {
   getCategorizationField,
 } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import type { ESQLCallbacks } from '../shared/types';
-import { getColumnsByTypeHelper } from '../shared/resources_helpers';
+import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
 
 export interface InlineSuggestionItem {
   /**
@@ -186,7 +186,7 @@ async function getFieldInfo(
   fromCommand: string,
   callbacks?: ESQLCallbacks
 ): Promise<{ timeField: string; categorizationField: string | undefined }> {
-  const { getColumnsByType } = getColumnsByTypeHelper(
+  const { getColumnsByType } = getColumnsByTypeRetriever(
     EsqlQuery.fromSrc(fromCommand).ast,
     fromCommand,
     callbacks
@@ -199,47 +199,15 @@ async function getFieldInfo(
 
   const timeField =
     dateFields.length > 0
-      ? dateFields.find((field) => field.name === '@timestamp')?.name || dateFields[0].name
+      ? dateFields.find((field) => field.text === '@timestamp')?.text || dateFields[0].text
       : '';
 
   const categorizationField =
     textFields.length > 0
-      ? getCategorizationField(textFields.map((field) => field.name))
+      ? getCategorizationField(textFields.map((field) => field.text))
       : undefined;
 
   return { timeField, categorizationField };
-}
-
-// LLM caching and debouncing for performance optimization
-const llmCache = new Map<string, { result: string[]; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const activeRequests = new Map<string, Promise<string[]>>();
-
-function getCachedLLMResult(query: string): string[] | null {
-  const cached = llmCache.get(query);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.result;
-  }
-  return null;
-}
-
-function setCachedLLMResult(query: string, result: string[]): void {
-  llmCache.set(query, { result, timestamp: Date.now() });
-}
-
-function extractESQLQueries(text: string): string[] {
-  const queries: string[] = [];
-  // The 'g' flag ensures that all matches are found, not just the first one.
-  const regex = /```esql\n([\s\S]*?)\n```/g;
-  let match;
-
-  while ((match = regex.exec(text)) !== null) {
-    if (match[1]) {
-      queries.push(match[1].trim());
-    }
-  }
-
-  return queries;
 }
 
 /**
@@ -247,14 +215,11 @@ function extractESQLQueries(text: string): string[] {
  */
 async function fetchAllSuggestions(
   fromCommand: string,
-  queryString: string,
   timeField: string,
   categorizationField: string | undefined,
   range: InlineSuggestionItem['range'],
-  callbacks?: ESQLCallbacks,
-  enableLLM: boolean = false
+  callbacks?: ESQLCallbacks
 ): Promise<InlineSuggestionItem[]> {
-  // Fast suggestions (local/cached data) - always get these
   const [editorExtensions, historyStarredItems] = await Promise.all([
     callbacks
       ?.getEditorExtensions?.(fromCommand)
@@ -283,90 +248,18 @@ async function fetchAllSuggestions(
   }));
 
   const baseSuggestions = [...extensionSuggestions, ...templateSuggestions, ...historySuggestions];
-
-  // For automatic triggers, return fast suggestions only
-  if (!enableLLM) {
-    return baseSuggestions;
-  }
-
-  // For manual triggers, return only LLM suggestions (skip fast suggestions)
-  if (queryString.length <= 8 || !callbacks?.getESQLCompletionFromLLM) {
-    return []; // No suggestions if query too short or LLM unavailable
-  }
-
-  // Check cache first for manual triggers
-  const cachedLLMQueries = getCachedLLMResult(queryString);
-  if (cachedLLMQueries) {
-    const llmSuggestions = cachedLLMQueries.map((query) => ({
-      insertText: query,
-      range,
-    }));
-    return llmSuggestions; // Only LLM suggestions for manual triggers
-  }
-
-  // For manual triggers, we're willing to wait longer for LLM
-  let llmRequest = activeRequests.get(queryString);
-
-  if (!llmRequest) {
-    // Create new request and cache it
-    llmRequest = callbacks
-      .getESQLCompletionFromLLM(queryString)
-      .then((llmOutput) => {
-        if (llmOutput) {
-          const llmQueries = extractESQLQueries(llmOutput);
-          setCachedLLMResult(queryString, llmQueries);
-          return llmQueries;
-        }
-        return [];
-      })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.debug('LLM call failed:', error);
-        return [];
-      })
-      .finally(() => {
-        // Clean up active request
-        activeRequests.delete(queryString);
-      });
-
-    activeRequests.set(queryString, llmRequest);
-  }
-
-  try {
-    // For manual triggers, wait longer (15 seconds) since user explicitly requested LLM
-    const timeoutPromise = new Promise<string[]>((_, reject) =>
-      setTimeout(() => reject(new Error('LLM timeout')), 15000)
-    );
-
-    const llmQueries = await Promise.race([llmRequest, timeoutPromise]);
-
-    if (llmQueries.length > 0) {
-      const llmSuggestions = llmQueries.map((query) => ({
-        insertText: query,
-        range,
-      }));
-      return llmSuggestions; // Only LLM suggestions for manual triggers
-    }
-  } catch (error) {
-    // Timeout or error - for manual triggers, return empty array since they specifically wanted LLM
-    // eslint-disable-next-line no-console
-    console.debug('LLM timeout on manual trigger:', error);
-  }
-
-  return []; // No suggestions if LLM fails on manual trigger
+  return baseSuggestions;
 }
 
 export async function inlineSuggest(
   fullText: string,
   textBeforeCursor: string,
   range: InlineSuggestionItem['range'],
-  callbacks?: ESQLCallbacks,
-  triggerKind?: 'automatic' | 'manual'
+  callbacks?: ESQLCallbacks
 ): Promise<{ items: InlineSuggestionItem[] }> {
   try {
     const trimmedText = processQuery(textBeforeCursor).toLowerCase();
     const trimmedFullText = processQuery(fullText).toLowerCase();
-    const isManualTrigger = triggerKind === 'manual';
 
     if (trimmedText !== trimmedFullText) {
       // Don't show suggestions if cursor is not at the end of the query
@@ -377,15 +270,13 @@ export async function inlineSuggest(
     const fromCommand = await getFromCommand(trimmedText, callbacks);
     const { timeField, categorizationField } = await getFieldInfo(fromCommand, callbacks);
 
-    // Fetch all suggestions with LLM control based on trigger
+    // Fetch all suggestions
     const allSuggestions = await fetchAllSuggestions(
       fromCommand,
-      trimmedText,
       timeField,
       categorizationField,
       range,
-      callbacks,
-      isManualTrigger
+      callbacks
     );
 
     // Process suggestions: remove duplicates, filter by prefix, and trim prefix

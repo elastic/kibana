@@ -39,7 +39,7 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
@@ -173,13 +173,11 @@ export class LensAttributes {
   constructor(
     layerConfigs: LayerConfig[],
     reportType: string,
-    lensFormulaHelper?: FormulaPublicApi,
     dslFilters?: QueryDslQueryContainer[]
   ) {
     this.layers = {};
     this.seriesReferenceLines = {};
     this.reportType = reportType;
-    this.lensFormulaHelper = lensFormulaHelper;
     this.isMultiSeries = layerConfigs.length > 1;
     this.dslFilters = dslFilters;
 
@@ -593,8 +591,7 @@ export class LensAttributes {
         format,
         label: columnLabel ?? label,
         dataView: layerConfig.dataView,
-        lensFormulaHelper: this.lensFormulaHelper!,
-      }).main;
+      });
     }
 
     if (showPercentileAnnotations) {
@@ -739,8 +736,7 @@ export class LensAttributes {
           layerId,
           columnFilter,
           dataView: layerConfig.dataView,
-          lensFormulaHelper: this.lensFormulaHelper!,
-        }).main,
+        }),
       ];
     }
 
@@ -795,29 +791,17 @@ export class LensAttributes {
       FieldBasedIndexPatternColumn | SumIndexPatternColumn | FormulaIndexPatternColumn
     > = {};
     const yAxisColumns = layerConfig.seriesConfig.yAxisColumns;
-    const { sourceField: mainSourceField, label: mainLabel } = yAxisColumns[0];
+    const { sourceField: mainSourceField } = yAxisColumns[0];
 
     if (mainSourceField === RECORDS_PERCENTAGE_FIELD && layerId && !forAccessorsKeys) {
-      return getDistributionInPercentageColumn({
-        label: mainLabel,
-        layerId,
-        columnFilter,
-        dataView: layerConfig.dataView,
-        lensFormulaHelper: this.lensFormulaHelper!,
-      }).supportingColumns;
+      return {};
     }
 
     if (mainSourceField && !forAccessorsKeys) {
-      const { columnLabel, formula, columnType } = this.getFieldMeta(mainSourceField, layerConfig);
+      const { columnType } = this.getFieldMeta(mainSourceField, layerConfig);
 
       if (columnType === FORMULA_COLUMN) {
-        return getDistributionInPercentageColumn({
-          label: columnLabel,
-          layerId,
-          formula,
-          dataView: layerConfig.dataView,
-          lensFormulaHelper: this.lensFormulaHelper!,
-        }).supportingColumns;
+        return {};
       }
     }
 

@@ -9,9 +9,15 @@ import { getDatasourceId } from '@kbn/visualization-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import type { VisualizeEditorContext, Suggestion, IndexPatternRef } from '../types';
-import type { TypedLensByValueInput, TypedLensSerializedState } from '../react_embeddable/types';
-import type { TextBasedPrivateState } from '../datasources/form_based/esql_layer/types';
+import type {
+  VisualizeEditorContext,
+  Suggestion,
+  IndexPatternRef,
+  VisualizationMap,
+  TypedLensByValueInput,
+  TypedLensSerializedState,
+  TextBasedPrivateState,
+} from '@kbn/lens-common';
 
 const datasourceHasIndexPatternRefs = (
   unknownDatasource: unknown
@@ -150,5 +156,42 @@ export function mergeSuggestionWithVisContext({
     };
   } catch {
     return suggestion;
+  }
+}
+
+/**
+ * Switches the visualization type of a suggestion to the specified visualization type
+ * @param visualizationMap the visualization map
+ * @param targetTypeId the target visualization type to switch to
+ * @param familyType the family type of the current suggestion
+ * @param shouldSwitch whether the visualization type should be switched
+ * @returns updated suggestion or undefined if no switch was made
+ */
+export function switchVisualizationType({
+  visualizationMap,
+  suggestions,
+  targetTypeId,
+  familyType,
+  shouldSwitch,
+}: {
+  visualizationMap: VisualizationMap;
+  suggestions: Suggestion[];
+  targetTypeId?: string;
+  familyType: string;
+  shouldSwitch: boolean;
+}): Suggestion[] | undefined {
+  const suggestion = suggestions.find((s) => s.visualizationId === familyType);
+
+  if (shouldSwitch && suggestion && familyType && targetTypeId) {
+    const visualizationState = visualizationMap[
+      suggestion.visualizationId
+    ]?.switchVisualizationType?.(targetTypeId, suggestion?.visualizationState);
+
+    return [
+      {
+        ...suggestion,
+        visualizationState,
+      },
+    ];
   }
 }

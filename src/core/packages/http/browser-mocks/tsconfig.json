@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-http-browser-internal",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

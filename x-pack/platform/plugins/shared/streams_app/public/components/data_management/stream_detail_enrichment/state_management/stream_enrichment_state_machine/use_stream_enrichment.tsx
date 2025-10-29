@@ -8,7 +8,12 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import { isActionBlock } from '@kbn/streamlang/types/streamlang';
+import type {
+  StreamlangProcessorDefinition,
+  StreamlangStepWithUIAttributes,
+} from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
   streamEnrichmentMachine,
@@ -41,11 +46,23 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
-      addProcessor: (processor?: StreamlangProcessorDefinition) => {
-        service.send({ type: 'processors.add', processor });
+      addProcessor: (
+        step?: StreamlangProcessorDefinition,
+        options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
+      ) => {
+        service.send({ type: 'step.addProcessor', step, options });
       },
-      reorderProcessors: (from: number, to: number) => {
-        service.send({ type: 'processors.reorder', from, to });
+      duplicateProcessor: (id: string) => {
+        service.send({ type: 'step.duplicateProcessor', processorStepId: id });
+      },
+      addCondition: (
+        step?: StreamlangWhereBlock,
+        options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
+      ) => {
+        service.send({ type: 'step.addCondition', step, options });
+      },
+      reorderStep: (stepId: string, direction: 'up' | 'down') => {
+        service.send({ type: 'step.reorder', stepId, direction });
       },
       resetChanges: () => {
         service.send({ type: 'stream.reset' });
@@ -135,9 +152,9 @@ const StreamEnrichmentCleanupOnUnmount = () => {
   useEffect(() => {
     return () => {
       const context = service.getSnapshot().context;
-      context.processorsRefs.forEach((procRef) => {
+      context.stepRefs.forEach((procRef) => {
         const procContext = procRef.getSnapshot().context;
-        if (isGrokProcessor(procContext.processor)) {
+        if (isActionBlock(procContext.step) && isGrokProcessor(procContext.step)) {
           const draftGrokExpressions = procContext.resources?.grokExpressions ?? [];
           draftGrokExpressions.forEach((expression) => {
             expression.destroy();

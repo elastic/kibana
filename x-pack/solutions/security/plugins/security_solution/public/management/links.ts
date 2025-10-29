@@ -15,6 +15,7 @@ import {
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
+  ENDPOINT_EXCEPTIONS_PATH,
   ENDPOINTS_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -23,15 +24,17 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
-  SecurityPageName,
   SECURITY_FEATURE_ID,
+  SecurityPageName,
   TRUSTED_APPS_PATH,
-  ENDPOINT_EXCEPTIONS_PATH,
   TRUSTED_DEVICES_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
+  ENDPOINT_EXCEPTIONS,
   ENDPOINTS,
+  ENTITY_ANALYTICS_RISK_SCORE,
+  ENTITY_STORE,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
@@ -39,9 +42,6 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
   TRUSTED_DEVICES,
-  ENTITY_ANALYTICS_RISK_SCORE,
-  ENTITY_STORE,
-  ENDPOINT_EXCEPTIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -57,6 +57,7 @@ import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
+import { IconDeviceControl } from '../common/icons/device_control';
 
 const categories = [
   {
@@ -163,9 +164,9 @@ export const links: LinkItem = {
       title: TRUSTED_DEVICES,
       description: i18n.translate('xpack.securitySolution.appLinks.trustedDevicesDescription', {
         defaultMessage:
-          'Add a trusted device to improve performance or alleviate compatibility issues.',
+          'Specify which external devices can connect to your endpoints even when Device Control is enabled.',
       }),
-      landingIcon: IconDashboards,
+      landingIcon: IconDeviceControl,
       path: TRUSTED_DEVICES_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -217,7 +218,6 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
-      experimentalKey: 'riskScoringRoutesEnabled',
       licenseType: 'platinum',
     },
     {

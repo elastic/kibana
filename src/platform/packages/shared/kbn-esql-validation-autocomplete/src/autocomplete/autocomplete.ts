@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
+import type { ESQLAstQueryExpression, ESQLColumn } from '@kbn/esql-ast';
 import {
   ESQL_VARIABLES_PREFIX,
   EsqlQuery,
+  Walker,
   esqlCommandRegistry,
   getCommandAutocompleteDefinitions,
   parse,
   type ESQLAstItem,
-  type ESQLCommand,
   type ESQLCommandOption,
   type ESQLFunction,
 } from '@kbn/esql-ast';
@@ -32,12 +32,14 @@ import {
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getAstContext } from '../shared/context';
-import { isSourceCommand } from '../shared/helpers';
-import { getColumnsByTypeHelper, getSourcesHelper } from '../shared/resources_helpers';
+import { isHeaderCommandSuggestion, isSourceCommandSuggestion } from '../shared/helpers';
+import { QueryColumns, getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
+import { getQueryForFields } from './get_query_for_fields';
 
 type GetColumnMapFn = () => Promise<Map<string, ESQLColumnData>>;
 
@@ -49,15 +51,16 @@ export async function suggest(
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText);
-  const { ast, root } = parse(correctedQuery, { withFormatting: true });
-  const astContext = getAstContext(innerText, ast, offset);
+  const { root } = parse(correctedQuery, { withFormatting: true });
+
+  const astContext = getAstContext(innerText, root, offset);
 
   if (astContext.type === 'comment') {
     return [];
   }
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    root,
+    getQueryForFields(correctedQuery, root),
     innerText,
     resourceRetriever
   );
@@ -96,7 +99,7 @@ export async function suggest(
       .map((command) => command.name);
 
     const suggestions = getCommandAutocompleteDefinitions(commands);
-    if (!ast.length) {
+    if (!root.commands.length) {
       // Display the recommended queries if there are no commands (empty state)
       const recommendedQueriesSuggestions: ISuggestionItem[] = [];
       if (getSources) {
@@ -114,7 +117,7 @@ export async function suggest(
           innerText,
           resourceRetriever
         );
-        const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? {
+        const editorExtensions = (await resourceRetriever?.getEditorExtensions?.('from *')) ?? {
           recommendedQueries: [],
         };
         const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
@@ -131,11 +134,18 @@ export async function suggest(
           ...recommendedQueriesSuggestionsFromStaticTemplates
         );
       }
-      const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
-      return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
+      const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
+      const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
+      return [
+        ...headerCommandsSuggestions,
+        ...sourceCommandsSuggestions,
+        ...recommendedQueriesSuggestions,
+      ];
     }
 
-    return suggestions.filter((def) => !isSourceCommand(def));
+    return suggestions.filter(
+      (def) => !isSourceCommandSuggestion(def) && !isHeaderCommandSuggestion(def)
+    );
   }
 
   // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492
@@ -153,9 +163,10 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
+    const commands = [...(root.header ?? []), ...root.commands];
     const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       fullText,
-      ast,
+      commands,
       astContext,
       getColumnsByType,
       getColumnMap,
@@ -173,7 +184,7 @@ export function getColumnsByTypeRetriever(
   queryText: string,
   resourceRetriever?: ESQLCallbacks
 ): { getColumnsByType: GetColumnsByTypeFn; getColumnMap: GetColumnMapFn } {
-  const helpers = getColumnsByTypeHelper(query, queryText, resourceRetriever);
+  const helpers = new QueryColumns(query, queryText, resourceRetriever);
   const getVariables = resourceRetriever?.getVariables;
   const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
 
@@ -195,7 +206,7 @@ export function getColumnsByTypeRetriever(
         recommendedFields: [],
       };
       const recommendedFieldsFromExtensions = editorExtensions.recommendedFields;
-      const columns = await helpers.getColumnsByType(expectedType, ignored);
+      const columns = await helpers.byType(expectedType, ignored);
       return buildFieldsDefinitionsWithMetadata(
         columns,
         recommendedFieldsFromExtensions,
@@ -203,11 +214,11 @@ export function getColumnsByTypeRetriever(
         await getVariables?.()
       );
     },
-    getColumnMap: helpers.getColumnMap,
+    getColumnMap: helpers.asMap.bind(helpers),
   };
 }
 
-function findNewUserDefinedColumn(userDefinedColumns: Map<string, ESQLColumnData>) {
+function findNewUserDefinedColumn(userDefinedColumns: Set<string>) {
   let autoGeneratedColumnCounter = 0;
   let name = `col${autoGeneratedColumnCounter++}`;
   while (userDefinedColumns.has(name)) {
@@ -218,9 +229,9 @@ function findNewUserDefinedColumn(userDefinedColumns: Map<string, ESQLColumnData
 
 async function getSuggestionsWithinCommandExpression(
   fullText: string,
-  commands: ESQLCommand[],
+  commands: ESQLAstAllCommands[],
   astContext: {
-    command: ESQLCommand;
+    command: ESQLAstAllCommands;
     node?: ESQLAstItem;
     option?: ESQLCommandOption;
     containingFunction?: ESQLFunction;
@@ -242,16 +253,13 @@ async function getSuggestionsWithinCommandExpression(
   const columnMap: Map<string, ESQLColumnData> = await getColumnMap();
   const references = { columns: columnMap };
 
-  const getSuggestedUserDefinedColumnName = (extraColumnNames?: string[]) => {
-    if (!extraColumnNames?.length) {
-      return findNewUserDefinedColumn(columnMap);
-    }
-
-    const augmentedColumnsMap = new Map(columnMap);
-    extraColumnNames.forEach((name) => {
-      augmentedColumnsMap.set(name, { name, type: 'double', userDefined: false });
-    });
-    return findNewUserDefinedColumn(augmentedColumnsMap);
+  const getSuggestedUserDefinedColumnName = () => {
+    const allUserDefinedColumns = new Set(
+      Walker.findAll(commands, (node) => node.type === 'column').map((col) =>
+        (col as ESQLColumn).parts.join('.')
+      )
+    );
+    return findNewUserDefinedColumn(allUserDefinedColumns);
   };
 
   const additionalCommandContext = await getCommandContext(
@@ -279,6 +287,7 @@ async function getSuggestionsWithinCommandExpression(
         : undefined,
       hasMinimumLicenseRequired,
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
+      isServerless: callbacks?.isServerless,
     },
     context,
     offset

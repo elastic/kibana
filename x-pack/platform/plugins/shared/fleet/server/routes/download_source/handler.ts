@@ -33,8 +33,7 @@ function ensureNoDuplicateSecrets(downloadSource: Partial<DownloadSource>) {
 }
 
 export const getDownloadSourcesHandler: RequestHandler = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
-  const downloadSources = await downloadSourceService.list(soClient);
+  const downloadSources = await downloadSourceService.list();
 
   const body: GetDownloadSourceResponse = {
     items: downloadSources.items,
@@ -49,9 +48,8 @@ export const getDownloadSourcesHandler: RequestHandler = async (context, request
 export const getOneDownloadSourcesHandler: RequestHandler<
   TypeOf<typeof GetOneDownloadSourcesRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    const downloadSource = await downloadSourceService.get(soClient, request.params.sourceId);
+    const downloadSource = await downloadSourceService.get(request.params.sourceId);
 
     const body: GetOneDownloadSourceResponse = {
       item: downloadSource,
@@ -81,7 +79,7 @@ export const putDownloadSourcesHandler: RequestHandler<
 
   try {
     await downloadSourceService.update(soClient, esClient, request.params.sourceId, request.body);
-    const downloadSource = await downloadSourceService.get(soClient, request.params.sourceId);
+    const downloadSource = await downloadSourceService.get(request.params.sourceId);
     if (downloadSource.is_default) {
       await agentPolicyService.bumpAllAgentPolicies(esClient);
     } else {
@@ -129,9 +127,8 @@ export const postDownloadSourcesHandler: RequestHandler<
 export const deleteDownloadSourcesHandler: RequestHandler<
   TypeOf<typeof DeleteDownloadSourcesRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    await downloadSourceService.delete(soClient, request.params.sourceId);
+    await downloadSourceService.delete(request.params.sourceId);
 
     const body: DeleteDownloadSourceResponse = {
       id: request.params.sourceId,

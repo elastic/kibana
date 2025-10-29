@@ -37,8 +37,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/expandable-flyout",
     "@kbn/grouping",
-    "@kbn/core-http-server-mocks",
-    "@kbn/shared-ux-router",
     "@kbn/std",
+    "@kbn/react-query"
   ]
 }

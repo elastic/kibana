@@ -9,9 +9,8 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ChartType } from '@kbn/visualization-utils';
 import type { DatasourceMock } from '../mocks';
 import { createMockVisualization, createMockDatasource } from '../mocks';
-import type { DatasourceSuggestion } from '../types';
+import type { DatasourceSuggestion, TypedLensByValueInput } from '@kbn/lens-common';
 import { suggestionsApi } from '.';
-import type { TypedLensByValueInput } from '../react_embeddable/types';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,
@@ -361,6 +360,90 @@ describe('suggestionsApi', () => {
         "visualizationId": "lnsXY",
         "visualizationState": Object {
           "preferredSeriesType": "line",
+        },
+      }
+    `);
+  });
+
+  test('returns the suggestion as donut if user asks for it ', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const visualizationMap = {
+      lnsPie: {
+        ...mockVis,
+        switchVisualizationType(seriesType: string, state: unknown) {
+          return {
+            ...(state as Record<string, unknown>),
+            preferredSeriesType: seriesType,
+          };
+        },
+        getSuggestions: () => [
+          {
+            score: 0.8,
+            title: 'pie',
+            state: {
+              preferredSeriesType: 'pie',
+            },
+            previewIcon: 'empty',
+            visualizationId: 'lnsPie',
+          },
+          {
+            score: 0.8,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+          },
+          {
+            score: 0.8,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+            incomplete: true,
+          },
+        ],
+      },
+    };
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    const context = {
+      dataViewSpec: {
+        id: 'index1',
+        title: 'index1',
+        name: 'DataView',
+      },
+      fieldName: '',
+      textBasedColumns: textBasedQueryColumns,
+      query: {
+        esql: 'FROM "index1" | keep field1, field2',
+      },
+    };
+    const suggestions = suggestionsApi({
+      context,
+      dataView,
+      datasourceMap,
+      visualizationMap,
+      preferredChartType: ChartType.Donut,
+    });
+    expect(suggestions?.length).toEqual(1);
+
+    expect(suggestions?.[0]).toMatchInlineSnapshot(`
+      Object {
+        "changeType": "unchanged",
+        "columns": 0,
+        "datasourceId": "textBased",
+        "datasourceState": Object {},
+        "keptLayerIds": Array [
+          "first",
+        ],
+        "previewIcon": "empty",
+        "score": 0.8,
+        "title": "pie",
+        "visualizationId": "lnsPie",
+        "visualizationState": Object {
+          "preferredSeriesType": "donut",
         },
       }
     `);

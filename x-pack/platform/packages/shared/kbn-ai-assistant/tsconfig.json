@@ -44,6 +44,7 @@
     "@kbn/security-plugin-types-common",
     "@kbn/ml-trained-models-utils",
     "@kbn/licensing-types",
-    "@kbn/product-doc-base-plugin"
+    "@kbn/product-doc-base-plugin",
+    "@kbn/ai-assistant-connector-selector-action"
   ]
 }

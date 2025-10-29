@@ -9,11 +9,10 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiSuperSelect,
   EuiSwitch,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -60,6 +59,10 @@ export const SpaceCopyResultDetails = (props: Props) => {
   const { destinationMap, onDestinationMapChange, summarizedCopyResult } = props;
   const { objects } = summarizedCopyResult;
   const { euiTheme } = useEuiTheme();
+  const objectIdLabel = i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyDetail.selectControlLabel',
+    { defaultMessage: 'Object ID' }
+  );
 
   return (
     <div
@@ -154,9 +157,13 @@ export const SpaceCopyResultDetails = (props: Props) => {
               `}
             >
               <EuiFlexItem grow={false}>
-                <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                  <EuiIcon aria-label={getSavedObjectLabel(type)} type={icon} size="s" />
-                </EuiToolTip>
+                <EuiIconTip
+                  position="top"
+                  content={getSavedObjectLabel(type)}
+                  aria-label={getSavedObjectLabel(type)}
+                  type={icon}
+                  size="s"
+                />
               </EuiFlexItem>
               <EuiFlexItem
                 grow={5}
@@ -204,10 +211,8 @@ export const SpaceCopyResultDetails = (props: Props) => {
                   options={selectProps.options}
                   valueOfSelected={destinationMap.get(`${type}:${id}`)}
                   onChange={selectProps.onChange}
-                  prepend={i18n.translate(
-                    'xpack.spaces.management.copyToSpace.copyDetail.selectControlLabel',
-                    { defaultMessage: 'Object ID' }
-                  )}
+                  prepend={objectIdLabel}
+                  aria-label={objectIdLabel}
                   hasDividers
                   fullWidth
                   compressed

@@ -5,3 +5,4 @@
  * 2.0.
  */
 export * from './file_selector';
+export * from './pending_actions_selector';

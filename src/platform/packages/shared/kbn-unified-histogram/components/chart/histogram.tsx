@@ -98,7 +98,6 @@ export function Histogram({
       transform: translate(-50%, -50%);
     }
   `;
-
   return (
     <>
       <div

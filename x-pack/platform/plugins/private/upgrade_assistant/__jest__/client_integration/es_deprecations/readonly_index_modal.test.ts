@@ -8,7 +8,8 @@
 import { act } from 'react-dom/test-utils';
 
 import type { ReindexStatusResponse } from '@kbn/reindex-service-plugin/common';
-import { ReindexStatus, ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { setupEnvironment } from '../helpers';
 import type { ElasticsearchTestBed } from './es_deprecations.helpers';
 import { setupElasticsearchPage } from './es_deprecations.helpers';

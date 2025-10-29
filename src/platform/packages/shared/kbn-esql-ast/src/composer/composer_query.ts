@@ -14,6 +14,7 @@ import { composerQuerySymbol, processTemplateHoles, validateParamName } from './
 import { Builder } from '../builder';
 import type {
   ESQLAstExpression,
+  ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
   ESQLCommand,
   ESQLNamedParamLiteral,
@@ -29,6 +30,20 @@ import type {
   QueryCommandTagParametrized,
 } from './types';
 import { Walker } from '../walker';
+import {
+  isBinaryExpression,
+  isBooleanLiteral,
+  isColumn,
+  isDoubleLiteral,
+  isFunctionExpression,
+  isHeaderCommand,
+  isIdentifier,
+  isIntegerLiteral,
+  isProperNode,
+  isStringLiteral,
+} from '../ast/is';
+import { replaceProperties } from '../walker/helpers';
+import { resolveItem } from '../visitor/utils';
 
 export class ComposerQuery {
   public readonly [composerQuerySymbol] = true;
@@ -52,14 +67,14 @@ export class ComposerQuery {
    * ```
    */
   private readonly _createCommandTag = (
-    synthCommandTag: synth.SynthMethod<ESQLCommand>
+    synthCommandTag: synth.SynthMethod<ESQLCommand | ESQLAstHeaderCommand>
   ): QueryCommandTag =>
     ((templateOrQueryOrParamValues, ...rest: unknown[]) => {
       const tagOrGeneratorWithParams =
         (initialParamValues: Record<string, unknown>): QueryCommandTagParametrized =>
         (templateOrQuery: any, ...holes: unknown[]) => {
           const params: Record<string, unknown> = { ...initialParamValues };
-          let command: ESQLCommand;
+          let command: ESQLCommand | ESQLAstHeaderCommand;
 
           if (typeof templateOrQuery === 'string') {
             const moreParamValues =
@@ -108,7 +123,12 @@ export class ComposerQuery {
             }
           }
 
-          this.ast.commands.push(command);
+          if (isHeaderCommand(command)) {
+            this.ast.header = this.ast.header || [];
+            this.ast.header.push(command);
+          } else {
+            this.ast.commands.push(command);
+          }
 
           return this;
         };
@@ -135,7 +155,70 @@ export class ComposerQuery {
       }
     }) as QueryCommandTag;
 
+  /**
+   * Appends a command to the query. This is the generic command appending method,
+   * which supports all ES|QL commands. Use it similar to `esql` template tag, but
+   * it adds one command at-a-time to the existing query. Use chainable calls to
+   * append multiple commands.
+   *
+   * Example:
+   *
+   * ```typescript
+   * // Start a new query with a source command:
+   * const query = esql `FROM index`;
+   *
+   * // Append commands using .pipe:
+   * query
+   *    .pipe `WHERE field > 10`
+   *    .pipe `LIMIT 100`;
+   * ```
+   *
+   * Safely inline dynamic values using template literal holes:
+   *
+   * ```typescript
+   * const threshold = 10;
+   * query.pipe `WHERE field > ${threshold}`;
+   * // WHERE field > 10
+   * ```
+   *
+   * Or insert named parameters using `${{param}}` syntax:
+   *
+   * ```typescript
+   * const limit = 100;
+   * query.pipe `WHERE field > ${{threshold}} | LIMIT ${{limit}}`;
+   * // WHERE field > ?threshold | LIMIT ?limit
+   * ```
+   *
+   * You can also insert parameters ahead of the template:
+   *
+   * ```typescript
+   * const limit = 100;
+   * const threshold = 10;
+   * query.pipe({ limit, threshold }) `WHERE field > ?threshold | LIMIT ?limit`;
+   * ```
+   *
+   * Or specify commands as strings, and provide parameters separately:
+   *
+   * ```typescript
+   * const limit = 100;
+   * const threshold = 10;
+   * query.pipe('WHERE field > ?threshold | LIMIT ?limit', { limit, threshold });
+   * ```
+   */
   public readonly pipe: QueryCommandTag = this._createCommandTag(synth.cmd);
+
+  /**
+   * Appends a header command to the query. This is used to add commands like `SET`
+   * to the query header. Use it exactly like {@linkcode pipe}, for example:
+   *
+   * ```typescript
+   * const query = esql `FROM index`;
+   * query.header `SET x = 10`;
+   *
+   * query.print(); // "SET x = 10; FROM index"
+   * ```
+   */
+  public readonly header: QueryCommandTag = this._createCommandTag(synth.hdr);
 
   /**
    * Appends a `CHANGE_POINT` command to detect change points in time series data.
@@ -729,6 +812,276 @@ export class ComposerQuery {
     }
 
     this.params.set(name, value);
+    return this;
+  }
+
+  /**
+   * Inlines a parameter by replacing its placeholder with its actual value.
+   * This operation modifies the query AST to include the literal value
+   * instead of the parameter reference. See {@linkcode inlineParams} for
+   * more details.
+   *
+   * @param name The name of the parameter to inline.
+   * @returns The updated ComposerQuery instance.
+   * @throws Error if the parameter does not exist or has an unsupported type.
+   */
+  public inlineParam(name: string): this {
+    const value = this.params.get(name);
+
+    if (value === undefined) {
+      throw new Error(`Parameter "${name}" does not exist in the query.`);
+    }
+
+    Walker.replaceAll(this.ast, { type: 'literal', literalType: 'param', value: name }, (node) => {
+      const param = node as ESQLNamedParamLiteral;
+      const parent = Walker.parent(this.ast, node);
+
+      if (parent && isFunctionExpression(parent) && parent.operator === node) {
+        return Builder.identifier(String(value));
+      } else if (
+        parent &&
+        isColumn(parent) &&
+        parent.args.length === 1 &&
+        parent.args[0] === node
+      ) {
+        replaceProperties(parent, synth.exp(String(value)));
+
+        return { ...node };
+      } else if (param.paramKind === '??') {
+        if (parent && isColumn(parent)) {
+          return Builder.identifier(String(value));
+        }
+
+        return synth.exp(String(value));
+      } else {
+        if (parent && isColumn(parent)) {
+          return Builder.identifier(String(value));
+        }
+        switch (typeof value) {
+          case 'string': {
+            return synth.str(value);
+          }
+          case 'number': {
+            return synth.num(value);
+          }
+          case 'boolean': {
+            return synth.bool(value);
+          }
+        }
+      }
+
+      throw new Error(`Cannot inline parameter "${name}" of unsupported type.`);
+    });
+
+    this.params.delete(name);
+
+    return this;
+  }
+
+  /**
+   * Inlines all parameters in the query by replacing parameter placeholders with
+   * their actual values directly in the AST. This operation modifies the query
+   * to contain literal values instead of parameter references and clears the
+   * parameter map.
+   *
+   * This method is useful when you want to convert a parameterized query into
+   * a static query with all values embedded directly in the query text.
+   *
+   * ```typescript
+   * // Create a parameterized query
+   * const query = esql`FROM logs | WHERE user == ${{ userName: 'admin' }} | LIMIT ${{ limit: 100 }}`;
+   *
+   * console.log(query.print());
+   * // FROM logs | WHERE user == ?userName | LIMIT ?limit
+   *
+   * console.log(query.getParams());
+   * // { userName: 'admin', limit: 100 }
+   *
+   * // Inline all parameters
+   * query.inlineParams();
+   *
+   * console.log(query.print());
+   * // FROM logs | WHERE user == "admin" | LIMIT 100
+   *
+   * console.log(query.getParams());
+   * // {} (empty - all parameters have been inlined)
+   * ```
+   *
+   * **Note:** This operation is irreversible. Once parameters are inlined,
+   * they cannot be extracted back into parameter form. The parameter map
+   * will be empty after this operation.
+   *
+   * **Supported parameter types:**
+   * - `string` - Converted to string literals
+   * - `number` - Converted to numeric literals
+   * - `boolean` - Converted to boolean literals
+   * - Column (field) names (when used with `??` param syntax)
+   * - Nested column name parts (both, `?` and `??` param syntax)
+   * - Function names (both, `?` and `??` param syntax)
+   *
+   * @returns The updated ComposerQuery instance with all parameters inlined.
+   * @throws Error if any parameter has an unsupported type that cannot be inlined.
+   */
+  public inlineParams(): this {
+    for (const name of [...this.params.keys()]) {
+      this.inlineParam(name);
+    }
+    return this;
+  }
+
+  /**
+   * Inserts a SET instruction into the query header.
+   *
+   * SET instructions are pseudo-commands that set configuration values for the query.
+   * They must appear before the main query and are separated by semicolons.
+   *
+   * ```typescript
+   * // Add a single SET instruction
+   * query.addSetCommand('a', 'foo');
+   * // Result: SET a = "foo"; <original query>
+   *
+   * // Add multiple SET instructions
+   * query.addSetCommand('b', 123);
+   * // Result: SET a = "foo"; SET b = 123; <original query>
+   * ```
+   *
+   * @param name The setting name (identifier) to set.
+   * @param value The value to assign to the setting (string, number, or boolean).
+   * @returns The updated ComposerQuery instance.
+   */
+  public addSetCommand(name: string, value: string | number | boolean): this {
+    this.header`SET ${synth.kwd(name)} = ${value}`;
+
+    return this;
+  }
+
+  /**
+   * Removes a SET instruction from the query header by setting name.
+   *
+   * ```typescript
+   * // Remove a specific SET instruction
+   * query.removeSetCommand('a');
+   * // Removes: SET a = "foo";
+   * ```
+   *
+   * @param name The setting name (identifier) to remove.
+   * @returns The updated ComposerQuery instance.
+   */
+  public removeSetCommand(name: string): this {
+    const ast = this.ast;
+    const header = ast.header;
+
+    if (!header) {
+      return this;
+    }
+
+    ast.header = header.filter((cmd) => {
+      if (!isHeaderCommand(cmd) || cmd.name !== 'set') {
+        return true;
+      }
+
+      const arg = cmd.args[0];
+
+      if (!isBinaryExpression(arg) || arg.name !== '=') {
+        return true;
+      }
+
+      const left = arg.args[0];
+
+      return !isIdentifier(left) || left.name !== name;
+    });
+
+    return this;
+  }
+
+  /**
+   * Gets all SET instructions from the query header.
+   *
+   * ```typescript
+   * const sets = query.getSetCommands();
+   * // Returns: [{ name: 'a', value: 'foo' }, { name: 'b', value: 123 }]
+   * ```
+   *
+   * @returns An array of objects containing the setting name and value pairs.
+   */
+  public getSetInstructions(): Array<[name: string, value: ESQLAstExpression]> {
+    const ast = this.ast;
+    const header = ast.header;
+    const sets: Array<[name: string, value: ESQLAstExpression]> = [];
+
+    if (!header) {
+      return sets;
+    }
+
+    for (const cmd of header) {
+      if (!isHeaderCommand(cmd) || cmd.name !== 'set') {
+        continue;
+      }
+
+      // We iterate over all instructions of a single SET command, as of this
+      // writing, ES|QL supports only one instruction per SET command, but
+      // used to support multiple in the past, and may likely do so again in
+      // the future.
+      for (const arg of cmd.args) {
+        if (isBinaryExpression(arg) && arg.name === '=') {
+          const left = arg.args[0];
+          const right = arg.args[1];
+
+          if (isIdentifier(left) && (isProperNode(right) || Array.isArray(right))) {
+            sets.push([left.name as string, resolveItem(right)]);
+          }
+        }
+      }
+    }
+
+    return sets;
+  }
+
+  /**
+   * Returns a flattened record of all SET instructions from the query header.
+   * Values are converted to their native types (string, number, boolean). If
+   * an instruction with the same name appears multiple times, the last one
+   * takes precedence. (Elasticsearch also uses the last value.)
+   *
+   * @returns A POJO of flattened set instructions.
+   */
+  public getSetInstructionRecord(): Record<string, string | number | boolean> {
+    const instructions = this.getSetInstructions();
+    const record: Record<string, string | number | boolean> = {};
+
+    for (const [name, value] of instructions) {
+      if (isStringLiteral(value)) {
+        record[name] = value.valueUnquoted;
+      } else if (isIntegerLiteral(value) || isDoubleLiteral(value)) {
+        record[name] = value.value;
+      } else if (isBooleanLiteral(value)) {
+        record[name] = value.value === 'TRUE';
+      }
+    }
+
+    return record;
+  }
+
+  /**
+   * Removes all SET instructions from the query header.
+   *
+   * ```typescript
+   * query.clearSetCommands();
+   * // Removes all: SET a = "foo"; SET b = 123;
+   * ```
+   *
+   * @returns The updated ComposerQuery instance.
+   */
+  public clearSetCommands(): this {
+    const ast = this.ast;
+    const header = ast.header;
+
+    if (header) {
+      // We use `.filter()` here to filter out only SET commands, preserving
+      // any other potential header commands in the future.
+      ast.header = header.filter((cmd) => !isHeaderCommand(cmd) || cmd.name !== 'set');
+    }
+
     return this;
   }
 

@@ -110,14 +110,7 @@ import type {
   SetAlertsStatusResponse,
 } from './detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
-import type {
-  EndpointGetActionsDetailsRequestParamsInput,
-  EndpointGetActionsDetailsResponse,
-} from './endpoint/actions/details/details.gen';
-import type {
-  EndpointFileDownloadRequestParamsInput,
-  EndpointFileDownloadResponse,
-} from './endpoint/actions/file_download/file_download.gen';
+import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
   EndpointFileInfoRequestParamsInput,
   EndpointFileInfoResponse,
@@ -126,6 +119,10 @@ import type {
   EndpointGetActionsListRequestQueryInput,
   EndpointGetActionsListResponse,
 } from './endpoint/actions/list/list.gen';
+import type {
+  CancelActionRequestBodyInput,
+  CancelActionResponse,
+} from './endpoint/actions/response_actions/cancel/cancel.gen';
 import type {
   EndpointExecuteActionRequestBodyInput,
   EndpointExecuteActionResponse,
@@ -222,6 +219,10 @@ import type {
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
+  EntityDetailsHighlightsRequestBodyInput,
+  EntityDetailsHighlightsResponse,
+} from './entity_analytics/entity_details/highlights.gen';
+import type {
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
 } from './entity_analytics/entity_store/enable.gen';
@@ -251,9 +252,24 @@ import type {
   StopEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
 import type {
+  DeleteSingleEntityRequestParamsInput,
+  DeleteSingleEntityRequestBodyInput,
+  DeleteSingleEntityResponse,
+} from './entity_analytics/entity_store/entities/delete_entity.gen';
+import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
+import type {
+  UpsertEntitiesBulkRequestQueryInput,
+  UpsertEntitiesBulkRequestBodyInput,
+} from './entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
+import type {
+  UpsertEntityRequestQueryInput,
+  UpsertEntityRequestParamsInput,
+  UpsertEntityRequestBodyInput,
+  UpsertEntityResponse,
+} from './entity_analytics/entity_store/entities/upsert_entity.gen';
 import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
@@ -560,6 +576,22 @@ If asset criticality records already exist for the specified entities, those rec
     return this.kbnClient
       .request<BulkUpsertAssetCriticalityRecordsResponse>({
         path: '/api/asset_criticality/bulk',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Cancel a running or pending response action (Applies only to some agent types).
+   */
+  async cancelAction(props: CancelActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CancelAction`);
+    return this.kbnClient
+      .request<CancelActionResponse>({
+        path: '/api/endpoint/action/cancel',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1045,6 +1077,24 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Delete a single entity in Entity Store.
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
+
+    */
+  async deleteSingleEntity(props: DeleteSingleEntityProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteSingleEntity`);
+    return this.kbnClient
+      .request<DeleteSingleEntityResponse>({
+        path: replaceParams('/api/entity_store/entities/{entityType}/{entityId}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Delete one or more Timelines or Timeline templates.
    */
   async deleteTimelines(props: DeleteTimelinesProps) {
@@ -1129,16 +1179,13 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Download a file from an endpoint. 
-> info
-> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-> {`file_id`} = {`action_id`}`.`{`agent_id`}
+    * Download a file associated with a response action.
 
     */
   async endpointFileDownload(props: EndpointFileDownloadProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileDownload`);
     return this.kbnClient
-      .request<EndpointFileDownloadResponse>({
+      .request({
         path: replaceParams(
           '/api/endpoint/action/{action_id}/file/{file_id}/download',
           props.params
@@ -1151,10 +1198,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Get information for the specified file using the file ID.
-> info
-> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-> {`file_id`} = {`action_id`}`.`{`agent_id`}
+    * Get information for the specified response action file download.
 
     */
   async endpointFileInfo(props: EndpointFileInfoProps) {
@@ -1162,21 +1206,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     return this.kbnClient
       .request<EndpointFileInfoResponse>({
         path: replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Get the details of a response action using the action ID.
-   */
-  async endpointGetActionsDetails(props: EndpointGetActionsDetailsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EndpointGetActionsDetails`);
-    return this.kbnClient
-      .request<EndpointGetActionsDetailsResponse>({
-        path: replaceParams('/api/endpoint/action/{action_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1358,6 +1387,19 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async entityDetailsHighlights(props: EntityDetailsHighlightsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API EntityDetailsHighlights`);
+    return this.kbnClient
+      .request<EntityDetailsHighlightsResponse>({
+        path: '/internal/entity_details/highlights',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3061,6 +3103,47 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Update or create many entities in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
+The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
+
+    */
+  async upsertEntitiesBulk(props: UpsertEntitiesBulkProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertEntitiesBulk`);
+    return this.kbnClient
+      .request({
+        path: '/api/entity_store/entities/bulk',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Update or create an entity in Entity Store.
+If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+> Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
+
+    */
+  async upsertEntity(props: UpsertEntityProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertEntity`);
+    return this.kbnClient
+      .request<UpsertEntityResponse>({
+        path: replaceParams('/api/entity_store/entities/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Creates or updates resources for an existing SIEM rules migration
    */
   async upsertRuleMigrationResources(props: UpsertRuleMigrationResourcesProps) {
@@ -3086,6 +3169,9 @@ export interface AlertsMigrationCleanupProps {
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
+}
+export interface CancelActionProps {
+  body: CancelActionRequestBodyInput;
 }
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
@@ -3163,6 +3249,10 @@ export interface DeleteRuleProps {
 export interface DeleteRuleMigrationProps {
   params: DeleteRuleMigrationRequestParamsInput;
 }
+export interface DeleteSingleEntityProps {
+  params: DeleteSingleEntityRequestParamsInput;
+  body: DeleteSingleEntityRequestBodyInput;
+}
 export interface DeleteTimelinesProps {
   body: DeleteTimelinesRequestBodyInput;
 }
@@ -3177,9 +3267,6 @@ export interface EndpointFileDownloadProps {
 }
 export interface EndpointFileInfoProps {
   params: EndpointFileInfoRequestParamsInput;
-}
-export interface EndpointGetActionsDetailsProps {
-  params: EndpointGetActionsDetailsRequestParamsInput;
 }
 export interface EndpointGetActionsListProps {
   query: EndpointGetActionsListRequestQueryInput;
@@ -3210,6 +3297,9 @@ export interface EndpointUnisolateActionProps {
 }
 export interface EndpointUploadActionProps {
   attachment: FormData;
+}
+export interface EntityDetailsHighlightsProps {
+  body: EntityDetailsHighlightsRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
@@ -3475,6 +3565,15 @@ export interface UploadAssetCriticalityRecordsProps {
 export interface UpsertDashboardMigrationResourcesProps {
   params: UpsertDashboardMigrationResourcesRequestParamsInput;
   body: UpsertDashboardMigrationResourcesRequestBodyInput;
+}
+export interface UpsertEntitiesBulkProps {
+  query: UpsertEntitiesBulkRequestQueryInput;
+  body: UpsertEntitiesBulkRequestBodyInput;
+}
+export interface UpsertEntityProps {
+  query: UpsertEntityRequestQueryInput;
+  params: UpsertEntityRequestParamsInput;
+  body: UpsertEntityRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;

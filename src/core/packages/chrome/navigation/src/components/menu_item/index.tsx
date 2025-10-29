@@ -8,10 +8,12 @@
  */
 
 import type { ReactNode, HTMLAttributes, ForwardedRef } from 'react';
-import React, { forwardRef } from 'react';
+import React, { Suspense, forwardRef } from 'react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiIcon, EuiScreenReaderOnly, EuiText, euiFontSize, useEuiTheme } from '@elastic/eui';
+
+import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 
 export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLButtonElement> {
   as?: 'a' | 'button';
@@ -19,7 +21,8 @@ export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLBu
   href: string;
   iconSize?: 's' | 'm';
   iconType: IconType;
-  isActive: boolean;
+  isHighlighted: boolean;
+  isCurrent?: boolean;
   isHorizontal?: boolean;
   isLabelVisible?: boolean;
   isTruncated?: boolean;
@@ -30,12 +33,13 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     {
       as = 'a',
       children,
-      isHorizontal,
       href,
       iconSize = 's',
       iconType,
       id,
-      isActive,
+      isCurrent = false,
+      isHighlighted,
+      isHorizontal,
       isLabelVisible = true,
       isTruncated = true,
       ...props
@@ -48,6 +52,12 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const isSingleWord = typeof children === 'string' && !children.includes(' ');
 
     const buttonStyles = css`
+      --menu-item-text-color: ${isHighlighted
+        ? euiTheme.components.buttons.textColorPrimary
+        : euiTheme.components.buttons.textColorText};
+      --high-contrast-hover-indicator-color: var(--menu-item-text-color);
+      ${useHighContrastModeStyles('.iconWrapper')};
+
       width: 100%;
       position: relative;
       overflow: hidden;
@@ -57,10 +67,9 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       flex-direction: ${isHorizontal ? 'row' : 'column'};
       // 3px is from Figma; there is no token
       gap: ${isHorizontal ? euiTheme.size.s : '3px'};
+      color: var(--menu-item-text-color);
+      // Focus affordance with border on the iconWrapper instead
       outline: none !important;
-      color: ${isActive
-        ? euiTheme.components.buttons.textColorPrimary
-        : euiTheme.components.buttons.textColorText};
 
       .iconWrapper {
         position: relative;
@@ -70,7 +79,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         height: ${euiTheme.size.xl};
         width: ${euiTheme.size.xl};
         border-radius: ${euiTheme.border.radius.medium};
-        background-color: ${isActive
+        background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimary
           : isHorizontal
           ? euiTheme.colors.backgroundBaseSubdued
@@ -91,26 +100,19 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       // source: https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible
       &:focus-visible .iconWrapper {
         border: ${euiTheme.border.width.thick} solid
-          ${isActive ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+          ${isHighlighted ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
       }
 
       &:hover .iconWrapper::before {
-        background-color: ${isActive
+        background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimaryHover
           : euiTheme.components.buttons.backgroundTextHover};
       }
 
       &:active .iconWrapper::before {
-        background-color: ${isActive
+        background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimaryActive
           : euiTheme.components.buttons.backgroundTextActive};
-      }
-
-      &:hover,
-      &:active {
-        color: ${isActive
-          ? euiTheme.components.buttons.textColorPrimary
-          : euiTheme.components.buttons.textColorText};
       }
     `;
 
@@ -130,30 +132,32 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
             -webkit-line-clamp: 2;
           `);
 
-    const horizontalStyles =
-      !isHorizontal &&
-      css`
-        ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
-        font-weight: ${euiTheme.font.weight.semiBold};
-      `;
+    const verticalStyles = css`
+      ${euiFontSize(euiThemeContext, 'xxs', { unit: 'px' }).fontSize};
+      font-weight: ${euiTheme.font.weight.semiBold};
+    `;
+
+    const horizontalStyles = css`
+      font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
+    `;
+
+    const labelStyles = css`
+      ${truncatedStyles}
+      ${isHorizontal ? horizontalStyles : verticalStyles}
+      overflow: hidden;
+      max-width: 100%;
+      padding: 0 ${euiTheme.size.s};
+    `;
 
     const content = (
       <>
         <div className="iconWrapper">
-          <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+          <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type="empty" />}>
+            <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+          </Suspense>
         </div>
         {isLabelVisible ? (
-          <EuiText
-            size={isHorizontal ? 's' : 'xs'}
-            textAlign="center"
-            css={css`
-              ${truncatedStyles}
-              ${horizontalStyles}
-              overflow: hidden;
-              max-width: 100%;
-              padding: 0 ${euiTheme.size.xs};
-            `}
-          >
+          <EuiText size={isHorizontal ? 's' : 'xs'} textAlign="center" css={labelStyles}>
             {children}
           </EuiText>
         ) : (
@@ -167,12 +171,13 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const commonProps = {
       css: buttonStyles,
       'data-menu-item': true,
+      'data-highlighted': isHighlighted ? 'true' : 'false',
       ...props,
     };
 
     if (as === 'button') {
       return (
-        <button ref={ref as ForwardedRef<HTMLButtonElement>} {...commonProps}>
+        <button id={id} ref={ref as ForwardedRef<HTMLButtonElement>} {...commonProps}>
           {content}
         </button>
       );
@@ -180,8 +185,9 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
 
     return (
       <a
-        aria-current={isActive ? 'page' : undefined}
+        aria-current={isCurrent ? 'page' : undefined}
         href={href}
+        id={id}
         ref={ref as ForwardedRef<HTMLAnchorElement>}
         {...commonProps}
       >
