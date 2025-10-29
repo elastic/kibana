@@ -8,21 +8,33 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MetricsGridProps } from './metrics_grid';
 import { MetricsGrid } from './metrics_grid';
 import { Chart } from './chart';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import type { UnifiedHistogramFetchMessage } from '@kbn/unified-histogram/types';
 
 jest.mock('./chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
 }));
 
 describe('MetricsGrid', () => {
+  let discoverFetch$: BehaviorSubject<UnifiedHistogramFetchMessage>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    discoverFetch$ = new BehaviorSubject({ type: 'fetch' });
+  });
+
+  afterEach(() => {
+    discoverFetch$.complete();
+  });
+
   const requestParams: MetricsGridProps['requestParams'] = {
     filters: [],
     getTimeRange: () => ({ from: 'now-1h', to: 'now' }),
@@ -59,7 +71,7 @@ describe('MetricsGrid', () => {
         columns={3}
         dimensions={[]}
         pivotOn="metric"
-        discoverFetch$={new Subject()}
+        discoverFetch$={discoverFetch$}
         fields={fields}
         requestParams={requestParams}
         services={services}
@@ -77,7 +89,7 @@ describe('MetricsGrid', () => {
         columns={3}
         dimensions={['host.name']}
         pivotOn="metric"
-        discoverFetch$={new Subject()}
+        discoverFetch$={discoverFetch$}
         fields={fields}
         requestParams={requestParams}
         services={services}
@@ -92,7 +104,7 @@ describe('MetricsGrid', () => {
         columns={4}
         dimensions={['host.name']}
         pivotOn="metric"
-        discoverFetch$={new Subject()}
+        discoverFetch$={discoverFetch$}
         fields={fields}
         requestParams={requestParams}
         services={services}
@@ -106,6 +118,11 @@ describe('MetricsGrid', () => {
   describe('MetricsGrid keyboard navigation', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     it('renders with proper ARIA grid attributes', () => {
@@ -114,7 +131,7 @@ describe('MetricsGrid', () => {
           columns={2}
           dimensions={[]}
           pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
           requestParams={requestParams}
           services={services}
@@ -139,7 +156,7 @@ describe('MetricsGrid', () => {
           columns={2}
           dimensions={[]}
           pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
           requestParams={requestParams}
           services={services}
@@ -162,14 +179,14 @@ describe('MetricsGrid', () => {
     });
 
     it('should handle arrow key navigation correctly', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <MetricsGrid
           columns={2}
           dimensions={[]}
           pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
           requestParams={requestParams}
           services={services}
@@ -195,14 +212,14 @@ describe('MetricsGrid', () => {
     });
 
     it('should handle clicking on cells to focus them', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       render(
         <MetricsGrid
           columns={2}
           dimensions={[]}
           pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
           requestParams={requestParams}
           services={services}
@@ -220,7 +237,7 @@ describe('MetricsGrid', () => {
     });
 
     it('should handle vertical arrow navigation in multi-row grid', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const multipleFields = [
         ...fields,
         {
@@ -242,7 +259,7 @@ describe('MetricsGrid', () => {
           columns={2}
           dimensions={[]}
           pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={multipleFields}
           requestParams={requestParams}
           services={services}
@@ -289,7 +306,7 @@ describe('MetricsGrid', () => {
             columns={2}
             dimensions={[]}
             pivotOn="metric"
-            discoverFetch$={new Subject()}
+            discoverFetch$={discoverFetch$}
             fields={fields}
             requestParams={requestParams}
             services={services}
@@ -321,7 +338,7 @@ describe('MetricsGrid', () => {
             columns={2}
             dimensions={[]}
             pivotOn="metric"
-            discoverFetch$={new Subject()}
+            discoverFetch$={discoverFetch$}
             fields={fields}
             requestParams={requestParams}
             services={services}
@@ -338,15 +355,23 @@ describe('MetricsGrid', () => {
     });
 
     describe('Focus state management', () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
       it('should update focus state when cell receives focus', async () => {
-        const user = userEvent.setup();
+        const user = userEvent.setup({ delay: null });
 
         render(
           <MetricsGrid
             columns={2}
             dimensions={[]}
             pivotOn="metric"
-            discoverFetch$={new Subject()}
+            discoverFetch$={discoverFetch$}
             fields={fields}
             requestParams={requestParams}
             services={services}
@@ -370,7 +395,7 @@ describe('MetricsGrid', () => {
             columns={2}
             dimensions={[]}
             pivotOn="metric"
-            discoverFetch$={new Subject()}
+            discoverFetch$={discoverFetch$}
             fields={fields}
             requestParams={requestParams}
             services={services}
@@ -381,8 +406,8 @@ describe('MetricsGrid', () => {
         const gridCells = screen.getAllByRole('gridcell');
 
         // Simulate programmatic focus (like from flyout closing)
-        gridCells[1].focus();
-        fireEvent.focus(gridCells[1]);
+        act(() => gridCells[1].focus());
+        act(() => fireEvent.focus(gridCells[1]));
 
         // Verify focus state and DOM focus
         expect(document.activeElement).toBe(gridCells[1]);
