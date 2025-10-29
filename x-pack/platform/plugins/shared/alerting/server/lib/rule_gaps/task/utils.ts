@@ -65,7 +65,7 @@ export function formatConsolidatedSummary(consolidated: AggregatedByRuleEntry[])
     parts.push(`${errorCount} error${errorCount === 1 ? '' : 's'}: ${errorsList}`);
   }
 
-  return `\n${parts.join(' |\n')}`;
+  return `\n${parts.join(' \n')}`;
 }
 
 export async function handleCancellation({

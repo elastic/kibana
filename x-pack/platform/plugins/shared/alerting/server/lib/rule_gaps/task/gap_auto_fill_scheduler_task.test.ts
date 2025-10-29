@@ -243,6 +243,10 @@ describe('Gap Auto Fill Scheduler Task', () => {
       });
     });
 
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     const buildRule = (id: string) => ({
       id,
       enabled: true,
@@ -671,7 +675,10 @@ describe('Gap Auto Fill Scheduler Task', () => {
           expect(logEventMock).toHaveBeenCalledWith(
             expect.objectContaining({
               status: 'success',
-              message: 'cancelled',
+              results: [],
+              message: expect.stringContaining(
+                'Gap Auto Fill Scheduler cancelled by timeout | Results: \nprocessed 0 gaps across 0 rules'
+              ),
             })
           );
         });
@@ -911,6 +918,9 @@ describe('Gap Auto Fill Scheduler Task', () => {
         });
 
         it('continues pagination when a full page is entirely filtered by overlap, then stops on empty page', async () => {
+          // Ensure isolation from other tests
+          mockedFindGaps.findGapsSearchAfter.mockReset();
+          mockBackfillClient.findOverlappingBackfills.mockReset();
           rulesClient.findBackfill.mockResolvedValue({ data: [], total: 0, page: 1, perPage: 1 });
 
           (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({ ruleIds: ['rule-1'] });
@@ -934,7 +944,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
             })
             .mockResolvedValueOnce({ total: 0, data: [], searchAfter: undefined, pitId: 'pit-1' });
 
-          mockBackfillClient.findOverlappingBackfills.mockResolvedValue([
+          mockBackfillClient.findOverlappingBackfills.mockResolvedValueOnce([
             {
               id: 'bf-1',
               start: '2024-01-01T00:00:00.000Z',
