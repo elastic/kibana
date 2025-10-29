@@ -138,8 +138,7 @@ export class WorkflowExecutionState {
         return acc;
       }, {});
 
-    const toCreate: Partial<EsWorkflowStepExecution>[] = [];
-    const toUpdate: Partial<EsWorkflowStepExecution>[] = [];
+    const documents: Partial<EsWorkflowStepExecution>[] = [];
 
     Object.entries(groupedStepChangesById).forEach(([objectId, changes]) => {
       const accumulated: Partial<EsWorkflowStepExecution> = changes.reduce(
@@ -150,14 +149,10 @@ export class WorkflowExecutionState {
         {}
       );
 
-      if (changes.some((change) => change.changeType === 'create')) {
-        toCreate.push(accumulated);
-      } else {
-        toUpdate.push(accumulated);
-      }
+      documents.push(accumulated);
     });
 
-    await this.workflowStepExecutionRepository.bulkUpsert(Array.from(toCreate.concat(toUpdate)));
+    await this.workflowStepExecutionRepository.bulkUpsert(documents);
     this.stepChanges = [];
   }
 
