@@ -65,17 +65,19 @@ describe('Workflows Connector', () => {
             workflowId: 'test-workflow-id',
             spaceId: 'default',
             inputs: {
-              alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
-              rule: {
-                id: 'rule-1',
-                name: 'Test Rule',
-                tags: ['test'],
-                consumer: 'test-consumer',
-                producer: 'test-producer',
-                ruleTypeId: 'test-rule-type',
+              event: {
+                alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+                rule: {
+                  id: 'rule-1',
+                  name: 'Test Rule',
+                  tags: ['test'],
+                  consumer: 'test-consumer',
+                  producer: 'test-producer',
+                  ruleTypeId: 'test-rule-type',
+                },
+                ruleUrl: 'https://example.com/rule',
+                spaceId: 'default',
               },
-              ruleUrl: 'https://example.com/rule',
-              spaceId: 'default',
             },
           },
         },
@@ -100,17 +102,19 @@ describe('Workflows Connector', () => {
         'test-workflow-id',
         'default',
         {
-          alerts: [{ _id: 'alert-1', _index: 'test-index' }],
-          rule: {
-            id: 'rule-1',
-            name: 'Test Rule',
-            tags: ['test'],
-            consumer: 'test-consumer',
-            producer: 'test-producer',
-            ruleTypeId: 'test-rule-type',
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: 'https://example.com/rule',
+            spaceId: 'default',
           },
-          ruleUrl: 'https://example.com/rule',
-          spaceId: 'default',
         },
         mockRequest
       );
@@ -207,17 +211,19 @@ describe('Workflows Connector', () => {
           subActionParams: {
             workflowId: 'test-workflow-id',
             inputs: {
-              alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
-              rule: {
-                id: 'rule-1',
-                name: 'Test Rule',
-                tags: ['test'],
-                consumer: 'test-consumer',
-                producer: 'test-producer',
-                ruleTypeId: 'test-rule-type',
+              event: {
+                alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+                rule: {
+                  id: 'rule-1',
+                  name: 'Test Rule',
+                  tags: ['test'],
+                  consumer: 'test-consumer',
+                  producer: 'test-producer',
+                  ruleTypeId: 'test-rule-type',
+                },
+                ruleUrl: 'https://example.com/rule',
+                spaceId: 'default',
               },
-              ruleUrl: 'https://example.com/rule',
-              spaceId: 'default',
             },
             spaceId: 'default',
           },

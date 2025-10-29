@@ -18,8 +18,8 @@ export type WorkflowsActionParamsType = ExecutorParams;
 export interface RunWorkflowParams {
   workflowId: string;
   spaceId: string;
-  inputs?: {
-    event?: {
+  inputs: {
+    event: {
       alerts: AlertHit[];
       rule: {
         id: string;
@@ -32,7 +32,6 @@ export interface RunWorkflowParams {
       ruleUrl?: string;
       spaceId: string;
     };
-    alerts?: AlertHit[];
   };
   [key: string]: unknown;
 }

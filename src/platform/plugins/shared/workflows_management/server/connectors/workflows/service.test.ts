@@ -198,6 +198,20 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await service.runWorkflow(params);
@@ -210,7 +224,20 @@ describe('Workflows Service', () => {
       expect(mockWorkflowService).toHaveBeenCalledWith(
         'test-workflow-id',
         'default',
-        {},
+        {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
         mockRequest
       );
     });

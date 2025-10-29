@@ -15,7 +15,7 @@ const run = async ({
   logger,
 }: ExternalServiceApiHandlerArgs): Promise<WorkflowsExecutorResultData> => {
   // Skip workflow execution if there are no alerts (similar to Cases pattern)
-  const alerts = params.inputs?.event?.alerts || params.inputs?.alerts;
+  const alerts = params.inputs?.event?.alerts;
   if (!alerts || alerts.length === 0) {
     logger.debug(
       `[WorkflowsConnector][run] No alerts. Skipping workflow execution for workflowId: ${params.workflowId}`

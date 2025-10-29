@@ -10,10 +10,10 @@
 import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod';
 
-const RunSubActionParamsSchema = schema.object({
-  workflowId: schema.string(),
-  inputs: schema.maybe(schema.any()),
-  spaceId: schema.string(),
+const RunSubActionParamsSchema = z.object({
+  workflowId: z.string(),
+  inputs: z.any().optional(),
+  spaceId: z.string(),
 });
 
 // Schema for rule configuration (what the UI saves)
