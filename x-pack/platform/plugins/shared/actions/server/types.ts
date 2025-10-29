@@ -191,11 +191,12 @@ export interface ActionType<
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   validate: {
-    params: ValidatorType<Params>;
+    params?: ValidatorType<Params>;
     config: ValidatorType<Config>;
     secrets: ValidatorType<Secrets>;
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
+  uiFields?: Record<string, unknown>;
   isSystemActionType?: boolean;
   subFeature?: SubFeature;
   isDeprecated?: boolean;
@@ -215,7 +216,7 @@ export interface ActionType<
     source?: ActionExecutionSourceType;
   }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
-  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  executor?: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
