@@ -642,6 +642,38 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         .addVersion(
           {
             version: API_VERSIONS.public.v1,
+            options: {
+              oasOperationObject: () => ({
+                responses: {
+                  200: {
+                    content: {
+                      'application/json': {
+                        examples: {
+                          successResponse: {
+                            value: {
+                              taskId: 'taskId',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  400: {
+                    content: {
+                      'application/json': {
+                        examples: {
+                          badRequestResponse: {
+                            value: {
+                              message: 'Bad Request',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              }),
+            },
             validate: {
               request: BulkRollbackPackagesRequestSchema,
               response: {
@@ -671,6 +703,38 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         .addVersion(
           {
             version: API_VERSIONS.public.v1,
+            options: {
+              oasOperationObject: () => ({
+                responses: {
+                  200: {
+                    content: {
+                      'application/json': {
+                        examples: {
+                          successResponse: {
+                            value: {
+                              status: 'success',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  400: {
+                    content: {
+                      'application/json': {
+                        examples: {
+                          badRequestResponse: {
+                            value: {
+                              message: 'Bad Request',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              }),
+            },
             validate: {
               request: GetOneBulkOperationPackagesRequestSchema,
               response: {
@@ -1089,18 +1153,49 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       .addVersion(
         {
           version: API_VERSIONS.public.v1,
+          options: {
+            oasOperationObject: () => ({
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        successResponse: {
+                          value: {
+                            version: '1.0.0',
+                            success: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                400: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        badRequestResponse: {
+                          value: {
+                            message: 'Bad Request',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          },
           validate: {
             request: RollbackPackageRequestSchema,
             response: {
               200: {
                 description: 'OK: A successful request.',
                 body: () => RollbackPackageResponseSchema,
-                description: 'OK',
               },
               400: {
                 description: 'A bad request.',
                 body: genericErrorResponse,
-                description: 'Bad Request',
               },
             },
           },

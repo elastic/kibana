@@ -751,6 +751,8 @@ export const GetInputsRequestSchema = {
 
 export const RollbackPackageRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
+    pkgName: schema.string({
+      meta: { description: 'Package name to roll back' },
+    }),
   }),
 };
