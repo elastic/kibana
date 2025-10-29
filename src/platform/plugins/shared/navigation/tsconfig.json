@@ -30,7 +30,6 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-application-browser",
     "@kbn/core-feature-flags-browser",
-    "@kbn/core-chrome-layout-feature-flags",
     "@kbn/core-chrome-navigation-tour",
   ],
   "exclude": [
