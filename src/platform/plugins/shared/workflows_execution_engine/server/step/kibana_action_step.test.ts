@@ -94,7 +94,6 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           owner: 'securitySolution',
           fetcher: {
             skip_ssl_verification: true,
-            timeout: 30000,
           },
         },
       };
@@ -406,7 +405,6 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           title: 'Test',
           fetcher: {
             skip_ssl_verification: true,
-            timeout: 30000,
             keep_alive: true,
             max_redirects: 5,
             follow_redirects: false,
@@ -440,7 +438,6 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const fetchOptions = fetchCall[1] as RequestInit;
 
       expect(fetchOptions.redirect).toBe('manual');
-      expect(fetchOptions.signal).toBeDefined();
     });
   });
 });
