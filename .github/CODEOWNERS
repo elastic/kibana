@@ -2258,9 +2258,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
 
-/x-pack/platform/test/functional/apps/**/cases/ @elastic/security-threat-hunting-investigations
-
-
 # Enterprise Search
 # search
 /x-pack/platform/test/fixtures/es_archives/data/search_sessions @elastic/search-kibana
