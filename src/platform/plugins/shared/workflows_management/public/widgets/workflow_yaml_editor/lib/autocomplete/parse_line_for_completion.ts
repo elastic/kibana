@@ -18,7 +18,6 @@ import { parsePath } from '../../../../../common/lib/zod';
 
 interface BaseLineParseResult {
   fullKey: string;
-  pathSegments: string[] | null;
   matchType: string;
   match: RegExpMatchArray | null;
 }
@@ -26,11 +25,15 @@ interface BaseLineParseResult {
 interface VariableLineParseResult extends BaseLineParseResult {
   matchType: 'at' | 'variable-complete' | 'variable-unfinished';
   match: RegExpMatchArray;
+  pathSegments: string[] | null;
+  lastPathSegment: string | null;
 }
 
 interface ForeachVariableLineParseResult extends BaseLineParseResult {
   matchType: 'foreach-variable';
   match: null;
+  pathSegments: string[] | null;
+  lastPathSegment: string | null;
 }
 
 interface LiquidLineParseResult extends BaseLineParseResult {
@@ -72,9 +75,8 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   if (timezoneFieldMatch) {
     const timezonePrefix = timezoneFieldMatch[1].trim();
     return {
-      fullKey: timezonePrefix,
-      pathSegments: null,
       matchType: 'timezone',
+      fullKey: timezonePrefix,
       match: timezoneFieldMatch,
     };
   }
@@ -83,9 +85,8 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   if (typeMatch) {
     const typePrefix = typeMatch[1].replace(/['"]/g, '').trim();
     return {
-      fullKey: typePrefix,
-      pathSegments: null,
       matchType: 'type',
+      fullKey: typePrefix,
       match: typeMatch,
     };
   }
@@ -94,9 +95,8 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   if (connectorIdMatch) {
     const connectorId = lineUpToCursor.split('connector-id:')[1].trim();
     return {
-      fullKey: connectorId,
-      pathSegments: null,
       matchType: 'connector-id',
+      fullKey: connectorId,
       match: connectorIdMatch,
     };
   }
@@ -104,10 +104,12 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   const atMatch = [...lineUpToCursor.matchAll(/@(?<key>\S+?)?\.?(?=\s|$)/g)].pop();
   if (atMatch) {
     const fullKey = cleanKey(atMatch.groups?.key ?? '');
+    const pathSegments = parsePath(fullKey);
     return {
+      matchType: 'at',
       fullKey,
       pathSegments: parsePath(fullKey),
-      matchType: 'at',
+      lastPathSegment: getLastPathSegment(lineUpToCursor, pathSegments),
       match: atMatch,
     };
   }
@@ -117,9 +119,8 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   if (liquidFilterMatch) {
     const filterPrefix = liquidFilterMatch[1] || '';
     return {
-      fullKey: filterPrefix,
-      pathSegments: null,
       matchType: 'liquid-filter',
+      fullKey: filterPrefix,
       match: liquidFilterMatch,
     };
   }
@@ -129,9 +130,8 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   if (liquidBlockFilterMatch) {
     const filterPrefix = liquidBlockFilterMatch[1] || '';
     return {
-      fullKey: filterPrefix,
-      pathSegments: null,
       matchType: 'liquid-block-filter',
+      fullKey: filterPrefix,
       match: liquidBlockFilterMatch,
     };
   }
@@ -141,9 +141,8 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   if (liquidBlockKeywordMatch) {
     const keywordPrefix = liquidBlockKeywordMatch[1] || '';
     return {
-      fullKey: keywordPrefix,
-      pathSegments: null,
       matchType: 'liquid-block-keyword',
+      fullKey: keywordPrefix,
       match: liquidBlockKeywordMatch,
     };
   }
@@ -152,10 +151,12 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   const unfinishedMatch = [...lineUpToCursor.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)].pop();
   if (unfinishedMatch) {
     const fullKey = cleanKey(unfinishedMatch.groups?.key ?? '');
+    const pathSegments = parsePath(fullKey);
     return {
-      fullKey,
-      pathSegments: parsePath(fullKey),
       matchType: 'variable-unfinished',
+      fullKey,
+      pathSegments,
+      lastPathSegment: getLastPathSegment(lineUpToCursor, pathSegments),
       match: unfinishedMatch,
     };
   }
@@ -164,10 +165,12 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   const completeMatch = [...lineUpToCursor.matchAll(VARIABLE_REGEX_GLOBAL)].pop();
   if (completeMatch) {
     const fullKey = cleanKey(completeMatch.groups?.key ?? '');
+    const pathSegments = parsePath(fullKey);
     return {
-      fullKey,
-      pathSegments: parsePath(fullKey),
       matchType: 'variable-complete',
+      fullKey,
+      pathSegments,
+      lastPathSegment: getLastPathSegment(lineUpToCursor, pathSegments),
       match: completeMatch,
     };
   }
@@ -175,10 +178,12 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   const lastWordBeforeCursor = lineUpToCursor.split(' ').pop();
   if (lineUpToCursor.includes('foreach:')) {
     const fullKey = cleanKey(lastWordBeforeCursor ?? '');
+    const pathSegments = parsePath(fullKey);
     return {
-      fullKey,
-      pathSegments: parsePath(fullKey),
       matchType: 'foreach-variable',
+      fullKey,
+      pathSegments,
+      lastPathSegment: getLastPathSegment(lineUpToCursor, pathSegments),
       match: null,
     };
   }
@@ -187,13 +192,16 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   if (lineUpToCursor.match(/\{\%\s*\w*$/)) {
     return {
       fullKey: lastWordBeforeCursor || '',
-      pathSegments: null,
       matchType: 'liquid-syntax',
       match: null,
     };
   }
 
   return null;
+}
+
+function getLastPathSegment(lineUpToCursor: string, pathSegments: string[] | null) {
+  return lineUpToCursor.endsWith('.') ? null : pathSegments?.at(-1) ?? null;
 }
 
 function cleanKey(key: string) {
@@ -203,4 +211,14 @@ function cleanKey(key: string) {
   }
   // remove trailing dot if it exists
   return key.endsWith('.') ? key.slice(0, -1) : key;
+}
+
+export function isVariableLineParseResult(
+  lineParseResult: LineParseResult
+): lineParseResult is VariableLineParseResult {
+  return (
+    lineParseResult.matchType === 'variable-unfinished' ||
+    lineParseResult.matchType === 'at' ||
+    lineParseResult.matchType === 'foreach-variable'
+  );
 }
