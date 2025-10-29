@@ -14,17 +14,11 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflow
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
-interface Change<T> {
-  objectId: string;
-  changeType: 'create' | 'update';
-  change: Partial<T>;
-}
-
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
-  private workflowChanges: Change<EsWorkflowExecution>[] = [];
-  private stepChanges: Map<string, Partial<EsWorkflowStepExecution>> = new Map();
+  private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
+  private stepDocumentsChanges: Map<string, Partial<EsWorkflowStepExecution>> = new Map();
 
   /**
    * Maps step IDs to their execution IDs in chronological order.
@@ -59,11 +53,10 @@ export class WorkflowExecutionState {
       ...this.workflowExecution,
       ...workflowExecution,
     };
-    this.workflowChanges.push({
-      objectId: this.workflowExecution.id,
-      changeType: 'update',
-      change: workflowExecution,
-    });
+    this.workflowDocumentChanges = {
+      ...(this.workflowDocumentChanges || {}),
+      ...workflowExecution,
+    };
   }
 
   public getAllStepExecutions(): EsWorkflowStepExecution[] {
@@ -120,11 +113,13 @@ export class WorkflowExecutionState {
   }
 
   public async flushStepChanges(): Promise<void> {
-    if (!this.stepChanges.size) {
+    if (!this.stepDocumentsChanges.size) {
       return;
     }
-    await this.workflowStepExecutionRepository.bulkUpsert(Array.from(this.stepChanges.values()));
-    this.stepChanges.clear();
+    await this.workflowStepExecutionRepository.bulkUpsert(
+      Array.from(this.stepDocumentsChanges.values())
+    );
+    this.stepDocumentsChanges.clear();
   }
 
   public async flush(): Promise<void> {
@@ -132,16 +127,14 @@ export class WorkflowExecutionState {
   }
 
   private async flushWorkflowChanges(): Promise<void> {
-    if (!this.workflowChanges.length) {
+    if (!this.workflowDocumentChanges) {
       return;
     }
 
-    const accumulated: Partial<EsWorkflowExecution> = this.workflowChanges.reduce(
-      (prev, acc) => ({ ...prev, ...acc.change }),
-      { id: this.workflowExecution.id } as EsWorkflowExecution
-    );
-
-    await this.workflowExecutionRepository.updateWorkflowExecution(accumulated);
+    await this.workflowExecutionRepository.updateWorkflowExecution({
+      ...this.workflowDocumentChanges,
+      id: this.workflowExecution.id,
+    });
 
     const fetchedWorkflowExecution =
       await this.workflowExecutionRepository.getWorkflowExecutionById(
@@ -150,7 +143,7 @@ export class WorkflowExecutionState {
       );
     this.workflowExecution = fetchedWorkflowExecution!;
 
-    this.workflowChanges = [];
+    this.workflowDocumentChanges = undefined;
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {
@@ -169,7 +162,7 @@ export class WorkflowExecutionState {
       spaceId: this.workflowExecution.spaceId,
     } as EsWorkflowStepExecution;
     this.stepExecutions.set(step.id as string, newStep);
-    this.stepChanges.set(step.id as string, newStep);
+    this.stepDocumentsChanges.set(step.id as string, newStep);
   }
 
   private updateStep(step: Partial<EsWorkflowStepExecution>) {
@@ -177,8 +170,8 @@ export class WorkflowExecutionState {
       ...this.stepExecutions.get(step.id!),
       ...step,
     } as EsWorkflowStepExecution);
-    this.stepChanges.set(step.id as string, {
-      ...(this.stepChanges.get(step.id as string) || {}),
+    this.stepDocumentsChanges.set(step.id as string, {
+      ...(this.stepDocumentsChanges.get(step.id as string) || {}),
       ...step,
     });
   }
