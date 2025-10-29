@@ -32,7 +32,7 @@ import {
   CUSTOM_INDEX_TYPE,
   MULTI_NAMESPACE_CUSTOM_INDEX_TYPE,
 } from '../../test_helpers/repository.test.common';
-import { mergeUserQueryWithNamespacesBoolForSearch } from './search';
+import { mergeUserQueryWithNamespacesBool } from './search';
 import type { NamespacesBoolFilter } from '../search/search_dsl/query_params';
 import type { estypes } from '@elastic/elasticsearch';
 
@@ -465,7 +465,7 @@ describe('search', () => {
   });
 });
 
-describe('#mergeUserQueryWithNamespacesBoolForSearch', () => {
+describe('#mergeUserQueryWithNamespacesBool', () => {
   describe('merges the user query with bool filters as expected', () => {
     it('multi namespace type queries', () => {
       const userQuery: estypes.QueryDslQueryContainer = {
@@ -490,22 +490,10 @@ describe('#mergeUserQueryWithNamespacesBoolForSearch', () => {
           minimum_should_match: 1,
         },
       };
-      const result = mergeUserQueryWithNamespacesBoolForSearch(userQuery, multiNamespaceBoolFilter);
+      const result = mergeUserQueryWithNamespacesBool(userQuery, multiNamespaceBoolFilter);
       expect(result).toEqual({
         bool: {
-          must: userQuery,
-          should: [
-            {
-              bool: {
-                must: [
-                  { term: { type: 'b' } },
-                  { terms: { namespaces: ['namespaceA', 'namespaceB'] } },
-                ],
-                must_not: [{ exists: { field: 'namespace' } }],
-              },
-            },
-          ],
-          minimum_should_match: 1,
+          must: [multiNamespaceBoolFilter, userQuery],
         },
       });
     });
@@ -535,26 +523,10 @@ describe('#mergeUserQueryWithNamespacesBoolForSearch', () => {
           minimum_should_match: 1,
         },
       };
-      const result = mergeUserQueryWithNamespacesBoolForSearch(
-        userQuery,
-        singleNamespaceBoolFilter
-      );
+      const result = mergeUserQueryWithNamespacesBool(userQuery, singleNamespaceBoolFilter);
       expect(result).toEqual({
         bool: {
-          must: userQuery,
-          should: [
-            {
-              bool: {
-                must: [{ term: { type: 'test' } }],
-                should: [
-                  { terms: { namespace: ['eligibleNamespace'] } },
-                  { bool: { must_not: [{ exists: { field: 'namespace' } }] } },
-                ],
-                must_not: [{ exists: { field: 'namespaces' } }],
-              },
-            },
-          ],
-          minimum_should_match: 1,
+          must: [singleNamespaceBoolFilter, userQuery],
         },
       });
     });
@@ -566,7 +538,7 @@ describe('#mergeUserQueryWithNamespacesBoolForSearch', () => {
         },
       };
       // If the type ever breaks ensure that future objects merge as expected
-      const singleNamespaceBoolFilter: NamespacesBoolFilter = {
+      const agnosticNamespaceBoolFilter: NamespacesBoolFilter = {
         bool: {
           should: [
             {
@@ -579,22 +551,10 @@ describe('#mergeUserQueryWithNamespacesBoolForSearch', () => {
           minimum_should_match: 1,
         },
       };
-      const result = mergeUserQueryWithNamespacesBoolForSearch(
-        userQuery,
-        singleNamespaceBoolFilter
-      );
+      const result = mergeUserQueryWithNamespacesBool(userQuery, agnosticNamespaceBoolFilter);
       expect(result).toEqual({
         bool: {
-          must: userQuery,
-          should: [
-            {
-              bool: {
-                must: [{ term: { type: 'a' } }],
-                must_not: [{ exists: { field: 'namespace' } }, { exists: { field: 'namespaces' } }],
-              },
-            },
-          ],
-          minimum_should_match: 1,
+          must: [agnosticNamespaceBoolFilter, userQuery],
         },
       });
     });

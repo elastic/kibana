@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { castArray } from 'lodash';
 import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
@@ -108,8 +107,7 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
     }
   }
 
-  const query = mergeUserQueryWithNamespacesBoolForSearch(
-    // We nest the provided query in a bool to allow for merging with the namespaces bool filter
+  const query = mergeUserQueryWithNamespacesBool(
     esOptions.query,
     getNamespacesBoolFilter({ namespaces, registry, types, typeToNamespacesMap })
   );
@@ -198,21 +196,17 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
   return result.body;
 }
 
-/**
- * This is how we inject our namespaces scope into the user query. We create a
- * nested `bool.must` clause for the user query and keep our query in a neighboring
- * `bool.should` clause.
- */
-export function mergeUserQueryWithNamespacesBoolForSearch(
+export function mergeUserQueryWithNamespacesBool(
   userQuery: undefined | estypes.QueryDslQueryContainer,
   namespacesBoolFilter: NamespacesBoolFilter
 ): estypes.QueryDslQueryContainer {
-  const { should, minimum_should_match: minimumShouldMatch } = namespacesBoolFilter.bool;
+  const must: estypes.QueryDslQueryContainer[] = [namespacesBoolFilter];
+  if (userQuery) {
+    must.push(userQuery);
+  }
   return {
     bool: {
-      ...(userQuery ? { must: userQuery } : {}),
-      should,
-      minimum_should_match: minimumShouldMatch,
+      must,
     },
   };
 }

@@ -87,10 +87,18 @@ describe('SOR - search API', () => {
     savedObjectsRepository = start.savedObjects.createInternalRepository();
 
     await savedObjectsRepository.bulkCreate(
-      users.map((user) => ({
-        type: 'test-type',
-        attributes: user,
-      }))
+      users
+        .map((user) => ({
+          type: 'test-type',
+          attributes: user,
+        }))
+        .concat(
+          users.slice(0, 2).map((user) => ({
+            type: 'test-type',
+            attributes: user,
+            initialNamespaces: ['namespaceA'],
+          }))
+        )
     );
   });
 
@@ -116,6 +124,27 @@ describe('SOR - search API', () => {
     const documents = await savedObjectsRepository.search({
       type: 'test-type',
       namespaces: ['default'],
+      query: {
+        bool: {
+          must: [
+            {
+              match: {
+                'test-type.email': 'john.doe@example.com',
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    expect(documents.hits.total).toHaveProperty('value', 1);
+    expect(documents.hits.hits).toHaveProperty('0._source.test-type.name', 'John Doe');
+  });
+
+  it('should perform objects search using bool query with namespaceA', async () => {
+    const documents = await savedObjectsRepository.search({
+      type: 'test-type',
+      namespaces: ['namespaceA'],
       query: {
         bool: {
           must: [
