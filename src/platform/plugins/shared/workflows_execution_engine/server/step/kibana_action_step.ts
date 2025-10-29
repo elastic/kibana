@@ -23,6 +23,25 @@ export interface KibanaActionStep extends BaseStep {
   with?: Record<string, any>;
 }
 
+/**
+ * Fetcher configuration options for customizing HTTP requests
+ */
+interface FetcherOptions {
+  skip_ssl_verification?: boolean;
+  timeout?: number;
+  follow_redirects?: boolean;
+  max_redirects?: number;
+  keep_alive?: boolean;
+  retry?: {
+    attempts?: number;
+    delay?: number;
+    backoff?: 'linear' | 'exponential';
+    retryOn?: number[];
+  };
+  // Allow additional undici Agent options to be passed through
+  [key: string]: any;
+}
+
 export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaActionStep> {
   constructor(
     step: KibanaActionStep,
@@ -200,7 +219,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       query?: any;
       headers?: Record<string, string>;
     },
-    fetcherOptions?: Record<string, any>
+    fetcherOptions?: FetcherOptions
   ): Promise<any> {
     const { method, path, body, query, headers = {} } = requestConfig;
 
@@ -255,24 +274,17 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       }
     }
 
-    // Setup timeout if configured
-    let timeoutId: NodeJS.Timeout | undefined;
-    if (fetcherOptions?.timeout) {
-      const controller = new AbortController();
-      timeoutId = setTimeout(() => controller.abort(), fetcherOptions.timeout);
-      fetchOptions.signal = controller.signal;
-    }
-
-    // Execute with retry logic
-    return this.executeWithRetry(fullUrl, fetchOptions, fetcherOptions?.retry, timeoutId);
+    // Execute with retry logic (timeout is applied per-attempt inside the retry loop)
+    return this.executeWithRetry(fullUrl, fetchOptions, fetcherOptions);
   }
 
   private async executeWithRetry(
     url: string,
     fetchOptions: RequestInit,
-    retryConfig?: Record<string, any>,
-    timeoutId?: NodeJS.Timeout
+    fetcherOptions?: FetcherOptions
   ): Promise<any> {
+    const retryConfig = fetcherOptions?.retry;
+    const timeoutMs = fetcherOptions?.timeout;
     const maxAttempts = retryConfig?.attempts ?? 1;
     const retryDelay = retryConfig?.delay ?? 1000;
     const backoffStrategy = retryConfig?.backoff ?? 'linear';
@@ -280,9 +292,21 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
 
     let lastError: any;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      try {
-        const response = await fetch(url, fetchOptions);
+      // Setup timeout for THIS attempt
+      let timeoutId: NodeJS.Timeout | undefined;
+      let attemptFetchOptions = fetchOptions;
 
+      if (timeoutMs) {
+        const controller = new AbortController();
+        timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        // Create new fetch options with this attempt's abort signal
+        attemptFetchOptions = { ...fetchOptions, signal: controller.signal };
+      }
+
+      try {
+        const response = await fetch(url, attemptFetchOptions);
+
+        // Clear timeout after successful fetch
         if (timeoutId) clearTimeout(timeoutId);
 
         // Retry on specific status codes
@@ -293,7 +317,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         ) {
           const delay =
             backoffStrategy === 'exponential' ? retryDelay * Math.pow(2, attempt) : retryDelay;
-          this.workflowLogger.logInfo(
+          this.workflowLogger.logDebug(
             `Retrying request (attempt ${
               attempt + 1
             }/${maxAttempts}) after ${delay}ms due to status ${response.status}`,
@@ -311,6 +335,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         return await response.json();
       } catch (error) {
         lastError = error;
+
+        // Clear timeout after error
         if (timeoutId) clearTimeout(timeoutId);
 
         // If this is the last attempt, throw

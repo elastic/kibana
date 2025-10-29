@@ -321,6 +321,63 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       clearTimeoutSpy.mockRestore();
       jest.useRealTimers();
     });
+
+    it('should apply timeout to each retry attempt independently', async () => {
+      jest.useFakeTimers();
+      const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+      const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+
+      // First two attempts fail, third succeeds
+      mockedFetch
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: jest.fn().mockResolvedValue({ success: true }),
+        } as any);
+
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.createCaseDefaultSpace',
+        spaceId: 'default',
+        with: {
+          title: 'Test',
+          fetcher: {
+            timeout: 5000,
+            retry: {
+              attempts: 3,
+              delay: 100,
+            },
+          },
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const runPromise = (kibanaStep as any)._run(step.with);
+      await jest.runAllTimersAsync();
+      await runPromise;
+
+      // Verify setTimeout was called 3 times (once per attempt)
+      // Note: Additional setTimeouts are for retry delays
+      const timeoutCalls = setTimeoutSpy.mock.calls.filter(
+        (call) => call[1] === 5000 // Filter for the 5000ms timeout calls
+      );
+      expect(timeoutCalls.length).toBe(3);
+
+      // Verify each timeout was cleared (3 times)
+      expect(clearTimeoutSpy).toHaveBeenCalledTimes(3);
+
+      setTimeoutSpy.mockRestore();
+      clearTimeoutSpy.mockRestore();
+      jest.useRealTimers();
+    });
   });
 
   describe('retry logic', () => {
