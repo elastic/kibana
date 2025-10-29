@@ -44,12 +44,12 @@ const optionListControlStyles = {
     }),
   validOption: ({ euiTheme }: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.text,
+      color: euiTheme.colors.textParagraph,
       fontWeight: euiTheme.font.weight.regular,
     }),
   invalidOption: ({ euiTheme }: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.warningText,
+      color: euiTheme.colors.textWarning,
       fontWeight: euiTheme.font.weight.medium,
     }),
   optionsListExistsFilter: ({ euiTheme }: UseEuiTheme) => css`
@@ -60,11 +60,7 @@ const optionListControlStyles = {
   filterButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
-      color: `${euiTheme.colors.subduedText} !important`,
-      padding: `0 ${euiTheme.size.s}`,
-      '&:hover::before': {
-        background: `${euiTheme.colors.backgroundBaseSubdued} !important`,
-      },
+      color: `${euiTheme.colors.textSubdued} !important`,
       blockSize: '100% !important',
       // temp. override until alignment is fixed on EUI side
       '.euiButtonEmpty__content': {
@@ -76,11 +72,14 @@ const optionListControlStyles = {
     textAlign: 'left',
   }),
   inputButtonOverride: css({
-    width: '100%',
-    height: '100%',
+    // width: '100%',
+    // height: '100%',
+    maxInlineSize: '100%',
   }),
   filterGroup: css`
     padding: 0 !important;
+    height: inherit;
+    width: 100%;
   `,
 };
 
