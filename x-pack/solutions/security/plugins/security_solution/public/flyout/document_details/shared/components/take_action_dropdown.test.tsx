@@ -124,7 +124,7 @@ describe('take action dropdown', () => {
     (useHttp as jest.Mock).mockReturnValue(mockStartServicesMock.http);
   });
 
-  afterEach(() => {
+  beforeEach(() => {
     (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
@@ -380,6 +380,10 @@ describe('take action dropdown', () => {
 
     describe('"Add Endpoint exception" button', () => {
       const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
+
+      beforeEach(() => {
+        (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue({ rulesPrivileges: { read: true, edit: true } }));
+      });
 
       test('should enable the "Add Endpoint exception" button if provided endpoint alert and has right privileges', async () => {
         set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);
