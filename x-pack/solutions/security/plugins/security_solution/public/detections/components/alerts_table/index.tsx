@@ -23,6 +23,8 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useOnExpandableFlyoutClose } from '../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
@@ -63,6 +65,7 @@ import { useCellActionsOptions } from '../../hooks/trigger_actions_alert_table/u
 import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { AlertTableCellContextProvider } from '../../configurations/security_solution_detections/cell_value_context';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -148,6 +151,34 @@ const casesConfiguration = {
 };
 const emptyInputFilters: Filter[] = [];
 
+const ExpandedAlertView: GetSecurityAlertsTableProp<'renderExpandedAlertView'> = ({
+  tableType,
+  alerts,
+  pageIndex,
+  pageSize,
+  expandedAlertIndex,
+}) => {
+  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
+  const alert = alerts[expandedAlertIndex - pageIndex * pageSize] as Alert | undefined;
+
+  useEffect(() => {
+    if (alert) {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: alert._id,
+            indexName: alert._index,
+            scopeId: tableType,
+          },
+        },
+      });
+    }
+  }, [alert, closeFlyout, openFlyout, tableType]);
+
+  return null;
+};
+
 const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
@@ -218,6 +249,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     viewMode: tableView = eventsDefaultModel.viewMode,
     columns,
     totalCount: count,
+    expandedAlertIndex,
   } = useSelector((state: State) => getTable(state, tableType) ?? licenseDefaults);
 
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
@@ -446,6 +478,23 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
 
   const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
 
+  const onExpandedAlertIndexChange = useCallback(
+    (newIndex?: number | null) => {
+      dispatch(
+        dataTableActions.updateExpandedAlertIndex({ id: tableType, expandedAlertIndex: newIndex })
+      );
+    },
+    [dispatch, tableType]
+  );
+
+  const onExpandedAlertFlyoutClose = useCallback(() => {
+    dispatch(
+      dataTableActions.updateExpandedAlertIndex({ id: tableType, expandedAlertIndex: null })
+    );
+  }, [dispatch, tableType]);
+
+  useOnExpandableFlyoutClose({ callback: onExpandedAlertFlyoutClose });
+
   /**
    * We want to hide additional controls (like grouping) if the table is being rendered
    * in the cases page OR if the user of the table explicitly set `disableAdditionalToolbarControls`
@@ -502,6 +551,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               }
               cellActionsOptions={cellActionsOptions}
               showInspectButton
+              expandedAlertIndex={expandedAlertIndex}
+              onExpandedAlertIndexChange={onExpandedAlertIndexChange}
+              renderExpandedAlertView={ExpandedAlertView}
               services={services}
               {...tablePropsOverrides}
             />
