@@ -879,35 +879,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    // Remove
-    hasVisualOptionsButton() {
-      return testSubjects.exists('lnsVisualOptionsButton');
-    },
-    // Remove
-    async openVisualOptions() {
-      if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
-        return;
-      }
-      await retry.try(async () => {
-        await testSubjects.click('lnsVisualOptionsButton');
-        await testSubjects.exists('lnsVisualOptionsPopover_title');
-      });
-    },
-    // Remove
-    async openTextOptions() {
-      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
-        return;
-      }
-      await retry.try(async () => {
-        await testSubjects.click('lnsTextOptionsButton');
-        await testSubjects.exists('lnsTextOptionsPopover_title');
-      });
-    },
-    async closeTitlesAndTextOptionsPopover() {
-      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
-        await testSubjects.click('lnsTextOptionsButton');
-      }
-    },
     async retrySetValue(
       input: string,
       value: string,
@@ -1012,7 +983,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDonutHoleSize() {
-      // await this.openVisualOptions();
       await this.openStyleSettingsFlyout();
 
       const comboboxOptions = await comboBox.getComboBoxSelectedOptions('lnsEmptySizeRatioOption');
@@ -1021,7 +991,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async setDonutHoleSize(value: string) {
       await retry.waitFor('visual options toolbar is open', async () => {
-        // await this.openVisualOptions();
         await this.openStyleSettingsFlyout();
 
         return await testSubjects.exists('lnsEmptySizeRatioOption');
@@ -1031,7 +1000,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async setGaugeShape(value: string) {
       await retry.waitFor('visual options toolbar is open', async () => {
-        // await this.openVisualOptions();
         await this.openStyleSettingsFlyout();
 
         return await testSubjects.exists('lnsToolbarGaugeAngleType');
@@ -1041,7 +1009,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getSelectedBarOrientationSetting() {
       await retry.waitFor('visual options are displayed', async () => {
-        // await this.openVisualOptions();
         await this.openStyleSettingsFlyout();
 
         return await testSubjects.exists('lns_barOrientation');
