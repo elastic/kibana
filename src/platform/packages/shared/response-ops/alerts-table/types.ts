@@ -54,6 +54,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Case } from './apis/bulk_get_cases';
@@ -409,6 +410,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * Dependencies
    */
   services: {
+    unifiedSearch: UnifiedSearchPublicPluginStart;
     data: DataPublicPluginStart;
     http: HttpStart;
     notifications: NotificationsStart;

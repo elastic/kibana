@@ -12,6 +12,8 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ADD_ALERTS_TABLE_ACTION_ID, EMBEDDABLE_ALERTS_TABLE_ID } from '../constants';
 import { ADD_ALERTS_TABLE_ACTION_LABEL } from '../translations';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
@@ -28,7 +30,9 @@ const checkRuleTypesPermissions = async (http: CoreStart['http']) => {
 };
 
 export const getAddAlertsTableAction = (
-  coreServices: CoreStart
+  coreServices: CoreStart,
+  unifiedSearch: UnifiedSearchPublicPluginStart,
+  data: DataPublicPluginStart
 ): ActionDefinition<EmbeddableApiContext> => {
   const { http } = coreServices;
   return {
@@ -52,6 +56,8 @@ export const getAddAlertsTableAction = (
               coreServices={coreServices}
               closeFlyout={closeFlyout}
               ariaLabelledBy={ariaLabelledBy}
+              unifiedSearch={unifiedSearch}
+              data={data}
               onSave={(tableConfig) => {
                 embeddable.addNewPanel(
                   {

@@ -21,6 +21,9 @@ import {
 import { css } from '@emotion/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
 import { getFilterMetadata } from '../filters_metadata';
 import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_form_context';
 import type {
@@ -77,7 +80,13 @@ export interface AlertsFiltersFormProps {
   services: {
     http: HttpStart;
     notifications: NotificationsStart;
+    unifiedSearch: UnifiedSearchPublicPluginStart;
+    data: DataPublicPluginStart;
   };
+  /**
+   * The solution of the alerts filters form
+   */
+  solution?: RuleTypeSolution;
 }
 
 // This ensures that the form is initialized with an empty "Filter by" selector
@@ -113,6 +122,7 @@ export const AlertsFiltersForm = ({
   isDisabled = false,
   maxFilters = DEFAULT_MAX_FILTERS,
   services,
+  solution,
 }: AlertsFiltersFormProps) => {
   const [firstItem, ...otherItems] = value as [
     {
@@ -211,6 +221,7 @@ export const AlertsFiltersForm = ({
             onValueChange={(newValue) => onFormItemValueChange(0, newValue)}
             isDisabled={isDisabled}
             errors={hasErrors ? errors?.[0] : undefined}
+            solution={solution}
           />
         </EuiFlexItem>
         {Boolean(otherItems?.length) && (
@@ -222,14 +233,17 @@ export const AlertsFiltersForm = ({
                 return (
                   <EuiFlexItem key={index}>
                     {isFilter(item) ? (
-                      <AlertsFiltersFormItem
-                        type={item.filter.type}
-                        onTypeChange={(newType) => onFormItemTypeChange(index, newType)}
-                        value={item.filter.value}
-                        onValueChange={(newValue) => onFormItemValueChange(index, newValue)}
-                        isDisabled={isDisabled}
-                        errors={hasErrors ? errors?.[index] : undefined}
-                      />
+                      <>
+                        <AlertsFiltersFormItem
+                          solution={solution}
+                          type={item.filter.type}
+                          onTypeChange={(newType) => onFormItemTypeChange(index, newType)}
+                          value={item.filter.value}
+                          onValueChange={(newValue) => onFormItemValueChange(index, newValue)}
+                          isDisabled={isDisabled}
+                          errors={hasErrors ? errors?.[index] : undefined}
+                        />
+                      </>
                     ) : (
                       <Operator operator={item.operator} onDelete={() => deleteOperand(index)} />
                     )}

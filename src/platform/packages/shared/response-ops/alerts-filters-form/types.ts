@@ -9,6 +9,8 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ComponentType } from 'react';
 
 export type AlertsFilterComponentType<T> = ComponentType<{
@@ -40,10 +42,12 @@ export interface AlertsFiltersFormContextValue {
   services: {
     http: HttpStart;
     notifications: NotificationsStart;
+    unifiedSearch: UnifiedSearchPublicPluginStart;
+    data: DataPublicPluginStart;
   };
 }
 
-export type AlertsFiltersType = 'ruleTags' | 'ruleTypes';
+export type AlertsFiltersType = 'ruleTags' | 'ruleTypes' | 'kql';
 
 export type AlertsFiltersExpressionOperator = 'and' | 'or';
 

@@ -41,6 +41,8 @@ import {
   FILTER_VALUE_REQUIRED_ERROR_MESSAGE,
 } from '@kbn/response-ops-alerts-filters-form/translations';
 import { getFilterMetadata } from '@kbn/response-ops-alerts-filters-form/filters_metadata';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SAVE_CONFIG_BUTTON_SUBJ } from '../constants';
 import type { EmbeddableAlertsTableConfig } from '../types';
 import {
@@ -67,6 +69,8 @@ export interface ConfigEditorContentProps {
     http: CoreStart['http'];
     notifications: CoreStart['notifications'];
     overlays: CoreStart['overlays'];
+    unifiedSearch: UnifiedSearchPublicPluginStart;
+    data: DataPublicPluginStart;
   };
   ariaLabelledBy: string;
 }
@@ -246,13 +250,16 @@ export const ConfigEditorContent = ({
                       <p>{CONFIG_EDITOR_CANNOT_LOAD_RULE_TYPES_DESCRIPTION}</p>
                     </EuiCallOut>
                   ) : (
-                    <AlertsFiltersForm
-                      ruleTypeIds={ruleTypeIds}
-                      value={filters}
-                      errors={filtersErrors}
-                      onChange={handleFiltersChange}
-                      services={services}
-                    />
+                    <>
+                      <AlertsFiltersForm
+                        ruleTypeIds={ruleTypeIds}
+                        solution={solution}
+                        value={filters}
+                        errors={filtersErrors}
+                        onChange={handleFiltersChange}
+                        services={services}
+                      />
+                    </>
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>

@@ -127,6 +127,16 @@ export const FILTER_TYPE_REQUIRED_ERROR_MESSAGE = i18n.translate(
   }
 );
 
+export const KQL_FILTER_LABEL = i18n.translate('alertsFiltersForm.kql.label', {
+  defaultMessage: 'KQL',
+  description:
+    'Label explaining that the user can enter Kibana Quer Language (KQL) query as filter input',
+});
+
+export const KQL_FILTER_PLACEHOLDER = i18n.translate('alertsFiltersForm.kql.placeholder', {
+  defaultMessage: 'Enter KQL query',
+});
+
 export const FILTER_VALUE_REQUIRED_ERROR_MESSAGE = i18n.translate(
   'alertsFiltersForm.filterValueRequiredErrorMessage',
   {
