@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiLink, EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -55,8 +55,20 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
 
   const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
 
+  // To make it possible to clear the selection to enter a new value,
+  // keep track of local empty state. As soon as field.value is set, switch back to highlighting
+  // the selected option.
+  const [localEmpty, setLocalEmpty] = React.useState(false);
+
+  useEffect(() => {
+    if (field.value) {
+      setLocalEmpty(false);
+    }
+  }, [field.value]);
+
   const handleChange = (selectedOptions: Array<EuiComboBoxOptionOption<ProcessorType>>) => {
     if (selectedOptions.length === 0) {
+      setLocalEmpty(true);
       return;
     }
     const type = selectedOptions[0].value!;
@@ -97,7 +109,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
         isDisabled={disabled}
         options={groupedOptions}
         isInvalid={fieldState.invalid}
-        selectedOptions={selectedOptions}
+        selectedOptions={localEmpty ? [] : selectedOptions}
         onChange={handleChange}
         fullWidth
         singleSelection={{ asPlainText: true }}
