@@ -25,6 +25,7 @@
     "@kbn/core-chrome-browser-mocks",
     "@kbn/ai-assistant-icon",
     "@kbn/react-kibana-context-render",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/react-query"
   ]
 }

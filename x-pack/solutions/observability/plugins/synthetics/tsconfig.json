@@ -116,7 +116,8 @@
     "@kbn/alerts-ui-shared",
     "@kbn/core-lifecycle-server",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/observability-synthetics-test-data"
+    "@kbn/observability-synthetics-test-data",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }
