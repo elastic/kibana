@@ -44,8 +44,15 @@ describe('TextareaInputArgument component', () => {
     const onChangeCallback = componentPropsMock.onChange.getMockImplementation()!;
     componentPropsMock.onChange.mockImplementation((value) => {
       onChangeCallback(value);
-      renderResult.rerender(<TextareaInputArgument {...componentPropsMock} />);
+      if (renderResult) {
+        renderResult.rerender(<TextareaInputArgument {...componentPropsMock} />);
+      }
     });
+  });
+
+  afterEach(() => {
+    // @ts-expect-error
+    renderResult = undefined;
   });
 
   it('should render with default values', () => {
@@ -145,7 +152,7 @@ describe('TextareaInputArgument component', () => {
     });
   });
 
-  it('should render message when argument is not allowed to be used more than once', () => {
+  it('should render message when argument is not allowed to be used more than once', async () => {
     componentPropsMock.argIndex = 1;
     componentPropsMock.command.commandDefinition.args![componentPropsMock.argName].allowMultiples =
       false;

@@ -27,6 +27,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
 import type { CommandArgumentValueSelectorProps, SupportedArguments } from '../../console/types';
@@ -107,7 +108,7 @@ export const HELP_NOT_AVAILABLE_TOOLTIP = i18n.translate(
  */
 export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
   ({
-    value = '',
+    value: propsValue,
     valueText = '',
     store: state = {
       isPopoverOpen: true,
@@ -128,10 +129,12 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
     showHelpIcon = true,
     'data-test-subj': dataTestSubj,
   }) => {
+    const value = propsValue ?? '';
     const testId = useTestIdGenerator(
       dataTestSubj ??
         `textareaInputArgument-${command.commandDefinition.name}-${argName}-${argIndex}`
     );
+    const isMounted = useIsMounted();
     const { euiTheme } = useEuiTheme();
     const [showHelpContent, setShowHelpContent] = useState(false);
 
@@ -211,23 +214,23 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
     useEffect(() => {
       // If the user picked a different script, after having already opened the help area, make
       // sure we reset the `showHelpContent` if the new script has no help content.
-      if (showHelpContent && !helpContent) {
+      if (isMounted() && showHelpContent && !helpContent) {
         setShowHelpContent(false);
       }
-    }, [helpContent, showHelpContent]);
+    }, [helpContent, isMounted, showHelpContent]);
 
     useEffect(() => {
       // If the argument selector should not be rendered, then at least set the `value` to a string
       // so that the normal console argument validations can be invoked if the user still ENTERs
       // the command
-      if (!shouldRender) {
+      if (isMounted() && !shouldRender && propsValue !== '') {
         onChange({
           value: '',
           valueText: '',
           store: state,
         });
       }
-    }, [onChange, shouldRender, state, value]);
+    }, [onChange, shouldRender, state, propsValue, isMounted]);
 
     return shouldRender ? (
       <EuiPopover
