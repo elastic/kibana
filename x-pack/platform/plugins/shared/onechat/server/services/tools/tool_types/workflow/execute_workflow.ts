@@ -85,14 +85,12 @@ export const executeWorkflow = async ({
   request,
   spaceId,
   workflowApi,
-  excludeDetails = false,
 }: {
   workflowId: string;
   workflowParams: Record<string, unknown>;
   request: KibanaRequest;
   spaceId: string;
   workflowApi: WorkflowApi;
-  excludeDetails?: boolean;
 }): Promise<ToolHandlerResult[]> => {
   const workflow = await workflowApi.getWorkflow(workflowId, spaceId);
 
@@ -131,9 +129,7 @@ export const executeWorkflow = async ({
 
       if (execution) {
         if (execution.status === WorkflowExecutionStatus.COMPLETED) {
-          const output = excludeDetails
-            ? getWorkflowOutput(execution.stepExecutions)
-            : execution.stepExecutions[execution.stepExecutions.length - 1].output;
+          const output = getWorkflowOutput(execution.stepExecutions);
 
           const data: Record<string, any> = {
             execution_id: executionId,
@@ -143,16 +139,6 @@ export const executeWorkflow = async ({
             finished_at: execution.finishedAt,
             output,
           };
-
-          // Include details array if not excluded
-          if (!excludeDetails) {
-            data.details = execution.stepExecutions.map((step) => ({
-              step_id: step.stepId,
-              execution_index: step.globalExecutionIndex,
-              input: step.input,
-              output: step.output,
-            }));
-          }
 
           return [
             {

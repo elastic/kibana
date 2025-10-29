@@ -45,7 +45,6 @@ export const getWorkflowToolType = ({
                 workflowApi,
                 workflowId,
                 workflowParams: params,
-                excludeDetails: config.exclude_details ?? false,
               });
 
               return {

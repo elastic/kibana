@@ -31,7 +31,6 @@ export const workflowToolRegistryEntry: ToolTypeRegistryEntry<WorkflowToolFormDa
     ...commonToolFormDefaultValues,
     type: ToolType.workflow,
     workflow_id: '',
-    exclude_details: false,
   },
   toolToFormData: (tool: ToolDefinitionWithSchema) => {
     if (!isWorkflowTool(tool)) {

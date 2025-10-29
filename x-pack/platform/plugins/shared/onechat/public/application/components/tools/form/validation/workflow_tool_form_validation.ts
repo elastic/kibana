@@ -49,7 +49,5 @@ export const createWorkflowFormValidationSchema = (toolsService: ToolsService) =
         { message: workflowI18nMessages.workflowId.notFoundError }
       ),
 
-    exclude_details: z.boolean().optional(),
-
     type: z.literal(ToolType.workflow),
   });
