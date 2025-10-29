@@ -301,14 +301,22 @@ const deprecations: ConfigDeprecationProvider = () => [
         }),
         level: 'warning',
         message: i18n.translate('core.deprecations.elasticsearchPingTimeout.message', {
-          defaultMessage: 'Setting "{pingTimeoutSetting}" is deprecated and no longer used. Use "{requestTimeoutSetting}" instead.',
-          values: { pingTimeoutSetting: `${fromPath}.pingTimeout`, requestTimeoutSetting: `${fromPath}.requestTimeout` },
+          defaultMessage:
+            'Setting "{pingTimeoutSetting}" is deprecated and no longer used. Use "{requestTimeoutSetting}" instead.',
+          values: {
+            pingTimeoutSetting: `${fromPath}.pingTimeout`,
+            requestTimeoutSetting: `${fromPath}.requestTimeout`,
+          },
         }),
         correctiveActions: {
           manualSteps: [
             i18n.translate('core.deprecations.elasticsearchPingTimeout.manualSteps1', {
-              defaultMessage: 'Remove Setting [{pingTimeoutSetting}] from your kibana configs and use "{requestTimeoutSetting}" instead.',
-              values: { pingTimeoutSetting: `${fromPath}.pingTimeout`, requestTimeoutSetting: `${fromPath}.requestTimeout` },
+              defaultMessage:
+                'Remove Setting [{pingTimeoutSetting}] from your kibana configs and use "{requestTimeoutSetting}" instead.',
+              values: {
+                pingTimeoutSetting: `${fromPath}.pingTimeout`,
+                requestTimeoutSetting: `${fromPath}.requestTimeout`,
+              },
             }),
           ],
         },
