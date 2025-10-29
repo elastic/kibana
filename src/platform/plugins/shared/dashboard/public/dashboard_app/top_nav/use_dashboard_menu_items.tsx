@@ -277,15 +277,14 @@ export const useDashboardMenuItems = ({
     lastSavedId,
     dashboardInteractiveSave,
     viewMode,
-    isResetting,
     showShare,
     dashboardApi,
     setIsLabsShown,
     isLabsShown,
     quickSaveDashboard,
     resetChanges,
+    isResetting,
     appId,
-    setIsResetting,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -404,9 +403,9 @@ export const useDashboardMenuItems = ({
     menuItems.settings,
     menuItems.interactiveSave,
     menuItems.switchToViewMode,
+    menuItems.quickSave,
     menuItems.add,
     menuItems.backgroundSearch,
-    menuItems.quickSave,
     hasExportIntegration,
     lastSavedId,
   ]);
