@@ -86,6 +86,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       visitGetStartedPage();
       openAssistant();
       assertNewConversation(false, 'New chat');
+      selectConnector(azureConnectorAPIPayload.name);
       assertConnectorSelected(azureConnectorAPIPayload.name);
       cy.get(USER_PROMPT).should('not.have.text');
     });
@@ -96,6 +97,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
         selectRule(createdRule?.body?.id);
         openAssistant('rule');
         assertNewConversation(false, `Detection Rules - Rule 1`);
+        selectConnector(azureConnectorAPIPayload.name);
         assertConnectorSelected(azureConnectorAPIPayload.name);
         cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
       });
@@ -107,6 +109,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       expandFirstAlert();
       openAssistant('alert');
       assertConversationTitleContains('New Rule Test');
+      selectConnector(azureConnectorAPIPayload.name);
       assertConnectorSelected(azureConnectorAPIPayload.name);
       cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', 'Alert (from summary)');
     });

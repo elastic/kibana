@@ -76,6 +76,7 @@ export const SELECT_ROW = 'select';
 const getSelect = (rows: DataTableRecord[]) => ({
   id: SELECT_ROW,
   width: DEFAULT_CONTROL_COLUMN_WIDTH,
+  headerCellProps: { className: 'unifiedDataTable__headerCell' },
   rowCellRender: SelectButton,
   headerCellRender: getSelectAllButton(rows),
 });

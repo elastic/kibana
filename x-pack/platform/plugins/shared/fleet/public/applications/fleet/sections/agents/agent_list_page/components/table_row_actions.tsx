@@ -9,6 +9,10 @@ import React, { useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { LICENSE_FOR_AGENT_MIGRATION } from '../../../../../../../common/constants';
+
+import { useLicense } from '../../../../hooks';
+
 import { FLEET_SERVER_PACKAGE } from '../../../../../../../common';
 import {
   isAgentMigrationSupported,
@@ -22,7 +26,6 @@ import { useLink } from '../../../../hooks';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
-import { ExperimentalFeaturesService } from '../../../../services';
 
 export const TableRowActions: React.FunctionComponent<{
   agent: Agent;
@@ -47,10 +50,11 @@ export const TableRowActions: React.FunctionComponent<{
 }) => {
   const { getHref } = useLink();
   const authz = useAuthz();
+  const licenseService = useLicense();
   const isFleetServerAgent =
     agentPolicy?.package_policies?.some((p) => p.package?.name === FLEET_SERVER_PACKAGE) ?? false;
-  const agentMigrationsEnabled = ExperimentalFeaturesService.get().enableAgentMigrations;
   const isUnenrolling = agent.status === 'unenrolling';
+  const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
     <EuiContextMenuItem
@@ -61,11 +65,11 @@ export const TableRowActions: React.FunctionComponent<{
       <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
     </EuiContextMenuItem>,
   ];
+
   if (
     authz.fleet.allAgents &&
     !agentPolicy?.is_protected &&
     !isFleetServerAgent &&
-    agentMigrationsEnabled &&
     isAgentMigrationSupported(agent)
   ) {
     menuItems.push(
@@ -75,7 +79,7 @@ export const TableRowActions: React.FunctionComponent<{
           onMigrateAgentClick();
           setIsMenuOpen(false);
         }}
-        disabled={!agent.active}
+        disabled={!agent.active || !doesLicenseAllowMigration}
         key="migrateAgent"
         data-test-subj="migrateAgentMenuItem"
       >

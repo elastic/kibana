@@ -4512,7 +4512,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "maxLength": 1000,
+                            "maxLength": 10000,
                             "type": "string"
                           }
                         },
@@ -6150,7 +6150,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "maxLength": 1000,
+                            "maxLength": 10000,
                             "type": "string"
                           }
                         },
@@ -17400,7 +17400,7 @@
     },
     "/api/fleet/agent_policies/{agentPolicyId}/download": {
       "get": {
-        "description": "Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.",
+        "description": "Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.",
         "operationId": "get-fleet-agent-policies-agentpolicyid-download",
         "parameters": [
           {
@@ -19749,6 +19749,171 @@
         ]
       }
     },
+    "/api/fleet/agents/bulk_migrate": {
+      "post": {
+        "description": "Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.",
+        "operationId": "post-fleet-agents-bulk-migrate",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "agents": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "batchSize": {
+                    "type": "number"
+                  },
+                  "enrollment_token": {
+                    "type": "string"
+                  },
+                  "settings": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ca_sha256": {
+                        "type": "string"
+                      },
+                      "certificate_authorities": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert_key": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert_key_passphrase": {
+                        "type": "string"
+                      },
+                      "headers": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "insecure": {
+                        "type": "boolean"
+                      },
+                      "proxy_disabled": {
+                        "type": "boolean"
+                      },
+                      "proxy_headers": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "proxy_url": {
+                        "type": "string"
+                      },
+                      "staging": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "uri": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "agents",
+                  "uri",
+                  "enrollment_token"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "actionId"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad Request"
+          }
+        },
+        "summary": "Migrate multiple agents",
+        "tags": [
+          "Elastic Agents"
+        ]
+      }
+    },
     "/api/fleet/agents/bulk_reassign": {
       "post": {
         "description": "[Required authorization] Route required privileges: fleet-agents-all.",
@@ -22010,6 +22175,165 @@
         "summary": "Create an agent action",
         "tags": [
           "Elastic Agent actions"
+        ]
+      }
+    },
+    "/api/fleet/agents/{agentId}/migrate": {
+      "post": {
+        "description": "Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.",
+        "operationId": "post-fleet-agents-agentid-migrate",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "agentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "enrollment_token": {
+                    "type": "string"
+                  },
+                  "settings": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ca_sha256": {
+                        "type": "string"
+                      },
+                      "certificate_authorities": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert_key": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert_key_passphrase": {
+                        "type": "string"
+                      },
+                      "headers": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "insecure": {
+                        "type": "boolean"
+                      },
+                      "proxy_disabled": {
+                        "type": "boolean"
+                      },
+                      "proxy_headers": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "proxy_url": {
+                        "type": "string"
+                      },
+                      "replace_token": {
+                        "type": "string"
+                      },
+                      "staging": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "uri": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "uri",
+                  "enrollment_token"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "actionId"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad Request"
+          }
+        },
+        "summary": "Migrate a single agent",
+        "tags": [
+          "Elastic Agents"
         ]
       }
     },
@@ -30520,7 +30844,7 @@
     },
     "/api/fleet/kubernetes": {
       "get": {
-        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.",
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.",
         "operationId": "get-fleet-kubernetes",
         "parameters": [
           {
@@ -30606,7 +30930,7 @@
     },
     "/api/fleet/kubernetes/download": {
       "get": {
-        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.",
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.",
         "operationId": "get-fleet-kubernetes-download",
         "parameters": [
           {
