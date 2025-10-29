@@ -290,6 +290,25 @@ export const CONSOLE_COMMANDS = {
       defaultMessage: 'Cancel a pending action on the host',
     }),
   },
+  memoryDump: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.memoryDump.about', {
+      defaultMessage: 'Generate a memory dump on the host',
+    }),
+    typeArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.typeArgAbout', {
+      defaultMessage: 'Type of memory dump to generate. Valid values are "kernel" or "process"',
+    }),
+    pidArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.pidArgAbout', {
+      defaultMessage:
+        'Process ID to generate a memory dump for. Valid only when "type" is "process"',
+    }),
+    entityIdArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.entityIdArgAbout',
+      {
+        defaultMessage:
+          'Process Entity ID to generate a memory dump for. Valid only when "type" is "process"',
+      }
+    ),
+  },
 };
 
 export const CROWDSTRIKE_CONSOLE_COMMANDS = {

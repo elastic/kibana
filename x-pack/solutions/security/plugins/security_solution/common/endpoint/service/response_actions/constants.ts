@@ -168,7 +168,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.fr
   scan: 'scan',
   runscript: 'runscript',
   cancel: 'cancel',
-  'memory-dump': 'memdump_kernel',
+  'memory-dump': 'memdump_process',
 });
 
 /**
