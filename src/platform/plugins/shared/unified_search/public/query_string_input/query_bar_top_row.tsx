@@ -54,7 +54,7 @@ import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { NoDataPopover } from './no_data_popover';
-import { ProjectPicker } from '@kbn/cps-utils';
+import { ProjectPickerWrapper } from './project_picker_wrapper';
 import type { ProjectPickerProps } from '@kbn/cps-utils';
 import type {
   SuggestionsAbstraction,
@@ -104,8 +104,6 @@ export const strings = {
       defaultMessage: 'Send to background',
     }),
 };
-
-const SHOW_PROJECT_PICKER_KEY = 'unifiedSearch.showProjectPicker';
 
 const getWrapperWithTooltip = (
   children: JSX.Element,
@@ -327,7 +325,6 @@ export const QueryBarTopRow = React.memo(
       docLinks,
       http,
       dataViews,
-      cps,
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
@@ -781,30 +778,6 @@ export const QueryBarTopRow = React.memo(
       }
     }
 
-    function renderProjectPicker() {
-      // Only show project picker in serverless environments
-      if (!cps?.cpsManager) {
-        return null;
-      }
-
-      // temporarily adding a local storage key to toggle the project picker visibility
-      if (localStorage.getItem(SHOW_PROJECT_PICKER_KEY) === 'true') {
-        const { projectRouting, onProjectRoutingChange } = props;
-        if (!onProjectRoutingChange) {
-          return null;
-        }
-        return (
-          <EuiFlexItem grow={isMobile}>
-            <ProjectPicker
-              projectRouting={projectRouting}
-              onProjectRoutingChange={onProjectRoutingChange}
-            />
-          </EuiFlexItem>
-        );
-      }
-      return null;
-    }
-
     function renderAddButton() {
       return (
         Boolean(props.showAddFilter) && (
@@ -968,7 +941,12 @@ export const QueryBarTopRow = React.memo(
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
-              {props.showProjectPicker && renderProjectPicker()}
+              {props.showProjectPicker && (
+                <ProjectPickerWrapper
+                  projectRouting={props.projectRouting}
+                  onProjectRoutingChange={props.onProjectRoutingChange}
+                />
+              )}
               {props.dataViewPickerOverride || renderDataViewsPicker()}
               {Boolean(isQueryLangSelected) && (
                 <ESQLMenuPopover

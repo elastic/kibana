@@ -16,7 +16,7 @@ export interface ProjectsData {
   linkedProjects: Project[];
 }
 
-export class CpsManager {
+export class CPSManager {
   private readonly http: HttpSetup;
   private readonly projectsSubject: BehaviorSubject<ProjectsData>;
 

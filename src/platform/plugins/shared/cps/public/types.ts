@@ -19,7 +19,7 @@ export interface CPSConfigType {
 export interface CPSServerStart {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CPSServerStop {}
-import type { CpsManager } from './services/cps_manager';
+import type { CPSManager } from './services/cps_manager';
 
 export interface Project {
   _id: string;
@@ -37,5 +37,5 @@ export interface ProjectTagsResponse {
 
 
 export interface CPSPluginStart {
-  cpsManager?: CpsManager;
+  cpsManager?: CPSManager;
 }

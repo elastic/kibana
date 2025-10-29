@@ -8,26 +8,32 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { CPSPluginSetup, CPSPluginStart } from './types';
-import { CpsManager } from './services/cps_manager';
+import type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
+import { CPSManager } from './services/cps_manager';
 
 export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
-  private readonly isServerless: boolean;
-  private cpsManager?: CpsManager;
+  private readonly initializerContext: PluginInitializerContext<CPSConfigType>;
+  private cpsManager?: CPSManager;
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+  constructor(initializerContext: PluginInitializerContext<CPSConfigType>) {
+    this.initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup): CPSPluginSetup {
-    return {};
+    const { cpsEnabled } = this.initializerContext.config.get();
+
+    return {
+      cpsEnabled,
+    };
   }
 
   public start(core: CoreStart): CPSPluginStart {
-    console.log('CPS Plugin started', this.isServerless);
-    // Only initialize cpsManager in serverless environments
-    if (this.isServerless) {
-      this.cpsManager = new CpsManager(core.http);
+    const { cpsEnabled } = this.initializerContext.config.get();
+    console.log('CPS Plugin started', cpsEnabled);
+
+    // Only initialize cpsManager in serverless environments when CPS is enabled
+    if (cpsEnabled) {
+      this.cpsManager = new CPSManager(core.http);
     }
 
     return {
