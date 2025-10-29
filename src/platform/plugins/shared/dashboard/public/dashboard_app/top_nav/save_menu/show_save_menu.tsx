@@ -101,6 +101,8 @@ export const SaveMenu = ({
       anchorPosition="downRight"
       attachToAnchor
       panelStyle={{ maxWidth: 100 }}
+      buffer={0}
+      repositionOnScroll
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiWrappingPopover>
