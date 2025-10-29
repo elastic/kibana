@@ -59,7 +59,6 @@ describe('useWorkflowExecutionPolling', () => {
     triggers: [
       {
         type: 'manual' as const,
-        enabled: true,
       },
     ],
     steps: [
@@ -84,7 +83,7 @@ describe('useWorkflowExecutionPolling', () => {
     stepExecutions: [],
     duration: PollingIntervalMs * 2,
     triggeredBy: 'manual',
-    yaml: 'version: "1"\\nname: test-workflow\\nenabled: true\\ntriggers:\\n  - type: manual\\n    enabled: true\\nsteps:\\n  - name: test-step\\n    type: console.log\\n    with:\\n      message: Hello World',
+    yaml: 'version: "1"\\nname: test-workflow\\nenabled: true\\ntriggers:\\n  - type: manual\\nsteps:\\n  - name: test-step\\n    type: console.log\\n    with:\\n      message: Hello World',
   });
 
   it('should return workflow execution data, loading state, and error from useWorkflowExecution', () => {
