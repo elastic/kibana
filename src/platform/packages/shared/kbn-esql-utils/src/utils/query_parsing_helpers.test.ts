@@ -216,6 +216,14 @@ describe('esql query helpers', () => {
       ).toBe('event.timefield');
     });
 
+    it('should return the time field if there is the interval param in the bucket function', () => {
+      expect(
+        getTimeFieldFromESQLQuery(
+          'from a | stats meow = avg(bytes) by bucket(event.timefield, ?_tautointerval)'
+        )
+      ).toBe('event.timefield');
+    });
+
     it('should return the time field if the column is casted', () => {
       expect(
         getTimeFieldFromESQLQuery(

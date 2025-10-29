@@ -16,6 +16,7 @@ import type { FunctionParameterType, SupportedDataType } from '../types';
 import { commaCompleteItem } from '../../commands_registry/complete_items';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
+export const AUTO_INTERVAL_PARAM = '?_tautointerval';
 
 // Targeted: define option interfaces for constants/date literals
 export interface BuildConstantsOptions {
@@ -144,6 +145,18 @@ export function getCompatibleLiterals(
   if (types.includes('time_duration')) {
     // TODO distinction between date_period and time durations!
     const timeLiteralSuggestions = [
+      ...buildConstantsDefinitions(
+        [AUTO_INTERVAL_PARAM],
+        i18n.translate('kbn-esql-ast.esql.autocomplete.intervalNamedParamDefinition', {
+          defaultMessage: 'Interval calculated based on time range',
+        }),
+        '1A',
+        options,
+        // appears when the user opens the second level popover
+        i18n.translate('kbn-esql-ast.esql.autocomplete.intervalTimeNamedParamDoc', {
+          defaultMessage: `Use the \`?_tautointerval\` parameter to calculate the interval from the time picker.`,
+        })
+      ),
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];
     if (options?.supportsControls) {

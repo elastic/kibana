@@ -29,6 +29,7 @@ import { catchError, defer, map, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import DateMath from '@kbn/datemath';
+import { UI_SETTINGS } from '../../constants';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import {
@@ -197,12 +198,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             locale,
             include_execution_metadata: true,
           };
+          const config = uiSettings as Parameters<typeof getEsQueryConfig>[0];
           if (input) {
-            const esQueryConfigs = getEsQueryConfig(
-              uiSettings as Parameters<typeof getEsQueryConfig>[0]
-            );
+            const esQueryConfigs = getEsQueryConfig(config);
+            const histogramBarTarget = config.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
-            const namedParams = getNamedParams(fixedQuery, input.timeRange, input.esqlVariables);
+            const namedParams = getNamedParams(fixedQuery, input.timeRange, input.esqlVariables, {
+              histogramBarTarget,
+            });
 
             if (namedParams.length) {
               params.params = namedParams;

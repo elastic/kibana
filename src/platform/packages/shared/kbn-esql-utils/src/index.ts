@@ -42,10 +42,9 @@ export {
   getESQLQueryColumnsRaw,
   getESQLResults,
   formatESQLColumns,
-  getStartEndParams,
-  hasStartEndParams,
-  getNamedParams,
 } from './utils/run_query';
+export { getStartEndParams, hasStartEndParams } from './utils/named_params/_tstart_end';
+export { getNamedParams } from './utils/named_params';
 export {
   isESQLColumnSortable,
   isESQLColumnGroupable,
