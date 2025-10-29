@@ -45,8 +45,8 @@ export const calculateScoresWithESQL = async (
     logger: Logger;
     experimentalFeatures: ExperimentalFeatures;
   } & CalculateScoresParams & {
-    filters?: Array<{ entity_types: string[]; filter: string }>;
-  }
+      filters?: Array<{ entity_types: string[]; filter: string }>;
+    }
 ): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const { identifierType, logger, esClient } = params;
@@ -140,7 +140,8 @@ export const calculateScoresWithESQL = async (
       responses.forEach(({ entityType, error }) => {
         if (error) {
           logger.error(
-            `Query failed for ${entityType}: ${error instanceof Error ? error.message : String(error)
+            `Query failed for ${entityType}: ${
+              error instanceof Error ? error.message : String(error)
             }`
           );
         }
@@ -366,42 +367,42 @@ export const getESQL = (
 
 export const buildRiskScoreBucket =
   (entityType: EntityType, index: string) =>
-    (row: FieldValue[]): RiskScoreBucket => {
-      const [count, score, _inputs, entity] = row as [
-        number,
-        number,
-        string | string[], // ES Multivalue nonsense: if it's just one value we get the value, if it's multiple we get an array
-        string
-      ];
+  (row: FieldValue[]): RiskScoreBucket => {
+    const [count, score, _inputs, entity] = row as [
+      number,
+      number,
+      string | string[], // ES Multivalue nonsense: if it's just one value we get the value, if it's multiple we get an array
+      string
+    ];
 
-      const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
-        const parsedRiskInputData = JSON.parse(input);
-        const value = parseFloat(parsedRiskInputData.risk_score);
-        const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
-        const { risk_score: _, ...otherFields } = parsedRiskInputData;
-        return {
-          ...otherFields,
-          score: value,
-          contribution: currentScore / RIEMANN_ZETA_VALUE,
-          index,
-        };
-      });
-
+    const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
+      const parsedRiskInputData = JSON.parse(input);
+      const value = parseFloat(parsedRiskInputData.risk_score);
+      const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
+      const { risk_score: _, ...otherFields } = parsedRiskInputData;
       return {
-        key: { [EntityTypeToIdentifierField[entityType]]: entity },
-        doc_count: count,
-        top_inputs: {
-          doc_count: inputs.length,
-          risk_details: {
-            value: {
-              score,
-              normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
-              notes: [],
-              category_1_score: score, // Don't normalize here - will be normalized in calculate_risk_scores.ts
-              category_1_count: count,
-              risk_inputs: inputs,
-            },
+        ...otherFields,
+        score: value,
+        contribution: currentScore / RIEMANN_ZETA_VALUE,
+        index,
+      };
+    });
+
+    return {
+      key: { [EntityTypeToIdentifierField[entityType]]: entity },
+      doc_count: count,
+      top_inputs: {
+        doc_count: inputs.length,
+        risk_details: {
+          value: {
+            score,
+            normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
+            notes: [],
+            category_1_score: score, // Don't normalize here - will be normalized in calculate_risk_scores.ts
+            category_1_count: count,
+            risk_inputs: inputs,
           },
         },
-      };
+      },
     };
+  };

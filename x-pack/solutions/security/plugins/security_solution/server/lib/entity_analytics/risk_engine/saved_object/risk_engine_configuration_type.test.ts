@@ -67,9 +67,9 @@ describe('riskEngineConfigurationType', () => {
       const result =
         version4?.changes[1]?.type === 'data_backfill'
           ? version4.changes[1].backfillFn(
-            mockDocument,
-            {} as SavedObjectModelTransformationContext
-          )
+              mockDocument,
+              {} as SavedObjectModelTransformationContext
+            )
           : null;
 
       expect(result).toEqual({
@@ -115,9 +115,9 @@ describe('riskEngineConfigurationType', () => {
       const result =
         version4?.changes[1]?.type === 'data_backfill'
           ? version4.changes[1].backfillFn(
-            mockDocument,
-            {} as SavedObjectModelTransformationContext
-          )
+              mockDocument,
+              {} as SavedObjectModelTransformationContext
+            )
           : null;
 
       expect(result).toEqual({
