@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import type { TextAttachmentData } from '@kbn/onechat-common/attachments';
 import { AttachmentType } from '@kbn/onechat-common/attachments';
-import type { InlineAttachmentTypeDefinition } from '@kbn/onechat-server/artifacts';
+import type { InlineAttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 
 const textDataSchema = z.object({
   content: z.string(),

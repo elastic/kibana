@@ -9,7 +9,7 @@ import type { AttachmentInput, Attachment } from '@kbn/onechat-common/attachment
 import type {
   AttachmentRepresentation,
   AttachmentTypeDefinition,
-} from '@kbn/onechat-server/artifacts';
+} from '@kbn/onechat-server/attachments';
 import type { ValidateAttachmentResult } from './validate_attachment';
 
 export interface AttachmentServiceSetup {

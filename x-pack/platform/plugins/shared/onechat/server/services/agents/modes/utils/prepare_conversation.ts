@@ -9,7 +9,7 @@ import type { ConversationRound, RawRoundInput, RoundInput } from '@kbn/onechat-
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
 import { getToolResultId } from '@kbn/onechat-server/tools';
-import type { AttachmentRepresentation } from '@kbn/onechat-server/artifacts';
+import type { AttachmentRepresentation } from '@kbn/onechat-server/attachments';
 
 export interface ProcessedAttachment {
   // TODO extends instead.

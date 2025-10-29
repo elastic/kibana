@@ -6,7 +6,7 @@
  */
 
 import type { Attachment } from '@kbn/onechat-common/attachments';
-import type { AttachmentRepresentation } from '@kbn/onechat-server/artifacts';
+import type { AttachmentRepresentation } from '@kbn/onechat-server/attachments';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
 export const formatAttachment = async ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/artifacts';
+import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 
 export interface AttachmentTypeRegistry {
   register(attachmentType: AttachmentTypeDefinition): void;

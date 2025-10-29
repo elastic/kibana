@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/artifacts';
+import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import type { AttachmentTypeRegistry } from '../attachment_type_registry';
 import { createTextAttachmentType } from './text';
 import { createScreenContextAttachmentType } from './screen_context';

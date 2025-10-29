@@ -40,9 +40,6 @@ export interface InlineAttachmentTypeDefinition<TContent = unknown> {
   validate: (input: unknown) => MaybePromise<AttachmentParseResult<TContent>>;
   /** format the attachment to presented to the LLM */
   format: (input: TContent) => MaybePromise<AttachmentRepresentation>;
-  /** Check if the attachment is different from the previous one */
-  // TODO: later
-  // getDelta: (a: unknown, b: unknown) => MaybePromise<unknown>;
 }
 
 /**
@@ -61,10 +58,6 @@ export interface ReferenceAttachmentTypeDefinition<TContent = unknown> {
   // resolve: (input: unknown) => MaybePromise<unknown>;
   /** format the attachment to presented to the LLM */
   format: (input: unknown) => MaybePromise<AttachmentRepresentation>;
-  /**
-   * Check if the attachment is different from the previous one
-   */
-  getDelta: (a: unknown, b: unknown) => MaybePromise<unknown>;
 }
 
 export type AttachmentTypeDefinition<TContent = unknown> =

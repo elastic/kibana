@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { AttachmentType } from '@kbn/onechat-common/attachments';
 import type { ScreenContextAttachmentData } from '@kbn/onechat-common/attachments';
-import type { InlineAttachmentTypeDefinition } from '@kbn/onechat-server/artifacts';
+import type { InlineAttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 
 const contextDataSchema = z
   .object({

@@ -6,7 +6,7 @@
  */
 
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/artifacts';
+import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
