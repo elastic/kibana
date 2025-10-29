@@ -7,7 +7,7 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { logRoles, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { FramePublicAPI, HeatmapVisualizationState } from '@kbn/lens-common';
@@ -46,10 +46,6 @@ const clickButtonByName = async (name: string | RegExp, container?: HTMLElement)
   await userEvent.click(query.getByRole('button', { name }));
 };
 
-const clickHorizontalAxisButton = async () => {
-  await clickButtonByName(/horizontal axis/i);
-};
-
 describe('heatmap style settings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,9 +53,8 @@ describe('heatmap style settings', () => {
 
   it('should have called setState with the proper value of xAxisLabelRotation', async () => {
     renderComponent();
-    await clickHorizontalAxisButton();
 
-    const orientationGroup = screen.getByRole('group', { name: /orientation/i });
+    const orientationGroup = screen.getByRole('group', { name: 'Orientation' });
     await clickButtonByName(/vertical/i, orientationGroup);
     expect(defaultProps.setState).toBeCalledTimes(1);
     expect(defaultProps.setState).toBeCalledWith({
@@ -70,9 +65,9 @@ describe('heatmap style settings', () => {
 
   it('should hide the orientation group if isXAxisLabelVisible it set to not visible', async () => {
     const { rerender } = renderComponent();
-    await clickHorizontalAxisButton();
 
-    const orientationGroup = screen.getByRole('group', { name: /orientation/i });
+    const orientationGroup = screen.getByRole('group', { name: 'Orientation' });
+
     expect(orientationGroup).toBeInTheDocument();
 
     rerender(
@@ -84,9 +79,8 @@ describe('heatmap style settings', () => {
         }}
       />
     );
-    await clickHorizontalAxisButton();
 
-    const updatedOrientationGroup = screen.queryByRole('group', { name: /orientation/i });
+    const updatedOrientationGroup = screen.queryByRole('group', { name: 'Orientation' });
     expect(updatedOrientationGroup).not.toBeInTheDocument();
   });
 });
