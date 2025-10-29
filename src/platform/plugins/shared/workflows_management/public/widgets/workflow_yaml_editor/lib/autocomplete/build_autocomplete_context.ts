@@ -130,9 +130,9 @@ export function buildAutocompleteContext({
     path,
     range,
     absoluteOffset,
-    focusedStepInfo,
     // currentStepInfo
-    // currentTriggerInfo
+    focusedStepInfo,
+    // TODO: add currentTriggerInfo
 
     // kind of ast info
     isInLiquidBlock,
