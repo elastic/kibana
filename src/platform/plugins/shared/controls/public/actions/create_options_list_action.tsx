@@ -42,8 +42,8 @@ export const createOptionsListControlAction =
         const field = dataView.getFieldByName(fieldName);
         return Boolean(field && isFieldCompatible(field));
       },
-      execute: async ({ embeddable, state, controlId }) => {
-        createDataControlOfType(OPTIONS_LIST_CONTROL, { embeddable, state, controlId });
+      execute: async ({ embeddable, state, controlId, isPinned }) => {
+        createDataControlOfType(OPTIONS_LIST_CONTROL, { embeddable, state, controlId, isPinned });
       },
       extension: {
         CustomOptionsComponent: OptionsListEditorOptions,

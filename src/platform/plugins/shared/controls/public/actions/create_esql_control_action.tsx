@@ -8,21 +8,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel, apiCanPinPanel } from '@kbn/presentation-containers';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
-import { ACTION_CREATE_ESQL_CONTROL } from './constants';
+import { ACTION_CREATE_ESQL_CONTROL, ADD_PANEL_CONTROL_GROUP } from './constants';
 import { uiActionsService } from '../services/kibana_services';
 
-export const createESQLControlAction = (): ActionDefinition<EmbeddableApiContext> => ({
+export const createESQLControlAction = (): ActionDefinition<
+  EmbeddableApiContext & { isPinned: boolean }
+> => ({
   id: ACTION_CREATE_ESQL_CONTROL,
   order: 1,
+  grouping: [ADD_PANEL_CONTROL_GROUP],
   getIconType: () => 'controlsHorizontal',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
-  execute: async ({ embeddable }) => {
+  execute: async ({ embeddable, isPinned }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const variablesInParent = apiPublishesESQLVariables(embeddable)
       ? embeddable.esqlVariables$.value
@@ -35,14 +38,19 @@ export const createESQLControlAction = (): ActionDefinition<EmbeddableApiContext
         controlType: EsqlControlType.VALUES_FROM_QUERY,
         esqlVariables: variablesInParent,
         onSaveControl: async (controlState: ESQLControlState) => {
-          embeddable.addNewPanel({
+          const newControl = {
             panelType: 'esqlControl',
             serializedState: {
               rawState: {
                 ...controlState,
               },
             },
-          });
+          };
+
+          // add a new control as either pinned or not depending on provided context
+          (isPinned && apiCanPinPanel(embeddable)
+            ? embeddable.addPinnedPanel
+            : embeddable.addNewPanel)(newControl, { displaySuccessMessage: true });
         },
       });
     } catch (e) {

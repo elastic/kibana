@@ -58,7 +58,7 @@ export function registerActions(uiActions: UiActionsStart) {
     return createESQLControlAction();
   });
 
-  uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_TIME_SLIDER, async () => {
+  uiActions.registerActionAsync(ACTION_CREATE_TIME_SLIDER, async () => {
     const { createTimeSliderAction } = await import('../controls_module');
     return createTimeSliderAction();
   });

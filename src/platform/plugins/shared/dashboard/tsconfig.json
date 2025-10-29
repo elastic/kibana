@@ -91,7 +91,7 @@
     "@kbn/controls-constants",
     "@kbn/controls-renderer",
     "@kbn/presentation-util",
-    "@kbn/background-search"
+    "@kbn/background-search",
   ],
   "exclude": ["target/**/*"]
 }
