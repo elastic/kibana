@@ -121,53 +121,43 @@ export class WorkflowExecutionState {
 
   public async flushStepChanges(): Promise<void> {
     const stepChanges = Array.from(this.stepChanges.values());
-    const tasks: Promise<void>[] = [];
 
-    if (stepChanges.length > 0) {
-      // const groupedStepChangesById =
-      // Group step changes by objectId to handle multiple changes to the same step
-      const groupedStepChangesById: Record<string, Change<EsWorkflowStepExecution>[]> =
-        stepChanges.reduce<Record<string, Change<EsWorkflowStepExecution>[]>>((acc, change) => {
-          // For each objectId, keep the latest change
-          if (!acc[change.objectId]) {
-            acc[change.objectId] = [] as Change<EsWorkflowStepExecution>[];
-          }
-
-          acc[change.objectId].push(change);
-          return acc;
-        }, {});
-
-      const createSteps: Partial<EsWorkflowStepExecution>[] = [];
-      const updateSteps: Partial<EsWorkflowStepExecution>[] = [];
-
-      Object.entries(groupedStepChangesById).forEach(([objectId, changes]) => {
-        const accumulated: Partial<EsWorkflowStepExecution> = changes.reduce(
-          (acc, change) => ({
-            ...acc,
-            ...change.change,
-          }),
-          {}
-        );
-
-        if (changes.some((change) => change.changeType === 'create')) {
-          createSteps.push(accumulated);
-        } else {
-          updateSteps.push(accumulated);
-        }
-      });
-
-      if (createSteps.length > 0) {
-        createSteps.forEach((step) =>
-          tasks.push(this.workflowStepExecutionRepository.createStepExecution(step))
-        );
-      }
-
-      if (updateSteps.length > 0) {
-        tasks.push(this.workflowStepExecutionRepository.updateStepExecutions(updateSteps));
-      }
+    if (!stepChanges.length) {
+      return;
     }
 
-    await Promise.all(tasks);
+    // Group step changes by objectId to handle multiple changes to the same step
+    const groupedStepChangesById: Record<string, Change<EsWorkflowStepExecution>[]> =
+      stepChanges.reduce<Record<string, Change<EsWorkflowStepExecution>[]>>((acc, change) => {
+        // For each objectId, keep the latest change
+        if (!acc[change.objectId]) {
+          acc[change.objectId] = [] as Change<EsWorkflowStepExecution>[];
+        }
+
+        acc[change.objectId].push(change);
+        return acc;
+      }, {});
+
+    const toCreate: Partial<EsWorkflowStepExecution>[] = [];
+    const toUpdate: Partial<EsWorkflowStepExecution>[] = [];
+
+    Object.entries(groupedStepChangesById).forEach(([objectId, changes]) => {
+      const accumulated: Partial<EsWorkflowStepExecution> = changes.reduce(
+        (acc, change) => ({
+          ...acc,
+          ...change.change,
+        }),
+        {}
+      );
+
+      if (changes.some((change) => change.changeType === 'create')) {
+        toCreate.push(accumulated);
+      } else {
+        toUpdate.push(accumulated);
+      }
+    });
+
+    await this.workflowStepExecutionRepository.bulkUpsert(Array.from(toCreate.concat(toUpdate)));
     this.stepChanges = [];
   }
 
