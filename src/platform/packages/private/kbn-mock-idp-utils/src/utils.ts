@@ -269,7 +269,7 @@ async function createUiamSessionTokens({
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
   const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
 
-  await seedTestUser({
+  const seedUserMessage = await seedTestUser({
     userId: username,
     organizationId,
     roleId: 'cloud-role-id',
@@ -279,6 +279,8 @@ async function createUiamSessionTokens({
     firstName: givenName,
     lastName: familyName,
   });
+
+  console.log(seedUserMessage);
 
   const accessTokenBody = Buffer.from(
     JSON.stringify({

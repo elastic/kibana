@@ -596,6 +596,162 @@ describe('API Keys', () => {
     });
   });
 
+  describe('grantViaUiam()', () => {
+    let mockUiam: any;
+
+    beforeEach(() => {
+      mockUiam = {
+        grantApiKey: jest.fn(),
+      };
+      apiKeys = new APIKeys({
+        clusterClient: mockClusterClient,
+        logger,
+        license: mockLicense,
+        applicationName: 'kibana-.kibana',
+        kibanaFeatures: [],
+        uiam: mockUiam,
+      });
+    });
+
+    it('returns null when security feature is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const result = await apiKeys.grantViaUiam(httpServerMock.createKibanaRequest(), {
+        name: 'test_api_key',
+      });
+      expect(result).toBeNull();
+      expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws an error when UIAM service is not available', async () => {
+      apiKeys = new APIKeys({
+        clusterClient: mockClusterClient,
+        logger,
+        license: mockLicense,
+        applicationName: 'kibana-.kibana',
+        kibanaFeatures: [],
+      });
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      await expect(
+        apiKeys.grantViaUiam(httpServerMock.createKibanaRequest(), {
+          name: 'test_api_key',
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"UIAM service is not available"`);
+      expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws an error when request does not contain an authorization header', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      await expect(
+        apiKeys.grantViaUiam(httpServerMock.createKibanaRequest(), {
+          name: 'test_api_key',
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to grant an API Key via UIAM, request does not contain an authorization header"`
+      );
+      expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws an error when authorization scheme is not Bearer', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      await expect(
+        apiKeys.grantViaUiam(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Basic ${encodeToBase64('foo:bar')}` },
+          }),
+          {
+            name: 'test_api_key',
+          }
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to grant an API Key via UIAM, request authorization scheme must be Bearer"`
+      );
+      expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+    });
+
+    it('calls UIAM grantApiKey with proper parameters', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockUiam.grantApiKey.mockResolvedValue({
+        id: 'api-key-id',
+        name: 'test_api_key',
+        api_key: 'encoded-key-value',
+        expiration: 1234567890,
+      });
+
+      const result = await apiKeys.grantViaUiam(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: 'Bearer foo-access-token' },
+        }),
+        {
+          name: 'test_api_key',
+          expiration: '7d',
+          metadata: { environment: 'test' },
+        }
+      );
+
+      expect(result).toEqual({
+        id: 'api-key-id',
+        name: 'test_api_key',
+        api_key: 'encoded-key-value',
+        expiration: 1234567890,
+      });
+      expect(mockUiam.grantApiKey).toHaveBeenCalledWith('foo-access-token', {
+        name: 'test_api_key',
+        expiration: '7d',
+        metadata: { environment: 'test' },
+      });
+    });
+
+    it('calls UIAM grantApiKey without optional parameters', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockUiam.grantApiKey.mockResolvedValue({
+        id: 'api-key-id',
+        name: 'test_api_key',
+        api_key: 'encoded-key-value',
+      });
+
+      const result = await apiKeys.grantViaUiam(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: 'Bearer foo-access-token' },
+        }),
+        {
+          name: 'test_api_key',
+        }
+      );
+
+      expect(result).toEqual({
+        id: 'api-key-id',
+        name: 'test_api_key',
+        api_key: 'encoded-key-value',
+      });
+      expect(mockUiam.grantApiKey).toHaveBeenCalledWith('foo-access-token', {
+        name: 'test_api_key',
+      });
+    });
+
+    it('throws error when UIAM grantApiKey fails', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      const error = new Error('UIAM service error');
+      mockUiam.grantApiKey.mockRejectedValue(error);
+
+      await expect(
+        apiKeys.grantViaUiam(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: 'Bearer foo-access-token' },
+          }),
+          {
+            name: 'test_api_key',
+          }
+        )
+      ).rejects.toThrowError('UIAM service error');
+      expect(mockUiam.grantApiKey).toHaveBeenCalledWith('foo-access-token', {
+        name: 'test_api_key',
+      });
+    });
+  });
+
   describe('invalidate()', () => {
     it('returns null when security feature is disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);

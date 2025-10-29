@@ -19,5 +19,11 @@ export const uiamServiceMock = {
       .fn()
       .mockResolvedValue({ accessToken: 'new-access', refreshToken: 'new-refresh' }),
     invalidateSessionTokens: jest.fn().mockResolvedValue(undefined),
+    grantApiKey: jest.fn().mockResolvedValue({
+      id: 'mock-api-key-id',
+      name: 'mock-api-key-name',
+      api_key: 'mock-api-key-value',
+      expiration: Date.now() + 86400000,
+    }),
   }),
 };

@@ -289,4 +289,101 @@ describe('UiamService', () => {
       });
     });
   });
+
+  describe('#grantApiKey', () => {
+    it('properly calls UIAM service to grant an API key', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'api-key-id',
+          name: 'test-key',
+          api_key: 'encoded-key-value',
+          expiration: 1234567890,
+        }),
+      });
+
+      await expect(
+        uiamService.grantApiKey('access-token', {
+          name: 'test-key',
+          expiration: '7d',
+          metadata: { environment: 'test' },
+        })
+      ).resolves.toEqual({
+        id: 'api-key-id',
+        name: 'test-key',
+        api_key: 'encoded-key-value',
+        expiration: 1234567890,
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        body: JSON.stringify({
+          name: 'test-key',
+          expiration: '7d',
+          metadata: { environment: 'test' },
+        }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('properly calls UIAM service to grant an API key without expiration and metadata', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'api-key-id',
+          name: 'test-key',
+          api_key: 'encoded-key-value',
+        }),
+      });
+
+      await expect(uiamService.grantApiKey('access-token', { name: 'test-key' })).resolves.toEqual({
+        id: 'api-key-id',
+        name: 'test-key',
+        api_key: 'encoded-key-value',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        body: JSON.stringify({ name: 'test-key' }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('throws error if granting API key fails with 400 status code', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Invalid request' } }),
+      });
+
+      await expect(
+        uiamService.grantApiKey('access-token', { name: 'test-key' })
+      ).rejects.toThrowError('Invalid request');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        body: JSON.stringify({ name: 'test-key' }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+  });
 });

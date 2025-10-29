@@ -79,6 +79,7 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'invalidate'
     | 'validate'
     | 'grantAsInternalUser'
+    | 'grantViaUiam'
     | 'invalidateAsInternalUser'
   >;
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
@@ -352,6 +353,7 @@ export class AuthenticationService {
       applicationName,
       kibanaFeatures,
       buildFlavor,
+      uiam,
     });
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
@@ -395,6 +397,7 @@ export class AuthenticationService {
         create: apiKeys.create.bind(apiKeys),
         update: apiKeys.update.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
+        grantViaUiam: apiKeys.grantViaUiam.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
