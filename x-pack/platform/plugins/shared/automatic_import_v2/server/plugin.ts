@@ -23,8 +23,6 @@ import type {
   AutomaticImportV2PluginRequestHandlerContext,
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
-import { integrationSavedObjectType } from './services/saved_objects/integration';
-import { dataStreamSavedObjectType } from './services/saved_objects/data_stream';
 import { AutomaticImportService } from './services';
 
 export class AutomaticImportV2Plugin
@@ -59,22 +57,15 @@ export class AutomaticImportV2Plugin
   ) {
     this.logger.debug('automaticImportV2: Setup');
 
-    core.savedObjects.registerType(integrationSavedObjectType);
-    core.savedObjects.registerType(dataStreamSavedObjectType);
-
     const coreStartServices = core.getStartServices().then(([coreStart]) => ({
       esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
-      savedObjectsClient: coreStart.savedObjects.createInternalRepository(),
     }));
     const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
-    const savedObjectsClientPromise = coreStartServices.then(
-      ({ savedObjectsClient }) => savedObjectsClient
-    );
 
     this.automaticImportService = new AutomaticImportService(
       this.logger,
       esClientPromise,
-      savedObjectsClientPromise
+      core.savedObjects
     );
 
     const requestContextFactory = new RequestContextFactory({
@@ -107,9 +98,21 @@ export class AutomaticImportV2Plugin
     this.logger.debug('automaticImportV2: Started');
 
     if (this.automaticImportService) {
-      this.automaticImportService.initialize(core.security).catch((error) => {
-        this.logger.error('Failed to initialize AutomaticImportService', error);
-      });
+      if (!plugins.security) {
+        throw new Error('Security service not initialized.');
+      }
+
+      if (!core.savedObjects) {
+        throw new Error('SavedObjects service not initialized.');
+      }
+
+      this.automaticImportService.initialize(core.security, core.savedObjects)
+        .then(() => {
+          this.logger.debug('AutomaticImportService initialized successfully');
+        })
+        .catch((error) => {
+          this.logger.error('Failed to initialize AutomaticImportService', error);
+        });
     }
 
     return {

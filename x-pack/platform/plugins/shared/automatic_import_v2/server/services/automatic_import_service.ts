@@ -18,12 +18,16 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SecurityServiceStart,
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { DataStreamSamples } from '../../common';
 import type { IntegrationAttributes, DataStreamAttributes } from './saved_objects/schemas/types';
 import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
 import { getAuthenticatedUser } from './lib/get_user';
 import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
+import { integrationSavedObjectType } from './saved_objects/integration';
+import { dataStreamSavedObjectType } from './saved_objects/data_stream';
 
 export class AutomaticImportService {
   private pluginStop$: Subject<void>;
@@ -31,22 +35,29 @@ export class AutomaticImportService {
   private security: SecurityServiceStart | null = null;
   private savedObjectService: AutomaticImportSavedObjectService | null = null;
   private logger: LoggerFactory;
-  private savedObjectsClientPromise: Promise<SavedObjectsClientContract>;
+  private savedObjectsServiceSetup: SavedObjectsServiceSetup;
 
   constructor(
     logger: LoggerFactory,
     esClientPromise: Promise<ElasticsearchClient>,
-    savedObjectsClientPromise: Promise<SavedObjectsClientContract>
+    savedObjectsServiceSetup: SavedObjectsServiceSetup
   ) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = logger;
-    this.savedObjectsClientPromise = savedObjectsClientPromise;
+    this.savedObjectsServiceSetup = savedObjectsServiceSetup;
     this.samplesIndexService = new AutomaticImportSamplesIndexService(logger, esClientPromise);
+
+    this.savedObjectsServiceSetup.registerType(integrationSavedObjectType);
+    this.savedObjectsServiceSetup.registerType(dataStreamSavedObjectType);
   }
 
-  public async initialize(security: SecurityServiceStart): Promise<void> {
+  // Run initialize in the start phase of plugin
+  public async initialize(
+    security: SecurityServiceStart,
+    savedObjectsServiceStart: SavedObjectsServiceStart
+  ): Promise<void> {
     this.security = security;
-    const savedObjectsClient = await this.savedObjectsClientPromise;
+    const savedObjectsClient = savedObjectsServiceStart.createInternalRepository();
     this.savedObjectService = new AutomaticImportSavedObjectService(
       this.logger,
       savedObjectsClient,
