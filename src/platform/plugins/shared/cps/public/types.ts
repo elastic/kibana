@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+export interface CPSPluginSetup {
+  cpsEnabled?: boolean;
+}
 
-export type { CPSServerSetup } from './types';
-export { config } from './config';
+export interface CPSConfigType {
+  cpsEnabled: boolean;
+}
 
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { CPSServerPlugin } = await import('./plugin');
-  return new CPSServerPlugin(initContext);
-};
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CPSServerStart {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CPSServerStop {}
