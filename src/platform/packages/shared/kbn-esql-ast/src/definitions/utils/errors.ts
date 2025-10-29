@@ -255,6 +255,14 @@ Expected one of:
           values: { identifier: out.identifier },
         }),
       };
+    case 'joinOnSingleExpression':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.joinOnSingleExpression', {
+          defaultMessage:
+            'JOIN ON clause must be a comma separated list of fields or a single expression',
+        }),
+        type: 'error',
+      };
     case 'tooManyForks':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.tooManyForks', {
@@ -458,6 +466,9 @@ export const errors = {
       errors.byId('invalidJoinIndex', identifier.location, { identifier: identifier.name }),
       'getJoinIndices'
     ),
+
+  joinOnSingleExpression: (location: ESQLLocation): ESQLMessage =>
+    errors.byId('joinOnSingleExpression', location, {}),
 
   noMatchingCallSignature: (
     fn: ESQLFunction,

@@ -13,7 +13,8 @@ import {
 } from '../../../../../common/constants';
 import { login, ROLE } from '../../tasks/login';
 
-describe('Endpoint exceptions - preserving behaviour without `endpointExceptionsMovedUnderManagement` feature flag', () => {
+// Failing: See https://github.com/elastic/kibana/issues/240815
+describe.skip('Endpoint exceptions - preserving behaviour without `endpointExceptionsMovedUnderManagement` feature flag', () => {
   describe('ESS', { tags: ['@ess'] }, () => {
     const loginWithReadAccess = () => {
       login.withCustomKibanaPrivileges({
