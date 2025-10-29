@@ -16,6 +16,7 @@ import type { FieldTypeOption } from '../../../../../public/components/data_mana
 export class StreamsApp {
   public readonly processorFieldComboBox;
   public readonly conditionEditorFieldComboBox;
+  public readonly processorTypeComboBox;
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
       this.page,
@@ -24,6 +25,11 @@ export class StreamsApp {
     this.conditionEditorFieldComboBox = new EuiComboBoxWrapper(
       this.page,
       'streamsAppConditionEditorFieldText'
+    );
+
+    this.processorTypeComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppProcessorTypeSelector'
     );
   }
 
@@ -490,8 +496,7 @@ export class StreamsApp {
   }
 
   async selectProcessorType(value: ProcessorType) {
-    await this.page.getByTestId('streamsAppProcessorTypeSelector').click();
-    await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
+    await this.processorTypeComboBox.selectSingleOption(value);
   }
 
   async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
