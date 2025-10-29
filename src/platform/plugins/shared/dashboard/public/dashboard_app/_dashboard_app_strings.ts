@@ -206,14 +206,6 @@ export const topNavStrings = {
       defaultMessage: 'Reset changes to dashboard',
     }),
   },
-  DiscardStarredQueryModal: {
-    label: i18n.translate('dashboard.topNave.discardChangesButtonAriaLabel', {
-      defaultMessage: 'Discard changes',
-    }),
-    description: i18n.translate('dashboard.topNave.discardChangesConfigDescription', {
-      defaultMessage: 'Discard unsaved changes on dashboard',
-    }),
-  },
   switchToViewMode: {
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
       defaultMessage: 'Exit edit',

@@ -11,7 +11,6 @@ import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 
 import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
@@ -20,13 +19,10 @@ import { topNavStrings } from '../../_dashboard_app_strings';
 
 interface SaveMenuProps {
   anchorElement: HTMLElement;
-  coreServices: CoreStart;
   dashboardApi: DashboardApi;
   isResetting: boolean;
-  resetChanges: () => void;
-  setIsResetting: (isResetting: boolean) => void;
   isSaveInProgress: boolean;
-  setIsSaveInProgress: (isSaveInProgress: boolean) => void;
+  resetChanges: () => void;
   dashboardInteractiveSave: () => void;
 }
 
@@ -109,7 +105,7 @@ export const SaveMenu = ({
   );
 };
 
-export function showSaveMenu({ coreServices, ...props }: SaveMenuProps) {
+export function showSaveMenu(props: SaveMenuProps) {
   if (isOpen) {
     cleanup();
     return;
@@ -117,10 +113,5 @@ export function showSaveMenu({ coreServices, ...props }: SaveMenuProps) {
 
   isOpen = true;
   document.body.appendChild(container);
-  ReactDOM.render(
-    <KibanaContextProvider services={coreServices}>
-      <SaveMenu {...props} coreServices={coreServices} />
-    </KibanaContextProvider>,
-    container
-  );
+  ReactDOM.render(<SaveMenu {...props} />, container);
 }
