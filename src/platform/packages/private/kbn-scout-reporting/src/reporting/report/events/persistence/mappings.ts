@@ -93,6 +93,20 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
       },
     },
   },
+  triggered_from_build: {
+    type: 'object',
+    properties: {
+      id: {
+        type: 'wildcard',
+      },
+      number: {
+        type: 'integer',
+      },
+      pipeline_slug: {
+        type: 'wildcard',
+      },
+    },
+  },
 };
 
 export const fileInfoProperties: Record<PropertyName, MappingProperty> = {
