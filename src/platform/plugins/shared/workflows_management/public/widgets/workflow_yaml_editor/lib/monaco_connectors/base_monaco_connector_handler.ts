@@ -9,11 +9,11 @@
 
 import type { monaco } from '@kbn/monaco';
 import type {
-  MonacoConnectorHandler,
-  HoverContext,
   ActionContext,
   ActionInfo,
   ConnectorExamples,
+  HoverContext,
+  MonacoConnectorHandler,
 } from '../monaco_providers/provider_interfaces';
 
 /**
@@ -147,7 +147,7 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     paramName: string,
     paramType: string,
     description?: string,
-    examples?: any[]
+    examples?: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
   ): string {
     const lines = [`**Parameter**: \`${paramName}\` (${paramType})`];
 
