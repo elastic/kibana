@@ -88,6 +88,7 @@ export type {
 } from './src/extensions/encryption';
 export type {
   AuthorizeObject,
+  AuthorizationResult,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,

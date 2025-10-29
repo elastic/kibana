@@ -172,6 +172,11 @@ export interface AuthorizeChangeAccessControlObject extends AuthorizeObjectWithE
   objectNamespace?: string;
 }
 
+/**
+ * The ObjectRequiringPrivilegeCheckResult interface represents the authorization
+ * result for a single saved object and includes a flag indicating whether the object
+ * requires a check for the manage access control privilege.
+ */
 export interface ObjectRequiringPrivilegeCheckResult {
   type: string;
   id: string;
@@ -179,6 +184,12 @@ export interface ObjectRequiringPrivilegeCheckResult {
   requiresManageAccessControl: boolean;
 }
 
+/**
+ * The GetObjectsRequiringPrivilegeCheckResult interface represents the authorization
+ * result for an array of saved object and includes both a set of types that require
+ * a check for the manage access control privilege, and an array of objects each with
+ * and individual requiresManageAccessControl flag.
+ */
 export interface GetObjectsRequiringPrivilegeCheckResult {
   types: Set<string>;
   objects: ObjectRequiringPrivilegeCheckResult[];
@@ -378,10 +389,19 @@ export interface RedactNamespacesParams<T, A extends string> {
 
 export type WithAuditName<T> = T & { name?: string };
 
+/**
+ * The SetAccessControlToWriteParams interface defines the parameters for the setAccessControlToWrite
+ * function. It includes the incoming access control mode, saved object type, the createdBy
+ * (current user profile ID if it exists), and the accessControl attributes from the prfelight check.
+ */
 export interface SetAccessControlToWriteParams {
+  /** The access control mode (default | write_restricted) */
   accessMode: SavedObjectAccessControl['accessMode'] | undefined;
+  /** The saved object type */
   type: string;
+  /** The relevant user profile ID for the operation - used in create and bulk create */
   createdBy?: string;
+  /** The existing access control metadata from the operation's preflight check */
   preflightAccessControl?: SavedObjectAccessControl;
 }
 
