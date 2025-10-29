@@ -10,6 +10,7 @@
 import type {
   ConnectorIdLineParseResult,
   ForeachVariableLineParseResult,
+  TypeLineParseResult,
 } from './parse_line_for_completion';
 import { parseLineForCompletion } from './parse_line_for_completion';
 
@@ -511,19 +512,23 @@ describe('parseLineForCompletion', () => {
     });
 
     it('should parse type with - prefix', () => {
-      const result = parseLineForCompletion('- type: action');
+      const line = '- type: action';
+      const result = parseLineForCompletion(line);
       expect(result?.matchType).toBe('type');
       expect(result?.fullKey).toBe('action');
-    });
-
-    it('should parse type with name before it', () => {
-      const result = parseLineForCompletion('- name: myStep type: filter');
-      expect(result?.matchType).toBe('type');
-      expect(result?.fullKey).toBe('filter');
+      expect((result as TypeLineParseResult)?.valueStartIndex).toBe(
+        line.indexOf('type: ') + 'type: '.length
+      );
     });
 
     it('should parse empty type', () => {
       const result = parseLineForCompletion('type: ');
+      expect(result?.matchType).toBe('type');
+      expect(result?.fullKey).toBe('');
+    });
+
+    it('should parse empty type with - prefix', () => {
+      const result = parseLineForCompletion('  - type:  ');
       expect(result?.matchType).toBe('type');
       expect(result?.fullKey).toBe('');
     });
@@ -535,9 +540,13 @@ describe('parseLineForCompletion', () => {
     });
 
     it('should parse type with quotes (removes them)', () => {
-      const result = parseLineForCompletion('type: "webhook"');
+      const line = 'type: "webhook"';
+      const result = parseLineForCompletion(line);
       expect(result?.matchType).toBe('type');
       expect(result?.fullKey).toBe('webhook');
+      expect((result as TypeLineParseResult)?.valueStartIndex).toBe(
+        line.indexOf('type: ') + 'type: '.length
+      );
     });
 
     it('should parse type with single quotes (removes them)', () => {
@@ -546,16 +555,19 @@ describe('parseLineForCompletion', () => {
       expect(result?.fullKey).toBe('filter');
     });
 
-    it('should parse type case-insensitive', () => {
+    it('should not parse type case-insensitive', () => {
       const result = parseLineForCompletion('Type: webhook');
-      expect(result?.matchType).toBe('type');
-      expect(result?.fullKey).toBe('webhook');
+      expect(result).toBeNull();
     });
 
     it('should parse type with indentation', () => {
-      const result = parseLineForCompletion('    type: script');
+      const line = '    type: script';
+      const result = parseLineForCompletion(line);
       expect(result?.matchType).toBe('type');
       expect(result?.fullKey).toBe('script');
+      expect((result as TypeLineParseResult)?.valueStartIndex).toBe(
+        line.indexOf('type: ') + 'type: '.length
+      );
     });
 
     it('should parse type with tabs', () => {
@@ -564,9 +576,8 @@ describe('parseLineForCompletion', () => {
       expect(result?.fullKey).toBe('webhook');
     });
 
-    it('should parse type with extra spaces', () => {
+    it('should not parse type when there are spaces before the colon', () => {
       const result = parseLineForCompletion('  type  :   filter  ');
-      // The regex doesn't match when there are spaces before the colon
       expect(result).toBeNull();
     });
 
@@ -582,16 +593,9 @@ describe('parseLineForCompletion', () => {
       expect(result?.fullKey).toBe('log_message');
     });
 
-    it('should parse type in complex line with name', () => {
-      const result = parseLineForCompletion('  - name: processData type: trans');
-      expect(result?.matchType).toBe('type');
-      expect(result?.fullKey).toBe('trans');
-    });
-
-    it('should parse type with mixed case in keyword', () => {
+    it('should not parse type with mixed case in keyword', () => {
       const result = parseLineForCompletion('  TyPe: webhook');
-      expect(result?.matchType).toBe('type');
-      expect(result?.fullKey).toBe('webhook');
+      expect(result).toBeNull();
     });
   });
 

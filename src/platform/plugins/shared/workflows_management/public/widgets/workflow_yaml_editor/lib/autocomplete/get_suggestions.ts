@@ -10,8 +10,8 @@
 import type { monaco } from '@kbn/monaco';
 import type { ExtendedAutocompleteContext } from './autocomplete.types';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
+import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
 import { getWithBlockSuggestions } from './connector_with/get_with_block_suggestions';
-import { getDirectTypeSuggestions } from './get_direct_type_suggestions';
 import {
   createLiquidBlockKeywordCompletions,
   createLiquidFilterCompletions,
@@ -19,6 +19,8 @@ import {
 } from './liquid/liquid_completions';
 import { getRRuleSchedulingSuggestions } from './rrule/get_rrule_scheduling_suggestions';
 import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
+import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
+import { isInTriggersContext } from './triggers_utils';
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
 
 export function getSuggestions(
@@ -70,25 +72,36 @@ export function getSuggestions(
   // Check if we're trying to complete a type field, regardless of schema validation
   // TODO: remove this, schema should be that forgiving so we don't need another handler
 
-  if (lineParseResult?.matchType === 'type') {
-    return getDirectTypeSuggestions(autocompleteContext);
+  if (lineParseResult?.matchType === 'type' && isInTriggersContext(autocompleteContext.path)) {
+    // For snippets, we need to replace from the start of the type value to the end of the line
+    const adjustedRange = {
+      ...autocompleteContext.range,
+      startColumn: lineParseResult.valueStartIndex + 1,
+      endColumn: autocompleteContext.line.length + 1, // Go to end of line to allow multi-line insertion
+    };
+    return getTriggerTypeSuggestions(lineParseResult.fullKey, adjustedRange);
+  }
+
+  if (lineParseResult?.matchType === 'type' && autocompleteContext.dynamicConnectorTypes) {
+    const adjustedRange = {
+      ...autocompleteContext.range,
+      startColumn: lineParseResult.valueStartIndex + 1,
+      endColumn: autocompleteContext.line.length + 1, // Go to end of line to allow multi-line insertion
+    };
+    return getConnectorTypeSuggestions(
+      lineParseResult.fullKey,
+      adjustedRange,
+      autocompleteContext.dynamicConnectorTypes
+    );
   }
 
   if (lineParseResult?.matchType === 'timezone') {
-    const { position } = autocompleteContext;
-    // TODO: this should be done in the parseLineForCompletion
-    const prefix = lineParseResult.match[1].trim();
-    const tzidValueStart =
-      (lineParseResult.match.index ?? 0) +
-      lineParseResult.match[0].indexOf(lineParseResult.match[1]);
-    const tzidValueRange = {
-      startLineNumber: position.lineNumber,
-      endLineNumber: position.lineNumber,
-      startColumn: tzidValueStart + 1,
-      endColumn: position.column,
+    const adjustedRange = {
+      ...autocompleteContext.range,
+      startColumn: lineParseResult.valueStartIndex + 1,
     };
 
-    return getTimezoneSuggestions(tzidValueRange, prefix);
+    return getTimezoneSuggestions(adjustedRange, lineParseResult.fullKey);
   }
 
   const { model, position } = autocompleteContext;

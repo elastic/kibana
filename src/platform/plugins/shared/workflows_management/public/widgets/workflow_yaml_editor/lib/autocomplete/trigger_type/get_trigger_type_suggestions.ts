@@ -29,9 +29,12 @@ export function getTriggerTypeSuggestions(
   const builtInTriggerTypes = getBuiltInTriggerTypesFromSchema();
 
   // Filter trigger types that match the prefix
-  const matchingTriggerTypes = builtInTriggerTypes.filter((triggerType) =>
-    triggerType.type.toLowerCase().includes(typePrefix.toLowerCase().trim())
-  );
+  const matchingTriggerTypes =
+    typePrefix.length > 0
+      ? builtInTriggerTypes.filter((triggerType) =>
+          triggerType.type.toLowerCase().includes(typePrefix.toLowerCase().trim())
+        )
+      : builtInTriggerTypes;
 
   matchingTriggerTypes.forEach((triggerType) => {
     const snippetText = generateTriggerSnippet(triggerType.type as TriggerType);

@@ -55,11 +55,13 @@ export interface ConnectorIdLineParseResult extends BaseLineParseResult {
 export interface TypeLineParseResult extends BaseLineParseResult {
   matchType: 'type';
   match: RegExpMatchArray;
+  valueStartIndex: number;
 }
 
 export interface TimezoneLineParseResult extends BaseLineParseResult {
   matchType: 'timezone';
   match: RegExpMatchArray;
+  valueStartIndex: number;
 }
 
 export type LineParseResult =
@@ -73,27 +75,31 @@ export type LineParseResult =
 
 // eslint-disable-next-line complexity
 export function parseLineForCompletion(lineUpToCursor: string): LineParseResult | null {
-  const timezoneFieldMatch = lineUpToCursor.match(/^\s*(?:tzid|timezone)\s*:\s*(.*)$/);
-  if (timezoneFieldMatch) {
-    const timezonePrefix = timezoneFieldMatch[1].trim();
+  const timezoneFieldMatch = lineUpToCursor.match(
+    /^(?<prefix>\s*(?:tzid|timezone)\s*:\s*)(?<value>.*)$/
+  );
+  if (timezoneFieldMatch && timezoneFieldMatch.groups) {
+    const timezonePrefix = timezoneFieldMatch.groups.value.trim();
     return {
       matchType: 'timezone',
       fullKey: timezonePrefix,
       match: timezoneFieldMatch,
+      valueStartIndex: timezoneFieldMatch.groups?.prefix.length + 1 ?? 0,
     };
   }
 
-  const typeMatch = lineUpToCursor.match(/^\s*-?\s*(?:name:\s*\w+\s*)?type:\s*(.*)$/i);
-  if (typeMatch) {
-    const typePrefix = typeMatch[1].replace(/['"]/g, '').trim();
+  const typeMatch = lineUpToCursor.match(/^(?<prefix>\s*-?\s*type:)\s*(?<value>.*)$/);
+  if (typeMatch && typeMatch.groups) {
+    const typePrefix = typeMatch.groups.value.replace(/['"]/g, '').trim();
     return {
       matchType: 'type',
       fullKey: typePrefix,
       match: typeMatch,
+      valueStartIndex: typeMatch.groups.prefix.length + 1,
     };
   }
 
-  const connectorIdMatch = lineUpToCursor.match(/^(?<prefix>\s*connector-id:)\s*(?<value>.*)$/i);
+  const connectorIdMatch = lineUpToCursor.match(/^(?<prefix>\s*connector-id:)\s*(?<value>.*)$/);
   if (connectorIdMatch && connectorIdMatch.groups) {
     const connectorId = connectorIdMatch.groups?.value.trim() ?? '';
     return {
