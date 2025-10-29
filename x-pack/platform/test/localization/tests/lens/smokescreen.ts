@@ -407,25 +407,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.editDimensionLabel('Test of label');
       await lens.editDimensionFormat(termTranslator('Percent'));
       await lens.editDimensionColor('#ff0000');
-<<<<<<< HEAD
-      await lens.closeDimensionEditor();
-
-      await lens.openVisualOptions();
-=======
 
       await lens.openStyleSettingsFlyout();
->>>>>>> 0713954b64c7 (Fix functional tests)
 
       await lens.setCurvedLines('CURVE_MONOTONE_X');
       await lens.editMissingValues('Linear');
 
       await lens.assertMissingValues(termTranslator('Linear'));
 
-<<<<<<< HEAD
-      await lens.closeVisualOptionsPopover();
-=======
       await lens.closeFlyout();
->>>>>>> 0713954b64c7 (Fix functional tests)
 
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await lens.assertColor('#ff0000');
@@ -505,9 +495,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await lens.openTextOptions();
+      await lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
-      await lens.closeTitlesAndTextOptionsPopover();
+      await lens.closeFlyout();
 
       // check for value labels
       let data = await lens.getCurrentChartDebugState('xyVisChart');

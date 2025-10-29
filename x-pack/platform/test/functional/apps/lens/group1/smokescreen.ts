@@ -296,9 +296,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await lens.openTextOptions();
+      await lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
-      await lens.closeTitlesAndTextOptionsPopover();
+      await lens.closeFlyout();
 
       // check for value labels
       const data = await lens.getCurrentChartDebugState('xyVisChart');

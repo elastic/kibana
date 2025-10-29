@@ -59,10 +59,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setEuiSwitch('lnsDynamicColoringGaugeSwitch', 'check');
       await lens.closeDimensionEditor();
 
-      await lens.openTextOptions();
+      await lens.openStyleSettingsFlyout();
       await lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title');
       await lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom', {});
       await lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
+      await lens.closeFlyout();
 
       await lens.waitForVisualization('gaugeChart');
       await lens.openDimensionEditor('lnsGauge_goalDimensionPanel > lns-empty-dimension');
