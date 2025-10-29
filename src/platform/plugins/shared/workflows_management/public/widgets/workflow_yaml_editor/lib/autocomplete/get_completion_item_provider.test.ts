@@ -60,6 +60,7 @@ steps:
       );
     });
 
+    // TODO: fix, this is failing because we now trying to fix yaml syntax before passing yaml to the autocomplete context
     it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', async () => {
       const yamlContent = `
 version: "1"
@@ -558,7 +559,7 @@ steps:
   - name: test
     type: set_variable
     with:
-      message: "{{ user.name | `;
+      message: "{{ user.name | |<-`;
 
       const result = await getSuggestions(yamlContent);
 
@@ -576,7 +577,7 @@ steps:
   - name: test
     type: set_variable
     with:
-      message: "{{ user.name | up`;
+      message: "{{ user.name | up|<-`;
 
       const result = await getSuggestions(yamlContent);
 
@@ -594,7 +595,7 @@ steps:
     type: set_variable
     with:
       content: |
-        {% `;
+        {% |<-`;
 
       const result = await getSuggestions(yamlContent);
 
@@ -612,7 +613,7 @@ steps:
     type: set_variable
     with:
       content: |
-        {% if`;
+        {% if|<-`;
 
       const result = await getSuggestions(yamlContent);
 
@@ -630,7 +631,7 @@ steps:
     with:
       message: |-
         {%- liquid
-\t\t\t`;
+\t\t\t|<-`;
 
       const result = await getSuggestions(yamlContent);
 
@@ -652,7 +653,7 @@ steps:
     with:
       message: |-
         {%- liquid
-\t  `;
+\t  |<-`;
 
       const result = await getSuggestions(yamlContent);
 
@@ -678,7 +679,7 @@ steps:
           assign x = 1
           {%- liquid
             assign y = 2
-            `;
+            |<-`;
 
       const result = await getSuggestions(yamlContent);
 
@@ -699,7 +700,7 @@ steps:
         {%- liquid
           assign x = 1
         -%}
-        `;
+        |<-`;
 
       const result = await getSuggestions(yamlContent);
 

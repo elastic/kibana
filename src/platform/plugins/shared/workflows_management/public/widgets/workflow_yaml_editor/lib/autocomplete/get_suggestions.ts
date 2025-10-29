@@ -26,6 +26,12 @@ export function getSuggestions(
 ): monaco.languages.CompletionItem[] {
   const { lineParseResult } = autocompleteContext;
 
+  // Check if we're in a scheduled trigger's with block for RRule suggestions
+  if (autocompleteContext.isInScheduledTriggerWithBlock) {
+    // We're in a scheduled trigger's with block - provide RRule suggestions
+    return getRRuleSchedulingSuggestions(autocompleteContext.range);
+  }
+
   if (lineParseResult?.matchType === 'connector-id') {
     return getConnectorIdSuggestions(autocompleteContext);
   }
@@ -44,7 +50,7 @@ export function getSuggestions(
     lineParseResult?.matchType === 'liquid-filter' ||
     lineParseResult?.matchType === 'liquid-block-filter'
   ) {
-    return createLiquidFilterCompletions(autocompleteContext);
+    return createLiquidFilterCompletions(autocompleteContext.range, lineParseResult?.fullKey ?? '');
   }
 
   // Liquid syntax completion ({% %})
@@ -80,12 +86,6 @@ export function getSuggestions(
     };
 
     return getTimezoneSuggestions(tzidValueRange, prefix);
-  }
-
-  // Check if we're in a scheduled trigger's with block for RRule suggestions
-  if (autocompleteContext.isInScheduledTriggerWithBlock) {
-    // We're in a scheduled trigger's with block - provide RRule suggestions
-    return getRRuleSchedulingSuggestions(autocompleteContext.range);
   }
 
   const { model, position } = autocompleteContext;

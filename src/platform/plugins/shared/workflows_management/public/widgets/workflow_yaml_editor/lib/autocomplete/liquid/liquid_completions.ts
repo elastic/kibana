@@ -477,20 +477,11 @@ export const LIQUID_FILTERS = [
  * Creates Monaco completion items for Liquid filters
  */
 export function createLiquidFilterCompletions(
-  autocompleteContext: AutocompleteContext
+  range: monaco.IRange,
+  prefix: string
 ): monaco.languages.CompletionItem[] {
-  const { lineParseResult, range, isInLiquidBlock } = autocompleteContext;
-  if (
-    !lineParseResult ||
-    (lineParseResult.matchType === 'liquid-block-filter' && !isInLiquidBlock)
-  ) {
-    return [];
-  }
-  const filterPrefix = lineParseResult.fullKey;
-  const filteredFilters = filterPrefix
-    ? LIQUID_FILTERS.filter((filter) =>
-        filter.name.toLowerCase().startsWith(filterPrefix.toLowerCase())
-      )
+  const filteredFilters = prefix
+    ? LIQUID_FILTERS.filter((filter) => filter.name.toLowerCase().startsWith(prefix.toLowerCase()))
     : LIQUID_FILTERS;
 
   return filteredFilters.map((filter) => ({
