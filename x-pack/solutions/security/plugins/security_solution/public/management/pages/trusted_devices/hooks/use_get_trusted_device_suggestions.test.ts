@@ -7,7 +7,7 @@
 
 import type { ReactQueryHookRenderer } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { useQuery as _useQuery } from '@kbn/react-query';
+import { useQuery as _useQuery } from '@tanstack/react-query';
 import { useGetTrustedDeviceSuggestions } from './use_get_trusted_device_suggestions';
 import { TrustedDevicesApiClient } from '../service/api_client';
 

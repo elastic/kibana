@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { UseQueryOptions, UseQueryResult } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { useQuery } from '@kbn/react-query';
 import { useHttp } from '../../../../common/lib/kibana/hooks';
 import { TrustedDevicesApiClient } from '../service/api_client';
+import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 
 export interface UseGetTrustedDeviceSuggestionsOptions {
   field: string;
