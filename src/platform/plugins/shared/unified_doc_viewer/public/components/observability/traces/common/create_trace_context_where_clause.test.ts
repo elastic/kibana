@@ -56,7 +56,7 @@ describe('createTraceContextWhereClauseForErrors', () => {
   it('returns a where AST node with traceId and error filters', () => {
     const pipeline = source.pipe(createTraceContextWhereClauseForErrors({ traceId: 'abc123' }));
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND (processor.event == "error" OR error.log.level == "error" OR (event_name IN ("exception", "error")))'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
 
@@ -65,7 +65,7 @@ describe('createTraceContextWhereClauseForErrors', () => {
       createTraceContextWhereClauseForErrors({ traceId: 'abc123', spanId: 'span456' })
     );
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND span.id == "span456" AND (processor.event == "error" OR error.log.level == "error" OR (event_name IN ("exception", "error")))'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND span.id == "span456" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
 
@@ -74,7 +74,7 @@ describe('createTraceContextWhereClauseForErrors', () => {
       createTraceContextWhereClauseForErrors({ traceId: 'abc123', transactionId: 'txn789' })
     );
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND (processor.event == "error" OR error.log.level == "error" OR (event_name IN ("exception", "error")))'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
 
@@ -87,7 +87,7 @@ describe('createTraceContextWhereClauseForErrors', () => {
       })
     );
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND span.id == "span456" AND (processor.event == "error" OR error.log.level == "error" OR (event_name IN ("exception", "error")))'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456") AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
 });
