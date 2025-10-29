@@ -768,6 +768,7 @@
     "@kbn/react-kibana-context-theme": "link:src/platform/packages/shared/react/kibana_context/theme",
     "@kbn/react-kibana-mount": "link:src/platform/packages/shared/react/kibana_mount",
     "@kbn/react-mute-legacy-root-warning": "link:src/platform/packages/private/kbn-react-mute-legacy-root-warning",
+    "@kbn/react-query": "link:src/platform/packages/shared/kbn-react-query",
     "@kbn/recently-accessed": "link:src/platform/packages/shared/kbn-recently-accessed",
     "@kbn/remote-clusters-plugin": "link:x-pack/platform/plugins/private/remote_clusters",
     "@kbn/rendering-plugin": "link:src/platform/test/plugin_functional/plugins/rendering_plugin",

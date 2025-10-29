@@ -1502,6 +1502,8 @@
       "@kbn/react-kibana-mount/*": ["src/platform/packages/shared/react/kibana_mount/*"],
       "@kbn/react-mute-legacy-root-warning": ["src/platform/packages/private/kbn-react-mute-legacy-root-warning"],
       "@kbn/react-mute-legacy-root-warning/*": ["src/platform/packages/private/kbn-react-mute-legacy-root-warning/*"],
+      "@kbn/react-query": ["src/platform/packages/shared/kbn-react-query"],
+      "@kbn/react-query/*": ["src/platform/packages/shared/kbn-react-query/*"],
       "@kbn/recently-accessed": ["src/platform/packages/shared/kbn-recently-accessed"],
       "@kbn/recently-accessed/*": ["src/platform/packages/shared/kbn-recently-accessed/*"],
       "@kbn/relocate": ["packages/kbn-relocate"],
