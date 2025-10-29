@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { lastValueFrom, of } from 'rxjs';
 import type { InferenceMessage } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/logging';
 import { collapseInternalToolCalls } from './convert_messages_for_inference';
 import type { Message } from './types';
 import { MessageRole } from './types';
-import type { Logger } from '@kbn/logging';
+import { addAnonymizationData } from '../server/service/client/operators/add_anonymization_data';
+import type { MessageAddEvent } from './conversation_complete';
+import { StreamingChatResponseEventType } from './conversation_complete';
 
 jest.mock('@kbn/inference-plugin/common/utils/generate_fake_tool_call_id', () => ({
   generateFakeToolCallId: jest.fn().mockReturnValue('123456'),
@@ -90,6 +94,16 @@ function formatMessage(msg: Message) {
   return toolName
     ? { role: msg.message.role, toolName }
     : { role: msg.message.role, message: msg.message.content };
+}
+
+function deanonymization(value: string) {
+  return [
+    {
+      start: 0,
+      end: value.length,
+      entity: { value, class_name: value.includes('@') ? 'EMAIL' : 'URL', mask: '[redacted]' },
+    },
+  ];
 }
 
 describe('collapseInternalToolCalls', () => {
@@ -431,3 +445,89 @@ describe('collapseInternalToolCalls', () => {
 });
 
 describe('convertMessagesForInference', () => {});
+
+describe('anonymization data mapping with collapsed messages', () => {
+  let baseUserMessages: Message[];
+  const availableToolNames = ['get_dataset_info', 'query'];
+
+  beforeEach(() => {
+    baseUserMessages = [
+      userMessage('My name is Claudia and my email is claudia@example.com'),
+      userMessage('My website is http://claudia.is'),
+    ];
+  });
+
+  it('maps deanonymizations when content is unchanged', async () => {
+    const collapsed = collapseInternalToolCalls({
+      messages: baseUserMessages,
+      availableToolNames,
+      logger: mockLogger,
+    });
+
+    const event: MessageAddEvent = {
+      type: StreamingChatResponseEventType.MessageAdd,
+      id: '1',
+      message: collapsed[0],
+      deanonymized_input: [
+        {
+          message: collapsed[0].message,
+          deanonymizations: deanonymization('claudia@example.com'),
+        },
+        {
+          message: collapsed[1].message,
+          deanonymizations: deanonymization('http://claudia.is'),
+        },
+      ],
+    };
+
+    const result = await lastValueFrom(of(event).pipe(addAnonymizationData(baseUserMessages)));
+
+    expect(result[0].message.deanonymizations).toHaveLength(1);
+    expect(result[0].message.deanonymizations?.[0].entity.value).toBe('claudia@example.com');
+
+    expect(result[1].message.deanonymizations).toHaveLength(1);
+    expect(result[1].message.deanonymizations?.[0].entity.value).toBe('http://claudia.is');
+  });
+
+  it('maps deanonymizations when messages are collapsed', async () => {
+    const messagesWithInternalTool: Message[] = [
+      ...baseUserMessages,
+      ...getTool('visualize_query'),
+    ];
+
+    const collapsed = collapseInternalToolCalls({
+      messages: messagesWithInternalTool,
+      availableToolNames,
+      logger: mockLogger,
+    });
+
+    const mutatedSecondUserMessage = collapsed.find(
+      (m) => m.message.role === MessageRole.User && m.message.content?.startsWith('My website')
+    )!.message.content!;
+
+    // Event with deanonymized_input referencing the mutated content
+    const event: MessageAddEvent = {
+      type: StreamingChatResponseEventType.MessageAdd,
+      id: '2',
+      message: baseUserMessages[0],
+      deanonymized_input: [
+        {
+          message: baseUserMessages[0].message,
+          deanonymizations: deanonymization('claudia@example.com'),
+        },
+        {
+          message: { ...baseUserMessages[1].message, content: mutatedSecondUserMessage },
+          deanonymizations: deanonymization('http://claudia.is'),
+        },
+      ],
+    };
+
+    const result = await lastValueFrom(of(event).pipe(addAnonymizationData(baseUserMessages)));
+
+    expect(result[0].message.deanonymizations).toHaveLength(1);
+    expect(result[0].message.deanonymizations?.[0].entity.value).toBe('claudia@example.com');
+
+    expect(result[1].message.deanonymizations).toHaveLength(1);
+    expect(result[1].message.deanonymizations?.[0].entity.value).toBe('http://claudia.is');
+  });
+});
