@@ -83,26 +83,7 @@ function wrapSpecialCharacters(yaml: string): string {
   const correctedLines: string[] = [];
 
   // Special characters that need to be quoted in YAML
-  const specialCharacters = [
-    '@',
-    '!',
-    '#',
-    '$',
-    '%',
-    '^',
-    '&',
-    '*',
-    // todo: add back when we have a way to handle them correctly, like '{ object}' is not valid, but '{ object: value }' is
-    // '{',
-    // '}',
-    // '[',
-    // ']',
-    '|',
-    '\\',
-    '>',
-    '<',
-    '?',
-  ];
+  const specialCharacters = ['@', '!', '#', '$', '%', '^', '&', '*', '|', '\\', '>', '<', '?'];
 
   for (const line of lines) {
     let correctedLine = line;
@@ -141,7 +122,10 @@ function wrapSpecialCharacters(yaml: string): string {
           continue;
         }
 
-        if (specialCharacters.includes(firstChar)) {
+        // Handle braces and brackets specially
+        if ((firstChar === '{' || firstChar === '[') && shouldWrapBrackets(value)) {
+          correctedLine = `${line.substring(0, colonIndex)}:${leadingSpaces}"${value}"`;
+        } else if (specialCharacters.includes(firstChar)) {
           // Wrap the entire value in quotes
           correctedLine = `${line.substring(0, colonIndex)}:${leadingSpaces}"${value}"`;
         } else if (value.includes('@') && !value.match(/^[\w.-]+@[\w.-]+$/)) {
@@ -155,6 +139,59 @@ function wrapSpecialCharacters(yaml: string): string {
   }
 
   return correctedLines.join('\n');
+}
+
+/**
+ * Checks if brackets/braces should be wrapped in quotes
+ * @param value - The value starting with { or [
+ * @returns True if the value should be wrapped
+ */
+function shouldWrapBrackets(value: string): boolean {
+  const trimmed = value.trim();
+
+  // Check for valid flow syntax patterns
+  if (trimmed.startsWith('{')) {
+    // Valid patterns: {}, { key: value }, { key: value, ... }
+    // Invalid patterns: {object}, { object}, etc.
+
+    // Empty object
+    if (trimmed === '{}') return false;
+
+    // Check if it's a valid flow mapping
+    // Look for colon after the opening brace (with optional whitespace)
+    const afterBrace = trimmed.substring(1).trim();
+    if (afterBrace.startsWith('}')) return false; // {}
+
+    // Check for key: value pattern
+    const colonMatch = afterBrace.match(/^[^:,}]+:/);
+    if (colonMatch) {
+      // This looks like a valid flow mapping
+      return false;
+    }
+
+    // Otherwise, it's likely invalid and should be wrapped
+    return true;
+  }
+
+  if (trimmed.startsWith('[')) {
+    // Valid patterns: [], [item1, item2], [ item1, item2 ]
+    // Invalid patterns: [array], [ array], etc.
+
+    // Empty array
+    if (trimmed === '[]') return false;
+
+    // Check if it ends with ]
+    if (!trimmed.endsWith(']')) {
+      // Incomplete array, might be valid when completed
+      return false;
+    }
+
+    // For now, we'll be conservative and not wrap arrays
+    // as they're more likely to be valid flow sequences
+    return false;
+  }
+
+  return false;
 }
 
 /**

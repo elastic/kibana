@@ -77,13 +77,50 @@ description: 'unclosed at start'`;
         { input: `value: ^caret`, expected: `value: "^caret"` },
         { input: `value: &reference`, expected: `value: "&reference"` },
         { input: `value: *pointer`, expected: `value: "*pointer"` },
-        { input: `value: {object}`, expected: `value: "{object}"` },
-        { input: `value: [array]`, expected: `value: "[array]"` },
         { input: `value: |pipe`, expected: `value: "|pipe"` },
         { input: `value: \\backslash`, expected: `value: "\\backslash"` },
         { input: `value: >folded`, expected: `value: ">folded"` },
         { input: `value: <tag>`, expected: `value: "<tag>"` },
         { input: `value: ?question`, expected: `value: "?question"` },
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        expect(correctYamlSyntax(input)).toBe(expected);
+      });
+    });
+
+    it('should wrap invalid brace patterns but not valid YAML flow syntax', () => {
+      const testCases = [
+        // Invalid patterns that should be wrapped
+        { input: `value: {object}`, expected: `value: "{object}"` },
+        { input: `value: { object}`, expected: `value: "{ object}"` },
+        { input: `value: {object }`, expected: `value: "{object }"` },
+        { input: `value: { object }`, expected: `value: "{ object }"` },
+
+        // Valid YAML flow syntax that should NOT be wrapped
+        { input: `value: {}`, expected: `value: {}` },
+        { input: `value: { }`, expected: `value: { }` },
+        { input: `value: { key: value }`, expected: `value: { key: value }` },
+        { input: `value: {key: value}`, expected: `value: {key: value}` },
+        { input: `value: { name: "test", id: 123 }`, expected: `value: { name: "test", id: 123 }` },
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        expect(correctYamlSyntax(input)).toBe(expected);
+      });
+    });
+
+    it('should handle square brackets conservatively', () => {
+      const testCases = [
+        // Arrays should generally not be wrapped as they're likely valid flow syntax
+        { input: `value: []`, expected: `value: []` },
+        { input: `value: [ ]`, expected: `value: [ ]` },
+        { input: `value: [array]`, expected: `value: [array]` },
+        { input: `value: [item1, item2]`, expected: `value: [item1, item2]` },
+        { input: `value: [ "item1", "item2" ]`, expected: `value: [ "item1", "item2" ]` },
+
+        // Incomplete arrays (being typed) should not be wrapped
+        { input: `value: [incomplete`, expected: `value: [incomplete` },
       ];
 
       testCases.forEach(({ input, expected }) => {
@@ -204,6 +241,30 @@ enabled:`;
 count: 42
 percentage: 100.5`;
       expect(correctYamlSyntax(input)).toBe(input);
+    });
+
+    it('should handle braces and brackets in complex scenarios', () => {
+      const input = `workflow:
+  name: 'My Workflow
+  config: {invalid}
+  validConfig: { key: "value" }
+  items: [item1, item2]
+  invalidBrace: { object }
+  emptyObject: {}
+  steps:
+    - with:
+        data: {malformed`;
+      const expected = `workflow:
+  name: 'My Workflow'
+  config: "{invalid}"
+  validConfig: { key: "value" }
+  items: [item1, item2]
+  invalidBrace: "{ object }"
+  emptyObject: {}
+  steps:
+    - with:
+        data: "{malformed"`;
+      expect(correctYamlSyntax(input)).toBe(expected);
     });
   });
 });
