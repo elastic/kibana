@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EntityType } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import { HostDetailsPanelKey } from '../../host_details_left';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { HostPanelKey } from '../../shared/constants';
 
 interface UseNavigateToHostDetailsParams {
@@ -22,13 +21,8 @@ interface UseNavigateToHostDetailsParams {
   hasMisconfigurationFindings: boolean;
   hasVulnerabilitiesFindings: boolean;
   hasNonClosedAlerts: boolean;
-  isPreviewMode?: boolean;
+  isPreviewMode: boolean;
   contextID: string;
-}
-
-interface UseNavigateToHostDetailsResult {
-  openDetailsPanel: (path: EntityDetailsPath) => void;
-  isLinkEnabled: boolean;
 }
 
 export const useNavigateToHostDetails = ({
@@ -40,22 +34,15 @@ export const useNavigateToHostDetails = ({
   hasNonClosedAlerts,
   isPreviewMode,
   contextID,
-}: UseNavigateToHostDetailsParams): UseNavigateToHostDetailsResult => {
+}: UseNavigateToHostDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationDisabled'
-  );
 
   telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
     entity: EntityType.host,
   });
 
-  const isLinkEnabled = useMemo(() => {
-    return !isPreviewMode || (isNewNavigationEnabled && isPreviewMode);
-  }, [isNewNavigationEnabled, isPreviewMode]);
-
-  const openDetailsPanel = useCallback(
+  return useCallback(
     (path?: EntityDetailsPath) => {
       const left = {
         id: HostDetailsPanelKey,
@@ -79,17 +66,13 @@ export const useNavigateToHostDetails = ({
         },
       };
 
-      // When new navigation is enabled, nevigation in preview is enabled and open a new flyout
-      if (isNewNavigationEnabled && isPreviewMode) {
+      if (isPreviewMode) {
         openFlyout({ right, left });
-      }
-      // When not in preview mode, open left panel as usual
-      else if (!isPreviewMode) {
+      } else {
         openLeftPanel(left);
       }
     },
     [
-      isNewNavigationEnabled,
       isPreviewMode,
       openFlyout,
       openLeftPanel,
@@ -102,6 +85,4 @@ export const useNavigateToHostDetails = ({
       contextID,
     ]
   );
-
-  return { openDetailsPanel, isLinkEnabled };
 };
