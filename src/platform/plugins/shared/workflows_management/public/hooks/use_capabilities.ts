@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows/common/constants';
+import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 import { useKibana } from './use_kibana';
 
 const CapabilitiesMap = {
-  canCreateWorkflow: 'createWorkflow',
-  canReadWorkflow: 'readWorkflow',
-  canUpdateWorkflow: 'updateWorkflow',
-  canDeleteWorkflow: 'deleteWorkflow',
-  canExecuteWorkflow: 'executeWorkflow',
-  canReadWorkflowExecution: 'readWorkflowExecution',
-  canCancelWorkflowExecution: 'cancelWorkflowExecution',
+  canCreateWorkflow: WorkflowsManagementUiActions.create,
+  canReadWorkflow: WorkflowsManagementUiActions.read,
+  canUpdateWorkflow: WorkflowsManagementUiActions.update,
+  canDeleteWorkflow: WorkflowsManagementUiActions.delete,
+  canExecuteWorkflow: WorkflowsManagementUiActions.execute,
+  canReadWorkflowExecution: WorkflowsManagementUiActions.readExecution,
+  canCancelWorkflowExecution: WorkflowsManagementUiActions.cancelExecution,
 } as const;
 
 export type CapabilitiesKey = keyof typeof CapabilitiesMap;
@@ -24,11 +26,12 @@ export type WorkflowsManagementCapabilities = Record<CapabilitiesKey, boolean>;
 
 export const useCapabilities = (): WorkflowsManagementCapabilities => {
   const { application } = useKibana().services;
+  const workflowsCapabilities = application?.capabilities?.[WORKFLOWS_MANAGEMENT_FEATURE_ID] ?? {};
 
   return Object.fromEntries(
     Object.entries(CapabilitiesMap).map(([key, value]) => [
       key,
-      Boolean(application?.capabilities.workflowsManagement?.[value]),
+      Boolean(workflowsCapabilities[value]),
     ])
   ) as WorkflowsManagementCapabilities;
 };
