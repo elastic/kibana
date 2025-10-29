@@ -77,8 +77,9 @@ describe('createAgentPolicyWithPackages', () => {
     mockedPackagePolicyService.buildPackagePolicyFromPackage.mockImplementation(
       (soClient, packageToInstall) => Promise.resolve(getPackagePolicy(packageToInstall))
     );
-    mockIncrementPackageName.mockImplementation((packageName: string, spaceIds: string[]) =>
-      Promise.resolve(`${packageName}-1`)
+    mockIncrementPackageName.mockImplementation(
+      (soClient: any, packageName: string, spaceIds: string[]) =>
+        Promise.resolve(`${packageName}-1`)
     );
     mockedPackagePolicyService.create.mockImplementation((soClient, esClient, newPolicy) =>
       Promise.resolve({

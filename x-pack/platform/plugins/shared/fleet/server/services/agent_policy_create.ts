@@ -89,6 +89,7 @@ async function createPackagePolicy(
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
   newPackagePolicy.name = await incrementPackageName(
+    soClient,
     packageToInstall,
     agentPolicy.space_ids ?? [options.spaceId]
   );

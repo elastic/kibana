@@ -15,20 +15,27 @@ import { packagePolicyService } from '../package_policy';
 import { appContextService } from '..';
 
 export async function incrementPackageName(
+  soClient: SavedObjectsClientContract,
   packageName: string,
   spaceIds: string[]
 ): Promise<string> {
-  const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+  const isMultiSpace = spaceIds.length > 1;
+  const _soClient = isMultiSpace
+    ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
+    : soClient;
+
   // Fetch all packagePolicies having the package name
-  const packagePoliciesResult = await packagePolicyService.list(allSpacesSoClient, {
+  const packagePoliciesResult = await packagePolicyService.list(_soClient, {
     perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
-    spaceId: '*',
+    spaceId: isMultiSpace ? '*' : undefined,
   });
 
-  const packagePolicies = packagePoliciesResult.items.filter((packagePolicy) => {
-    return packagePolicy.spaceIds?.some((spaceId) => spaceIds.includes(spaceId));
-  });
+  const packagePolicies = isMultiSpace
+    ? packagePoliciesResult.items.filter((packagePolicy) => {
+        return packagePolicy.spaceIds?.some((spaceId) => spaceIds.includes(spaceId));
+      })
+    : packagePoliciesResult.items;
 
   return getMaxPackageName(packageName, packagePolicies);
 }
