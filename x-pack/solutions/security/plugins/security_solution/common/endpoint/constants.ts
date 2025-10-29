@@ -19,6 +19,7 @@ export const ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN = `${ENDPOINT_ACTION_RESPON
 
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const FILE_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.file-*';
+export const DEVICE_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.device-*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 
 // metadata datastream

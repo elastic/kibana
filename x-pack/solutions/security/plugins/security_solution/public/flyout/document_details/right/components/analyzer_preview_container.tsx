@@ -14,7 +14,6 @@ import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 /**
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
@@ -23,9 +22,6 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   const { dataAsNestedObject, isRulePreview, eventId, indexName, scopeId, isPreviewMode } =
     useDocumentDetailsContext();
 
-  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationDisabled'
-  );
   // decide whether to show the analyzer preview or not
   const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
@@ -39,18 +35,11 @@ export const AnalyzerPreviewContainer: React.FC = () => {
 
   const iconType = useMemo(() => (!isPreviewMode ? 'arrowStart' : undefined), [isPreviewMode]);
 
-  const isNavigationEnabled = useMemo(() => {
-    // if the analyzer is not enabled or in rule preview mode, the navigation is not enabled
-    if (!isEnabled || isRulePreview) {
-      return false;
-    }
-    // if the new navigation is enabled, the navigation is enabled (flyout or timeline)
-    if (isNewNavigationEnabled) {
-      return true;
-    }
-    // if the new navigation is not enabled, the navigation is enabled if the flyout is not in preview mode
-    return !isPreviewMode;
-  }, [isNewNavigationEnabled, isPreviewMode, isEnabled, isRulePreview]);
+  // if the analyzer is not enabled or in rule preview mode, the navigation is not enabled
+  const isNavigationEnabled = useMemo(
+    () => !(!isEnabled || isRulePreview),
+    [isEnabled, isRulePreview]
+  );
 
   return (
     <ExpandablePanel
