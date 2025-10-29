@@ -489,6 +489,8 @@ export const FullAgentPolicyResponseSchema = schema.object({
         secrets: schema.maybe(BaseSecretsSchema),
         timeout: schema.maybe(schema.string()),
         target_directory: schema.maybe(schema.string()),
+        proxy_url: schema.maybe(schema.string()),
+        proxy_headers: schema.maybe(schema.any()),
       }),
       features: schema.recordOf(
         schema.string(),

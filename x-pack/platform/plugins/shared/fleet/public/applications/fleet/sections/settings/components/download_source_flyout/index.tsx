@@ -7,6 +7,7 @@
 
 import React, { useMemo, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFlyout,
@@ -110,6 +111,14 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
     onToggleSecretStorage(secretEnabled);
   };
 
+  const onToggleSelectProxy = (options: EuiComboBoxOptionOption<string>[]) => {
+    inputs.proxyIdInput.setValue(options?.[0]?.value ?? '');
+    inputs.sslKeyInput.clear();
+    inputs.sslKeySecretInput.setValue('');
+    inputs.sslCertificateInput.clear();
+    inputs.sslCertificateAuthoritiesInput.setValue([]);
+  };
+
   const flyoutTitleId = useGeneratedHtmlId();
 
   return (
@@ -202,7 +211,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             helpText={
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.proxyInputDescription"
-                defaultMessage="Proxy used for accessing the download source. Currently only the proxy URL is used, headers and certificates are not supported."
+                defaultMessage="Proxy used for accessing the download source. When selected, the SSL settings and headers from the proxy will be used."
               />
             }
           >
@@ -210,7 +219,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               fullWidth
               data-test-subj="settingsOutputsFlyout.proxyIdInput"
               {...inputs.proxyIdInput.props}
-              onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+              onChange={onToggleSelectProxy}
               selectedOptions={
                 inputs.proxyIdInput.value !== ''
                   ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
@@ -245,6 +254,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
           </EuiFormRow>
           <EuiSpacer size="m" />
           <SSLFormSection
+            disabled={inputs.proxyIdInput.value !== ''}
             inputs={inputs}
             useSecretsStorage={enableSSLSecrets && useSecretsStorage}
             isConvertedToSecret={isConvertedToSecret.sslKey}
