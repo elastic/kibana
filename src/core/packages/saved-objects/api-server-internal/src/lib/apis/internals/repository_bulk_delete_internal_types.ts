@@ -15,7 +15,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-server';
-import type { Either } from '../utils';
+import type { Either } from '@kbn/core-saved-objects-api-server';
 import type { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';
 
 /**

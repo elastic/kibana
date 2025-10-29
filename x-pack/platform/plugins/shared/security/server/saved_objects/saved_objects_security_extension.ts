@@ -6,15 +6,20 @@
  */
 
 import type { EcsEvent } from '@elastic/ecs';
+import type { Payload } from '@hapi/boom';
 
-import type {
-  SavedObjectAccessControl,
-  SavedObjectReferenceWithContext,
-  SavedObjectsFindResult,
-  SavedObjectsResolveResponse,
+import {
+  type Either,
+  isLeft,
+  left,
+  type SavedObjectAccessControl,
+  type SavedObjectReferenceWithContext,
+  type SavedObjectsFindResult,
+  type SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/internals/internal_bulk_resolve';
+import { errorContent } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -604,6 +609,26 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     );
   }
 
+  private allRequestedObjectAreInaccessible(
+    typesAndSpaces: Map<string, Set<string>>,
+    inaccessibleTypes: Set<string>,
+    allAccessControlObjects: ObjectRequiringPrivilegeCheckResult[],
+    inaccessibleObjects: Set<ObjectRequiringPrivilegeCheckResult>
+  ): boolean {
+    const allTypes = [...typesAndSpaces.keys()];
+
+    const allAccessControlObjectsAreInaccessible = this.allAccessControlObjectsAreInaccessible(
+      allAccessControlObjects,
+      inaccessibleObjects
+    );
+
+    return (
+      allAccessControlObjectsAreInaccessible &&
+      allTypes.length === inaccessibleTypes.size &&
+      allTypes.every((type) => inaccessibleTypes.has(type))
+    );
+  }
+
   /*
    * The enforce method uses the result of an authorization check authorization map) and a map
    * of types to spaces (type map) to determine if the action is authorized for all types and spaces
@@ -654,18 +679,20 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         ) {
           inaccessibleTypes.add(type);
           accessControlObjectsToCheck
-            ?.filter((obj) => obj.type === type)
+            ?.filter((obj) => obj.type === type && obj.requiresManageAccessControl)
             .forEach((obj) => inaccessibleObjects.add(obj));
         }
       }
     }
 
-    const allAccessControlObjectsAreInaccessible = this.allAccessControlObjectsAreInaccessible(
+    const allRequestedObjectAreInaccessible = this.allRequestedObjectAreInaccessible(
+      typesAndSpaces,
+      inaccessibleTypes,
       allAccessControlObjects,
       inaccessibleObjects
     );
 
-    if (unauthorizedTypes.size > 0 || allAccessControlObjectsAreInaccessible) {
+    if (unauthorizedTypes.size > 0 || allRequestedObjectAreInaccessible) {
       const uniqueTypes = new Set([...unauthorizedTypes, ...inaccessibleTypes]);
       const targetTypes = [...uniqueTypes].sort().join(',');
       const inaccessibleObjectsString = [...inaccessibleObjects]
@@ -673,7 +700,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         .sort()
         .join(',');
       const msg = `Unable to ${authzAction} ${targetTypes}${
-        allAccessControlObjectsAreInaccessible
+        inaccessibleObjects.size > 0
           ? ', access control restrictions for ' + inaccessibleObjectsString
           : ''
       }`; // could potnentially include the list of objects that were inaccessible
@@ -1250,16 +1277,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     };
   }
 
-  // getTypesRequiringAccessControlCheck(
-  //   objects: AuthorizeObject[],
-  //   action: SecurityAction = SecurityAction.CHANGE_OWNERSHIP
-  // ) {
-  //   return this.accessControlService.getObjectsRequiringPrivilegeCheck({
-  //     objects,
-  //     actions: new Set([action]),
-  //   }) as GetObjectsRequiringPrivilegeCheckResult;
-  // }
-
   auditClosePointInTime() {
     this.addAuditEvent({
       action: AuditAction.CLOSE_POINT_IN_TIME,
@@ -1724,6 +1741,66 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       });
 
     return accessControlToWrite;
+  }
+
+  /**
+   * Filters out objects that are inaccessible due to access control restrictions during bulk actions.
+   * If an object is found in the `inaccessibleObjects` array, returns a left error result for that object.
+   * Otherwise, returns the original expected result with an updated esRequestIndex.
+   *
+   * @template L - Left (error) type
+   * @template R - Right (success) type
+   * @param expectedResults - Array of Either<L, R> results (left: error, right: valid object)
+   * @param inaccessibleObjects - Array of objects that are inaccessible due to access control
+   * @returns Array of Either<L, R> with inaccessible objects converted to error results
+   */
+  async filterInaccessibleObjectsForBulkAction<
+    L extends { type: string; id?: string; error: Payload },
+    R extends { type: string; id: string; esRequestIndex?: number }
+  >(
+    expectedResults: Array<Either<L, R>>,
+    inaccessibleObjects: Array<{ type: string; id: string }>,
+    action: 'bulk_create' | 'bulk_update' | 'bulk_delete',
+    reindex?: boolean
+  ): Promise<Array<Either<L, R>>> {
+    let reIndexCounter = 0;
+    const verbMap = new Map([
+      ['bulk_create', 'Overwriting'], // inaccessible objects during create can only be a result of overwriting
+      ['bulk_update', 'Updating'],
+      ['bulk_delete', 'Deleting'],
+    ]);
+    return Promise.all(
+      expectedResults.map(async (result) => {
+        if (isLeft<L, R>(result)) {
+          return result;
+        }
+        if (
+          inaccessibleObjects.find(
+            (obj) => obj.type === result.value.type && obj.id === result.value.id
+          )
+        ) {
+          return left({
+            id: result.value.id,
+            type: result.value.type,
+            error: {
+              ...errorContent(
+                SavedObjectsErrorHelpers.decorateForbiddenError(
+                  new Error(
+                    `${
+                      verbMap.get(action) ?? 'Affecting'
+                    } objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.`
+                  )
+                )
+              ),
+            },
+          } as L);
+        }
+        return {
+          ...result,
+          ...(reindex && { value: { ...result.value, esRequestIndex: reIndexCounter++ } }),
+        } as Either<L, R>;
+      })
+    );
   }
 }
 

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { isEnterForeach } from '@kbn/workflows/graph';
 import type { Document } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
+import { isEnterForeach } from '@kbn/workflows/graph';
 import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { getCurrentPath, getStepNode } from '../../../../common/lib/yaml_utils';
-import type { VariableItem } from '../model/types';
 import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
+import type { VariableItem } from '../model/types';
 
 export function collectAllVariables(
   model: monaco.editor.ITextModel,
@@ -27,6 +27,7 @@ export function collectAllVariables(
   // TODO: remove if/when foreach uses mustache expressions
   for (const node of workflowGraph?.getAllNodes() ?? []) {
     if (!isEnterForeach(node)) {
+      // eslint-disable-next-line no-continue
       continue;
     }
     const yamlNode = getStepNode(yamlDocument, node.stepId);
