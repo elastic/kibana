@@ -49,11 +49,6 @@ This tool will:
     tags: [],
     handler: async ({ title, description, panels }, { logger, request, esClient }) => {
       try {
-        // TODO: this flow is temporary until we define a proper way of creating a dashboard (saving, not saving, embedding portable etc)
-
-        // eslint-disable-next-line no-console
-        console.log('create_dashboard called with:', { title, description, panels });
-
         const dashboardContentClient = dashboard.getContentClient();
         if (!dashboardContentClient) {
           throw new Error('Dashboard content client is not available');
