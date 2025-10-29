@@ -42,9 +42,7 @@ describe('<HeaderRow />', () => {
     const { getByTestId } = render(<HeaderRow item={item} />);
 
     const link = getByTestId(GROUPED_ITEM_TITLE_TEST_ID);
-    fireEvent.click(link);
-    fireEvent.click(link);
-    fireEvent.click(link);
+    Array.from({ length: 3 }).forEach(() => fireEvent.click(link));
     await flushMicrotasks();
 
     expect(next).toHaveBeenCalledTimes(1);
