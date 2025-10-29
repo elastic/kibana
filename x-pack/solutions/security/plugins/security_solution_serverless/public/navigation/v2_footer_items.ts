@@ -101,14 +101,11 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
           title: i18nStrings.stackManagementV2.organization.title,
           breadcrumbStatus: 'hidden',
           children: [
-            // TODO: verify visibility of Users and Roles link
             {
               cloudLink: 'billingAndSub',
             },
-            // TODO: verify visibility of Users and Roles link
             {
               cloudLink: 'userAndRoles',
-              title: i18nStrings.stackManagement.access.usersAndRoles,
             },
           ],
         },
