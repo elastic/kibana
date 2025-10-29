@@ -26,6 +26,7 @@ export * from './actions/response_actions/upload';
 export * from './actions/response_actions/scan';
 export * from './actions/response_actions/run_script';
 export * from './actions/response_actions/cancel';
+export * from './actions/response_actions/memory_dump';
 
 export * from './metadata';
 
