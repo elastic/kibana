@@ -20,28 +20,40 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
       validate: {
         body: buildRouteValidation(
           t.union([
-            t.strict({
-              status: t.union([
-                t.literal('open'),
-                t.literal('closed'),
-                t.literal('in-progress'), // TODO: remove after migration to acknowledged
-                t.literal('acknowledged'),
-              ]),
-              index: t.string,
-              ids: t.array(t.string),
-              query: t.undefined,
-            }),
-            t.strict({
-              status: t.union([
-                t.literal('open'),
-                t.literal('closed'),
-                t.literal('in-progress'), // TODO: remove after migration to acknowledged
-                t.literal('acknowledged'),
-              ]),
-              index: t.string,
-              ids: t.undefined,
-              query: t.union([t.object, t.string]),
-            }),
+            t.intersection([
+              t.strict({
+                index: t.string,
+                ids: t.array(t.string),
+                query: t.undefined,
+              }),
+              t.partial({
+                status: t.union([
+                  t.literal('open'),
+                  t.literal('closed'),
+                  t.literal('in-progress'), // TODO: remove after migration to acknowledged
+                  t.literal('acknowledged'),
+                ]),
+                addTags: t.array(t.string),
+                removeTags: t.array(t.string),
+              }),
+            ]),
+            t.intersection([
+              t.strict({
+                index: t.string,
+                ids: t.undefined,
+                query: t.union([t.object, t.string]),
+              }),
+              t.partial({
+                status: t.union([
+                  t.literal('open'),
+                  t.literal('closed'),
+                  t.literal('in-progress'), // TODO: remove after migration to acknowledged
+                  t.literal('acknowledged'),
+                ]),
+                addTags: t.array(t.string),
+                removeTags: t.array(t.string),
+              }),
+            ]),
           ])
         ),
       },
@@ -58,7 +70,7 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { status, ids, index, query } = req.body;
+        const { status, ids, index, query, addTags, removeTags } = req.body;
 
         if (ids != null && ids.length > 1000) {
           return response.badRequest({
@@ -73,6 +85,8 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
           status,
           query,
           index,
+          addTags,
+          removeTags,
         });
 
         if (updatedAlert == null) {
