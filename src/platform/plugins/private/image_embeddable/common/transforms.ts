@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import { ImageEmbeddableState } from '../server';
+import type { ImageEmbeddableState } from '../server';
 
 export function getTransforms(
   transformEnhancementsIn: EnhancementsRegistry['transformIn'],
