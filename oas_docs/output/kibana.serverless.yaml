@@ -30380,6 +30380,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              bulkRollbackRequest:
+                value:
+                  packages:
+                    - name: system
             schema:
               additionalProperties: false
               type: object
@@ -30390,6 +30395,7 @@ paths:
                     type: object
                     properties:
                       name:
+                        description: Package name to rollback
                         type: string
                     required:
                       - name
@@ -30450,7 +30456,8 @@ paths:
       description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
       operationId: get-fleet-epm-packages-bulk-rollback-taskid
       parameters:
-        - in: path
+        - description: Task ID of the bulk operation
+          in: path
           name: taskId
           required: true
           schema:
@@ -30615,7 +30622,8 @@ paths:
       description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
       operationId: get-fleet-epm-packages-bulk-uninstall-taskid
       parameters:
-        - in: path
+        - description: Task ID of the bulk operation
+          in: path
           name: taskId
           required: true
           schema:
@@ -30776,7 +30784,8 @@ paths:
       description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
       operationId: get-fleet-epm-packages-bulk-upgrade-taskid
       parameters:
-        - in: path
+        - description: Task ID of the bulk operation
+          in: path
           name: taskId
           required: true
           schema:
