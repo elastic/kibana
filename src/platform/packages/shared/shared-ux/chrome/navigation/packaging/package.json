@@ -1,0 +1,15 @@
+{
+  "name": "@kbn/shared-ux-avatar-solution",
+  "version": "9.0.0",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "main": "index.js",
+  "peerDependencies": {
+    "@elastic/eui": "^9.0.0",
+    "@emotion/css": "^11.11.0",
+    "@emotion/react": "^11.0.0",
+    "classnames": "2.2.6",
+    "react": "^17",
+    "react-use": "^15.3.8",
+    "rxjs": "^7.8.1"
+  }
+}
