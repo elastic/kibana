@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 // eslint-disable-next-line no-restricted-imports
 import { Router } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
