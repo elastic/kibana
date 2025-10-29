@@ -62,6 +62,9 @@ const optionListControlStyles = {
       fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
       color: `${euiTheme.colors.textSubdued} !important`,
       blockSize: '100% !important',
+      // remove the border coming from EUI
+      boxShadow: 'none',
+
       // temp. override until alignment is fixed on EUI side
       '.euiButtonEmpty__content': {
         justifyContent: 'flex-end',
@@ -80,6 +83,11 @@ const optionListControlStyles = {
     padding: 0 !important;
     height: inherit;
     width: 100%;
+
+    // remove the border coming from EUI
+    &::after {
+      border: none !important;
+    }
   `,
 };
 

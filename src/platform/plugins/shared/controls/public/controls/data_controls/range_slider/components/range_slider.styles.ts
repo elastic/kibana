@@ -27,7 +27,14 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       &,
       .euiPopover,
       .euiFormControlLayoutDelimited {
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        width: 100%;
         height: 100%;
+      }
+
+      // remove the border coming from EUI
+      .euiFormControlLayoutDelimited::after {
+        border: none !important;
       }
 
       .euiFormControlLayout {
@@ -35,6 +42,10 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
         border-radius: 0;
 
       .euiFormControlLayout__childrenWrapper {
+        border: none;
+        box-shadow: none;
+        background: ${euiTheme.colors.backgroundBasePlain};
+
         /** Don't deform the control when rendering the loading spinner. 
         * Instead, render the spinner on top of the control with a light background,
         * ensuring that it covers up the up/down arrow buttons rendered at all times by some browsers.
