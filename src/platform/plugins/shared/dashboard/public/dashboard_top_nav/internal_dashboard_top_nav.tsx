@@ -325,7 +325,7 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [hasUnsavedChanges, viewMode, showWriteControls, dashboardApi, isPopoverOpen, maybeRedirect]);
+  }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
 
   const setFavoriteButtonMountPoint = useCallback(
     (mountPoint: MountPoint<HTMLElement> | undefined) => {
