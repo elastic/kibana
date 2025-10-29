@@ -25,18 +25,18 @@ function main() {
       followSymbolicLinks: false,
       cwd: repoRoot,
       absolute: true,
-      ignore: ['**/node_modules/**', '**/build/**', 'target', outputDir],
+      ignore: ['**/node_modules/**', '**/build/**', outputDir],
     })
     .on('data', async (p) => {
-      const targetFolderPath = path.dirname(path.dirname(p.toString()));
-      const targetDestinationPath = path.join(outputDir, path.relative(repoRoot, targetFolderPath));
+      const typesFolder = path.dirname(p.toString());
+      const targetDestinationPath = path.join(outputDir, path.relative(repoRoot, typesFolder));
       if (fs.existsSync(targetDestinationPath)) {
         await fs.promises.mkdir(targetDestinationPath, { recursive: true });
       }
       const copyPromise = fs.promises
-        .cp(targetFolderPath, targetDestinationPath, { force: true, recursive: true })
+        .cp(typesFolder, targetDestinationPath, { force: true, recursive: true })
         .then(() => {
-          console.log('Copied:\t', targetFolderPath);
+          console.log('Copied:\t', typesFolder);
         });
       copyPromises.push(copyPromise);
     })
