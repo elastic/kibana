@@ -137,58 +137,64 @@ describe('search', () => {
     expect(searchRequest?.query).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
-          "minimum_should_match": 1,
-          "should": Array [
+          "must": Array [
             Object {
               "bool": Object {
                 "minimum_should_match": 1,
-                "must": Array [
-                  Object {
-                    "term": Object {
-                      "type": "config",
-                    },
-                  },
-                ],
-                "must_not": Array [
-                  Object {
-                    "exists": Object {
-                      "field": "namespaces",
-                    },
-                  },
-                ],
                 "should": Array [
                   Object {
-                    "terms": Object {
-                      "namespace": Array [
-                        "foo-namespace",
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "must": Array [
+                        Object {
+                          "term": Object {
+                            "type": "config",
+                          },
+                        },
+                      ],
+                      "must_not": Array [
+                        Object {
+                          "exists": Object {
+                            "field": "namespaces",
+                          },
+                        },
+                      ],
+                      "should": Array [
+                        Object {
+                          "terms": Object {
+                            "namespace": Array [
+                              "foo-namespace",
+                            ],
+                          },
+                        },
                       ],
                     },
                   },
-                ],
-              },
-            },
-            Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "must": Array [
                   Object {
-                    "term": Object {
-                      "type": "index-pattern",
-                    },
-                  },
-                ],
-                "must_not": Array [
-                  Object {
-                    "exists": Object {
-                      "field": "namespaces",
-                    },
-                  },
-                ],
-                "should": Array [
-                  Object {
-                    "terms": Object {
-                      "namespace": Array [
-                        "foo-namespace",
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "must": Array [
+                        Object {
+                          "term": Object {
+                            "type": "index-pattern",
+                          },
+                        },
+                      ],
+                      "must_not": Array [
+                        Object {
+                          "exists": Object {
+                            "field": "namespaces",
+                          },
+                        },
+                      ],
+                      "should": Array [
+                        Object {
+                          "terms": Object {
+                            "namespace": Array [
+                              "foo-namespace",
+                            ],
+                          },
+                        },
                       ],
                     },
                   },
@@ -292,9 +298,10 @@ describe('search', () => {
       await expect(repository.search(options)).resolves.toEqual(EMPTY_SEARCH_RESPONSE);
       expect(client.search).toHaveBeenCalledTimes(1);
       const [[searchRequest]] = client.search.mock.calls;
-      expect(searchRequest).toHaveProperty('query.bool.should.0.bool.should.0.terms.namespace', [
-        'searchable',
-      ]);
+      expect(searchRequest).toHaveProperty(
+        'query.bool.must.0.bool.should.0.bool.should.0.terms.namespace',
+        ['searchable']
+      );
     });
   });
 
@@ -344,114 +351,120 @@ describe('search', () => {
       expect(searchRequest?.query).toMatchInlineSnapshot(`
         Object {
           "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
+            "must": Array [
               Object {
                 "bool": Object {
                   "minimum_should_match": 1,
-                  "must": Array [
-                    Object {
-                      "term": Object {
-                        "type": "index-pattern",
-                      },
-                    },
-                  ],
-                  "must_not": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "namespaces",
-                      },
-                    },
-                  ],
                   "should": Array [
                     Object {
-                      "terms": Object {
-                        "namespace": Array [
-                          "foo-namespace",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "type": "index-pattern",
+                            },
+                          },
+                        ],
+                        "must_not": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "namespaces",
+                            },
+                          },
+                        ],
+                        "should": Array [
+                          Object {
+                            "terms": Object {
+                              "namespace": Array [
+                                "foo-namespace",
+                              ],
+                            },
+                          },
                         ],
                       },
                     },
-                  ],
-                },
-              },
-              Object {
-                "bool": Object {
-                  "minimum_should_match": 1,
-                  "must": Array [
                     Object {
-                      "term": Object {
-                        "type": "dashboard",
-                      },
-                    },
-                  ],
-                  "must_not": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "namespaces",
-                      },
-                    },
-                  ],
-                  "should": Array [
-                    Object {
-                      "terms": Object {
-                        "namespace": Array [
-                          "foo-namespace",
-                          "bar-namespace",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "type": "dashboard",
+                            },
+                          },
+                        ],
+                        "must_not": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "namespaces",
+                            },
+                          },
+                        ],
+                        "should": Array [
+                          Object {
+                            "terms": Object {
+                              "namespace": Array [
+                                "foo-namespace",
+                                "bar-namespace",
+                              ],
+                            },
+                          },
                         ],
                       },
                     },
-                  ],
-                },
-              },
-              Object {
-                "bool": Object {
-                  "minimum_should_match": 1,
-                  "must": Array [
                     Object {
-                      "term": Object {
-                        "type": "customIndex",
-                      },
-                    },
-                  ],
-                  "must_not": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "namespaces",
-                      },
-                    },
-                  ],
-                  "should": Array [
-                    Object {
-                      "terms": Object {
-                        "namespace": Array [
-                          "bar-namespace",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "type": "customIndex",
+                            },
+                          },
+                        ],
+                        "must_not": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "namespaces",
+                            },
+                          },
+                        ],
+                        "should": Array [
+                          Object {
+                            "terms": Object {
+                              "namespace": Array [
+                                "bar-namespace",
+                              ],
+                            },
+                          },
                         ],
                       },
                     },
-                  ],
-                },
-              },
-              Object {
-                "bool": Object {
-                  "must": Array [
                     Object {
-                      "term": Object {
-                        "type": "multiNamespaceTypeCustomIndex",
-                      },
-                    },
-                    Object {
-                      "terms": Object {
-                        "namespaces": Array [
-                          "default",
-                          "*",
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "type": "multiNamespaceTypeCustomIndex",
+                            },
+                          },
+                          Object {
+                            "terms": Object {
+                              "namespaces": Array [
+                                "default",
+                                "*",
+                              ],
+                            },
+                          },
                         ],
-                      },
-                    },
-                  ],
-                  "must_not": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "namespace",
+                        "must_not": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "namespace",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
