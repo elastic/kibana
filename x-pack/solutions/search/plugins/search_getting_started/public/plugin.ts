@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { BehaviorSubject, type Subscription } from 'rxjs';
+
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { QueryClient } from '@tanstack/react-query';
+import { AppStatus, DEFAULT_APP_CATEGORIES, type AppUpdater } from '@kbn/core/public';
+import { QueryClient } from '@kbn/react-query';
+import { SEARCH_GETTING_STARTED_FEATURE_FLAG } from '@kbn/search-shared-ui/src/constants';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {
@@ -26,6 +29,9 @@ export class SearchGettingStartedPlugin
       SearchGettingStartedAppPluginStartDependencies
     >
 {
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private featureFlagSubscription: Subscription | undefined;
+
   public setup(
     core: CoreSetup<
       SearchGettingStartedAppPluginStartDependencies,
@@ -51,6 +57,8 @@ export class SearchGettingStartedPlugin
 
         return renderApp(coreStart, services, element, queryClient);
       },
+      status: AppStatus.inaccessible,
+      updater$: this.appUpdater$,
       order: 1,
       visibleIn: ['globalSearch', 'sideNav'],
     });
@@ -59,6 +67,25 @@ export class SearchGettingStartedPlugin
   }
 
   public start(core: CoreStart) {
+    // Create a subscription for the value of our feature flag
+    this.featureFlagSubscription = core.featureFlags
+      .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, false)
+      .subscribe((featureFlagEnabled) => {
+        const status: AppStatus = featureFlagEnabled
+          ? AppStatus.accessible
+          : AppStatus.inaccessible;
+        // This will update the Kibana application's status based on the current value of the feature flag
+        this.appUpdater$.next(() => ({
+          status,
+        }));
+      });
     return {};
+  }
+
+  public stop() {
+    if (this.featureFlagSubscription) {
+      this.featureFlagSubscription.unsubscribe();
+      this.featureFlagSubscription = undefined;
+    }
   }
 }

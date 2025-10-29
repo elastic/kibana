@@ -13,7 +13,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/security-api-key-management",
     "@kbn/search-shared-ui",
-    "@kbn/search-api-keys-server"
+    "@kbn/search-api-keys-server",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*",
