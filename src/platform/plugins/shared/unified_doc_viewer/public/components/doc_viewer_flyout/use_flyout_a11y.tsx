@@ -9,22 +9,22 @@
 
 import { EuiScreenReaderOnly, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 
 export const useFlyoutA11y = ({ isXlScreen }: { isXlScreen: boolean }) => {
   const descriptionId = useGeneratedHtmlId();
   const [triggerEl] = useState(document.activeElement);
-  const flyoutElRef = useRef<HTMLElement>(null);
+  const [flyoutEl, setFlyoutEl] = useState<HTMLElement | null>(null);
 
   // Auto-focus push flyout on open or when switching to XL screen
   useEffect(() => {
-    if (isXlScreen && flyoutElRef.current && document.contains(flyoutElRef.current)) {
+    if (isXlScreen && flyoutEl && document.contains(flyoutEl)) {
       // Wait a tick before focusing or focus will be stolen by the trigger element when
       // switching from an overlay flyout to a push flyout (due to EUI focus lock)
-      setTimeout(() => flyoutElRef.current?.focus());
+      setTimeout(() => flyoutEl.focus());
     }
-  }, [flyoutElRef, isXlScreen]);
+  }, [flyoutEl, isXlScreen]);
 
   // Return focus to the trigger element when the flyout is closed
   useUnmount(() => {
@@ -35,7 +35,7 @@ export const useFlyoutA11y = ({ isXlScreen }: { isXlScreen: boolean }) => {
 
   return {
     a11yProps: {
-      ref: flyoutElRef,
+      ref: setFlyoutEl,
       role: isXlScreen ? 'dialog' : undefined,
       tabIndex: isXlScreen ? 0 : undefined,
       'aria-describedby': isXlScreen ? descriptionId : undefined,
