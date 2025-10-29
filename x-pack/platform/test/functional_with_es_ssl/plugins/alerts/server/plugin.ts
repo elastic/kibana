@@ -9,11 +9,14 @@ import { Plugin, CoreSetup } from '@kbn/core/server';
 import { AlertingServerSetup, RuleType, RuleTypeParams } from '@kbn/alerting-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import type { IEventLogClientService } from '@kbn/event-log-plugin/server';
+import { registerRoutes } from './routes';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
   alerting: AlertingServerSetup;
   features: FeaturesPluginSetup;
+  eventLog: IEventLogClientService;
 }
 
 export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -106,11 +109,16 @@ export const failingAlertType: RuleType<never, never, never, never, never, 'defa
   },
 };
 
-export class AlertingFixturePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerting, features }: AlertingExampleDeps) {
+export class AlertingFixturePlugin
+  implements Plugin<void, void, AlertingExampleDeps, AlertingExampleDeps>
+{
+  public setup(core: CoreSetup<AlertingExampleDeps>, { alerting, features }: AlertingExampleDeps) {
     alerting.registerType(noopAlertType);
     alerting.registerType(alwaysFiringAlertType);
     alerting.registerType(failingAlertType);
+
+    registerRoutes(core);
+
     features.registerKibanaFeature({
       id: 'alerting_fixture',
       name: 'alerting_fixture',
