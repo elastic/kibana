@@ -2650,10 +2650,9 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.5.0.tgz#99ca807edeb157baf38fef9e39fd031f19b702a5"
   integrity sha512-dW6U7N4HAdSst+Iqhaw1In8zxT8rE4AMnIJIN6C/vNM8XDKmFyzkw/AddpvW5oZHdV0D7+3w/VI9petN4RnWBQ==
 
-"@elastic/eui-theme-borealis@4.0.0":
+"@elastic/eui-theme-borealis@file:./elastic-eui-theme-borealis-flyout-system.tgz":
   version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-4.0.0.tgz#9fc6463f8e358f9b3b2f6387e5935d66be481122"
-  integrity sha512-NV+g4vaoPfAV1mAI2oORMY7WD2YdLqx1zMGSH/HKjM9j49U/OK8Jl3DvHGTTAloWe2TvjlWnq6QJgm0xNwxjiA==
+  resolved "file:./elastic-eui-theme-borealis-flyout-system.tgz#e50d5016546377be256ca77083ea5936a379ec0c"
 
 "@elastic/eui-theme-common@6.0.0":
   version "6.0.0"
@@ -2664,10 +2663,17 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@108.0.0":
+"@elastic/eui-theme-common@file:./elastic-eui-theme-common-flyout-system.tgz":
+  version "6.0.0"
+  resolved "file:./elastic-eui-theme-common-flyout-system.tgz#efed6091999f4280fb7edffb72dabeb19e42e1ba"
+  dependencies:
+    "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
+    lodash "^4.17.21"
+
+"@elastic/eui@file:./elastic-eui-flyout-system.tgz":
   version "108.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-108.0.0.tgz#409fc6c49f19651832c411072482cd79bcdbd17c"
-  integrity sha512-W9l/jGlhxYYT0pN9vpaGmeR7nWYwTpmiLCkX8HnYOORQLUY6eXz5+9ng6WY68XzHWTcWUOMQB15OSyisj4VLVw==
+  resolved "file:./elastic-eui-flyout-system.tgz#3f5182b60a26bd3ad961b8f5b105c88cbee2a42e"
   dependencies:
     "@elastic/eui-theme-common" "6.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -2702,6 +2708,7 @@
     unified "^9.2.2"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
+    use-sync-external-store "^1.6.0"
     uuid "^8.3.0"
     vfile "^4.2.1"
 
@@ -33154,6 +33161,11 @@ use-sync-external-store@^1.0.0, use-sync-external-store@^1.2.0, use-sync-externa
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.4.0.tgz#adbc795d8eeb47029963016cefdf89dc799fcebc"
   integrity sha512-9WXSPC5fMv61vaupRkCKCxsPxBocVnwakBEkMIHHpkTTg6icbJtg6jzgtLDm4bl3cSHAca52rYWih0k4K3PfHw==
+
+use-sync-external-store@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
+  integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==
 
 use@^2.0.0:
   version "2.0.2"
