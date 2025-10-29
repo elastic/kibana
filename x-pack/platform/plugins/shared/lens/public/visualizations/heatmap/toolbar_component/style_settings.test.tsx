@@ -7,7 +7,7 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { logRoles, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { FramePublicAPI, HeatmapVisualizationState } from '@kbn/lens-common';
