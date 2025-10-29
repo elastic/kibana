@@ -246,7 +246,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe.only('POST /agents/bulkUpdateAgentTags', () => {
+    describe('POST /agents/bulkUpdateAgentTags', () => {
       beforeEach(async () => {
         await cleanFleetAgents(esClient);
         await createAgents();
