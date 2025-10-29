@@ -573,7 +573,7 @@ export function getLookupIndexCreateSuggestion(
       }
     ),
 
-    sortText: '1A',
+    sortText: '0',
 
     command: {
       id: `esql.lookup_index.create`,

@@ -46,11 +46,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
-   * Disables new notes
-   */
-  securitySolutionNotesDisabled: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -182,9 +177,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   microsoftDefenderEndpointCancelEnabled: true,
   /**
-   * Protects all the work related to the attacks and alert alignment effort
+   * Protects all the work related to the attacks and alerts alignment effort
    */
-  attacksAlertAlignment: false,
+  attacksAlertsAlignment: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
