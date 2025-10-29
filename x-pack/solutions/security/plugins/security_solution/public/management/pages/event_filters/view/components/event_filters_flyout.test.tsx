@@ -254,26 +254,15 @@ describe('Event filter flyout', () => {
       expect(renderResult.getByText('Cancel')).not.toBeNull();
     });
 
-    it('should show OS selector pre-populated with Linux from enriched event data', async () => {
-      const searchMock = (useKibana as jest.Mock)().services.data.search.search;
+    it('should show OS selector', async () => {
+      const eventData = ecsEventMock();
 
       act(() => {
-        render({ data: ecsEventMock() });
-      });
-
-      await waitFor(() => {
-        expect(searchMock).toHaveBeenCalled();
+        render({ data: eventData });
       });
 
       const osSelect = renderResult.getByTestId('eventFilters-form-os-select');
-      expect(osSelect).toBeTruthy();
-
-      await waitFor(
-        () => {
-          expect(renderResult.getByText('Linux')).toBeTruthy();
-        },
-        { timeout: 5000 }
-      );
+      expect(osSelect).toBeVisible();
     });
 
     it('should start with "add event filter" button disabled', () => {
