@@ -208,7 +208,6 @@ export function PreviewTable({
     }
     return canonicalColumnOrder;
   }, [canonicalColumnOrder, displayColumns, mode]);
-  console.log(displayColumns, visibleColumns);
 
   const sortingConfig = useMemo(() => {
     if (!sorting && !setSorting) {
@@ -436,7 +435,7 @@ export function PreviewTable({
               closePopover={() => {}}
               density={DataGridDensity.COMPACT}
               rowHeight={rowHeight}
-              shouldShowFieldHandler={() => false}
+              shouldShowFieldHandler={() => true}
               core={core}
               share={share}
               fieldFormats={fieldFormats}

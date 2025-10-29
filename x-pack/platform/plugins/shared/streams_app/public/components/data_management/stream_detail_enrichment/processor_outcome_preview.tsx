@@ -60,6 +60,7 @@ export const ProcessorOutcomePreview = () => {
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewRecords(snapshot.context)
   );
+  const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
 
   const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
     state.context.dataSourcesRefs.some((ref) => {
@@ -69,6 +70,54 @@ export const ProcessorOutcomePreview = () => {
       );
     })
   );
+
+  const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
+    const currentProcessorRef = state.context.stepRefs.find(
+      (stepRef) =>
+        isActionBlock(stepRef.getSnapshot().context.step) && isStepUnderEdit(stepRef.getSnapshot())
+    );
+
+    if (!currentProcessorRef) return undefined;
+
+    const step = currentProcessorRef.getSnapshot().context.step;
+
+    if (!isActionBlock(step)) return undefined;
+
+    return getSourceField(step);
+  });
+
+  const allColumns = useMemo(() => {
+    return getAllFieldsInOrder(previewDocuments, detectedFields);
+  }, [detectedFields, previewDocuments]);
+
+  const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
+    selectDraftProcessor(snapshot.context)
+  );
+
+  const grokMode =
+    draftProcessor?.processor &&
+    'action' in draftProcessor.processor &&
+    draftProcessor.processor.action === 'grok' &&
+    !isEmpty(draftProcessor.processor.from) &&
+    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
+      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
+      const fieldName = draftProcessor.processor?.from;
+      return Array.from(grokExpression.getFields().values()).some(
+        (field) => field.name === fieldName
+      );
+    });
+
+  const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
+  const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
+
+  const validCurrentProcessorSourceField =
+    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
+      ? currentProcessorSourceField
+      : undefined;
+
+  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+
+  const effectiveViewMode = isViewModeForced ? 'columns' : viewMode;
 
   if (isEmpty(samples)) {
     if (areDataSourcesLoading) {
@@ -94,9 +143,9 @@ export const ProcessorOutcomePreview = () => {
           {!isEmpty(previewDocuments) && (
             <EuiFlexItem grow={false}>
               <ViewModeToggle
-                previewDocuments={previewDocuments}
-                viewMode={viewMode}
+                viewMode={effectiveViewMode}
                 setViewMode={setViewMode}
+                isDisabled={isViewModeForced}
               />
             </EuiFlexItem>
           )}
@@ -106,7 +155,7 @@ export const ProcessorOutcomePreview = () => {
       {isEmpty(previewDocuments) ? (
         <NoPreviewDocumentsEmptyPrompt />
       ) : (
-        <OutcomePreviewTable previewDocuments={previewDocuments} viewMode={viewMode} />
+        <OutcomePreviewTable previewDocuments={previewDocuments} viewMode={effectiveViewMode} />
       )}
     </>
   );
@@ -189,64 +238,14 @@ const PreviewDocumentsGroupBy = () => {
 };
 
 const ViewModeToggle = ({
-  previewDocuments,
   viewMode,
   setViewMode,
+  isDisabled,
 }: {
-  previewDocuments: FlattenRecord[];
   viewMode: PreviewTableMode;
   setViewMode: (mode: PreviewTableMode) => void;
+  isDisabled: boolean;
 }) => {
-  const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
-
-  const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
-    const currentProcessorRef = state.context.stepRefs.find(
-      (stepRef) =>
-        isActionBlock(stepRef.getSnapshot().context.step) && isStepUnderEdit(stepRef.getSnapshot())
-    );
-
-    if (!currentProcessorRef) return undefined;
-
-    const step = currentProcessorRef.getSnapshot().context.step;
-
-    if (!isActionBlock(step)) return undefined;
-
-    return getSourceField(step);
-  });
-
-  const allColumns = useMemo(() => {
-    return getAllFieldsInOrder(previewDocuments, detectedFields);
-  }, [detectedFields, previewDocuments]);
-
-  const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
-    selectDraftProcessor(snapshot.context)
-  );
-
-  const grokMode =
-    draftProcessor?.processor &&
-    'action' in draftProcessor.processor &&
-    draftProcessor.processor.action === 'grok' &&
-    !isEmpty(draftProcessor.processor.from) &&
-    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
-      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
-      const fieldName = draftProcessor.processor?.from;
-      return Array.from(grokExpression.getFields().values()).some(
-        (field) => field.name === fieldName
-      );
-    });
-
-  const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
-  const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
-
-  const validCurrentProcessorSourceField =
-    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
-      ? currentProcessorSourceField
-      : undefined;
-
-  const isViewModeToggleDisabled = Boolean(
-    grokMode || validCurrentProcessorSourceField || validGrokField
-  );
-
   const viewModeOptions = [
     {
       id: 'columns',
@@ -271,7 +270,7 @@ const ViewModeToggle = ({
       idSelected={viewMode}
       onChange={(id) => setViewMode(id as PreviewTableMode)}
       buttonSize="compressed"
-      isDisabled={isViewModeToggleDisabled}
+      isDisabled={isDisabled}
     />
   );
 };
@@ -364,11 +363,6 @@ const OutcomePreviewTable = ({
       ? currentProcessorSourceField
       : undefined;
 
-  const effectiveViewMode =
-    validGrokField || validCurrentProcessorSourceField || (detectedFields?.length ?? 0) > 0
-      ? 'columns'
-      : viewMode;
-
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
       currentProcessorSourceField: validCurrentProcessorSourceField,
@@ -378,7 +372,7 @@ const OutcomePreviewTable = ({
 
     if (cols.length === 0) {
       // If no columns are detected, fall back to all fields from the preview documents
-      cols = [];
+      cols = allColumns;
     }
     // Filter out columns that are explicitly disabled
     const filteredCols = cols.filter((col) => !explicitlyDisabledPreviewColumns.includes(col));
@@ -388,12 +382,6 @@ const OutcomePreviewTable = ({
         filteredCols.push(col);
       }
     });
-
-    // If no columns are left (all filtered out), return empty array
-    // This will trigger the summary column to be shown automatically
-    if (filteredCols.length === 0) {
-      return [];
-    }
 
     return filteredCols;
   }, [
@@ -518,7 +506,7 @@ const OutcomePreviewTable = ({
           setSorting={setPreviewColumnsSorting}
           columnOrderHint={previewColumnsOrder}
           renderCellValue={renderCellValue}
-          mode={effectiveViewMode}
+          mode={viewMode}
           streamName={streamName}
         />
       </RowSelectionContext.Provider>
