@@ -19,6 +19,7 @@ import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
 
 export interface ConversationFlyoutRef {
@@ -80,5 +81,7 @@ export interface OnechatPluginStart {
    * flyoutRef.close();
    * ```
    */
-  openConversationFlyout: (options: OpenConversationFlyoutOptions) => OpenConversationFlyoutReturn;
+  openConversationFlyout: (options?: OpenConversationFlyoutOptions) => OpenConversationFlyoutReturn;
+  setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
+  clearConversationFlyoutActiveConfig: () => void;
 }
