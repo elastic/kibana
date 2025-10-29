@@ -22,6 +22,7 @@ pageLoadAssetSize:
   contentManagement: 8350
   controls: 12234
   core: 574609
+  cps: 1580
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -72,7 +73,7 @@ pageLoadAssetSize:
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
-  graph: 9946
+  graph: 10006
   grokdebugger: 5484
   home: 13560
   imageEmbeddable: 6000
@@ -109,7 +110,7 @@ pageLoadAssetSize:
   navigation: 11684
   newsfeed: 12371
   noDataPage: 1749
-  observability: 107955
+  observability: 109574
   observabilityAIAssistant: 52556
   observabilityAIAssistantApp: 16012
   observabilityAiAssistantManagement: 6438
@@ -139,7 +140,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 3252
   searchAssistant: 6150
-  searchGettingStarted: 6009
+  searchGettingStarted: 6600
   searchHomepage: 7962
   searchIndices: 9991
   searchInferenceEndpoints: 8071
@@ -153,9 +154,9 @@ pageLoadAssetSize:
   securitySolution: 119452
   securitySolutionEss: 43319
   securitySolutionServerless: 62964
-  serverless: 7852
-  serverlessObservability: 24052
-  serverlessSearch: 31457
+  serverless: 7854
+  serverlessObservability: 23996
+  serverlessSearch: 33338
   serverlessWorkplaceAI: 6600
   sessionView: 47912
   share: 58677
@@ -197,5 +198,5 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38374
   watcher: 10485
-  workflowsManagement: 7268
-  workplaceAIApp: 5759
+  workflowsManagement: 7267
+  workplaceAIApp: 5822
