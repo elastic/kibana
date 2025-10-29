@@ -39,6 +39,7 @@ import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
+import { filterAlertState } from './filter_alert_state';
 
 interface BuildRecoveredAlertOpts<
   AlertData extends RuleAlertData,
@@ -91,7 +92,8 @@ export const buildRecoveredAlert = <
   // Make sure that any alert fields that are updateable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
   const alertState = legacyAlert.getState();
-  const hasAlertState = Object.keys(alertState).length > 0;
+  const filteredAlertState = filterAlertState(alertState);
+  const hasAlertState = Object.keys(filteredAlertState).length > 0;
 
   const alertUpdates = {
     // Update the timestamp to reflect latest update time
@@ -139,7 +141,7 @@ export const buildRecoveredAlert = <
         ...(rule[ALERT_RULE_TAGS] ?? []),
       ])
     ),
-    ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: alertState } : {}),
+    ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: filteredAlertState } : {}),
   };
 
   // Clean the existing alert document so any nested fields that will be updated

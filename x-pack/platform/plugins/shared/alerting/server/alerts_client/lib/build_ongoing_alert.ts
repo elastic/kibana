@@ -39,6 +39,7 @@ import {
   replaceRefreshableAlertFields,
   replaceEmptyAlertFields,
 } from './format_alert';
+import { filterAlertState } from './filter_alert_state';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
@@ -97,7 +98,8 @@ export const buildOngoingAlert = <
   // Omit fields that are overwrite-able with undefined value
   const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
   const alertState = legacyAlert.getState();
-  const hasAlertState = Object.keys(alertState).length > 0;
+  const filteredAlertState = filterAlertState(alertState);
+  const hasAlertState = Object.keys(filteredAlertState).length > 0;
 
   const alertUpdates = {
     // Set latest rule configuration
@@ -141,7 +143,7 @@ export const buildOngoingAlert = <
         ...(rule[ALERT_RULE_TAGS] ?? []),
       ])
     ),
-    ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: alertState } : {}),
+    ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: filteredAlertState } : {}),
   };
 
   // Clean the existing alert document so any nested fields that will be updated

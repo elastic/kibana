@@ -31,7 +31,6 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
-  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import { alertRule, existingFlattenedNewAlert, existingExpandedNewAlert } from './test_fixtures';
 
@@ -77,10 +76,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               [EVENT_KIND]: 'signal',
@@ -146,10 +141,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               [EVENT_KIND]: 'signal',
@@ -231,10 +222,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               [EVENT_KIND]: 'signal',
@@ -317,10 +304,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['*'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               [EVENT_KIND]: 'signal',
@@ -399,10 +382,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               [EVENT_KIND]: 'signal',
@@ -498,10 +477,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               [EVENT_KIND]: 'signal',
@@ -563,10 +538,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               [EVENT_KIND]: 'signal',
@@ -668,10 +639,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               [EVENT_KIND]: 'signal',
@@ -778,10 +745,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['-tags', 'custom-tag2', 'old-tag1', 'rule-'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               [EVENT_KIND]: 'signal',
@@ -868,10 +831,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               'kibana.alert.nested_field': 3,
@@ -975,10 +934,6 @@ for (const flattened of [true, false]) {
         [SPACE_IDS]: ['default'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
-        [ALERT_STATE_NAMESPACE]: {
-          duration: '36000000',
-          start: '2023-03-28T12:27:28.159Z',
-        },
         ...(flattened
           ? {
               [EVENT_KIND]: 'signal',

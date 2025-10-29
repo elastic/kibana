@@ -649,10 +649,6 @@ describe('Task Runner', () => {
               [SPACE_IDS]: ['default'],
               [VERSION]: '8.8.0',
               [TAGS]: ['rule-', '-tags'],
-              [ALERT_STATE_NAMESPACE]: {
-                duration: '0',
-                start: '1970-01-01T00:00:00.000Z',
-              },
             },
           ],
         });

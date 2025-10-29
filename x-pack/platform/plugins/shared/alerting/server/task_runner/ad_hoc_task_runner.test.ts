@@ -88,7 +88,6 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_PENDING_RECOVERED_COUNT,
-  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import { validateRuleTypeParams } from '../lib/validate_rule_type_params';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
@@ -539,10 +538,6 @@ describe('Ad Hoc Task Runner', () => {
           [SPACE_IDS]: ['default'],
           [VERSION]: '8.8.0',
           [TAGS]: mockedAdHocRunSO.attributes.rule.tags,
-          [ALERT_STATE_NAMESPACE]: {
-            duration: '0',
-            start: schedule1.runAt,
-          },
         },
       ],
     });

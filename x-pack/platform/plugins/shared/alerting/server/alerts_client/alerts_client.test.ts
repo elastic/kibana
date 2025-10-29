@@ -257,10 +257,6 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [SPACE_IDS]: ['default'],
   [VERSION]: '8.9.0',
   [TAGS]: ['rule-', '-tags'],
-  [ALERT_STATE_NAMESPACE]: {
-    start: '2023-03-28T22:27:28.159Z',
-    duration: '0',
-  },
   ...overrides,
 });
 
@@ -275,11 +271,6 @@ const getOngoingIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_SEVERITY_IMPROVING]: undefined,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
-  [ALERT_STATE_NAMESPACE]: {
-    duration: '36000000000000',
-    foo: true,
-    start: '2023-03-28T12:27:28.159Z',
-  },
   ...overrides,
 });
 
@@ -298,12 +289,6 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_SEVERITY_IMPROVING]: true,
   [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   [ALERT_PENDING_RECOVERED_COUNT]: 0,
-  [ALERT_STATE_NAMESPACE]: {
-    duration: '36000000000000',
-    foo: true,
-    start: '2023-03-28T12:27:28.159Z',
-    end: '2023-03-28T22:27:28.159Z',
-  },
   ...overrides,
 });
 
@@ -768,7 +753,10 @@ describe('Alerts Client', () => {
                 },
               },
               // ongoing alert doc
-              getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
+              getOngoingIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+              }),
               {
                 create: { _id: uuid2, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
               },
@@ -880,11 +868,7 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
-                [ALERT_STATE_NAMESPACE]: {
-                  duration: '36000000000000',
-                  foo: true,
-                  start: '2023-03-28T12:27:28.159Z',
-                },
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
               {
                 create: { _id: uuid2, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
@@ -984,7 +968,11 @@ describe('Alerts Client', () => {
                 },
               },
               // ongoing alert doc
-              getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc', [ALERT_CONSECUTIVE_MATCHES]: 0 }),
+              getOngoingIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_CONSECUTIVE_MATCHES]: 0,
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+              }),
             ],
           });
           expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
@@ -1070,17 +1058,16 @@ describe('Alerts Client', () => {
                 [ALERT_DURATION]: 72000000000,
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
-                [ALERT_STATE_NAMESPACE]: {
-                  duration: '72000000000000',
-                  foo: true,
-                  start: '2023-03-28T02:27:28.159Z',
-                },
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               }),
               {
                 create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
               },
               // new alert doc
-              getNewIndexedAlertDoc({ [ALERT_UUID]: uuid3, [ALERT_INSTANCE_ID]: '3' }),
+              getNewIndexedAlertDoc({
+                [ALERT_UUID]: uuid3,
+                [ALERT_INSTANCE_ID]: '3',
+              }),
               {
                 index: {
                   _id: 'abc',
@@ -1091,7 +1078,10 @@ describe('Alerts Client', () => {
                 },
               },
               // recovered alert doc
-              getRecoveredIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
+              getRecoveredIndexedAlertDoc({
+                [ALERT_UUID]: 'abc',
+                [ALERT_STATE_NAMESPACE]: { foo: true },
+              }),
             ],
           });
           expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
@@ -1206,11 +1196,7 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
-                [ALERT_STATE_NAMESPACE]: {
-                  duration: '72000000000000',
-                  foo: true,
-                  start: '2023-03-28T02:27:28.159Z',
-                },
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
               {
                 create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
@@ -1258,10 +1244,7 @@ describe('Alerts Client', () => {
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
                 [ALERT_STATE_NAMESPACE]: {
-                  duration: '36000000000000',
-                  end: '2023-03-28T22:27:28.159Z',
                   foo: true,
-                  start: '2023-03-28T12:27:28.159Z',
                 },
               },
             ],
@@ -1353,9 +1336,7 @@ describe('Alerts Client', () => {
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
                 [ALERT_STATE_NAMESPACE]: {
-                  duration: '37951841000000',
                   foo: true,
-                  start: '2023-03-28T02:27:28.159Z',
                 },
               }),
               {
@@ -1369,7 +1350,6 @@ describe('Alerts Client', () => {
                 [ALERT_INSTANCE_ID]: '3',
                 [ALERT_START]: startedAtDate,
                 [ALERT_TIME_RANGE]: { gte: startedAtDate },
-                [ALERT_STATE_NAMESPACE]: { start: startedAtDate, duration: '0' },
               }),
               {
                 index: {
@@ -1389,10 +1369,7 @@ describe('Alerts Client', () => {
                 [ALERT_END]: startedAtDate,
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: startedAtDate },
                 [ALERT_STATE_NAMESPACE]: {
-                  duration: '1951841000000',
-                  end: '2023-03-28T13:00:00.000Z',
                   foo: true,
-                  start: '2023-03-28T12:27:28.159Z',
                 },
               }),
             ],
@@ -1487,9 +1464,7 @@ describe('Alerts Client', () => {
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
                 [ALERT_STATE_NAMESPACE]: {
-                  duration: '37951841000000',
                   foo: true,
-                  start: '2023-03-28T02:27:28.159Z',
                 },
               }),
               {
@@ -1503,7 +1478,6 @@ describe('Alerts Client', () => {
                 [ALERT_INSTANCE_ID]: '3',
                 [ALERT_START]: startedAtDate,
                 [ALERT_TIME_RANGE]: { gte: startedAtDate },
-                [ALERT_STATE_NAMESPACE]: { start: startedAtDate, duration: '0' },
               }),
               {
                 index: {
@@ -1523,10 +1497,7 @@ describe('Alerts Client', () => {
                 [ALERT_END]: startedAtDate,
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: startedAtDate },
                 [ALERT_STATE_NAMESPACE]: {
-                  duration: '1951841000000',
-                  end: '2023-03-28T13:00:00.000Z',
                   foo: true,
-                  start: '2023-03-28T12:27:28.159Z',
                 },
               }),
             ],
@@ -1708,9 +1679,7 @@ describe('Alerts Client', () => {
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
                 [ALERT_STATE_NAMESPACE]: {
-                  duration: '72000000000000',
                   foo: true,
-                  start: '2023-03-28T02:27:28.159Z',
                 },
               }),
             ],
@@ -3423,6 +3392,7 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
             ],
           });
@@ -3527,6 +3497,7 @@ describe('Alerts Client', () => {
                 [SPACE_IDS]: ['default'],
                 [VERSION]: '8.9.0',
                 [TAGS]: ['rule-', '-tags'],
+                [ALERT_STATE_NAMESPACE]: { foo: true },
               },
             ],
           });
