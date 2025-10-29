@@ -148,14 +148,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       // Use API key from fakeRequest if available
       headers.Authorization = fakeRequest.headers.authorization.toString();
     } else {
-      // Fallback to basic auth for development
-      const basicAuth = Buffer.from('elastic:changeme').toString('base64');
-      headers.Authorization = `Basic ${basicAuth}`;
+      // error
+      throw new Error('No authentication headers found');
     }
-
-    // Note: User context is not available in KibanaRequestAuth interface
-    // Could be added in the future if needed for user attribution
-
     return headers;
   }
 

@@ -384,6 +384,9 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     it('should retry on configured status codes with exponential backoff', async () => {
       jest.useFakeTimers();
 
+      // Reset mock to override the default beforeEach setup
+      mockedFetch.mockReset();
+
       // First two calls fail with 503, third succeeds
       mockedFetch
         .mockResolvedValueOnce({
