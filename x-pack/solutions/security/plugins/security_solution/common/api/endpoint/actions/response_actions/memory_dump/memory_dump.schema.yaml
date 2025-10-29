@@ -6,7 +6,7 @@ paths:
   /api/endpoint/action/memory_dump:
     post:
       summary: Generate a memory dump from the host machine
-      operationId: EndpointGetActionsDetails
+      operationId: EndpointGenerateMemoryDump
       description: Generates memory dumps on the targeted host.
       x-codegen-enabled: false
       x-labels: [ ess, serverless ]

@@ -473,19 +473,19 @@ components:
                       type: number
                       description: The process ID (PID)
                 - type: object
-                  title: Process memory dump with entity id
+                  title: Process memory dump with entity ID
                   required:
                     - type
                     - entity_id
                   properties:
                     type:
-                      description: Process level memory dump using an entity id
+                      description: Process level memory dump using an entity ID
                       type: string
                       enum:
                         - process
                     entity_id:
                       type: string
-                      description: The process entity id
+                      description: The process entity ID
 
             outputs:
               type: object

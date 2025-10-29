@@ -400,7 +400,7 @@ paths:
   /api/endpoint/action/memory_dump:
     post:
       description: Generates memory dumps on the targeted host.
-      operationId: EndpointGetActionsDetails
+      operationId: EndpointGenerateMemoryDump
       requestBody:
         content:
           application/json:
@@ -1736,7 +1736,8 @@ components:
                       enum:
                         - kernel
                       type: string
-                  required: type
+                  required:
+                    - type
                   title: Kernel memory dump
                   type: object
                 - properties:
@@ -1755,19 +1756,20 @@ components:
                   type: object
                 - properties:
                     entity_id:
-                      description: The process entity id
+                      description: The process entity ID
                       type: string
                     type:
-                      description: Process level memory dump using an entity id
+                      description: Process level memory dump using an entity ID
                       enum:
                         - process
                       type: string
                   required:
                     - type
                     - entity_id
-                  title: Process memory dump with entity id
+                  title: Process memory dump with entity ID
                   type: object
-          required: parameters
+          required:
+            - parameters
     MemoryDumpRouteRequestBody:
       allOf:
         - type: object
