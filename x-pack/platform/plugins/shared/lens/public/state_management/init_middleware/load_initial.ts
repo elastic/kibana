@@ -154,7 +154,7 @@ async function loadFromLocatorState(
       visualization: {
         activeId: emptyState.visualization.activeId,
         state: visualizationState,
-        selectedLayerId: null,
+        selectedLayerId: emptyState.visualization.selectedLayerId,
       },
       dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
       datasourceStates: Object.entries(datasourceStates).reduce(
