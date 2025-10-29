@@ -14,16 +14,14 @@ const DEFAULT_NUM_THREADS = 1;
 export const connectorOverrides = (connectorId: string) => {
   switch (connectorId) {
     case '.inference':
-      // explicit check to see if this field exists as it only exists in serverless
       const formSerializer = (data: ConnectorFormSchema) => {
-        if (
-          data &&
-          (data.config?.providerConfig as InferenceConnectorProviderConfig)
-            ?.max_number_of_allocations !== undefined
-        ) {
-          const providerConfig = data.config?.providerConfig as InferenceConnectorProviderConfig;
-          const { max_number_of_allocations: maxAllocations, ...restProviderConfig } =
-            providerConfig || {};
+        const providerConfig = data.config?.providerConfig as InferenceConnectorProviderConfig;
+        if (data && providerConfig) {
+          const {
+            max_number_of_allocations: maxAllocations,
+            headers,
+            ...restProviderConfig
+          } = providerConfig || {};
 
           return {
             ...data,
@@ -31,14 +29,19 @@ export const connectorOverrides = (connectorId: string) => {
               ...data.config,
               providerConfig: {
                 ...restProviderConfig,
-                adaptive_allocations: {
-                  enabled: true,
-                  min_number_of_allocations: MIN_ALLOCATIONS,
-                  ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
-                },
-                // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
-                num_threads: DEFAULT_NUM_THREADS,
+                ...(maxAllocations
+                  ? {
+                      adaptive_allocations: {
+                        enabled: true,
+                        min_number_of_allocations: MIN_ALLOCATIONS,
+                        ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+                      },
+                      // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
+                      num_threads: DEFAULT_NUM_THREADS,
+                    }
+                  : {}),
               },
+              ...(headers ? { headers } : {}),
             },
           };
         }
@@ -47,25 +50,30 @@ export const connectorOverrides = (connectorId: string) => {
 
       const formDeserializer = (data: ConnectorFormSchema) => {
         if (
-          data &&
           (data.config?.providerConfig as InferenceConnectorProviderConfig)?.adaptive_allocations
-            ?.max_number_of_allocations
+            ?.max_number_of_allocations ||
+          data.config?.headers
         ) {
+          const { headers, ...restConfig } = data.config;
+          const maxAllocations = (data.config.providerConfig as InferenceConnectorProviderConfig)
+            .adaptive_allocations?.max_number_of_allocations;
+
           return {
             ...data,
             config: {
-              ...data.config,
+              ...restConfig,
               providerConfig: {
                 ...(data.config.providerConfig as InferenceConnectorProviderConfig),
-                max_number_of_allocations: (
-                  data.config.providerConfig as InferenceConnectorProviderConfig
-                ).adaptive_allocations?.max_number_of_allocations,
-                // remove the adaptive_allocations from the data config as form does not expect it
-                adaptive_allocations: undefined,
+                ...(headers ? { headers } : {}),
+                ...(maxAllocations
+                  ? // remove the adaptive_allocations from the data config as form does not expect it
+                    { max_number_of_allocations: maxAllocations, adaptive_allocations: undefined }
+                  : {}),
               },
             },
           };
         }
+
         return data;
       };
 

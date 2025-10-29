@@ -66,13 +66,15 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
     const esClient = services.scopedClusterClient.asInternalUser;
     try {
-      const taskSettings = config?.taskTypeConfig
-        ? {
-            ...unflattenObject(config?.taskTypeConfig),
-          }
-        : {};
+      const { providerConfig, taskTypeConfig, headers } = config ?? {};
+      const taskSettings = {
+        ...(taskTypeConfig ? unflattenObject(taskTypeConfig) : {}),
+        ...(headers ? { headers } : {}),
+      };
+
       const serviceSettings = {
-        ...unflattenObject(config?.providerConfig ?? {}),
+        ...(isUpdate === false ? unflattenObject(providerConfig ?? {}) : {}),
+        // Update accepts only secrets in service_settings
         ...unflattenObject(secrets?.providerSecrets ?? {}),
       };
 
@@ -93,24 +95,27 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       }
 
       if (isUpdate && inferenceExists && config && config.provider) {
-        // TODO: replace, when update API for inference endpoint exists
-        await deleteInferenceEndpoint(
-          config.inferenceId,
-          config.taskType as InferenceTaskType,
-          logger,
-          esClient
-        );
+        // test num_allocations
+        await esClient?.inference.update({
+          inference_id: config?.inferenceId,
+          task_type: config?.taskType as InferenceTaskType,
+          // @ts-ignore The InferenceInferenceEndpoint type is out of date and has 'service' as a required property but this call will error if service is included
+          inference_config: {
+            service_settings: serviceSettings,
+            task_settings: taskSettings,
+          },
+        });
+      } else {
+        await esClient?.inference.put({
+          inference_id: config?.inferenceId ?? '',
+          task_type: config?.taskType as InferenceTaskType,
+          inference_config: {
+            service: config!.provider,
+            service_settings: serviceSettings,
+            task_settings: taskSettings,
+          },
+        });
       }
-
-      await esClient?.inference.put({
-        inference_id: config?.inferenceId ?? '',
-        task_type: config?.taskType as InferenceTaskType,
-        inference_config: {
-          service: config!.provider,
-          service_settings: serviceSettings,
-          task_settings: taskSettings,
-        },
-      });
       logger.debug(
         `Inference endpoint for task type "${config?.taskType}" and inference id ${
           config?.inferenceId
