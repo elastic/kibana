@@ -481,7 +481,7 @@ describe('parseLineForCompletion', () => {
       expect(result?.matchType).toBe('connector-id');
       expect(result?.fullKey).toBe('email-service');
       expect((result as ConnectorIdLineParseResult)?.valueStartColumn).toEqual(
-        line.indexOf('connector-id:') + 'connector-id:'.length + 1
+        line.indexOf('connector-id: ') + 'connector-id: '.length + 1
       );
     });
 

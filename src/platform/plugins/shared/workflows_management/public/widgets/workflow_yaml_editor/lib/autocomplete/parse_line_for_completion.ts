@@ -93,14 +93,15 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     };
   }
 
-  const connectorIdMatch = lineUpToCursor.match(/^(?<prefix>.*?connector-id:)\s*(?<value>.*)$/i);
+  const connectorIdMatch = lineUpToCursor.match(/^\s*(?<prefix>connector-id:)\s*(?<value>.*)$/i);
   if (connectorIdMatch && connectorIdMatch.groups) {
     const connectorId = connectorIdMatch.groups?.value.trim() ?? '';
     return {
       matchType: 'connector-id',
       fullKey: connectorId,
       match: connectorIdMatch,
-      valueStartColumn: connectorIdMatch.groups.prefix.length + 1,
+      // +1 for the space and +1 to convert to 1-based index
+      valueStartColumn: connectorIdMatch.groups.prefix.length + 2,
     };
   }
   // Try @ trigger first (e.g., "@const" or "@steps.step1")
