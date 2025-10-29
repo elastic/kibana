@@ -26176,6 +26176,17 @@
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "bulkRollbackRequest": {
+                  "value": {
+                    "packages": [
+                      {
+                        "name": "system"
+                      }
+                    ]
+                  }
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -26184,6 +26195,7 @@
                       "additionalProperties": false,
                       "properties": {
                         "name": {
+                          "description": "Package name to rollback",
                           "type": "string"
                         }
                       },
@@ -26282,6 +26294,7 @@
         "operationId": "get-fleet-epm-packages-bulk-rollback-taskid",
         "parameters": [
           {
+            "description": "Task ID of the bulk operation",
             "in": "path",
             "name": "taskId",
             "required": true,
@@ -26524,6 +26537,7 @@
         "operationId": "get-fleet-epm-packages-bulk-uninstall-taskid",
         "parameters": [
           {
+            "description": "Task ID of the bulk operation",
             "in": "path",
             "name": "taskId",
             "required": true,
@@ -26758,6 +26772,7 @@
         "operationId": "get-fleet-epm-packages-bulk-upgrade-taskid",
         "parameters": [
           {
+            "description": "Task ID of the bulk operation",
             "in": "path",
             "name": "taskId",
             "required": true,
