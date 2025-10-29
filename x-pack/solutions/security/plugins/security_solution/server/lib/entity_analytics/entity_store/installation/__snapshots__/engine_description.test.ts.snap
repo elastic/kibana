@@ -1133,12 +1133,12 @@ Object {
   "capabilities": Array [
     "CRUD_API",
   ],
-  "displayNameTemplate": "{{host.entity.Calculated_id}}",
+  "displayNameTemplate": "{{Calculated_entity_id}}",
   "filter": "",
   "id": "security_host_test",
   "identityFields": Array [
     Object {
-      "field": "host.entity.Calculated_id",
+      "field": "Calculated_entity_id",
       "optional": false,
     },
   ],
@@ -1584,6 +1584,9 @@ Object {
     "@timestamp": Object {
       "type": "date",
     },
+    "Calculated_entity_id": Object {
+      "type": "keyword",
+    },
     "asset.business_unit": Object {
       "type": "keyword",
     },
@@ -1681,9 +1684,6 @@ Object {
       "type": "keyword",
     },
     "host.domain": Object {
-      "type": "keyword",
-    },
-    "host.entity.Calculated_id": Object {
       "type": "keyword",
     },
     "host.hostname": Object {

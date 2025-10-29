@@ -9,6 +9,9 @@ Object {
         "@timestamp": Object {
           "type": "date",
         },
+        "Calculated_entity_id": Object {
+          "type": "keyword",
+        },
         "asset.business_unit": Object {
           "type": "keyword",
         },
@@ -40,9 +43,6 @@ Object {
           "type": "keyword",
         },
         "host.domain": Object {
-          "type": "keyword",
-        },
-        "host.entity.Calculated_id": Object {
           "type": "keyword",
         },
         "host.entity.attributes.Asset": Object {
