@@ -420,7 +420,7 @@ export const WorkflowConstsSchema = z.record(
 );
 
 const StepSchema = z.lazy(() =>
-  z.discriminatedUnion('type', [
+  z.union([
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
@@ -459,6 +459,13 @@ export const WorkflowSchema = z.object({
 });
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
+
+export const WorkflowSchemaForAutocomplete = WorkflowSchema.partial()
+  .extend({
+    triggers: z.array(TriggerSchema).default([]),
+    steps: z.array(BaseStepSchema.passthrough()).default([]),
+  })
+  .passthrough();
 
 export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),

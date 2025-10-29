@@ -22,6 +22,7 @@ import {
   createLiquidFilterCompletions,
   createLiquidSyntaxCompletions,
 } from './liquid_completions';
+import { z } from '@kbn/zod';
 
 export function getCompletionItemProvider(
   getState: () => MinimalWorkflowDetailState | undefined
@@ -43,12 +44,12 @@ export function getCompletionItemProvider(
           incomplete: false,
         };
       }
-      const autocompleteContext = buildAutocompleteContext(
+      const autocompleteContext = buildAutocompleteContext({
         editorState,
         model,
         position,
-        completionContext
-      );
+        completionContext,
+      });
       if (!autocompleteContext) {
         console.error('No autocomplete context built');
         return {
@@ -56,7 +57,21 @@ export function getCompletionItemProvider(
           incomplete: false,
         };
       }
-      console.log('autocompleteContext:', autocompleteContext);
+      console.log('autocompleteContext:', {
+        lineParseResult: autocompleteContext.lineParseResult,
+        lineUpToCursor: autocompleteContext.lineUpToCursor,
+        line: autocompleteContext.line,
+        triggerCharacter: autocompleteContext.triggerCharacter,
+        triggerKind: autocompleteContext.triggerKind,
+        range: autocompleteContext.range,
+        absolutePosition: autocompleteContext.absolutePosition,
+        path: autocompleteContext.path,
+        contextSchema:
+          autocompleteContext.contextSchema instanceof z.ZodObject
+            ? autocompleteContext.contextSchema.shape
+            : undefined,
+        focusedStepInfo: autocompleteContext.focusedStepInfo,
+      });
 
       const { lineParseResult } = autocompleteContext;
 

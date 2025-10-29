@@ -21,12 +21,19 @@ import { getContextSchemaForPath } from '../../../../features/workflow_context/l
 import { getConnectorTypeFromContext } from '../snippets/generate_connector_snippet';
 import type { StepInfo } from '../store';
 
-export function buildAutocompleteContext(
-  editorState: MinimalWorkflowDetailState,
-  model: monaco.editor.ITextModel,
-  position: monaco.Position,
-  completionContext: monaco.languages.CompletionContext
-): AutocompleteContext | null {
+export interface BuildAutocompleteContextParams {
+  editorState: MinimalWorkflowDetailState | undefined;
+  model: monaco.editor.ITextModel;
+  position: monaco.Position;
+  completionContext: monaco.languages.CompletionContext;
+}
+
+export function buildAutocompleteContext({
+  editorState,
+  model,
+  position,
+  completionContext,
+}: BuildAutocompleteContextParams): AutocompleteContext | null {
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
   const workflowGraph = editorState?.computed?.workflowGraph;
   const yamlDocument = editorState?.computed?.yamlDocument;
@@ -85,11 +92,8 @@ export function buildAutocompleteContext(
   const lineUpToCursor = line.substring(0, position.column - 1);
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
-  try {
-    // For variable expressions, we want the root context with consts, event, workflow, etc.
-    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, []);
-  } catch (contextError) {
-    console.error('Error getting context schema for path', contextError);
+  if (workflowDefinition && workflowGraph) {
+    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path);
   }
 
   if (parseResult?.fullKey) {

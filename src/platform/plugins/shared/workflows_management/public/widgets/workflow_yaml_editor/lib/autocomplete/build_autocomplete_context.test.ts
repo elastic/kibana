@@ -8,30 +8,172 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
+import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import { z } from '@kbn/zod';
+import type { MinimalWorkflowDetailState } from './autocomplete.types';
+import type { BuildAutocompleteContextParams } from './build_autocomplete_context';
 import { buildAutocompleteContext } from './build_autocomplete_context';
+import { expectZodSchemaEqual } from '../../../../../common/lib/zod';
 import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
+import { performComputation } from '../store/utils/computation';
+import { findStepByLine } from '../store/utils/step_finder';
+
+export function getFakeAutocompleteContextParams(
+  yamlContent: string
+): BuildAutocompleteContextParams {
+  const mockConnectors: ConnectorContractUnion[] = [
+    {
+      type: 'console',
+      paramsSchema: z.object({
+        message: z.string(),
+      }),
+      outputSchema: z.object({
+        message: z.string(),
+      }),
+    },
+  ];
+  const connectorTypes: Record<string, ConnectorTypeInfo> = {
+    console: {
+      actionTypeId: 'console',
+      displayName: 'Console',
+      instances: [],
+      minimumLicenseRequired: 'basic',
+      subActions: [],
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+    },
+  };
+
+  const cursorOffset = yamlContent.indexOf('|<-');
+  const cleanedYaml = yamlContent.replace('|<-', '');
+  const mockModel = createFakeMonacoModel(cleanedYaml, cursorOffset);
+  const position = mockModel.getPositionAt(cursorOffset);
+  const triggerCharacter = cleanedYaml.slice(cursorOffset - 1, cursorOffset);
+  const looseSchema = generateYamlSchemaFromConnectors(mockConnectors, true);
+  const computedData = performComputation(cleanedYaml, looseSchema);
+  const mockEditorState: MinimalWorkflowDetailState = {
+    yamlString: cleanedYaml,
+    focusedStepId: computedData?.workflowLookup
+      ? findStepByLine(position.lineNumber, computedData.workflowLookup)
+      : undefined,
+    computed: computedData,
+    connectors: { connectorTypes, totalConnectors: Object.keys(connectorTypes).length },
+  };
+
+  return {
+    model: mockModel as unknown as monaco.editor.ITextModel,
+    position: position as monaco.Position,
+    completionContext: {
+      triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+      triggerCharacter,
+    } as monaco.languages.CompletionContext,
+    editorState: mockEditorState,
+  };
+}
 
 describe('buildAutocompleteContext', () => {
-  it('should return null if the yaml document is null', () => {
+  it('should return null if the yaml is empty', () => {
+    const result = buildAutocompleteContext(getFakeAutocompleteContextParams(''));
+
+    expect(result).toBeNull();
+  });
+
+  it('should return an autocomplete context if the yaml document is not null', () => {
+    const result = buildAutocompleteContext(getFakeAutocompleteContextParams('name: "test"'));
+
+    expect(result).toBeDefined();
+  });
+
+  it('should have consts in the context schema', () => {
     const result = buildAutocompleteContext(
-      {
-        yamlString: '',
-        computed: {
-          yamlDocument: undefined,
-          workflowLookup: undefined,
-          workflowGraph: undefined,
-          workflowDefinition: undefined,
-        },
-        focusedStepId: undefined,
-        connectors: undefined,
-      },
-      createFakeMonacoModel('', 0) as unknown as monaco.editor.ITextModel,
-      new monaco.Position(1, 1),
-      {
-        triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
-        triggerCharacter: '',
-      } as monaco.languages.CompletionContext
+      getFakeAutocompleteContextParams(`
+name: "test"
+consts:
+  stringConst: "test-const"
+  numberConst: 1
+  booleanConst: true
+  arrayConst: [1, 2, 3]
+  objectConst: { key: "value" }
+steps:
+  - name: "first-step"
+    type: "console"
+    with:
+      message: "|<-"
+`)
     );
-    expect(result).toEqual(null);
+
+    expect(result?.contextSchema).toBeDefined();
+    expect((result?.contextSchema as z.ZodObject<any>).shape.consts).toBeDefined();
+    const constsShape = (result?.contextSchema as z.ZodObject<any>).shape.consts.shape;
+    expectZodSchemaEqual(constsShape.stringConst, z.literal('test-const'));
+    expectZodSchemaEqual(constsShape.numberConst, z.literal(1));
+    expectZodSchemaEqual(constsShape.booleanConst, z.literal(true));
+    expectZodSchemaEqual(constsShape.arrayConst, z.array(z.literal(1)).length(3));
+    expectZodSchemaEqual(constsShape.objectConst, z.object({ key: z.literal('value') }));
+  });
+
+  it('should have steps outputs in the context schema', () => {
+    const result = buildAutocompleteContext(
+      getFakeAutocompleteContextParams(`
+name: "test"
+steps:
+  - name: first-step
+    type: console
+    with:
+      message: hello
+  - name: second-step
+    type: console
+    with:
+      message: "|<-"
+`)
+    );
+
+    expect(result?.contextSchema).toBeDefined();
+    expect((result?.contextSchema as z.ZodObject<any>).shape.steps).toBeDefined();
+    const stepsShape = (result?.contextSchema as z.ZodObject<any>).shape.steps.shape;
+    expect(stepsShape['first-step']).toBeDefined();
+    expectZodSchemaEqual(
+      stepsShape['first-step'],
+      z.object({ output: z.string().optional(), error: z.any().optional() })
+    );
+  });
+
+  it('should have steps outputs in the context schema for nested steps', () => {
+    const result = buildAutocompleteContext(
+      getFakeAutocompleteContextParams(`version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: if-step
+    type: if
+    with:
+      condition: "something:something"
+    steps:
+      - name: first-true-step
+        type: console
+        with:
+          message: "im true"
+      - name: second-true-step
+        type: console
+        with:
+          message: "im true, {{steps.|<-}}"
+    else: 
+      - name: false-step
+        type: console
+        with:
+          message: "im unreachable"
+`)
+    );
+
+    expect(result?.contextSchema).toBeDefined();
+    const stepsShape = (result?.contextSchema as z.ZodObject<any>).shape;
+    expect(stepsShape['first-true-step']).toBeDefined();
+    expectZodSchemaEqual(
+      stepsShape['first-true-step'],
+      z.object({ output: z.string().optional(), error: z.any().optional() })
+    );
   });
 });

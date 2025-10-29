@@ -8,72 +8,25 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
-import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
-import { z } from '@kbn/zod';
-import type { MinimalWorkflowDetailState } from './autocomplete/autocomplete.types';
+import { getFakeAutocompleteContextParams } from './autocomplete/build_autocomplete_context.test';
 import { getCompletionItemProvider } from './get_completion_item_provider';
-import { performComputation } from './store/utils/computation';
-import { findStepByLine } from './store/utils/step_finder';
-import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';
 
 async function getSuggestions(yamlContent: string): Promise<monaco.languages.CompletionItem[]> {
-  const mockConnectors: ConnectorContractUnion[] = [
-    {
-      type: 'console',
-      paramsSchema: z.object({
-        message: z.string(),
-      }),
-      outputSchema: z.object({
-        message: z.string(),
-      }),
-    },
-  ];
-  const connectorTypes: Record<string, ConnectorTypeInfo> = {
-    console: {
-      actionTypeId: 'console',
-      displayName: 'Console',
-      instances: [],
-      minimumLicenseRequired: 'basic',
-      subActions: [],
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-    },
-  };
-
-  const cursorOffset = yamlContent.indexOf('|<-');
-  const cleanedYaml = yamlContent.replace('|<-', '');
-  const mockModel = createFakeMonacoModel(cleanedYaml, cursorOffset);
-  const position = mockModel.getPositionAt(cursorOffset);
-  const triggerCharacter = cleanedYaml.slice(cursorOffset - 1, cursorOffset);
-
-  const looseSchema = generateYamlSchemaFromConnectors(mockConnectors, true);
-
-  const computedData = performComputation(cleanedYaml, looseSchema);
-
-  const mockEditorState: MinimalWorkflowDetailState = {
-    yamlString: cleanedYaml,
-    focusedStepId: computedData?.workflowLookup
-      ? findStepByLine(position.lineNumber, computedData.workflowLookup)
-      : undefined,
-    computed: computedData,
-    connectors: { connectorTypes, totalConnectors: Object.keys(connectorTypes).length },
-  };
-
-  expect(mockEditorState.computed).toBeDefined();
-  expect(mockEditorState.computed?.workflowDefinition).toBeDefined();
-
-  const completionProvider = getCompletionItemProvider(() => mockEditorState);
+  const fakeAutocompleteContextParams = getFakeAutocompleteContextParams(yamlContent);
+  const completionProvider = getCompletionItemProvider(
+    () => fakeAutocompleteContextParams.editorState
+  );
 
   const result = await completionProvider.provideCompletionItems(
-    mockModel as unknown as monaco.editor.ITextModel,
-    position as monaco.Position,
+    fakeAutocompleteContextParams.model,
+    fakeAutocompleteContextParams.position,
+    fakeAutocompleteContextParams.completionContext,
     {
-      triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
-      triggerCharacter,
-    } as monaco.languages.CompletionContext,
-    {} as any // cancellation token
+      isCancellationRequested: false,
+      onCancellationRequested: () => ({
+        dispose: () => {},
+      }),
+    }
   );
 
   return result?.suggestions ?? [];
@@ -249,8 +202,6 @@ steps:
       );
     });
 
-    // CURRENT
-
     it('should provide previous step completion', async () => {
       const yamlContent = `
 version: "1"
@@ -324,28 +275,28 @@ steps:
 
     it('should provide completions with brackets for keys in kebab-case and use single quotes when inside double quoted string', async () => {
       const yamlContent = `
-  version: "1"
-  name: "test"
-  consts:
-    api-url: "https://api.example.com"
-  steps:
-    - name: step0
+version: "1"
+name: "test"
+consts:
+  api-url: "https://api.example.com"
+steps:
+  - name: step0
     type: console
     with:
       message: "{{consts.|<-}}"
-  `.trim();
+`.trim();
       const suggestions = await getSuggestions(yamlContent);
       expect(suggestions.map((s) => s.insertText)).toEqual(expect.arrayContaining(["['api-url']"]));
     });
 
     it('should provide completions with brackets for keys in kebab-case and use double quotes when inside single quoted string', async () => {
       const yamlContent = `
-  version: "1"
-  name: "test"
-  consts:
-    api-url: "https://api.example.com"
-  steps:
-    - name: step0
+version: "1"
+name: "test"
+consts:
+  api-url: "https://api.example.com"
+steps:
+  - name: step0
     type: console
     with:
       message: '{{consts.|<-}}'
@@ -354,6 +305,7 @@ steps:
       expect(suggestions.map((s) => s.insertText)).toEqual(expect.arrayContaining(['["api-url"]']));
     });
 
+    // CURRENT
     it('should provide rrule suggestions in empty scheduled trigger with block', async () => {
       const yamlContent = `
 version: "1"
