@@ -2700,8 +2700,7 @@ describe('BackfillClient', () => {
 
       const result = await backfillClient.findOverlappingBackfills({
         ruleId: '1',
-        start: mockStart,
-        end: mockEnd,
+        ranges: [{ start: mockStart, end: mockEnd }],
         savedObjectsRepository: mockSavedObjectsRepository,
         actionsClient,
       });

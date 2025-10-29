@@ -179,7 +179,7 @@ export interface AlertingServerStart {
   getAllTypes: RuleTypeRegistry['getAllTypes'];
   getType: RuleTypeRegistry['get'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
-  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClient>;
+  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
