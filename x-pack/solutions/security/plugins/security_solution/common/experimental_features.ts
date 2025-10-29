@@ -46,29 +46,9 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
-   * Disables new notes
-   */
-  securitySolutionNotesDisabled: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
-
-  /**
-   * Enables the Managed User section inside the new user details flyout.
-   */
-  newUserDetailsFlyoutManagedUser: false,
-
-  /**
-   * Enable risk engine client and initialisation of datastream, component templates and mappings
-   */
-  riskScoringPersistence: true,
-
-  /**
-   * Enables experimental Entity Analytics HTTP endpoints
-   */
-  riskScoringRoutesEnabled: true,
 
   /**
    * Disables ESQL-based risk scoring
@@ -157,11 +137,6 @@ export const allowedExperimentalValues = Object.freeze({
   endpointExceptionsMovedUnderManagement: false,
 
   /**
-   * Disables flyout history and new preview navigation
-   */
-  newExpandableFlyoutNavigationDisabled: false,
-
-  /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
@@ -202,9 +177,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   microsoftDefenderEndpointCancelEnabled: true,
   /**
-   * Protects all the work related to the attacks and alert alignment effort
+   * Protects all the work related to the attacks and alerts alignment effort
    */
-  attacksAlertAlignment: false,
+  attacksAlertsAlignment: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
