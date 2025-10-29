@@ -47,9 +47,9 @@ describe('gauge style settings', () => {
     };
   };
 
-  describe.skip('gauge titles and text', () => {
-    const getTitleLabel = () => screen.getByLabelText('Title');
-    const getSubtitleLabel = () => screen.getByLabelText('Subtitle');
+  describe('gauge titles and text', () => {
+    const getTitleLabel = () => screen.getByTestId('lnsToolbarGaugeLabelMajor');
+    const getSubtitleLabel = () => screen.getByTestId('lnsToolbarGaugeLabelMinor');
     const getTitleSelectValue = () => screen.getByTestId('lnsToolbarGaugeLabelMajor-select');
     const getSubtitleSelectValue = () => screen.getByTestId('lnsToolbarGaugeLabelMinor-select');
     it('should reflect state in the UI for default props', async () => {
