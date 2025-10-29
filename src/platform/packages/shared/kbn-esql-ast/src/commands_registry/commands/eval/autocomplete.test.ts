@@ -14,16 +14,18 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   getOperatorSuggestions,
+} from '../../../__tests__/autocomplete';
+import type { ICommandCallbacks } from '../../types';
+import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
+import { timeUnitsToSuggest } from '../../../definitions/constants';
+import {
   logicalOperators,
   arithmeticOperators,
   comparisonFunctions,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
-} from '../../../__tests__/autocomplete';
-import type { ICommandCallbacks } from '../../types';
-import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
-import { timeUnitsToSuggest } from '../../../definitions/constants';
+} from '../../../definitions/all_operators';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 

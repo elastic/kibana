@@ -16,11 +16,13 @@ import {
   getFunctionSignaturesByReturnType,
   mockFieldsWithTypes,
   getOperatorSuggestions,
+} from '../../../__tests__/autocomplete';
+import {
   logicalOperators,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
-} from '../../../__tests__/autocomplete';
+} from '../../../definitions/all_operators';
 import type { ICommandCallbacks } from '../../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
 import { getDateLiterals } from '../../../definitions/utils';

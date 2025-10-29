@@ -19,11 +19,13 @@ import {
   getFunctionSignaturesByReturnType,
   getLiteralsByType,
   getOperatorSuggestions,
+} from '../../../__tests__/autocomplete';
+import {
   comparisonFunctions,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
-} from '../../../__tests__/autocomplete';
+} from '../../../definitions/all_operators';
 import type { ICommandCallbacks } from '../../types';
 import type { FunctionReturnType, FieldType } from '../../../definitions/types';
 import {
@@ -840,7 +842,7 @@ describe('STATS Autocomplete', () => {
           expect(suggestions).toContainEqual(expectedCompletionItem);
         });
 
-        test('should NOT appear inside BUCKET function', async () => {
+        test('BUCKET constant arguments should not trigger function suggestions', async () => {
           const suggestions = await suggest('FROM a | STATS BY BUCKET(dateField, 50, ');
 
           const dateHistogramSuggestions = suggestions.filter((s) =>

@@ -19,17 +19,16 @@ import {
   withCompleteItem,
   assignCompletionItem,
 } from '../../complete_items';
+import { expectSuggestions, suggest } from '../../../__tests__/autocomplete';
+import type { ICommandCallbacks } from '../../types';
+import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import {
-  expectSuggestions,
-  suggest,
   logicalOperators,
   comparisonFunctions,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
-} from '../../../__tests__/autocomplete';
-import type { ICommandCallbacks } from '../../types';
-import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
+} from '../../../definitions/all_operators';
 
 // ============================================================================
 // Operator Suggestions - Derived from Real Definitions

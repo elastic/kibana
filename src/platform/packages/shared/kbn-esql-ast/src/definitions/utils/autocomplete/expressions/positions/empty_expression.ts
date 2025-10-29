@@ -15,9 +15,8 @@ import type { ExpressionContext } from '../types';
 import { ensureKeywordAndText } from '../../functions';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { SignatureAnalyzer } from '../signature_analyzer';
-import { getControlSuggestion, getVariablePrefix, getLiteralsSuggestions } from '../../helpers';
+import { getControlSuggestion, getVariablePrefix } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
-import { getCompatibleLiterals } from '../../../literals';
 import type {
   FunctionDefinition,
   FunctionParameter,
@@ -151,7 +150,7 @@ function buildLiteralSuggestions(
   config: ReturnType<typeof getParamSuggestionConfig>
 ): ISuggestionItem[] {
   const { paramDefinitions, functionDefinition } = functionParamContext;
-  const { location, command } = ctx;
+  const { command } = ctx;
 
   const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
   const suggestions: ISuggestionItem[] = [];
@@ -160,7 +159,7 @@ function buildLiteralSuggestions(
   // Constant-only literals (true, false, null, string/number literals)
   const constantOnlySuggestions = buildConstantOnlyLiteralSuggestions(
     paramDefinitions,
-    ctx.context,
+    ctx,
     config.shouldAddComma,
     hasMoreMandatoryArgs
   );
@@ -178,17 +177,17 @@ function buildLiteralSuggestions(
     (functionParamContext.currentParameterIndex ?? 0) === 0;
 
   if (!isFtsFunction && !isBucketFirstParam && !hasConstantOnlyParams) {
-    const dateItems = getLiteralsSuggestions(
-      paramDefinitions.map(({ type }) => type),
-      location,
-      {
-        includeDateLiterals: true,
-        includeCompatibleLiterals: false,
-        addComma: config.shouldAddComma,
-        advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-      }
-    );
-    suggestions.push(...dateItems);
+    const builder = new SuggestionBuilder(ctx);
+
+    builder.addLiterals({
+      types: paramDefinitions.map(({ type }) => type),
+      includeDateLiterals: true,
+      includeCompatibleLiterals: false,
+      addComma: config.shouldAddComma,
+      advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+    });
+
+    suggestions.push(...builder.build());
   }
 
   return suggestions;
@@ -373,7 +372,7 @@ function buildEnumValueSuggestions(
 /** Builds suggestions for constant-only literal parameters */
 function buildConstantOnlyLiteralSuggestions(
   paramDefinitions: FunctionParameter[],
-  context: ExpressionContext['context'],
+  ctx: ExpressionContext,
   shouldAddComma: boolean,
   hasMoreMandatoryArgs: boolean
 ): ISuggestionItem[] {
@@ -382,13 +381,23 @@ function buildConstantOnlyLiteralSuggestions(
     return [];
   }
 
-  return getCompatibleLiterals(
-    ensureKeywordAndText(constantOnlyParams.map(({ type }) => type)),
-    {
-      supportsControls: context?.supportsControls,
-      addComma: shouldAddComma,
-      advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-    },
-    context?.variables
-  );
+  const types = ensureKeywordAndText(constantOnlyParams.map(({ type }) => type));
+
+  const builder = new SuggestionBuilder(ctx);
+
+  builder.addLiterals({
+    types,
+    addComma: shouldAddComma,
+    advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+    includeDateLiterals: false, // Date literals are added separately in buildLiteralSuggestions
+    includeCompatibleLiterals: true,
+  });
+
+  builder.addFunctions({
+    types,
+    addComma: shouldAddComma,
+    constantGeneratingOnly: true,
+  });
+
+  return builder.build();
 }

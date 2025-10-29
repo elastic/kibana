@@ -14,10 +14,14 @@ import {
   getFunctionSignaturesByReturnType,
   suggest,
   getOperatorSuggestions,
+} from '../../../__tests__/autocomplete';
+
+import {
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
-} from '../../../__tests__/autocomplete';
+} from '../../../definitions/all_operators';
+
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
 

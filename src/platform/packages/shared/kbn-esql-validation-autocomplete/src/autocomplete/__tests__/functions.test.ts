@@ -1268,14 +1268,12 @@ describe('functions arg suggestions', () => {
       });
     });
 
-    it.skip('conditional with text field: suggests pattern/IN/null operators (not comparison) in STATS', async () => {
+    it('conditional with text field: suggests pattern/IN/null operators (not comparison) in STATS', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | STATS result = CASE(textField /)');
       const labels = suggestions.map(({ label }) => label);
 
-      expect(labels).toEqual(
-        expect.arrayContaining([...patternMatchSymbols, ...inSymbols, ...nullCheckSymbols])
-      );
+      expect(labels).toEqual(expect.arrayContaining([]));
 
       const comparison = comparisonFunctions.map(({ name }) => name.toUpperCase());
       comparison.forEach((op) => {

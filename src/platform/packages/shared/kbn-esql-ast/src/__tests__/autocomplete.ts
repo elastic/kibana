@@ -356,16 +356,6 @@ export const containsSnippet = (text: string): boolean => {
   return snippetRegex.test(text);
 };
 
-// Re-export operator groups for use in tests (avoid hardcoding operator names)
-export {
-  logicalOperators,
-  arithmeticOperators,
-  comparisonFunctions,
-  patternMatchOperators,
-  inOperators,
-  nullCheckOperators,
-};
-
 /**
  * Convert operator definition groups to suggestion strings.
  * Use this instead of hardcoding operator strings in tests.
