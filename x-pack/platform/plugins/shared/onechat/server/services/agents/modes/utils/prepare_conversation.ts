@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { ConversationRound, RoundInput } from '@kbn/onechat-common';
+import type { ConversationRound, RawRoundInput, RoundInput } from '@kbn/onechat-common';
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import type { AttachmentRepresentation } from '@kbn/onechat-server/artifacts';
 
 export interface ProcessedAttachment {
+  // TODO extends instead.
   attachment: Attachment;
   representation: AttachmentRepresentation;
 }
@@ -36,7 +37,7 @@ export const prepareConversation = async ({
   attachmentsService,
 }: {
   previousRounds: ConversationRound[];
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
   attachmentsService: AttachmentsService;
 }): Promise<ProcessedConversation> => {
   const processedNextInput = await prepareRoundInput({ input: nextInput, attachmentsService });
@@ -67,7 +68,7 @@ const prepareRoundInput = async ({
   input,
   attachmentsService,
 }: {
-  input: RoundInput;
+  input: RoundInput | RawRoundInput;
   attachmentsService: AttachmentsService;
 }): Promise<ProcessedRoundInput> => {
   let attachments: ProcessedAttachment[] = [];

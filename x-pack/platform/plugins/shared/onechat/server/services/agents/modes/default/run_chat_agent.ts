@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import type { ChatAgentEvent } from '@kbn/onechat-common';
+import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
 import {
   addRoundCompleteEvent,
@@ -122,8 +122,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     finalize(() => manualEvents$.complete())
   );
 
+  const processedInput: RoundInput = {
+    message: processedConversation.nextInput.message,
+    attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
+  };
+
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: nextInput }),
+    addRoundCompleteEvent({ userInput: processedInput }),
     shareReplay()
   );
 

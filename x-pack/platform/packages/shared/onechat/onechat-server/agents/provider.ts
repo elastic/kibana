@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationRound,
-  RoundInput,
+  RawRoundInput,
   ChatAgentEvent,
   AgentCapabilities,
 } from '@kbn/onechat-common';
@@ -104,7 +104,7 @@ export interface AgentParams {
   /**
    * The input triggering this round.
    */
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
   /**
    * Agent capabilities to enable.
    */

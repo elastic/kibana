@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
-import type { Conversation, ConversationRound, RoundInput } from '@kbn/onechat-common';
+import type { Conversation, ConversationRound, RawRoundInput } from '@kbn/onechat-common';
 import { createUserMessage } from '@kbn/onechat-genai-utils/langchain';
 
 /**
@@ -22,7 +22,7 @@ export const generateTitle = ({
   conversation,
   chatModel,
 }: {
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
   conversation: Conversation;
   chatModel: InferenceChatModel;
 }): Observable<string> => {
@@ -41,7 +41,7 @@ const generateConversationTitle = async ({
   chatModel,
 }: {
   previousRounds: ConversationRound[];
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
   chatModel: InferenceChatModel;
 }) => {
   return withActiveInferenceSpan(
