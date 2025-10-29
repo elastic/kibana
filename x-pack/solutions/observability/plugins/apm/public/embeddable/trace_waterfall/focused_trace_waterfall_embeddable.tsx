@@ -36,7 +36,6 @@ export function FocusedTraceWaterfallEmbeddable({
   if (data === undefined) {
     return (
       <EuiCallOut
-        announceOnMount
         data-test-subj="FocusedTraceWaterfallEmbeddableNoData"
         color="danger"
         size="s"
