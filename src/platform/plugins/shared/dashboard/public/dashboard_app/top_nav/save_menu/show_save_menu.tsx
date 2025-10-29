@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 
-import { EuiContextMenu, EuiIcon, EuiWrappingPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -46,17 +46,14 @@ export const SaveMenu = ({
   dashboardApi,
   anchorElement,
   isResetting,
-  resetChanges,
-  setIsResetting,
   isSaveInProgress,
-  setIsSaveInProgress,
+  resetChanges,
   dashboardInteractiveSave,
 }: SaveMenuProps) => {
-  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode] = useBatchedPublishingSubjects(
+  const [hasOverlays, hasUnsavedChanges, lastSavedId] = useBatchedPublishingSubjects(
     dashboardApi.hasOverlays$,
     dashboardApi.hasUnsavedChanges$,
-    dashboardApi.savedObjectId$,
-    dashboardApi.viewMode$
+    dashboardApi.savedObjectId$
   );
 
   const closePopover = useCallback(() => {
@@ -75,6 +72,7 @@ export const SaveMenu = ({
           'data-test-subj': 'dashboardInteractiveSaveMenuItem',
           iconType: lastSavedId ? undefined : 'save',
           onClick: () => {
+            dashboardInteractiveSave();
             closePopover();
           },
         },
