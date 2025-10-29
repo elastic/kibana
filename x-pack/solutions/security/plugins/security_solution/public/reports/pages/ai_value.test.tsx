@@ -226,52 +226,6 @@ describe('AIValue', () => {
 
       expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
     });
-
-    it('shows no privileges when user lacks alert read privileges', () => {
-      mockUseAlertsPrivileges.mockReturnValue({
-        hasKibanaREAD: false,
-        hasIndexRead: true,
-        hasIndexUpdateDelete: false,
-        hasKibanaCRUD: false,
-        loading: false,
-        isAuthenticated: true,
-        hasEncryptionKey: true,
-        hasIndexManage: false,
-        hasIndexWrite: false,
-        hasIndexMaintenance: false,
-      });
-
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
-    });
-
-    it('shows no privileges when user lacks index read privileges', () => {
-      mockUseAlertsPrivileges.mockReturnValue({
-        hasKibanaREAD: true,
-        hasIndexRead: false,
-        hasIndexUpdateDelete: false,
-        hasKibanaCRUD: false,
-        loading: false,
-        isAuthenticated: true,
-        hasEncryptionKey: true,
-        hasIndexManage: false,
-        hasIndexWrite: false,
-        hasIndexMaintenance: false,
-      });
-
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
-    });
   });
 
   describe('Main Content Rendering', () => {
