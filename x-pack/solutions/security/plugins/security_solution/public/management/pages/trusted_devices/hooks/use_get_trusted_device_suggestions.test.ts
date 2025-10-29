@@ -11,8 +11,8 @@ import { useQuery as _useQuery } from '@tanstack/react-query';
 import { useGetTrustedDeviceSuggestions } from './use_get_trusted_device_suggestions';
 import { TrustedDevicesApiClient } from '../service/api_client';
 
-jest.mock('@kbn/react-query', () => {
-  const actualReactQueryModule = jest.requireActual('@kbn/react-query');
+jest.mock('@tanstack/react-query', () => {
+  const actualReactQueryModule = jest.requireActual('@tanstack/react-query');
   return {
     ...actualReactQueryModule,
     useQuery: jest.fn((...args) => actualReactQueryModule.useQuery(...args)),
