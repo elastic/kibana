@@ -21,7 +21,11 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import {
+  appendWhereClauseToESQLQuery,
+  hasTransformationalCommand,
+  appendFilteringWhereClauseForCascadeLayout,
+} from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
@@ -125,6 +129,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
+  const cascadeConfig = useCurrentTabSelector((state) => state.uiState.cascade);
+
+  const cascadeLayoutSelected = useMemo(() => {
+    return Boolean(cascadeConfig?.selectedCascadeGroups?.length);
+  }, [cascadeConfig?.selectedCascadeGroups?.length]);
 
   const fetchCounter = useRef<number>(0);
 
@@ -235,13 +244,19 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       // weird existence logic from Discover components
       // in the field it comes the operator _exists_ and in the value the field
       // I need to take care of it here but I think it should be handled on the fieldlist instead
-      const updatedQuery = appendWhereClauseToESQLQuery(
+      const updatedQuery = (
+        cascadeLayoutSelected
+          ? appendFilteringWhereClauseForCascadeLayout
+          : appendWhereClauseToESQLQuery
+      ).call(
+        null,
         query.esql,
         fieldName === '_exists_' ? String(values) : fieldName,
         fieldName === '_exists_' || values == null ? undefined : values,
         getOperator(fieldName, values, operation),
         fieldType
       );
+
       if (!updatedQuery) {
         return;
       }
@@ -257,7 +272,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         fieldsMetadata,
       });
     },
-    [query, data.query.queryString, trackUiMetric, scopedEBTManager, fieldsMetadata]
+    [
+      query,
+      cascadeLayoutSelected,
+      data.query.queryString,
+      trackUiMetric,
+      scopedEBTManager,
+      fieldsMetadata,
+    ]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
