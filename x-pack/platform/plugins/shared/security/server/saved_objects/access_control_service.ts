@@ -48,13 +48,20 @@ export class AccessControlService {
 
     const { accessControl } = object;
     if (!accessControl) {
+      // Always check if we are introducing access control for an unowned object
+      if (
+        actions.has(SecurityAction.CHANGE_OWNERSHIP) ||
+        actions.has(SecurityAction.CHANGE_ACCESS_MODE)
+      ) {
+        return true;
+      }
       return false;
     }
 
     // Note: We will ultimately have to check privileges even if there is no
     // current user because we will need to support actions via HTTP APIs,
     // like import
-    if (!accessControl.owner || !currentUser) {
+    if (!accessControl?.owner || !currentUser) {
       return false;
     }
 
