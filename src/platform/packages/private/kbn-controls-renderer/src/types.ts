@@ -44,3 +44,10 @@ export type ControlsRendererParentApi = Pick<
     layout$: BehaviorSubject<ControlsLayout>;
     isCompressed?: () => boolean;
   };
+
+export interface HasPrependWrapperRef {
+  prependWrapperRef: React.RefObject<HTMLDivElement>;
+}
+
+export const apiHasPrependWrapperRef = (api: unknown): api is HasPrependWrapperRef =>
+  Boolean((api as HasPrependWrapperRef).prependWrapperRef);

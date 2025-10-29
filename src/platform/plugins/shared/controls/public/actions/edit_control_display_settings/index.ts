@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ControlsRenderer } from './src/controls_renderer';
-export type { ControlsRendererParentApi, HasPrependWrapperRef } from './src/types';
-export { apiHasPrependWrapperRef } from './src/types';
+export { EditControlDisplaySettingsAction } from './edit_control_display_settings';

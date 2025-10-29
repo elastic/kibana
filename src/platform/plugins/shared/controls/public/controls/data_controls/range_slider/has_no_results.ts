@@ -45,7 +45,6 @@ export function hasNoResults$({
       if (!dataView || !rangeFilter || ignoreValidations) {
         return false;
       }
-      controlFetchContext.filters = getFetchContextFilters(controlFetchContext, useGlobalFilters);
 
       try {
         setIsLoading(true);
@@ -56,6 +55,7 @@ export function hasNoResults$({
           dataView,
           rangeFilter,
           ...controlFetchContext,
+          filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
         });
       } catch (error) {
         // Ignore error, validation is not required for control to function properly

@@ -9,24 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { apiCanPinPanel } from '@kbn/presentation-containers';
-import type { PublishingSubject, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import { map } from 'rxjs';
-import type { StickyControlLayoutState } from '@kbn/controls-schemas';
 import { ACTION_CREATE_TIME_SLIDER } from './constants';
 
-interface PublishesControlsLayout {
-  layout$: PublishingSubject<{
-    controls: {
-      [id: string]: StickyControlLayoutState;
-    };
-  }>;
-}
-
-const apiPublishesControlsLayout = (api: unknown): api is PublishesControlsLayout =>
-  Boolean((api as PublishesControlsLayout).layout$);
+import { apiPublishesControlsLayout } from './types';
 
 const compatibilityCheck = (api: unknown | null) =>
   apiCanPinPanel(api) &&
