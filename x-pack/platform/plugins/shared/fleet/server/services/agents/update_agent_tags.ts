@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
-import { AgentReassignmentError } from '../../errors';
+import { AgentReassignmentError, FleetVersionConflictError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -19,6 +19,7 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import type { GetAgentsOptions } from '.';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
+import pRetry from 'p-retry';
 
 export async function updateAgentTags(
   soClient: SavedObjectsClientContract,
@@ -84,9 +85,20 @@ export async function updateAgentTags(
     ).runActionAsyncTask();
   }
 
-  return await updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
-    tagsToAdd,
-    tagsToRemove,
-    spaceId: currentSpaceId,
-  });
+  await pRetry(
+    () =>
+      updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
+        tagsToAdd,
+        tagsToRemove,
+        spaceId: currentSpaceId,
+      }),
+    {
+      onFailedAttempt: (error) => {
+        if (!(error instanceof FleetVersionConflictError)) {
+          throw error;
+        }
+      },
+      retries: 3,
+    }
+  );
 }
