@@ -8,7 +8,7 @@
 import React from 'react';
 import { AsyncField, createPrebuildFields } from './use_rule_description_fields';
 import { screen, render } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from './rule_detail_description_type';
 

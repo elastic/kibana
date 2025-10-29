@@ -8,7 +8,7 @@
 import React, { Suspense, useMemo } from 'react';
 import { EuiBadge, EuiCodeBlock, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@kbn/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { HttpResponse, HttpSetup } from '@kbn/core/public';
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from './rule_detail_description_type';

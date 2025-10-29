@@ -84,7 +84,6 @@ export const configSchema = schema.object({
   gapAutoFillScheduler: schema.maybe(
     schema.object({
       enabled: schema.boolean({ defaultValue: false }),
-      maxBackfills: schema.number({ defaultValue: 1000 }),
       timeout: schema.maybe(
         schema.string({ validate: validateDurationSchema, defaultValue: '40s' })
       ),

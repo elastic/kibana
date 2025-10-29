@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { SavedObjectsCreateOptions } from '@kbn/core/server';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { CreateGapAutoFillSchedulerParams } from './types';
 import type { GapAutoFillSchedulerResponse } from '../../result/types';
@@ -56,71 +57,82 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
     throw error;
   }
 
-  const soClient = context.unsecuredSavedObjectsClient;
-  const taskManager = context.taskManager;
+  try {
+    const soClient = context.unsecuredSavedObjectsClient;
+    const taskManager = context.taskManager;
 
-  const createdBy = await context.getUserName?.();
+    const createdBy = await context.getUserName?.();
 
-  const now = new Date().toISOString();
-  const attributes = transformGapAutoFillSchedulerCreateParamToSavedObject(params, {
-    createdBy,
-    createdAt: now,
-    updatedAt: now,
-    updatedBy: createdBy,
-  });
+    const now = new Date().toISOString();
+    const attributes = transformGapAutoFillSchedulerCreateParamToSavedObject(params, {
+      createdBy,
+      createdAt: now,
+      updatedAt: now,
+      updatedBy: createdBy,
+    });
 
-  const savedObjectOptions = params.id
-    ? { id: params.id, refresh: 'wait_for' as const }
-    : { refresh: 'wait_for' as const };
-
-  const so = await soClient.create(
-    GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-    attributes,
-    savedObjectOptions
-  );
-
-  const task = await taskManager.ensureScheduled(
-    {
-      id: so.id,
-      taskType: GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
-      schedule: params.schedule,
-      scope: params.scope ?? [],
-      params: {
-        configId: so.id,
-        spaceId: context.spaceId,
-      },
-      state: {},
-    },
-    {
-      request: params.request,
+    const savedObjectOptions: SavedObjectsCreateOptions = {
+      refresh: 'wait_for' as const,
+    };
+    if (params.id) {
+      savedObjectOptions.id = params.id;
     }
-  );
 
-  // Update the saved object with the scheduled task ID
-  await soClient.update<GapAutoFillSchedulerSO>(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, so.id, {
-    scheduledTaskId: task.id,
-    updatedAt: new Date().toISOString(),
-  });
+    const so = await soClient.create(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      attributes,
+      savedObjectOptions
+    );
 
-  const updatedSo = await soClient.get<GapAutoFillSchedulerSO>(
-    GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-    so.id
-  );
-
-  // Log successful creation
-  context.auditLogger?.log(
-    gapAutoFillSchedulerAuditEvent({
-      action: GapAutoFillSchedulerAuditAction.CREATE,
-      savedObject: {
-        type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-        id: updatedSo.id,
-        name: updatedSo.attributes.name,
+    const task = await taskManager.ensureScheduled(
+      {
+        id: so.id,
+        taskType: GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
+        schedule: params.schedule,
+        scope: params.scope ?? [],
+        params: {
+          configId: so.id,
+          spaceId: context.spaceId,
+        },
+        state: {},
       },
-    })
-  );
+      {
+        request: params.request,
+      }
+    );
 
-  // Transform the saved object to the result format
-  return transformSavedObjectToGapAutoFillSchedulerResult({
-    savedObject: updatedSo,
-  });
+    // Update the saved object with the scheduled task ID
+    await soClient.update<GapAutoFillSchedulerSO>(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      so.id,
+      {
+        scheduledTaskId: task.id,
+        updatedAt: new Date().toISOString(),
+      }
+    );
+
+    const updatedSo = await soClient.get<GapAutoFillSchedulerSO>(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      so.id
+    );
+
+    // Log successful creation
+    context.auditLogger?.log(
+      gapAutoFillSchedulerAuditEvent({
+        action: GapAutoFillSchedulerAuditAction.CREATE,
+        savedObject: {
+          type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+          id: updatedSo.id,
+          name: updatedSo.attributes.name,
+        },
+      })
+    );
+
+    // Transform the saved object to the result format
+    return transformSavedObjectToGapAutoFillSchedulerResult({
+      savedObject: updatedSo,
+    });
+  } catch (error) {
+    throw Boom.boomify(error, { message: 'Failed to create gap auto fill scheduler' });
+  }
 }

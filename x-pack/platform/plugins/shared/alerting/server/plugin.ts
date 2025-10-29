@@ -452,10 +452,7 @@ export class AlertingPlugin {
         logger: this.logger,
         getRulesClientWithRequest: (request) => this?.getRulesClientWithRequest?.(request),
         eventLogger: this.eventLogger!,
-        schedulerConfig: this.config.gapAutoFillScheduler as unknown as {
-          timeout?: string;
-          sortOrder?: 'asc' | 'desc';
-        },
+        schedulerConfig: this.config.gapAutoFillScheduler,
       });
     }
 

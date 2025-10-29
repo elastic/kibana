@@ -14,11 +14,6 @@ describe('config validation', () => {
       Object {
         "cancelAlertsOnRuleTimeout": true,
         "enableFrameworkAlerts": true,
-        "gapAutoFillScheduler": Object {
-          "enabled": false,
-          "gapFillRange": "now-7d",
-          "maxBackfills": 1000,
-        },
         "healthCheck": Object {
           "interval": "60m",
         },
