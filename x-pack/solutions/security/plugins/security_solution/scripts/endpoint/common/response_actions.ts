@@ -364,6 +364,19 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
         },
       } as unknown as ResponseOutput;
 
+    case 'memory-dump':
+      return {
+        output: {
+          type: 'json',
+          content: {
+            code: 'ra_memory-dump_success_done',
+            file_size: 2322000,
+            path: '/path/to/file/on/host',
+            disk_free: 123456789,
+          },
+        },
+      } as unknown as ResponseOutput;
+
     default:
       return { output: undefined };
   }
