@@ -8,12 +8,14 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { AlertFiltersKqlBar } from './alert_filters_kql_bar';
 import type { UIAlertFilter } from './common';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
+import type { SelectedDataView } from '../../../sourcerer/store/model';
 
 jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/lib/kibana');
@@ -26,8 +28,23 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockDataView: Partial<DataView> = {
   id: 'test-data-view-id',
   title: 'test-index',
-  fields: [],
+  fields: [] as unknown as DataView['fields'],
 };
+
+const mockSourcererDataViewSpec: DataViewSpec = {
+  id: 'test-data-view-id',
+  title: 'test-index',
+  fields: {} as DataViewSpec['fields'],
+};
+
+const createMockSelectedDataView = (): SelectedDataView => ({
+  browserFields: {} as BrowserFields,
+  dataViewId: mockSourcererDataViewSpec.id ?? null,
+  indicesExist: true,
+  loading: false,
+  selectedPatterns: [mockSourcererDataViewSpec.title ?? 'test-index'],
+  sourcererDataView: mockSourcererDataViewSpec,
+});
 
 const mockCreateDataView = jest.fn().mockResolvedValue(mockDataView);
 const mockClearInstanceCache = jest.fn();
@@ -47,14 +64,7 @@ describe('AlertFiltersKqlBar', () => {
       },
     });
 
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {
-        id: 'test-sourcerer-id',
-        title: 'test-index',
-        fields: [],
-      },
-      loading: false,
-    } as ReturnType<typeof useSourcererDataView>);
+    mockUseSourcererDataView.mockReturnValue(createMockSelectedDataView());
 
     const submitButtonText = 'Submit';
     mockUseKibana.mockReturnValue({
@@ -94,7 +104,7 @@ describe('AlertFiltersKqlBar', () => {
           },
         },
       },
-    } as ReturnType<typeof useKibana>);
+    } as unknown as ReturnType<typeof useKibana>);
   });
 
   afterEach(() => {
