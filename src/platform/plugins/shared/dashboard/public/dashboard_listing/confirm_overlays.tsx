@@ -25,11 +25,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { coreServices } from '../services/kibana_services';
-import {
-  createConfirmStrings,
-  resetConfirmStrings,
-  unsavedChangesConfirmStrings,
-} from './_dashboard_listing_strings';
+import { createConfirmStrings, resetConfirmStrings } from './_dashboard_listing_strings';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
