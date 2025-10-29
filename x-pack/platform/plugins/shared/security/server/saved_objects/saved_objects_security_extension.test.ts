@@ -6599,4 +6599,94 @@ describe('#authorizeChangeAccessControl', () => {
       },
     });
   });
+
+  test('audits success event when changeOwnership operation is authorized', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
+      typesRequiringAccessControl: new Set(['dashboard', 'visualization']),
+    });
+    setupSimpleCheckPrivsMockResolve(
+      checkPrivileges,
+      'dashboard',
+      MANAGE_ACCESS_CONTROL_ACTION,
+      false
+    );
+    checkAuthorizationSpy.mockResolvedValue({
+      status: 'fully_authorized',
+      typeMap: new Map()
+        .set('dashboard', {
+          manage_access_control: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('visualization', {
+          manage_access_control: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+    });
+
+    await securityExtension.authorizeChangeAccessControl(
+      {
+        namespace,
+        objects: objectsWithExistingNamespaces,
+      },
+      'changeOwnership'
+    );
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+    expect(auditHelperSpy).toHaveBeenCalledWith({
+      action: AuditAction.UPDATE_OBJECTS_OWNER,
+      objects: objectsWithExistingNamespaces,
+      useSuccessOutcome: true,
+      addToSpaces: undefined,
+      deleteFromSpaces: undefined,
+      unauthorizedSpaces: undefined,
+      unauthorizedTypes: undefined,
+      error: undefined,
+    });
+  });
+
+  test('audits success event when changeAccessMode operation is authorized', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
+      typesRequiringAccessControl: new Set(['dashboard', 'visualization']),
+    });
+    setupSimpleCheckPrivsMockResolve(
+      checkPrivileges,
+      'dashboard',
+      MANAGE_ACCESS_CONTROL_ACTION,
+      false
+    );
+    checkAuthorizationSpy.mockResolvedValue({
+      status: 'fully_authorized',
+      typeMap: new Map()
+        .set('dashboard', {
+          manage_access_control: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('visualization', {
+          manage_access_control: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+    });
+
+    await securityExtension.authorizeChangeAccessControl(
+      {
+        namespace,
+        objects: objectsWithExistingNamespaces,
+      },
+      'changeAccessMode'
+    );
+
+    expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+    expect(auditHelperSpy).toHaveBeenCalledWith({
+      action: AuditAction.UPDATE_OBJECTS_ACCESS_MODE,
+      objects: objectsWithExistingNamespaces,
+      useSuccessOutcome: true,
+      addToSpaces: undefined,
+      deleteFromSpaces: undefined,
+      unauthorizedSpaces: undefined,
+      unauthorizedTypes: undefined,
+      error: undefined,
+    });
+  });
 });

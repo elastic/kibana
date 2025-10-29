@@ -1187,6 +1187,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         },
       });
 
+      if (auditAction) {
+        this.auditHelper({
+          action: auditAction,
+          objects,
+          useSuccessOutcome: true,
+        });
+      }
+
       return authorizationResult;
     }
     return {
