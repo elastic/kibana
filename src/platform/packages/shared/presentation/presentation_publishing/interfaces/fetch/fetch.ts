@@ -54,10 +54,6 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     timeslice: of(undefined),
   };
 
-  if (apiPublishesTimeRange(api)) {
-    observables.timeRange = api.timeRange$;
-  }
-
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
     observables.filters = api.parentApi.filters$;
     observables.query = api.parentApi.query$;
