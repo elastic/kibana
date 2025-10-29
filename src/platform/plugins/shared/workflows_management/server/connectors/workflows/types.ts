@@ -8,11 +8,11 @@
  */
 
 import type { AlertHit } from '@kbn/alerting-plugin/server/types';
-import type { TypeOf } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
+import type { z } from '@kbn/zod';
 import type { ExecutorParamsSchema } from './schema';
 
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
 export type WorkflowsActionParamsType = ExecutorParams;
 
 export interface RunWorkflowParams {

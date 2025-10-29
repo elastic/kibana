@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 const RunSubActionParamsSchema = schema.object({
   workflowId: schema.string(),
@@ -25,9 +26,11 @@ export const WorkflowsRuleActionParamsSchema = schema.object({
 });
 
 // Schema for execution (what the executor receives)
-export const ExecutorParamsSchema = schema.object({
-  subAction: schema.literal('run'),
-  subActionParams: RunSubActionParamsSchema,
-});
+export const ExecutorParamsSchema = z
+  .object({
+    subAction: z.literal('run'),
+    subActionParams: RunSubActionParamsSchema,
+  })
+  .strict();
 
 export const ExecutorSubActionRunParamsSchema = RunSubActionParamsSchema;
