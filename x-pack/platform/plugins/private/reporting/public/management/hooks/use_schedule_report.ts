@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { mutationKeys } from '../mutation_keys';
 import { scheduleReport, ScheduleReportRequestParams } from '../apis/schedule_report';
 

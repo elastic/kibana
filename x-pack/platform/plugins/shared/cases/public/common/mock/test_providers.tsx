@@ -15,7 +15,7 @@ import type { RenderOptions } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { FilesClient, ScopedFilesClient } from '@kbn/files-plugin/public';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 import { coreMock } from '@kbn/core/public/mocks';
