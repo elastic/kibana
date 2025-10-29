@@ -105,7 +105,6 @@ export function UnifiedHistogramChart({
   dataView,
   requestParams,
   relativeTimeRange: originalRelativeTimeRange,
-  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -225,7 +224,6 @@ export function UnifiedHistogramChart({
     visContext,
     esqlVariables,
     onLoad,
-    lastReloadRequestTime,
   });
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
