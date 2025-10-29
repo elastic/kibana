@@ -6,12 +6,14 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
-import * as i18n from './translations';
+const NOTES = i18n.translate('xpack.securitySolution.timeline.notes.notesButtonLabel', {
+  defaultMessage: 'Notes',
+});
 
 export const NotificationDot = styled.span`
   position: absolute;
@@ -43,7 +45,7 @@ const NotesButtonContainer = styled(EuiFlexGroup)`
 `;
 
 const SmallNotesButton = React.memo<SmallNotesButtonProps>(
-  ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType, eventId, notesCount }) => {
+  ({ ariaLabel = NOTES, isDisabled, toggleShowNotes, timelineType, eventId, notesCount }) => {
     const isTemplate = timelineType === TimelineTypeEnum.template;
     const onClick = useCallback(() => {
       if (eventId != null) {
