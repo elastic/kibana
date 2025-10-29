@@ -176,4 +176,21 @@ steps:
       z.object({ output: z.string().optional(), error: z.any().optional() })
     );
   });
+
+  it('should detect if we are in a scheduled trigger with block', () => {
+    const result = buildAutocompleteContext(
+      getFakeAutocompleteContextParams(`
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`)
+    );
+
+    expect(result?.isInScheduledTriggerWithBlock).toBe(true);
+  });
 });

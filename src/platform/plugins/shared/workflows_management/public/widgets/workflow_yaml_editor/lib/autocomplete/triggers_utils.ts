@@ -38,22 +38,74 @@ export function isInScheduledTriggerWithBlock(
         return;
       }
 
-      // Check if we're inside this trigger's range
-      if (absolutePosition < node.range[0] || absolutePosition > node.range[2]) {
-        return;
-      }
-
       // Find the 'with' property node within this trigger
       const withPair = node.items.find(
         (item) => isPair(item) && isScalar(item.key) && item.key.value === 'with'
       ) as Pair<Scalar, Node> | undefined;
 
-      if (withPair?.value?.range) {
-        // Check if the current position is within the with block's range
-        if (
-          absolutePosition >= withPair.value.range[0] &&
-          absolutePosition <= withPair.value.range[2]
-        ) {
+      if (withPair) {
+        let isInWithBlock = false;
+
+        // Check if cursor is within the value's range (for non-empty values)
+        if (withPair.value?.range) {
+          if (
+            absolutePosition >= withPair.value.range[0] &&
+            absolutePosition <= withPair.value.range[2]
+          ) {
+            isInWithBlock = true;
+          }
+        }
+
+        // For empty or null values, check if cursor is in the area where a value would be typed
+        // This includes immediately after the colon and on the next line(s) with proper indentation
+        if (!isInWithBlock && withPair.key?.range) {
+          const keyEnd = withPair.key.range[2];
+
+          // Get the boundary position - look for next content after the trigger
+          let boundaryPosition: number | undefined;
+
+          // First check if there's a next property in the same trigger
+          const triggerItemIndex = node.items.indexOf(withPair);
+          if (triggerItemIndex < node.items.length - 1) {
+            const nextItem = node.items[triggerItemIndex + 1];
+            if (isPair(nextItem) && nextItem.key?.range) {
+              boundaryPosition = nextItem.key.range[0];
+            }
+          }
+
+          // If no boundary found yet, look at the parent context
+          if (!boundaryPosition && ancestors.length > 1) {
+            // Get the trigger's parent (triggers array) and grandparent (document)
+            const triggersArray = ancestors[ancestors.length - 1];
+            const document = ancestors[ancestors.length - 2];
+
+            if (isMap(document) && document.items) {
+              // Find what comes after 'triggers' in the document
+              const triggersIndex = document.items.findIndex(
+                (item) => isPair(item) && isScalar(item.key) && item.key.value === 'triggers'
+              );
+
+              if (triggersIndex !== -1 && triggersIndex < document.items.length - 1) {
+                const nextDocItem = document.items[triggersIndex + 1];
+                if (isPair(nextDocItem) && nextDocItem.key?.range) {
+                  boundaryPosition = nextDocItem.key.range[0];
+                }
+              }
+            }
+          }
+
+          // If still no boundary, use a reasonable distance (e.g., 50 characters)
+          if (!boundaryPosition) {
+            boundaryPosition = keyEnd + 50;
+          }
+
+          // Check if cursor is after the key but before the boundary
+          if (absolutePosition > keyEnd && absolutePosition < boundaryPosition) {
+            isInWithBlock = true;
+          }
+        }
+
+        if (isInWithBlock) {
           // Check if there's already an existing rrule or every configuration
           if (hasExistingScheduleConfiguration(withPair.value)) {
             // Don't show rrule suggestions if there's already a schedule configuration
