@@ -6,7 +6,7 @@
  */
 
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import {
   useGetMigrationTranslationStats,
   useInvalidateGetMigrationTranslationStats,

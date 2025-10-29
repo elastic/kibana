@@ -17,7 +17,7 @@ import type {
   TestWorkflowResponseDto,
   TestWorkflowCommand,
 } from '@kbn/workflows';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export function useWorkflowActions() {
