@@ -38,16 +38,22 @@ import { apiPublishesPauseFetch } from './publishes_pause_fetch';
 import { apiPublishesReload } from './publishes_reload';
 import { apiPublishesSearchSession, type PublishesSearchSession } from './publishes_search_session';
 import {
+  apiPublishesProjectRouting,
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
+  type PublishesProjectRouting,
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
 } from './publishes_unified_search';
 
 function getReloadTimeFetchContext(api: unknown, reloadTimestamp?: number): ReloadTimeFetchContext {
   const typeApi = api as Partial<
-    PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
+    PublishesTimeRange &
+      HasParentApi<
+        Partial<PublishesUnifiedSearch & PublishesSearchSession & PublishesProjectRouting>
+      >
   >;
+  const projectRoutingValue = typeApi?.parentApi?.projectRouting$?.value;
   return {
     reloadTimestamp,
     filters: typeApi?.parentApi?.filters$?.value,
@@ -55,6 +61,7 @@ function getReloadTimeFetchContext(api: unknown, reloadTimestamp?: number): Relo
     searchSessionId: typeApi?.parentApi?.searchSessionId$?.value,
     timeRange: typeApi?.timeRange$?.value ?? typeApi?.parentApi?.timeRange$?.value,
     timeslice: typeApi?.timeRange$?.value ? undefined : typeApi?.parentApi?.timeslice$?.value,
+    projectRouting: projectRoutingValue,
   };
 }
 
@@ -110,6 +117,9 @@ function getImmediateObservables(api: unknown): Array<Observable<unknown>> {
   const observables: Array<Observable<unknown>> = [];
   if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
     observables.push(api.parentApi.searchSessionId$.pipe(skip(1)));
+  }
+  if (apiHasParentApi(api) && apiPublishesProjectRouting(api.parentApi)) {
+    observables.push(api.parentApi.projectRouting$.pipe(skip(1)));
   }
   if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
     observables.push(api.parentApi.reload$.pipe(filter(() => !hasSearchSession(api))));
@@ -174,6 +184,7 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       timeRange: reloadTimeFetchContext.timeRange,
       timeslice: reloadTimeFetchContext.timeslice,
       searchSessionId: reloadTimeFetchContext.searchSessionId,
+      projectRouting: reloadTimeFetchContext.projectRouting,
     }))
   );
 }

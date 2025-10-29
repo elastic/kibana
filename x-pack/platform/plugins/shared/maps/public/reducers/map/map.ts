@@ -213,7 +213,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
     case MAP_EXTENT_CHANGED:
       return { ...state, mapState: { ...state.mapState, ...action.mapViewContext } };
     case SET_QUERY:
-      const { query, timeFilters, timeslice, filters, searchSessionId, searchSessionMapBuffer } =
+      const { query, timeFilters, timeslice, filters, searchSessionId, searchSessionMapBuffer, projectRouting } =
         action;
       return {
         ...state,
@@ -225,6 +225,7 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           filters,
           searchSessionId,
           searchSessionMapBuffer,
+          projectRouting,
         },
       };
     case SET_SELECTED_LAYER:

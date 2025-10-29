@@ -85,16 +85,25 @@ export function InternalDashboardTopNav({
 
   const dashboardApi = useDashboardApi();
 
-  const [allDataViews, fullScreenMode, hasUnsavedChanges, lastSavedId, query, title, viewMode] =
-    useBatchedPublishingSubjects(
-      dashboardApi.dataViews$,
-      dashboardApi.fullScreenMode$,
-      dashboardApi.hasUnsavedChanges$,
-      dashboardApi.savedObjectId$,
-      dashboardApi.query$,
-      dashboardApi.title$,
-      dashboardApi.viewMode$
-    );
+  const [
+    allDataViews,
+    fullScreenMode,
+    hasUnsavedChanges,
+    lastSavedId,
+    query,
+    title,
+    viewMode,
+    projectRouting,
+  ] = useBatchedPublishingSubjects(
+    dashboardApi.dataViews$,
+    dashboardApi.fullScreenMode$,
+    dashboardApi.hasUnsavedChanges$,
+    dashboardApi.savedObjectId$,
+    dashboardApi.query$,
+    dashboardApi.title$,
+    dashboardApi.viewMode$,
+    dashboardApi.projectRouting$
+  );
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -351,6 +360,8 @@ export function InternalDashboardTopNav({
       <navigationService.ui.TopNavMenu
         {...visibilityProps}
         query={query as Query | undefined}
+        projectRouting={projectRouting}
+        onProjectRoutingChange={dashboardApi.setProjectRouting}
         badges={badges}
         screenTitle={title}
         useDefaultBehaviors={true}

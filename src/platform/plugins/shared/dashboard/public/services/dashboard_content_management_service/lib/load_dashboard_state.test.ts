@@ -65,4 +65,62 @@ describe('Load dashboard state', () => {
     expect(dashboardContentManagementCache.fetchDashboard).toBeCalled();
     expect(dashboardContentManagementCache.addDashboard).not.toBeCalled();
   });
+
+  describe('projectRouting loading', () => {
+    it('should load projectRouting from saved object attributes', async () => {
+      dashboardContentManagementCache.fetchDashboard = jest
+        .fn()
+        .mockImplementation((id: string) => {
+          return {
+            item: {
+              id,
+              version: 1,
+              references: [],
+              type: 'dashboard',
+              attributes: {
+                kibanaSavedObjectMeta: { searchSourceJSON: '' },
+                title: 'Test dashboard with project routing',
+                projectRouting: '_alias:_origin',
+              },
+            },
+            meta: {},
+          };
+        });
+      contentManagementService.client.get = jest.fn();
+
+      const result = await loadDashboardState({
+        id: '123',
+      });
+
+      expect(result.dashboardInput.projectRouting).toBe('_alias:_origin');
+    });
+
+    it('should handle missing projectRouting (undefined)', async () => {
+      dashboardContentManagementCache.fetchDashboard = jest
+        .fn()
+        .mockImplementation((id: string) => {
+          return {
+            item: {
+              id,
+              version: 1,
+              references: [],
+              type: 'dashboard',
+              attributes: {
+                kibanaSavedObjectMeta: { searchSourceJSON: '' },
+                title: 'Test dashboard without project routing',
+                // projectRouting is intentionally omitted
+              },
+            },
+            meta: {},
+          };
+        });
+      contentManagementService.client.get = jest.fn();
+
+      const result = await loadDashboardState({
+        id: '456',
+      });
+
+      expect(result.dashboardInput.projectRouting).toBeUndefined();
+    });
+  });
 });

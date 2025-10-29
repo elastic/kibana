@@ -33,6 +33,7 @@ export function transformDashboardOut(
     timeTo,
     title,
     version,
+    projectRouting,
   } = attributes;
   // Extract tag references
   const tags: string[] = references
@@ -64,6 +65,7 @@ export function transformDashboardOut(
     ...(tags && tags.length && { tags }),
     ...(timeRange && { timeRange }),
     timeRestore: timeRestore ?? false,
+    ...(projectRouting && { projectRouting }),
     title,
     ...(version && { version }),
   };

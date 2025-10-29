@@ -96,4 +96,36 @@ describe('getSerializedState', () => {
 
     expect(result.references).toEqual(panelReferences);
   });
+
+  describe('projectRouting serialization', () => {
+    it('should omit projectRouting from attributes when undefined', () => {
+      const dashboardState = {
+        ...getSampleDashboardState(),
+        projectRouting: undefined,
+      };
+      const result = getSerializedState({
+        controlGroupReferences: [],
+        dashboardState,
+        panelReferences: [],
+      });
+
+      expect(result.attributes.projectRouting).toBeUndefined();
+      // Verify it's not in the object at all
+      expect(Object.keys(result.attributes)).not.toContain('projectRouting');
+    });
+
+    it('should include projectRouting when set to _alias:_origin', () => {
+      const dashboardState = {
+        ...getSampleDashboardState(),
+        projectRouting: '_alias:_origin' as const,
+      };
+      const result = getSerializedState({
+        controlGroupReferences: [],
+        dashboardState,
+        panelReferences: [],
+      });
+
+      expect(result.attributes.projectRouting).toBe('_alias:_origin');
+    });
+  });
 });

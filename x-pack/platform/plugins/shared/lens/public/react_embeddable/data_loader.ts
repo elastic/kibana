@@ -6,7 +6,11 @@
  */
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
+import {
+  apiPublishesProjectRouting,
+  apiPublishesUnifiedSearch,
+  fetch$,
+} from '@kbn/presentation-publishing';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import {
@@ -67,12 +71,17 @@ function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable
         timeRange$: new BehaviorSubject(undefined),
       };
 
+  const { projectRouting$ } = apiPublishesProjectRouting(parentApi)
+    ? parentApi
+    : { projectRouting$: undefined };
+
   return {
     esqlVariables,
     filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
     timeRange: unifiedSearch$.timeRange$.getValue(),
     timeslice: unifiedSearch$.timeslice$?.getValue(),
+    projectRouting: projectRouting$?.getValue(),
   };
 }
 

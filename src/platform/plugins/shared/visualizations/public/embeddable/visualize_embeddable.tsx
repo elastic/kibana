@@ -323,6 +323,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
             ? {
                 query: data.query,
                 filters: data.filters,
+                projectRouting: data.projectRouting,
               }
             : {};
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';

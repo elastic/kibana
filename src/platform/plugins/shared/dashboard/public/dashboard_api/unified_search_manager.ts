@@ -10,7 +10,7 @@
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
@@ -67,6 +67,15 @@ export function initializeUnifiedSearchManager(
       query$.next(query);
     }
   }
+  const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
+    initialState.projectRouting
+  );
+  function setProjectRouting(projectRouting: ProjectRouting | undefined) {
+    if (projectRouting !== projectRouting$.value) {
+      projectRouting$.next(projectRouting);
+    }
+  }
+
   const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(
     initialState.refreshInterval
   );
@@ -274,6 +283,7 @@ export function initializeUnifiedSearchManager(
         (b ?? []).filter((f) => !isFilterPinned(f)),
         COMPARE_ALL_OPTIONS
       ),
+    projectRouting: 'deepEquality',
     query: 'deepEquality',
     refreshInterval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
       timeRestore$.value ? fastIsEqual(a, b) : true,
@@ -285,12 +295,12 @@ export function initializeUnifiedSearchManager(
       return true;
     },
   } as StateComparators<
-    Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>
+    Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'projectRouting'>
   >;
 
   const getState = (): Pick<
     DashboardState,
-    'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
+    'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore' | 'projectRouting'
   > => {
     // pinned filters are not serialized when saving the dashboard
     const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
@@ -301,6 +311,7 @@ export function initializeUnifiedSearchManager(
       refreshInterval: refreshInterval$.value,
       timeRange: timeRange$.value,
       timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
+      projectRouting: projectRouting$.value,
     };
   };
 
@@ -312,6 +323,8 @@ export function initializeUnifiedSearchManager(
         controlGroupReload$.next();
         panelsReload$.next();
       },
+      projectRouting$,
+      setProjectRouting,
       query$,
       refreshInterval$,
       setFilters: setUnifiedSearchFilters,
@@ -326,14 +339,16 @@ export function initializeUnifiedSearchManager(
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           unifiedSearchFilters$,
+          projectRouting$,
           query$,
           refreshInterval$,
           timeRange$,
           timeRestore$,
         ]).pipe(
           debounceTime(COMPARE_DEBOUNCE),
-          map(([filters, query, refreshInterval, timeRange]) => ({
+          map(([filters, projectRouting, query, refreshInterval, timeRange]) => ({
             filters,
+            projectRouting,
             query,
             refreshInterval,
             timeRange,
@@ -350,6 +365,7 @@ export function initializeUnifiedSearchManager(
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
           ...(lastSavedState.filters ?? []),
         ]);
+        setProjectRouting(lastSavedState.projectRouting);
         if (lastSavedState.query) {
           setQuery(lastSavedState.query);
         }

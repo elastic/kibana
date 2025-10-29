@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '../../publishing_subject';
@@ -33,6 +33,18 @@ export type PublishesWritableTimeRange = PublishesTimeRange & {
 export interface PublishesFilters {
   filters$: PublishingSubject<Filter[] | undefined>;
 }
+
+export interface PublishesProjectRouting {
+  projectRouting$: PublishingSubject<ProjectRouting | undefined>;
+}
+
+export const apiPublishesProjectRouting = (
+  unknownApi: unknown
+): unknownApi is PublishesProjectRouting => {
+  return Boolean(
+    unknownApi && (unknownApi as PublishesProjectRouting)?.projectRouting$ !== undefined
+  );
+};
 
 export type PublishesUnifiedSearch = PublishesTimeRange &
   PublishesFilters & {

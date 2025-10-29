@@ -20,6 +20,8 @@ export const ProjectPickerLazy = React.lazy(async () => {
   return { default: ProjectPicker };
 });
 
+export type { ProjectPickerProps } from './project_picker';
+
 /**
  * A `ProjectPicker` component that is wrapped by the `withSuspense` HOC. This component can
  * be used directly by consumers and will load the `ProjectPickerLazy` component lazily with
