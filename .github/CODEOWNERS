@@ -1195,9 +1195,6 @@ x-pack/solutions/security/test
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 x-pack/solutions/security/test/security_solution_api_integration
 x-pack/solutions/security/test/security_solution_endpoint
-x-pack/solutions/workplace_ai/packages/wci-browser @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/workplace_ai/packages/wci-common @elastic/search-kibana @elastic/workchat-eng
-x-pack/solutions/workplace_ai/packages/wci-server @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplace_ai/plugins/serverless_workplace_ai @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplace_ai/plugins/workplace_ai_app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplace_ai/test @elastic/workchat-eng
