@@ -42,8 +42,7 @@ const TESTS_TIMEOUT = 8000;
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
 
-// Failing: See https://github.com/elastic/kibana/issues/237961
-describe.skip('When on integration detail', () => {
+describe('When on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
   const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
   let testRenderer: TestRenderer;
@@ -61,9 +60,10 @@ describe.skip('When on integration detail', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     testRenderer = createIntegrationsTestRendererMock();
     mockedApi = mockApiCalls(testRenderer.startServices.http);
-    await act(() => testRenderer.mountHistory.push(detailPageUrlPath));
+    act(() => testRenderer.mountHistory.push(detailPageUrlPath));
   });
 
   describe('and the package is installed', () => {
@@ -131,7 +131,7 @@ describe.skip('When on integration detail', () => {
     it('should display prerelease callout if prerelease setting enabled and prerelease version available', async () => {
       const calloutTitle = renderResult.getByTestId('prereleaseCallout');
       expect(calloutTitle).toBeInTheDocument();
-      const calloutGABtn = renderResult.getByTestId('switchToGABtn');
+      const calloutGABtn = renderResult.getAllByTestId('switchToGABtn')[0];
       expect((calloutGABtn as any)?.href).toEqual(
         'http://localhost/mock/app/integrations/detail/nginx-1.0.0/overview'
       );
@@ -934,6 +934,16 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       }
       if (path === '/api/fleet/epm/verification_key_id') {
         return mockedApiInterface.responseProvider.getVerificationKeyId();
+      }
+      if (path === '/api/fleet/space_settings') {
+        return Promise.resolve({
+          item: {
+            allowed_namespace_prefixes: [],
+          },
+        });
+      }
+      if (path.endsWith('/changelog.yml')) {
+        return Promise.resolve();
       }
 
       const err = new Error(`API [GET ${path}] is not MOCKED!`);
