@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './file_selector';
-export * from './pending_actions_selector';
-export * from './textarea_input_argument';
-export * from './script_input_params_selector';
+
+export * from './microsoft_script_input_params';
+export * from './sentinelone_script_input_params';
+export * from './crowdstrike_script_input_params';
