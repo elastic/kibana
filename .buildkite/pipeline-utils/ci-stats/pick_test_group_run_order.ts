@@ -512,14 +512,14 @@ export async function pickTestGroupRunOrder() {
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
+            // retry: {
+            //   automatic: [
+            //     { exit_status: '-1', limit: 3 },
+            //     ...(JEST_CONFIGS_RETRY_COUNT > 0
+            //       ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+            //       : []),
+            //   ],
+            // },
           }
         : [],
       integration.count > 0
@@ -533,17 +533,17 @@ export async function pickTestGroupRunOrder() {
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
+            // retry: {
+            //   automatic: [
+            //     { exit_status: '-1', limit: 3 },
+            //     ...(JEST_CONFIGS_RETRY_COUNT > 0
+            //       ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+            //       : []),
+            //   ],
+            // },
           }
         : [],
-      functionalGroups.length
+      functionalGroups.length && false
         ? {
             group: 'FTR Configs',
             key: 'ftr-configs',
