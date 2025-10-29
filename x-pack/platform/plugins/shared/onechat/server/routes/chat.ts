@@ -64,11 +64,30 @@ export function registerChatRoutes({
     attachments: schema.maybe(
       schema.arrayOf(
         schema.object({
-          id: schema.maybe(schema.string()),
-          type: schema.string(),
-          data: schema.recordOf(schema.string(), schema.any()),
-          hidden: schema.maybe(schema.boolean()),
-          transient: schema.maybe(schema.boolean()),
+          id: schema.maybe(
+            schema.string({
+              meta: { description: 'Optional id for the attachment.' },
+            })
+          ),
+          type: schema.string({
+            meta: { description: 'Type of the attachment.' },
+          }),
+          data: schema.recordOf(schema.string(), schema.any(), {
+            meta: { description: 'Payload of the attachment.' },
+          }),
+          hidden: schema.maybe(
+            schema.boolean({
+              meta: { description: 'When true, the attachment will not be displayed in the UI.' },
+            })
+          ),
+          transient: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'When true, the attachment will only be exposed to the agent in the current round of conversation.',
+              },
+            })
+          ),
         }),
         { meta: { description: 'Optional attachments to send with the message.' } }
       )
