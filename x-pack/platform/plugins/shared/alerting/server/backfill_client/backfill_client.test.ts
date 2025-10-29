@@ -2656,8 +2656,8 @@ describe('BackfillClient', () => {
         perPage: 100,
         hasReference: [{ id: '1', type: RULE_SAVED_OBJECT_TYPE }],
         filter: `
-        ad_hoc_run_params.attributes.start <= "${mockEnd.toISOString()}" and
-        ad_hoc_run_params.attributes.end >= "${mockStart.toISOString()}"
+        (ad_hoc_run_params.attributes.start <= "${mockEnd.toISOString()}" and
+        ad_hoc_run_params.attributes.end >= "${mockStart.toISOString()}")
       `,
       });
 

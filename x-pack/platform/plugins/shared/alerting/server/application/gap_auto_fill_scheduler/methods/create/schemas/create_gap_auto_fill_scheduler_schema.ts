@@ -11,8 +11,8 @@ export const createGapAutoFillSchedulerSchema = schema.object({
   id: schema.maybe(schema.string()),
   name: schema.string(),
   enabled: schema.boolean(),
-  maxBackfills: schema.number(),
-  amountOfRetries: schema.number(),
+  maxBackfills: schema.number({ min: 1, max: 5000 }),
+  amountOfRetries: schema.number({ min: 1 }),
   gapFillRange: schema.string(),
   schedule: schema.object({
     interval: schema.string(),

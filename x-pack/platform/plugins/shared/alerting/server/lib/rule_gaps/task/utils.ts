@@ -174,13 +174,7 @@ export async function initRun({
 }): Promise<{
   rulesClient: RulesClientApi;
   rulesClientContext: RulesClientContext;
-  config: {
-    name: string;
-    amountOfRetries: number;
-    gapFillRange: string;
-    schedule: { interval: string };
-    maxBackfills: number;
-  };
+  config: GapAutoFillSchedulerLogConfig;
   logEvent: GapAutoFillSchedulerEventLogger;
 }> {
   if (!getRulesClientWithRequest || !fakeRequest) {
@@ -212,6 +206,7 @@ export async function initRun({
     gapFillRange: soAttrs.gapFillRange,
     schedule: soAttrs.schedule,
     maxBackfills: soAttrs.maxBackfills,
+    ruleTypes: soAttrs.ruleTypes,
   };
   const logEvent = createGapAutoFillSchedulerEventLogger({
     eventLogger,

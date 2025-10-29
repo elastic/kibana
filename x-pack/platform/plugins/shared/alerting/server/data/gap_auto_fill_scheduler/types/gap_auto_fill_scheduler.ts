@@ -13,6 +13,7 @@ export interface GapAutoFillSchedulerSO extends Record<string, unknown> {
   gapFillRange: string;
   maxBackfills: number;
   amountOfRetries: number;
+  ruleTypes: Array<{ type: string; consumer: string }>;
   createdBy?: string;
   updatedBy?: string;
   createdAt: string;
@@ -28,6 +29,7 @@ export interface GapAutoFillScheduler {
   gapFillRange: string;
   maxBackfills: number;
   amountOfRetries: number;
+  ruleTypes: Array<{ type: string; consumer: string }>;
   createdBy?: string;
   updatedBy?: string;
   createdAt: string;

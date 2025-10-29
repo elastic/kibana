@@ -11,13 +11,19 @@ import type { TypeOf } from '@kbn/config-schema';
 export const rawGapAutoFillSchedulerSchemaV1 = schema.object(
   {
     name: schema.string(),
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: schema.boolean(),
     schedule: schema.object({
       interval: schema.string(),
     }),
-    gapFillRange: schema.string({ defaultValue: 'now-7d' }),
-    maxBackfills: schema.number({ defaultValue: 1000 }),
-    amountOfRetries: schema.number({ defaultValue: 3 }),
+    gapFillRange: schema.string(),
+    maxBackfills: schema.number(),
+    amountOfRetries: schema.number(),
+    ruleTypes: schema.arrayOf(
+      schema.object({
+        type: schema.string(),
+        consumer: schema.string(),
+      })
+    ),
     createdBy: schema.maybe(schema.string()),
     updatedBy: schema.maybe(schema.string()),
     createdAt: schema.string(),

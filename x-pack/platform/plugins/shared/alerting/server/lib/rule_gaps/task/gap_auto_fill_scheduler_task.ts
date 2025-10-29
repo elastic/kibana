@@ -125,6 +125,7 @@ export function registerGapAutoFillSchedulerTask({
               gapFillRange: string;
               schedule: { interval: string };
               maxBackfills: number;
+              ruleTypes: Array<{ type: string; consumer: string }>;
             };
             let logEvent: ReturnType<typeof createGapAutoFillSchedulerEventLogger>;
             try {
@@ -234,6 +235,8 @@ export function registerGapAutoFillSchedulerTask({
                     filter: `alert.attributes.enabled:true AND (${currentRuleIds
                       .map((id) => `alert.id: ("alert:${id}")`)
                       .join(' OR ')})`,
+                    ruleTypeIds: config.ruleTypes.map((rt) => rt.type),
+                    consumers: Array.from(new Set(config.ruleTypes.map((rt) => rt.consumer))),
                   },
                 });
 
