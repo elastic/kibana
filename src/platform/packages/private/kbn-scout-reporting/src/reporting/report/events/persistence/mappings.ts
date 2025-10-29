@@ -45,7 +45,7 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
         type: 'text',
       },
       slug: {
-        type: 'wildcard',
+        type: 'keyword',
       },
     },
   },
@@ -103,7 +103,7 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
         type: 'integer',
       },
       pipeline_slug: {
-        type: 'wildcard',
+        type: 'keyword',
       },
     },
   },
