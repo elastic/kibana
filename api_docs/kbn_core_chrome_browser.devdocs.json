@@ -3386,9 +3386,9 @@
         "label": "PanelSelectedNode",
         "description": [],
         "signature": [
-          "{ id: string; title?: string | undefined; children?: ",
+          "{ id: string; path: string; title?: string | undefined; children?: ",
           "ChromeProjectNavigationNode",
-          "[] | undefined; path: string; sideNavStatus?: ",
+          "[] | undefined; sideNavStatus?: ",
           "SideNavNodeStatus",
           " | undefined; deepLink?: ",
           "ChromeNavLink",

@@ -4123,13 +4123,10 @@
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.UpdatedWorkflowResponseDto.lastUpdatedAt",
-            "type": "Object",
+            "type": "string",
             "tags": [],
             "label": "lastUpdatedAt",
             "description": [],
-            "signature": [
-              "Date"
-            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4276,13 +4273,10 @@
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.WorkflowDetailDto.createdAt",
-            "type": "Object",
+            "type": "string",
             "tags": [],
             "label": "createdAt",
             "description": [],
-            "signature": [
-              "Date"
-            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4301,13 +4295,10 @@
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.WorkflowDetailDto.lastUpdatedAt",
-            "type": "Object",
+            "type": "string",
             "tags": [],
             "label": "lastUpdatedAt",
             "description": [],
-            "signature": [
-              "Date"
-            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5074,13 +5065,10 @@
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.WorkflowListItemDto.createdAt",
-            "type": "Object",
+            "type": "string",
             "tags": [],
             "label": "createdAt",
             "description": [],
-            "signature": [
-              "Date"
-            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
