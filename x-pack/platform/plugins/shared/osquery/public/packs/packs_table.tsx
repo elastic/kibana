@@ -131,12 +131,13 @@ const PacksTableComponent = () => {
       });
 
       return (
-        <EuiToolTip position="top" content={playText}>
+        <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="play"
             onClick={handlePlayClick(item)}
             isDisabled={!enabled}
             data-test-subj={`play-${item.name}-button`}
+            aria-label={playText}
           />
         </EuiToolTip>
       );

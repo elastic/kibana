@@ -23,8 +23,6 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 
-import iconStreamClassic from '../../assets/icon_stream_classic.svg';
-import iconStreamWired from '../../assets/icon_stream_wired.svg';
 import { truncateText } from '../../util/truncate_text';
 
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
@@ -65,7 +63,7 @@ export function ClassicStreamBadge() {
     >
       <EuiBadge
         color="hollow"
-        iconType={iconStreamClassic}
+        iconType="streamsClassic"
         iconSide="left"
         tabIndex={0}
         data-test-subj="classicStreamBadge"
@@ -82,7 +80,7 @@ export function WiredStreamBadge() {
   return (
     <EuiBadge
       color="hollow"
-      iconType={iconStreamWired}
+      iconType="streamsWired"
       iconSide="left"
       data-test-subj="wiredStreamBadge"
     >

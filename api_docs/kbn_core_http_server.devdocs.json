@@ -3425,6 +3425,10 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
+              },
+              {
                 "plugin": "@kbn/content-management-content-insights-server",
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
@@ -3459,6 +3463,18 @@
               {
                 "plugin": "globalSearch",
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/get_searchable_types.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/es_config/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/spec_definitions/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -3638,7 +3654,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/scheduled.ts"
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/list/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -3882,31 +3898,39 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_connectors.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_step_execution.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_aggs.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_by_id.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_execution_by_id.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_execution_logs.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_executions.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_json_schema.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/get_workflow_stats.ts"
               },
               {
                 "plugin": "onechat",
@@ -4079,22 +4103,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget/server/init_routes.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -4493,16 +4501,8 @@
                 "path": "src/platform/plugins/private/interactive_setup/server/routes/status.ts"
               },
               {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/es_config/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/spec_definitions/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts"
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_projects_tags.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -4523,6 +4523,10 @@
               {
                 "plugin": "visTypeTimelion",
                 "path": "src/platform/plugins/private/vis_types/timelion/server/routes/functions.ts"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/lookup_index.ts"
               },
               {
                 "plugin": "@kbn/test-suites-src",
@@ -6345,6 +6349,14 @@
                 "path": "x-pack/platform/plugins/shared/global_search/server/routes/find.ts"
               },
               {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/proxy/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_create_route.ts"
               },
@@ -6522,7 +6534,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/schedule/schedule_from_jobparams.ts"
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/create/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -6698,31 +6710,31 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_cancel_workflow_execution.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_clone_workflow.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_create_workflow.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_run_workflow.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_search_workflows.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_test_step.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_test_workflow.ts"
               },
               {
                 "plugin": "onechat",
@@ -7257,14 +7269,6 @@
                 "path": "src/platform/plugins/private/interactive_setup/server/routes/verify.ts"
               },
               {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/proxy/index.ts"
-              },
-              {
-                "plugin": "console",
-                "path": "src/platform/plugins/shared/console/server/routes/api/console/convert_request_to_language/index.ts"
-              },
-              {
                 "plugin": "contentManagement",
                 "path": "src/platform/plugins/shared/content_management/server/plugin.test.ts"
               },
@@ -7311,6 +7315,14 @@
               {
                 "plugin": "visTypeTimelion",
                 "path": "src/platform/plugins/private/vis_types/timelion/server/routes/run.ts"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/lookup_index.ts"
               },
               {
                 "plugin": "@kbn/test-suites-src",
@@ -7770,14 +7782,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.test.ts"
               },
               {
@@ -7966,6 +7970,10 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/external/create/create_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/external/unarchive/unarchive_maintenance_window_route.test.ts"
               },
               {
@@ -8030,7 +8038,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/internal/finish/finish_maintenance_window_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/internal/create/create_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8043,6 +8051,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/internal/finish/finish_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/internal/finish/finish_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/internal/update/update_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8526,6 +8542,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/update/index.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
@@ -8626,7 +8646,7 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/put_update_workflow.ts"
               },
               {
                 "plugin": "grokdebugger",
@@ -8990,7 +9010,7 @@
               },
               {
                 "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/scheduled.ts"
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_disable/index.ts"
               },
               {
                 "plugin": "reporting",
@@ -9087,6 +9107,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/external/update/update_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -9318,6 +9342,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/scheduled_reports/bulk_delete/index.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/public/jobs.ts"
               },
               {
@@ -9358,11 +9386,11 @@
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/delete_workflow_by_id.ts"
               },
               {
                 "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/delete_workflows_bulk.ts"
               },
               {
                 "plugin": "grokdebugger",
@@ -9375,6 +9403,14 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
                 "plugin": "observability",
@@ -12287,6 +12323,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/torq_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -15926,6 +15966,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entity_crud/upsert_entities_bulk.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/create_index.ts"
               },
               {
@@ -16816,6 +16860,10 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/users/suggest.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/test_internal/update_anonymization_fields_route.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
               },
@@ -17090,6 +17138,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/migrations/routes/run_migrations.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_details/routes/entity_details_highlight.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17700,6 +17752,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/delete.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entity_crud/delete_entity.ts"
               },
               {
                 "plugin": "securitySolution",

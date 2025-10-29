@@ -11,134 +11,59 @@ import { useEffect, useState } from 'react';
 const MESSAGE_BUCKETS: Record<number, string[]> = {
   5: [
     i18n.translate('xpack.streams.useWaitingForAiMessage.5s.1', {
-      defaultMessage: 'Working on it...',
+      defaultMessage: 'Processing request...',
     }),
     i18n.translate('xpack.streams.useWaitingForAiMessage.5s.2', {
-      defaultMessage: 'Just a moment...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.5s.3', {
-      defaultMessage: "Let's race, me versus your coffee machine!",
+      defaultMessage: 'Formulating an execution plan...',
     }),
   ],
   10: [
     i18n.translate('xpack.streams.useWaitingForAiMessage.10s.1', {
-      defaultMessage: 'This is taking longer than usual...',
+      defaultMessage: 'Generating an optimized Elasticsearch query...',
     }),
     i18n.translate('xpack.streams.useWaitingForAiMessage.10s.2', {
-      defaultMessage: 'Still thinking...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.10s.3', {
-      defaultMessage: 'Still crunching the numbers...',
+      defaultMessage: 'Clustering your data...',
     }),
   ],
   15: [
     i18n.translate('xpack.streams.useWaitingForAiMessage.15s.1', {
-      defaultMessage: 'Still processing...',
+      defaultMessage: 'Executing query against your data...',
     }),
     i18n.translate('xpack.streams.useWaitingForAiMessage.15s.2', {
-      defaultMessage: 'Hold on...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.15s.3', {
-      defaultMessage: "I'm not giving up yet...",
+      defaultMessage: 'Fetching more data for analysis...',
     }),
   ],
   20: [
     i18n.translate('xpack.streams.useWaitingForAiMessage.20s.1', {
-      defaultMessage: 'Hang in there...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.20s.2', {
-      defaultMessage: 'Almost done...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.20s.3', {
-      defaultMessage: 'Still working on your request...',
+      defaultMessage: 'Analyzing query results...',
     }),
   ],
   25: [
     i18n.translate('xpack.streams.useWaitingForAiMessage.25s.1', {
-      defaultMessage: 'Almost there, I think...',
+      defaultMessage: 'Correlating events...',
     }),
     i18n.translate('xpack.streams.useWaitingForAiMessage.25s.2', {
-      defaultMessage: 'Finalizing...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.25s.3', {
-      defaultMessage: 'Just checking everything...',
+      defaultMessage: 'Synthesizing findings...',
     }),
   ],
   30: [
     i18n.translate('xpack.streams.useWaitingForAiMessage.30s.1', {
-      defaultMessage: 'Just the final touches...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.30s.2', {
-      defaultMessage: 'Nearly ready...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.30s.3', {
-      defaultMessage: 'Last step, promise!',
+      defaultMessage: 'Generating a natural language summary...',
     }),
   ],
   35: [
     i18n.translate('xpack.streams.useWaitingForAiMessage.35s.1', {
-      defaultMessage: 'Still working...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.35s.2', {
-      defaultMessage: 'Thanks for your patience...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.35s.3', {
-      defaultMessage: "We're nearly there...",
+      defaultMessage: 'Verifying the accuracy of the findings...',
     }),
   ],
   40: [
     i18n.translate('xpack.streams.useWaitingForAiMessage.40s.1', {
-      defaultMessage: 'Just a bit longer...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.40s.2', {
-      defaultMessage: "We're nearly there...",
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.40s.3', {
-      defaultMessage: 'Still processing, please wait...',
+      defaultMessage: 'Compiling insights into a final response...',
     }),
   ],
   45: [
     i18n.translate('xpack.streams.useWaitingForAiMessage.45s.1', {
-      defaultMessage: 'Still going...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.45s.2', {
-      defaultMessage: 'Thank you for waiting...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.45s.3', {
-      defaultMessage: 'Just finishing up...',
-    }),
-  ],
-  50: [
-    i18n.translate('xpack.streams.useWaitingForAiMessage.50s.1', {
-      defaultMessage: 'Almost complete...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.50s.2', {
-      defaultMessage: 'Just finishing up...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.50s.3', {
-      defaultMessage: 'Final steps...',
-    }),
-  ],
-  55: [
-    i18n.translate('xpack.streams.useWaitingForAiMessage.55s.1', {
-      defaultMessage: 'One moment more...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.55s.2', {
-      defaultMessage: 'Wrapping up...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.55s.3', {
-      defaultMessage: 'Last checks...',
-    }),
-  ],
-  60: [
-    i18n.translate('xpack.streams.useWaitingForAiMessage.60s.1', {
-      defaultMessage: 'Thanks for waiting! Still working...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.60s.2', {
-      defaultMessage: 'Still processing, please wait...',
-    }),
-    i18n.translate('xpack.streams.useWaitingForAiMessage.60s.3', {
-      defaultMessage: 'Nearly finished...',
+      defaultMessage: 'The analysis is taking longer than usual but is still progressing.',
     }),
   ],
 };
@@ -171,7 +96,7 @@ export function useWaitingForAiMessage(hasInitialResults: boolean = false) {
         });
   }
 
-  const bucket = Math.min(Math.floor(elapsed / 5) * 5, 60);
+  const bucket = Math.min(Math.floor(elapsed / 5) * 5, 45);
   const messages = MESSAGE_BUCKETS[bucket] || [];
   const index = Math.floor(Math.random() * messages.length);
 

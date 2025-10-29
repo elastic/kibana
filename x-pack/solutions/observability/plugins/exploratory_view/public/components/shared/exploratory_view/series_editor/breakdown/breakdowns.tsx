@@ -122,6 +122,9 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
         onChange={(value) => onOptionChange(value)}
         data-test-subj={'seriesBreakdown'}
         disabled={differentSeriesHasBreakdown}
+        aria-label={i18n.translate('xpack.exploratoryView.breakDownFilter.selectAriaLabel', {
+          defaultMessage: 'Breakdown',
+        })}
       />
     );
   }

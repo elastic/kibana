@@ -29,5 +29,6 @@
     "@kbn/alerting-comparators",
     "@kbn/test",
     "@kbn/scout",
+    "@kbn/some-dev-log",
   ]
 }

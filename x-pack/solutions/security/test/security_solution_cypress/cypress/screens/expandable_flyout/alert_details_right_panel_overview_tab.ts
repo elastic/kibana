@@ -45,8 +45,6 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS =
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER =
   getDataTestSubjectSelector('securitySolutionFlyoutInvestigationSectionHeader');
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_CONTENT =
-  getDataTestSubjectSelector('securitySolutionFlyoutInvestigationSectionContent');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE =
   getDataTestSubjectSelector('securitySolutionFlyoutHighlightedFieldsTitle');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS =
@@ -63,8 +61,6 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_GUIDE_BUTTON =
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER =
   getDataTestSubjectSelector('securitySolutionFlyoutInsightsHeader');
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_CONTENT =
-  getDataTestSubjectSelector('securitySolutionFlyoutInsightsContent');
 
 /* Insights Entities */
 
@@ -92,8 +88,6 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_E
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER =
   getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsTitleLink');
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_SUPPRESSED_ALERTS =
-  getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsSuppressedAlertsButton');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_ANCESTRY =
   getDataTestSubjectSelector('securitySolutionFlyoutCorrelationsRelatedAlertsByAncestryButton');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SAME_SOURCE_EVENT =
@@ -116,8 +110,6 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_CONTENT =
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER =
   getDataTestSubjectSelector('securitySolutionFlyoutVisualizationsHeader');
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_CONTENT =
-  getDataTestSubjectSelector('securitySolutionFlyoutVisualizationsContent');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_TITLE_LINK =
   getDataTestSubjectSelector('securitySolutionFlyoutAnalyzerPreviewTitleLink');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_CONTAINER =
@@ -131,8 +123,6 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_NO_DATA =
 
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_HEADER =
   getDataTestSubjectSelector('securitySolutionFlyoutResponseSectionHeader');
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_SECTION_CONTENT =
-  getDataTestSubjectSelector('securitySolutionFlyoutResponseSectionContent');
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON = getDataTestSubjectSelector(
   'securitySolutionFlyoutResponseButton'
 );

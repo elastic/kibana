@@ -201,6 +201,10 @@ export const AnomalyTimeline: FC = () => {
 
   const [selectedSwimlane, setSelectedSwimlane] = useState<SwimlaneType | undefined>();
 
+  const viewByLabel = i18n.translate('xpack.ml.explorer.viewByLabel', {
+    defaultMessage: 'View by',
+  });
+
   const timeRange = getTimeBoundsFromSelection(selectedCells);
 
   const viewByLoadedForTimeFormatted = timeRange
@@ -406,8 +410,8 @@ export const AnomalyTimeline: FC = () => {
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -478,9 +482,8 @@ export const AnomalyTimeline: FC = () => {
             <>
               <EuiFlexItem grow={false}>
                 <EuiSelect
-                  prepend={i18n.translate('xpack.ml.explorer.viewByLabel', {
-                    defaultMessage: 'View by',
-                  })}
+                  prepend={viewByLabel}
+                  aria-label={viewByLabel}
                   compressed
                   id="selectViewBy"
                   options={mapSwimlaneOptionsToEuiOptions(viewBySwimlaneOptions)}

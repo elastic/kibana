@@ -26,7 +26,10 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '../../common/constants';
+import {
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE,
+} from '../../common/constants';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
@@ -43,7 +46,7 @@ interface GenAiSettingsAppProps {
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks, notifications, featureFlags } = services;
+  const { application, http, docLinks, featureFlags } = services;
   const {
     showSpacesIntegration,
     isPermissionsBased,
@@ -96,7 +99,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
   const showDefaultLlmSetting = featureFlags.getBooleanValue(
     AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-    false
+    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
   );
 
   const connectorDescription = useMemo(() => {
@@ -199,20 +202,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   ]);
 
   async function handleSave() {
-    try {
-      const needsReload = await saveAll();
-      if (needsReload) {
-        window.location.reload();
-      }
-    } catch (e) {
-      const error = e as Error;
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.observabilityAiAssistantManagement.save.error', {
-          defaultMessage: 'An error occurred while saving the settings',
-        }),
-        text: error.message,
-      });
-      throw error;
+    const needsReload = await saveAll();
+    if (needsReload) {
+      window.location.reload();
     }
   }
 

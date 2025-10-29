@@ -189,6 +189,9 @@ export function ErrorSampleDetails({
               pageCount={errorSampleIds.length}
               activePage={sampleActivePage}
               onPageClick={goToSample}
+              aria-label={i18n.translate('xpack.apm.errorSampleDetails.paginationAriaLabel', {
+                defaultMessage: 'Error sample pages',
+              })}
               compressed
             />
           )}

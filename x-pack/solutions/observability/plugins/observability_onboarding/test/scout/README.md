@@ -41,4 +41,10 @@ npx playwright test --config x-pack/solutions/observability/plugins/observabilit
 --project=local --grep @svlLogsEssentials
 ```
 
+You can also run tests in UI mode by passing the `--ui` flag to the test command:
+
+```
+npx playwright test --ui --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep @ess
+```
+
 Test results are available in `x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/output`

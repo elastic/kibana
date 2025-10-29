@@ -109,6 +109,12 @@ export class ConditionExpression extends Component {
         </EuiPopoverTitle>
         <div className="euiExpression" style={{ width: 200 }}>
           <EuiSelect
+            aria-label={i18n.translate(
+              'xpack.ml.ruleEditor.conditionExpression.appliesToSelectAriaLabel',
+              {
+                defaultMessage: 'Applies to',
+              }
+            )}
             value={this.props.appliesTo}
             onChange={this.changeAppliesTo}
             options={[
@@ -144,6 +150,12 @@ export class ConditionExpression extends Component {
           <EuiFlexGroup style={{ maxWidth: 450 }}>
             <EuiFlexItem grow={false} style={{ width: 250 }}>
               <EuiSelect
+                aria-label={i18n.translate(
+                  'xpack.ml.ruleEditor.conditionExpression.operatorSelectAriaLabel',
+                  {
+                    defaultMessage: 'Operator',
+                  }
+                )}
                 value={this.props.operator}
                 onChange={this.changeOperator}
                 options={[

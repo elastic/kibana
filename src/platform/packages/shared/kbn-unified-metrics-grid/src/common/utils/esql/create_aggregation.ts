@@ -81,13 +81,17 @@ export function createMetricAggregation({
   instrument,
   metricName,
   placeholderName = 'metricName',
+  customFunction,
 }: {
   instrument: MetricField['instrument'];
   metricName?: string;
   placeholderName?: string;
+  customFunction?: string;
 }) {
   const functionTemplate =
-    instrument === 'counter' ? `SUM(RATE(??${placeholderName}))` : `AVG(??${placeholderName})`;
+    instrument === 'counter'
+      ? `SUM(RATE(??${placeholderName}))`
+      : `${customFunction || 'AVG'}(??${placeholderName})`;
   return metricName
     ? replaceFunctionParams(functionTemplate, { [placeholderName]: metricName })
     : functionTemplate;
