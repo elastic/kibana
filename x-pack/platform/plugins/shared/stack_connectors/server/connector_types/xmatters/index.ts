@@ -7,8 +7,7 @@
 
 import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -31,32 +30,34 @@ export type XmattersConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
 >;
 
 const configSchemaProps = {
-  configUrl: schema.nullable(schema.string()),
-  usesBasic: schema.boolean({ defaultValue: true }),
+  configUrl: z.string().nullable().default(null),
+  usesBasic: z.boolean().default(true),
 };
-const ConfigSchema = schema.object(configSchemaProps);
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
+const ConfigSchema = z.object(configSchemaProps).strict();
+export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 
 // secrets definition
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
+export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 const secretSchemaProps = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-  secretsUrl: schema.nullable(schema.string()),
+  user: z.string().nullable().default(null),
+  password: z.string().nullable().default(null),
+  secretsUrl: z.string().nullable().default(null),
 };
-const SecretsSchema = schema.object(secretSchemaProps);
+const SecretsSchema = z.object(secretSchemaProps).strict();
 
 // params definition
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-const ParamsSchema = schema.object({
-  alertActionGroupName: schema.maybe(schema.string()),
-  signalId: schema.maybe(schema.string()),
-  ruleName: schema.maybe(schema.string()),
-  date: schema.maybe(schema.string()),
-  severity: schema.string(),
-  spaceId: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.string()),
-});
+export type ActionParamsType = z.infer<typeof ParamsSchema>;
+const ParamsSchema = z
+  .object({
+    alertActionGroupName: z.string().optional(),
+    signalId: z.string().optional(),
+    ruleName: z.string().optional(),
+    date: z.string().optional(),
+    severity: z.string(),
+    spaceId: z.string().optional(),
+    tags: z.string().optional(),
+  })
+  .strict();
 
 export const ConnectorTypeId = '.xmatters';
 // connector type definition
