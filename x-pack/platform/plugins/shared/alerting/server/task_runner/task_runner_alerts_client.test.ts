@@ -104,7 +104,6 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_PENDING_RECOVERED_COUNT,
-  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
