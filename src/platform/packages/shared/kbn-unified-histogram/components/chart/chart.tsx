@@ -63,7 +63,7 @@ import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
 
 export interface UnifiedHistogramChartProps {
-  abortController?: AbortController;
+  abortController: AbortController | undefined;
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
   services: UnifiedHistogramServices;
@@ -71,8 +71,8 @@ export interface UnifiedHistogramChartProps {
   requestParams: UseRequestParamsResult;
   isPlainRecord?: boolean;
   lensVisService: LensVisService;
-  relativeTimeRange?: TimeRange;
-  request?: UnifiedHistogramRequestContext;
+  relativeTimeRange: TimeRange | undefined;
+  request: UnifiedHistogramRequestContext | undefined;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
   breakdown?: UnifiedHistogramBreakdownContext;
@@ -91,8 +91,8 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
-  columns?: DatatableColumn[];
-  controlsState?: ControlPanelsState<ESQLControlState>;
+  columns: DatatableColumn[] | undefined;
+  controlsState: ControlPanelsState<ESQLControlState> | undefined;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;

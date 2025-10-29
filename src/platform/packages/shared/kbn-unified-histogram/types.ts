@@ -8,7 +8,7 @@
  */
 
 import type React from 'react';
-import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -21,7 +21,11 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type {
+  Datatable,
+  DatatableColumn,
+  DefaultInspectorAdapters,
+} from '@kbn/expressions-plugin/common';
 import type { Subject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -31,6 +35,8 @@ import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { UseRequestParamsResult } from './hooks/use_request_params';
 
 /**
@@ -193,6 +199,65 @@ export interface UnifiedHistogramVisContext {
   attributes: TypedLensByValueInput['attributes'];
   requestData: LensRequestData;
   suggestionType: UnifiedHistogramSuggestionType;
+}
+
+export interface UnifiedHistogramFetchParams {
+  /**
+   * The request adapter to use for the inspector
+   */
+  requestAdapter?: UnifiedHistogramRequestContext['adapter'];
+  /**
+   * The current search session ID
+   */
+  searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
+  /**
+   * The abort controller to use for requests
+   */
+  abortController?: AbortController;
+  /**
+   * The current data view
+   */
+  dataView: DataView;
+  /**
+   * The current query
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * The current filters
+   */
+  filters?: Filter[];
+  /**
+   * The current time range
+   */
+  timeRange?: TimeRange;
+  /**
+   * The relative time range, used when timeRange is an absolute range (e.g. for edit visualization button)
+   */
+  relativeTimeRange?: TimeRange;
+  /**
+   * The ES|QL variables to use for the chart
+   */
+  esqlVariables?: ESQLControlVariable[];
+  /**
+   * The controls state to use for the chart
+   */
+  controlsState?: ControlPanelsState<ESQLControlState>;
+  /**
+   * The current columns
+   */
+  columns?: DatatableColumn[];
+  /**
+   * Preloaded data table sometimes used for rendering the chart in ES|QL mode
+   */
+  table?: Datatable;
+  /**
+   * The current breakdown field
+   */
+  breakdownField?: string;
+  /**
+   * The external custom Lens vis
+   */
+  externalVisContext?: UnifiedHistogramVisContext;
 }
 
 // A shared interface for communication between Discover and custom components.

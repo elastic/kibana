@@ -13,12 +13,13 @@ import { Subject } from 'rxjs';
 import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
-import type { UnifiedHistogramInputMessage } from '../types';
+import type { UnifiedHistogramInputMessage, UnifiedHistogramFetchParams } from '../types';
 import { useRequestParams } from './use_request_params';
 import { getBreakdownField } from '../utils/local_storage_utils';
 
 export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
   const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
+  const [fetchParams, setFetchParams] = useState<UnifiedHistogramFetchParams | null>(null);
 
   const [stateService] = useState(() => {
     const { services, initialState, localStorageKeyPrefix } = props;
@@ -30,7 +31,9 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
   });
 
   const [api] = useState<UnifiedHistogramApi>(() => ({
-    fetch: () => {
+    fetch: (params) => {
+      console.log('UnifiedHistogramApi.fetch called with params:', params);
+      setFetchParams(params);
       input$.next({ type: 'fetch' });
     },
     ...pick(
@@ -43,18 +46,7 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     ),
   }));
 
-  const {
-    services,
-    dataView,
-    query,
-    columns,
-    searchSessionId,
-    requestAdapter,
-    localStorageKeyPrefix,
-    filters,
-    timeRange,
-    esqlVariables,
-  } = props;
+  const { services, localStorageKeyPrefix } = props;
 
   const initialBreakdownField = useMemo(
     () =>
@@ -68,22 +60,15 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     services,
     localStorageKeyPrefix,
     stateService,
-    dataView,
-    query,
-    searchSessionId,
-    requestAdapter,
-    columns,
-    breakdownField: 'breakdownField' in props ? props.breakdownField : initialBreakdownField,
+    fetchParams,
+    initialBreakdownField,
     onBreakdownFieldChange: props.onBreakdownFieldChange,
     onVisContextChanged: props.onVisContextChanged,
   });
 
   const requestParams = useRequestParams({
     services,
-    query,
-    filters,
-    esqlVariables,
-    timeRange,
+    fetchParams,
   });
 
   return {
@@ -91,5 +76,9 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     input$,
     stateProps,
     requestParams,
+    fetchParams,
+    hasValidFetchParams: Boolean(
+      fetchParams && (fetchParams.searchSessionId || stateProps.isPlainRecord)
+    ),
   };
 };

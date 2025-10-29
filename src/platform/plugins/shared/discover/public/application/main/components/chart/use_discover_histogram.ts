@@ -31,6 +31,7 @@ import {
   skip,
   startWith,
 } from 'rxjs';
+import useLatest from 'react-use/lib/useLatest';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -255,45 +256,6 @@ export const useDiscoverHistogram = (
     };
   }, [isEsqlMode, stateContainer.dataState.fetchChart$, esqlFetchComplete$]);
 
-  /**
-   * Data fetching
-   */
-
-  // Handle unified histogram refetching
-  useEffect(() => {
-    if (!unifiedHistogramApi) {
-      return;
-    }
-
-    let fetchChart$: Observable<string>;
-
-    // When in ES|QL mode, we refetch under two conditions:
-    // 1. When the current Lens suggestion changes. This syncs the visualization
-    //    with the user's selection.
-    // 2. When the documents are done fetching. This is necessary because we don't
-    //    have access to the latest columns until after the documents are fetched,
-    //    which are required to get the latest Lens suggestion, which would trigger
-    //    a refetch anyway and result in multiple unnecessary fetches.
-    if (isEsqlMode) {
-      fetchChart$ = merge(
-        createCurrentSuggestionObservable(unifiedHistogramApi.state$).pipe(map(() => 'lens')),
-        esqlFetchComplete$.pipe(map(() => 'discover'))
-      ).pipe(debounceTime(50));
-    } else {
-      fetchChart$ = stateContainer.dataState.fetchChart$.pipe(map(() => 'discover'));
-    }
-
-    const subscription = fetchChart$.subscribe((source) => {
-      if (source === 'discover') addLog('Unified Histogram - Discover refetch');
-      if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
-      unifiedHistogramApi.fetch();
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [isEsqlMode, stateContainer.dataState.fetchChart$, esqlFetchComplete$, unifiedHistogramApi]);
-
   const dataView = useCurrentDataView();
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
@@ -388,12 +350,80 @@ export const useDiscoverHistogram = (
     [breakdownField, stateContainer.appState]
   );
 
+  const triggerUnifiedHistogramFetch = useLatest(() => {
+    unifiedHistogramApi?.fetch({
+      searchSessionId,
+      requestAdapter: inspectorAdapters.requests,
+      abortController: getAbortController(),
+      dataView: isEsqlMode ? esqlDataView : dataView,
+      query: isEsqlMode ? esqlQuery : query,
+      filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
+      timeRange: timeRangeMemoized,
+      relativeTimeRange,
+      columns: isEsqlMode ? esqlColumns : undefined,
+      table: isEsqlMode ? table : undefined,
+      breakdownField,
+      esqlVariables,
+      controlsState: currentTabControlState,
+      // visContext should be in sync with current query
+      externalVisContext:
+        isEsqlMode && canImportVisContext(savedSearchState?.visContext)
+          ? savedSearchState?.visContext
+          : undefined,
+    });
+  });
+
+  /**
+   * Data fetching
+   */
+
+  // Handle unified histogram refetching
+  useEffect(() => {
+    console.log('Unified Histogram - Setting up fetch subscription', unifiedHistogramApi);
+    if (!unifiedHistogramApi) {
+      return;
+    }
+
+    let fetchChart$: Observable<string>;
+
+    // When in ES|QL mode, we refetch under two conditions:
+    // 1. When the current Lens suggestion changes. This syncs the visualization
+    //    with the user's selection.
+    // 2. When the documents are done fetching. This is necessary because we don't
+    //    have access to the latest columns until after the documents are fetched,
+    //    which are required to get the latest Lens suggestion, which would trigger
+    //    a refetch anyway and result in multiple unnecessary fetches.
+    if (isEsqlMode) {
+      fetchChart$ = merge(
+        createCurrentSuggestionObservable(unifiedHistogramApi.state$).pipe(map(() => 'lens')),
+        esqlFetchComplete$.pipe(map(() => 'discover'))
+      ).pipe(debounceTime(50));
+    } else {
+      fetchChart$ = stateContainer.dataState.fetchChart$.pipe(map(() => 'discover'));
+    }
+
+    const subscription = fetchChart$.subscribe((source) => {
+      if (source === 'discover') addLog('Unified Histogram - Discover refetch');
+      if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
+      console.debug('Unified Histogram - Fetch triggered by', source);
+      triggerUnifiedHistogramFetch.current();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [
+    isEsqlMode,
+    stateContainer.dataState.fetchChart$,
+    esqlFetchComplete$,
+    triggerUnifiedHistogramFetch,
+    unifiedHistogramApi,
+  ]);
+
   return {
     setUnifiedHistogramApi,
     services,
     localStorageKeyPrefix: 'discover',
-    requestAdapter: inspectorAdapters.requests,
-    abortController: getAbortController(),
     initialState: {
       chartHidden,
       timeInterval,
@@ -401,29 +431,13 @@ export const useDiscoverHistogram = (
       totalHitsStatus: UnifiedHistogramFetchStatus.loading,
       totalHitsResult: undefined,
     },
-    dataView: isEsqlMode ? esqlDataView : dataView,
-    query: isEsqlMode ? esqlQuery : query,
-    filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
-    timeRange: timeRangeMemoized,
-    relativeTimeRange,
-    columns: isEsqlMode ? esqlColumns : undefined,
-    table: isEsqlMode ? table : undefined,
     onFilter: histogramCustomization?.onFilter,
     onBrushEnd: histogramCustomization?.onBrushEnd,
     withDefaultActions: histogramCustomization?.withDefaultActions,
     disabledActions: histogramCustomization?.disabledActions,
     isChartLoading: isSuggestionLoading,
-    // visContext should be in sync with current query
-    externalVisContext:
-      isEsqlMode && canImportVisContext(savedSearchState?.visContext)
-        ? savedSearchState?.visContext
-        : undefined,
     onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
-    breakdownField,
-    esqlVariables,
-    controlsState: currentTabControlState,
     onBreakdownFieldChange,
-    searchSessionId,
     getModifiedVisAttributes,
   };
 };

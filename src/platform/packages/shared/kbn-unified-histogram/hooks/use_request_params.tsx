@@ -11,7 +11,8 @@ import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useCallback, useMemo, useRef } from 'react';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { UnifiedHistogramServices } from '../types';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { UnifiedHistogramServices, UnifiedHistogramFetchParams } from '../types';
 import { useStableCallback } from './use_stable_callback';
 
 export interface UseRequestParamsResult {
@@ -21,22 +22,24 @@ export interface UseRequestParamsResult {
   relativeTimeRange: TimeRange;
   getTimeRange: () => TimeRange;
   updateTimeRange: () => void;
+  columnsMap?: Record<string, DatatableColumn>;
 }
 
 export const useRequestParams = ({
   services,
-  query: originalQuery,
-  filters: originalFilters,
-  esqlVariables: originalEsqlVariables,
-  timeRange: originalTimeRange,
+  fetchParams,
 }: {
   services: UnifiedHistogramServices;
-  query: Query | AggregateQuery | undefined;
-  filters: Filter[] | undefined;
-  esqlVariables: ESQLControlVariable[] | undefined;
-  timeRange: TimeRange | undefined;
+  fetchParams: UnifiedHistogramFetchParams | null;
 }): UseRequestParamsResult => {
   const { data } = services;
+  const {
+    filters: originalFilters,
+    query: originalQuery,
+    timeRange: originalTimeRange,
+    esqlVariables: originalEsqlVariables,
+    columns,
+  } = fetchParams || {};
 
   const filters = useMemo(() => originalFilters ?? [], [originalFilters]);
 
@@ -60,5 +63,20 @@ export const useRequestParams = ({
     timeRange.current = getAbsoluteTimeRange(relativeTimeRange);
   });
 
-  return { filters, query, esqlVariables, getTimeRange, updateTimeRange, relativeTimeRange };
+  const columnsMap = useMemo(() => {
+    return columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
+      acc[column.id] = column;
+      return acc;
+    }, {});
+  }, [columns]);
+
+  return {
+    filters,
+    query,
+    esqlVariables,
+    getTimeRange,
+    updateTimeRange,
+    relativeTimeRange,
+    columnsMap,
+  };
 };

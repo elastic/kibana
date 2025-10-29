@@ -49,6 +49,7 @@ export const useLensProps = ({
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
   const buildLensProps = useCallback(() => {
+    console.log('useLensProps - buildLensProps called');
     if (!visContext) {
       return;
     }
@@ -72,6 +73,7 @@ export const useLensProps = ({
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   useEffect(() => {
+    console.log('useLensProps - Subscribing to fetch$ observable');
     const subscription = fetch$.subscribe(updateLensPropsContext);
     return () => subscription.unsubscribe();
   }, [fetch$, updateLensPropsContext]);
