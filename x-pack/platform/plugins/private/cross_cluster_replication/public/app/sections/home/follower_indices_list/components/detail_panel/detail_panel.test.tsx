@@ -6,36 +6,40 @@
  */
 
 import React from 'react';
-import { render as rtlRender, screen, within } from '@testing-library/react';
+import { render as rtlRender, screen, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getRandomString } from '@kbn/test-jest-helpers';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DetailPanel } from './detail_panel';
 import { API_STATUS } from '../../../../../constants';
 import type { FollowerIndexWithPausedStatus } from '../../../../../../../common/types';
+import { routing } from '../../../../../services/routing';
 
 // Mock the external dependencies
-jest.mock('../../../../../services/routing', () => ({
-  routing: {
-    getFollowerIndexPath: jest.fn(() => '/follower-index-path'),
-    navigate: jest.fn(),
-    _reactRouter: {
-      getUrlForApp: jest.fn(() => '/mock-url'),
+jest.mock('../../../../../services/routing', () => {
+  return {
+    routing: {
+      getFollowerIndexPath: jest.fn(() => '/follower-index-path'),
+      navigate: jest.fn(),
+      _reactRouter: {
+        getUrlForApp: jest.fn(() => '/mock-url'),
+      },
     },
-  },
-}));
+  };
+});
 
 jest.mock('@kbn/index-management-plugin/public', () => ({
   getIndexListUri: jest.fn((filter) => `/index-list?${filter}`),
 }));
 
 jest.mock('../context_menu', () => ({
-  ContextMenu: ({ followerIndices, label, testSubj }: any) => (
+  ContextMenu: ({ followerIndices, label, testSubj, isPollingStatus }: any) => (
     <div data-test-subj={testSubj}>
       <span>{label}</span>
       <span data-test-subj="contextMenuFollowerIndices">
         {JSON.stringify(followerIndices.map((fi: any) => fi.name))}
       </span>
+      <span data-test-subj="contextMenuIsPollingStatus">{String(isPollingStatus)}</span>
     </div>
   ),
 }));
@@ -101,11 +105,16 @@ const defaultProps = {
   followerIndex: createMockFollowerIndex({ name: 'test-follower-index' }),
   apiStatus: API_STATUS.IDLE,
   closeDetailPanel: jest.fn(),
+  getFollowerIndex: jest.fn(),
 };
 
 describe('DetailPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (routing.navigate as jest.Mock).mockClear();
+    // Clear URL search params
+    delete (window as any).location;
+    (window as any).location = { search: '' };
   });
 
   describe('Loading state', () => {
@@ -500,6 +509,7 @@ describe('DetailPanel', () => {
         followerIndex: undefined,
         apiStatus: API_STATUS.IDLE,
         closeDetailPanel: jest.fn(),
+        getFollowerIndex: jest.fn(),
       };
 
       render(<DetailPanel {...minimalProps} />);
@@ -644,6 +654,249 @@ describe('DetailPanel', () => {
 
       expect(screen.queryByText('Loading follower index…')).not.toBeInTheDocument();
       expect(screen.getByTestId('status')).toBeInTheDocument();
+    });
+  });
+
+  describe('Polling behavior', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should start polling when paused index is loaded with waitForActive param', async () => {
+      (window as any).location = { search: '?waitForActive=true' };
+      const getFollowerIndex = jest.fn();
+      const pausedFollowerIndex = createMockFollowerIndex({
+        name: 'paused-index',
+        isPaused: true,
+        status: 'Paused',
+      });
+
+      render(
+        <DetailPanel
+          {...defaultProps}
+          followerIndexId="paused-index"
+          followerIndex={pausedFollowerIndex}
+          getFollowerIndex={getFollowerIndex}
+        />
+      );
+
+      // First poll after 1s
+      await act(async () => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(getFollowerIndex).toHaveBeenCalledWith('paused-index');
+      expect(getFollowerIndex).toHaveBeenCalledTimes(1);
+
+      // Second poll after another 1s
+      await act(async () => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(getFollowerIndex).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not start polling without waitForActive param', async () => {
+      (window as any).location = { search: '' };
+      const getFollowerIndex = jest.fn();
+      const pausedFollowerIndex = createMockFollowerIndex({
+        name: 'paused-index',
+        isPaused: true,
+        status: 'Paused',
+      });
+
+      render(
+        <DetailPanel
+          {...defaultProps}
+          followerIndexId="paused-index"
+          followerIndex={pausedFollowerIndex}
+          getFollowerIndex={getFollowerIndex}
+        />
+      );
+
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(getFollowerIndex).not.toHaveBeenCalled();
+    });
+
+    it('should not start polling for active index', async () => {
+      (window as any).location = { search: '?waitForActive=true' };
+      const getFollowerIndex = jest.fn();
+      const activeFollowerIndex = createMockFollowerIndex({
+        name: 'active-index',
+        isPaused: false,
+        status: 'Active',
+      });
+
+      render(
+        <DetailPanel
+          {...defaultProps}
+          followerIndexId="active-index"
+          followerIndex={activeFollowerIndex}
+          getFollowerIndex={getFollowerIndex}
+        />
+      );
+
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(getFollowerIndex).not.toHaveBeenCalled();
+    });
+
+    it('should stop polling after timeout and clear URL param', async () => {
+      (window as any).location = { search: '?waitForActive=true' };
+      const getFollowerIndex = jest.fn();
+      const pausedFollowerIndex = createMockFollowerIndex({
+        name: 'paused-index',
+        isPaused: true,
+        status: 'Paused',
+      });
+
+      render(
+        <DetailPanel
+          {...defaultProps}
+          followerIndexId="paused-index"
+          followerIndex={pausedFollowerIndex}
+          getFollowerIndex={getFollowerIndex}
+        />
+      );
+
+      // Advance to timeout (5000ms)
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      // Should have called getFollowerIndex 5 times (at 1s, 2s, 3s, 4s, 5s)
+      expect(getFollowerIndex).toHaveBeenCalledTimes(5);
+
+      // Should clear URL param
+      expect(routing.navigate).toHaveBeenCalledWith('/follower_indices', {
+        name: encodeURIComponent('paused-index'),
+      });
+
+      // No more polling after timeout
+      getFollowerIndex.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(getFollowerIndex).not.toHaveBeenCalled();
+    });
+
+    it('should stop polling when index becomes active', async () => {
+      (window as any).location = { search: '?waitForActive=true' };
+      const getFollowerIndex = jest.fn();
+      const pausedFollowerIndex = createMockFollowerIndex({
+        name: 'paused-index',
+        isPaused: true,
+        status: 'Paused',
+      });
+
+      const { rerender } = render(
+        <DetailPanel
+          {...defaultProps}
+          followerIndexId="paused-index"
+          followerIndex={pausedFollowerIndex}
+          getFollowerIndex={getFollowerIndex}
+        />
+      );
+
+      // Poll once
+      await act(async () => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(getFollowerIndex).toHaveBeenCalledTimes(1);
+
+      // Update to active index
+      const activeFollowerIndex = createMockFollowerIndex({
+        name: 'paused-index',
+        isPaused: false,
+        status: 'Active',
+      });
+
+      rerender(
+        <IntlProvider locale="en">
+          <DetailPanel
+            {...defaultProps}
+            followerIndexId="paused-index"
+            followerIndex={activeFollowerIndex}
+            getFollowerIndex={getFollowerIndex}
+          />
+        </IntlProvider>
+      );
+
+      // Should clear URL param
+      expect(routing.navigate).toHaveBeenCalledWith('/follower_indices', {
+        name: encodeURIComponent('paused-index'),
+      });
+
+      // No more polling
+      getFollowerIndex.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+
+      expect(getFollowerIndex).not.toHaveBeenCalled();
+    });
+
+    it('should show checking status message while polling paused index', async () => {
+      (window as any).location = { search: '?waitForActive=true' };
+      const pausedFollowerIndex = createMockFollowerIndex({
+        name: 'paused-index',
+        isPaused: true,
+        status: 'Paused',
+      });
+
+      render(
+        <DetailPanel
+          {...defaultProps}
+          followerIndexId="paused-index"
+          followerIndex={pausedFollowerIndex}
+        />
+      );
+
+      // Wait for polling to start
+      await act(async () => {
+        jest.advanceTimersByTime(100);
+      });
+
+      expect(screen.getByText('Checking status...')).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+
+    it('should pass isPollingStatus to ContextMenu', async () => {
+      (window as any).location = { search: '?waitForActive=true' };
+      const pausedFollowerIndex = createMockFollowerIndex({
+        name: 'paused-index',
+        isPaused: true,
+        status: 'Paused',
+      });
+
+      render(
+        <DetailPanel
+          {...defaultProps}
+          followerIndexId="paused-index"
+          followerIndex={pausedFollowerIndex}
+        />
+      );
+
+      // Wait for polling to start
+      await act(async () => {
+        jest.advanceTimersByTime(100);
+      });
+
+      const manageButton = screen.getByTestId('manageButton');
+      const isPollingStatus = within(manageButton).getByTestId('contextMenuIsPollingStatus');
+
+      expect(isPollingStatus).toHaveTextContent('true');
     });
   });
 });
