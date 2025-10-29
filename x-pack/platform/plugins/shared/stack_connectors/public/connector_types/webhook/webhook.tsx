@@ -30,7 +30,7 @@ export function getConnectorType(): ConnectorTypeModel<
     }),
     validateParams: async (
       actionParams: WebhookActionParams,
-      connectorConfig?: Record<string, unknown>
+      connectorConfig: Record<string, unknown>
     ): Promise<GenericValidationResult<WebhookActionParams>> => {
       const webhookMethod: WebhookMethods = connectorConfig?.method
         ? (connectorConfig.method as unknown as WebhookMethods)
