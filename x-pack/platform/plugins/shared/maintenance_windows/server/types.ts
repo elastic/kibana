@@ -6,7 +6,8 @@
  */
 
 import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { MaintenanceWindowClient } from './maintenance_window_client';
+import type { MaintenanceWindowClient } from './client';
+import { PublicMethodsOf } from '@kbn/utility-types';
 
 export interface MaintenanceWindowApiRequestHandlerContext {
   getMaintenanceWindowClient: () => MaintenanceWindowClient;
@@ -15,3 +16,5 @@ export interface MaintenanceWindowApiRequestHandlerContext {
 export type MaintenanceWindowRequestHandlerContext = CustomRequestHandlerContext<{
   maintenanceWindow: MaintenanceWindowApiRequestHandlerContext;
 }>;
+
+export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;

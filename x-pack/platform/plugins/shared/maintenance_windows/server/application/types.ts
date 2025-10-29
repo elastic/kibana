@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { maintenanceWindowStatus } from './constants';
 import type { maintenanceWindowSchema } from './schemas/maintenance_window';
+import type { rRuleSchema } from './schemas/r_rule';
 
 export type MaintenanceWindow = TypeOf<typeof maintenanceWindowSchema>;
 export type MaintenanceWindowStatus =
@@ -17,3 +18,5 @@ export type MaintenanceWindowWithoutComputedProperties = Omit<
   MaintenanceWindow,
   'id' | 'eventStartTime' | 'eventEndTime' | 'status'
 >;
+
+export type RRule = TypeOf<typeof rRuleSchema>;

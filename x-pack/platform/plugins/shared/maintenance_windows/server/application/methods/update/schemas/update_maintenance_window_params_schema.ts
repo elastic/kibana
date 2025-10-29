@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowCategoryIdsSchema } from '../../../schemas/maintenance_window';
 import { alertsFilterQuerySchema } from '../../../schemas/alerts_filter_query_schemas';
+import { rRuleRequestSchema } from '../../../../routes/apis/r_rule';
 
 export const updateMaintenanceWindowParamsSchema = schema.object({
   id: schema.string(),
