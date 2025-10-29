@@ -206,7 +206,7 @@ function containsHelper(this: any, item: string, check: string | string[], optio
   }
   return '';
 }
-// handlebars.registerHelper('contains', containsHelper);
+handlebars.registerHelper('contains', containsHelper);
 
 // escapeStringHelper will wrap the provided string with single quotes.
 // Single quoted strings in yaml need to escape single quotes by doubling them
@@ -216,7 +216,7 @@ function escapeStringHelper(str: string) {
   if (!str) return undefined;
   return "'" + str.replace(/\'/g, "''").replace(/\n/g, '\n\n') + "'";
 }
-// handlebars.registerHelper('escape_string', escapeStringHelper);
+handlebars.registerHelper('escape_string', escapeStringHelper);
 
 /**
  * escapeMultilineStringHelper will escape a multiline string by doubling the newlines
@@ -238,7 +238,7 @@ function toJsonHelper(value: any) {
   }
   return JSON.stringify(value);
 }
-// handlebars.registerHelper('to_json', toJsonHelper);
+handlebars.registerHelper('to_json', toJsonHelper);
 
 // urlEncodeHelper returns a string encoded as a URI component.
 function urlEncodeHelper(input: string) {
@@ -254,7 +254,7 @@ function urlEncodeHelper(input: string) {
 
   return encodedString;
 }
-// handlebars.registerHelper('url_encode', urlEncodeHelper);
+handlebars.registerHelper('url_encode', urlEncodeHelper);
 
 function semverSatisfiesHelper(
   this: any,
