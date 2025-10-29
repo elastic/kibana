@@ -49,7 +49,7 @@ export interface LiquidSyntaxLineParseResult extends BaseLineParseResult {
 export interface ConnectorIdLineParseResult extends BaseLineParseResult {
   matchType: 'connector-id';
   match: RegExpMatchArray;
-  valueStartColumn: number;
+  valueStartIndex: number;
 }
 
 export interface TypeLineParseResult extends BaseLineParseResult {
@@ -100,8 +100,8 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       matchType: 'connector-id',
       fullKey: connectorId,
       match: connectorIdMatch,
-      // +1 for the space and +1 to convert to 1-based index
-      valueStartColumn: connectorIdMatch.groups.prefix.length + 2,
+      // +1 for the space char
+      valueStartIndex: connectorIdMatch.groups.prefix.length + 1,
     };
   }
   // Try @ trigger first (e.g., "@const" or "@steps.step1")

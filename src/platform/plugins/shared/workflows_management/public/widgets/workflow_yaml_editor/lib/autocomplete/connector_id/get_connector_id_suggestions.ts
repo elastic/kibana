@@ -32,7 +32,7 @@ export function getConnectorIdSuggestions({
   if (lineParseResult.fullKey !== '') {
     const replaceRange = {
       ...range,
-      startColumn: lineParseResult.valueStartColumn,
+      startColumn: lineParseResult.valueStartIndex + 1,
       endColumn: line.length + 1,
     };
     return getConnectorIdSuggestionsItems(stepConnectorType, replaceRange, dynamicConnectorTypes);
