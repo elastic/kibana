@@ -157,6 +157,11 @@ export const RuleDefinition = () => {
     return !!(ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleTypeId));
   }, [ruleTypeId, authorizedConsumers, canShowConsumerSelection]);
 
+  // Hide advanced options for the new ES|QL rule
+  const shouldShowAdvancedSettings = useMemo(() => {
+    return !!(ruleTypeId && ruleTypeId !== '.esql');
+  }, [ruleTypeId]);
+
   const RuleParamsExpressionComponent = selectedRuleTypeModel.ruleParamsExpression ?? null;
 
   const docsUrl = useMemo(() => {
@@ -313,72 +318,74 @@ export const RuleDefinition = () => {
             <RuleConsumerSelection validConsumers={authorizedConsumers} />
           </EuiDescribedFormGroup>
         )}
-        <EuiFlexItem>
-          <EuiAccordion
-            id="advancedOptionsAccordion"
-            data-test-subj="advancedOptionsAccordion"
-            onToggle={(isOpen) => {
-              setIsAdvancedOptionsVisible(isOpen);
-              setIsFlappingPopoverOpen(false);
-            }}
-            initialIsOpen={isAdvancedOptionsVisible}
-            buttonProps={{
-              'data-test-subj': 'advancedOptionsAccordionButton',
-            }}
-            buttonContent={
-              <EuiText size="s">
-                <p>{ADVANCED_OPTIONS_TITLE}</p>
-              </EuiText>
-            }
-          >
-            <EuiSpacer size="s" />
-            <EuiPanel hasShadow={false} hasBorder color="subdued">
-              <EuiDescribedFormGroup
-                fullWidth
-                title={<h4>{ALERT_DELAY_TITLE}</h4>}
-                description={
-                  <EuiText size="s">
-                    <p>
-                      {ALERT_DELAY_DESCRIPTION_TEXT}&nbsp;
-                      <EuiIconTip
-                        position="right"
-                        type="question"
-                        content={ALERT_DELAY_HELP_TEXT}
-                        aria-label={ALERT_DELAY_HELP_TEXT}
-                      />
-                    </p>
-                  </EuiText>
-                }
-              >
-                <RuleAlertDelay />
-              </EuiDescribedFormGroup>
-              {IS_RULE_SPECIFIC_FLAPPING_ENABLED && readFlappingSettingsUI && (
+        {shouldShowAdvancedSettings && (
+          <EuiFlexItem>
+            <EuiAccordion
+              id="advancedOptionsAccordion"
+              data-test-subj="advancedOptionsAccordion"
+              onToggle={(isOpen) => {
+                setIsAdvancedOptionsVisible(isOpen);
+                setIsFlappingPopoverOpen(false);
+              }}
+              initialIsOpen={isAdvancedOptionsVisible}
+              buttonProps={{
+                'data-test-subj': 'advancedOptionsAccordionButton',
+              }}
+              buttonContent={
+                <EuiText size="s">
+                  <p>{ADVANCED_OPTIONS_TITLE}</p>
+                </EuiText>
+              }
+            >
+              <EuiSpacer size="s" />
+              <EuiPanel hasShadow={false} hasBorder color="subdued">
                 <EuiDescribedFormGroup
-                  data-test-subj="ruleDefinitionFlappingFormGroup"
                   fullWidth
-                  title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}
+                  title={<h4>{ALERT_DELAY_TITLE}</h4>}
                   description={
                     <EuiText size="s">
-                      <p>{ALERT_FLAPPING_DETECTION_DESCRIPTION}</p>
-                      <RuleSettingsFlappingTitleTooltip
-                        isOpen={isFlappingPopoverOpen}
-                        setIsPopoverOpen={setIsFlappingPopoverOpen}
-                        anchorPosition="downCenter"
-                      />
+                      <p>
+                        {ALERT_DELAY_DESCRIPTION_TEXT}&nbsp;
+                        <EuiIconTip
+                          position="right"
+                          type="question"
+                          content={ALERT_DELAY_HELP_TEXT}
+                          aria-label={ALERT_DELAY_HELP_TEXT}
+                        />
+                      </p>
                     </EuiText>
                   }
                 >
-                  <RuleSettingsFlappingForm
-                    flappingSettings={flapping}
-                    spaceFlappingSettings={flappingSettings}
-                    canWriteFlappingSettingsUI={!!writeFlappingSettingsUI}
-                    onFlappingChange={onSetFlapping}
-                  />
+                  <RuleAlertDelay />
                 </EuiDescribedFormGroup>
-              )}
-            </EuiPanel>
-          </EuiAccordion>
-        </EuiFlexItem>
+                {IS_RULE_SPECIFIC_FLAPPING_ENABLED && readFlappingSettingsUI && (
+                  <EuiDescribedFormGroup
+                    data-test-subj="ruleDefinitionFlappingFormGroup"
+                    fullWidth
+                    title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}
+                    description={
+                      <EuiText size="s">
+                        <p>{ALERT_FLAPPING_DETECTION_DESCRIPTION}</p>
+                        <RuleSettingsFlappingTitleTooltip
+                          isOpen={isFlappingPopoverOpen}
+                          setIsPopoverOpen={setIsFlappingPopoverOpen}
+                          anchorPosition="downCenter"
+                        />
+                      </EuiText>
+                    }
+                  >
+                    <RuleSettingsFlappingForm
+                      flappingSettings={flapping}
+                      spaceFlappingSettings={flappingSettings}
+                      canWriteFlappingSettingsUI={!!writeFlappingSettingsUI}
+                      onFlappingChange={onSetFlapping}
+                    />
+                  </EuiDescribedFormGroup>
+                )}
+              </EuiPanel>
+            </EuiAccordion>
+          </EuiFlexItem>
+        )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );
