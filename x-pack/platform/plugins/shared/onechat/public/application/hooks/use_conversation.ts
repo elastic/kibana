@@ -72,12 +72,12 @@ export const useAgentId = () => {
   const isNewConversation = !conversationId;
   const getNewConversationAgentId = useGetNewConversationAgentId();
 
-  if (context.agentId) {
-    return context.agentId;
-  }
-
   if (agentId) {
     return agentId;
+  }
+
+  if (context.agentId) {
+    return context.agentId;
   }
 
   // For new conversations, agent id must be defined

@@ -10,7 +10,7 @@ import { useConversationContext } from '../context/conversation/conversation_con
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useSendMessage } from '../context/send_message/send_message_context';
 
-export const useInitialMessage = () => {
+export const useSendPredefinedInitialMessage = () => {
   const context = useConversationContext();
   const conversationId = useConversationId();
   const { sendMessage } = useSendMessage();

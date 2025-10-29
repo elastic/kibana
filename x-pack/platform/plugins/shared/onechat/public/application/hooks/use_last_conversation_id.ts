@@ -20,7 +20,7 @@ export const useLastConversationId = ({
   agentId,
 }: UseLastConversationIdParams = {}) => {
   const storageKey = storageKeys.getLastConversationKey(sessionTag, agentId);
-  const [storedId] = useLocalStorage<string>(storageKey);
+  const [storedId, setStoredId] = useLocalStorage<string>(storageKey);
 
   const { conversations, isLoading } = useConversationList({ agentId });
 
@@ -28,8 +28,14 @@ export const useLastConversationId = ({
     if (storedId && conversations?.find((c) => c.id === storedId)) {
       return storedId;
     }
+
+    // Remove the stored ID if the conversation no longer exists
+    if (storedId && conversations) {
+      setStoredId(undefined);
+    }
+
     return undefined;
-  }, [storedId, conversations]);
+  }, [storedId, conversations, setStoredId]);
 
   return {
     lastConversationId,
