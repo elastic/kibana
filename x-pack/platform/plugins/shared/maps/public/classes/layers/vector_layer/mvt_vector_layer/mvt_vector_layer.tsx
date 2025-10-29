@@ -235,13 +235,12 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       if (this.getSource().getType() === SOURCE_TYPES.ES_SEARCH) {
         await this._syncMaxResultWindow(syncContext);
       }
-      const currentStyle = this.getCurrentStyle();
-      await this._syncSourceStyleMeta(syncContext, this.getSource(), currentStyle);
-      await this._syncSourceFormatters(syncContext, this.getSource(), currentStyle);
+      await this._syncSourceStyleMeta(syncContext, this.getSource(), this.getCurrentStyle());
+      await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
       await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
 
       let maxLineWidth = 0;
-      const lineWidth = currentStyle
+      const lineWidth = this.getCurrentStyle()
         .getAllStyleProperties()
         .find((styleProperty) => {
           return styleProperty.getStyleName() === VECTOR_STYLES.LINE_WIDTH;
@@ -255,37 +254,25 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       }
       const buffer = Math.ceil(3.5 * maxLineWidth);
 
-      const hasLabels = currentStyle.hasLabels();
-      const requestMeta = await this._getVectorSourceRequestMeta(
-        syncContext.isForceRefresh,
-        syncContext.dataFilters,
-        this.getSource(),
-        currentStyle,
-        syncContext.isFeatureEditorOpenForLayer
-      );
-
-      const nextSourceMeta: Record<string, unknown> = requestMeta.sourceMeta
-        ? { ...requestMeta.sourceMeta }
-        : {};
-      nextSourceMeta.__mvtLabelDescriptorHash = JSON.stringify(
-        currentStyle.getPropertiesDescriptor().labelText ?? null
-      );
-      nextSourceMeta.__mvtHasLabels = hasLabels;
-      requestMeta.sourceMeta = nextSourceMeta;
-
       await syncMvtSourceData({
         buffer,
-        hasLabels,
+        hasLabels: this.getCurrentStyle().hasLabels(),
         layerId: this.getId(),
         layerName: await this.getDisplayName(),
         prevDataRequest: this.getSourceDataRequest(),
-        requestMeta,
+        requestMeta: await this._getVectorSourceRequestMeta(
+          syncContext.isForceRefresh,
+          syncContext.dataFilters,
+          this.getSource(),
+          this.getCurrentStyle(),
+          syncContext.isFeatureEditorOpenForLayer
+        ),
         source: this.getSource() as IMvtVectorSource,
         syncContext,
       });
 
       if (this.hasJoins()) {
-        await this._syncJoins(syncContext, currentStyle);
+        await this._syncJoins(syncContext, this.getCurrentStyle());
       }
     } catch (error) {
       // Error used to stop execution flow. Error state stored in data request and displayed to user in layer legend.

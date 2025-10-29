@@ -10,11 +10,10 @@ import { EuiPanel, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createNewIndexAndPattern } from './create_new_index_pattern';
 import type { RenderWizardArguments } from '../layer_wizard_registry';
-import { GeoJsonVectorLayer, MvtVectorLayer } from '../../vector_layer';
 import { ESSearchSource } from '../../../sources/es_search_source';
+import { createDefaultLayerDescriptor } from '../../../sources/es_search_source/es_documents_layer_wizard';
 import { ADD_LAYER_STEP_ID } from '../../../../connected_components/add_layer_panel/view';
 import { getFileUpload, getIndexNameFormComponent } from '../../../../kibana_services';
-import { SCALING_TYPES } from '../../../../../common/constants';
 
 interface State {
   indexName: string;
@@ -129,10 +128,10 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       filterByMapBounds: false,
       applyGlobalQuery: false,
     });
-    const layerDescriptor =
-      sourceDescriptor.scalingType === SCALING_TYPES.MVT
-        ? MvtVectorLayer.createDescriptor({ sourceDescriptor }, this.props.mapColors)
-        : GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, this.props.mapColors);
+    const layerDescriptor = createDefaultLayerDescriptor(
+      { ...sourceDescriptor },
+      this.props.mapColors
+    );
     this.props.previewLayers([layerDescriptor]);
     this.props.advanceToNextStep();
   };
