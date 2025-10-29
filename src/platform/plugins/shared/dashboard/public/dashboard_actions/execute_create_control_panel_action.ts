@@ -23,7 +23,7 @@ export async function executeCreateControlPanelAction(dashboardApi: DashboardApi
     } as ActionExecutionContext);
   } catch (error) {
     coreServices.notifications.toasts.addWarning(
-      i18n.translate('dashboard.addNewPanelError', {
+      i18n.translate('dashboard.addNewControlPanelError', {
         defaultMessage: 'Unable to create new control',
       })
     );
