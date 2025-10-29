@@ -33,6 +33,10 @@ export const performComputation = (
     // Parse workflow JSON for graph creation
     const parsingResult = parseWorkflowYamlToJSON(yamlString, schemaLoose as z.ZodSchema);
 
+    if (!parsingResult.success) {
+      console.error('Error parsing workflow YAML', parsingResult.error);
+    }
+
     // Build workflow lookup
     const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
 
@@ -47,6 +51,7 @@ export const performComputation = (
       workflowDefinition: parsedWorkflow as WorkflowYaml,
     };
   } catch (e) {
+    console.error('Error performing computation', e);
     // Clear computed data on error
   }
 };

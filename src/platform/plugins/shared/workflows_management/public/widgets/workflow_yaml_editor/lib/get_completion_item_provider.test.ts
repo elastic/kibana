@@ -11,11 +11,13 @@ import { monaco } from '@kbn/monaco';
 import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import type { MinimalWorkflowDetailState } from './autocomplete/autocomplete.types';
 import { getCompletionItemProvider } from './get_completion_item_provider';
 import { performComputation } from './store/utils/computation';
+import { findStepByLine } from './store/utils/step_finder';
 import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';
 
-async function getSuggestions(yamlContent: string) {
+async function getSuggestions(yamlContent: string): Promise<monaco.languages.CompletionItem[]> {
   const mockConnectors: ConnectorContractUnion[] = [
     {
       type: 'console',
@@ -39,7 +41,6 @@ async function getSuggestions(yamlContent: string) {
       enabledInLicense: true,
     },
   };
-  let focusedStepId: string | undefined;
 
   const cursorOffset = yamlContent.indexOf('|<-');
   const cleanedYaml = yamlContent.replace('|<-', '');
@@ -49,12 +50,21 @@ async function getSuggestions(yamlContent: string) {
 
   const looseSchema = generateYamlSchemaFromConnectors(mockConnectors, true);
 
-  const completionProvider = getCompletionItemProvider(() => ({
+  const computedData = performComputation(cleanedYaml, looseSchema);
+
+  const mockEditorState: MinimalWorkflowDetailState = {
     yamlString: cleanedYaml,
-    focusedStepId,
-    computed: performComputation(cleanedYaml, looseSchema),
+    focusedStepId: computedData?.workflowLookup
+      ? findStepByLine(position.lineNumber, computedData.workflowLookup)
+      : undefined,
+    computed: computedData,
     connectors: { connectorTypes, totalConnectors: Object.keys(connectorTypes).length },
-  }));
+  };
+
+  expect(mockEditorState.computed).toBeDefined();
+  expect(mockEditorState.computed?.workflowDefinition).toBeDefined();
+
+  const completionProvider = getCompletionItemProvider(() => mockEditorState);
 
   const result = await completionProvider.provideCompletionItems(
     mockModel as unknown as monaco.editor.ITextModel,
