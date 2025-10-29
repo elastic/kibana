@@ -11,7 +11,7 @@ restore_target_folders
 
 echo --- Check Types
 set +e
-node scripts/type_check --extendedDiagnostics > type_check.log
+node scripts/type_check
 EXIT_CODE=$?
 set -e
 
