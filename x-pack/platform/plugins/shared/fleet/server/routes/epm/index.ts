@@ -644,6 +644,19 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             version: API_VERSIONS.public.v1,
             options: {
               oasOperationObject: () => ({
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      examples: {
+                        bulkRollbackRequest: {
+                          value: {
+                            packages: [{ name: 'system' }],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
                 responses: {
                   200: {
                     content: {
