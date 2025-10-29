@@ -12,7 +12,7 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import { isoToEpoch } from '@kbn/zod-helpers';
 import { parse as dateMathParse } from '@kbn/datemath';
 import { createRoute } from '../create_route';
-import { getDimensions } from './get_dimentions';
+import { getDimensions } from './get_dimensions';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getDimensionsRoute = createRoute({
