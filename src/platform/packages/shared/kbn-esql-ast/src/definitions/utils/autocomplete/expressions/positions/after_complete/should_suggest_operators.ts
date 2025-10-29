@@ -13,6 +13,7 @@ import type { ExpressionContext, FunctionParameterContext } from '../../types';
 import { SignatureAnalyzer } from '../../signature_analyzer';
 import {
   arithmeticOperators,
+  comparisonFunctions,
   logicalOperators,
   patternMatchOperators,
   inOperators,
@@ -57,15 +58,17 @@ type Rule = (context: OperatorRuleContext) => OperatorDecision | null;
 // 4. Default fallback
 
 const rules: Rule[] = [
-  // Rule 1: No function context - allow operators (filtered by type)
+  // Rule 1: No function context - allow operators (filtered by type and expression preference)
   (ctx) => {
     if (!ctx.functionParameterContext) {
       const { expressionType } = ctx;
+      const preferredType = ctx.ctx.options.preferredExpressionType;
 
-      // For text/keyword outside functions (e.g., SORT field, STATS BY field),
-      // only suggest string-specific operators
       if (expressionType === 'text' || expressionType === 'keyword') {
+        const isBooleanContext = preferredType === 'boolean' || preferredType === 'any';
+
         const stringOperators = [
+          ...(isBooleanContext ? comparisonFunctions.map(({ name }) => name) : []),
           ...patternMatchOperators.map(({ name }) => name),
           ...inOperators.map(({ name }) => name),
           ...nullCheckOperators.map(({ name }) => name),
@@ -74,7 +77,9 @@ const rules: Rule[] = [
         return {
           shouldSuggest: true,
           allowedOperators: stringOperators,
-          reason: 'Outside function - string operators only for text/keyword fields',
+          reason: isBooleanContext
+            ? 'Boolean/any context - all operators for text/keyword fields'
+            : 'Non-boolean context - string operators only',
         };
       }
 

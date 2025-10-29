@@ -13,6 +13,10 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   suggest,
+  getOperatorSuggestions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
 } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
@@ -23,16 +27,11 @@ const expectedFunctionSuggestions = getFunctionSignaturesByReturnType(Location.S
 });
 
 // String operators for text/keyword fields (no comparison operators)
-const stringOperatorSuggestions = [
-  'IN $0',
-  'IS NOT NULL',
-  'IS NULL',
-  'LIKE $0',
-  'NOT IN $0',
-  'NOT LIKE $0',
-  'NOT RLIKE $0',
-  'RLIKE $0',
-];
+const stringOperatorSuggestions = getOperatorSuggestions([
+  ...patternMatchOperators,
+  ...inOperators,
+  ...nullCheckOperators,
+]);
 
 const sortExpectSuggestions = (
   query: string,

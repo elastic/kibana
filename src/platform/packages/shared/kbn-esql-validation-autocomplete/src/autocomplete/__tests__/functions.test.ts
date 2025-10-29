@@ -1094,17 +1094,8 @@ describe('functions arg suggestions', () => {
           name: 'first param string: comma and string operators',
           query: 'FROM index | EVAL result = COALESCE(textField /)',
           expectComma: true,
-          expectContains: [
-            'LIKE',
-            'NOT LIKE',
-            'RLIKE',
-            'NOT RLIKE',
-            'IN',
-            'NOT IN',
-            'IS NULL',
-            'IS NOT NULL',
-          ],
-          expectNotContains: ['==', '!=', '<', '>', '<=', '>='], // No comparison operators for strings
+          expectContains: [...patternMatchSymbols, ...inSymbols, ...nullCheckSymbols],
+          expectNotContains: comparisonSymbols, // No comparison operators for strings
         },
         {
           name: 'first param numeric: comma and arithmetic/comparison',

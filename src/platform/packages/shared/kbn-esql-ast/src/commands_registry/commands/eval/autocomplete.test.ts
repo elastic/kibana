@@ -13,6 +13,13 @@ import {
   expectSuggestions,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
+  getOperatorSuggestions,
+  logicalOperators,
+  arithmeticOperators,
+  comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
 } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
@@ -177,7 +184,9 @@ describe('EVAL Autocomplete', () => {
     );
     await evalExpectSuggestions(
       'from index | EVAL keywordField not ',
-      ['LIKE $0', 'RLIKE $0', 'IN $0'],
+      getOperatorSuggestions(
+        [...inOperators, ...patternMatchOperators].filter((op) => !op.name.startsWith('not '))
+      ),
       mockCallbacks
     );
 
@@ -223,10 +232,7 @@ describe('EVAL Autocomplete', () => {
           { operators: true, skipAssign: true },
           ['double', 'long']
         ),
-        'IN $0',
-        'IS NOT NULL',
-        'IS NULL',
-        'NOT IN $0',
+        ...getOperatorSuggestions([...inOperators, ...nullCheckOperators]),
       ],
       mockCallbacks
     );
@@ -482,45 +488,32 @@ describe('EVAL Autocomplete', () => {
       // case( field ) suggests all appropriate operators for that field type
       // Note: CASE is expression-heavy, comma is not automatically suggested after fields
       await evalExpectSuggestions('from a | eval case( textField ', [
-        'IN $0',
-        'IS NOT NULL',
-        'IS NULL',
-        'LIKE $0',
-        'NOT IN $0',
-        'NOT LIKE $0',
-        'NOT RLIKE $0',
-        'RLIKE $0',
+        ...getOperatorSuggestions([
+          ...patternMatchOperators,
+          ...inOperators,
+          ...nullCheckOperators,
+        ]),
       ]);
 
       await evalExpectSuggestions('from a | eval case( doubleField ', [
-        '!= $0',
-        '% $0',
-        '* $0',
-        '+ $0',
-        '- $0',
-        '/ $0',
-        '< $0',
-        '<= $0',
-        '== $0',
-        '> $0',
-        '>= $0',
-        'IN $0',
-        'IS NOT NULL',
-        'IS NULL',
-        'NOT IN $0',
+        ...getOperatorSuggestions([
+          ...comparisonFunctions,
+          // Exclude unary-only operators (negation) - autocomplete doesn't suggest them
+          ...arithmeticOperators.filter(
+            (op) => !op.signatures.every((sig) => sig.params.length === 1)
+          ),
+          ...inOperators,
+          ...nullCheckOperators,
+        ]),
       ]);
 
       await evalExpectSuggestions('from a | eval case( booleanField ', [
-        '!= $0',
+        ...getOperatorSuggestions(
+          comparisonFunctions.filter(({ name }) => name === '==' || name === '!=')
+        ),
         ',',
-        '== $0',
-        'AND $0',
-        'IN $0',
-        'IS NOT NULL',
-        'IS NULL',
+        ...getOperatorSuggestions([...logicalOperators, ...inOperators, ...nullCheckOperators]),
         'NOT',
-        'NOT IN $0',
-        'OR $0',
       ]);
     });
 

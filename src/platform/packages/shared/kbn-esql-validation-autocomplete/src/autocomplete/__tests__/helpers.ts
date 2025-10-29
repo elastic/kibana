@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { camelCase } from 'lodash';
-import type { FieldType, FunctionParameterType, FunctionReturnType } from '@kbn/esql-ast';
+import type {
+  FieldType,
+  FunctionParameterType,
+  FunctionReturnType,
+  FunctionDefinition,
+} from '@kbn/esql-ast';
 import { withAutoSuggest, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
 import type {
@@ -21,7 +26,12 @@ import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/gener
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import {
   operatorsDefinitions,
+  logicalOperators,
+  arithmeticOperators,
   comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
 } from '@kbn/esql-ast/src/definitions/all_operators';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -133,6 +143,7 @@ export function getFunctionSignaturesByReturnType(
     grouping,
     scalar,
     operators,
+    excludeOperatorGroups,
     timeseriesAgg,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
@@ -142,6 +153,10 @@ export function getFunctionSignaturesByReturnType(
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    /** Exclude specific operator groups (e.g., ['in', 'nullCheck']) */
+    excludeOperatorGroups?: Array<
+      'logical' | 'comparison' | 'arithmetic' | 'pattern' | 'in' | 'nullCheck'
+    >;
     timeseriesAgg?: boolean;
     skipAssign?: boolean;
   } = {},
@@ -171,8 +186,29 @@ export function getFunctionSignaturesByReturnType(
     list.push(...timeSeriesAggFunctionDefinitions);
   }
   if (operators) {
-    const hasStringParams = paramsTypes?.some((type) => type === 'text' || type === 'keyword');
-    const comparisonOperatorNames = comparisonFunctions.map(({ name }) => name);
+    // Build set of operator names to exclude based on excludeOperatorGroups
+    const excludedOperatorNames = new Set<string>();
+
+    if (excludeOperatorGroups) {
+      const operatorGroupMap: Record<string, FunctionDefinition[]> = {
+        logical: logicalOperators,
+        comparison: comparisonFunctions,
+        arithmetic: arithmeticOperators,
+        pattern: patternMatchOperators,
+        in: inOperators,
+        nullCheck: nullCheckOperators,
+      };
+
+      for (const groupName of excludeOperatorGroups) {
+        const group = operatorGroupMap[groupName];
+
+        if (group) {
+          for (const op of group) {
+            excludedOperatorNames.add(op.name);
+          }
+        }
+      }
+    }
 
     list.push(
       ...operatorsDefinitions.filter(({ name }) => {
@@ -180,7 +216,7 @@ export function getFunctionSignaturesByReturnType(
           return false;
         }
 
-        if (hasStringParams && comparisonOperatorNames.includes(name)) {
+        if (excludedOperatorNames.has(name)) {
           return false;
         }
 

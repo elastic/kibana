@@ -15,6 +15,11 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   mockFieldsWithTypes,
+  getOperatorSuggestions,
+  logicalOperators,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
 } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
@@ -84,14 +89,17 @@ describe('WHERE Autocomplete', () => {
       'after a field name (%s)',
       async (query) => {
         await whereExpectSuggestions(query, [
-          'IN $0',
-          'IS NOT NULL',
-          'IS NULL',
-          'LIKE $0',
-          'NOT IN $0',
-          'NOT LIKE $0',
-          'NOT RLIKE $0',
-          'RLIKE $0',
+          '!= $0',
+          '< $0',
+          '<= $0',
+          '== $0',
+          '> $0',
+          '>= $0',
+          ...getOperatorSuggestions([
+            ...patternMatchOperators,
+            ...inOperators,
+            ...nullCheckOperators,
+          ]),
         ]);
       }
     );
@@ -239,28 +247,29 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggestions after IS', async () => {
-      await whereExpectSuggestions('from index | WHERE keywordField IS ', [
-        'IS NULL',
-        'IS NOT NULL',
-      ]);
+      await whereExpectSuggestions(
+        'from index | WHERE keywordField IS ',
+        getOperatorSuggestions(nullCheckOperators)
+      );
 
       await whereExpectSuggestions('from index | WHERE keywordField IS NU', ['IS NULL']);
     });
 
     test('suggestions after NOT', async () => {
-      await whereExpectSuggestions('from index | WHERE keywordField not ', [
-        'LIKE $0',
-        'RLIKE $0',
-        'IN $0',
-      ]);
-      await whereExpectSuggestions('from index | WHERE keywordField NOT ', [
-        'LIKE $0',
-        'RLIKE $0',
-        'IN $0',
-      ]);
+      await whereExpectSuggestions(
+        'from index | WHERE keywordField not ',
+        getOperatorSuggestions(
+          [...patternMatchOperators, ...inOperators].filter((op) => !op.name.startsWith('not '))
+        )
+      );
+      await whereExpectSuggestions(
+        'from index | WHERE keywordField NOT ',
+        getOperatorSuggestions(
+          [...patternMatchOperators, ...inOperators].filter((op) => !op.name.startsWith('not '))
+        )
+      );
       await whereExpectSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") ', [
-        'AND $0',
-        'OR $0',
+        ...getOperatorSuggestions(logicalOperators),
         '| ',
       ]);
       await whereExpectSuggestions('from index | WHERE keywordField IS NOT ', ['IS NOT NULL']);
@@ -291,12 +300,15 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggestions after IS (NOT) NULL', async () => {
-      await whereExpectSuggestions('FROM index | WHERE tags.keyword IS NULL ', ['AND $0', 'OR $0']);
+      await whereExpectSuggestions(
+        'FROM index | WHERE tags.keyword IS NULL ',
+        getOperatorSuggestions(logicalOperators)
+      );
 
-      await whereExpectSuggestions('FROM index | WHERE tags.keyword IS NOT NULL ', [
-        'AND $0',
-        'OR $0',
-      ]);
+      await whereExpectSuggestions(
+        'FROM index | WHERE tags.keyword IS NOT NULL ',
+        getOperatorSuggestions(logicalOperators)
+      );
     });
 
     test('suggestions after an arithmetic expression', async () => {

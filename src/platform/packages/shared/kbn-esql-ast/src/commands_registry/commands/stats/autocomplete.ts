@@ -8,7 +8,6 @@
  */
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { FunctionParameterContext } from '../../../definitions/utils/autocomplete/expressions/types';
-import { Walker } from '../../../walker';
 import { isAssignment, isColumn, isFunctionExpression } from '../../../ast/is';
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
@@ -119,40 +118,26 @@ export async function autocomplete(
         return [];
       }
 
-      // Check if we're in any function with a constantOnly parameter
-      const anyContainingFunction = findAnyContainingFunction(command, cursorPosition);
-      const hasConstantOnlyParam = anyContainingFunction
-        ? buildCustomFilteringContext(
-            command,
-            anyContainingFunction,
-            context
-          )?.paramDefinitions.some((p) => p.constantOnly === true) ?? false
-        : false;
-
       const expressionSuggestions = await getExpressionSuggestions({
         query,
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: expressionRoot,
+        lastArg: foundFunction || expressionRoot,
         location: Location.STATS,
         context,
         callbacks,
-        emptySuggestions: hasConstantOnlyParam
-          ? []
-          : [
-              ...(!isNewMultipleExpression && !isInlineStats
-                ? [
-                    {
-                      ...byCompleteItem,
-                      sortText: 'D',
-                    },
-                  ]
-                : []),
-              getNewUserDefinedColumnSuggestion(
-                callbacks?.getSuggestedUserDefinedColumnName?.() || ''
-              ),
-            ],
+        emptySuggestions: [
+          ...(!isNewMultipleExpression && !isInlineStats
+            ? [
+                {
+                  ...byCompleteItem,
+                  sortText: 'D',
+                },
+              ]
+            : []),
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+        ],
         afterCompleteSuggestions: [
           whereCompleteItem,
           byCompleteItem,
@@ -193,7 +178,7 @@ export async function autocomplete(
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: lastArgRhs,
+        lastArg: foundFunction || lastArgRhs,
         location: Location.STATS,
         context,
         callbacks,
@@ -268,20 +253,16 @@ export async function autocomplete(
         ? rightHandAssignment[0]
         : rightHandAssignment;
 
-      const insideFunction = foundFunction && within(cursorPosition, foundFunction);
-
       return getExpressionSuggestions({
         query,
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: lastArgRhs,
+        lastArg: foundFunction || lastArgRhs,
         location: Location.STATS_BY,
         context,
         callbacks,
-        emptySuggestions: insideFunction
-          ? []
-          : [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
+        emptySuggestions: [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         addSpaceAfterFirstField: false,
         ignoredColumns,
@@ -304,39 +285,19 @@ export async function autocomplete(
 
       const ignoredColumns = alreadyUsedColumns(command);
 
-      // Only add emptySuggestions (col0, date histogram) when NOT inside a function
-      // OR when the current parameter has constantOnly: true
-      const insideFunction = foundFunction && within(cursorPosition, foundFunction);
-
-      // Check if we're in any function with a constantOnly parameter
-      const anyContainingFunction = findAnyContainingFunction(command, cursorPosition);
-      const hasConstantOnlyParam = anyContainingFunction
-        ? buildCustomFilteringContext(
-            command,
-            anyContainingFunction,
-            context
-          )?.paramDefinitions.some((param) => param.constantOnly === true) ?? false
-        : false;
-
-      const shouldSkipEmptySuggestions = insideFunction || hasConstantOnlyParam;
-
       return getExpressionSuggestions({
         query,
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: expressionRoot,
+        lastArg: foundFunction || expressionRoot,
         location: Location.STATS_BY,
         context,
         callbacks,
-        emptySuggestions: shouldSkipEmptySuggestions
-          ? []
-          : [
-              getNewUserDefinedColumnSuggestion(
-                callbacks?.getSuggestedUserDefinedColumnName?.() || ''
-              ),
-              getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
-            ],
+        emptySuggestions: [
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+          getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
+        ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         addSpaceAfterFirstField: false,
         ignoredColumns,
@@ -392,6 +353,9 @@ async function getExpressionSuggestions({
   const suggestions: ISuggestionItem[] = [];
   const innerText = query.substring(0, cursorPosition);
 
+  const insideFunction =
+    lastArg && isFunctionExpression(lastArg) && within(cursorPosition, lastArg);
+
   if (!rightAfterColumn(innerText, expressionRoot, (name) => _columnExists(name, context))) {
     const modifiedCallbacks = suggestColumns ? callbacks : { ...callbacks, getByType: undefined };
 
@@ -417,18 +381,14 @@ async function getExpressionSuggestions({
     );
   }
 
-  // Add emptySuggestions if appropriate (caller should pass empty array if inside function)
   if (
     (!expressionRoot ||
       (isColumn(expressionRoot) && !_columnExists(expressionRoot.parts.join('.'), context))) &&
-    !/not\s+$/i.test(innerText)
+    !/not\s+$/i.test(innerText) &&
+    !insideFunction
   ) {
     suggestions.push(...emptySuggestions);
   }
-
-  // Add after-complete suggestions (check if we're inside a function)
-  const insideFunction =
-    lastArg && isFunctionExpression(lastArg) && within(cursorPosition, lastArg);
 
   if (
     isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText) &&
@@ -505,48 +465,19 @@ function buildCustomFilteringContext(
   };
 }
 
-/** Finds any function that contains the cursor (for constantOnly checks). */
-function findAnyContainingFunction(
-  command: ESQLAstAllCommands,
-  cursorPosition: number
-): ESQLFunction | null {
-  const allFunctions: ESQLFunction[] = [];
-  Walker.walk(command, {
-    visitFunction: (fn) => {
-      if (within(cursorPosition, fn)) {
-        allFunctions.push(fn);
-      }
-    },
-  });
-
-  // Get the innermost function (smallest location range)
-  return (
-    allFunctions.sort((a, b) => {
-      const aSize = a.location.max - a.location.min;
-      const bSize = b.location.max - b.location.min;
-      return aSize - bSize;
-    })[0] || null
-  );
-}
-
-/** Finds the function at cursor position that should handle suggestions. */
 function findFunctionForSuggestions(
   command: ESQLAstAllCommands,
   cursorPosition: number
 ): ESQLFunction | null {
-  const { node } = findAstPosition([command], cursorPosition);
+  const { node, containingFunction } = findAstPosition([command], cursorPosition);
 
-  // Check if the node at cursor is a function
   if (node && node.type === 'function') {
     const fn = node as ESQLFunction;
 
-    // Check if it's a special operator that needs custom handling
     const isSpecialOperator =
       inOperators.some((op) => op.name === fn.name) ||
       nullCheckOperators.some((op) => op.name === fn.name);
 
-    // Accept variadic-call functions or special binary-expression operators
-    // Exclude regular binary operators (comparison, assignment) that are handled generically
     if (
       fn.subtype === 'variadic-call' ||
       (fn.subtype === 'binary-expression' && isSpecialOperator)
@@ -555,22 +486,5 @@ function findFunctionForSuggestions(
     }
   }
 
-  // If no special operator found at cursor position, look for containing variadic-call functions
-  const allFunctions: ESQLFunction[] = [];
-  Walker.walk(command, {
-    visitFunction: (fn) => {
-      if (fn.subtype === 'variadic-call' && within(cursorPosition, fn)) {
-        allFunctions.push(fn);
-      }
-    },
-  });
-
-  // Get the innermost variadic-call function
-  return (
-    allFunctions.sort((a, b) => {
-      const aSize = a.location.max - a.location.min;
-      const bSize = b.location.max - b.location.min;
-      return aSize - bSize;
-    })[0] || null
-  );
+  return containingFunction || null;
 }

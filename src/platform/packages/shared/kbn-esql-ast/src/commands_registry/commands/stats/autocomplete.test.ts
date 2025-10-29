@@ -18,6 +18,11 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   getLiteralsByType,
+  getOperatorSuggestions,
+  comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
 } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import type { FunctionReturnType, FieldType } from '../../../definitions/types';
@@ -483,14 +488,12 @@ describe('STATS Autocomplete', () => {
 
         it('suggests operators after a first operand', async () => {
           await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField ', [
-            'IN $0',
-            'IS NOT NULL',
-            'IS NULL',
-            'LIKE $0',
-            'NOT IN $0',
-            'NOT LIKE $0',
-            'NOT RLIKE $0',
-            'RLIKE $0',
+            ...getOperatorSuggestions([
+              ...comparisonFunctions,
+              ...patternMatchOperators,
+              ...inOperators,
+              ...nullCheckOperators,
+            ]),
           ]);
         });
 
@@ -758,7 +761,9 @@ describe('STATS Autocomplete', () => {
       test('after NOT keyword', async () => {
         await statsExpectSuggestions(
           'FROM logs-apache_error | STATS count() by keywordField <= textField NOT ',
-          ['LIKE $0', 'RLIKE $0', 'IN $0']
+          getOperatorSuggestions(
+            [...patternMatchOperators, ...inOperators].filter((op) => !op.name.startsWith('not '))
+          )
         );
       });
 

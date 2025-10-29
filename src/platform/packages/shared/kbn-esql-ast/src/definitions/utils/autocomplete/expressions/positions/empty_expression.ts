@@ -209,9 +209,6 @@ async function buildFieldAndFunctionSuggestions(
   // Suggest fields when:
   // - there is at least one non-constant parameter, OR
   // - param definitions are empty (variadic/unknown position, e.g., CONCAT third+ arg)
-  // const hasNonConstantParam = paramDefinitions.some(({ constantOnly }) => !constantOnly);
-  // const isVariadicOrUnknownPosition = paramDefinitions.length === 0;
-  // if (hasNonConstantParam || isVariadicOrUnknownPosition) {
 
   const hasConstantOnlyParam = paramDefinitions.some(({ constantOnly }) => constantOnly);
   const hasFieldsOnlyParam = paramDefinitions.some(({ fieldsOnly }) => fieldsOnly);

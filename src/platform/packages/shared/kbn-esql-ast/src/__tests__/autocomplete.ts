@@ -24,7 +24,15 @@ import { aggFunctionDefinitions } from '../definitions/generated/aggregation_fun
 import { timeSeriesAggFunctionDefinitions } from '../definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { operatorsDefinitions, comparisonFunctions } from '../definitions/all_operators';
+import {
+  operatorsDefinitions,
+  comparisonFunctions,
+  logicalOperators,
+  arithmeticOperators,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '../definitions/all_operators';
 import { parse } from '../parser';
 import type { ESQLAstAllCommands } from '../types';
 import type {
@@ -164,6 +172,7 @@ export function getFunctionSignaturesByReturnType(
     grouping,
     scalar,
     operators,
+    excludeOperatorGroups,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
@@ -173,6 +182,10 @@ export function getFunctionSignaturesByReturnType(
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    /** Exclude specific operator groups (e.g., ['in', 'nullCheck']) */
+    excludeOperatorGroups?: Array<
+      'logical' | 'comparison' | 'arithmetic' | 'pattern' | 'in' | 'nullCheck'
+    >;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
@@ -204,17 +217,47 @@ export function getFunctionSignaturesByReturnType(
     const hasStringParams = paramsTypes?.some((type) => type === 'text' || type === 'keyword');
     const comparisonOperatorNames = comparisonFunctions.map(({ name }) => name);
 
-    list.push(
-      ...operatorsDefinitions.filter(({ name }) => {
-        if (skipAssign && (name === '=' || name === ':')) {
-          return false;
+    // Build set of operator names to exclude based on excludeOperatorGroups
+    const excludedOperatorNames = new Set<string>();
+
+    if (excludeOperatorGroups) {
+      const operatorGroupMap: Record<string, Array<{ name: string; signatures?: unknown[] }>> = {
+        logical: logicalOperators,
+        comparison: comparisonFunctions,
+        arithmetic: arithmeticOperators,
+        pattern: patternMatchOperators,
+        in: inOperators,
+        nullCheck: nullCheckOperators,
+      };
+
+      for (const groupName of excludeOperatorGroups) {
+        const group = operatorGroupMap[groupName];
+
+        if (group) {
+          for (const op of group) {
+            excludedOperatorNames.add(op.name);
+          }
         }
-        if (hasStringParams && comparisonOperatorNames.includes(name)) {
-          return false;
-        }
-        return true;
-      })
-    );
+      }
+    }
+
+    const filteredOperators = operatorsDefinitions.filter(({ name }) => {
+      if (skipAssign && (name === '=' || name === ':')) {
+        return false;
+      }
+
+      if (hasStringParams && comparisonOperatorNames.includes(name)) {
+        return false;
+      }
+
+      if (excludedOperatorNames.has(name)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    list.push(...filteredOperators);
   }
 
   const deduped = Array.from(new Set(list));
@@ -312,3 +355,27 @@ export const containsSnippet = (text: string): boolean => {
   const snippetRegex = /\$(\d+|\{\d+:[^}]*\})/;
   return snippetRegex.test(text);
 };
+
+// Re-export operator groups for use in tests (avoid hardcoding operator names)
+export {
+  logicalOperators,
+  arithmeticOperators,
+  comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+};
+
+/**
+ * Convert operator definition groups to suggestion strings.
+ * Use this instead of hardcoding operator strings in tests.
+ */
+export function getOperatorSuggestions(
+  operators: Array<{ name: string; signatures: Array<{ params: unknown[] }> }>
+): string[] {
+  return operators.map(({ name, signatures }) =>
+    signatures.some(({ params }) => params.length > 1)
+      ? `${name.toUpperCase()} $0`
+      : name.toUpperCase()
+  );
+}

@@ -19,20 +19,28 @@ import {
   withCompleteItem,
   assignCompletionItem,
 } from '../../complete_items';
-import { expectSuggestions, suggest } from '../../../__tests__/autocomplete';
+import {
+  expectSuggestions,
+  suggest,
+  logicalOperators,
+  comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 
 // ============================================================================
-// Single Source of Truth - Operator Suggestions by Group
+// Operator Suggestions - Derived from Real Definitions
 // ============================================================================
 
 const OPERATOR_SUGGESTIONS = {
-  LOGICAL: ['AND', 'OR'],
-  COMPARISON: ['!=', '==', '>', '>=', '<', '<='],
-  PATTERN: ['LIKE', 'NOT LIKE', 'RLIKE', 'NOT RLIKE', ':'],
-  SET: ['IN', 'NOT IN'],
-  EXISTENCE: ['IS NULL', 'IS NOT NULL'],
+  LOGICAL: logicalOperators.map(({ name }) => name.toUpperCase()),
+  COMPARISON: comparisonFunctions.map(({ name }) => name.toUpperCase()),
+  PATTERN: [...patternMatchOperators.map(({ name }) => name.toUpperCase()), ':'], // ':' is assignment, keep for now
+  SET: inOperators.map(({ name }) => name.toUpperCase()),
+  EXISTENCE: nullCheckOperators.map(({ name }) => name.toUpperCase()),
 };
 
 // Helper to add placeholder to operator labels for test expectations
