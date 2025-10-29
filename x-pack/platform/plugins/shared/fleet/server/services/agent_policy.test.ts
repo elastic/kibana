@@ -2307,7 +2307,6 @@ describe('Agent policy', () => {
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
         searchFields: ['name'],
         search: `\"${testAgentPolicy.name}\"`,
-        namespaces: testAgentPolicy.space_ids,
       });
     });
 
@@ -2336,7 +2335,6 @@ describe('Agent policy', () => {
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
         searchFields: ['name'],
         search: `\"${testAgentPolicy.name}\"`,
-        namespaces: testAgentPolicy.space_ids,
       });
     });
 
@@ -2369,7 +2367,6 @@ describe('Agent policy', () => {
         type: AGENT_POLICY_SAVED_OBJECT_TYPE,
         searchFields: ['name'],
         search: `\"${testAgentPolicy.name}\"`,
-        namespaces: testAgentPolicy.space_ids,
       });
     });
 
