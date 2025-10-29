@@ -94,9 +94,6 @@ export function buildAutocompleteContext(
 
   const lineUpToCursor = line.substring(0, position.column - 1);
   const parseResult = parseLineForCompletion(lineUpToCursor);
-  const lastPathSegment = lineUpToCursor.endsWith('.')
-    ? null
-    : parseResult?.pathSegments?.pop() ?? null;
 
   if (parseResult?.fullKey) {
     const schemaAtPath = getSchemaAtPath(contextSchema, parseResult.fullKey, { partial: true });

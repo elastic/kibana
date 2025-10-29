@@ -22,9 +22,10 @@ async function getSuggestions(
   yamlContent: string
 ) {
   const cursorOffset = yamlContent.indexOf('|<-');
-  const mockModel = createMockMonacoTextModel(yamlContent, cursorOffset);
+  const cleanedYaml = yamlContent.replace('|<-', '');
+  const mockModel = createMockMonacoTextModel(cleanedYaml, cursorOffset);
   const position = mockModel.getPositionAt(cursorOffset);
-  const triggerCharacter = yamlContent.slice(cursorOffset - 1, cursorOffset);
+  const triggerCharacter = cleanedYaml.slice(cursorOffset - 1, cursorOffset);
 
   const result = await completionProvider.provideCompletionItems(
     mockModel as any,
@@ -738,7 +739,7 @@ triggers:
 
       it('should not match liquid filter in regular text', () => {
         const result = parseLineForCompletion('text: "normal | pipe character"');
-        expect(result.matchType).toBeNull();
+        expect(result).toBeNull();
       });
     });
 
@@ -825,12 +826,12 @@ triggers:
 
       it('should not match liquid syntax if not at end of line', () => {
         const result = parseLineForCompletion('{% if condition %} content');
-        expect(result.matchType).toBeNull();
+        expect(result).toBeNull();
       });
 
       it('should not match liquid syntax without %', () => {
         const result = parseLineForCompletion('{ if ');
-        expect(result.matchType).toBeNull();
+        expect(result).toBeNull();
       });
     });
 
@@ -897,7 +898,7 @@ triggers:
 
       it('should not match liquid block keyword with complex content', () => {
         const result = parseLineForCompletion('assign variable = "value"');
-        expect(result.matchType).toBeNull();
+        expect(result).toBeNull();
       });
     });
 
@@ -931,7 +932,7 @@ steps:
       message: "{{ user.name | `;
 
       const cursorOffset = yamlContent.length;
-      const model = createMockModel(yamlContent, cursorOffset);
+      const model = createMockMonacoTextModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
       const result = await completionProvider.provideCompletionItems(
@@ -962,7 +963,7 @@ steps:
       message: "{{ user.name | up`;
 
       const cursorOffset = yamlContent.length;
-      const model = createMockModel(yamlContent, cursorOffset);
+      const model = createMockMonacoTextModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
       const result = await completionProvider.provideCompletionItems(
@@ -990,7 +991,7 @@ steps:
         {% `;
 
       const cursorOffset = yamlContent.length;
-      const model = createMockModel(yamlContent, cursorOffset);
+      const model = createMockMonacoTextModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
       const result = await completionProvider.provideCompletionItems(
@@ -1021,7 +1022,7 @@ steps:
         {% if`;
 
       const cursorOffset = yamlContent.length;
-      const model = createMockModel(yamlContent, cursorOffset);
+      const model = createMockMonacoTextModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
       const result = await completionProvider.provideCompletionItems(
@@ -1049,7 +1050,7 @@ steps:
 \t\t\t`;
 
       const cursorOffset = yamlContent.length;
-      const model = createMockModel(yamlContent, cursorOffset);
+      const model = createMockMonacoTextModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
       const result = await completionProvider.provideCompletionItems(
@@ -1081,7 +1082,7 @@ steps:
 \t  `;
 
       const cursorOffset = yamlContent.length;
-      const model = createMockModel(yamlContent, cursorOffset);
+      const model = createMockMonacoTextModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
       const result = await completionProvider.provideCompletionItems(
@@ -1117,7 +1118,7 @@ steps:
             `;
 
       const cursorOffset = yamlContent.length;
-      const model = createMockModel(yamlContent, cursorOffset);
+      const model = createMockMonacoTextModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
       const result = await completionProvider.provideCompletionItems(
@@ -1148,7 +1149,7 @@ steps:
         `;
 
       const cursorOffset = yamlContent.length;
-      const model = createMockModel(yamlContent, cursorOffset);
+      const model = createMockMonacoTextModel(yamlContent, cursorOffset);
       const position = model.getPositionAt(cursorOffset);
 
       const result = await completionProvider.provideCompletionItems(

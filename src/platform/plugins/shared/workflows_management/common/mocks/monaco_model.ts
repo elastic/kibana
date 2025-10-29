@@ -9,9 +9,9 @@
 
 /**
  * Simple mock for monaco model, partially compatible with the real model to be use in tests
- * @param yamlContent - The yaml content to create the model from
+ * @param value - The content to create the model from
  * @param cursorOffset - The offset of the cursor in the model
- * @returns The mock monaco model with getLineCount, getOffsetAt, getPositionAt, getLineContent, pushEditOperations methods
+ * @returns The mock monaco model with getValue, getLineCount, getOffsetAt, getPositionAt, getLineContent, getWordUntilPosition, getWordAtPosition, pushEditOperations methods
  */
 export function createMockMonacoTextModel(value: string, cursorOffset: number) {
   const lines = value.split('\n');
@@ -32,6 +32,7 @@ export function createMockMonacoTextModel(value: string, cursorOffset: number) {
   }
 
   return {
+    getValue: () => value,
     getLineCount: () => lines.length,
     getOffsetAt: (pos: typeof position) => cursorOffset,
     getPositionAt: (offset: number) => {
