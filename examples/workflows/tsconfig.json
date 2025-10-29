@@ -24,5 +24,6 @@
     "@kbn/workflows-management-plugin",
     "@kbn/code-editor",
     "@kbn/security-plugin",
+    "@kbn/react-query",
   ]
 }
