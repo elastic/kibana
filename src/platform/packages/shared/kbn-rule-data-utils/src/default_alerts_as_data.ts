@@ -57,7 +57,7 @@ const ALERT_CONSECUTIVE_MATCHES = `${ALERT_NAMESPACE}.consecutive_matches` as co
 const ALERT_PENDING_RECOVERED_COUNT = `${ALERT_NAMESPACE}.pending_recovered_count` as const;
 
 // kibana.alert.instance.id - alert ID, also known as alert instance ID
-const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
+const ALERT_INSTANCE_ID = `alert.id` as const;
 
 // kibana.alert.last_detected - timestamp when the alert was last seen
 const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
@@ -81,13 +81,13 @@ const ALERT_UPDATED_BY_USER_ID = `${ALERT_NAMESPACE}.updated_by.user.id` as cons
 const ALERT_UPDATED_BY_USER_NAME = `${ALERT_NAMESPACE}.updated_by.user.name` as const;
 
 // kibana.alert.status - active/recovered status of alert
-const ALERT_STATUS = `${ALERT_NAMESPACE}.status` as const;
+const ALERT_STATUS = `alert.status` as const;
 
 // kibana.alert.time_range - time range of alert from kibana.alert.start to now
 const ALERT_TIME_RANGE = `${ALERT_NAMESPACE}.time_range` as const;
 
 // kibana.alert.uuid - unique ID for the active span of this alert
-const ALERT_UUID = `${ALERT_NAMESPACE}.uuid` as const;
+const ALERT_UUID = `alert.uuid` as const;
 
 // kibana.alert.workflow_status - open/closed status of alert
 const ALERT_WORKFLOW_STATUS = `${ALERT_NAMESPACE}.workflow_status` as const;
@@ -108,7 +108,7 @@ const ALERT_RULE_CONSUMER = `${ALERT_RULE_NAMESPACE}.consumer` as const;
 const ALERT_RULE_EXECUTION_TIMESTAMP = `${ALERT_RULE_NAMESPACE}.execution.timestamp` as const;
 
 // kibana.alert.rule.execution.uuid - unique ID for the rule execution that generated this alert
-const ALERT_RULE_EXECUTION_UUID = `${ALERT_RULE_NAMESPACE}.execution.uuid` as const;
+const ALERT_RULE_EXECUTION_UUID = `rule.execution.uuid` as const;
 
 // kibana.alert.rule.name - rule name for rule that generated this alert
 const ALERT_RULE_NAME = `${ALERT_RULE_NAMESPACE}.name` as const;
@@ -132,7 +132,7 @@ const ALERT_RULE_TYPE_ID = `${ALERT_RULE_NAMESPACE}.rule_type_id` as const;
 const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
 
 // kibana.alert.rule.uuid - rule ID for rule that generated this alert
-const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
+const ALERT_RULE_UUID = `rule.id` as const;
 
 // kibana.alert.rule.execution.type - rule execution type for rule that generated this alert (manual /scheduled)
 const ALERT_RULE_EXECUTION_TYPE = `${ALERT_RULE_NAMESPACE}.execution.type` as const;

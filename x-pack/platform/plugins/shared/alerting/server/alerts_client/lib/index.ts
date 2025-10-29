@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { buildAlert } from './build_alert';
 export { buildNewAlert } from './build_new_alert';
 export { buildOngoingAlert } from './build_ongoing_alert';
 export { buildRecoveredAlert } from './build_recovered_alert';

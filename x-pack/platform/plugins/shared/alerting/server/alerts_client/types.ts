@@ -154,6 +154,11 @@ export interface PublicAlertsClient<
   report(
     alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>
   ): ReportedAlertData<AlertData>;
+  writeAlerts(
+    activeAlerts: Array<ReportedAlert<AlertData, State, Context, ActionGroupIds>>,
+    recoveredAlerts: Array<ReportedAlert<AlertData, State, Context, ActionGroupIds>>
+  ): Promise<void>;
+  getTrackedAlerts(): Record<string, Alert & AlertData>;
   isTrackedAlert(id: string): boolean;
   setAlertData(alert: UpdateableAlert<AlertData, State, Context, ActionGroupIds>): void;
   getAlertLimitValue: () => number;

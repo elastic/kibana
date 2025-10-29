@@ -69,17 +69,11 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const AlertRequired = rt.type({
   '@timestamp': schemaDate,
-  'kibana.alert.instance.id': schemaString,
-  'kibana.alert.rule.category': schemaString,
-  'kibana.alert.rule.consumer': schemaString,
-  'kibana.alert.rule.name': schemaString,
-  'kibana.alert.rule.producer': schemaString,
-  'kibana.alert.rule.revision': schemaStringOrNumber,
-  'kibana.alert.rule.rule_type_id': schemaString,
-  'kibana.alert.rule.uuid': schemaString,
-  'kibana.alert.status': schemaString,
-  'kibana.alert.uuid': schemaString,
-  'kibana.space_ids': schemaStringArray,
+  'alert.id': schemaString,
+  'alert.status': schemaString,
+  'alert.uuid': schemaString,
+  'rule.id': schemaString,
+  'rule.query': schemaString,
 });
 // prettier-ignore
 const AlertOptional = rt.partial({
@@ -102,7 +96,7 @@ const AlertOptional = rt.partial({
   'kibana.alert.reason': schemaString,
   'kibana.alert.rule.execution.timestamp': schemaDate,
   'kibana.alert.rule.execution.type': schemaString,
-  'kibana.alert.rule.execution.uuid': schemaString,
+  'rule.execution.uuid': schemaString,
   'kibana.alert.rule.parameters': schemaUnknown,
   'kibana.alert.rule.tags': schemaStringArray,
   'kibana.alert.severity_improving': schemaBoolean,

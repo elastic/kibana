@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { findLastIndex } from 'lodash';
+import { findLastIndex, isNil } from 'lodash';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLCommandOption } from '@kbn/esql-ast';
 import {
@@ -79,25 +78,31 @@ export const getEsqlQueryHits = async (
   for (let r = 0; r < table.values.length; r++) {
     const row = table.values[r];
     const document = rowToDocument(table.columns, row);
+    const mappedAlertId = alertIdFields
+      .filter((a) => !isNil(document[a]))
+      .map((a) => document[a])
+      .sort();
 
-    const alertId = uuidv4();
-    const hit = {
-      _id: ESQL_DOCUMENT_ID,
-      _index: '',
-      _source: document,
-    };
-    if (groupedHits[alertId]) {
-      groupedHits[alertId].push(hit);
-    } else {
-      groupedHits[alertId] = [hit];
-    }
+    if (mappedAlertId.length > 0) {
+      const alertId = mappedAlertId.join(',');
+      const hit = {
+        _id: ESQL_DOCUMENT_ID,
+        _index: '',
+        _source: document,
+      };
+      if (groupedHits[alertId]) {
+        groupedHits[alertId].push(hit);
+      } else {
+        groupedHits[alertId] = [hit];
+      }
 
-    if (isPreview) {
-      rows.push(Object.assign({ [ALERT_ID_COLUMN]: alertId }, document));
-    }
+      if (isPreview) {
+        rows.push(Object.assign({ [ALERT_ID_COLUMN]: alertId }, document));
+      }
 
-    if (r !== 0 && r % chunkSize === 0) {
-      await new Promise(setImmediate);
+      if (r !== 0 && r % chunkSize === 0) {
+        await new Promise(setImmediate);
+      }
     }
   }
 

@@ -55,6 +55,7 @@ import type {
   GetMaintenanceWindowScopedQueryAlertsParams,
 } from './types';
 import {
+  buildAlert,
   buildNewAlert,
   buildOngoingAlert,
   buildUpdatedRecoveredAlert,
@@ -197,7 +198,7 @@ export class AlertsClient<
         // implemented to allow filtering the ongoing recovered alerts. Then we can just query for
         // the alerts of the latest execution by setting the size to 1 and adding inner_hits.
         const executions = await this.search({
-          size: opts.flappingSettings.lookBackWindow,
+          size: 1,
           query: {
             bool: {
               must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
@@ -679,6 +680,148 @@ export class AlertsClient<
     }
   }
 
+  public async writeAlerts(
+    activeAlerts: Array<
+      ReportedAlert<
+        AlertData,
+        LegacyState,
+        LegacyContext,
+        WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+      >
+    >,
+    recoveredAlerts: Array<
+      ReportedAlert<
+        AlertData,
+        LegacyState,
+        LegacyContext,
+        WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+      >
+    >
+  ) {
+    const currentTime = this.startedAtString ?? new Date().toISOString();
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const activeAlertsToIndex: Array<Alert & AlertData> = [];
+    for (const alert of activeAlerts) {
+      activeAlertsToIndex.push(
+        buildAlert<AlertData, LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>({
+          alert,
+          rule: this.rule,
+          timestamp: currentTime,
+          status: ALERT_STATUS_ACTIVE,
+        })
+      );
+    }
+
+    const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
+    for (const alert of recoveredAlerts) {
+      activeAlertsToIndex.push(
+        buildAlert<AlertData, LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>({
+          alert,
+          rule: this.rule,
+          timestamp: currentTime,
+          status: ALERT_STATUS_RECOVERED,
+        })
+      );
+    }
+
+    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
+      (alert: Alert & AlertData) => {
+        const alertUuid = get(alert, ALERT_UUID);
+        const alertIndex = this.trackedAlerts.indices[alertUuid];
+        if (!alertIndex) {
+          return true;
+        } else if (!isValidAlertIndexName(alertIndex)) {
+          this.options.logger.warn(
+            `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported ${this.ruleInfoMessage}.`,
+            this.logTags
+          );
+          return false;
+        }
+        return true;
+      }
+    );
+
+    if (alertsToIndex.length > 0) {
+      const bulkBody = flatMap(
+        alertsToIndex.map((alert: Alert & AlertData) => {
+          const alertUuid = get(alert, ALERT_UUID);
+          return [
+            getBulkMeta(
+              alertUuid,
+              this.trackedAlerts.indices[alertUuid],
+              this.trackedAlerts.seqNo[alertUuid],
+              this.trackedAlerts.primaryTerm[alertUuid],
+              this.isUsingDataStreams()
+            ),
+            alert,
+          ];
+        })
+      );
+
+      try {
+        const response = await esClient.bulk({
+          // On serverless we can force a refresh to we don't wait for the longer refresh interval
+          // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
+          refresh: this.isServerless ? true : 'wait_for',
+          index: this.indexTemplateAndPattern.alias,
+          require_alias: !this.isUsingDataStreams(),
+          body: bulkBody,
+        });
+        // If there were individual indexing errors, they will be returned in the success response
+        if (response && response.errors) {
+          this.throwIfHasClusterBlockException(response);
+          await resolveAlertConflicts({
+            logger: this.options.logger,
+            esClient,
+            bulkRequest: {
+              refresh: 'wait_for',
+              index: this.indexTemplateAndPattern.alias,
+              require_alias: !this.isUsingDataStreams(),
+              operations: bulkBody,
+            },
+            bulkResponse: response,
+            ruleId: this.options.rule.id,
+            ruleName: this.options.rule.name,
+            ruleType: this.ruleType.id,
+          });
+        }
+      } catch (err) {
+        this.options.logger.error(
+          `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} ${this.ruleInfoMessage} - ${err.message}`,
+          this.logTags
+        );
+        throw err;
+      }
+    }
+    function getBulkMeta(
+      uuid: string,
+      index: string | undefined,
+      seqNo: number | undefined,
+      primaryTerm: number | undefined,
+      isUsingDataStreams: boolean
+    ) {
+      if (index && seqNo != null && primaryTerm != null) {
+        return {
+          index: {
+            _id: uuid,
+            _index: index,
+            if_seq_no: seqNo,
+            if_primary_term: primaryTerm,
+            require_alias: false,
+          },
+        };
+      }
+
+      return {
+        create: {
+          _id: uuid,
+          ...(isUsingDataStreams ? {} : { require_alias: true }),
+        },
+      };
+    }
+  }
+
   private async getMaintenanceWindowScopedQueryAlerts({
     ruleId,
     spaceId,
@@ -899,6 +1042,25 @@ export class AlertsClient<
           hit: this.trackedAlerts.get(alert.getUuid()),
         }));
       },
+      getTrackedAlerts: () => this.trackedAlerts.active,
+      writeAlerts: (
+        activeAlerts: Array<
+          ReportedAlert<
+            AlertData,
+            LegacyState,
+            LegacyContext,
+            WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+          >
+        >,
+        recoveredAlerts: Array<
+          ReportedAlert<
+            AlertData,
+            LegacyState,
+            LegacyContext,
+            WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+          >
+        >
+      ) => this.writeAlerts(activeAlerts, recoveredAlerts),
     };
   }
 
