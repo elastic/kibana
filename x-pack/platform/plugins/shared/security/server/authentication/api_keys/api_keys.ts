@@ -27,6 +27,7 @@ import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
+import type { UiamServicePublic } from '../../uiam';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
@@ -47,6 +48,7 @@ export interface ConstructorOptions {
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
   buildFlavor?: BuildFlavor;
+  uiam?: UiamServicePublic;
 }
 
 type GrantAPIKeyParams =
@@ -72,6 +74,7 @@ export class APIKeys implements APIKeysType {
   private readonly applicationName: string;
   private readonly kibanaFeatures: KibanaFeature[];
   private readonly buildFlavor?: BuildFlavor;
+  private readonly uiam?: UiamServicePublic;
 
   constructor({
     logger,
@@ -80,6 +83,7 @@ export class APIKeys implements APIKeysType {
     applicationName,
     kibanaFeatures,
     buildFlavor,
+    uiam,
   }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
@@ -87,6 +91,7 @@ export class APIKeys implements APIKeysType {
     this.applicationName = applicationName;
     this.kibanaFeatures = kibanaFeatures;
     this.buildFlavor = buildFlavor;
+    this.uiam = uiam;
   }
 
   /**
@@ -303,6 +308,47 @@ export class APIKeys implements APIKeysType {
     }
 
     return result;
+  }
+
+  /**
+   * Grants an API key using the UIAM service.
+   * @param request Request instance containing the access token.
+   * @param createParams Create operation parameters.
+   */
+  async grantViaUiam(
+    request: KibanaRequest,
+    createParams: { name: string; expiration?: string; metadata?: Record<string, unknown> }
+  ) {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    if (!this.uiam) {
+      throw new Error('UIAM service is not available');
+    }
+
+    this.logger.debug('Trying to grant an API key via UIAM');
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader == null) {
+      throw new Error(
+        `Unable to grant an API Key via UIAM, request does not contain an authorization header`
+      );
+    }
+
+    if (authorizationHeader.scheme.toLowerCase() !== 'bearer') {
+      throw new Error(
+        `Unable to grant an API Key via UIAM, request authorization scheme must be Bearer`
+      );
+    }
+
+    try {
+      const result = await this.uiam.grantApiKey(authorizationHeader.credentials, createParams);
+      this.logger.debug('API key was granted successfully via UIAM');
+      return result;
+    } catch (e) {
+      this.logger.error(`Failed to grant API key via UIAM: ${e.message}`);
+      throw e;
+    }
   }
 
   /**

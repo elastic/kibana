@@ -47,6 +47,16 @@ export interface UiamServicePublic {
    * @param refreshToken UIAM session refresh token.
    */
   invalidateSessionTokens(accessToken: string, refreshToken: string): Promise<void>;
+
+  /**
+   * Grants an API key using the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param request API key grant request parameters.
+   */
+  grantApiKey(
+    accessToken: string,
+    request: { name: string; expiration?: string; metadata?: Record<string, unknown> }
+  ): Promise<{ id: string; name: string; api_key: string; expiration?: number }>;
 }
 
 /**
@@ -152,6 +162,49 @@ export class UiamService implements UiamServicePublic {
       this.#logger.error(
         () => `Failed to invalidate session tokens: ${getDetailedErrorMessage(err)}`
       );
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.grantApiKey}.
+   */
+  async grantApiKey(
+    accessToken: string,
+    request: { name: string; expiration?: string; metadata?: Record<string, unknown> }
+  ) {
+    try {
+      this.#logger.debug('Attempting to grant API key.');
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            ...request,
+            description: 'test',
+            internal: true,
+            role_assignments: {
+              limit: {
+                access: ['application'],
+                resource: ['project'],
+              },
+            },
+          }),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug('Successfully granted API key.');
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to grant API key: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }

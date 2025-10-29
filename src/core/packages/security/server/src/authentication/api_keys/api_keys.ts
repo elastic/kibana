@@ -70,6 +70,16 @@ export interface APIKeys {
   ): Promise<GrantAPIKeyResult | null>;
 
   /**
+   * Grants an API key using the UIAM service.
+   * @param request Request instance containing the access token.
+   * @param createParams Create operation parameters.
+   */
+  grantViaUiam(
+    request: KibanaRequest,
+    createParams: { name: string; expiration?: string; metadata?: Record<string, unknown> }
+  ): Promise<{ id: string; name: string; api_key: string; expiration?: number } | null>;
+
+  /**
    * Tries to validate an API key.
    * @param apiKeyPrams ValidateAPIKeyParams.
    */

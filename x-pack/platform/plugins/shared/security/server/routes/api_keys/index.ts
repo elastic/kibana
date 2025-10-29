@@ -7,6 +7,7 @@
 
 import { defineCreateApiKeyRoutes } from './create';
 import { defineEnabledApiKeysRoutes } from './enabled';
+import { defineGrantViaUiamApiKeyRoutes } from './grant_via_uiam';
 import { defineHasApiKeysRoutes } from './has_active';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
 import { defineQueryApiKeysAndAggregationsRoute } from './query';
@@ -27,5 +28,6 @@ export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineCreateApiKeyRoutes(params);
   defineUpdateApiKeyRoutes(params);
   defineInvalidateApiKeysRoutes(params);
+  defineGrantViaUiamApiKeyRoutes(params);
   defineQueryApiKeysAndAggregationsRoute(params);
 }
