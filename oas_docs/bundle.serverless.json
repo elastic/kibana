@@ -26208,6 +26208,13 @@
           "200": {
             "content": {
               "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "taskId": "taskId"
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -26222,11 +26229,18 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
               "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -26253,7 +26267,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Bulk rollback packages",
@@ -26280,6 +26294,13 @@
           "200": {
             "content": {
               "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "status": "success"
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -26337,11 +26358,18 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
               "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -26368,7 +26396,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Get Bulk rollback packages details",
@@ -27157,6 +27185,7 @@
             }
           },
           {
+            "description": "Package name to roll back",
             "in": "path",
             "name": "pkgName",
             "required": true,
@@ -27169,6 +27198,14 @@
           "200": {
             "content": {
               "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "success": true,
+                      "version": "1.0.0"
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -27187,11 +27224,18 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK: A successful request."
           },
           "400": {
             "content": {
               "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "description": "Generic Error",
@@ -27218,7 +27262,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "A bad request."
           }
         },
         "summary": "Rollback a package to previous version",
