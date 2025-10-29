@@ -144,6 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
         'file_operations_all',
         'execute_operations_all',
         'scan_operations_all',
+        'soc_management_all',
       ],
       siemV2: [
         'all',
@@ -174,6 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
         'file_operations_all',
         'execute_operations_all',
         'scan_operations_all',
+        'soc_management_all',
       ],
       siemV3: [
         'all',
@@ -201,6 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
         'policy_management_read',
         'actions_log_management_all',
         'actions_log_management_read',
+        'soc_management_all',
         'host_isolation_all',
         'process_operations_all',
         'file_operations_all',
@@ -233,6 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
         'policy_management_read',
         'actions_log_management_all',
         'actions_log_management_read',
+        'soc_management_all',
         'host_isolation_all',
         'process_operations_all',
         'file_operations_all',
