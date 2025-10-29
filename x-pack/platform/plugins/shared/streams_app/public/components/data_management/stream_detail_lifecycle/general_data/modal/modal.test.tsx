@@ -89,7 +89,9 @@ describe('EditLifecycleModal', () => {
     ] as PolicyFromES[]);
     // Override the runtime type guard to treat provided test definitions with a wired ingest block as wired streams.
     // This ensures the component's isWired branch is exercised in tests. Root determination still follows real isRoot().
-    (Streams as any).WiredStream.GetResponse.is = jest.fn((def: any) => !!def?.stream?.ingest?.wired);
+    (Streams as any).WiredStream.GetResponse.is = jest.fn(
+      (def: any) => !!def?.stream?.ingest?.wired
+    );
   });
 
   describe('Modal Structure', () => {
