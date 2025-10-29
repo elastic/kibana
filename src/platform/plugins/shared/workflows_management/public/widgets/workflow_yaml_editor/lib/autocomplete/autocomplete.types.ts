@@ -30,11 +30,10 @@ export interface AutocompleteContext {
   lineParseResult: LineParseResult | null;
   contextSchema: z.ZodType;
   focusedStepInfo: StepInfo | null;
-  connectorType: string | null;
   yamlDocument: Document;
   scalarType: Scalar.Type | null;
   path: (string | number)[];
-  absolutePosition: number;
+  absoluteOffset: number;
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
   isInLiquidBlock: boolean;
   isInScheduledTriggerWithBlock: boolean;

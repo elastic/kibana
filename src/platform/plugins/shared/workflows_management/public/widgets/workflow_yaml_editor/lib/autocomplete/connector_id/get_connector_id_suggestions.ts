@@ -17,20 +17,13 @@ export function getConnectorIdSuggestions({
   focusedStepInfo,
   dynamicConnectorTypes,
 }: AutocompleteContext) {
-  // Find the connector type for this step
-  //   let stepConnectorType: string | null = getConnectorTypeFromContext(
-  //     context.yamlDocument,
-  //     path,
-  //     model,
-  //     position
-  //   );
-
   // eslint-disable-next-line prefer-const
   let stepConnectorType = focusedStepInfo?.stepType ?? null;
 
   if (!stepConnectorType || !lineParseResult) {
     return [];
   }
+  // TODO: find out if it's really needed to adjust the range here or annotate it better
   // For connector-id values, we replace from the start of the value to the end of the line
   // Find the position right after "connector-id: "
   const valueStartColumn = lineParseResult.match

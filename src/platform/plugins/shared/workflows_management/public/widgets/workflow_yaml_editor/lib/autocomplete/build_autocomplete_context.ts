@@ -19,7 +19,6 @@ import { isInScheduledTriggerWithBlock } from './triggers_utils';
 import { getCurrentPath } from '../../../../../common/lib/yaml';
 import { getSchemaAtPath } from '../../../../../common/lib/zod';
 import { getContextSchemaForPath } from '../../../../features/workflow_context/lib/get_context_for_path';
-import { getConnectorTypeFromContext } from '../snippets/generate_connector_snippet';
 import type { StepInfo } from '../store';
 
 export interface BuildAutocompleteContextParams {
@@ -35,33 +34,37 @@ export function buildAutocompleteContext({
   position,
   completionContext,
 }: BuildAutocompleteContextParams): AutocompleteContext | null {
+  // derived from workflow state
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
   const workflowGraph = editorState?.computed?.workflowGraph;
   const yamlDocument = editorState?.computed?.yamlDocument;
   const workflowLookup = editorState?.computed?.workflowLookup;
   const focusedStepId = editorState?.focusedStepId;
   const workflowDefinition = editorState?.computed?.workflowDefinition;
-  const absolutePosition = model.getOffsetAt(position);
+  // monaco-related
+  const absoluteOffset = model.getOffsetAt(position);
   const { lineNumber } = position;
   const line = model.getLineContent(lineNumber);
   const wordUntil = model.getWordUntilPosition(position);
   const word = model.getWordAtPosition(position) || wordUntil;
   const { startColumn, endColumn } = word;
 
-  const focusedYamlPair = getFocusedYamlPair(workflowLookup, focusedStepId, absolutePosition);
-  let shouldUseCurlyBraces = true;
-  const focusedStepInfo: StepInfo | null = null;
+  const focusedStepInfo: StepInfo | null = focusedStepId
+    ? workflowLookup?.steps[focusedStepId] ?? null
+    : null;
+  const focusedYamlPair = getFocusedYamlPair(workflowLookup, focusedStepId, absoluteOffset);
 
   if (!yamlDocument) {
     return null;
   }
 
+  // variables
+  let shouldUseCurlyBraces = true;
   if (completionContext.triggerCharacter === '@' && focusedYamlPair) {
     shouldUseCurlyBraces = focusedYamlPair.keyNode.value !== 'foreach';
   }
 
   let range: monaco.IRange;
-
   if (completionContext.triggerCharacter === ' ') {
     // When triggered by space, set range to start at current position
     // This tells Monaco there's no prefix to filter against
@@ -72,7 +75,7 @@ export function buildAutocompleteContext({
       endColumn: position.column,
     };
   } else {
-    // Normal range calculation
+    // Use word range, but within current line
     range = {
       startLineNumber: lineNumber,
       endLineNumber: lineNumber,
@@ -81,13 +84,10 @@ export function buildAutocompleteContext({
     };
   }
 
-  const path = getCurrentPath(yamlDocument, absolutePosition);
+  const path = getCurrentPath(yamlDocument, absoluteOffset);
   const yamlNode = yamlDocument.getIn(path, true);
   const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
   const shouldBeQuoted = scalarType === null || scalarType === 'PLAIN';
-
-  // First check if we're in a connector's with block (using enhanced detection)
-  const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
 
   let contextSchema: z.ZodType = DynamicStepContextSchema;
   const lineUpToCursor = line.substring(0, position.column - 1);
@@ -108,26 +108,40 @@ export function buildAutocompleteContext({
   const isInLiquidBlock = isInsideLiquidBlock(model.getValue(), position);
   const _isInScheduledTriggerWithBlock = isInScheduledTriggerWithBlock(
     yamlDocument,
-    absolutePosition
+    absoluteOffset
   );
 
   return {
+    // what triggered the completion
     triggerCharacter: completionContext.triggerCharacter ?? null,
     triggerKind: completionContext.triggerKind ?? null,
+
+    // content
     line,
     lineUpToCursor,
     lineParseResult: parseResult,
+
+    // context
     contextSchema,
-    focusedStepInfo,
-    connectorType,
     yamlDocument,
     scalarType,
+
+    // position of the cursor
     path,
     range,
-    absolutePosition,
-    dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
+    absoluteOffset,
+    focusedStepInfo,
+    // currentStepInfo
+    // currentTriggerInfo
+
+    // kind of ast info
     isInLiquidBlock,
     isInScheduledTriggerWithBlock: _isInScheduledTriggerWithBlock,
+
+    // dynamic connector types
+    dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
+
+    // formatting
     shouldUseCurlyBraces,
     shouldBeQuoted,
   };

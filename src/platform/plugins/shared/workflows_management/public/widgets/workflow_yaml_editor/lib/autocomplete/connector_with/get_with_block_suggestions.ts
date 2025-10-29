@@ -24,11 +24,14 @@ export function getWithBlockSuggestions(autocompleteContext: ExtendedAutocomplet
     line,
     lineUpToCursor,
     range,
-    connectorType,
     dynamicConnectorTypes,
+    focusedStepInfo,
     model,
     position,
   } = autocompleteContext;
+
+  const connectorType = focusedStepInfo?.stepType ?? null;
+
   // 🔍 SPECIAL CASE: Check if we're inside a connector's 'with' block
   // Checking if we're inside a connector's 'with' block
   // Detected connector type

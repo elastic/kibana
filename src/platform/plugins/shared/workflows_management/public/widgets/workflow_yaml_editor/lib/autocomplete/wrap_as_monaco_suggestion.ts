@@ -11,6 +11,7 @@ import type { Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { PROPERTY_PATH_REGEX } from '../../../../../common/lib/regex';
 
+// TODO: extract the formatting logic, which is related only to the variable completions
 export function wrapAsMonacoSuggestion(
   key: string,
   triggerCharacter: string | null,
