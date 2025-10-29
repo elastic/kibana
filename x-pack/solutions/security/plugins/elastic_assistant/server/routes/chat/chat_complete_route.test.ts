@@ -27,6 +27,7 @@ import {
   createConversationWithUserInput,
   langChainExecute,
 } from '../helpers';
+import type { OnLlmResponse } from '../../lib/langchain/executors/types';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const license = licensingMock.createLicenseMock();
@@ -162,24 +163,32 @@ describe('chatCompleteRoute', () => {
       }: {
         connectorId: string;
         isStream: boolean;
-        onLlmResponse: (
-          content: string,
-          replacements: Record<string, string>,
-          isError: boolean
-        ) => Promise<void>;
+        onLlmResponse: OnLlmResponse;
       }) => {
         if (!isStream && connectorId === 'mock-connector-id') {
-          onLlmResponse('Non-streamed test reply.', {}, false).catch(() => {});
+          onLlmResponse({
+            content: 'Non-streamed test reply.',
+            traceData: {},
+            isError: false,
+          }).catch(() => {});
           return {
             connector_id: 'mock-connector-id',
             data: mockActionResponse,
             status: 'ok',
           };
         } else if (isStream && connectorId === 'mock-connector-id') {
-          onLlmResponse('Streamed test reply.', {}, false).catch(() => {});
+          onLlmResponse({
+            content: 'Streamed test reply.',
+            traceData: {},
+            isError: false,
+          }).catch(() => {});
           return mockStream;
         } else {
-          onLlmResponse('simulated error', {}, true).catch(() => {});
+          onLlmResponse({
+            content: 'simulated error',
+            traceData: {},
+            isError: true,
+          }).catch(() => {});
           throw new Error('simulated error');
         }
       }
