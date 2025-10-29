@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { RiskScorePreviewSection } from '../components/risk_score_management/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_management/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
@@ -199,10 +199,18 @@ export const EntityAnalyticsManagementPage = () => {
           </>
         )}
       </EuiFlexGroup>
-      {savedRiskEngineSettings && !selectedSettingsMatchSavedSettings && (
+      {((savedRiskEngineSettings && !selectedSettingsMatchSavedSettings) ||
+        (!savedRiskEngineSettings &&
+          selectedRiskEngineSettings &&
+          selectedRiskEngineSettings.filters &&
+          selectedRiskEngineSettings.filters.length > 0)) && (
         <RiskScoreSaveBar
           resetSelectedSettings={resetSelectedSettings}
-          saveSelectedSettings={saveSelectedSettingsMutation.mutateAsync}
+          saveSelectedSettings={() => {
+            if (selectedRiskEngineSettings) {
+              saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
+            }
+          }}
           isLoading={isLoadingRiskEngineSettings || saveSelectedSettingsMutation.isLoading}
         />
       )}

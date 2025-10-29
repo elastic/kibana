@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import styled from '@emotion/styled';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFormRow,
@@ -15,6 +16,7 @@ import {
   EuiText,
   EuiButtonIcon,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
@@ -42,6 +44,30 @@ const DEFAULT_OPTIONS: Array<{
   { label: COMBOBOX_LABEL_MAPPING.service, value: 'service' },
 ];
 
+const ClickablePanelContainer = styled.div`
+  max-width: 300px;
+  cursor: pointer;
+`;
+
+const TruncatedTextWrapper = styled.div<{ maxWidth?: string }>`
+  max-width: ${({ maxWidth }) => maxWidth || '150px'};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const PopoverContentContainer = styled.div`
+  padding: ${({ theme }) => theme.euiTheme.size.xs};
+  max-height: 280px;
+  overflow: auto;
+  word-break: break-word;
+  white-space: pre-wrap;
+`;
+
+const ComboBoxContainer = styled.div`
+  min-width: 200px;
+`;
+
 interface AlertFiltersKqlBarProps {
   onQueryChange?: (query: Query) => void;
   onFiltersChange?: (filters: Array<UIAlertFilter>) => void;
@@ -67,9 +93,14 @@ const CustomFilterChip: React.FC<CustomFilterChipProps> = ({
   const [selectedEntities, setSelectedEntities] = useState<ComboBoxOptions[]>(() =>
     filter.entityTypes.map((et) => ({ label: COMBOBOX_LABEL_MAPPING[et], value: et }))
   );
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
   const onChange = useCallback(
     (options: ComboBoxOptions[]) => {
+      // Prevent deselecting all options - ensure at least one is selected
+      if (options.length === 0) {
+        return;
+      }
       setSelectedEntities(options);
       const entityTypes = options
         .map((opt) => opt.value)
@@ -82,71 +113,100 @@ const CustomFilterChip: React.FC<CustomFilterChipProps> = ({
   // Get the display string for the filter
   const filterDisplayString = filter.text;
 
-  // Parse the filter string to separate field name and value
-  const parseFilterString = (filterStr: string) => {
-    const colonIndex = filterStr.indexOf(':');
-    if (colonIndex === -1) {
-      return { fieldName: filterStr, value: '' };
-    }
-    const fieldName = filterStr.substring(0, colonIndex).trim();
-    const value = filterStr.substring(colonIndex + 1).trim();
-    return { fieldName, value };
-  };
+  // Check if the query contains AND/OR operators (complex query)
+  const hasOperators = /(\s+AND\s+|\s+OR\s+)/i.test(filterDisplayString);
 
-  const { fieldName, value } = parseFilterString(filterDisplayString);
+  // For complex queries, display the entire query as-is
+  // For simple queries, parse into field:value format
+  const { fieldName, value } = hasOperators
+    ? { fieldName: '', value: filterDisplayString }
+    : (() => {
+        const colonIndex = filterDisplayString.indexOf(':');
+        if (colonIndex === -1) {
+          return { fieldName: filterDisplayString, value: '' };
+        }
+        const parsedFieldName = filterDisplayString.substring(0, colonIndex).trim();
+        const parsedValue = filterDisplayString.substring(colonIndex + 1).trim();
+        return { fieldName: parsedFieldName, value: parsedValue };
+      })();
 
   return (
-    <EuiPanel hasBorder paddingSize="s" color="subdued" grow={false}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
-        {/* Field-Value pair in its own chip */}
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            hasBorder
-            paddingSize="xs"
-            color="primary"
-            grow={false}
-            style={{ display: 'flex', alignItems: 'center' }}
-          >
-            <EuiText size="xs">
-              {fieldName}
-              {':'}
-            </EuiText>
-            <EuiText size="xs" color="success" style={{ marginLeft: '4px' }}>
-              {value}
-            </EuiText>
-          </EuiPanel>
-        </EuiFlexItem>
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
+      {/* Field-Value pair in its own chip */}
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          isOpen={isTooltipOpen}
+          closePopover={() => setIsTooltipOpen(false)}
+          button={
+            <ClickablePanelContainer onClick={() => setIsTooltipOpen(true)}>
+              <EuiPanel hasBorder paddingSize="xs" grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="xs" wrap={false} responsive={false}>
+                  {fieldName ? (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <TruncatedTextWrapper maxWidth="150px">
+                          <EuiText size="s">{`${fieldName}:\u00A0`}</EuiText>
+                        </TruncatedTextWrapper>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <TruncatedTextWrapper maxWidth="150px">
+                          <EuiText size="s" color="success">
+                            {value}
+                          </EuiText>
+                        </TruncatedTextWrapper>
+                      </EuiFlexItem>
+                    </>
+                  ) : (
+                    <EuiFlexItem grow={false}>
+                      <TruncatedTextWrapper maxWidth="250px">
+                        <EuiText size="s">{value}</EuiText>
+                      </TruncatedTextWrapper>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="cross"
+                      color="text"
+                      onClick={onRemove}
+                      aria-label={i18n.REMOVE_FILTER}
+                      size="xs"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </ClickablePanelContainer>
+          }
+          panelStyle={{ maxWidth: '500px', maxHeight: '300px' }}
+          anchorPosition="upCenter"
+        >
+          <PopoverContentContainer>
+            <EuiText size="s">{filterDisplayString}</EuiText>
+          </PopoverContentContainer>
+        </EuiPopover>
+      </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.APPLIED_TO_RISK_SCORES_OF}
-          </EuiText>
-        </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          {i18n.APPLIED_TO_RISK_SCORES_OF}
+        </EuiText>
+      </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false}>
+        <ComboBoxContainer>
           <EuiComboBox
             options={DEFAULT_OPTIONS}
             selectedOptions={selectedEntities}
             onChange={onChange}
-            compressed
+            compressed={true}
             isClearable={false}
             singleSelection={false}
             placeholder="Select entities"
             aria-label="Select entity types for filter application"
+            fullWidth={false}
           />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            color="text"
-            onClick={onRemove}
-            aria-label={i18n.REMOVE_FILTER}
-            size="s"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+        </ComboBoxContainer>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
