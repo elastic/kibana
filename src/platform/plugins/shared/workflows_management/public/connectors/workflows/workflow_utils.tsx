@@ -29,10 +29,9 @@ export interface WorkflowOption {
 
 export interface WorkflowSelectorConfig {
   // Filtering
-  filterByTrigger?: 'alert' | 'scheduled' | 'manual';
-
+  filterFunction?: (workflows: WorkflowListDto['results']) => WorkflowListDto['results'];
   // Sorting
-  sortByTrigger?: 'alert' | 'scheduled' | 'manual';
+  sortFunction?: (workflows: WorkflowListDto['results']) => WorkflowListDto['results'];
 
   // UI Configuration
   label?: string;
@@ -51,29 +50,17 @@ export function processWorkflowsToOptions(
   selectedWorkflowId?: string,
   config: WorkflowSelectorConfig = {}
 ): WorkflowOption[] {
-  let filteredWorkflows = [...workflows];
+  let processedWorkflows = [...workflows];
 
-  // Apply filters
-  if (config.filterByTrigger) {
-    filteredWorkflows = filteredWorkflows.filter((workflow) => {
-      const triggers = workflow.definition?.triggers ?? [];
-      return triggers.some((trigger) => trigger.type === config.filterByTrigger);
-    });
+  if (config.filterFunction) {
+    processedWorkflows = config.filterFunction(processedWorkflows);
   }
-
-  // Apply sorting
-  if (config.sortByTrigger) {
-    filteredWorkflows.sort((a, b) => {
-      const aHasAlert = (a.definition?.triggers ?? []).some((t) => t.type === config.sortByTrigger);
-      const bHasAlert = (b.definition?.triggers ?? []).some((t) => t.type === config.sortByTrigger);
-      if (aHasAlert && !bHasAlert) return -1;
-      if (!aHasAlert && bHasAlert) return 1;
-      return 0;
-    });
+  if (config.sortFunction) {
+    processedWorkflows = config.sortFunction(processedWorkflows);
   }
 
   // Convert to WorkflowOption format
-  return filteredWorkflows.map((workflow) => {
+  return processedWorkflows.map((workflow) => {
     return {
       id: workflow.id,
       name: workflow.name,

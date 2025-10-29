@@ -10,7 +10,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import * as i18n from './translations';
 import type { WorkflowsActionParams } from './types';
 import { WorkflowSelector } from './workflow_selector';
 
@@ -56,7 +55,14 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       selectedWorkflowId={workflowId}
       onWorkflowChange={handleWorkflowChange}
       config={{
-        sortByTrigger: 'alert',
+        sortFunction: (workflows) =>
+          workflows.sort((a, b) => {
+            const aHasAlert = a.definition?.triggers?.some((t) => t.type === 'alert');
+            const bHasAlert = b.definition?.triggers?.some((t) => t.type === 'alert');
+            if (aHasAlert && !bHasAlert) return -1;
+            if (!aHasAlert && bHasAlert) return 1;
+            return 0;
+          }),
       }}
       error={validationError}
       onCreateWorkflow={handleOpenWorkflowManagementApp}
