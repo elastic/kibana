@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OperationMetadata } from '../../../types';
+import type { OperationMetadata } from '@kbn/lens-common';
 import type { OperationType } from './definitions';
 
 export const createMockedFullReference = () => {
