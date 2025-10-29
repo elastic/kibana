@@ -115,7 +115,11 @@ export function createEvaluateDataset({
         dataset,
         task: callConverseAndEvaluate,
       },
-      [...createQuantitativeCorrectnessEvaluators(), createQuantitativeGroundednessEvaluator()]
+      [
+        ...createQuantitativeCorrectnessEvaluators(),
+        createQuantitativeGroundednessEvaluator(),
+        ...evaluators.traceBasedEvaluators(),
+      ]
     );
   };
 }

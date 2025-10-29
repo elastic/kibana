@@ -14,6 +14,8 @@ import {
 } from '@kbn/evals';
 import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { context, ROOT_CONTEXT, trace } from '@opentelemetry/api';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
 
 interface ObservabilityAIAssistantDatasetExample extends Example {
@@ -70,10 +72,27 @@ export function createEvaluateObservabilityAIAssistantDataset({
       {
         dataset,
         task: async ({ input, output, metadata }) => {
-          const response = await chatClient.complete({
-            messages: input.question,
-            scope: input.scope,
-          });
+          const response = await context.with(ROOT_CONTEXT, () =>
+            withActiveInferenceSpan(
+              'EvaluateExample',
+              {
+                attributes: {
+                  'inscrumentationScope.name': '@kbn/evals',
+                },
+              },
+              async () => {
+                const chatCompleteResponse = await chatClient.complete({
+                  messages: input.question,
+                  scope: input.scope,
+                });
+
+                return {
+                  ...chatCompleteResponse,
+                  traceId: trace.getActiveSpan()?.spanContext().traceId,
+                };
+              }
+            )
+          );
 
           const result: any = {
             errors: response.errors,
@@ -105,7 +124,10 @@ export function createEvaluateObservabilityAIAssistantDataset({
               result.groundednessAnalysis = groundednessResult.metadata;
           }
 
-          return result;
+          return {
+            ...result,
+            traceId: response.traceId,
+          };
         },
       },
       [

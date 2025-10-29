@@ -26,6 +26,10 @@ import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationAnalysisService } from './utils/analysis';
 import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
+import { createInputTokensEvaluator } from './evaluators/trace_based/input_tokens';
+import { createOutputTokensEvaluator } from './evaluators/trace_based/output_tokens';
+import { createLatencyEvaluator } from './evaluators/trace_based/latency';
+import { createToolCallsEvaluator } from './evaluators/trace_based/tool_calls';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -163,7 +167,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
   ],
   evaluators: [
-    async ({ log, inferenceClient, evaluationConnector }, use) => {
+    async ({ log, inferenceClient, evaluationConnector, esClient }, use) => {
       const evaluatorInferenceClient = inferenceClient.bindTo({
         connectorId: evaluationConnector.id,
       });
@@ -187,6 +191,26 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             inferenceClient: evaluatorInferenceClient,
             log,
           });
+        },
+        traceBasedEvaluators: () => {
+          return [
+            createInputTokensEvaluator({
+              esClient,
+              log,
+            }),
+            createOutputTokensEvaluator({
+              esClient,
+              log,
+            }),
+            createLatencyEvaluator({
+              esClient,
+              log,
+            }),
+            createToolCallsEvaluator({
+              esClient,
+              log,
+            }),
+          ];
         },
       };
       await use(evaluators);

@@ -9,7 +9,7 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import { sumBy } from 'lodash';
+import { sumBy, mean } from 'lodash';
 import { table } from 'table';
 import chalk from 'chalk';
 import { hostname } from 'os';

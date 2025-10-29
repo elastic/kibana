@@ -50,11 +50,11 @@ export interface Evaluator<
 > extends Omit<PhoenixEvaluator, 'evaluate'> {
   evaluate: EvaluatorCallback<TExample, TTaskOutput>;
 }
-
 export interface DefaultEvaluators {
   criteria: (criteria: EvaluationCriterion[]) => Evaluator;
   correctnessAnalysis: () => Evaluator;
   groundednessAnalysis: () => Evaluator;
+  traceBasedEvaluators: () => Evaluator[];
 }
 
 export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOutput> = (
