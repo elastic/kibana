@@ -54,7 +54,6 @@ export function getRelevantAnomalyFields(
     recordFields.push('actual', 'typical');
   }
 
-  // Extract partition/by/over fields from job detectors
   const detectorFields = new Set<string>();
 
   if (jobConfigs.length > 0) {
@@ -62,21 +61,18 @@ export function getRelevantAnomalyFields(
       const detectors = job.analysis_config?.detectors || [];
 
       detectors.forEach((detector) => {
-        // Add partition fields
         if (detector.partition_field_name) {
           detectorFields.add('partition_field_name');
           detectorFields.add('partition_field_value');
           detectorFields.add(detector.partition_field_name);
         }
 
-        // Add by fields
         if (detector.by_field_name) {
           detectorFields.add('by_field_name');
           detectorFields.add('by_field_value');
           detectorFields.add(detector.by_field_name);
         }
 
-        // Add over fields
         if (detector.over_field_name) {
           detectorFields.add('over_field_name');
           detectorFields.add('over_field_value');
