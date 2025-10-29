@@ -74,6 +74,8 @@ export class ServiceManager {
       getRunner,
       spaces,
       elasticsearch,
+      uiSettings,
+      savedObjects,
     });
 
     const agents = this.services.agents.start({
