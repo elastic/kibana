@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButtonGroup,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,13 +20,11 @@ import { isCondition } from '@kbn/streamlang';
 import { getSegments, MAX_NESTING_LEVEL } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState, useCallback } from 'react';
-import useAsync from 'react-use/lib/useAsync';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
-import { useKibana } from '../../../hooks/use_kibana';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { MemoPreviewTable, PreviewFlyout, SUMMARY_COLUMN_ID } from '../shared';
+import { MemoPreviewTable, PreviewFlyout, type PreviewTableMode } from '../shared';
 import { buildCellActions } from './cell_actions';
 import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import {
@@ -122,17 +121,25 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     (snapshot) => snapshot.context.definition.stream.name
   );
 
-  const {
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
+  const [viewMode, setViewMode] = useState<PreviewTableMode>('columns');
 
-  // Create a simple data view for the stream
-  const { value: dataView } = useAsync(async () => {
-    if (!streamName) return undefined;
-    return data.dataViews.create({ title: streamName });
-  }, [streamName, data.dataViews]);
+  const viewModeOptions = useMemo(
+    () => [
+      {
+        id: 'columns' as const,
+        label: i18n.translate('xpack.streams.streamDetail.preview.columnsView', {
+          defaultMessage: 'Columns',
+        }),
+      },
+      {
+        id: 'summary' as const,
+        label: i18n.translate('xpack.streams.streamDetail.preview.summaryView', {
+          defaultMessage: 'Summary',
+        }),
+      },
+    ],
+    []
+  );
 
   const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
   const documents = useStreamSamplesSelector((snapshot) =>
@@ -159,9 +166,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const [visibleColumns, setVisibleColumns] = useState<string[]>();
 
   const handleSetVisibleColumns = useCallback((newVisibleColumns: string[]) => {
-    // Filter out Summary column from the visible columns list as it's automatically managed
-    const nonSummaryColumns = newVisibleColumns.filter((col) => col !== SUMMARY_COLUMN_ID);
-    setVisibleColumns(nonSummaryColumns.length > 0 ? nonSummaryColumns : undefined);
+    setVisibleColumns(newVisibleColumns.length > 0 ? newVisibleColumns : undefined);
   }, []);
 
   const docViewsRegistry = useDocViewerSetup();
@@ -219,6 +224,15 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   } else if (hasDocuments) {
     content = (
       <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.streams.streamDetail.preview.viewModeLegend', {
+            defaultMessage: 'Select view mode',
+          })}
+          options={viewModeOptions}
+          idSelected={viewMode}
+          onChange={(id) => setViewMode(id as PreviewTableMode)}
+          buttonSize="compressed"
+        />
         <RowSelectionContext.Provider value={rowSelectionContextValue}>
           <MemoPreviewTable
             documents={documents}
@@ -228,8 +242,8 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
             displayColumns={visibleColumns}
             setVisibleColumns={handleSetVisibleColumns}
             cellActions={cellActions}
-            showSummaryColumn={true}
-            dataView={dataView}
+            mode={viewMode}
+            streamName={streamName}
           />
         </RowSelectionContext.Provider>
         <PreviewFlyout

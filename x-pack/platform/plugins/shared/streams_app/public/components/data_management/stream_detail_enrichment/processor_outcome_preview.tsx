@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
+  EuiButtonGroup,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -21,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import useAsync from 'react-use/lib/useAsync';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { getPercentageFormatter } from '../../../util/formatters';
@@ -49,10 +49,9 @@ import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
-import { PreviewFlyout, MemoPreviewTable, SUMMARY_COLUMN_ID } from '../shared';
+import { PreviewFlyout, MemoPreviewTable, type PreviewTableMode } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { RowSelectionContext } from '../shared/preview_table';
-import { useKibana } from '../../../hooks/use_kibana';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -175,6 +174,9 @@ const PreviewDocumentsGroupBy = () => {
 };
 
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
+  // Local state for view mode toggle
+  const [viewMode, setViewMode] = useState<PreviewTableMode>('columns');
+
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
@@ -194,18 +196,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   const hasSimulatedRecords = useSimulatorSelector((snapshot) =>
     selectHasSimulatedRecords(snapshot.context)
   );
-
-  const {
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
-
-  // Create a simple data view for the stream
-  const { value: dataView } = useAsync(async () => {
-    if (!streamName) return undefined;
-    return data.dataViews.create({ title: streamName });
-  }, [streamName, data.dataViews]);
 
   const shouldShowRowSourceAvatars = useStreamEnrichmentSelector(
     (state) => state.context.dataSourcesRefs.length >= 2
@@ -268,6 +258,28 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       ? currentProcessorSourceField
       : undefined;
 
+  // Determine if view mode toggle should be disabled
+  // Disable when in grok mode or when a processor defines specific columns
+  const isViewModeToggleDisabled = Boolean(
+    grokMode || validCurrentProcessorSourceField || validGrokField
+  );
+
+  // View mode toggle options
+  const viewModeOptions = [
+    {
+      id: 'columns',
+      label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.columns', {
+        defaultMessage: 'Columns',
+      }),
+    },
+    {
+      id: 'summary',
+      label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
+        defaultMessage: 'Summary',
+      }),
+    },
+  ];
+
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
       currentProcessorSourceField: validCurrentProcessorSourceField,
@@ -317,12 +329,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const setVisibleColumns = useCallback(
     (visibleColumns: string[]) => {
-      // Filter out Summary column from the visible columns list as it's automatically managed
-      const nonSummaryColumns = visibleColumns.filter((col) => col !== SUMMARY_COLUMN_ID);
-
-      if (nonSummaryColumns.length === 0) {
-        // If no non-summary columns are visible, reset to show only summary column
-        // This clears all explicit preferences and triggers the default state
+      if (visibleColumns.length === 0) {
+        // If no columns are visible, reset to default state
         setExplicitlyDisabledPreviewColumns([]);
         setExplicitlyEnabledPreviewColumns([]);
         setPreviewColumnsOrder([]);
@@ -330,23 +338,21 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       }
 
       // find which columns got added or removed comparing visibleColumns with the current displayColumns
-      const addedColumns = nonSummaryColumns.filter((col) => !previewColumns.includes(col));
+      const addedColumns = visibleColumns.filter((col) => !previewColumns.includes(col));
       if (addedColumns.length > 0) {
         setExplicitlyEnabledPreviewColumns([
           ...explicitlyEnabledPreviewColumns,
           ...addedColumns.filter((col) => !explicitlyEnabledPreviewColumns.includes(col)),
         ]);
       }
-      const removedColumns = previewColumns.filter(
-        (col) => !nonSummaryColumns.includes(col) && col !== SUMMARY_COLUMN_ID
-      );
+      const removedColumns = previewColumns.filter((col) => !visibleColumns.includes(col));
       if (removedColumns.length > 0) {
         setExplicitlyDisabledPreviewColumns([
           ...explicitlyDisabledPreviewColumns,
           ...removedColumns.filter((col) => !explicitlyDisabledPreviewColumns.includes(col)),
         ]);
       }
-      setPreviewColumnsOrder(nonSummaryColumns);
+      setPreviewColumnsOrder(visibleColumns);
     },
     [
       explicitlyDisabledPreviewColumns,
@@ -410,6 +416,21 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   return (
     <>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.streams.processorOutcomePreview.viewModeToggle.legend', {
+              defaultMessage: 'Preview view mode',
+            })}
+            options={viewModeOptions}
+            idSelected={viewMode}
+            onChange={(id) => setViewMode(id as PreviewTableMode)}
+            buttonSize="compressed"
+            isDisabled={isViewModeToggleDisabled}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <RowSelectionContext.Provider value={rowSelectionContextValue}>
         <MemoPreviewTable
           documents={previewDocuments}
@@ -423,8 +444,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setSorting={setPreviewColumnsSorting}
           columnOrderHint={previewColumnsOrder}
           renderCellValue={renderCellValue}
-          showSummaryColumn={!grokMode}
-          dataView={dataView}
+          mode={viewMode}
+          streamName={streamName}
         />
       </RowSelectionContext.Provider>
       <DocViewerContext.Provider value={docViewerContext}>

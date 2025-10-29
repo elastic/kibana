@@ -8,6 +8,7 @@
  */
 
 import type { ResourceFields } from '../../..';
+import { getFieldValueWithFallback } from '../../../utils/get_field_value_with_fallback';
 
 // Use first available field from each group
 const AVAILABLE_RESOURCE_FIELDS: Array<Array<keyof ResourceFields>> = [
@@ -42,3 +43,38 @@ export const getAvailableResourceFields = (resourceDoc: ResourceFields) =>
     }
     return acc;
   }, []);
+
+/**
+ * Enhanced version that uses OTel field fallbacks and returns the actual field names found.
+ * This ensures that UI components display the correct field names (e.g., 'resource.attributes.service.name'
+ * instead of 'service.name' when the document uses OTel format).
+ *
+ * @param document - The flattened document object
+ * @returns Array of objects with actual field names and their values
+ */
+export const getAvailableResourceFieldsWithActualNames = (
+  document: Record<string, any>
+): Array<{ field: string; value: any }> => {
+  // Priority order for resource fields to check (ECS names)
+  const RESOURCE_FIELD_PRIORITY = [
+    'service.name',
+    'container.name', // Also covers kubernetes.container.name, k8s.container.name
+    'host.name', // Also covers kubernetes.node.name, k8s.node.name
+    'orchestrator.cluster.name', // Also covers k8s.cluster.name
+    'kubernetes.namespace', // Also covers k8s.namespace.name
+    'kubernetes.pod.name', // Also covers k8s.pod.name
+    'kubernetes.deployment.name', // Also covers other k8s workload types
+  ];
+
+  const result: Array<{ field: string; value: any }> = [];
+
+  for (const ecsFieldName of RESOURCE_FIELD_PRIORITY) {
+    const { field: actualField, value } = getFieldValueWithFallback(document, ecsFieldName);
+
+    if (actualField && value !== undefined && value !== null) {
+      result.push({ field: actualField, value });
+    }
+  }
+
+  return result;
+};

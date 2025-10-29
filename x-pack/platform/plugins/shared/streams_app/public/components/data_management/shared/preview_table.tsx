@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { namespacePrefixes, type SampleDocument } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
 import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
 import type {
@@ -28,9 +28,8 @@ import type {
   DocumentWithIgnoredFields,
 } from '@kbn/streams-schema/src/shared/record_types';
 import { LazySummaryColumn } from '@kbn/discover-contextual-components';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataGridDensity } from '@kbn/unified-data-table';
-import { EcsFlat } from '@elastic/ecs';
+import useAsync from 'react-use/lib/useAsync';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import type {
   SampleDocumentWithUIAttributes,
@@ -42,6 +41,8 @@ import type { EnrichmentDataSourceWithUIAttributes } from '../stream_detail_enri
 import { useKibana } from '../../../hooks/use_kibana';
 
 const emptyCell = <>&nbsp;</>;
+
+export type PreviewTableMode = 'columns' | 'summary';
 
 export const SUMMARY_COLUMN_ID = i18n.translate(
   'xpack.streams.resultPanel.euiDataGrid.summaryColumnId',
@@ -58,37 +59,6 @@ interface RowSelectionContextType {
 export const RowSelectionContext = createContext<RowSelectionContextType>({});
 
 const useRowSelection = () => useContext(RowSelectionContext);
-
-const allNamespacesRegex = new RegExp(`^(${namespacePrefixes.join('|')})`);
-const otelEquivalentLookupMap = Object.fromEntries(
-  Object.entries(EcsFlat).flatMap(([fieldName, field]) => {
-    if (!('otel' in field) || !field.otel) {
-      return [];
-    }
-    const otelEquivalentProperty = field.otel.find(
-      (otelProperty) => otelProperty.relation === 'equivalent'
-    );
-    if (
-      !otelEquivalentProperty ||
-      !('attribute' in otelEquivalentProperty) ||
-      !(typeof otelEquivalentProperty.attribute === 'string')
-    ) {
-      const otlpProperty = field.otel.find((otelProperty) => otelProperty.relation === 'otlp');
-      if (
-        !otlpProperty ||
-        !('otlp_field' in otlpProperty) ||
-        !(typeof otlpProperty.otlp_field === 'string')
-      ) {
-        return [];
-      }
-      return [
-        [otlpProperty.otlp_field === 'body' ? 'body.text' : otlpProperty.otlp_field, fieldName],
-      ];
-    }
-
-    return [[otelEquivalentProperty.attribute, fieldName]];
-  })
-);
 
 function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
   const { selectedRowIndex, onRowSelected } = useRowSelection();
@@ -136,8 +106,8 @@ export function PreviewTable({
   showLeadingControlColumns = true,
   originalSamples,
   cellActions,
-  showSummaryColumn = false,
-  dataView,
+  mode = 'columns',
+  streamName,
 }: {
   documents: SampleDocument[] | DocumentWithIgnoredFields[];
   displayColumns?: string[];
@@ -157,25 +127,32 @@ export function PreviewTable({
   showLeadingControlColumns?: boolean;
   originalSamples?: SampleDocumentWithUIAttributes[];
   cellActions?: EuiDataGridColumnCellAction[];
-  showSummaryColumn?: boolean;
-  dataView?: DataView;
+  mode?: PreviewTableMode;
+  streamName?: string;
 }) {
   const { euiTheme: theme } = useEuiTheme();
   const {
     core,
     dependencies: {
-      start: { share, fieldFormats },
+      start: { share, fieldFormats, data },
     },
   } = useKibana();
 
+  // Create dataView for summary mode
+  const { value: dataView } = useAsync(async () => {
+    if (mode !== 'summary' || !streamName) return undefined;
+    return data.dataViews.create({ title: streamName });
+  }, [mode, streamName, data.dataViews]);
+
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
-    const cols = new Set<string>();
-
-    // Add summary column first if enabled
-    if (showSummaryColumn && dataView) {
-      cols.add(SUMMARY_COLUMN_ID);
+    // In summary mode, only show the summary column
+    if (mode === 'summary') {
+      return [SUMMARY_COLUMN_ID];
     }
+
+    // In columns mode, show regular columns
+    const cols = new Set<string>();
 
     documents.forEach((doc) => {
       const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
@@ -191,10 +168,6 @@ export function PreviewTable({
 
     // Sort columns by displayColumns or alphabetically as baseline
     allColumns = allColumns.sort((a, b) => {
-      // Keep Summary column first if it's present
-      if (a === SUMMARY_COLUMN_ID) return -1;
-      if (b === SUMMARY_COLUMN_ID) return 1;
-
       const indexA = (displayColumns || []).indexOf(a);
       const indexB = (displayColumns || []).indexOf(b);
       if (indexA === -1 && indexB === -1) {
@@ -220,25 +193,21 @@ export function PreviewTable({
       ];
     }
     return allColumns;
-  }, [columnOrderHint, displayColumns, documents, showSummaryColumn, dataView]);
+  }, [columnOrderHint, displayColumns, documents, mode]);
 
   // Derive visibleColumns from canonical order
   const visibleColumns = useMemo(() => {
-    if (displayColumns) {
-      const filtered = canonicalColumnOrder.filter((col) => displayColumns.includes(col));
-      // If no columns are visible and summary column is available, show only summary column
-      if (
-        filtered.length === 0 &&
-        showSummaryColumn &&
-        dataView &&
-        canonicalColumnOrder.includes(SUMMARY_COLUMN_ID)
-      ) {
-        return [SUMMARY_COLUMN_ID];
-      }
-      return filtered;
+    // In summary mode, always show only the summary column
+    if (mode === 'summary') {
+      return [SUMMARY_COLUMN_ID];
     }
-    return [SUMMARY_COLUMN_ID];
-  }, [canonicalColumnOrder, displayColumns, showSummaryColumn, dataView]);
+
+    // In columns mode, filter by displayColumns or show all
+    if (displayColumns) {
+      return canonicalColumnOrder.filter((col) => displayColumns.includes(col));
+    }
+    return canonicalColumnOrder;
+  }, [canonicalColumnOrder, displayColumns, mode]);
 
   const sortingConfig = useMemo(() => {
     if (!sorting && !setSorting) {
@@ -321,7 +290,7 @@ export function PreviewTable({
   const gridColumns = useMemo(() => {
     return canonicalColumnOrder.map((column) => {
       // Special handling for summary column
-      if (column === SUMMARY_COLUMN_ID && showSummaryColumn && dataView) {
+      if (column === SUMMARY_COLUMN_ID) {
         return {
           id: column,
           display: (
@@ -365,15 +334,7 @@ export function PreviewTable({
         cellActions,
       };
     });
-  }, [
-    cellActions,
-    canonicalColumnOrder,
-    setSorting,
-    setVisibleColumns,
-    columnWidths,
-    showSummaryColumn,
-    dataView,
-  ]);
+  }, [cellActions, canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
 
   const [currentRowHeights, setCurrentRowHeights] = useState<
     EuiDataGridRowHeightsOptions | undefined
@@ -438,33 +399,13 @@ export function PreviewTable({
         }
 
         // Special rendering for summary column
-        if (columnId === SUMMARY_COLUMN_ID && showSummaryColumn && dataView) {
-          // remap special names
-          const normalizedDocument = Object.fromEntries(
-            Object.entries(document).map(([key, value]) => {
-              if (namespacePrefixes.some((prefix) => key.startsWith(prefix))) {
-                const aliasKey = key.replace(allNamespacesRegex, '');
-
-                const otelEquivalent = otelEquivalentLookupMap[aliasKey];
-                if (otelEquivalent) {
-                  // Map the value to the OpenTelemetry equivalent
-                  return [otelEquivalent, value];
-                }
-                return [aliasKey, value];
-              }
-              const otelEquivalent = otelEquivalentLookupMap[key];
-              if (otelEquivalent) {
-                // Map the value to the OpenTelemetry equivalent
-                return [otelEquivalent, value];
-              }
-              return [key, value];
-            })
-          );
-
+        if (columnId === SUMMARY_COLUMN_ID && mode === 'summary' && dataView) {
           // Convert to DataTableRecord format expected by SummaryColumn
+          // No normalization - pass documents as-is with OTel fields
+          // The kbn-discover-utils will handle OTel field fallbacks
           const dataTableRecord = {
-            raw: normalizedDocument,
-            flattened: normalizedDocument,
+            raw: document,
+            flattened: document,
             id: `${rowIndex}-summary`,
           };
 

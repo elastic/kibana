@@ -15,16 +15,19 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  RESOURCE_FIELDS,
   type ShouldShowFieldInTableHandler,
   TRACE_FIELDS,
-  getLogDocumentOverview,
-  getMessageFieldWithFallbacks,
+  getMessageFieldValueWithOtelFallback,
 } from '@kbn/discover-utils';
-import { getAvailableResourceFields, getAvailableTraceFields } from '@kbn/discover-utils/src';
+import { getAvailableTraceFields } from '@kbn/discover-utils/src';
 import { Resource } from './resource';
 import { Content } from './content';
-import { createResourceFields, formatJsonDocumentForContent, isTraceDocument } from './utils';
+import {
+  createResourceFields,
+  createResourceFieldsWithOtelFallback,
+  formatJsonDocumentForContent,
+  isTraceDocument,
+} from './utils';
 import {
   closeCellActionPopoverText,
   contentLabel,
@@ -74,9 +77,10 @@ const SummaryCell = ({
   const rowHeight = maybeNullishRowHeight ?? DEFAULT_ROW_COUNT;
   const isSingleLine = rowHeight === SINGLE_ROW_COUNT;
 
-  const resourceFields = createResourceFields(
+  // Use enhanced version that returns actual field names (including OTel fields)
+  const resourceFields =
     isTracesSummary && isTraceDocument(row)
-      ? {
+      ? createResourceFields({
           row,
           fields: TRACE_FIELDS,
           getAvailableFields: getAvailableTraceFields,
@@ -84,17 +88,15 @@ const SummaryCell = ({
           core,
           share,
           fieldFormats,
-        }
-      : {
+        })
+      : createResourceFieldsWithOtelFallback({
           row,
-          fields: RESOURCE_FIELDS,
-          getAvailableFields: getAvailableResourceFields,
           dataView,
           core,
           share,
           fieldFormats,
-        }
-  );
+        });
+
   const shouldRenderResource = resourceFields.length > 0;
 
   return isSingleLine ? (
@@ -130,31 +132,29 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
 
   const isTraceDoc = isTracesSummary && isTraceDocument(row);
 
-  const resourceFields = createResourceFields(
-    isTraceDoc
-      ? {
-          row,
-          fields: TRACE_FIELDS,
-          getAvailableFields: getAvailableTraceFields,
-          dataView,
-          core,
-          share,
-          fieldFormats,
-        }
-      : {
-          row,
-          fields: RESOURCE_FIELDS,
-          getAvailableFields: getAvailableResourceFields,
-          dataView,
-          core,
-          share,
-          fieldFormats,
-        }
-  );
+  // Use enhanced version that returns actual field names (including OTel fields)
+  const resourceFields = isTraceDoc
+    ? createResourceFields({
+        row,
+        fields: TRACE_FIELDS,
+        getAvailableFields: getAvailableTraceFields,
+        dataView,
+        core,
+        share,
+        fieldFormats,
+      })
+    : createResourceFieldsWithOtelFallback({
+        row,
+        dataView,
+        core,
+        share,
+        fieldFormats,
+      });
+
   const shouldRenderResource = resourceFields.length > 0;
 
-  const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
-  const { field, value, formattedValue } = getMessageFieldWithFallbacks(documentOverview, {
+  // Use OTel fallback version that returns the actual field name used
+  const { field, value, formattedValue } = getMessageFieldValueWithOtelFallback(row.flattened, {
     includeFormattedValue: true,
   });
   const messageCodeBlockProps = formattedValue

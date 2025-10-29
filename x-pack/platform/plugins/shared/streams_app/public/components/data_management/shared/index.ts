@@ -6,5 +6,5 @@
  */
 export { PreviewFlyout } from './preview_flyout';
 export type { DataTableRecordWithIndex } from './preview_flyout';
-export { MemoPreviewTable, SUMMARY_COLUMN_ID } from './preview_table';
+export { MemoPreviewTable, type PreviewTableMode } from './preview_table';
 export { ConditionPanel, ConditionDisplay, EditableConditionPanel } from './condition_display';

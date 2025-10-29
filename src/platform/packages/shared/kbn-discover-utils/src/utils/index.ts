@@ -13,6 +13,7 @@ export * from './contains_index_pattern';
 export * from './format_hit';
 export * from './format_value';
 export * from './get_doc_id';
+export * from './get_field_value_with_fallback';
 export * from './get_ignored_reason';
 export * from './get_log_document_overview';
 export * from './get_trace_document_overview';

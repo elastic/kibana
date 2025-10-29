@@ -11,8 +11,7 @@ import React, { useMemo } from 'react';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { ShouldShowFieldInTableHandler, DataTableRecord } from '@kbn/discover-utils';
 import {
-  getLogDocumentOverview,
-  getMessageFieldWithFallbacks,
+  getMessageFieldValueWithOtelFallback,
   getLogLevelCoalescedValue,
   getLogLevelColor,
   LOG_LEVEL_REGEX,
@@ -97,8 +96,8 @@ export const Content = ({
   row,
   shouldShowFieldHandler,
 }: ContentProps) => {
-  const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
-  const { field, value } = getMessageFieldWithFallbacks(documentOverview);
+  // Use OTel fallback version that returns the actual field name used
+  const { field, value } = getMessageFieldValueWithOtelFallback(row.flattened);
 
   const { euiTheme } = useEuiTheme();
   const isDarkTheme = useKibanaIsDarkMode();
