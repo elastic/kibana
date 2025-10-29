@@ -14,6 +14,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
+import { useEditorActionContext } from '../../../contexts';
 
 interface QueryParams {
   load_from: string;
@@ -47,6 +48,7 @@ export const readLoadFromParam = () => {
 export const useSetInitialValue = (params: SetInitialValueParams) => {
   const { localStorageValue, setValue, toasts } = params;
   const isInitialValueSet = useRef<boolean>(false);
+  const editorDispatch = useEditorActionContext();
 
   useEffect(() => {
     const ALLOWED_PATHS = ['/guide/', '/docs/'];
@@ -69,7 +71,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         ) {
           const resp = await fetch(parsedURL);
           const data = await resp.text();
-          setValue(`${localStorageValue ?? ''}\n\n${data}`);
+          editorDispatch({ type: 'setRequestToRestore', payload: { request: data } });
         } else {
           toasts.addWarning(
             i18n.translate('console.monaco.loadFromDataUnrecognizedUrlErrorMessage', {
@@ -95,12 +97,12 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
           return;
         }
 
-        setValue(data);
+        editorDispatch({ type: 'setRequestToRestore', payload: { request: data } });
       }
     };
 
     // Support for loading a console snippet from a remote source, like support docs.
-    const onHashChange = debounce(async () => {
+    const loadFromUrl = debounce(async () => {
       const url = readLoadFromParam();
       if (!url) {
         return;
@@ -108,23 +110,18 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
       await loadBufferFromRemote(url);
     }, 200);
 
-    window.addEventListener('hashchange', onHashChange);
-
-    const loadFromParam = readLoadFromParam();
+    window.addEventListener('hashchange', loadFromUrl);
 
     // Only set the value in the editor if an initial value hasn't been set yet
     if (!isInitialValueSet.current) {
-      if (loadFromParam) {
-        loadBufferFromRemote(loadFromParam);
-      } else {
-        // Only set to default input value if the localstorage value is undefined
-        setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
-      }
+      // Only set to default input value if the localstorage value is undefined
+      setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
+      loadFromUrl();
       isInitialValueSet.current = true;
     }
 
     return () => {
-      window.removeEventListener('hashchange', onHashChange);
+      window.removeEventListener('hashchange', loadFromUrl);
     };
-  }, [localStorageValue, setValue, toasts]);
+  }, [localStorageValue, setValue, toasts, editorDispatch]);
 };
