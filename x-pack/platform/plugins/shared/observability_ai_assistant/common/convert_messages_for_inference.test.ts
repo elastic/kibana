@@ -457,7 +457,7 @@ describe('anonymization data mapping with collapsed messages', () => {
     ];
   });
 
-  it('maps deanonymizations when content is unchanged', async () => {
+  it('maps deanonymizations when the user messagecontent is unchanged (no collapsed messages)', async () => {
     const collapsed = collapseInternalToolCalls({
       messages: baseUserMessages,
       availableToolNames,
