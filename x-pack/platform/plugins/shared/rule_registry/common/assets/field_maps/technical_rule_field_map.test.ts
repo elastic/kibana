@@ -75,6 +75,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "boolean",
       },
+      "kibana.alert.index_pattern": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.instance.id": Object {
         "array": false,
         "required": true,
@@ -267,6 +272,20 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.scheduled_action.date": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.scheduled_action.group": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.scheduled_action.throttling": Object {
+        "required": false,
+        "type": "unmapped",
       },
       "kibana.alert.severity": Object {
         "array": false,

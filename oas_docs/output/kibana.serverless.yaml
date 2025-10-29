@@ -3538,7 +3538,7 @@ paths:
                       type: object
                       properties:
                         blob:
-                          maxLength: 1000
+                          maxLength: 10000
                           type: string
                       required:
                         - blob
@@ -4813,7 +4813,7 @@ paths:
                       type: object
                       properties:
                         blob:
-                          maxLength: 1000
+                          maxLength: 10000
                           type: string
                       required:
                         - blob
@@ -8153,7 +8153,7 @@ paths:
           name: product_name
   /api/attack_discovery/_bulk:
     post:
-      description: Performs bulk updates on multiple Attack discovery alerts, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert. `Technical preview`
+      description: Performs bulk updates on multiple Attack discoveries, including workflow status changes and visibility settings. This endpoint allows efficient batch processing of alert modifications without requiring individual API calls for each alert. `Technical preview`
       operationId: PostAttackDiscoveryBulk
       requestBody:
         content:
@@ -8202,7 +8202,7 @@ paths:
                     - ids
               required:
                 - update
-        description: Bulk update parameters for Attack discovery alerts
+        description: Bulk update parameters for Attack discoveries
         required: true
       responses:
         '200':
@@ -8242,7 +8242,7 @@ paths:
                   - error
                   - message
           description: Generic Error
-      summary: Bulk update Attack discovery alerts
+      summary: Bulk update Attack discoveries
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -8268,7 +8268,7 @@ paths:
           name: product_name
   /api/attack_discovery/_find:
     get:
-      description: Finds Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. `Technical preview`
+      description: Find Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. `Technical preview`
       operationId: AttackDiscoveryFind
       parameters:
         - description: Filter results to Attack discoveries that include any of the provided alert IDs
@@ -8455,7 +8455,7 @@ paths:
                     example: 400
                     type: number
           description: Generic Error
-      summary: Finds Attack discoveries that match the search criteria
+      summary: Find Attack discoveries that match the search criteria
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -8528,7 +8528,6 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/_generate' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json" \
-             --header "elastic-api-version: 2023-10-31" \
              --data '{
                 "alertsIndexPattern": ".alerts-security.alerts-default",
                 "anonymizationFields": [
@@ -9468,7 +9467,7 @@ paths:
           name: product_name
   /api/attack_discovery/generations:
     get:
-      description: Get the latest attack discovery generations (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations. `Technical preview`
+      description: Get the latest attack discovery generations metadata (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations. `Technical preview`
       operationId: GetAttackDiscoveryGenerations
       parameters:
         - description: End of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
@@ -9528,7 +9527,7 @@ paths:
                     example: 400
                     type: number
           description: Bad request
-      summary: Get the latest attack discovery generations (that are not dismissed) for the current user
+      summary: Get the latest attack discovery generations metadata for the current user
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -9758,7 +9757,7 @@ paths:
               enabled: true
               name: Daily Security Analysis
               params:
-                alerts_index_pattern: .alerts-security.alerts-*
+                alerts_index_pattern: .alerts-security.alerts-default
                 api_config:
                   actionTypeId: bedrock
                   connectorId: my-bedrock-connector
@@ -9784,7 +9783,7 @@ paths:
                 id: 12345678-1234-1234-1234-123456789012
                 name: Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -9824,7 +9823,7 @@ paths:
                "name": "Daily Security Analysis",
                "enabled": true,
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -9837,7 +9836,22 @@ paths:
                "schedule": {
                  "interval": "24h"
                },
-               "actions": []
+               "actions": [
+                  {
+                     "action_type_id": ".cases",
+                     "id": "system-connector-.cases",
+                     "params": {
+                       "subAction": "run",
+                       "subActionParams": {
+                         "timeWindow": "7d",
+                         "reopenClosedCases": false,
+                         "groupingBy": [],
+                         "templateId": null
+                       }
+                     },
+                     "uuid": "12345678-1234-1234-1234-123456789012"
+                   }
+               ]
              }'
       x-state: Technical Preview; added in 9.2.0
       x-metaTags:
@@ -9933,7 +9947,7 @@ paths:
           lang: curl
           source: |
             curl \
-             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find?page=1&per_page=10&sort_field=name&sort_direction=asc' \
+             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-state: Technical Preview; added in 9.2.0
@@ -10019,7 +10033,7 @@ paths:
                   status: ok
                 name: Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -10077,7 +10091,7 @@ paths:
               actions: []
               name: Updated Daily Security Analysis
               params:
-                alerts_index_pattern: .alerts-security.alerts-*
+                alerts_index_pattern: .alerts-security.alerts-default
                 api_config:
                   actionTypeId: bedrock
                   connectorId: my-bedrock-connector
@@ -10103,7 +10117,7 @@ paths:
                 id: 12345678-1234-1234-1234-123456789012
                 name: Updated Daily Security Analysis
                 params:
-                  alerts_index_pattern: .alerts-security.alerts-*
+                  alerts_index_pattern: .alerts-security.alerts-default
                   api_config:
                     actionTypeId: bedrock
                     connectorId: my-bedrock-connector
@@ -10142,7 +10156,7 @@ paths:
              --data '{
                "name": "Updated Daily Security Analysis",
                "params": {
-                 "alerts_index_pattern": ".alerts-security.alerts-*",
+                 "alerts_index_pattern": ".alerts-security.alerts-default",
                  "api_config": {
                    "actionTypeId": "bedrock",
                    "connectorId": "my-bedrock-connector",
@@ -10162,7 +10176,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/schedules/{id}/_disable:
-    put:
+    post:
       description: Disables an Attack discovery schedule, preventing it from running according to its configured interval. The schedule configuration is preserved and can be re-enabled later. Any currently running executions will complete, but no new executions will be started. `Technical preview`
       operationId: DisableAttackDiscoverySchedules
       parameters:
@@ -10206,7 +10220,7 @@ paths:
           lang: curl
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-state: Technical Preview; added in 9.2.0
@@ -10214,7 +10228,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/attack_discovery/schedules/{id}/_enable:
-    put:
+    post:
       description: Enables a previously disabled Attack discovery schedule, allowing it to run according to its configured interval. Once enabled, the schedule will begin executing at the next scheduled time based on its interval configuration. `Technical preview`
       operationId: EnableAttackDiscoverySchedules
       parameters:
@@ -10258,7 +10272,7 @@ paths:
           lang: curl
           source: |
             curl \
-             --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
+             --request POST 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
       x-state: Technical Preview; added in 9.2.0
@@ -16111,6 +16125,50 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/entity_store/entities/{entityType}:
+    delete:
+      description: |
+        Delete a single entity in Entity Store.
+        The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
+      operationId: DeleteSingleEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  description: Identifier of the entity to be deleted, commonly entity.id value.
+                  type: string
+              required:
+                - id
+        description: Schema for the deleting entity
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+          description: Successful response. Entity deleted.
+        '404':
+          description: Entity Not Found. No entity with this ID and Type exists.
+        '503':
+          description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
+      summary: Delete an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
     put:
       description: |
         Update or create an entity in Entity Store.
@@ -18755,6 +18813,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -18775,6 +18834,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agent binary download sources
       tags:
         - Elastic Agent binary download sources
@@ -18908,6 +18968,7 @@ paths:
                       - host
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -18928,6 +18989,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -18963,6 +19025,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -18983,6 +19046,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -19060,6 +19124,7 @@ paths:
                       - host
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -19080,6 +19145,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -19218,6 +19284,7 @@ paths:
                       - host
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -19238,6 +19305,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -19973,6 +20041,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -19993,6 +20062,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agent policies
       tags:
         - Elastic Agent policies
@@ -20886,6 +20956,7 @@ paths:
                       - revision
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -20906,6 +20977,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create an agent policy
       tags:
         - Elastic Agent policies
@@ -21606,6 +21678,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -21626,6 +21699,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk get agent policies
       tags:
         - Elastic Agent policies
@@ -22303,6 +22377,7 @@ paths:
                       - revision
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -22323,6 +22398,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an agent policy
       tags:
         - Elastic Agent policies
@@ -23226,6 +23302,7 @@ paths:
                       - revision
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -23246,6 +23323,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update an agent policy
       tags:
         - Elastic Agent policies
@@ -23277,6 +23355,10 @@ paths:
                       properties:
                         agents:
                           type: number
+                        failedUpgradeActionIds:
+                          items:
+                            type: string
+                          type: array
                         failedUpgradeAgents:
                           type: number
                         version:
@@ -23291,6 +23373,7 @@ paths:
                 required:
                   - currentVersions
                   - totalAgents
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -23311,6 +23394,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get auto upgrade agent status
       tags:
         - Elastic Agent policies
@@ -24009,6 +24093,7 @@ paths:
                       - revision
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -24029,6 +24114,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Copy an agent policy
       tags:
         - Elastic Agent policies
@@ -24037,7 +24123,7 @@ paths:
           name: product_name
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
-      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - in: path
@@ -24066,6 +24152,7 @@ paths:
             application/json:
               schema:
                 type: string
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -24086,6 +24173,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -24106,6 +24194,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Not found.
       summary: Download an agent policy
       tags:
         - Elastic Agent policies
@@ -24545,6 +24634,7 @@ paths:
                           - inputs
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -24565,6 +24655,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a full agent policy
       tags:
         - Elastic Agent policies
@@ -24648,6 +24739,7 @@ paths:
                       - data
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -24668,6 +24760,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get outputs for an agent policy
       tags:
         - Elastic Agent policies
@@ -24715,6 +24808,7 @@ paths:
                 required:
                   - id
                   - name
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -24735,6 +24829,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete an agent policy
       tags:
         - Elastic Agent policies
@@ -24836,6 +24931,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -24856,6 +24952,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get outputs for agent policies
       tags:
         - Elastic Agent policies
@@ -24934,6 +25031,7 @@ paths:
                       - active
                 required:
                   - results
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -24954,6 +25052,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an agent status summary
       tags:
         - Elastic Agent status
@@ -25016,6 +25115,7 @@ paths:
                 required:
                   - items
                   - dataPreview
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -25036,6 +25136,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get incoming agent data
       tags:
         - Elastic Agents
@@ -25448,6 +25549,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -25468,6 +25570,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agents
       tags:
         - Elastic Agents
@@ -25512,6 +25615,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -25532,6 +25636,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agents by action ids
       tags:
         - Elastic Agents
@@ -25569,6 +25674,7 @@ paths:
                     type: string
                 required:
                   - action
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -25589,6 +25695,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete an agent
       tags:
         - Elastic Agents
@@ -25913,6 +26020,7 @@ paths:
                       - local_metadata
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -25933,6 +26041,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an agent
       tags:
         - Elastic Agents
@@ -26272,6 +26381,7 @@ paths:
                       - local_metadata
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -26292,6 +26402,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update an agent by ID
       tags:
         - Elastic Agents
@@ -26415,6 +26526,7 @@ paths:
                       - ack_data
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -26435,6 +26547,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create an agent action
       tags:
         - Elastic Agent actions
@@ -26521,7 +26634,7 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -26542,7 +26655,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Migrate a single agent
       tags:
         - Elastic Agents
@@ -26585,6 +26698,7 @@ paths:
                 additionalProperties: false
                 type: object
                 properties: {}
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -26605,6 +26719,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Reassign an agent
       tags:
         - Elastic Agent actions
@@ -26654,6 +26769,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -26674,6 +26790,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Request agent diagnostics
       tags:
         - Elastic Agent actions
@@ -26758,6 +26875,7 @@ paths:
                 additionalProperties: false
                 type: object
                 properties: {}
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -26778,6 +26896,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Upgrade an agent
       tags:
         - Elastic Agent actions
@@ -26838,6 +26957,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -26858,6 +26978,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agent uploads
       tags:
         - Elastic Agents
@@ -27007,6 +27128,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27027,6 +27149,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an agent action status
       tags:
         - Elastic Agent actions
@@ -27100,6 +27223,7 @@ paths:
                       - ack_data
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27120,6 +27244,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Cancel an agent action
       tags:
         - Elastic Agent actions
@@ -27145,6 +27270,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27165,6 +27291,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get available agent versions
       tags:
         - Elastic Agents
@@ -27253,7 +27380,7 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27274,7 +27401,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Migrate multiple agents
       tags:
         - Elastic Agents
@@ -27328,6 +27455,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27348,6 +27476,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk reassign agents
       tags:
         - Elastic Agent actions
@@ -27401,6 +27530,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27421,6 +27551,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk request diagnostics from agents
       tags:
         - Elastic Agent actions
@@ -27479,6 +27610,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27499,6 +27631,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk unenroll agents
       tags:
         - Elastic Agent actions
@@ -27557,6 +27690,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27577,6 +27711,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk update agent tags
       tags:
         - Elastic Agent actions
@@ -27641,6 +27776,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27661,6 +27797,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk upgrade agents
       tags:
         - Elastic Agent actions
@@ -27699,6 +27836,7 @@ paths:
                 required:
                   - id
                   - deleted
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27719,6 +27857,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete an uploaded file
       tags:
         - Elastic Agents
@@ -27746,6 +27885,7 @@ paths:
             application/json:
               schema:
                 type: object
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27766,6 +27906,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an uploaded file
       tags:
         - Elastic Agents
@@ -27816,6 +27957,7 @@ paths:
                   - isReady
                   - missing_requirements
                   - missing_optional_features
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27836,6 +27978,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agent setup info
       tags:
         - Elastic Agents
@@ -27880,6 +28023,7 @@ paths:
                 required:
                   - isInitialized
                   - nonFatalErrors
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27900,6 +28044,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Initiate agent setup
       tags:
         - Elastic Agents
@@ -27936,6 +28081,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27956,6 +28102,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agent tags
       tags:
         - Elastic Agents
@@ -27989,6 +28136,7 @@ paths:
                     type: boolean
                 required:
                   - success
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28009,6 +28157,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Check permissions
       tags:
         - Fleet internals
@@ -28071,7 +28220,7 @@ paths:
                     type: array
                 required:
                   - items
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28092,7 +28241,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
@@ -28205,7 +28354,7 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28226,7 +28375,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
@@ -28268,7 +28417,7 @@ paths:
                     type: string
                 required:
                   - id
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28289,7 +28438,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Delete cloud connector (supports force deletion)
       tags:
         - Fleet cloud connectors
@@ -28345,7 +28494,7 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28366,7 +28515,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Get cloud connector
       tags:
         - Fleet cloud connectors
@@ -28474,7 +28623,7 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28495,7 +28644,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Update cloud connector
       tags:
         - Fleet cloud connectors
@@ -28581,6 +28730,7 @@ paths:
                     type: array
                 required:
                   - data_streams
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28601,6 +28751,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get data streams
       tags:
         - Data streams
@@ -28716,6 +28867,7 @@ paths:
                   - page
                   - perPage
                   - list
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28736,6 +28888,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get enrollment API keys
       tags:
         - Fleet enrollment API keys
@@ -28814,6 +28967,7 @@ paths:
                 required:
                   - item
                   - action
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28834,6 +28988,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -28871,6 +29026,7 @@ paths:
                     type: string
                 required:
                   - action
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28891,6 +29047,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Revoke an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -28947,6 +29104,7 @@ paths:
                       - created_at
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28967,6 +29125,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -29045,6 +29204,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -29065,6 +29225,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk get assets
       tags:
         - Elastic Package Manager (EPM)
@@ -29116,6 +29277,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -29136,6 +29298,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get package categories
       tags:
         - Elastic Package Manager (EPM)
@@ -29266,6 +29429,7 @@ paths:
                 required:
                   - items
                   - _meta
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -29286,6 +29450,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create a custom integration
       tags:
         - Elastic Package Manager (EPM)
@@ -29325,7 +29490,8 @@ paths:
               required:
                 - readMeData
       responses:
-        '200': {}
+        '200':
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -29346,6 +29512,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update a custom integration
       tags:
         - Elastic Package Manager (EPM)
@@ -29408,6 +29575,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -29428,6 +29596,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get data streams
       tags:
         - Data streams
@@ -29692,6 +29861,8 @@ paths:
                               type: array
                             installed_kibana_space_id:
                               type: string
+                            is_rollback_ttl_expired:
+                              type: boolean
                             latest_executed_state:
                               additionalProperties: true
                               type: object
@@ -29840,6 +30011,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -29860,6 +30032,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get packages
       tags:
         - Elastic Package Manager (EPM)
@@ -29974,6 +30147,7 @@ paths:
                 required:
                   - items
                   - _meta
+          description: 'OK: A successful request.'
         '400':
           content:
             application/gzip; application/zip:
@@ -29994,6 +30168,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Install a package by upload
       tags:
         - Elastic Package Manager (EPM)
@@ -30161,7 +30336,7 @@ paths:
                     type: array
                 required:
                   - items
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30182,7 +30357,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
@@ -30239,7 +30414,7 @@ paths:
                     type: string
                 required:
                   - taskId
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30260,7 +30435,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Bulk uninstall packages
       tags:
         - Elastic Package Manager (EPM)
@@ -30318,7 +30493,7 @@ paths:
                     type: string
                 required:
                   - status
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30339,7 +30514,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Get Bulk uninstall packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -30400,7 +30575,7 @@ paths:
                     type: string
                 required:
                   - taskId
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30421,7 +30596,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Bulk upgrade packages
       tags:
         - Elastic Package Manager (EPM)
@@ -30479,7 +30654,7 @@ paths:
                     type: string
                 required:
                   - status
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30500,7 +30675,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Get Bulk upgrade packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -30601,6 +30776,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30621,6 +30797,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete a package
       tags:
         - Elastic Package Manager (EPM)
@@ -30925,6 +31102,8 @@ paths:
                             type: array
                           installed_kibana_space_id:
                             type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
                           latest_executed_state:
                             additionalProperties: true
                             type: object
@@ -31106,6 +31285,7 @@ paths:
                       - has_policies
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31126,6 +31306,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a package
       tags:
         - Elastic Package Manager (EPM)
@@ -31263,7 +31444,7 @@ paths:
                 required:
                   - items
                   - _meta
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31284,7 +31465,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Install a package from the registry
       tags:
         - Elastic Package Manager (EPM)
@@ -31587,6 +31768,8 @@ paths:
                             type: array
                           installed_kibana_space_id:
                             type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
                           latest_executed_state:
                             additionalProperties: true
                             type: object
@@ -31760,6 +31943,7 @@ paths:
                       - assets
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31780,6 +31964,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
@@ -31811,6 +31996,7 @@ paths:
           content:
             application/json:
               schema: {}
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31831,6 +32017,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a package file
       tags:
         - Elastic Package Manager (EPM)
@@ -31876,6 +32063,7 @@ paths:
                     type: boolean
                 required:
                   - success
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31896,6 +32084,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete assets for an input package
       tags:
         - Elastic Package Manager (EPM)
@@ -31936,7 +32125,7 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31957,7 +32146,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Delete Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -32013,7 +32202,7 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32034,7 +32223,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Install Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -32085,7 +32274,7 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32106,7 +32295,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Install Kibana alert rule for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -32178,6 +32367,7 @@ paths:
                     - success
                     - error
                 type: array
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32198,6 +32388,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Authorize transforms
       tags:
         - Elastic Package Manager (EPM)
@@ -32235,6 +32426,7 @@ paths:
                       - package_policy_count
                 required:
                   - response
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32255,6 +32447,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get package stats
       tags:
         - Elastic Package Manager (EPM)
@@ -32388,6 +32581,7 @@ paths:
                 required:
                   - items
                   - total
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32408,6 +32602,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get installed packages
       tags:
         - Elastic Package Manager (EPM)
@@ -32433,6 +32628,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32453,6 +32649,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a limited package list
       tags:
         - Elastic Package Manager (EPM)
@@ -32540,6 +32737,7 @@ paths:
                         type: array
                     required:
                       - inputs
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32560,6 +32758,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an inputs template
       tags:
         - Elastic Package Manager (EPM)
@@ -32584,6 +32783,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32604,6 +32804,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a package signature verification key ID
       tags:
         - Elastic Package Manager (EPM)
@@ -32737,6 +32938,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32757,6 +32959,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get Fleet Server hosts
       tags:
         - Fleet Server hosts
@@ -32988,6 +33191,7 @@ paths:
                       - id
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33008,6 +33212,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -33043,6 +33248,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33063,6 +33269,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -33189,6 +33396,7 @@ paths:
                       - id
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33209,6 +33417,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -33438,6 +33647,7 @@ paths:
                       - id
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33458,6 +33668,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -33503,6 +33714,7 @@ paths:
                     type: string
                 required:
                   - status
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33523,6 +33735,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -33543,6 +33756,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Not found.
       summary: Check Fleet Server health
       tags:
         - Fleet internals
@@ -33551,7 +33765,7 @@ paths:
           name: product_name
   /api/fleet/kubernetes:
     get:
-      description: '[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-kubernetes
       parameters:
         - in: query
@@ -33581,6 +33795,7 @@ paths:
                     type: string
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33601,6 +33816,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a full K8s agent manifest
       tags:
         - Elastic Agent policies
@@ -33609,7 +33825,7 @@ paths:
           name: product_name
   /api/fleet/kubernetes/download:
     get:
-      description: '[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.'
+      description: '[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.'
       operationId: get-fleet-kubernetes-download
       parameters:
         - in: query
@@ -33633,6 +33849,7 @@ paths:
             application/json:
               schema:
                 type: string
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33653,6 +33870,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -33673,6 +33891,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Not found.
       summary: Download an agent manifest
       tags:
         - Elastic Agent policies
@@ -33703,6 +33922,7 @@ paths:
                     type: string
                 required:
                   - api_key
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33723,6 +33943,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Generate a Logstash API key
       tags:
         - Fleet outputs
@@ -33759,6 +33980,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33779,6 +34001,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '500':
           content:
             application/json:
@@ -33799,6 +34022,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: An internal server error.
       summary: Rotate a Fleet message signing key pair
       tags:
         - Message Signing Service
@@ -34572,6 +34796,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -34592,6 +34817,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get outputs
       tags:
         - Fleet outputs
@@ -36104,6 +36330,7 @@ paths:
                           - password
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36124,6 +36351,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create output
       tags:
         - Fleet outputs
@@ -36159,6 +36387,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36179,6 +36408,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -36199,6 +36429,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Not found.
       summary: Delete output
       tags:
         - Fleet outputs
@@ -36965,6 +37196,7 @@ paths:
                           - password
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36985,6 +37217,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get output
       tags:
         - Fleet outputs
@@ -38481,6 +38714,7 @@ paths:
                           - password
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -38501,6 +38735,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update output
       tags:
         - Fleet outputs
@@ -38538,6 +38773,7 @@ paths:
                   - state
                   - message
                   - timestamp
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -38558,6 +38794,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get the latest output health
       tags:
         - Fleet outputs
@@ -39027,6 +39264,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -39047,6 +39285,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get package policies
       tags:
         - Fleet package policies
@@ -39905,6 +40144,7 @@ paths:
                       - created_by
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -39925,6 +40165,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '409':
           content:
             application/json:
@@ -39945,6 +40186,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A conflict occurred.
       summary: Create a package policy
       tags:
         - Fleet package policies
@@ -40390,6 +40632,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -40410,6 +40653,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -40421,6 +40665,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: Not found.
       summary: Bulk get package policies
       tags:
         - Fleet package policies
@@ -40461,6 +40706,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -40481,6 +40727,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete a package policy
       tags:
         - Fleet package policies
@@ -40906,6 +41153,7 @@ paths:
                       - created_by
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -40926,6 +41174,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -40937,6 +41186,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: Not found.
       summary: Get a package policy
       tags:
         - Fleet package policies
@@ -41794,6 +42044,7 @@ paths:
                       - created_by
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -41814,6 +42065,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '403':
           content:
             application/json:
@@ -41834,6 +42086,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Forbidden.
       summary: Update a package policy
       tags:
         - Fleet package policies
@@ -41952,6 +42205,7 @@ paths:
                     - policy_ids
                     - package
                 type: array
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -41972,6 +42226,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk delete package policies
       tags:
         - Fleet package policies
@@ -42032,6 +42287,7 @@ paths:
                     - id
                     - success
                 type: array
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -42052,6 +42308,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Upgrade a package policy
       tags:
         - Fleet package policies
@@ -42901,6 +43158,7 @@ paths:
                   required:
                     - hasErrors
                 type: array
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -42921,6 +43179,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Dry run a package policy upgrade
       tags:
         - Fleet package policies
@@ -42987,6 +43246,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43007,6 +43267,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get proxies
       tags:
         - Fleet proxies
@@ -43104,6 +43365,7 @@ paths:
                       - name
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43124,6 +43386,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create a proxy
       tags:
         - Fleet proxies
@@ -43159,6 +43422,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43179,6 +43443,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete a proxy
       tags:
         - Fleet proxies
@@ -43238,6 +43503,7 @@ paths:
                       - name
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43258,6 +43524,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a proxy
       tags:
         - Fleet proxies
@@ -43357,6 +43624,7 @@ paths:
                       - name
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43377,6 +43645,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update a proxy
       tags:
         - Fleet proxies
@@ -43444,6 +43713,7 @@ paths:
                       - id
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43464,6 +43734,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -43475,6 +43746,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: Not found.
       summary: Get settings
       tags:
         - Fleet internals
@@ -43500,6 +43772,7 @@ paths:
               type: object
               properties:
                 additional_yaml_config:
+                  deprecated: true
                   type: string
                 delete_unenrolled_agents:
                   additionalProperties: false
@@ -43513,10 +43786,13 @@ paths:
                     - enabled
                     - is_preconfigured
                 has_seen_add_data_notice:
+                  deprecated: true
                   type: boolean
                 kibana_ca_sha256:
+                  deprecated: true
                   type: string
                 kibana_urls:
+                  deprecated: true
                   items:
                     format: uri
                     type: string
@@ -43579,6 +43855,7 @@ paths:
                       - id
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43599,6 +43876,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -43610,6 +43888,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: Not found.
       summary: Update settings
       tags:
         - Fleet internals
@@ -43655,6 +43934,7 @@ paths:
                 required:
                   - isInitialized
                   - nonFatalErrors
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43675,6 +43955,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '500':
           content:
             application/json:
@@ -43687,6 +43968,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: An internal server error occurred.
       summary: Initiate Fleet setup
       tags:
         - Fleet internals
@@ -43719,6 +44001,7 @@ paths:
                       - allowed_namespace_prefixes
                 required:
                   - item
+          description: 'OK: A successful request.'
       summary: Get space settings
       tags: []
       x-state: Generally available
@@ -43769,6 +44052,7 @@ paths:
                       - allowed_namespace_prefixes
                 required:
                   - item
+          description: 'OK: A successful request.'
       summary: Create space settings
       tags: []
       x-state: Generally available
@@ -43848,6 +44132,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43868,6 +44153,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get metadata for latest uninstall tokens
       tags:
         - Fleet uninstall tokens
@@ -43918,6 +44204,7 @@ paths:
                       - token
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43938,6 +44225,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a decrypted uninstall token
       tags:
         - Fleet uninstall tokens
@@ -48110,6 +48398,25 @@ paths:
                   items:
                     type: string
                   type: array
+                filters:
+                  items:
+                    type: object
+                    properties:
+                      entity_types:
+                        items:
+                          enum:
+                            - host
+                            - user
+                            - service
+                          type: string
+                        type: array
+                      filter:
+                        description: KQL filter string
+                        type: string
+                    required:
+                      - entity_types
+                      - filter
+                  type: array
                 range:
                   type: object
                   properties:
@@ -52257,6 +52564,170 @@ paths:
                                                             properties:
                                                               action:
                                                                 enum:
+                                                                  - convert
+                                                                type: string
+                                                              customIdentifier:
+                                                                minLength: 1
+                                                                type: string
+                                                              description:
+                                                                type: string
+                                                              from:
+                                                                minLength: 1
+                                                                type: string
+                                                              ignore_failure:
+                                                                type: boolean
+                                                              ignore_missing:
+                                                                type: boolean
+                                                              to:
+                                                                minLength: 1
+                                                                type: string
+                                                              type:
+                                                                enum:
+                                                                  - integer
+                                                                  - long
+                                                                  - double
+                                                                  - boolean
+                                                                  - string
+                                                                type: string
+                                                              where:
+                                                                anyOf:
+                                                                  - anyOf:
+                                                                      - additionalProperties: false
+                                                                        type: object
+                                                                        properties:
+                                                                          contains:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          endsWith:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          eq:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          field:
+                                                                            minLength: 1
+                                                                            type: string
+                                                                          gt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          gte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          lt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          lte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          neq:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          range:
+                                                                            additionalProperties: false
+                                                                            type: object
+                                                                            properties:
+                                                                              gt:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                              gte:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                              lt:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                              lte:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                          startsWith:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                        required:
+                                                                          - field
+                                                                      - additionalProperties: false
+                                                                        type: object
+                                                                        properties:
+                                                                          exists:
+                                                                            type: boolean
+                                                                          field:
+                                                                            minLength: 1
+                                                                            type: string
+                                                                        required:
+                                                                          - field
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      and:
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - and
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      or:
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - or
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      not: {}
+                                                                    required:
+                                                                      - not
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      never:
+                                                                        additionalProperties: false
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - never
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      always:
+                                                                        additionalProperties: false
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - always
+                                                            required:
+                                                              - action
+                                                              - from
+                                                              - type
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              action:
+                                                                enum:
                                                                   - manual_ingest_pipeline
                                                                 type: string
                                                               customIdentifier:
@@ -52721,6 +53192,8 @@ paths:
                                                                       - 'null'
                                                                     nullable: true
                                                                   - not: {}
+                                                              type: array
+                                                            - items: {}
                                                               type: array
                                                             - {}
                                                         type: object
@@ -54125,6 +54598,170 @@ paths:
                                                           - action
                                                           - to
                                                           - value
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          action:
+                                                            enum:
+                                                              - convert
+                                                            type: string
+                                                          customIdentifier:
+                                                            minLength: 1
+                                                            type: string
+                                                          description:
+                                                            type: string
+                                                          from:
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_failure:
+                                                            type: boolean
+                                                          ignore_missing:
+                                                            type: boolean
+                                                          to:
+                                                            minLength: 1
+                                                            type: string
+                                                          type:
+                                                            enum:
+                                                              - integer
+                                                              - long
+                                                              - double
+                                                              - boolean
+                                                              - string
+                                                            type: string
+                                                          where:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      contains:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      endsWith:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      eq:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      gt:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      gte:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      lt:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      lte:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      neq:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      range:
+                                                                        additionalProperties: false
+                                                                        type: object
+                                                                        properties:
+                                                                          gt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          gte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          lt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          lte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                      startsWith:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      exists:
+                                                                        type: boolean
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  not: {}
+                                                                required:
+                                                                  - not
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                        required:
+                                                          - action
+                                                          - from
+                                                          - type
                                                       - additionalProperties: false
                                                         type: object
                                                         properties:
@@ -55801,6 +56438,170 @@ paths:
                                                             properties:
                                                               action:
                                                                 enum:
+                                                                  - convert
+                                                                type: string
+                                                              customIdentifier:
+                                                                minLength: 1
+                                                                type: string
+                                                              description:
+                                                                type: string
+                                                              from:
+                                                                minLength: 1
+                                                                type: string
+                                                              ignore_failure:
+                                                                type: boolean
+                                                              ignore_missing:
+                                                                type: boolean
+                                                              to:
+                                                                minLength: 1
+                                                                type: string
+                                                              type:
+                                                                enum:
+                                                                  - integer
+                                                                  - long
+                                                                  - double
+                                                                  - boolean
+                                                                  - string
+                                                                type: string
+                                                              where:
+                                                                anyOf:
+                                                                  - anyOf:
+                                                                      - additionalProperties: false
+                                                                        type: object
+                                                                        properties:
+                                                                          contains:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          endsWith:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          eq:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          field:
+                                                                            minLength: 1
+                                                                            type: string
+                                                                          gt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          gte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          lt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          lte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          neq:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          range:
+                                                                            additionalProperties: false
+                                                                            type: object
+                                                                            properties:
+                                                                              gt:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                              gte:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                              lt:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                              lte:
+                                                                                anyOf:
+                                                                                  - type: string
+                                                                                  - type: number
+                                                                                  - type: boolean
+                                                                          startsWith:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                        required:
+                                                                          - field
+                                                                      - additionalProperties: false
+                                                                        type: object
+                                                                        properties:
+                                                                          exists:
+                                                                            type: boolean
+                                                                          field:
+                                                                            minLength: 1
+                                                                            type: string
+                                                                        required:
+                                                                          - field
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      and:
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - and
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      or:
+                                                                        items: {}
+                                                                        type: array
+                                                                    required:
+                                                                      - or
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      not: {}
+                                                                    required:
+                                                                      - not
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      never:
+                                                                        additionalProperties: false
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - never
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      always:
+                                                                        additionalProperties: false
+                                                                        type: object
+                                                                        properties: {}
+                                                                    required:
+                                                                      - always
+                                                            required:
+                                                              - action
+                                                              - from
+                                                              - type
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              action:
+                                                                enum:
                                                                   - manual_ingest_pipeline
                                                                 type: string
                                                               customIdentifier:
@@ -56265,6 +57066,8 @@ paths:
                                                                       - 'null'
                                                                     nullable: true
                                                                   - not: {}
+                                                              type: array
+                                                            - items: {}
                                                               type: array
                                                             - {}
                                                         type: object
@@ -57519,6 +58322,170 @@ paths:
                                                           - action
                                                           - to
                                                           - value
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          action:
+                                                            enum:
+                                                              - convert
+                                                            type: string
+                                                          customIdentifier:
+                                                            minLength: 1
+                                                            type: string
+                                                          description:
+                                                            type: string
+                                                          from:
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_failure:
+                                                            type: boolean
+                                                          ignore_missing:
+                                                            type: boolean
+                                                          to:
+                                                            minLength: 1
+                                                            type: string
+                                                          type:
+                                                            enum:
+                                                              - integer
+                                                              - long
+                                                              - double
+                                                              - boolean
+                                                              - string
+                                                            type: string
+                                                          where:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      contains:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      endsWith:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      eq:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      gt:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      gte:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      lt:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      lte:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      neq:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                      range:
+                                                                        additionalProperties: false
+                                                                        type: object
+                                                                        properties:
+                                                                          gt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          gte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          lt:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                          lte:
+                                                                            anyOf:
+                                                                              - type: string
+                                                                              - type: number
+                                                                              - type: boolean
+                                                                      startsWith:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      exists:
+                                                                        type: boolean
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  not: {}
+                                                                required:
+                                                                  - not
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                        required:
+                                                          - action
+                                                          - from
+                                                          - type
                                                       - additionalProperties: false
                                                         type: object
                                                         properties:
@@ -59533,6 +60500,170 @@ paths:
                                             properties:
                                               action:
                                                 enum:
+                                                  - convert
+                                                type: string
+                                              customIdentifier:
+                                                minLength: 1
+                                                type: string
+                                              description:
+                                                type: string
+                                              from:
+                                                minLength: 1
+                                                type: string
+                                              ignore_failure:
+                                                type: boolean
+                                              ignore_missing:
+                                                type: boolean
+                                              to:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - integer
+                                                  - long
+                                                  - double
+                                                  - boolean
+                                                  - string
+                                                type: string
+                                              where:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          contains:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          endsWith:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          eq:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          gt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          gte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          neq:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          range:
+                                                            additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              gt:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                              gte:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                              lt:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                              lte:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                          startsWith:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          exists:
+                                                            type: boolean
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      not: {}
+                                                    required:
+                                                      - not
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                            required:
+                                              - action
+                                              - from
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              action:
+                                                enum:
                                                   - manual_ingest_pipeline
                                                 type: string
                                               customIdentifier:
@@ -59991,6 +61122,8 @@ paths:
                                                       - 'null'
                                                     nullable: true
                                                   - not: {}
+                                              type: array
+                                            - items: {}
                                               type: array
                                             - {}
                                         type: object
@@ -61179,6 +62312,170 @@ paths:
                                             properties:
                                               action:
                                                 enum:
+                                                  - convert
+                                                type: string
+                                              customIdentifier:
+                                                minLength: 1
+                                                type: string
+                                              description:
+                                                type: string
+                                              from:
+                                                minLength: 1
+                                                type: string
+                                              ignore_failure:
+                                                type: boolean
+                                              ignore_missing:
+                                                type: boolean
+                                              to:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - integer
+                                                  - long
+                                                  - double
+                                                  - boolean
+                                                  - string
+                                                type: string
+                                              where:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          contains:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          endsWith:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          eq:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          gt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          gte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lt:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          lte:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          neq:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                          range:
+                                                            additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              gt:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                              gte:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                              lt:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                              lte:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                          startsWith:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          exists:
+                                                            type: boolean
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      not: {}
+                                                    required:
+                                                      - not
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                            required:
+                                              - action
+                                              - from
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              action:
+                                                enum:
                                                   - manual_ingest_pipeline
                                                 type: string
                                               customIdentifier:
@@ -61637,6 +62934,8 @@ paths:
                                                       - 'null'
                                                     nullable: true
                                                   - not: {}
+                                              type: array
+                                            - items: {}
                                               type: array
                                             - {}
                                         type: object
@@ -67474,7 +68773,7 @@ components:
           example: 404
           type: integer
     Data_views_allownoindex:
-      description: Allows the data view saved object to exist before the data is available.
+      description: Allows the data view saved object to exist before the data is available. Defaults to `false`.
       type: boolean
     Data_views_create_data_view_request_object:
       title: Create data view request
@@ -68435,6 +69734,35 @@ components:
       required:
         - id
         - type
+    Security_AI_Assistant_API_BaseInterruptResumeValue:
+      description: The basis of an interrupt resume value
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptType'
+          description: Type of the resume value
+          example: SELECT_OPTION
+      required:
+        - type
+    Security_AI_Assistant_API_BaseInterruptValue:
+      description: The basis of an agent interrupt
+      type: object
+      properties:
+        expired:
+          description: Whether the interrupt has expired and can no longer be resumed.
+          example: false
+          type: boolean
+        threadId:
+          description: Thread ID of the graph execution that produced this message.
+          example: <UUID>
+          type: string
+        type:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptType'
+          description: Type of the interrupt
+          example: SELECT_OPTION
+      required:
+        - type
+        - threadId
     Security_AI_Assistant_API_BulkCrudActionSummary:
       type: object
       properties:
@@ -69054,6 +70382,65 @@ components:
           - fieldType
           - description
       type: array
+    Security_AI_Assistant_API_InputTextInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+            value:
+              description: Text value used to resume the graph execution with.
+              example: .logs*
+              type: string
+          required:
+            - value
+            - type
+      description: A resume value for input text
+    Security_AI_Assistant_API_InputTextInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: What is the index you would like to use for the query.
+              type: string
+            placeholder:
+              description: Placeholder text for the input field
+              example: Enter index pattern here...
+              type: string
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+          required:
+            - type
+      description: Interrupt that requests user to provide text input
+    Security_AI_Assistant_API_InterruptResumeValue:
+      description: Union of the interrupt resume values
+      oneOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptResumeValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_InputTextInterruptResumeValue'
+          additionalProperties: false
+    Security_AI_Assistant_API_InterruptType:
+      description: The type of interrupt
+      enum:
+        - SELECT_OPTION
+        - INPUT_TEXT
+      type: string
+    Security_AI_Assistant_API_InterruptValue:
+      description: Union of the interrupt values
+      oneOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_InputTextInterruptValue'
+          additionalProperties: false
     Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason:
       description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
@@ -69333,6 +70720,12 @@ components:
         contentReferences:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ContentReferences'
           description: Data referred to by the message content.
+        interruptResumeValue:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptResumeValue'
+          description: When the agent is resumed after an interrupt, this field is populated with the details of the resume value.
+        interruptValue:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_InterruptValue'
+          description: When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
     Security_AI_Assistant_API_MessageRole:
       description: Message role.
       enum:
@@ -69757,6 +71150,77 @@ components:
           required:
             - type
       description: References the security alerts page
+    Security_AI_Assistant_API_SelectOptionInterruptOption:
+      description: A request approval option
+      type: object
+      properties:
+        buttonColor:
+          enum:
+            - text
+            - accent
+            - accentSecondary
+            - primary
+            - success
+            - warning
+            - danger
+            - neutral
+            - risk
+          example: danger
+          type: string
+        label:
+          example: Option 1
+          type: string
+        value:
+          example: option_1
+          type: string
+      required:
+        - label
+        - value
+    Security_AI_Assistant_API_SelectOptionInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+            value:
+              description: The value of the selected option to resume the graph execution with
+              example: option_1
+              type: string
+          required:
+            - value
+            - type
+      description: A request approval resume schema
+    Security_AI_Assistant_API_SelectOptionInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: Select one of the options
+              type: string
+            options:
+              description: List of actions to choose from
+              example:
+                - label: Option 1
+                - label: Option 2
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_SelectOptionInterruptOption'
+              type: array
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+          required:
+            - type
+            - description
+            - options
+      description: Interrupt that requests user to select one of the provided options
     Security_AI_Assistant_API_SortOrder:
       description: The order in which results are sorted.
       enum:
@@ -70019,27 +71483,9 @@ components:
         - schedule
         - actions
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleAction:
-      type: object
-      properties:
-        action_type_id:
-          description: The action type used for sending notifications.
-          type: string
-        alerts_filter:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
-        frequency:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
-        group:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
-        id:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
-        params:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
-        uuid:
-          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
-      required:
-        - action_type_id
-        - id
-        - params
+      oneOf:
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction'
+        - $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction'
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter:
       additionalProperties: true
       type: object
@@ -70135,6 +71581,29 @@ components:
         - unknown
         - warning
       type: string
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleGeneralAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        alerts_filter:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionAlertsFilter'
+        frequency:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionFrequency'
+        group:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionGroup'
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - group
+        - id
+        - params
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleParams:
       description: An attack discovery schedule params
       type: object
@@ -70170,6 +71639,22 @@ components:
         - alerts_index_pattern
         - api_config
         - size
+    Security_Attack_discovery_API_AttackDiscoveryApiScheduleSystemAction:
+      type: object
+      properties:
+        action_type_id:
+          description: The action type used for sending notifications.
+          type: string
+        id:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionId'
+        params:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleActionParams'
+        uuid:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_NonEmptyString'
+      required:
+        - action_type_id
+        - id
+        - params
     Security_Attack_discovery_API_AttackDiscoveryApiScheduleUpdateProps:
       description: An attack discovery schedule update properties
       type: object
@@ -78096,6 +79581,8 @@ components:
         wasSuccessful:
           description: Whether the response action was successful
           type: boolean
+      required:
+        - command
     Security_Endpoint_Management_API_RunningProcesses:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
