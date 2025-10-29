@@ -66,7 +66,7 @@ export const TagFilterContextProvider: FC<React.PropsWithChildren<Context>> = ({
 
 export const TagFilterPanel: FC<{}> = ({}) => {
   const { euiTheme } = useEuiTheme();
-  const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
+  const { getTagManagementUrl } = useServices();
   const componentContext = React.useContext(TagFilterContext);
   const titleId = useGeneratedHtmlId();
 

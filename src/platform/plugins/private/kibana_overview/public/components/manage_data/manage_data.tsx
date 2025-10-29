@@ -21,8 +21,6 @@ import {
   useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
 import { Synopsis } from '../synopsis';
 import { METRIC_TYPE, trackUiMetric } from '../../lib/ui_metric';
@@ -33,9 +31,6 @@ interface Props {
 }
 
 export const ManageData: FC<Props> = ({ addBasePath, features }) => {
-  const {
-    services: { application },
-  } = useKibana<CoreStart>();
   const minBreakpointM = useEuiMinBreakpoint('m');
   return (
     <>
