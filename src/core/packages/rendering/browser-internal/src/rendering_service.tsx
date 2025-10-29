@@ -33,6 +33,7 @@ import {
 } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
+import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -112,6 +113,7 @@ export class RenderingService implements IRenderingService {
 
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
+        <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
       </KibanaRootContextProvider>,
       targetDomElement

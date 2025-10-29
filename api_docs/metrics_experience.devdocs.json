@@ -101,7 +101,7 @@
           "ZodTypeAny",
           ", { from: number; to: number; }, { from: string; to: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { from: number; to: number; }; path: { indexPattern: string; }; }, { query: { from: string; to: string; }; path: { indexPattern: string; }; }>, ",
+          ", { path: { indexPattern: string; }; query: { from: number; to: number; }; }, { path: { indexPattern: string; }; query: { from: string; to: string; }; }>, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
