@@ -50,7 +50,7 @@ export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
       Object.keys(indicator.fields).filter((field) =>
         byIndicatorType(sanitisedIndicatorType, field)
       ),
-    [sanitisedIndicatorType]
+    [indicator.fields, sanitisedIndicatorType]
   );
 
   return (
