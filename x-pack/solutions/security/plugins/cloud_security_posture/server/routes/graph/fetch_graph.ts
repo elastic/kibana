@@ -6,30 +6,11 @@
  */
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
-import {
-  DOCUMENT_TYPE_ALERT,
-  DOCUMENT_TYPE_EVENT,
-} from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import {
-  DOCUMENT_TYPE_ENTITY,
-  INDEX_PATTERN_REGEX,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
-
-const NON_ENRICHED_ENTITY_TYPE_PLURAL = 'Entities';
-const NON_ENRICHED_ENTITY_TYPE_SINGULAR = 'Entity';
-const NON_ENRICHED_PLACEHOLDER = 'NonEnriched';
-
-interface BuildEsqlQueryParams {
-  indexPatterns: string[];
-  originEventIds: OriginEventId[];
-  originAlertIds: OriginEventId[];
-  isEnrichPolicyExists: boolean;
-  spaceId: string;
-  alertsMappingsIncluded: boolean;
-}
+import { buildEsqlQuery } from './esql_query_builder';
 
 export const fetchGraph = async ({
   esClient,
@@ -66,18 +47,13 @@ export const fetchGraph = async ({
 
   const isEnrichPolicyExists = await checkEnrichPolicyExists(esClient, logger, spaceId);
 
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
-  const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
-    indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
-  );
-
   const query = buildEsqlQuery({
     indexPatterns,
     originEventIds,
     originAlertIds,
     isEnrichPolicyExists,
-    spaceId,
-    alertsMappingsIncluded,
+    enrichPolicyName: getEnrichPolicyId(spaceId),
+    securityAlertsIdentifier: '.alerts-security.alerts-',
   });
 
   logger.trace(`Executing query [${query}]`);
@@ -163,179 +139,4 @@ const checkEnrichPolicyExists = async (
     logger.error(error);
     return false;
   }
-};
-
-const buildEsqlQuery = ({
-  indexPatterns,
-  originEventIds,
-  originAlertIds,
-  isEnrichPolicyExists,
-  spaceId,
-  alertsMappingsIncluded,
-}: BuildEsqlQueryParams): string => {
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
-  const enrichPolicyName = getEnrichPolicyId(spaceId);
-
-  const query = `FROM ${indexPatterns
-    .filter((indexPattern) => indexPattern.length > 0)
-    .join(',')} METADATA _id, _index
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
-${
-  isEnrichPolicyExists
-    ? `
-| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
-| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
-
-// Construct actor and target entities data
-| EVAL actorDocData = CONCAT("{",
-    "\\"id\\":\\"", actor.entity.id, "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entity\\":", "{",
-      "\\"name\\":\\"", actorEntityName, "\\"",
-      ",\\"type\\":\\"", actorEntityType, "\\"",
-      ",\\"sub_type\\":\\"", actorEntitySubType, "\\"",
-      CASE (
-        actorHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
-        ""
-      ),
-    "}",
-  "}")
-| EVAL targetDocData = CONCAT("{",
-    "\\"id\\":\\"", target.entity.id, "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entity\\":", "{",
-      "\\"name\\":\\"", targetEntityName, "\\"",
-      ",\\"type\\":\\"", targetEntityType, "\\"",
-      ",\\"sub_type\\":\\"", targetEntitySubType, "\\"",
-      CASE (
-        targetHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
-        ""
-      ),
-    "}",
-  "}")
-`
-    : `
-// Fallback to null string with non-enriched actor
-| EVAL actorEntityType = TO_STRING(null)
-| EVAL actorEntitySubType = TO_STRING(null)
-| EVAL actorHostIp = TO_STRING(null)
-| EVAL actorDocData = TO_STRING(null)
-
-// Fallback to null string with non-enriched target
-| EVAL targetEntityType = TO_STRING(null)
-| EVAL targetEntitySubType = TO_STRING(null)
-| EVAL targetHostIp = TO_STRING(null)
-| EVAL targetDocData = TO_STRING(null)
-`
-}
-// Map host and source values to enriched contextual data
-| EVAL sourceIps = source.ip
-| EVAL sourceCountryCodes = source.geo.country_iso_code
-// Origin event and alerts allow us to identify the start position of graph traversal
-| EVAL isOrigin = ${
-    originEventIds.length > 0
-      ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
-      : 'false'
-  }
-| EVAL isOriginAlert = isOrigin AND ${
-    originAlertIds.length > 0
-      ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
-      : 'false'
-  }
-| EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
-// Aggregate document's data for popover expansion and metadata enhancements
-// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
-// but it flattens the data and we lose the structure
-| EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
-| EVAL docData = CONCAT("{",
-    "\\"id\\":\\"", _id, "\\"",
-    CASE (event.id IS NOT NULL AND event.id != "", CONCAT(",\\"event\\":","{","\\"id\\":\\"", event.id, "\\"","}"), ""),
-    ",\\"type\\":\\"", docType, "\\"",
-    ",\\"index\\":\\"", _index, "\\"",
-    ${
-      // ESQL complains about missing field's mapping when we don't fetch from alerts index
-      alertsMappingsIncluded
-        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
-      "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
-    "}"), ""),`
-        : ''
-    }
-  "}")
-
-// Construct actor and target entity groups (using placeholder for non-enriched)
-| EVAL actorEntityGroup = CASE(
-    actorEntityType IS NOT NULL AND actorEntitySubType IS NOT NULL,
-    CONCAT(actorEntityType, ":", actorEntitySubType),
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    "${NON_ENRICHED_PLACEHOLDER}"
-  )
-| EVAL targetEntityGroup = CASE(
-    targetEntityType IS NOT NULL AND targetEntitySubType IS NOT NULL,
-    CONCAT(targetEntityType, ":", targetEntitySubType),
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    "${NON_ENRICHED_PLACEHOLDER}"
-  )
-
-| STATS badge = COUNT(*),
-  totalEventsCount = COUNT_DISTINCT(event.id),
-  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, event.id, null)),
-  isAlert = MV_MAX(VALUES(isAlert)),
-  docs = VALUES(docData),
-  sourceIps = MV_DEDUPE(VALUES(sourceIps)),
-  sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
-  // actor attributes
-  actorIds = VALUES(actor.entity.id),
-  actorIdsCount = COUNT_DISTINCT(actor.entity.id),
-  actorEntityType = VALUES(actorEntityType),
-  actorEntitySubType = VALUES(actorEntitySubType),
-  actorsDocData = VALUES(actorDocData),
-  actorHostIp = VALUES(actorHostIp),
-  // target attributes
-  targetIds = VALUES(target.entity.id),
-  targetIdsCount = COUNT_DISTINCT(target.entity.id),
-  targetEntityType = VALUES(targetEntityType),
-  targetEntitySubType = VALUES(targetEntitySubType),
-  targetsDocData = VALUES(targetDocData)
-    BY action = event.action,
-      actorEntityGroup,
-      targetEntityGroup,
-      isOrigin,
-      isOriginAlert
-| EVAL actorEntityType = CASE(
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    actorIdsCount == 1,
-    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
-  )
-| EVAL targetEntityType = CASE(
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    targetIdsCount == 1,
-    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
-  )
-| EVAL actorLabel = CASE(
-    actorEntitySubType IS NOT NULL,
-    actorEntitySubType,
-    actorIdsCount == 1,
-    MV_FIRST(actorIds),
-    ""
-  )
-| EVAL targetLabel = CASE(
-    targetEntitySubType IS NOT NULL,
-    targetEntitySubType,
-    targetIdsCount == 1,
-    MV_FIRST(targetIds),
-    ""
-  )
-| EVAL uniqueEventsCount = totalEventsCount - uniqueAlertsCount
-| LIMIT 1000
-| SORT action DESC, actorEntityGroup, targetEntityGroup, isOrigin`;
-
-  return query;
 };
