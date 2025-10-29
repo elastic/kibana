@@ -22,7 +22,6 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, features }) => {
-
   return (
     <section className="kbnOverviewDataAdd" aria-labelledby="kbnOverviewDataAdd__title">
       <EuiFlexGroup alignItems="center">
