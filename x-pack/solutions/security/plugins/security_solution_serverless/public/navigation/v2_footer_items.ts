@@ -211,6 +211,12 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
             },
           ],
         },
+        {
+          // We include this link here to ensure that sidenav panel opens when user lands to legacy management landing page
+          // https://github.com/elastic/kibana/issues/240275
+          link: 'management',
+          sideNavStatus: 'hidden',
+        },
       ],
     },
   ],
