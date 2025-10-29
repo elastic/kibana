@@ -389,6 +389,8 @@ const extractStepActionFromError = (errorMessage: string): string | undefined =>
   return undefined;
 };
 
+const MAX_SCRIPT_LENGTH = 200;
+
 /**
  * Formats step information for display in alert messages
  */
@@ -451,8 +453,9 @@ export const formatStepInformation = (
 
   if (stepInfo.scriptSource) {
     // Limit script source to first 200 characters to avoid too long messages
-    const truncatedScript = stepInfo.scriptSource.substring(0, 200);
-    const script = stepInfo.scriptSource.length > 200 ? `${truncatedScript}...` : truncatedScript;
+    const truncatedScript = stepInfo.scriptSource.substring(0, MAX_SCRIPT_LENGTH);
+    const script =
+      stepInfo.scriptSource.length > MAX_SCRIPT_LENGTH ? `${truncatedScript}...` : truncatedScript;
     parts.push(`\n- Script: ${script}  `);
   }
 

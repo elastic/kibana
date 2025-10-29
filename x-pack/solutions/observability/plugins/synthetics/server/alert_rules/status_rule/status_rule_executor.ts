@@ -434,9 +434,7 @@ export class StatusRuleExecutor {
         // If recoveryStrategy is 'firstUp', we only consider configs that are not up
         const configs =
           recoveryStrategy === 'firstUp'
-            ? locationConfigs.filter(
-                (c: AlertStatusMetaData) => (c.latestPing.summary?.up ?? 0) === 0
-              )
+            ? locationConfigs.filter((c) => (c.latestPing.summary?.up ?? 0) === 0)
             : locationConfigs;
 
         if (!configs.length) {
@@ -466,10 +464,8 @@ export class StatusRuleExecutor {
             configId,
             downThreshold,
             useLatestChecks,
-            locationNames: configs.map(
-              (c: AlertStatusMetaData) => c.latestPing.observer.geo?.name!
-            ),
-            locationIds: configs.map((c: AlertStatusMetaData) => c.latestPing.observer.name!),
+            locationNames: configs.map((c) => c.latestPing.observer.geo?.name!),
+            locationIds: configs.map((c) => c.latestPing.observer.name!),
           });
         }
       }
@@ -631,6 +627,12 @@ export class StatusRuleExecutor {
 
     if ('statusConfig' in params && 'checks' in params.statusConfig) {
       context.checks = params.statusConfig.checks;
+    } else if ('downConfigs' in params) {
+      // For ungrouped alerts with downConfigs, get checks from the first config
+      const configsArray = Object.values(params.downConfigs);
+      if (configsArray.length > 0 && 'checks' in configsArray[0]) {
+        context.checks = configsArray[0].checks;
+      }
     }
 
     // Fetch step information for browser monitors synchronously before creating alert
