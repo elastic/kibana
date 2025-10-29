@@ -57,15 +57,11 @@ const VisualizationToolbar = memo(function VisualizationToolbar({
     return null;
   }
 
-  return (
-    <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
-      {ToolbarComponent({
-        frame: framePublicAPI,
-        state: visualization.state,
-        setState: setVisualizationState,
-      })}
-    </EuiFlexItem>
-  );
+  return ToolbarComponent({
+    frame: framePublicAPI,
+    state: visualization.state,
+    setState: setVisualizationState,
+  });
 });
 
 export function VisualizationToolbarWrapper({

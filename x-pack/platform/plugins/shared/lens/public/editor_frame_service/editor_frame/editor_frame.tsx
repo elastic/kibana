@@ -17,8 +17,10 @@ import type {
   AddUserMessages,
   LensInspector,
 } from '@kbn/lens-common';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DataPanelWrapper } from './data_panel_wrapper';
@@ -63,7 +65,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const visualization = useLensSelector(selectVisualization);
   const areDatasourcesLoaded = useLensSelector(selectAreDatasourcesLoaded);
 
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
 
   const isVisualizationLoaded = !!visualization.state;
   const visualizationTypeIsKnown = Boolean(
@@ -154,18 +156,16 @@ export function EditorFrame(props: EditorFrameProps) {
           areDatasourcesLoaded && (
             <ErrorBoundary onError={onError}>
               <>
-                <EuiFlexItem
-                  css={css({ margin: `${euiTheme.size.base} ${euiTheme.size.base} 0 0` })}
+                <EuiFlexGroup
+                  css={styles.visualizationToolbar}
+                  justifyContent="flexEnd"
+                  responsive={false}
+                  wrap={true}
                 >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    justifyContent="flexEnd"
-                    responsive={false}
-                    wrap={true}
-                  >
+                  <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
                     <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <ConfigPanelWrapper
                   core={props.core}
                   framePublicAPI={framePublicAPI}
@@ -215,3 +215,8 @@ export function EditorFrame(props: EditorFrameProps) {
     </RootDragDropProvider>
   );
 }
+
+const componentStyles = {
+  visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
+    css({ margin: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}` }),
+};
