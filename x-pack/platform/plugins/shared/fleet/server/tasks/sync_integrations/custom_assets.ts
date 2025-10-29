@@ -302,7 +302,9 @@ async function updateIngestPipeline(
         esClient.ingest.putPipeline(
           {
             id: customAsset.name,
-            ...customAsset.pipeline,
+            description: customAsset.pipeline.description,
+            version: customAsset.pipeline.version,
+            processors: customAsset.pipeline.processors,
           },
           {
             signal: abortController.signal,
