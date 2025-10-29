@@ -161,7 +161,7 @@ export const AgentsList: React.FC = () => {
               </EuiToolTip>
             );
           },
-          available: (agent) => !agent.readonly,
+          available: (agent) => !agent.readonly && manageAgents,
         },
       ],
     };
