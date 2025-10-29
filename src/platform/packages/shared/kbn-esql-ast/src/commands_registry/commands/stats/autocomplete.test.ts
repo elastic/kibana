@@ -665,7 +665,7 @@ describe('STATS Autocomplete', () => {
           ' = ',
           getDateHistogramCompletionItem().text,
           ...fields,
-          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { scalar: true }),
           ...allGroupingFunctions,
         ]);
       });

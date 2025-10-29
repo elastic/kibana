@@ -27,7 +27,7 @@ import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
-import { registerFeatures } from './features';
+import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
@@ -154,9 +154,8 @@ export class WorkflowsPlugin
       });
     }
 
-    // Register saved object types
-
-    registerFeatures(plugins);
+    // Register the workflows management feature and its privileges
+    plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter();
