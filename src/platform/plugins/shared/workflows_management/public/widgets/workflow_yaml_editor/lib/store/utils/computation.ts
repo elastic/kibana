@@ -17,29 +17,24 @@ import type { WorkflowZodSchemaLooseType } from '../../../../../../common/schema
 import type { ComputedData } from '../types';
 
 export const performComputation = (
-  _yamlString: string | undefined,
+  yamlString: string | undefined,
   schemaLoose: WorkflowZodSchemaLooseType
 ): ComputedData | undefined => {
-  if (!_yamlString) {
+  if (!yamlString) {
     return;
   }
 
   // Compute derived data
   try {
-    const yamlString = correctYamlSyntax(_yamlString);
-    // Parse YAML document
-    // todo: try to close unclosed quotes, wrap special characters like "@" with quotes before dangerously parsing
+    // Parse YAML document from original yaml string
     // todo: use parseDocument once, not here plus inside parseWorkflowYamlToJSON
     const lineCounter = new LineCounter();
     const yamlDoc = YAML.parseDocument(yamlString, { lineCounter, keepSourceTokens: true });
 
+    // use corrected yaml for schema parsing
+    const correctedYamlString = correctYamlSyntax(yamlString);
     // Parse workflow JSON for graph creation
-    const parsingResult = parseWorkflowYamlForAutocomplete(yamlString);
-    // const dangerouslyParseResult = dangerouslyParseWorkflowYamlToJSON(yamlString);
-
-    if (!parsingResult.success) {
-      console.error('Error parsing workflow YAML', parsingResult.error);
-    }
+    const parsingResult = parseWorkflowYamlForAutocomplete(correctedYamlString);
 
     // Build workflow lookup
     const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
@@ -55,7 +50,6 @@ export const performComputation = (
       workflowDefinition: parsedWorkflow as WorkflowYaml,
     };
   } catch (e) {
-    console.error('Error performing computation', e);
     // Clear computed data on error
   }
 };
