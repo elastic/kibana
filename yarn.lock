@@ -6627,6 +6627,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/global-redirect-app-links@link:src/platform/packages/private/kbn-global-redirect-app-links":
+  version "0.0.0"
+  uid ""
+
 "@kbn/global-search-bar-plugin@link:x-pack/platform/plugins/private/global_search_bar":
   version "0.0.0"
   uid ""
@@ -8387,14 +8391,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-link-redirect-app-mocks@link:src/platform/packages/shared/shared-ux/link/redirect_app/mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-link-redirect-app-types@link:src/platform/packages/shared/shared-ux/link/redirect_app/types":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-link-redirect-app@link:src/platform/packages/shared/shared-ux/link/redirect_app/impl":
   version "0.0.0"
   uid ""
@@ -9611,16 +9607,17 @@
   dependencies:
     "@types/mdx" "^2.0.0"
 
-"@modelcontextprotocol/sdk@^1.13.2":
-  version "1.13.2"
-  resolved "https://registry.yarnpkg.com/@modelcontextprotocol/sdk/-/sdk-1.13.2.tgz#cb33fb668a03573cc4d3df9d194dc5c73239861f"
-  integrity sha512-Vx7qOcmoKkR3qhaQ9qf3GxiVKCEu+zfJddHv6x3dY/9P6+uIwJnmuAur5aB+4FDXf41rRrDnOEGkviX5oYZ67w==
+"@modelcontextprotocol/sdk@^1.20.2":
+  version "1.20.2"
+  resolved "https://registry.yarnpkg.com/@modelcontextprotocol/sdk/-/sdk-1.20.2.tgz#7c448a073164841814d34ec9c76bcc37f2d6ffdc"
+  integrity sha512-6rqTdFt67AAAzln3NOKsXRmv5ZzPkgbfaebKBqUbts7vK1GZudqnrun5a8d3M/h955cam9RHZ6Jb4Y1XhnmFPg==
   dependencies:
     ajv "^6.12.6"
     content-type "^1.0.5"
     cors "^2.8.5"
     cross-spawn "^7.0.5"
     eventsource "^3.0.2"
+    eventsource-parser "^3.0.0"
     express "^5.0.1"
     express-rate-limit "^7.5.0"
     pkce-challenge "^5.0.0"
@@ -11438,16 +11435,6 @@
   integrity sha512-UDAOQJtJDxZHQ5Nm1olycBIsz2wdGX8SdzyGVHmD8EOQYAeDZQyIlQYohDe9nazdIOQLZCIc3fU0G9gqVLkaGQ==
   dependencies:
     "@sentry/types" "7.120.3"
-
-"@seriousme/openapi-schema-validator@^2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@seriousme/openapi-schema-validator/-/openapi-schema-validator-2.4.1.tgz#09d44527e7cd5c78c72ab51ef29956eb309fcd30"
-  integrity sha512-OX15CKLV2JFGcoXxFVD/CMtWzys+r6G9gArKY8iaUqOkIEqp80ispclk5c8j5i1iEIIlyCRJ0R0N5MddHFg2xg==
-  dependencies:
-    ajv "^8.17.1"
-    ajv-draft-04 "^1.0.0"
-    ajv-formats "^3.0.1"
-    js-yaml "^4.1.0"
 
 "@sideway/address@^4.1.5":
   version "4.1.5"
@@ -17705,7 +17692,7 @@ crypto-browserify@^3.12.1:
     randombytes "^2.1.0"
     randomfill "^1.0.4"
 
-crypto-js@^4.1.1, crypto-js@^4.2.0:
+crypto-js@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.2.0.tgz#4d931639ecdfd12ff80e8186dba6af2c2e856631"
   integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
@@ -24623,10 +24610,10 @@ linkify-it@^5.0.0:
   dependencies:
     uc.micro "^2.0.0"
 
-liquidjs@^10.22.0:
-  version "10.22.0"
-  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.22.0.tgz#06f2be823d897986fc92f88855caf903c381498c"
-  integrity sha512-SGBYxl7U7vqmmAQdP/PTP3P3q11f99xUjdtxVICqNQqPecl+JIMCsTshDObGzicHaAqWAnPW0o25a9hDaJxOng==
+liquidjs@^10.24.0:
+  version "10.24.0"
+  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.24.0.tgz#1aa832189b48b4102049dfa7a8eea40281fa9389"
+  integrity sha512-TAUNAdgwaAXjjcUFuYVJm9kOVH7zc0mTKxsG9t9Lu4qdWjB2BEblyVIYpjWcmJLMGgiYqnGNJjpNMHx0gp/46A==
   dependencies:
     commander "^10.0.0"
 
@@ -27648,12 +27635,10 @@ pixelmatch@5.3.0, pixelmatch@^5.3.0:
   dependencies:
     pngjs "^6.0.0"
 
-pkce-challenge@3.1.0, pkce-challenge@^5.0.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/pkce-challenge/-/pkce-challenge-3.1.0.tgz#c974ee934e62c501f09da817964e75db201ee8bf"
-  integrity sha512-bQ/0XPZZ7eX+cdAkd61uYWpfMhakH3NeteUF1R8GNa+LMqX8QFAkbCLqq+AYAns1/ueACBu/BMWhrlKGrdvGZg==
-  dependencies:
-    crypto-js "^4.1.1"
+pkce-challenge@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/pkce-challenge/-/pkce-challenge-5.0.0.tgz#c3a405cb49e272094a38e890a2b51da0228c4d97"
+  integrity sha512-ueGLflrrnvwB3xuo/uGob5pd5FN7l0MsLf0Z87o/UQmRtwjvfylfc9MurIxRAWywCYTgrvpXBcqjV4OfCYGCIQ==
 
 pkg-dir@^3.0.0:
   version "3.0.0"
