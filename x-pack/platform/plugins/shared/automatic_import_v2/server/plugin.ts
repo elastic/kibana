@@ -106,7 +106,8 @@ export class AutomaticImportV2Plugin
         throw new Error('SavedObjects service not initialized.');
       }
 
-      this.automaticImportService.initialize(core.security, core.savedObjects)
+      this.automaticImportService
+        .initialize(core.security, core.savedObjects)
         .then(() => {
           this.logger.debug('AutomaticImportService initialized successfully');
         })

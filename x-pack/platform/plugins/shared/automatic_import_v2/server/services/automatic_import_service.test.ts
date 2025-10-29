@@ -103,7 +103,6 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should use internal repository from createInternalRepository', async () => {
-
       await service.initialize(mockSecurity, mockSavedObjectsStart);
 
       expect(mockSavedObjectsStart.createInternalRepository).toHaveBeenCalled();
@@ -112,21 +111,21 @@ describe('AutomaticImportSetupService', () => {
 
   describe('methods before initialization', () => {
     it('should throw error when calling insertIntegration before initialize', async () => {
-      await expect(
-        service.insertIntegration({} as any, {} as any)
-      ).rejects.toThrow('Saved Objects service not initialized.');
+      await expect(service.insertIntegration({} as any, {} as any)).rejects.toThrow(
+        'Saved Objects service not initialized.'
+      );
     });
 
     it('should throw error when calling getIntegration before initialize', async () => {
-      await expect(
-        service.getIntegration('test-id')
-      ).rejects.toThrow('Saved Objects service not initialized.');
+      await expect(service.getIntegration('test-id')).rejects.toThrow(
+        'Saved Objects service not initialized.'
+      );
     });
 
     it('should throw error when calling addSamplesToDataStream before initialize', async () => {
-      await expect(
-        service.addSamplesToDataStream({} as any, {} as any)
-      ).rejects.toThrow('Security service not initialized.');
+      await expect(service.addSamplesToDataStream({} as any, {} as any)).rejects.toThrow(
+        'Security service not initialized.'
+      );
     });
   });
 
