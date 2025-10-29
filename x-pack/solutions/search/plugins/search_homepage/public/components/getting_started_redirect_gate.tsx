@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { GETTING_STARTED_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
+import { useSearchGettingStartedFeatureFlag } from '../hooks/use_search_getting_started_feature_flag';
 
 interface Props {
   coreStart: CoreStart;
@@ -15,12 +16,13 @@ interface Props {
 }
 
 export const GettingStartedRedirectGate = ({ coreStart, children }: Props) => {
+  const isGettingStartedEnabled = useSearchGettingStartedFeatureFlag();
   useEffect(() => {
     const visited = localStorage.getItem(GETTING_STARTED_LOCALSTORAGE_KEY);
-    if (!visited || visited === 'false') {
+    if (isGettingStartedEnabled && (!visited || visited === 'false')) {
       coreStart.application.navigateToApp('searchGettingStarted');
     }
-  }, [coreStart]);
+  }, [coreStart, isGettingStartedEnabled]);
 
   return <>{children}</>;
 };
