@@ -637,7 +637,7 @@ describe('WorkflowsService', () => {
   });
 
   describe('createWorkflow', () => {
-    it('should create workflow successfully', async () => {
+    it('should create workflow with valid yaml successfully', async () => {
       const mockRequest = {
         auth: {
           credentials: {
@@ -679,6 +679,72 @@ steps:
           }),
           refresh: 'wait_for',
           require_alias: true,
+        })
+      );
+    });
+
+    it('should create workflow with invalid yaml and set valid to false', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const workflowCommand = {
+        yaml: 'name: invalid workflow\nenabled: true\ntriggers:\n  - type: invalid-trigger-type',
+      };
+
+      mockEsClient.index.mockResolvedValue({ _id: 'new-workflow-id' } as any);
+
+      const result = await service.createWorkflow(workflowCommand, 'default', mockRequest);
+
+      expect(result.name).toBe('Untitled workflow');
+      expect(result.enabled).toBe(false);
+      expect(result.valid).toBe(false);
+      expect(result.definition).toBeNull();
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: expect.any(String),
+          index: '.workflows-workflows',
+        })
+      );
+    });
+
+    it('should create workflow with duplicate step names and set valid to false', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const workflowCommand = {
+        yaml: `name: duplicate step names workflow
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: first-step
+    with:
+      message: "Hello, world!"
+  - type: console
+    name: first-step
+    with:
+      message: "Hello, world!"`,
+      };
+
+      mockEsClient.index.mockResolvedValue({ _id: 'new-workflow-id' } as any);
+
+      const result = await service.createWorkflow(workflowCommand, 'default', mockRequest);
+
+      expect(result.name).toBe('duplicate step names workflow');
+      expect(result.enabled).toBe(true);
+      expect(result.valid).toBe(false);
+      expect(result.definition).toBeNull();
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: expect.any(String),
+          index: '.workflows-workflows',
         })
       );
     });

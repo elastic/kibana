@@ -28,6 +28,7 @@ import type {
   ConnectorTypeInfo,
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   ExecutionStatus,
@@ -64,7 +65,7 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
-import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
+import { InvalidYamlSchemaError } from '../../common/lib/errors';
 
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
@@ -177,26 +178,29 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
+    let workflowToCreate: EsWorkflowCreate = {
+      name: 'Untitled workflow',
+      description: undefined,
+      enabled: false,
+      tags: [],
+      definition: undefined,
+      valid: false,
+    };
     const parsedYaml = parseWorkflowYamlToJSON(
       workflow.yaml,
       await this.getWorkflowZodSchema({ loose: false }, spaceId, request)
     );
-    if (!parsedYaml.success) {
-      throw new Error(`Invalid workflow yaml: ${parsedYaml.error.message}`);
-    }
+    if (parsedYaml.success) {
+      // The type of parsedYaml.data is validated by getWorkflowZodSchemaLoose(), so this assertion is partially safe.
+      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
 
-    // Validate step name uniqueness
-    const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
-    if (!stepValidation.isValid) {
-      const errorMessages = stepValidation.errors.map((error) => error.message);
-      throw new WorkflowValidationError(
-        'Workflow validation failed: Step names must be unique throughout the workflow.',
-        errorMessages
-      );
+      // Validate step name uniqueness
+      const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+      if (!stepValidation.isValid) {
+        workflowToCreate.valid = false;
+        workflowToCreate.definition = undefined;
+      }
     }
-
-    // The type of parsedYaml.data is validated by getWorkflowZodSchemaLoose(), so this assertion is partially safe.
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
 
@@ -206,11 +210,11 @@ export class WorkflowsService {
       enabled: workflowToCreate.enabled,
       tags: workflowToCreate.tags || [],
       yaml: workflow.yaml,
-      definition: workflowToCreate.definition,
+      definition: workflowToCreate.definition ?? null,
       createdBy: authenticatedUser,
       lastUpdatedBy: authenticatedUser,
       spaceId,
-      valid: true,
+      valid: workflowToCreate.valid,
       deleted_at: null,
       created_at: now.toISOString(),
       updated_at: now.toISOString(),
@@ -224,7 +228,7 @@ export class WorkflowsService {
     });
 
     // Schedule the workflow if it has triggers
-    if (this.taskScheduler && workflowToCreate.definition.triggers) {
+    if (this.taskScheduler && workflowToCreate.definition?.triggers) {
       for (const trigger of workflowToCreate.definition.triggers) {
         if (trigger.type === 'scheduled') {
           await this.taskScheduler.scheduleWorkflowTask(id, spaceId, trigger, request);
