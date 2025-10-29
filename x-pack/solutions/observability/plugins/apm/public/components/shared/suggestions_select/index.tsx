@@ -73,7 +73,7 @@ export function SuggestionsSelect({
     { preservePreviousData: false }
   );
 
-    useEffect(() => {
+  useEffect(() => {
     const removerCallback = (newState: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedOptions(newState);
     };
