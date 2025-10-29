@@ -10,7 +10,9 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequestFromAction } from '@kbn/workflows';
+import type { z } from '@kbn/zod';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -25,22 +27,12 @@ export interface KibanaActionStep extends BaseStep {
 
 /**
  * Fetcher configuration options for customizing HTTP requests
+ * Derived from the Zod schema to ensure type safety and avoid duplication
  */
-interface FetcherOptions {
-  skip_ssl_verification?: boolean;
-  timeout?: number;
-  follow_redirects?: boolean;
-  max_redirects?: number;
-  keep_alive?: boolean;
-  retry?: {
-    attempts?: number;
-    delay?: number;
-    backoff?: 'linear' | 'exponential';
-    retryOn?: number[];
-  };
+type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
   // Allow additional undici Agent options to be passed through
   [key: string]: any;
-}
+};
 
 export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaActionStep> {
   constructor(
@@ -232,7 +224,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       body: body ? JSON.stringify(body) : undefined,
     };
 
-    // Apply undici Agent with all fetcher options
+    // Apply undici Agent with fetcher options
     if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
       const { Agent } = await import('undici');
 
@@ -242,8 +234,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         follow_redirects, // eslint-disable-next-line @typescript-eslint/naming-convention
         max_redirects, // eslint-disable-next-line @typescript-eslint/naming-convention
         keep_alive,
-        timeout,
-        retry,
         ...otherOptions
       } = fetcherOptions;
 
@@ -269,98 +259,13 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       }
     }
 
-    // Execute with retry logic (timeout is applied per-attempt inside the retry loop)
-    return this.executeWithRetry(fullUrl, fetchOptions, fetcherOptions);
-  }
+    // Make the HTTP request
+    const response = await fetch(fullUrl, fetchOptions);
 
-  private async executeWithRetry(
-    url: string,
-    fetchOptions: RequestInit,
-    fetcherOptions?: FetcherOptions
-  ): Promise<any> {
-    const retryConfig = fetcherOptions?.retry;
-    const timeoutMs = fetcherOptions?.timeout;
-    const maxAttempts = retryConfig?.attempts ?? 1;
-    const retryDelay = retryConfig?.delay ?? 1000;
-    const backoffStrategy = retryConfig?.backoff ?? 'linear';
-    const retryOnStatuses = retryConfig?.retryOn ?? [502, 503, 504];
-
-    let lastError: any;
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      // Setup timeout for THIS attempt
-      let timeoutId: NodeJS.Timeout | undefined;
-      let attemptFetchOptions = fetchOptions;
-
-      if (timeoutMs) {
-        const controller = new AbortController();
-        timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-        // Create new fetch options with this attempt's abort signal
-        attemptFetchOptions = { ...fetchOptions, signal: controller.signal };
-      }
-
-      try {
-        const response = await fetch(url, attemptFetchOptions);
-
-        // Clear timeout after successful fetch
-        if (timeoutId) clearTimeout(timeoutId);
-
-        // Retry on specific status codes
-        if (
-          !response.ok &&
-          attempt < maxAttempts - 1 &&
-          retryOnStatuses.includes(response.status)
-        ) {
-          const delay =
-            backoffStrategy === 'exponential' ? retryDelay * Math.pow(2, attempt) : retryDelay;
-          this.workflowLogger.logDebug(
-            `Retrying request (attempt ${
-              attempt + 1
-            }/${maxAttempts}) after ${delay}ms due to status ${response.status}`,
-            { event: { action: 'kibana-action', outcome: 'unknown' }, tags: ['kibana', 'retry'] }
-          );
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-        }
-
-        return await response.json();
-      } catch (error) {
-        lastError = error;
-
-        // Clear timeout after error
-        if (timeoutId) clearTimeout(timeoutId);
-
-        // If this is the last attempt, throw
-        if (attempt === maxAttempts - 1) throw error;
-
-        // Check if this is an HTTP error with a status code
-        const isHttpError = error instanceof Error && error.message.startsWith('HTTP ');
-        if (isHttpError) {
-          // Extract status code from error message
-          const statusMatch = error.message.match(/^HTTP (\d+):/);
-          if (statusMatch) {
-            const statusCode = parseInt(statusMatch[1], 10);
-            // Don't retry if status code is not in retryOn list
-            if (!retryOnStatuses.includes(statusCode)) {
-              throw error;
-            }
-          }
-        }
-
-        // Retry on network errors or retryable HTTP errors
-        const delay =
-          backoffStrategy === 'exponential' ? retryDelay * Math.pow(2, attempt) : retryDelay;
-        this.workflowLogger.logInfo(
-          `Retrying request (attempt ${attempt + 1}/${maxAttempts}) after ${delay}ms due to error`,
-          { event: { action: 'kibana-action', outcome: 'unknown' }, tags: ['kibana', 'retry'] }
-        );
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
     }
-    throw lastError;
+
+    return response.json();
   }
 }

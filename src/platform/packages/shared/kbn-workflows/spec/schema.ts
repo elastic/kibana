@@ -217,6 +217,16 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
+// Fetcher configuration for HTTP request customization (shared across formats)
+export const FetcherConfigSchema = z
+  .object({
+    skip_ssl_verification: z.boolean().optional(),
+    follow_redirects: z.boolean().optional(),
+    max_redirects: z.number().optional(),
+    keep_alive: z.boolean().optional(),
+  })
+  .optional();
+
 // Generic Kibana step schema for backend validation
 export const KibanaStepSchema = BaseStepSchema.extend({
   type: z.string().refine((val) => val.startsWith('kibana.'), {
@@ -231,24 +241,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         body: z.any().optional(),
         headers: z.record(z.string(), z.string()).optional(),
       }),
-      // Fetcher configuration for HTTP request customization
-      fetcher: z
-        .object({
-          skip_ssl_verification: z.boolean().optional(),
-          timeout: z.number().optional(),
-          follow_redirects: z.boolean().optional(),
-          max_redirects: z.number().optional(),
-          keep_alive: z.boolean().optional(),
-          retry: z
-            .object({
-              attempts: z.number().optional(),
-              delay: z.number().optional(),
-              backoff: z.enum(['linear', 'exponential']).optional(),
-              retryOn: z.array(z.number()).optional(),
-            })
-            .optional(),
-        })
-        .optional(),
+      fetcher: FetcherConfigSchema,
     }),
     // Sugar syntax for common Kibana operations
     z
@@ -269,24 +262,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         page: z.number().optional(),
         perPage: z.number().optional(),
         status: z.string().optional(),
-        // Fetcher configuration for HTTP request customization
-        fetcher: z
-          .object({
-            skip_ssl_verification: z.boolean().optional(),
-            timeout: z.number().optional(),
-            follow_redirects: z.boolean().optional(),
-            max_redirects: z.number().optional(),
-            keep_alive: z.boolean().optional(),
-            retry: z
-              .object({
-                attempts: z.number().optional(),
-                delay: z.number().optional(),
-                backoff: z.enum(['linear', 'exponential']).optional(),
-                retryOn: z.array(z.number()).optional(),
-              })
-              .optional(),
-          })
-          .optional(),
+        fetcher: FetcherConfigSchema,
       })
       .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
   ]),
