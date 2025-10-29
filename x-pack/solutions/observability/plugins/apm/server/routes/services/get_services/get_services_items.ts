@@ -15,7 +15,6 @@ import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getHealthStatuses } from './get_health_statuses';
-import { getServicesWithoutTransactions } from './get_services_without_transactions';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import type { MergedServiceStat } from './merge_service_stats';
@@ -25,7 +24,6 @@ export const MAX_NUMBER_OF_SERVICES = 1_000;
 
 export interface ServicesItemsResponse {
   items: MergedServiceStat[];
-  maxCountExceeded: boolean;
   serviceOverflowCount: number;
 }
 
@@ -75,39 +73,30 @@ export async function getServicesItems({
       searchQuery,
     };
 
-    const [
-      { serviceStats, serviceOverflowCount },
-      { services: servicesWithoutTransactions, maxCountExceeded },
-      healthStatuses,
-      alertCounts,
-    ] = await Promise.all([
-      getServiceTransactionStats({
-        ...commonParams,
-        apmEventClient,
-      }),
-      getServicesWithoutTransactions({
-        ...commonParams,
-        apmEventClient,
-      }),
-      getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
-        logger.debug(err);
-        return [];
-      }),
-      getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
-        logger.debug(err);
-        return [];
-      }),
-    ]);
+    const [{ serviceStats, serviceOverflowCount }, healthStatuses, alertCounts] = await Promise.all(
+      [
+        getServiceTransactionStats({
+          ...commonParams,
+          apmEventClient,
+        }),
+        getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
+          logger.debug(err);
+          return [];
+        }),
+        getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
+          logger.debug(err);
+          return [];
+        }),
+      ]
+    );
 
     return {
       items:
         mergeServiceStats({
           serviceStats,
-          servicesWithoutTransactions,
           healthStatuses,
           alertCounts,
         }) ?? [],
-      maxCountExceeded,
       serviceOverflowCount,
     };
   });
