@@ -9,7 +9,7 @@
 
 import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './build_autocomplete_context';
-import { createMockMonacoTextModel } from '../../../../../common/mocks/monaco_model';
+import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
 
 describe('buildAutocompleteContext', () => {
   it('should return null if the yaml document is null', () => {
@@ -25,7 +25,7 @@ describe('buildAutocompleteContext', () => {
         focusedStepId: undefined,
         connectors: undefined,
       },
-      createMockMonacoTextModel('', 0) as unknown as monaco.editor.ITextModel,
+      createFakeMonacoModel('', 0) as unknown as monaco.editor.ITextModel,
       new monaco.Position(1, 1),
       {
         triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,

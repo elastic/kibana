@@ -9,8 +9,9 @@
 
 import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
-import type { AutocompleteContext } from './autocomplete.types';
+import { DynamicStepContextSchema } from '@kbn/workflows';
+import type { z } from '@kbn/zod';
+import type { AutocompleteContext, MinimalWorkflowDetailState } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
 import { parseLineForCompletion } from './parse_line_for_completion';
@@ -18,13 +19,10 @@ import { getCurrentPath } from '../../../../../common/lib/yaml';
 import { getSchemaAtPath } from '../../../../../common/lib/zod';
 import { getContextSchemaForPath } from '../../../../features/workflow_context/lib/get_context_for_path';
 import { getConnectorTypeFromContext } from '../snippets/generate_connector_snippet';
-import type { StepInfo, WorkflowDetailState } from '../store';
+import type { StepInfo } from '../store';
 
 export function buildAutocompleteContext(
-  editorState: Pick<
-    WorkflowDetailState,
-    'yamlString' | 'computed' | 'focusedStepId' | 'connectors'
-  >,
+  editorState: MinimalWorkflowDetailState,
   model: monaco.editor.ITextModel,
   position: monaco.Position,
   completionContext: monaco.languages.CompletionContext
@@ -83,17 +81,16 @@ export function buildAutocompleteContext(
   // First check if we're in a connector's with block (using enhanced detection)
   const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
 
-  let contextSchema: z.ZodType = z.object({});
-  try {
-    if (workflowDefinition && workflowGraph) {
-      contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path);
-    }
-  } catch (contextError) {
-    // console.error('Error getting context schema for path', contextError);
-  }
-
+  let contextSchema: z.ZodType = DynamicStepContextSchema;
   const lineUpToCursor = line.substring(0, position.column - 1);
   const parseResult = parseLineForCompletion(lineUpToCursor);
+
+  try {
+    // For variable expressions, we want the root context with consts, event, workflow, etc.
+    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, []);
+  } catch (contextError) {
+    console.error('Error getting context schema for path', contextError);
+  }
 
   if (parseResult?.fullKey) {
     const schemaAtPath = getSchemaAtPath(contextSchema, parseResult.fullKey, { partial: true });

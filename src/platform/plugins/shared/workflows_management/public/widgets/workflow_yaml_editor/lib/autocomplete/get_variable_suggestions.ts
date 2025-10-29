@@ -21,17 +21,25 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
     scalarType,
     shouldBeQuoted,
     shouldUseCurlyBraces,
+    lineParseResult,
   } = autocompleteContext;
   const suggestions: monaco.languages.CompletionItem[] = [];
-  const lastPathSegment = autocompleteContext.lineParseResult?.pathSegments?.pop() ?? null;
+  const lastPathSegment =
+    lineParseResult?.pathSegments?.[lineParseResult.pathSegments.length - 1] ?? null;
+
+  console.log('getVariableSuggestions - lineParseResult:', lineParseResult);
+
   // We're inside a variable expression, provide context-based completions
   if (contextSchema instanceof z.ZodObject) {
     const contextKeys = Object.keys(contextSchema.shape);
+    console.log('contextKeys:', contextKeys);
+    console.log('lastPathSegment:', lastPathSegment);
 
     // Filter based on what the user has typed so far
     const filteredKeys = lastPathSegment
       ? contextKeys.filter((key) => key.startsWith(lastPathSegment))
       : contextKeys;
+    console.log('filteredKeys:', filteredKeys);
 
     for (const key of filteredKeys) {
       const keySchema = contextSchema.shape[key];

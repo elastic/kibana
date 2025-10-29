@@ -8,6 +8,7 @@
  */
 
 import type { monaco } from '@kbn/monaco';
+import type { MinimalWorkflowDetailState } from './autocomplete/autocomplete.types';
 import { buildAutocompleteContext } from './autocomplete/build_autocomplete_context';
 import { getConnectorIdSuggestions } from './autocomplete/get_connector_id_suggestions';
 import { getDirectTypeSuggestions } from './autocomplete/get_direct_type_suggestions';
@@ -21,10 +22,9 @@ import {
   createLiquidFilterCompletions,
   createLiquidSyntaxCompletions,
 } from './liquid_completions';
-import type { WorkflowDetailState } from './store';
 
 export function getCompletionItemProvider(
-  getState: () => WorkflowDetailState | undefined
+  getState: () => MinimalWorkflowDetailState | undefined
 ): monaco.languages.CompletionItemProvider {
   return {
     // Trigger characters for completion:

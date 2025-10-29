@@ -13,7 +13,7 @@
  * @param cursorOffset - The offset of the cursor in the model
  * @returns The mock monaco model with getValue, getLineCount, getOffsetAt, getPositionAt, getLineContent, getWordUntilPosition, getWordAtPosition, pushEditOperations methods
  */
-export function createMockMonacoTextModel(value: string, cursorOffset: number) {
+export function createFakeMonacoModel(value: string, cursorOffset: number) {
   const lines = value.split('\n');
   let position = { lineNumber: 1, column: 1 };
 
@@ -37,7 +37,7 @@ export function createMockMonacoTextModel(value: string, cursorOffset: number) {
     getOffsetAt: (pos: typeof position) => cursorOffset,
     getPositionAt: (offset: number) => {
       // Simple implementation: convert offset to line/column
-      const currentOffset2 = 0;
+      let currentOffset2 = 0;
       for (let i = 0; i < lines.length; i++) {
         const lineLength = lines[i].length + 1; // +1 for newline
         if (currentOffset2 + lineLength > offset) {
@@ -46,7 +46,7 @@ export function createMockMonacoTextModel(value: string, cursorOffset: number) {
             column: offset - currentOffset2 + 1,
           };
         }
-        currentOffset += lineLength;
+        currentOffset2 += lineLength;
       }
       return { lineNumber: lines.length, column: lines[lines.length - 1].length + 1 };
     },

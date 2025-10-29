@@ -8,15 +8,15 @@
  */
 
 import { monaco } from '@kbn/monaco/src/monaco_imports';
-import { createMockMonacoTextModel } from './monaco_model';
+import { createFakeMonacoModel } from './monaco_model';
 
 describe('createMockModel', () => {
   it('should create a mock model', () => {
-    const model = createMockMonacoTextModel('name: one_step_workflow');
+    const model = createFakeMonacoModel('name: one_step_workflow');
     expect(model.getLineCount()).toBe(1);
   });
   it('should calculate offset from position', () => {
-    const model = createMockMonacoTextModel(`name: one_step_workflow
+    const model = createFakeMonacoModel(`name: one_step_workflow
 steps:
   - name: get_google
     type: http
