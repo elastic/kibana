@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
+import '@kbn/react-query/mock';
 import * as ReactQuery from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
@@ -21,8 +23,6 @@ const queryClient = new QueryClient(testQueryClientConfig);
 const wrapper: FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
-
-const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
 
 const mockHttpClient = httpServiceMock.createStartContract();
 
@@ -75,15 +75,15 @@ describe('useFetchAlertsFieldsQuery', () => {
       }
     );
 
-    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+    expect(ReactQuery.useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
 
     rerender({ ruleTypeIds: [], enabled: true });
 
-    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+    expect(ReactQuery.useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
 
     rerender({ ruleTypeIds: ['apm'] });
 
-    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+    expect(ReactQuery.useQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
   });
 
   it('should call the api only once', async () => {
