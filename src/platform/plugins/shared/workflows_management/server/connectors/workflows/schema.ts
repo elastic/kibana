@@ -12,7 +12,6 @@ import { schema } from '@kbn/config-schema';
 const RunSubActionParamsSchema = schema.object({
   workflowId: schema.string(),
   inputs: schema.maybe(schema.any()),
-  alerts: schema.arrayOf(schema.any()),
   spaceId: schema.string(),
 });
 

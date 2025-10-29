@@ -34,7 +34,7 @@ export const createExternalService = (
   const runWorkflow = async ({
     workflowId,
     spaceId,
-    inputs = {},
+    inputs,
   }: RunWorkflowParams): Promise<WorkflowExecutionResponse> => {
     try {
       logger.info(`Attempting to run workflow ${workflowId} via internal service`);
@@ -46,7 +46,7 @@ export const createExternalService = (
       }
 
       // Use the injected service function instead of making HTTP requests
-      const workflowRunId = await runWorkflowService(workflowId, spaceId, inputs, request);
+      const workflowRunId = await runWorkflowService(workflowId, spaceId, inputs || {}, request);
 
       if (!workflowRunId) {
         throw new Error('Invalid response: missing workflowRunId');
