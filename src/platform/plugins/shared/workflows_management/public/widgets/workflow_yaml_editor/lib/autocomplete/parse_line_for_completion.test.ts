@@ -34,6 +34,11 @@ describe('parseLineForCompletion', () => {
       expect(result?.matchType).toBe('at');
       expect(result?.fullKey).toBe('consts');
     });
+
+    it('should parse @ trigger inside full quoted string', () => {
+      const result = parseLineForCompletion('      message: "@"');
+      expect(result?.matchType).toBe('at');
+    });
   });
 
   describe('mustache unfinished scenarios', () => {

@@ -37,6 +37,7 @@ export function getCompletionItemProvider(
     provideCompletionItems: (model, position, completionContext) => {
       const editorState = getState();
       if (!editorState) {
+        console.error('No editor state found');
         return {
           suggestions: [],
           incomplete: false,
@@ -49,11 +50,13 @@ export function getCompletionItemProvider(
         completionContext
       );
       if (!autocompleteContext) {
+        console.error('No autocomplete context built');
         return {
           suggestions: [],
           incomplete: false,
         };
       }
+      console.log('autocompleteContext:', autocompleteContext);
 
       const { lineParseResult } = autocompleteContext;
 

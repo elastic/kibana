@@ -18,6 +18,7 @@ import {
   getOnFailureStepSchema,
   getParallelStepSchema,
   getWorkflowSettingsSchema,
+  TriggerSchema,
   WaitStepSchema,
   WorkflowSchema,
 } from '../schema';

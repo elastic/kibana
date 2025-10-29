@@ -16,7 +16,6 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   yamlString: string,
   schema: T
 ): z.SafeParseReturnType<z.input<T>, z.output<T>> | { success: false; error: Error } {
-  // todo: try to close unclosed quotes, wrap special characters like "@" with quotes before dangerously parsing
   const dangerouslyParseResult = dangerouslyParseWorkflowYamlToJSON(yamlString);
   if (!dangerouslyParseResult.success) {
     return {

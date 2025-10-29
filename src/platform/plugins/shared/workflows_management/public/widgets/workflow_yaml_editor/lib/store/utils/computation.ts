@@ -12,36 +12,44 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod';
 import { buildWorkflowLookup } from './build_workflow_lookup';
-import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml';
+import {
+  dangerouslyParseWorkflowYamlToJSON,
+  parseWorkflowYamlToJSON,
+} from '../../../../../../common/lib/yaml';
+import { correctYamlSyntax } from '../../../../../../common/lib/yaml/correct_yaml_syntax';
 import type { WorkflowZodSchemaLooseType } from '../../../../../../common/schema';
 import type { ComputedData } from '../types';
 
 export const performComputation = (
-  yamlString: string | undefined,
+  _yamlString: string | undefined,
   schemaLoose: WorkflowZodSchemaLooseType
 ): ComputedData | undefined => {
-  if (!yamlString) {
+  if (!_yamlString) {
     return;
   }
 
   // Compute derived data
   try {
+    const yamlString = correctYamlSyntax(_yamlString);
     // Parse YAML document
+    // todo: try to close unclosed quotes, wrap special characters like "@" with quotes before dangerously parsing
+    // todo: use parseDocument once, not here plus inside parseWorkflowYamlToJSON
     const lineCounter = new LineCounter();
     const yamlDoc = YAML.parseDocument(yamlString, { lineCounter, keepSourceTokens: true });
 
     // Parse workflow JSON for graph creation
-    const parsingResult = parseWorkflowYamlToJSON(yamlString, schemaLoose as z.ZodSchema);
+    // const parsingResult = parseWorkflowYamlToJSON(yamlString, schemaLoose as z.ZodSchema);
+    const dangerouslyParseResult = dangerouslyParseWorkflowYamlToJSON(yamlString);
 
-    if (!parsingResult.success) {
-      console.error('Error parsing workflow YAML', parsingResult.error);
+    if (!dangerouslyParseResult.success) {
+      console.error('Error parsing workflow YAML', dangerouslyParseResult.error);
     }
 
     // Build workflow lookup
     const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
 
     // Create workflow graph
-    const parsedWorkflow = parsingResult.success ? parsingResult.data : undefined;
+    const parsedWorkflow = dangerouslyParseResult.success ? dangerouslyParseResult.json : undefined;
     const graph = parsedWorkflow ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow) : undefined;
     return {
       yamlLineCounter: lineCounter,

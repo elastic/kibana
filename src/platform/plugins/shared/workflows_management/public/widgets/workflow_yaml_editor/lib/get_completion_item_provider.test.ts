@@ -120,19 +120,19 @@ steps:
       message: @|<-
 `.trim();
       const suggestions = await getSuggestions(yamlContent);
-      expect(suggestions.map((s) => s.label)).toEqual(
-        expect.arrayContaining([
-          'consts',
-          'event',
-          'now',
-          'workflow',
-          'steps',
-          'execution',
-          'inputs',
-        ])
+      expect(suggestions.map((s) => s.label).sort()).toEqual(
+        ['consts', 'event', 'now', 'workflow', 'steps', 'execution', 'inputs'].sort()
       );
-      expect(suggestions.map((s) => s.insertText)).toEqual(
-        expect.arrayContaining([expect.stringMatching(/^".*"$/)])
+      expect(suggestions.map((s) => s.insertText).sort()).toEqual(
+        [
+          '"{{ event$0 }}"',
+          '"{{ execution$0 }}"',
+          '"{{ workflow$0 }}"',
+          '"{{ inputs$0 }}"',
+          '"{{ consts$0 }}"',
+          '"{{ now$0 }}"',
+          '"{{ steps$0 }}"',
+        ].sort()
       );
     });
 
@@ -164,7 +164,7 @@ steps:
   - name: step1
     type: console
     with:
-      message: "@<-"
+      message: "@|<-"
 `.trim();
 
       const suggestions = await getSuggestions(yamlContent);
@@ -248,6 +248,8 @@ steps:
         ])
       );
     });
+
+    // CURRENT
 
     it('should provide previous step completion', async () => {
       const yamlContent = `
