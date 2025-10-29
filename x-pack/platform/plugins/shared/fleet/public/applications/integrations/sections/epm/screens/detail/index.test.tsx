@@ -114,24 +114,17 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
     }, TESTS_TIMEOUT);
 
-    it('should NOT display policy usage count', async () => {
+    it('should display expected version and prerelease elements', async () => {
       expect(renderResult.queryByTestId('policyCount')).toBeNull();
-    });
-
-    it('should NOT display the Policies tab', async () => {
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
-    });
 
-    it('should display version select if prerelease setting enabled and prererelase version available', async () => {
       const versionSelect = renderResult.queryByTestId('versionSelect');
       expect(versionSelect?.textContent).toEqual('1.0.0-beta1.0.0');
       expect((versionSelect as any)?.value).toEqual('1.0.0-beta');
-    });
 
-    it('should display prerelease callout if prerelease setting enabled and prerelease version available', async () => {
       const calloutTitle = renderResult.getByTestId('prereleaseCallout');
       expect(calloutTitle).toBeInTheDocument();
-      const calloutGABtn = renderResult.getAllByTestId('switchToGABtn')[0];
+      const calloutGABtn = renderResult.getByTestId('switchToGABtn');
       expect((calloutGABtn as any)?.href).toEqual(
         'http://localhost/mock/app/integrations/detail/nginx-1.0.0/overview'
       );
