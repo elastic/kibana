@@ -3608,7 +3608,6 @@ Object {
                 },
               },
               "required": Array [
-                "channelNames",
                 "text",
               ],
               "type": "object",
@@ -3656,7 +3655,6 @@ Object {
                 },
               },
               "required": Array [
-                "channelNames",
                 "text",
               ],
               "type": "object",
