@@ -7749,6 +7749,8 @@ describe('Package policy service', () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const updateSpy = jest.spyOn(packagePolicyService, 'update');
+
+      mockAgentPolicyGet();
       soClient.find.mockResolvedValue({
         saved_objects: [
           {
