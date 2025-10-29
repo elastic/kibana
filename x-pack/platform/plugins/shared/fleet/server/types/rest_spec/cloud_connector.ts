@@ -63,11 +63,9 @@ export const CreateCloudConnectorRequestSchema = {
   }),
 };
 
-// Schema for response vars (union type since we're returning, not validating input)
-const CloudConnectorResponseVarsSchema = schema.oneOf([
-  AwsCloudConnectorVarsSchema,
-  AzureCloudConnectorVarsSchema,
-]);
+// Schema for response vars - using recordOf for flexible OpenAPI generation
+// The actual structure varies based on cloudProvider (AWS vs Azure), so we use a flexible schema
+const CloudConnectorResponseVarsSchema = schema.recordOf(schema.string(), schema.any());
 
 export const CreateCloudConnectorResponseSchema = schema.object({
   item: schema.object({
