@@ -215,8 +215,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.assertMissingValues('Linear');
 
-      await lens.closeVisualOptionsPopover();
-
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await lens.assertColor('#ff0000');
 
@@ -877,8 +875,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Line Chart', () => {
         before(async () => {
-          // Make sure the popover is closed
-          await lens.closeVisualOptionsPopover();
           await lens.switchToVisualization('line');
           await lens.waitForVisualization('xyVisChart');
 
@@ -903,8 +899,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Area Chart', () => {
         before(async () => {
-          // Make sure the popover is closed
-          await lens.closeVisualOptionsPopover();
           await lens.switchToVisualization('area');
           await lens.waitForVisualization('xyVisChart');
 

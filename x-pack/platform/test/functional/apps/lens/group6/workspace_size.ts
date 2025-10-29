@@ -254,8 +254,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lns_gaugeOrientation_verticalBullet');
       await lens.closeFlyout();
 
-      await lens.closeVisualOptionsPopover();
-
       // this height is below the requested 600px
       // that is because the window size isn't large enough to fit the requested dimensions
       // and the chart is forced to shrink.
