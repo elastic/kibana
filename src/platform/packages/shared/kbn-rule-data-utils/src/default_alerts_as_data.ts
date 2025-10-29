@@ -57,7 +57,7 @@ const ALERT_CONSECUTIVE_MATCHES = `${ALERT_NAMESPACE}.consecutive_matches` as co
 const ALERT_PENDING_RECOVERED_COUNT = `${ALERT_NAMESPACE}.pending_recovered_count` as const;
 
 // kibana.alert.instance.id - alert ID, also known as alert instance ID
-const ALERT_INSTANCE_ID = `alert.id` as const;
+const ALERT_INSTANCE_ID = `entity.key` as const;
 
 // kibana.alert.last_detected - timestamp when the alert was last seen
 const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
@@ -87,7 +87,7 @@ const ALERT_STATUS = `alert.status` as const;
 const ALERT_TIME_RANGE = `${ALERT_NAMESPACE}.time_range` as const;
 
 // kibana.alert.uuid - unique ID for the active span of this alert
-const ALERT_UUID = `alert.uuid` as const;
+const ALERT_UUID = `alert.id` as const;
 
 // kibana.alert.workflow_status - open/closed status of alert
 const ALERT_WORKFLOW_STATUS = `${ALERT_NAMESPACE}.workflow_status` as const;
