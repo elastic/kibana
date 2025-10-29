@@ -358,6 +358,9 @@ export class DashboardPageObject extends FtrService {
 
   public async clickDiscardChanges(accept = true) {
     await this.retry.try(async () => {
+      if (!(await this.testSubjects.exists('dashboardDiscardChangesMenuItem'))) {
+        await this.openSaveSplitMenu();
+      }
       await this.expectDiscardChangesButtonEnabled();
       this.log.debug('clickDiscardChanges');
       await this.testSubjects.click('dashboardDiscardChangesMenuItem');
