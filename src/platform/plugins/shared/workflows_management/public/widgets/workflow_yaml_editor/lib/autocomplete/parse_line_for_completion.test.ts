@@ -475,6 +475,16 @@ describe('parseLineForCompletion', () => {
       expect(result?.fullKey).toBe('my-webhook');
     });
 
+    it('should parse connector-id with leading tabs', () => {
+      const line = '    connector-id: security-demos';
+      const result = parseLineForCompletion(line);
+      expect(result?.matchType).toBe('connector-id');
+      expect(result?.fullKey).toBe('security-demos');
+      expect((result as ConnectorIdLineParseResult)?.valueStartColumn).toEqual(
+        line.indexOf('connector-id: ') + 'connector-id: '.length + 1
+      );
+    });
+
     it('should parse connector-id with extra spaces', () => {
       const line = 'connector-id:   email-service  ';
       const result = parseLineForCompletion(line);

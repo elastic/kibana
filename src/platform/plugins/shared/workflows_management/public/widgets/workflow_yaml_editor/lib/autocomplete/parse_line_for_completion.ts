@@ -93,7 +93,7 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     };
   }
 
-  const connectorIdMatch = lineUpToCursor.match(/^\s*(?<prefix>connector-id:)\s*(?<value>.*)$/i);
+  const connectorIdMatch = lineUpToCursor.match(/^(?<prefix>\s*connector-id:)\s*(?<value>.*)$/i);
   if (connectorIdMatch && connectorIdMatch.groups) {
     const connectorId = connectorIdMatch.groups?.value.trim() ?? '';
     return {
