@@ -12,5 +12,8 @@ restore_target_folders
 echo --- Check Types
 node scripts/type_check
 
+echo --- Checking types again
+node scripts/type_check
+
 # Try to archive target folders for future caching
 archive_target_folders
