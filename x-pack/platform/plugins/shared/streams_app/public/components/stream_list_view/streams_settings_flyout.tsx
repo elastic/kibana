@@ -145,6 +145,10 @@ export function StreamsSettingsFlyout({
       id: `${shipperButtonGroupPrefix}__fleet`,
       label: 'Fleet',
     },
+    {
+      id: `${shipperButtonGroupPrefix}__curl`,
+      label: 'Curl',
+    },
   ];
   const [selectedShipperId, setSelectedShipperId] = React.useState(
     `${shipperButtonGroupPrefix}__otel`
@@ -188,6 +192,11 @@ output.elasticsearch:
     action => "create"
   }
 }`,
+    [`${shipperButtonGroupPrefix}__curl`]: `POST /logs/_bulk
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "body": { "text": "Hello world!" }, "resource": { "attributes": { "host.name": "my-host-name" } } }
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "message": "Hello world!", "host.name": "my-host-name" }`,
   };
 
   return (
@@ -353,7 +362,7 @@ output.elasticsearch:
               </EuiText>
             ) : (
               <EuiCodeBlock
-                language="yaml"
+                language={selectedShipperId.endsWith('__curl') ? 'json' : 'yaml'}
                 isCopyable
                 paddingSize="m"
                 data-test-subj="streamsShipperConfigExample"
