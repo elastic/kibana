@@ -17,7 +17,6 @@ import { SearchGettingStartedHeader } from './header';
 
 export const SearchGettingStartedPage: React.FC = () => {
   const usageTracker = useUsageTracker();
-
   useEffect(() => {
     usageTracker.load(AnalyticsEvents.gettingStartedLoaded);
   }, [usageTracker]);
