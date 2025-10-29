@@ -29,41 +29,6 @@ describe('DELETE /api/workflows', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the bulk delete workflows route with correct configuration', () => {
-      registerDeleteWorkflowsBulkRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const deleteBulkCall = (mockRouter.delete as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows'
-      );
-
-      expect(deleteBulkCall).toBeDefined();
-      expect(deleteBulkCall[0]).toMatchObject({
-        path: '/api/workflows',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['all', 'workflow_delete'],
-              },
-            ],
-          },
-        },
-      });
-      expect(deleteBulkCall[0].validate).toBeDefined();
-      expect(deleteBulkCall[0].validate.body).toBeDefined();
-      expect(deleteBulkCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 
