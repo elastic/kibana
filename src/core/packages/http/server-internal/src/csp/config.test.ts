@@ -8,14 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-// Defer loading @kbn/config until actually used to avoid heavy module initialization in tests
-const lazyConfig = () => require('@kbn/config');
-
-const applyDeprecations: typeof import('@kbn/config').applyDeprecations = (...args: any[]) =>
-  lazyConfig().applyDeprecations(...args);
-
-const configDeprecationFactory: import('@kbn/config').ConfigDeprecationFactory =
-  lazyConfig().configDeprecationFactory;
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { cspConfig } from './config';
 
 const deprecationContext = {
