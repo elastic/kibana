@@ -12,7 +12,7 @@ import type {
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 
 export interface BaseGroupedItemCommonFields {
-  id?: string;
+  id: string;
   /** source index (used for opening single document previews) */
   index?: string;
   /** raw timestamp */

@@ -22,7 +22,7 @@ import type {
 // Base interface for common props across all stories
 interface BaseStoryProps {
   isLoading?: boolean;
-  id?: string;
+  id: string;
   timestamp?: string | number | Date;
   ip?: string;
   countryCode?: string;

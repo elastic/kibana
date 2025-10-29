@@ -24,7 +24,7 @@ const DEDUPE_WINDOW_MS = 250; // ignore exact same id within window
 /** Convenience publisher with naive duplicate suppression */
 export const emitGroupedItemClick = (item: EntityOrEventItem) => {
   const now = Date.now();
-  if (item.id && item.id === lastEmittedId && now - lastEmittedTs < DEDUPE_WINDOW_MS) {
+  if (item.id === lastEmittedId && now - lastEmittedTs < DEDUPE_WINDOW_MS) {
     return; // drop duplicate rapid click
   }
   lastEmittedId = item.id;
