@@ -68,9 +68,19 @@ describe('secrets validation', () => {
   test('fails when secret token is not provided', () => {
     expect(() => {
       validateSecrets(actionType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [token]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"token\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
   });
 });
 

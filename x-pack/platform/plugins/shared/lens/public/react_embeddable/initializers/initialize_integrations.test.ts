@@ -7,8 +7,8 @@
 
 import { faker } from '@faker-js/faker';
 import { createEmptyLensState } from '../helper';
-import { makeEmbeddableServices, getLensRuntimeStateMock, getLensInternalApiMock } from '../mocks';
-import type { LensRuntimeState } from '../types';
+import { makeEmbeddableServices, getLensRuntimeStateMock } from '../mocks';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import { initializeIntegrations } from './initialize_integrations';
 
 function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>) {
@@ -17,14 +17,8 @@ function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>) {
     dataOverrides: { id: 'formBased' },
   });
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
-  const internalApi = getLensInternalApiMock();
   const serializeDynamicActions = undefined;
-  const { api } = initializeIntegrations(
-    () => runtimeState,
-    serializeDynamicActions,
-    services,
-    internalApi
-  );
+  const { api } = initializeIntegrations(() => runtimeState, serializeDynamicActions, services);
   return api;
 }
 

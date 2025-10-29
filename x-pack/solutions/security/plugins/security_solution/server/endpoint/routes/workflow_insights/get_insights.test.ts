@@ -303,8 +303,6 @@ describe('Get Insights Route Handler', () => {
       const enableSpaceAwareness: () => {
         mockEnsureInCurrentSpace: jest.Mock;
       } = () => {
-        // @ts-expect-error write to readonly property
-        mockEndpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
         return {
           mockEnsureInCurrentSpace: mockEndpointContext.service.getInternalFleetServices()
             .ensureInCurrentSpace as jest.Mock,
