@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { filterMetadata as kqlFilterMetadata } from './components/alerts_filter_by_kql';
 import { filterMetadata as ruleTagsFilterMetadata } from './components/alerts_filter_by_rule_tags';
 import { filterMetadata as ruleTypesFilterMetadata } from './components/alerts_filter_by_rule_types';
 import type { AlertsFilterMetadata, AlertsFiltersType } from './types';
 
 export const alertsFiltersMetadata: Record<AlertsFiltersType, AlertsFilterMetadata<any>> = {
+  kql: kqlFilterMetadata,
   ruleTags: ruleTagsFilterMetadata,
   ruleTypes: ruleTypesFilterMetadata,
 };
