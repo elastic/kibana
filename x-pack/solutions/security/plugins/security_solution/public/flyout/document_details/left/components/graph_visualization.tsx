@@ -89,7 +89,7 @@ export const GraphVisualization: React.FC = memo(() => {
       const docMode = getNodeDocumentMode(node);
       const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
 
-      const showEntityPreview = (item: { id?: string }) => {
+      const showEntityPreview = (item: { id: string }) => {
         openPreviewPanel({
           id: GenericEntityPanelKey,
           params: {
@@ -104,7 +104,7 @@ export const GraphVisualization: React.FC = memo(() => {
       };
 
       const showEventOrAlertPreview = (
-        item: { id?: string },
+        item: { id: string },
         banner: {
           title: string;
           backgroundColor: string;
