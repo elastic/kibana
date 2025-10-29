@@ -437,7 +437,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       expect(mockedFetch).toHaveBeenCalledTimes(3);
 
       // Verify retry logs
-      expect(mockWorkflowLogger.logInfo).toHaveBeenCalledWith(
+      expect(mockWorkflowLogger.logDebug).toHaveBeenCalledWith(
         expect.stringContaining('Retrying request'),
         expect.any(Object)
       );
