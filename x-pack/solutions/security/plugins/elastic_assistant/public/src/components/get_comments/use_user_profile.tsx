@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { UserProfileAvatarData } from '@kbn/user-profile-components';
 import type { User } from '@kbn/elastic-assistant-common';
 import type { UserProfile } from '@kbn/core-user-profile-common';
