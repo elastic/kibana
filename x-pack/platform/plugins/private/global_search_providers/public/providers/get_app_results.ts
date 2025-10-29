@@ -62,7 +62,23 @@ export const scoreApp = (term: string, appLink: AppLink): number => {
   ];
   const appScoreByKeywords = scoreAppByKeywords(term, keywords);
 
-  return Math.max(appScoreByTerms, appScoreByKeywords);
+  const baseScore = Math.max(appScoreByTerms, appScoreByKeywords);
+
+  // Boost for Observability Alerts
+  const OBSERVABILITY_ALERTS_LINK_ID = 'observability-overview-alerts';
+  const isAlertSearchTerm =
+    term.startsWith('aler') || term.includes('alert') || term.includes('alerts');
+  const isObservabilityAlertsLink =
+    appLink.id === OBSERVABILITY_ALERTS_LINK_ID ||
+    (appLink.app.id === 'observability' &&
+      appLink.subLinkTitles.join(' ').toLowerCase().startsWith('aler')); // needs adjusting?
+
+  if (isAlertSearchTerm && isObservabilityAlertsLink) {
+    const ALERTS_BOOST = 20;
+    return Math.min(100, baseScore + ALERTS_BOOST);
+  }
+
+  return baseScore;
 };
 
 const scoreAppByTerms = (term: string, title: string): number => {
