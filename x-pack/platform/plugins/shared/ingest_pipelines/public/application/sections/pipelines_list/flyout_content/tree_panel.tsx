@@ -42,7 +42,7 @@ export const TreePanel = React.memo(
       <EuiSplitPanel.Inner
         color="subdued"
         data-test-subj="pipelineTreePanel"
-        style={{ overflowY: 'auto', borderRight: euiTheme.border.thin }}
+        style={{ overflowY: 'auto', borderRight: euiTheme.border.thin, maxWidth: '460px' }}
         paddingSize="l"
       >
         <EuiTitle id="pipelineTreeTitle">
@@ -53,7 +53,7 @@ export const TreePanel = React.memo(
           </h2>
         </EuiTitle>
 
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
 
         <EuiText color="subdued" size="s">
           {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.pipelineTree.description', {

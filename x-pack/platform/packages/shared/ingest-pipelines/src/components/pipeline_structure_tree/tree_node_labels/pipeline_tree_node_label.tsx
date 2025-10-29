@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiFlexItemProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -18,7 +17,7 @@ interface PipelineTreeNodeLabelProps {
   onClick: () => void;
 }
 
-const MAX_PIPELINE_NAME_LENGTH = 30;
+const MAX_PIPELINE_NAME_LENGTH = 40;
 
 export const PipelineTreeNodeLabel = ({
   pipelineName,
@@ -30,16 +29,13 @@ export const PipelineTreeNodeLabel = ({
   return (
     <EuiFlexGroup
       direction="row"
-      gutterSize="none"
-      css={{ width: '350px' }}
+      gutterSize="s"
+      css={{ width: '360px' }}
       alignItems="center"
       data-test-subj={`pipelineTreeNode-${pipelineName}`}
       responsive={false}
     >
-      <EuiFlexItem
-        grow={(10 - Number(isDeprecated) - Number(isManaged)) as EuiFlexItemProps['grow']}
-        css={{ textAlign: 'left' }}
-      >
+      <EuiFlexItem grow={true}>
         <EuiLink
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
@@ -53,7 +49,7 @@ export const PipelineTreeNodeLabel = ({
         </EuiLink>
       </EuiFlexItem>
       {isManaged && (
-        <EuiFlexItem grow={1} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>
+        <EuiFlexItem grow={false} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>
           <EuiIconTip
             content={i18n.translate(
               'ingestPipelines.pipelineStructureTree.treeNodeManagedTooltip',
@@ -67,7 +63,10 @@ export const PipelineTreeNodeLabel = ({
         </EuiFlexItem>
       )}
       {isDeprecated && (
-        <EuiFlexItem grow={1} data-test-subj={`pipelineTreeNode-${pipelineName}-deprecatedIcon`}>
+        <EuiFlexItem
+          grow={false}
+          data-test-subj={`pipelineTreeNode-${pipelineName}-deprecatedIcon`}
+        >
           <EuiIconTip
             content={i18n.translate(
               'ingestPipelines.pipelineStructureTree.treeNodeDeprecatedTooltip',
