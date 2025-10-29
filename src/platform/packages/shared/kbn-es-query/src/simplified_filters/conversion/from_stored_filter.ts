@@ -11,7 +11,7 @@
  * Functions for converting stored filters to SimplifiedFilter format
  *
  * Conversion Strategy (in order of precedence):
- * 1. Legacy Migration: Normalize pre-ES 5.x filters with top-level query properties
+ * 1. Legacy Migration: Normalize legacy Kibana filters with top-level query properties
  * 2. Full Compatibility: Direct conversion to SimpleFilterCondition (simple operators)
  * 3. Enhanced Compatibility: Parse complex query structures into SimpleFilterCondition
  * 4. High-Fidelity: Preserve complex filters as RawDSL (custom queries, scripts, etc.)
@@ -62,7 +62,7 @@ export function fromStoredFilter(storedFilter: unknown): SimplifiedFilter {
     // Cast to Filter for type-safe access (we validate shape through type guards below)
     const filter = storedFilter as Filter;
 
-    // Migrate legacy filter formats (pre-ES 5.x) to modern format only if needed
+    // Migrate legacy filter formats to modern format only if needed
     // This avoids unnecessary processing for modern filters, which would lose properties
     // via migrateFilter's pick() call. Legacy filters have top-level query properties
     // (range, exists, match_all, match) that need to be moved under .query

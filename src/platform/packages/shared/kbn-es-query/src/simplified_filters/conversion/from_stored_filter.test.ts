@@ -18,6 +18,108 @@ import { isConditionFilter, isGroupFilter, isDSLFilter } from './type_guards';
 import type { Filter } from '@kbn/es-query-server';
 
 describe('fromStoredFilter', () => {
+  describe('Legacy filter migration', () => {
+    it('should migrate legacy range filter with top-level range property', () => {
+      // Legacy Kibana filter format: top-level range property
+      const legacyRangeFilter = {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'bytes',
+          field: 'bytes',
+          params: { gte: '3000' },
+          type: 'range',
+        },
+        range: { bytes: { gte: '3000' } },
+        $state: { store: 'appState' },
+      };
+
+      const result = fromStoredFilter(legacyRangeFilter);
+
+      expect(isConditionFilter(result)).toBe(true);
+      if (isConditionFilter(result)) {
+        expect(result.condition).toEqual({
+          field: 'bytes',
+          operator: 'range',
+          value: { gte: '3000' },
+        });
+      }
+    });
+
+    it('should migrate legacy phrase filter with top-level match_phrase', () => {
+      // Legacy Kibana filter format: top-level match_phrase property
+      const legacyPhraseFilter = {
+        meta: {
+          alias: null,
+          disabled: false,
+          field: 'geo.src',
+          key: 'geo.src',
+          negate: false,
+          params: { query: 'CN' },
+          type: 'phrase',
+        },
+        match_phrase: { 'geo.src': 'CN' },
+        $state: { store: 'appState' },
+      };
+
+      const result = fromStoredFilter(legacyPhraseFilter);
+
+      expect(isConditionFilter(result)).toBe(true);
+      if (isConditionFilter(result)) {
+        expect(result.condition).toEqual({
+          field: 'geo.src',
+          operator: 'is',
+          value: 'CN',
+        });
+      }
+    });
+
+    it('should migrate legacy exists filter with top-level exists property', () => {
+      // Legacy Kibana filter format: top-level exists property
+      const legacyExistsFilter = {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'user.name',
+          type: 'exists',
+        },
+        exists: { field: 'user.name' },
+        $state: { store: 'appState' },
+      };
+
+      const result = fromStoredFilter(legacyExistsFilter);
+
+      expect(isConditionFilter(result)).toBe(true);
+      if (isConditionFilter(result)) {
+        expect(result.condition).toEqual({
+          field: 'user.name',
+          operator: 'exists',
+        });
+      }
+    });
+
+    it('should migrate legacy match_all filter', () => {
+      // Legacy Kibana filter format: top-level match_all property
+      const legacyMatchAllFilter = {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: 'All documents',
+          type: 'match_all',
+        },
+        match_all: {},
+        $state: { store: 'globalState' },
+      };
+
+      const result = fromStoredFilter(legacyMatchAllFilter);
+
+      // match_all gets preserved as DSL since it's a special case
+      expect(isDSLFilter(result) || isConditionFilter(result)).toBe(true);
+    });
+  });
+
   describe('main conversion function', () => {
     it('should convert simple phrase filters', () => {
       const storedFilter = {

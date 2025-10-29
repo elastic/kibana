@@ -20,7 +20,7 @@ import type {
 } from '@kbn/es-query-server';
 
 /**
- * Legacy filter interface for pre-ES 5.x filters
+ * Legacy filter interface for legacy Kibana filter format
  * These filters have query properties at the top level instead of under .query
  */
 interface LegacyFilter {
@@ -33,7 +33,7 @@ interface LegacyFilter {
 }
 
 /**
- * Type guard to check if a filter has legacy pre-ES 5.x properties
+ * Type guard to check if a filter has legacy Kibana filter format properties
  * These filters have query properties at the top level instead of under .query
  */
 export function isLegacyFilter(value: unknown): value is LegacyFilter {
@@ -43,7 +43,7 @@ export function isLegacyFilter(value: unknown): value is LegacyFilter {
 
   const filter = value as Record<string, unknown>;
 
-  // Check for legacy top-level properties (pre-ES 5.x format)
+  // Check for legacy top-level properties (legacy Kibana filter format)
   return !!(filter.range || filter.exists || filter.match_all || filter.match);
 }
 
