@@ -221,7 +221,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
     config = EMPTY_OBJECT as TriggersActionsUiConfig,
     onSort = EMPTY_HANDLER,
     onPage = EMPTY_HANDLER,
-    onRuleClick = EMPTY_HANDLER,
     onRuleEditClick = EMPTY_HANDLER,
     onRuleDeleteClick = EMPTY_HANDLER,
     onManageLicenseClick = EMPTY_HANDLER,
