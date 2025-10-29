@@ -847,7 +847,7 @@ export function getBinarySourceSettings(
     if (downloadSourceProxy.url) {
       config.proxy_url = downloadSourceProxy.url;
     }
-    if (downloadSourceProxy.url) {
+    if (downloadSourceProxy.proxy_headers) {
       config.proxy_headers = downloadSourceProxy.proxy_headers;
     }
     // if the proxy is configured, get the ssl settings from it
