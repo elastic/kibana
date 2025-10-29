@@ -48,6 +48,7 @@ export const SpaceSelector = <T extends FieldValues>({
       agentPolicies &&
       data?.spacesDataPromise
     ) {
+      if (isDisabled) return;
       const selectedPolicy = agentPolicies.find((policy) => policy.id === selectedAgentPolicyId);
       if (!selectedPolicy) {
         throw new Error('Selected agent policy not found, this should never happen');
@@ -71,9 +72,7 @@ export const SpaceSelector = <T extends FieldValues>({
             : [];
         });
         setSpacesList(formattedSpaces);
-        if (!isDisabled) {
-          setValue(NAMESPACES_NAME, policySpaceIds as PathValue<T, Path<T>>);
-        }
+        setValue(NAMESPACES_NAME, policySpaceIds as PathValue<T, Path<T>>);
       });
     }
   }, [
