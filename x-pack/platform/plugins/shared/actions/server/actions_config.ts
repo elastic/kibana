@@ -274,7 +274,7 @@ export function getActionsConfigurationUtilities(
       return ['*'];
     },
     getMaxEmailBodyLength() {
-      const configuredLength = config.email?.maximum_body_length || DEFAULT_EMAIL_BODY_LENGTH;
+      const configuredLength = config.email?.maximum_body_length ?? DEFAULT_EMAIL_BODY_LENGTH;
       const nonNegativeLength = Math.max(0, configuredLength);
       return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
     },

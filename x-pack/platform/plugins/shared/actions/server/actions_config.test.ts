@@ -577,16 +577,17 @@ describe('validateEmailAddresses()', () => {
 
 describe('getMaxEmailBodyLength() ', () => {
   function getAcu(maxEmailBodyLength?: number) {
-    if (maxEmailBodyLength == null) {
-      return getActionsConfigurationUtilities(defaultActionsConfig);
-    }
+    const actionsConfig =
+      maxEmailBodyLength == null
+        ? defaultActionsConfig
+        : {
+            ...defaultActionsConfig,
+            email: {
+              maximum_body_length: maxEmailBodyLength,
+            },
+          };
 
-    return getActionsConfigurationUtilities({
-      ...defaultActionsConfig,
-      email: {
-        maximum_body_length: maxEmailBodyLength,
-      },
-    });
+    return getActionsConfigurationUtilities(actionsConfig);
   }
 
   test('default value is as expected', async () => {
@@ -601,16 +602,22 @@ describe('getMaxEmailBodyLength() ', () => {
     expect(actual).toBe(0);
   });
 
-  test('value coerced to maximum of range if above', async () => {
-    const acu = getAcu(MAX_EMAIL_BODY_LENGTH + 100);
+  test('value of 0 accepted', async () => {
+    const acu = getAcu(0);
     const actual = acu.getMaxEmailBodyLength();
-    expect(actual).toBe(MAX_EMAIL_BODY_LENGTH);
+    expect(actual).toBe(0);
   });
 
   test('value within range is passed through', async () => {
     const acu = getAcu(100);
     const actual = acu.getMaxEmailBodyLength();
     expect(actual).toBe(100);
+  });
+
+  test('value coerced to maximum of range if above', async () => {
+    const acu = getAcu(MAX_EMAIL_BODY_LENGTH + 100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(MAX_EMAIL_BODY_LENGTH);
   });
 });
 
