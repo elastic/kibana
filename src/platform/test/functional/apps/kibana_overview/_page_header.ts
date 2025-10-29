@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'dashboard']);
 
   describe('overview page - page header', function describeIndexTests() {
@@ -38,12 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on integrations leads to integrations', async () => {
-      const header = await find.byCssSelector('.euiPageHeaderContent');
-      const items = await header.findAllByTestSubject('kbnRedirectAppLink');
-      expect(items!.length).to.be(3);
-
-      const integrations = await items!.at(2);
-      await integrations!.click();
+      await testSubjects.click('homeAddData');
       await PageObjects.common.waitUntilUrlIncludes('app/integrations/browse');
     });
 
