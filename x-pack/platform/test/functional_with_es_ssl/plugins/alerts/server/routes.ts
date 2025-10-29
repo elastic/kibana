@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
-import { AlertingExampleDeps } from './plugin';
+import type { AlertingExampleDeps } from './plugin';
 
 export const registerRoutes = (core: CoreSetup<AlertingExampleDeps>) => {
   const router = core.http.createRouter();
