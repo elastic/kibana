@@ -24,7 +24,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
   const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
   const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
 
-  describe('[FOO] POST /api/agent_builder/converse: attachments', function () {
+  describe('POST /api/agent_builder/converse: attachments', function () {
     let llmProxy: LlmProxy;
     let connectorId: string;
 
