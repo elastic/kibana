@@ -217,15 +217,15 @@ export function InternalDashboardTopNav({
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
       !forceHide && (dataService.query.filterManager.getFilters().length > 0 || !fullScreenMode);
 
-    const showDatePicker = Boolean(forceHideUnifiedSearch)
-      ? false
-      : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
-    const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showQueryInput = Boolean(forceHideUnifiedSearch)
       ? false
       : shouldShowNavBarComponent(
           Boolean(embedSettings?.forceShowQueryInput || viewMode === 'edit')
         );
+    const showDatePicker = Boolean(forceHideUnifiedSearch)
+      ? false
+      : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
+    const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
     const showSearchBar = showQueryInput || showDatePicker || showFilterBar;
     return {
