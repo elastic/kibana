@@ -80,10 +80,9 @@ export class WorkflowsExecutionEnginePlugin
         title: 'Run Workflow',
         description: 'Executes a workflow immediately',
         // Set high timeout for long-running workflows.
-        // This is an arbitrary high value to allow for long-running workflows.
-        // The timeout logic is defined in workflow execution engine logic
-        // Maybe it should be more than 1 day?
-        timeout: '1d',
+        // This is high value to allow long-running workflows.
+        // The workflow timeout logic defined in workflow execution engine logic is the primary control.
+        timeout: '365d',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           const taskAbortController = new AbortController();
@@ -130,10 +129,9 @@ export class WorkflowsExecutionEnginePlugin
         title: 'Resume Workflow',
         description: 'Resumes a paused workflow',
         // Set high timeout for long-running workflows.
-        // This is an arbitrary high value to allow for long-running workflows.
-        // The timeout logic is defined in workflow execution engine logic
-        // Maybe it should be more than 1 day?
-        timeout: '1d',
+        // This is high value to allow long-running workflows.
+        // The workflow timeout logic defined in workflow execution engine logic is the primary control.
+        timeout: '365d',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           const taskAbortController = new AbortController();

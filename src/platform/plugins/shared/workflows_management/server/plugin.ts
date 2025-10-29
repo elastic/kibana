@@ -125,10 +125,9 @@ export class WorkflowsPlugin
           title: 'Scheduled Workflow Execution',
           description: 'Executes workflows on a scheduled basis',
           // Set high timeout for long-running workflows.
-          // This is an arbitrary high value to allow for long-running workflows.
-          // The timeout logic is defined in workflow execution engine logic
-          // Maybe it should be more than 1 day?
-          timeout: '1d',
+          // This is high value to allow long-running workflows.
+          // The workflow timeout logic defined in workflow execution engine logic is the primary control.
+          timeout: '365d',
           maxAttempts: 3,
           createTaskRunner: ({ taskInstance, fakeRequest }) => {
             // Capture the plugin instance in a closure
