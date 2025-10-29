@@ -79,6 +79,25 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
         'test-task-id',
       ]);
       expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+
+      // Verify the task instance structure includes workflow object
+      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'workflow:test-workflow:scheduled',
+          taskType: 'workflow:scheduled',
+          params: expect.objectContaining({
+            workflow: expect.objectContaining({
+              id: 'test-workflow',
+              name: 'Test Workflow',
+              enabled: true,
+              definition: expect.any(Object),
+              yaml: '',
+            }),
+            spaceId: 'default',
+            triggerType: 'scheduled',
+          }),
+        })
+      );
     });
 
     it('should reject invalid RRule frequency', async () => {

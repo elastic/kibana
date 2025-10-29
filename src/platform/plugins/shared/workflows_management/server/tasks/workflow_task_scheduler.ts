@@ -9,7 +9,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { EsWorkflow } from '@kbn/workflows';
+import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
 import type { WorkflowTrigger } from '../lib/schedule_utils';
 import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
@@ -39,7 +39,7 @@ export class WorkflowTaskScheduler {
 
     for (const trigger of scheduledTriggers) {
       try {
-        const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger, request);
+        const taskId = await this.scheduleWorkflowTask(workflow, spaceId, trigger, request);
         scheduledTaskIds.push(taskId);
         this.logger.info(
           `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
@@ -59,7 +59,7 @@ export class WorkflowTaskScheduler {
    * Schedules a single workflow task for a specific trigger
    */
   async scheduleWorkflowTask(
-    workflowId: string,
+    workflow: EsWorkflow,
     spaceId: string,
     trigger: WorkflowTrigger,
     request?: KibanaRequest
@@ -72,16 +72,25 @@ export class WorkflowTaskScheduler {
       const intervalText = getReadableInterval(schedule.rrule.freq, schedule.rrule.interval);
 
       this.logger.info(
-        `RRule schedule created for workflow ${workflowId}: ${freqText} every ${schedule.rrule.interval} ${intervalText}`
+        `RRule schedule created for workflow ${workflow.id}: ${freqText} every ${schedule.rrule.interval} ${intervalText}`
       );
     }
 
+    // Convert workflow to execution model format
+    const workflowExecutionModel: WorkflowExecutionEngineModel = {
+      id: workflow.id,
+      name: workflow.name,
+      enabled: workflow.enabled,
+      definition: workflow.definition,
+      yaml: workflow.yaml,
+    };
+
     const taskInstance = {
-      id: `workflow:${workflowId}:${trigger.type}`,
+      id: `workflow:${workflow.id}:${trigger.type}`,
       taskType: 'workflow:scheduled',
       schedule,
       params: {
-        workflowId,
+        workflow: workflowExecutionModel,
         spaceId,
         triggerType: trigger.type,
       },
