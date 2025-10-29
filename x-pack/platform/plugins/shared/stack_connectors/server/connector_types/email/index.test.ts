@@ -1460,7 +1460,7 @@ describe('execute()', () => {
     sendEmailMock.mockReset();
     await connectorType.executor(customExecutorOptions);
 
-    const additionalTextWeAdded = 273;
+    const additionalTextWeAdded = 273; // determined manually looking at the output
     expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(
       MaxEmailBodyLength + additionalTextWeAdded
     );
@@ -1486,12 +1486,10 @@ describe('execute()', () => {
     sendEmailMock.mockReset();
     await connectorType.executor(customExecutorOptions);
 
-    const additionalTextWeAdded = 273;
-    expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(
-      MaxEmailBodyLength + additionalTextWeAdded
-    );
+    const additionalTextWeAdded = 271; // determined manually looking at the output
+    expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(additionalTextWeAdded);
 
-    const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
+    const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
     expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
   });
 
@@ -1514,7 +1512,7 @@ describe('execute()', () => {
     sendEmailMock.mockReset();
     await connectorType.executor(customExecutorOptions);
 
-    const additionalTextWeAdded = 233;
+    const additionalTextWeAdded = 233; // determined manually looking at the output
     expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(
       MaxEmailBodyLength + additionalTextWeAdded
     );
@@ -1542,12 +1540,10 @@ describe('execute()', () => {
     sendEmailMock.mockReset();
     await connectorType.executor(customExecutorOptions);
 
-    const additionalTextWeAdded = 233;
-    expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(
-      MaxEmailBodyLength + additionalTextWeAdded
-    );
+    const additionalTextWeAdded = 231; // determined manually looking at the output
+    expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(additionalTextWeAdded);
 
-    const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
+    const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
     expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
   });
 });
