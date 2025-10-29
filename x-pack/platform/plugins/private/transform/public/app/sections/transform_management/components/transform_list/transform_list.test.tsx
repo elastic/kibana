@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import '@kbn/react-query/mock';
 import { QueryClient, QueryClientProvider, type UseQueryResult } from '@kbn/react-query';
 import * as ReactQuery from '@kbn/react-query';
 
