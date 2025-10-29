@@ -68,7 +68,7 @@ import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/li
 
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
-import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
+import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { createStorage } from '../storage/workflow_storage';
@@ -179,7 +179,7 @@ export class WorkflowsService {
 
     const parsedYaml = parseWorkflowYamlToJSON(
       workflow.yaml,
-      await this.getWorkflowZodSchema({ loose: true }, spaceId, request)
+      await this.getWorkflowZodSchema({ loose: false }, spaceId, request)
     );
     if (!parsedYaml.success) {
       throw new Error(`Invalid workflow yaml: ${parsedYaml.error.message}`);
@@ -1128,15 +1128,12 @@ export class WorkflowsService {
 
   public async getWorkflowZodSchema(
     options: {
-      loose: boolean;
+      loose?: false;
     },
     spaceId: string,
     request: KibanaRequest
   ): Promise<z.ZodType> {
     const { connectorsByType } = await this.getAvailableConnectors(spaceId, request);
-    if (options.loose) {
-      return getWorkflowZodSchemaLoose(connectorsByType);
-    }
     return getWorkflowZodSchema(connectorsByType);
   }
 }

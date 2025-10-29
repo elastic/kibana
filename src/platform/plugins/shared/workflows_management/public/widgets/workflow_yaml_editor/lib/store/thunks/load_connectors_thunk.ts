@@ -9,10 +9,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
-import {
-  addDynamicConnectorsToCache,
-  getWorkflowZodSchemaLoose,
-} from '../../../../../../common/schema';
+import { addDynamicConnectorsToCache, getWorkflowZodSchema } from '../../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../../../entities/connectors/model/types';
 import type { WorkflowsServices } from '../../../../../types';
 import { _setGeneratedSchemaInternal, setConnectors } from '../slice';
@@ -46,8 +43,8 @@ export const loadConnectorsThunk = createAsyncThunk<
       if (hasChanged) {
         addDynamicConnectorsToCache(currentConnectorTypes);
 
-        const schemaLoose = getWorkflowZodSchemaLoose(currentConnectorTypes);
-        dispatch(_setGeneratedSchemaInternal(schemaLoose));
+        const schema = getWorkflowZodSchema(currentConnectorTypes);
+        dispatch(_setGeneratedSchemaInternal(schema));
       }
 
       return response;

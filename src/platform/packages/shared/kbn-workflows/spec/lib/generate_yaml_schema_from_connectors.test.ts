@@ -12,42 +12,6 @@ import type { ConnectorContractUnion } from '../..';
 import { generateYamlSchemaFromConnectors } from '../..';
 
 describe('generateYamlSchemaFromConnectors', () => {
-  describe('loose mode', () => {
-    it('should generate a valid YAML schema from connectors', () => {
-      const connectors: ConnectorContractUnion[] = [
-        {
-          type: 'console',
-          paramsSchema: z.object({
-            message: z.string(),
-          }),
-          outputSchema: z.object({
-            message: z.string(),
-          }),
-        },
-      ];
-      const schema = generateYamlSchemaFromConnectors(connectors, true);
-      expect(schema).toBeDefined();
-      expect(() =>
-        schema.parse({
-          steps: [],
-        })
-      ).not.toThrow();
-      // should allow empty '"with" block
-      expect(() =>
-        schema.parse({
-          name: 'test',
-          steps: [
-            {
-              name: 'step1',
-              type: 'console',
-              with: {},
-            },
-          ],
-        })
-      ).not.toThrow();
-    });
-  });
-
   describe('strict mode', () => {
     it('should generate a valid YAML schema from connectors', () => {
       const connectors: ConnectorContractUnion[] = [

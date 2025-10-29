@@ -13,13 +13,9 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowLookup } from './build_workflow_lookup';
 import { correctYamlSyntax } from '../../../../../../common/lib/yaml/correct_yaml_syntax';
 import { parseWorkflowYamlForAutocomplete } from '../../../../../../common/lib/yaml/parse_workflow_yaml_for_autocomplete';
-import type { WorkflowZodSchemaLooseType } from '../../../../../../common/schema';
 import type { ComputedData } from '../types';
 
-export const performComputation = (
-  yamlString: string | undefined,
-  schemaLoose: WorkflowZodSchemaLooseType
-): ComputedData | undefined => {
+export const performComputation = (yamlString: string | undefined): ComputedData | undefined => {
   if (!yamlString) {
     return;
   }
@@ -41,7 +37,9 @@ export const performComputation = (
 
     // Create workflow graph
     const parsedWorkflow = parsingResult.success ? parsingResult.data : undefined;
-    const graph = parsedWorkflow ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow) : undefined;
+    const graph = parsedWorkflow
+      ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow as WorkflowYaml)
+      : undefined;
     return {
       yamlLineCounter: lineCounter,
       yamlDocument: yamlDoc,

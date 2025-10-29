@@ -67,19 +67,4 @@ describe('getConnectorIdSuggestions', () => {
     expect(result[1].label).toBe('Private Slack • private-slack');
     expect(result[1].insertText).toBe('Private Slack');
   });
-
-  it('should return a filtered list of available instances for the connector type if user has typed part of the connector id', () => {
-    const line = 'connector-id: pub';
-    const result = getConnectorIdSuggestions({
-      line,
-      lineParseResult: parseLineForCompletion(line),
-      range: { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: line.length + 1 },
-      focusedStepInfo: { stepType: 'slack' },
-      dynamicConnectorTypes: fakeConnectorTypes,
-    } as unknown as AutocompleteContext);
-    // or it should return all but preselect the matching one??
-    expect(result).toHaveLength(1);
-    expect(result[0].label).toBe('Public Slack • public-slack');
-    expect(result[0].insertText).toBe('public-slack');
-  });
 });

@@ -19,9 +19,7 @@ const compute = (
   yamlString: string | undefined,
   store: MiddlewareAPI<Dispatch<AnyAction>, RootState>
 ) => {
-  // Get fresh state at execution time, not at scheduling time
-  const state = store.getState();
-  const computed = performComputation(yamlString, state.detail.schemaLoose);
+  const computed = performComputation(yamlString);
   if (computed) {
     store.dispatch(_setComputedDataInternal(computed));
   } else {

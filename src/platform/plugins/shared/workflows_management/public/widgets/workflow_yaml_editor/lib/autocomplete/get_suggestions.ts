@@ -59,8 +59,11 @@ export function getSuggestions(
   }
 
   // Liquid block keyword completion (inside {%- liquid ... -%})
-  if (lineParseResult?.matchType === 'liquid-block-keyword') {
-    return createLiquidBlockKeywordCompletions(autocompleteContext);
+  if (
+    lineParseResult?.matchType === 'liquid-block-keyword' &&
+    autocompleteContext.isInLiquidBlock
+  ) {
+    return createLiquidBlockKeywordCompletions(autocompleteContext.range, lineParseResult?.fullKey);
   }
 
   // Direct type completion - context-aware
