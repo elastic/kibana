@@ -75,19 +75,6 @@ export const DashboardViewport = () => {
   //   };
   // }, [controlGroupApi]);
 
-  // const [controlsReady, setControlsReady] = useState(false);
-  // useEffect(() => {
-  //   let ignore = false;
-  //   dashboardInternalApi.untilControlsInitialized().then(() => {
-  //     if (!ignore) {
-  //       setControlsReady(true);
-  //     }
-  //   });
-  //   return () => {
-  //     ignore = true;
-  //   };
-  // }, [dashboardInternalApi]);
-
   const styles = useMemoCss(dashboardViewportStyles);
 
   return (

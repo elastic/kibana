@@ -93,11 +93,13 @@ export function buildMockDashboardApi({
 export function getSampleDashboardState(overrides?: Partial<DashboardState>): DashboardState {
   return {
     // options
-    useMargins: true,
-    syncColors: false,
-    syncCursor: true,
-    syncTooltips: false,
-    hidePanelTitles: false,
+    options: {
+      useMargins: true,
+      syncColors: false,
+      syncCursor: true,
+      syncTooltips: false,
+      hidePanelTitles: false,
+    },
 
     tags: [],
     filters: [],

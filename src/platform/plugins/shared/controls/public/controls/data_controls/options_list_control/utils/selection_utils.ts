@@ -65,7 +65,7 @@ export const makeSelection = ({
   showOnlySelected: boolean | undefined;
 }) => {
   const field = api.field$.getValue();
-  if (!key || !field) {
+  if (key == null || !field) {
     api.setBlockingError(new Error(OptionsListStrings.control.getInvalidSelectionMessage()));
     return;
   }

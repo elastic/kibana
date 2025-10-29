@@ -60,6 +60,7 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
+import { FieldsGroupNames } from '@kbn/unified-field-list';
 
 export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,
@@ -222,15 +223,16 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
           const dataView = dataViews?.[0];
           let newFilter: Filter | undefined;
-          if (dataView) {
-            newFilter = buildFilter(dataView, uuid, {
-              fieldName,
-              selectedOptions,
-              existsSelected,
-              exclude,
-            });
-          }
-          dataControlManager.internalApi.setOutputFilter(newFilter);
+          if (!dataView || !fieldName) return;
+
+          newFilter = buildFilter(dataView, uuid, {
+            fieldName,
+            selectedOptions,
+            existsSelected,
+            exclude,
+          });
+
+          if (newFilter) dataControlManager.internalApi.setOutputFilter(newFilter);
         });
 
       function serializeState(): SerializedPanelState<OptionsListControlState> {

@@ -6,6 +6,7 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useState } from 'react';
 import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
 import { synonymToComboBoxOption, synonymsOptionToString } from '../../utils/synonyms_utils';
@@ -39,6 +40,12 @@ export const useSynonymRuleFlyoutState = ({
   const [fromTermErrors, setFromTermErrors] = useState<string[]>([]);
   const [mapToTermErrors, setMapToTermErrors] = useState<string[]>([]);
   const [currentSortDirection, setCurrentSortDirection] = useState<SortDirection>('ascending');
+  const [announcement, setAnnouncement] = useState('');
+
+  const announce = (message: string) => {
+    setAnnouncement(message);
+    setTimeout(() => setAnnouncement(''), 1000); // clear for next use
+  };
 
   const hasChanges =
     flyoutMode === 'create'
@@ -68,6 +75,11 @@ export const useSynonymRuleFlyoutState = ({
     setIsMapToTermsInvalid(false);
     setFromTermErrors([]);
     setMapToTermErrors([]);
+    announce(
+      i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.resetAnnouncement', {
+        defaultMessage: 'All changes have been reset',
+      })
+    );
   };
 
   const isValid = (value: string) => {
@@ -151,7 +163,14 @@ export const useSynonymRuleFlyoutState = ({
     setFromTerms(fromTerms.filter((t) => t.label !== term.label));
   };
 
-  const clearFromTerms = () => setFromTerms([]);
+  const clearFromTerms = () => {
+    setFromTerms([]);
+    announce(
+      i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.clearedAnnouncement', {
+        defaultMessage: 'All terms have been removed',
+      })
+    );
+  };
   const onMapToChange = (value: string) => {
     isMapToValid(value);
     setMapToTerms(value);
@@ -169,6 +188,7 @@ export const useSynonymRuleFlyoutState = ({
     isMapToTermsInvalid,
     mapToTermErrors,
     mapToTerms,
+    announcement,
     onCreateOption,
     onMapToChange,
     onSearchChange,

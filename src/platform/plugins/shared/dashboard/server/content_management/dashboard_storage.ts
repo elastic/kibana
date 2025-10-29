@@ -23,15 +23,14 @@ import {
   type DashboardSavedObjectAttributes,
 } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
-import {
-  type DashboardAttributes,
-  type DashboardCreateOptions,
-  type DashboardUpdateOptions,
-  type DashboardSearchOptions,
-  type DashboardItem,
-  type DashboardGetOut,
-  savedObjectToItem,
-  transformDashboardIn,
+import { savedObjectToItem, transformDashboardIn } from './latest';
+import type {
+  DashboardState,
+  DashboardCreateOptions,
+  DashboardUpdateOptions,
+  DashboardSearchOptions,
+  DashboardItem,
+  DashboardGetOut,
 } from './latest';
 import type { DashboardCreateOut, DashboardSearchOut, DashboardUpdateOut } from './v1/types';
 
@@ -129,7 +128,7 @@ export class DashboardStorage {
 
   async create(
     ctx: StorageContext,
-    data: DashboardAttributes,
+    data: DashboardState,
     options: DashboardCreateOptions
   ): Promise<DashboardCreateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
@@ -137,8 +136,8 @@ export class DashboardStorage {
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
-      DashboardAttributes,
-      DashboardAttributes
+      DashboardState,
+      DashboardState
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
@@ -205,7 +204,7 @@ export class DashboardStorage {
   async update(
     ctx: StorageContext,
     id: string,
-    data: DashboardAttributes,
+    data: DashboardState,
     options: DashboardUpdateOptions
   ): Promise<DashboardUpdateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
@@ -213,8 +212,8 @@ export class DashboardStorage {
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
-      DashboardAttributes,
-      DashboardAttributes
+      DashboardState,
+      DashboardState
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);

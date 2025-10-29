@@ -14,7 +14,6 @@ import type { PublishesDataViews, PublishingSubject } from '@kbn/presentation-pu
 import { apiPublishesDataViews } from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
 import { BehaviorSubject, switchMap } from 'rxjs';
-import { dataService } from '../services/kibana_services';
 
 export function initializeDataViewsManager(
   children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
@@ -29,18 +28,7 @@ export function initializeDataViewsManager(
   )
     .pipe(
       switchMap(async (childDataViews) => {
-        const allDataViews = childDataViews.filter((dataView) => dataView.isPersisted());
-
-        if (allDataViews.length === 0) {
-          try {
-            const defaultDataView = await dataService.dataViews.getDefaultDataView();
-            if (defaultDataView) {
-              allDataViews.push(defaultDataView);
-            }
-          } catch (error) {
-            // ignore error getting default data view
-          }
-        }
+        const allDataViews = [...childDataViews];
         return uniqBy(allDataViews, 'id');
       })
     )

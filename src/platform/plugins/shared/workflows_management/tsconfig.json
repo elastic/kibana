@@ -24,7 +24,6 @@
     "@kbn/workflows",
     "@kbn/zod",
     "@kbn/code-editor",
-    "@kbn/security-plugin-types-common",
     "@kbn/monaco",
     "@kbn/actions-plugin",
     "@kbn/features-plugin",
@@ -43,11 +42,11 @@
     "@kbn/storybook",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-chrome-layout",
-    "@kbn/core-security-browser",
     "@kbn/react-kibana-context-theme",
     "@kbn/react-field",
     "@kbn/storage-adapter",
     "@kbn/core-i18n-browser-mocks",
+    "@kbn/stack-connectors-plugin",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/serverless",
     "@kbn/field-types",
@@ -59,7 +58,12 @@
     "@kbn/rrule",
     "@kbn/resizable-layout",
     "@kbn/es-types",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/utility-types",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/react-query",
+    "@kbn/core-http-server"
   ],
   "exclude": ["target/**/*"]
 }

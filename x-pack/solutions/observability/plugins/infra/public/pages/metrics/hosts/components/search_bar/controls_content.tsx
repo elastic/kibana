@@ -142,7 +142,7 @@ export const ControlsContent = ({
         isHostsView
         onChange={onPreferredSchemaChange}
         schemas={schemas}
-        value={schema}
+        value={schema ?? 'semconv'}
         isLoading={isLoading}
       />
     </ControlGroupContainer>

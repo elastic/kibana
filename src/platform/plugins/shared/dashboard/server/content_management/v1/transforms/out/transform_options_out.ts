@@ -7,31 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
-import type { optionsSchema } from '../../cm_services';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardState } from '../../types';
+
+const OPTION_KEYS = ['hidePanelTitles', 'useMargins', 'syncColors', 'syncCursor', 'syncTooltips'];
 
 export function transformOptionsOut(
   optionsJSON: string,
   controlGroupShowApplyButtonSetting: boolean | undefined
-): DashboardAttributes['options'] {
-  const options: TypeOf<typeof optionsSchema> = transformOptionsSetDefaults(
-    JSON.parse(optionsJSON)
-  );
-
+): Required<DashboardState>['options'] {
+  const options = JSON.parse(optionsJSON);
+  const knownOptions: { [key: string]: unknown } = {};
+  Object.keys(options).forEach((key) => {
+    if (OPTION_KEYS.includes(key)) knownOptions[key] = options[key];
+  });
   return {
-    ...options,
-    ...{
+    ...knownOptions,
+    ...(controlGroupShowApplyButtonSetting !== undefined && {
       autoApplyFilters: !controlGroupShowApplyButtonSetting,
-    },
-  };
-}
-
-// TODO We may want to remove setting defaults in the future
-function transformOptionsSetDefaults(options: DashboardAttributes['options']) {
-  return {
-    ...DEFAULT_DASHBOARD_OPTIONS,
-    ...options,
+    }),
   };
 }

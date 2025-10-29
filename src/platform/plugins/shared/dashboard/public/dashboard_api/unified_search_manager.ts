@@ -50,9 +50,11 @@ import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import type { DashboardCreationOptions } from './types';
 
+export const COMPARE_DEBOUNCE = 100;
+
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
-  timeRestore$: PublishingSubject<boolean | undefined>,
+  timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
   creationOptions?: DashboardCreationOptions
@@ -286,8 +288,14 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       unifiedSearchFilters$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([unifiedSearchFilters$, query$, refreshInterval$, timeRange$]).pipe(
-          debounceTime(100),
+        return combineLatest([
+          unifiedSearchFilters$,
+          query$,
+          refreshInterval$,
+          timeRange$,
+          timeRestore$,
+        ]).pipe(
+          debounceTime(COMPARE_DEBOUNCE),
           map(([filters, query, refreshInterval, timeRange]) => ({
             filters,
             query,
