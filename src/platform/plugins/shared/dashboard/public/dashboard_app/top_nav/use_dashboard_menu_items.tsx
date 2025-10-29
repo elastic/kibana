@@ -40,7 +40,6 @@ export const useDashboardMenuItems = ({
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
 }) => {
-  const [isResetting, setIsResetting] = useState(false);
   const isMounted = useMountedState();
   const appId = useObservable(coreServices.application.currentAppId$);
 
@@ -95,6 +94,7 @@ export const useDashboardMenuItems = ({
    * (1) reset the dashboard to the last saved state, and
    * (2) if `switchToViewMode` is `true`, set the dashboard to view mode.
    */
+  const [isResetting, setIsResetting] = useState(false);
   const resetChanges = useCallback(
     (switchToViewMode: boolean = false) => {
       dashboardApi.clearOverlays();
@@ -117,7 +117,7 @@ export const useDashboardMenuItems = ({
         }
       }, viewMode);
     },
-    [dashboardApi, hasUnsavedChanges, viewMode, setIsResetting, isMounted]
+    [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
   );
 
   /**
