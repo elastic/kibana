@@ -7,6 +7,7 @@
 
 import type { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
+  ConvertProcessor,
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
@@ -28,6 +29,7 @@ export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
 export type DissectFormState = DissectProcessor;
 export type DateFormState = DateProcessor;
 export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
+export type ConvertFormState = ConvertProcessor;
 
 export type SetFormState = SetProcessor;
 
@@ -36,6 +38,7 @@ export type SpecialisedFormState =
   | DissectFormState
   | DateFormState
   | ManualIngestPipelineFormState
+  | ConvertFormState
   | SetFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
