@@ -222,16 +222,14 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .pipe(debounceTime(0))
         .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
           const dataView = dataViews?.[0];
-          let newFilter: Filter | undefined;
-          if (!dataView || !fieldName) return;
+          if (!dataView) return;
 
-          newFilter = buildFilter(dataView, uuid, {
+          const newFilter = buildFilter(dataView, uuid, {
             fieldName,
             selectedOptions,
             existsSelected,
             exclude,
           });
-
           if (newFilter) dataControlManager.internalApi.setOutputFilter(newFilter);
         });
 

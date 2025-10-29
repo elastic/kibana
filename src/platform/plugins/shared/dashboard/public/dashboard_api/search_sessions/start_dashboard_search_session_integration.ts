@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, filter, skip } from 'rxjs';
+import { skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
@@ -52,38 +52,30 @@ export function startDashboardSearchSessionIntegration(
   const searchSessionIdChangeSubscription = sessionIdUrlChangeObservable
     ?.pipe(skip(1))
     .subscribe(() => dashboardApi.forceRefresh());
+  const newSessionSubscription = newSession$(dashboardApi).subscribe(() => {
+    const currentSearchSessionId = dashboardApi.searchSessionId$.value;
 
-  const newSessionSubscription = combineLatest([
-    newSession$(dashboardApi),
-    dashboardApi.isFetchPaused$,
-  ])
-    .pipe(
-      filter(([, isFetchPaused]) => !isFetchPaused) // don't generate new search session until fetch is unpaused
-    )
-    .subscribe(() => {
-      const currentSearchSessionId = dashboardApi.searchSessionId$.value;
-
-      const updatedSearchSessionId: string | undefined = (() => {
-        let searchSessionIdFromURL = getSearchSessionIdFromURL();
-        if (searchSessionIdFromURL) {
-          if (
-            dataService.search.session.isRestore() &&
-            dataService.search.session.isCurrentSession(searchSessionIdFromURL)
-          ) {
-            // we had previously been in a restored session but have now changed state so remove the session id from the URL.
-            removeSessionIdFromUrl();
-            searchSessionIdFromURL = undefined;
-          } else {
-            dataService.search.session.restore(searchSessionIdFromURL);
-          }
+    const updatedSearchSessionId: string | undefined = (() => {
+      let searchSessionIdFromURL = getSearchSessionIdFromURL();
+      if (searchSessionIdFromURL) {
+        if (
+          dataService.search.session.isRestore() &&
+          dataService.search.session.isCurrentSession(searchSessionIdFromURL)
+        ) {
+          // we had previously been in a restored session but have now changed state so remove the session id from the URL.
+          removeSessionIdFromUrl();
+          searchSessionIdFromURL = undefined;
+        } else {
+          dataService.search.session.restore(searchSessionIdFromURL);
         }
-        return searchSessionIdFromURL ?? dataService.search.session.start();
-      })();
-
-      if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
-        setSearchSessionId(updatedSearchSessionId);
       }
-    });
+      return searchSessionIdFromURL ?? dataService.search.session.start();
+    })();
+
+    if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
+      setSearchSessionId(updatedSearchSessionId);
+    }
+  });
 
   return () => {
     searchSessionIdChangeSubscription?.unsubscribe();
