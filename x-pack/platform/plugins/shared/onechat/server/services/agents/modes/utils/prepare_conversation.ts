@@ -12,7 +12,6 @@ import { getToolResultId } from '@kbn/onechat-server/tools';
 import type { AttachmentRepresentation } from '@kbn/onechat-server/attachments';
 
 export interface ProcessedAttachment {
-  // TODO extends instead.
   attachment: Attachment;
   representation: AttachmentRepresentation;
 }
