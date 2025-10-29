@@ -18,6 +18,7 @@ import {
   isRoundCompleteEvent,
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
+  createBadRequestError,
 } from '@kbn/onechat-common';
 import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
@@ -57,19 +58,21 @@ export function registerChatRoutes({
         },
       })
     ),
-    // TODO: proper type
+    input: schema.string({
+      meta: { description: 'The user input message to send to the agent.' },
+    }),
     attachments: schema.maybe(
       schema.arrayOf(
         schema.object({
           id: schema.maybe(schema.string()),
           type: schema.string(),
           data: schema.recordOf(schema.string(), schema.any()),
-        })
+          hidden: schema.maybe(schema.boolean()),
+          transient: schema.maybe(schema.boolean()),
+        }),
+        { meta: { description: 'Optional attachments to send with the message.' } }
       )
     ),
-    input: schema.string({
-      meta: { description: 'The user input message to send to the agent.' },
-    }),
     capabilities: schema.maybe(
       schema.object(
         {
@@ -105,8 +108,7 @@ export function registerChatRoutes({
       if (validation.valid) {
         results.push(validation.attachment);
       } else {
-        // TODO: merge errors for each attachment
-        throw new Error(`Attachment validation failed: ${validation.error}`);
+        throw createBadRequestError(`Attachment validation failed: ${validation.error}`);
       }
     }
     return results;
