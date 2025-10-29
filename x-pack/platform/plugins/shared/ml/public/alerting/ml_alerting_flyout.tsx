@@ -14,7 +14,6 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../application/contexts/kibana';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { PLUGIN_ID } from '../../common/constants/app';
 import type { MlAnomalyDetectionAlertRule } from '../../common/types/alerts';
 import type { FocusTrapProps } from '../application/util/create_focus_trap_props';
 import { createJobActionFocusTrapProps } from '../application/util/create_focus_trap_props';
@@ -26,6 +25,8 @@ interface MlAnomalyAlertFlyoutProps {
   onCloseFlyout: () => void;
   focusTrapProps?: FocusTrapProps;
 }
+
+const validConsumers = [AlertConsumers.ALERTS, AlertConsumers.STACK_ALERTS];
 
 /**
  * Invoke alerting flyout from the ML plugin context.
@@ -71,9 +72,10 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
     return (
       <RuleFormFlyout
         {...commonProps}
-        consumer={PLUGIN_ID}
+        consumer={AlertConsumers.ALERTS}
         ruleTypeId={ML_ALERT_TYPES.ANOMALY_DETECTION}
         initialMetadata={{}}
+        validConsumers={validConsumers}
         multiConsumerSelection={AlertConsumers.ALERTS}
         initialValues={{
           params: {
