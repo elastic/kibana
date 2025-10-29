@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
 import type { FramePublicAPI, Visualization } from '@kbn/lens-common';
 import {
   useLensDispatch,
