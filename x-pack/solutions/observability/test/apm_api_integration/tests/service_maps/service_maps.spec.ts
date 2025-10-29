@@ -82,14 +82,25 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         expect(getElements(response).length).to.be.greaterThan(0);
       });
 
-      it('returns serviceNames equal empty array if services have no traces', () => {
+      it('returns the correct data', () => {
         const elements: Array<{ data: Record<string, any> }> = getElements(response);
         const serviceNames = uniq(
           elements
             .filter((element) => element.data['service.name'] !== undefined)
             .map((element) => element.data['service.name'])
         ).sort();
-        expect(serviceNames.length).to.be.equal(0);
+        expectSnapshot(serviceNames).toMatchInline(`
+              Array [
+                "auditbeat",
+                "opbeans-dotnet",
+                "opbeans-go",
+                "opbeans-java",
+                "opbeans-node",
+                "opbeans-python",
+                "opbeans-ruby",
+                "opbeans-rum",
+              ]
+            `);
 
         const externalDestinations = uniq(
           elements
