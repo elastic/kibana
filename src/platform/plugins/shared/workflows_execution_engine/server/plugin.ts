@@ -172,6 +172,112 @@ export class WorkflowsExecutionEnginePlugin
         },
       },
     });
+    plugins.taskManager.registerTaskDefinitions({
+      'workflow:scheduled': {
+        title: 'Scheduled Workflow Execution',
+        description: 'Executes workflows on a scheduled basis',
+        // Set high timeout for long-running workflows.
+        // This is high value to allow long-running workflows.
+        // The workflow timeout logic defined in workflow execution engine logic is the primary control.
+        timeout: '365d',
+        maxAttempts: 3,
+        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          const taskAbortController = new AbortController();
+          return {
+            async run() {
+              const { workflow, spaceId } = taskInstance.params as {
+                workflow: WorkflowExecutionEngineModel;
+                spaceId: string;
+                triggerType: string;
+              };
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
+              const { actions, taskManager } = pluginsStart;
+
+              logger.info(`Running scheduled workflow task for workflow ${workflow.id}`);
+
+              // Check for RRule triggers and log details
+              const scheduledTriggers =
+                workflow.definition.triggers?.filter((trigger) => trigger.type === 'scheduled') ||
+                [];
+              const rruleTriggers = scheduledTriggers.filter(
+                (trigger) => trigger.type === 'scheduled' && 'rrule' in (trigger.with || {})
+              );
+
+              if (rruleTriggers.length > 0) {
+                logger.info(
+                  `Executing RRule-scheduled workflow ${workflow.id} with ${rruleTriggers.length} RRule triggers`
+                );
+              }
+
+              // Create workflow execution record
+              const workflowCreatedAt = new Date();
+              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const logsRepository = new LogsRepository(esClient, logger);
+
+              const executionContext = {
+                workflowRunId: `scheduled-${Date.now()}`,
+                spaceId,
+                inputs: {},
+                event: {
+                  type: 'scheduled',
+                  timestamp: new Date().toISOString(),
+                  source: 'task-manager',
+                },
+                triggeredBy: 'scheduled',
+              };
+
+              const workflowExecution: Partial<EsWorkflowExecution> = {
+                id: generateUuid(),
+                spaceId,
+                workflowId: workflow.id,
+                isTestRun: workflow.isTestRun,
+                workflowDefinition: workflow.definition,
+                yaml: workflow.yaml,
+                context: executionContext,
+                status: ExecutionStatus.PENDING,
+                createdAt: workflowCreatedAt.toISOString(),
+                createdBy: '',
+                triggeredBy: 'scheduled',
+              };
+              await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+
+              // We're already in a task - execute directly without scheduling another task
+              logger.debug(
+                `Executing scheduled workflow directly (already in Task Manager context): ${workflow.id}`
+              );
+
+              await runWorkflow({
+                workflowRunId: workflowExecution.id!,
+                spaceId: workflowExecution.spaceId!,
+                workflowExecutionRepository,
+                stepExecutionRepository,
+                logsRepository,
+                taskAbortController,
+                coreStart,
+                esClient,
+                actions,
+                taskManager,
+                logger,
+                config,
+                fakeRequest: fakeRequest || ({} as any), // will be undefined if not available
+                dependencies,
+              });
+
+              const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
+              logger.info(
+                `Successfully executed ${scheduleType}-scheduled workflow ${workflow.id}`
+              );
+            },
+            async cancel() {
+              taskAbortController.abort();
+            },
+          };
+        },
+      },
+    });
 
     return {};
   }
