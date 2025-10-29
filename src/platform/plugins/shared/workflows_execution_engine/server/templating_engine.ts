@@ -35,6 +35,26 @@ export class WorkflowTemplatingEngine {
     return this.renderValueRecursively(obj, context) as T;
   }
 
+  public evaluateExpression(template: string, context: Record<string, unknown>): unknown {
+    let resolvedExpression = template.trim();
+    const openExpressionIndex = resolvedExpression.indexOf('{{');
+    const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
+
+    if (!openExpressionIndex && !closeExpressionIndex) {
+      throw new Error(`The provided expression is invalid. Got: ${template}.`);
+    }
+
+    resolvedExpression = resolvedExpression
+      .substring(openExpressionIndex + 2, closeExpressionIndex)
+      .trim();
+
+    try {
+      return this.engine.evalValueSync(resolvedExpression, context);
+    } catch (err) {
+      throw new Error(`The provided expression is invalid. Got: ${template}.`);
+    }
+  }
+
   private renderValueRecursively(value: unknown, context: Record<string, unknown>): unknown {
     // Handle null and undefined
     if (value === null || value === undefined) {
@@ -64,7 +84,7 @@ export class WorkflowTemplatingEngine {
     return value;
   }
 
-  public renderString(template: string, context: Record<string, unknown>): string {
+  private renderString(template: string, context: Record<string, unknown>): string {
     try {
       return this.engine.parseAndRenderSync(template, context);
     } catch (error) {
