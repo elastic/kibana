@@ -267,7 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should override axis title', async () => {
       const axisTitle = 'overridden axis';
-      await PageObjects.lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await PageObjects.lens.openStyleSettingsFlyout();
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
@@ -280,6 +280,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
+
+      await PageObjects.lens.closeFlyout();
     });
 
     it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {

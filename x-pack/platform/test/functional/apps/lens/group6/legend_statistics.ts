@@ -54,12 +54,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('shows table with legend statistics', async () => {
         await loadSavedLens('lnsXYvis');
 
-        await lens.toggleToolbarPopover('lnsLegendButton');
+        await lens.openLegendSettingsFlyout();
         await lens.selectOptionFromComboBox('lnsLegendStatisticsSelect', [
           'average',
           'minimum',
           'maximum',
         ]);
+        await lens.closeFlyout();
 
         const tableText = `Avg
 Min

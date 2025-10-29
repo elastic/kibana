@@ -865,7 +865,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
     async openLegendSettingsFlyout() {
-      if (await this.hasStyleButton()) {
+      if (await this.hasLegendButton()) {
         const legendButton = await find.byCssSelector(
           'button[data-test-subj="legend"][title="Legend"]'
         );
