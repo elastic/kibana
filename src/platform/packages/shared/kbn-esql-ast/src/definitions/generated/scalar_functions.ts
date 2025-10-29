@@ -4436,7 +4436,7 @@ const kqlDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: [
     'FROM books\n| WHERE KQL("author: Faulkner")',
     'FROM employees\n| WHERE KQL("mary", {"case_insensitive": true, "default_field": "first_name", "boost": 1.5})',
@@ -6127,7 +6127,7 @@ const matchDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: [
     'FROM books\n| WHERE MATCH(author, "Faulkner")',
     'FROM books\n| WHERE MATCH(title, "Hobbit Back Again", {"operator": "AND"})\n| KEEP title;',
@@ -7070,7 +7070,7 @@ const multiMatchDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: [
     'FROM books\n| WHERE MULTI_MATCH("Faulkner", author, description)\n| KEEP book_no, author\n| SORT book_no\n| LIMIT 5',
     'FROM books\n| WHERE MULTI_MATCH("Hobbit Back Again", title, description, {"operator": "AND"})\n| KEEP title;',
@@ -7582,6 +7582,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'boolean',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7597,6 +7598,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'cartesian_point',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7612,6 +7614,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'cartesian_shape',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7627,6 +7630,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'date',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7642,6 +7646,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'date_nanos',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7657,6 +7662,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'double',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7672,6 +7678,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geo_point',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7687,6 +7694,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geo_shape',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7702,6 +7710,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geohash',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7717,6 +7726,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geohex',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7732,6 +7742,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'geotile',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7747,6 +7758,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'integer',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7762,6 +7774,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'ip',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7777,6 +7790,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'keyword',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7792,6 +7806,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'keyword',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7807,6 +7822,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'long',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7822,6 +7838,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'text',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7837,6 +7854,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'text',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7852,6 +7870,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'unsigned_long',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -7867,6 +7886,7 @@ const mvContainsDefinition: FunctionDefinition = {
           name: 'superset',
           type: 'version',
           optional: false,
+          supportsMultiValues: true,
         },
         {
           name: 'subset',
@@ -10719,7 +10739,7 @@ const qstrDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
   examples: [
     'FROM books\n| WHERE QSTR("author: Faulkner")',
     'FROM books\n| WHERE QSTR("title: Hobbjt~", {"fuzziness": 2})',

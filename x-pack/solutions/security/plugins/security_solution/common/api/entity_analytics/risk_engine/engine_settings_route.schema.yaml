@@ -27,3 +27,19 @@ paths:
                   enableResetToZero:
                     type: boolean
                     description: Whether to enable resetting risk scores to zero when there are no alerts in the selected date range
+                  filters:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entity_types:
+                          type: array
+                          items:
+                            type: string
+                            enum: [host, user, service]
+                        filter:
+                          type: string
+                          description: KQL filter string
+                      required:
+                        - entity_types
+                        - filter
