@@ -193,7 +193,7 @@ export function getConnectorInstancesForType(
  */
 export function getConnectorIdSuggestionsItems(
   connectorType: string,
-  range: monaco.IRange,
+  range: monaco.IRange | monaco.languages.CompletionItemRanges,
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];

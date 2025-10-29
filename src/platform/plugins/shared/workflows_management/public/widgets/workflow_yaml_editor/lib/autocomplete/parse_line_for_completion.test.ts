@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  ConnectorIdLineParseResult,
+  ForeachVariableLineParseResult,
+} from './parse_line_for_completion';
 import { parseLineForCompletion } from './parse_line_for_completion';
 
 describe('parseLineForCompletion', () => {
@@ -368,16 +372,21 @@ describe('parseLineForCompletion', () => {
       expect(result?.matchType).toBe('foreach-variable');
       expect(result?.fullKey).toBe('items');
       expect(result?.match).toBeNull();
-      expect(result?.pathSegments).toEqual(['items']);
-      expect(result?.lastPathSegment).toBe('items');
+      expect((result as ForeachVariableLineParseResult)?.pathSegments).toEqual(['items']);
+      expect((result as ForeachVariableLineParseResult)?.lastPathSegment).toBe('items');
     });
 
     it('should parse foreach variable with dotted path', () => {
       const result = parseLineForCompletion('foreach: steps.getUsers.output.users');
       expect(result?.matchType).toBe('foreach-variable');
       expect(result?.fullKey).toBe('steps.getUsers.output.users');
-      expect(result?.pathSegments).toEqual(['steps', 'getUsers', 'output', 'users']);
-      expect(result?.lastPathSegment).toBe('users');
+      expect((result as ForeachVariableLineParseResult)?.pathSegments).toEqual([
+        'steps',
+        'getUsers',
+        'output',
+        'users',
+      ]);
+      expect((result as ForeachVariableLineParseResult)?.lastPathSegment).toBe('users');
     });
 
     it('should parse foreach variable with trailing space', () => {
@@ -390,16 +399,16 @@ describe('parseLineForCompletion', () => {
       const result = parseLineForCompletion('foreach: steps.get');
       expect(result?.matchType).toBe('foreach-variable');
       expect(result?.fullKey).toBe('steps.get');
-      expect(result?.pathSegments).toEqual(['steps', 'get']);
-      expect(result?.lastPathSegment).toBe('get');
+      expect((result as ForeachVariableLineParseResult)?.pathSegments).toEqual(['steps', 'get']);
+      expect((result as ForeachVariableLineParseResult)?.lastPathSegment).toBe('get');
     });
 
     it('should parse foreach variable with trailing dot', () => {
       const result = parseLineForCompletion('foreach: steps.');
       expect(result?.matchType).toBe('foreach-variable');
       expect(result?.fullKey).toBe('steps');
-      expect(result?.pathSegments).toEqual(['steps']);
-      expect(result?.lastPathSegment).toBeNull();
+      expect((result as ForeachVariableLineParseResult)?.pathSegments).toEqual(['steps']);
+      expect((result as ForeachVariableLineParseResult)?.lastPathSegment).toBeNull();
     });
 
     it('should parse foreach variable with indentation', () => {
@@ -418,8 +427,8 @@ describe('parseLineForCompletion', () => {
       const result = parseLineForCompletion('foreach: ');
       expect(result?.matchType).toBe('foreach-variable');
       expect(result?.fullKey).toBe('');
-      expect(result?.pathSegments).toBeNull(); // parsePath returns null for empty string
-      expect(result?.lastPathSegment).toBeNull();
+      expect((result as ForeachVariableLineParseResult)?.pathSegments).toBeNull(); // parsePath returns null for empty string
+      expect((result as ForeachVariableLineParseResult)?.lastPathSegment).toBeNull();
     });
 
     it('should parse foreach variable with extra spaces around colon', () => {
@@ -432,10 +441,14 @@ describe('parseLineForCompletion', () => {
 
   describe('connector-id scenarios', () => {
     it('should parse connector-id with value', () => {
-      const result = parseLineForCompletion('connector-id: my-connector-123');
+      const line = 'connector-id: my-connector-123';
+      const result = parseLineForCompletion(line);
       expect(result?.matchType).toBe('connector-id');
       expect(result?.fullKey).toBe('my-connector-123');
       expect(result?.match).toBeTruthy();
+      expect((result as ConnectorIdLineParseResult)?.valueStartColumn).toEqual(
+        line.indexOf('connector-id: ') + 'connector-id: '.length + 1
+      );
     });
 
     it('should parse empty connector-id', () => {
@@ -463,9 +476,13 @@ describe('parseLineForCompletion', () => {
     });
 
     it('should parse connector-id with extra spaces', () => {
-      const result = parseLineForCompletion('  connector-id  :   email-service  ');
-      // The regex doesn't match when there are spaces before the colon
-      expect(result).toBeNull();
+      const line = 'connector-id:   email-service  ';
+      const result = parseLineForCompletion(line);
+      expect(result?.matchType).toBe('connector-id');
+      expect(result?.fullKey).toBe('email-service');
+      expect((result as ConnectorIdLineParseResult)?.valueStartColumn).toEqual(
+        line.indexOf('connector-id:') + 'connector-id:'.length + 1
+      );
     });
 
     it('should parse connector-id with complex name', () => {

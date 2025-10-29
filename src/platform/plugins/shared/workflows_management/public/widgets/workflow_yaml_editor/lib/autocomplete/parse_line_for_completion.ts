@@ -22,44 +22,46 @@ interface BaseLineParseResult {
   match: RegExpMatchArray | null;
 }
 
-interface VariableLineParseResult extends BaseLineParseResult {
+export interface VariableLineParseResult extends BaseLineParseResult {
   matchType: 'at' | 'variable-complete' | 'variable-unfinished';
   match: RegExpMatchArray;
   pathSegments: string[] | null;
   lastPathSegment: string | null;
 }
 
-interface ForeachVariableLineParseResult extends BaseLineParseResult {
+export interface ForeachVariableLineParseResult extends BaseLineParseResult {
   matchType: 'foreach-variable';
   match: null;
   pathSegments: string[] | null;
   lastPathSegment: string | null;
 }
 
-interface LiquidLineParseResult extends BaseLineParseResult {
+export interface LiquidLineParseResult extends BaseLineParseResult {
   matchType: 'liquid-filter' | 'liquid-block-filter' | 'liquid-block-keyword';
   match: RegExpMatchArray;
 }
 
-interface LiquidSyntaxLineParseResult extends BaseLineParseResult {
+export interface LiquidSyntaxLineParseResult extends BaseLineParseResult {
   matchType: 'liquid-syntax';
   match: null;
 }
 
-interface ConnectorIdLineParseResult extends BaseLineParseResult {
+export interface ConnectorIdLineParseResult extends BaseLineParseResult {
   matchType: 'connector-id';
   match: RegExpMatchArray;
+  valueStartColumn: number;
 }
 
-interface TypeLineParseResult extends BaseLineParseResult {
+export interface TypeLineParseResult extends BaseLineParseResult {
   matchType: 'type';
   match: RegExpMatchArray;
 }
 
-interface TimezoneLineParseResult extends BaseLineParseResult {
+export interface TimezoneLineParseResult extends BaseLineParseResult {
   matchType: 'timezone';
   match: RegExpMatchArray;
 }
+
 export type LineParseResult =
   | VariableLineParseResult
   | ForeachVariableLineParseResult
@@ -69,6 +71,7 @@ export type LineParseResult =
   | TypeLineParseResult
   | TimezoneLineParseResult;
 
+// eslint-disable-next-line complexity
 export function parseLineForCompletion(lineUpToCursor: string): LineParseResult | null {
   const timezoneFieldMatch = lineUpToCursor.match(/^\s*(?:tzid|timezone)\s*:\s*(.*)$/);
   if (timezoneFieldMatch) {
@@ -90,13 +93,14 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
     };
   }
 
-  const connectorIdMatch = lineUpToCursor.match(/^\s*connector-id:\s*(.*)$/i);
-  if (connectorIdMatch) {
-    const connectorId = lineUpToCursor.split('connector-id:')[1].trim();
+  const connectorIdMatch = lineUpToCursor.match(/^(?<prefix>.*?connector-id:)\s*(?<value>.*)$/i);
+  if (connectorIdMatch && connectorIdMatch.groups) {
+    const connectorId = connectorIdMatch.groups?.value.trim() ?? '';
     return {
       matchType: 'connector-id',
       fullKey: connectorId,
       match: connectorIdMatch,
+      valueStartColumn: connectorIdMatch.groups.prefix.length + 1,
     };
   }
   // Try @ trigger first (e.g., "@const" or "@steps.step1")

@@ -20,25 +20,23 @@ export function getConnectorIdSuggestions({
   // eslint-disable-next-line prefer-const
   let stepConnectorType = focusedStepInfo?.stepType ?? null;
 
-  if (!stepConnectorType || !lineParseResult) {
+  if (
+    !stepConnectorType ||
+    !lineParseResult ||
+    lineParseResult.matchType !== 'connector-id' ||
+    !dynamicConnectorTypes
+  ) {
     return [];
   }
-  // TODO: find out if it's really needed to adjust the range here or annotate it better
-  // For connector-id values, we replace from the start of the value to the end of the line
-  // Find the position right after "connector-id: "
-  const valueStartColumn = lineParseResult.match
-    ? lineParseResult.match[1].length + 1
-    : range.startColumn;
-  const adjustedRange = {
-    startLineNumber: range.startLineNumber,
-    endLineNumber: range.endLineNumber,
-    startColumn: valueStartColumn,
-    endColumn: line.length + 1,
-  };
-
-  if (!dynamicConnectorTypes) {
-    return [];
+  // If the user has typed part of the connector-id, we replace from the start of the value to the end of the line
+  if (lineParseResult.fullKey !== '') {
+    const replaceRange = {
+      ...range,
+      startColumn: lineParseResult.valueStartColumn,
+      endColumn: line.length + 1,
+    };
+    return getConnectorIdSuggestionsItems(stepConnectorType, replaceRange, dynamicConnectorTypes);
   }
 
-  return getConnectorIdSuggestionsItems(stepConnectorType, adjustedRange, dynamicConnectorTypes);
+  return getConnectorIdSuggestionsItems(stepConnectorType, range, dynamicConnectorTypes);
 }
