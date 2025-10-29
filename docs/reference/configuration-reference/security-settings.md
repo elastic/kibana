@@ -74,7 +74,7 @@ xpack.security.authc.providers.<provider-type>.<provider-name>.hint ![logo cloud
 xpack.security.authc.providers.<provider-type>.<provider-name>.icon ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Custom icon for the provider entry displayed on the Login Selector UI.
 
-xpack.security.authc.providers.<provider-type>.<provider-name>.origin ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+xpack.security.authc.providers.<provider-type>.<provider-name>.origin {applies_to}`stack: ga 9.3` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies a list of allowed origins for authentication requests initiated from the UI. Each origin must be a valid URI and is matched against the browser’s `origin` header when fulfilling an authentication request. Providers not matching the browser's location do not appear in the UI. By default, requests are not restricted to specific origins.
 
     For example:
