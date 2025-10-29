@@ -17609,6 +17609,10 @@
                                 "download": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "proxy_headers": {},
+                                    "proxy_url": {
+                                      "type": "string"
+                                    },
                                     "secrets": {
                                       "additionalProperties": true,
                                       "properties": {
@@ -17668,7 +17672,8 @@
                                     }
                                   },
                                   "required": [
-                                    "sourceURI"
+                                    "sourceURI",
+                                    "proxy_headers"
                                   ],
                                   "type": "object"
                                 },
