@@ -301,8 +301,12 @@ const deprecations: ConfigDeprecationProvider = () => [
         }),
         level: 'warning',
         message: i18n.translate('core.deprecations.elasticsearchPingTimeout.message', {
-          defaultMessage: 'Setting "{pingTimeoutSetting}" is deprecated and no longer used. Use "{requestTimeoutSetting}" instead.',
-          values: { pingTimeoutSetting: `${fromPath}.pingTimeout`, requestTimeoutSetting: `${fromPath}.requestTimeout` },
+          defaultMessage:
+            'Setting "{pingTimeoutSetting}" is deprecated and no longer used. Use "{requestTimeoutSetting}" instead.',
+          values: {
+            pingTimeoutSetting: `${fromPath}.pingTimeout`,
+            requestTimeoutSetting: `${fromPath}.requestTimeout`,
+          },
         }),
         correctiveActions: {
           manualSteps: [
