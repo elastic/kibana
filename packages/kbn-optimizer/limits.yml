@@ -73,7 +73,7 @@ pageLoadAssetSize:
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
-  graph: 10006
+  graph: 9946
   grokdebugger: 5484
   home: 13560
   imageEmbeddable: 6000
@@ -110,7 +110,7 @@ pageLoadAssetSize:
   navigation: 11684
   newsfeed: 12371
   noDataPage: 1749
-  observability: 109574
+  observability: 107955
   observabilityAIAssistant: 52556
   observabilityAIAssistantApp: 16012
   observabilityAiAssistantManagement: 6438
@@ -151,12 +151,12 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79724
-  securitySolution: 119452
+  securitySolution: 119378
   securitySolutionEss: 43319
-  securitySolutionServerless: 62964
-  serverless: 7854
-  serverlessObservability: 23996
-  serverlessSearch: 33338
+  securitySolutionServerless: 62689
+  serverless: 7852
+  serverlessObservability: 23774
+  serverlessSearch: 31189
   serverlessWorkplaceAI: 6600
   sessionView: 47912
   share: 58677
@@ -170,7 +170,7 @@ pageLoadAssetSize:
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
-  timelines: 196842
+  timelines: 192134
   transform: 16515
   triggersActionsUi: 110000
   uiActions: 24670
@@ -199,4 +199,4 @@ pageLoadAssetSize:
   visualizations: 38374
   watcher: 10485
   workflowsManagement: 7267
-  workplaceAIApp: 5822
+  workplaceAIApp: 5759
