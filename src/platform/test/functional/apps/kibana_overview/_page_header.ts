@@ -46,11 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const header = await find.byCssSelector('.euiPageHeaderContent');
-      const items = await header.findAllByTestSubject('kbnRedirectAppLink');
-
-      const management = await items!.at(1);
-      await management!.click();
+      await testSubjects.click('homeManage');
       await PageObjects.common.waitUntilUrlIncludes('app/management');
     });
 
@@ -58,11 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const header = await find.byCssSelector('.euiPageHeaderContent');
-      const items = await header.findAllByTestSubject('kbnRedirectAppLink');
-
-      const devTools = await items!.at(0);
-      await devTools!.click();
+      await testSubjects.click('homeDevTools');
       await PageObjects.common.waitUntilUrlIncludes('app/dev_tools');
     });
   });
