@@ -57,13 +57,6 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       onWorkflowChange={handleWorkflowChange}
       config={{
         sortByTrigger: 'alert',
-        label: i18n.WORKFLOW_ID_LABEL,
-        placeholder: i18n.SELECT_WORKFLOW_PLACEHOLDER,
-        createWorkflowLinkText: i18n.CREATE_NEW_WORKFLOW,
-        errorMessages: {
-          selectedWorkflowDisabled: i18n.SELECTED_WORKFLOW_DISABLED_ERROR,
-          loadFailed: i18n.FAILED_TO_LOAD_WORKFLOWS,
-        },
       }}
       error={validationError}
       onCreateWorkflow={handleOpenWorkflowManagementApp}

@@ -24,6 +24,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import * as i18n from './translations';
 import { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
 import { getSelectedWorkflowDisabledError, processWorkflowsToOptions } from './workflow_utils';
 import type { WorkflowOption, WorkflowSelectorConfig } from './workflow_utils';
@@ -54,12 +55,12 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   // Default configuration
   const defaultConfig: WorkflowSelectorConfig = useMemo(
     () => ({
-      label: 'Select Workflow',
-      placeholder: 'Select a workflow',
-      createWorkflowLinkText: 'Create new',
+      label: i18n.WORKFLOW_ID_LABEL,
+      placeholder: i18n.SELECT_WORKFLOW_PLACEHOLDER,
+      createWorkflowLinkText: i18n.CREATE_NEW_WORKFLOW,
       errorMessages: {
-        selectedWorkflowDisabled: 'Selected workflow is disabled',
-        loadFailed: 'Failed to load workflows',
+        selectedWorkflowDisabled: i18n.SELECTED_WORKFLOW_DISABLED_ERROR,
+        loadFailed: i18n.FAILED_TO_LOAD_WORKFLOWS,
       },
     }),
     []
@@ -135,7 +136,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     );
 
     if (option.disabled) {
-      return <EuiToolTip content="Disabled workflow">{content}</EuiToolTip>;
+      return <EuiToolTip content={i18n.DISABLED_WORKFLOW_TOOLTIP}>{content}</EuiToolTip>;
     }
 
     return content;
@@ -202,7 +203,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const helpText = fetchError
     ? finalConfig.errorMessages?.loadFailed
     : isLoading
-    ? 'Loading workflows...'
+    ? i18n.LOADING_WORKFLOWS
     : undefined;
 
   return (
