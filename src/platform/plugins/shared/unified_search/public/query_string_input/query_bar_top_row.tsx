@@ -54,8 +54,8 @@ import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { NoDataPopover } from './no_data_popover';
-import { ProjectPicker } from '../project_picker';
-import type { ProjectPickerProps } from '../project_picker';
+import { ProjectPicker } from '@kbn/cps-utils';
+import type { ProjectPickerProps } from '@kbn/cps-utils';
 import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
