@@ -71,7 +71,7 @@ export function BulkOperationProvider({ children }: { children: React.ReactNode 
     queries: tasks
       .filter((task) => task.status === 'in-progress')
       .map((task) => ({
-        queryKey: sloKeys.bulkDeleteStatus(task.taskId),
+        queryKey: sloKeys.bulkOperationStatus(task.taskId),
         queryFn: async () => {
           const url = taskUrls.get(task.operation);
           if (!url) {
