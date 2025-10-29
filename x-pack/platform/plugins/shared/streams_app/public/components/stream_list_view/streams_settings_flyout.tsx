@@ -361,14 +361,39 @@ output.elasticsearch:
                 </ul>
               </EuiText>
             ) : (
-              <EuiCodeBlock
-                language={selectedShipperId.endsWith('__curl') ? 'json' : 'yaml'}
-                isCopyable
-                paddingSize="m"
-                data-test-subj="streamsShipperConfigExample"
-              >
-                {shipperConfigExamples[selectedShipperId]}
-              </EuiCodeBlock>
+              <>
+                {selectedShipperId.endsWith('__curl') && (
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.streams.streamsListView.shipperConfigCurlDescription"
+                        defaultMessage="Send data to the {logsEndpoint} endpoint using the {bulkApiLink}. Refer to the following example for more information:"
+                        values={{
+                          logsEndpoint: <code>/logs/</code>,
+                          bulkApiLink: (
+                            <EuiLink
+                              href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              external
+                            >
+                              Bulk API
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiText>
+                )}
+                <EuiCodeBlock
+                  language={selectedShipperId.endsWith('__curl') ? 'json' : 'yaml'}
+                  isCopyable
+                  paddingSize="m"
+                  data-test-subj="streamsShipperConfigExample"
+                >
+                  {shipperConfigExamples[selectedShipperId]}
+                </EuiCodeBlock>
+              </>
             )}
           </EuiFlexGroup>
         </EuiFlyoutBody>
