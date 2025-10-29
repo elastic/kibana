@@ -30,6 +30,7 @@ export interface WorkflowOption {
 export interface WorkflowSelectorConfig {
   // Filtering
   filterFunction?: (workflows: WorkflowListDto['results']) => WorkflowListDto['results'];
+
   // Sorting
   sortFunction?: (workflows: WorkflowListDto['results']) => WorkflowListDto['results'];
 
