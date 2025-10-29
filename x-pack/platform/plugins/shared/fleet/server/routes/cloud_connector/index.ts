@@ -22,6 +22,8 @@ import {
   UpdateCloudConnectorResponseSchema,
   DeleteCloudConnectorRequestSchema,
   DeleteCloudConnectorResponseSchema,
+  CreateAgentPolicyWithCloudConnectorRequestSchema,
+  CreateAgentPolicyWithCloudConnectorResponseSchema,
 } from '../../types/rest_spec/cloud_connector';
 
 import {
@@ -30,6 +32,7 @@ import {
   getCloudConnectorHandler,
   updateCloudConnectorHandler,
   deleteCloudConnectorHandler,
+  createCloudConnectorWithPackagePolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -256,5 +259,37 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       deleteCloudConnectorHandler
+    );
+
+  // POST /internal/fleet/cloud_connector_with_package_policy
+  // Internal API: Create cloud connector with agent policy and package policy
+  router.versioned
+    .post({
+      path: CLOUD_CONNECTOR_API_ROUTES.CREATE_WITH_PACKAGE_POLICY,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: CreateAgentPolicyWithCloudConnectorRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => CreateAgentPolicyWithCloudConnectorResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      createCloudConnectorWithPackagePolicyHandler
     );
 };

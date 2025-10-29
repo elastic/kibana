@@ -105,7 +105,6 @@ import {
   FleetNotFoundError,
   PackageRollbackError,
   CloudConnectorInvalidVarsError,
-  CloudConnectorCreateError,
   CloudConnectorUpdateError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
@@ -2979,6 +2978,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
   }
 
+  /**
+   * Updates an existing cloud connector's package policy count when a package policy
+   * references it. Cloud connector creation should now be done through the internal
+   * Fleet API endpoint (createAgentPolicyWithCloudConnector) for atomic operations.
+   *
+   * @deprecated Use createAgentPolicyWithCloudConnector for new cloud connector creation
+   */
   public async createCloudConnectorForPackagePolicy(
     soClient: SavedObjectsClientContract,
     enrichedPackagePolicy: NewPackagePolicy,
@@ -3022,19 +3028,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           throw new CloudConnectorUpdateError(`${e}`);
         }
       } else {
-        logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
-        try {
-          const cloudConnector = await cloudConnectorService.create(soClient, {
-            name: `${cloudProvider}-cloud-connector: ${enrichedPackagePolicy.name}`,
-            vars: cloudConnectorVars,
-            cloudProvider,
-          });
-          logger.info(`Successfully created cloud connector: ${cloudConnector.id}`);
-          return cloudConnector;
-        } catch (error) {
-          logger.error(`Error creating cloud connector: ${error}`);
-          throw new CloudConnectorCreateError(`${error}`);
-        }
+        // Cloud connector creation removed - use createAgentPolicyWithCloudConnector internal API
+        logger.debug(
+          'Package policy supports cloud connector but no cloud_connector_id provided. ' +
+            'Use createAgentPolicyWithCloudConnector internal API for atomic creation.'
+        );
+        return;
       }
     }
   }

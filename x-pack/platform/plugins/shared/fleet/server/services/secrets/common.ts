@@ -229,6 +229,7 @@ export async function extractAndWriteSOSecrets<T>(opts: {
       ...(Array.isArray(currentSecret)
         ? { ids: currentSecret.map(({ id }) => id) }
         : { id: currentSecret.id }),
+      isSecretRef: true,
       ...(typeof maybeHash === 'string' && { hash: maybeHash }),
     });
   });
@@ -282,6 +283,7 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
       ...(Array.isArray(currentSecret)
         ? { ids: currentSecret.map(({ id }) => id) }
         : { id: currentSecret.id }),
+      isSecretRef: true,
       ...(typeof maybeHash === 'string' && { hash: maybeHash }),
     });
   });
