@@ -408,6 +408,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.ruleFormV2Enabled (boolean?)',
         'xpack.observability.unsafe.ruleFormV2.enabled (boolean?)',
         'xpack.slo.experimental.ruleFormV2.enabled (boolean?)',
+
+        // temporary feature flag, to be removed when cps is released
+        'cps.cpsEnabled (boolean?|never)',
         /**/
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
