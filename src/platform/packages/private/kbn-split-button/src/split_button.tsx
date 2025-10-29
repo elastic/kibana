@@ -8,11 +8,11 @@
  */
 
 import { EuiButton, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
-import type { IconType, UseEuiTheme } from '@elastic/eui';
+import type { EuiButtonProps, IconType, UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import React from 'react';
 
-type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
+export type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
   isMainButtonLoading?: boolean;
   isMainButtonDisabled?: boolean;
   iconOnly?: boolean;
@@ -58,7 +58,7 @@ export const SplitButton = ({
 
   const areButtonsDisabled = disabled || isDisabled;
 
-  const commonMainButtonProps = {
+  const commonMainButtonProps: EuiButtonProps = {
     css: styles.mainButton,
     style: {
       borderRightColor: borderColor,

@@ -161,11 +161,10 @@ export const useDashboardMenuItems = ({
         id: 'quick-save',
         iconType: 'save',
         emphasize: true,
-        isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: disableTopNav || !hasUnsavedChanges || isResetting,
+        disableButton: disableTopNav || isResetting,
         run: () => quickSaveDashboard(),
-        secondaryButton: {
+        splitButtonProps: {
           run: (anchorElement: HTMLElement) => {
             showSaveMenu({
               dashboardApi,
@@ -176,11 +175,12 @@ export const useDashboardMenuItems = ({
               dashboardInteractiveSave,
             });
           },
-          ariaLabel: topNavStrings.saveMenu.label,
-          label: topNavStrings.saveMenu.label,
-          iconType: 'arrowDown',
-          fill: true,
-          isDisabled: disableTopNav || isResetting || isSaveInProgress,
+          isMainButtonLoading: isSaveInProgress,
+          isMainButtonDisabled: !hasUnsavedChanges,
+          secondaryButtonAriaLabel: topNavStrings.saveMenu.label,
+          secondaryButtonIcon: 'arrowDown',
+          secondaryButtonFill: true,
+          isSecondaryButtonDisabled: isSaveInProgress,
         },
       } as TopNavMenuData,
 

@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import type { MouseEvent } from 'react';
 import React from 'react';
 
-import type { EuiButtonColor } from '@elastic/eui';
+import type { EuiButtonColor, EuiButtonProps } from '@elastic/eui';
 import {
   EuiToolTip,
   EuiButton,
@@ -81,9 +81,9 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
   }
 
   function handleSecondaryButtonClick(event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
-    if (props.secondaryButton?.isDisabled) return;
+    if (props.splitButtonProps?.isSecondaryButtonDisabled) return;
 
-    props.secondaryButton?.run(event.currentTarget);
+    props.splitButtonProps?.run?.(event.currentTarget);
     if (props.isMobileMenu) {
       props.closePopover();
     }
@@ -91,10 +91,11 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
 
   const routerLinkProps = props.href
     ? getRouterLinkProps({ href: props.href, onClick: handleClick })
-    : { onClick: handleClick };
+    : { href: undefined, onClick: handleClick };
 
-  const commonButtonProps = {
+  const commonButtonProps: EuiButtonProps & { id?: string } = {
     id: props.htmlId,
+    isDisabled: isDisabled(),
     isLoading: props.isLoading,
     iconType: props.iconType,
     iconSide: props.iconSide,
@@ -132,20 +133,13 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
           iconType={props.iconType}
           display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
           aria-label={upperFirst(props.label || props.id!)}
-          isDisabled={isDisabled()}
         />
       )
-    ) : props.secondaryButton ? (
+    ) : props.splitButtonProps ? (
       <SplitButton
         {...commonButtonProps}
-        isMainButtonDisabled={isDisabled()}
-        fill={props.emphasize ?? false}
+        {...props.splitButtonProps}
         onSecondaryButtonClick={handleSecondaryButtonClick}
-        secondaryButtonAriaLabel={props.secondaryButton.ariaLabel}
-        secondaryButtonIcon={props.secondaryButton.iconType ?? 'arrowDown'}
-        secondaryButtonTitle={props.secondaryButton.label}
-        secondaryButtonFill={props.secondaryButton.fill ?? false}
-        isSecondaryButtonDisabled={false}
         size="s"
       >
         <ButtonContainer />
@@ -157,12 +151,11 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
         fullWidth={props.isMobileMenu}
         {...commonButtonProps}
         fill={props.fill ?? true}
-        isDisabled={isDisabled()}
       >
         <ButtonContainer />
       </EuiButton>
     ) : (
-      <EuiHeaderLink size="s" {...commonButtonProps} isDisabled={isDisabled()} {...overrideProps}>
+      <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
         <ButtonContainer />
       </EuiHeaderLink>
     );
