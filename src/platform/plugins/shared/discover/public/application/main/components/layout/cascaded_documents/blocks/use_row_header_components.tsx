@@ -14,7 +14,7 @@ import type {
 } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import { type AggregateQuery } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
+import { appendFilteringWhereClauseForCascadeLayout, constructCascadeQuery } from '@kbn/esql-utils';
 import {
   EuiBadge,
   EuiContextMenu,
@@ -33,7 +33,6 @@ import {
   type ESQLStatsQueryMeta,
   type SupportedStatsFunction,
 } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
-import { constructCascadeQuery } from '@kbn/esql-utils';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns/pattern_cell_renderer';
 
 import type { ESQLDataGroupNode, DataTableRecord } from './types';
@@ -87,7 +86,7 @@ const contextRowActions: Array<
     icon: 'plusInCircle',
     'data-test-subj': 'dscCascadeRowContextActionFilterIn',
     onClick(this: RowClickActionContext) {
-      const updatedQuery = appendWhereClauseToESQLQuery(
+      const updatedQuery = appendFilteringWhereClauseForCascadeLayout(
         this.editorQuery.esql,
         this.rowContext.groupId,
         this.rowContext.groupValue as string,
@@ -110,7 +109,7 @@ const contextRowActions: Array<
     icon: 'minusInCircle',
     'data-test-subj': 'dscCascadeRowContextActionFilterOut',
     onClick(this: RowClickActionContext) {
-      const updatedQuery = appendWhereClauseToESQLQuery(
+      const updatedQuery = appendFilteringWhereClauseForCascadeLayout(
         this.editorQuery.esql,
         this.rowContext.groupId,
         this.rowContext.groupValue as string,
