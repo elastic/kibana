@@ -21,6 +21,40 @@ const ALLOWED_KEYS_UPDATE_CLOUD = [
   'solutionNavigationTour:completed', // TODO: remove with https://github.com/elastic/kibana/issues/239313
 ];
 
+const userProfileUpdateSchema = schema.object({
+  avatar: schema.maybe(
+    schema.object({
+      initials: schema.maybe(schema.string()),
+      color: schema.maybe(schema.string()),
+      imageUrl: schema.maybe(schema.string()),
+    })
+  ),
+  userSettings: schema.maybe(
+    schema.object({
+      darkMode: schema.maybe(
+        schema.string(
+          schema.oneOf([
+            schema.literal('system'),
+            schema.literal('dark'),
+            schema.literal('light'),
+            schema.literal('space_default'),
+          ])
+        )
+      ),
+      contrastMode: schema.maybe(
+        schema.string(
+          schema.oneOf([
+            schema.literal('system'),
+            schema.literal('standard'),
+            schema.literal('high'),
+          ])
+        )
+      ),
+      solutionNavOptOut: schema.maybe(schema.boolean()),
+    })
+  ),
+});
+
 export function defineUpdateUserProfileDataRoute({
   router,
   getSession,
@@ -39,7 +73,7 @@ export function defineUpdateUserProfileDataRoute({
         },
       },
       validate: {
-        body: schema.recordOf(schema.string(), schema.any()),
+        body: userProfileUpdateSchema,
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {

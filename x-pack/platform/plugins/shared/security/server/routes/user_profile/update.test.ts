@@ -67,16 +67,16 @@ describe('Update profile routes', () => {
     it('correctly defines route.', () => {
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
       expect(() => bodySchema.validate(0)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [object] but got [number]"`
+        `"expected a plain object value, but found [number] instead."`
       );
       expect(() => bodySchema.validate('avatar')).toThrowErrorMatchingInlineSnapshot(
-        `"could not parse record value from json input"`
+        `"could not parse object value from json input"`
       );
       expect(() => bodySchema.validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [object] but got [boolean]"`
+        `"expected a plain object value, but found [boolean] instead."`
       );
       expect(() => bodySchema.validate(null)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [object] but got [null]"`
+        `"expected a plain object value, but found [null] instead."`
       );
       expect(() => bodySchema.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
         `"expected value of type [object] but got [undefined]"`
