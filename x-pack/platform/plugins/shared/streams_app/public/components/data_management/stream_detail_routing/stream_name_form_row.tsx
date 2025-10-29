@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 interface StreamNameFormRowProps {
   value: string;
   onChange?: (value: string) => void;
-  disabled?: boolean;
+  readOnly?: boolean;
   autoFocus?: boolean;
 }
 
@@ -31,13 +31,13 @@ const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 export function StreamNameFormRow({
   value,
   onChange = () => {},
-  disabled = false,
+  readOnly = false,
   autoFocus = false,
 }: StreamNameFormRowProps) {
   const descriptionId = useGeneratedHtmlId();
 
   const helpText =
-    value.length >= MAX_NAME_LENGTH && !disabled
+    value.length >= MAX_NAME_LENGTH && !readOnly
       ? i18n.translate('xpack.streams.streamDetailRouting.nameHelpText', {
           defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
           values: {
@@ -73,7 +73,7 @@ export function StreamNameFormRow({
         value={partitionName}
         fullWidth
         compressed
-        disabled={disabled}
+        readOnly={readOnly}
         autoFocus={autoFocus}
         onChange={handleChange}
         maxLength={MAX_NAME_LENGTH - prefix.length}
