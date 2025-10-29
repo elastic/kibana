@@ -178,7 +178,7 @@ export class WorkflowExecutionState {
       ...step,
     } as EsWorkflowStepExecution);
     this.stepChanges.set(step.id as string, {
-      ...this.stepChanges.get(step.id as string),
+      ...(this.stepChanges.get(step.id as string) || {}),
       ...step,
     });
   }
