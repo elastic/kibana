@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo, type FC } from 'react';
+import React, { type FC, useMemo } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
-import { RawIndicatorFieldId } from '../../../../../../common/threat_intelligence/types/indicator';
-import { unwrapValue } from '../../utils/unwrap_value';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import { RawIndicatorFieldId } from '../../../../common/threat_intelligence/types/indicator';
+import { unwrapValue } from '../../../threat_intelligence/modules/indicators/utils/unwrap_value';
 import { IndicatorFieldsTable } from './fields_table';
 
 /**

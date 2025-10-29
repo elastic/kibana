@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -14,6 +13,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { BlockListFlyout } from '../../../block_list/containers/flyout';
 import { AddToBlockListContextMenu } from '../../../block_list/components/add_to_block_list';
 import { AddToNewCase } from '../../../cases/components/add_to_new_case';
 import { AddToExistingCase } from '../../../cases/components/add_to_existing_case';
@@ -38,7 +38,9 @@ export interface TakeActionProps {
  * Component rendered in the action column.
  * Renders a ... icon button, with a dropdown.
  */
-export const MoreActions: FC<TakeActionProps> = ({ indicator }) => {
+export const MoreActions = memo(({ indicator }: TakeActionProps) => {
+  const [blockListIndicatorValue, setBlockListIndicatorValue] = useState('');
+
   const [isPopoverOpen, setPopover] = useState(false);
   const smallContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'smallContextMenuPopover',
@@ -63,6 +65,7 @@ export const MoreActions: FC<TakeActionProps> = ({ indicator }) => {
       data={canAddToBlockList(indicator)}
       onClick={closePopover}
       data-test-subj={ADD_TO_BLOCK_LIST_TEST_ID}
+      setBlockListIndicatorValue={setBlockListIndicatorValue}
     />,
   ];
 
@@ -80,15 +83,26 @@ export const MoreActions: FC<TakeActionProps> = ({ indicator }) => {
   );
 
   return (
-    <EuiPopover
-      id={smallContextMenuPopoverId}
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel size="s" items={items} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        id={smallContextMenuPopoverId}
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel size="s" items={items} />
+      </EuiPopover>
+
+      {blockListIndicatorValue && (
+        <BlockListFlyout
+          indicatorFileHash={blockListIndicatorValue}
+          setBlockListIndicatorValue={setBlockListIndicatorValue}
+        />
+      )}
+    </>
   );
-};
+});
+
+MoreActions.displayName = 'MoreActions';
