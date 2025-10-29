@@ -54,6 +54,8 @@ import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { RowSelectionContext } from '../shared/preview_table';
 
 export const ProcessorOutcomePreview = () => {
+  const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
+
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewRecords(snapshot.context)
@@ -85,13 +87,26 @@ export const ProcessorOutcomePreview = () => {
   return (
     <>
       <EuiFlexItem grow={false}>
-        <PreviewDocumentsGroupBy />
+        <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
+          <EuiFlexItem>
+            <PreviewDocumentsGroupBy />
+          </EuiFlexItem>
+          {!isEmpty(previewDocuments) && (
+            <EuiFlexItem grow={false}>
+              <ViewModeToggle
+                previewDocuments={previewDocuments}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isEmpty(previewDocuments) ? (
         <NoPreviewDocumentsEmptyPrompt />
       ) : (
-        <OutcomePreviewTable previewDocuments={previewDocuments} />
+        <OutcomePreviewTable previewDocuments={previewDocuments} viewMode={viewMode} />
       )}
     </>
   );
@@ -173,10 +188,101 @@ const PreviewDocumentsGroupBy = () => {
   );
 };
 
-const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
-  // Local state for view mode toggle
-  const [viewMode, setViewMode] = useState<PreviewTableMode>('columns');
+const ViewModeToggle = ({
+  previewDocuments,
+  viewMode,
+  setViewMode,
+}: {
+  previewDocuments: FlattenRecord[];
+  viewMode: PreviewTableMode;
+  setViewMode: (mode: PreviewTableMode) => void;
+}) => {
+  const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
 
+  const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
+    const currentProcessorRef = state.context.stepRefs.find(
+      (stepRef) =>
+        isActionBlock(stepRef.getSnapshot().context.step) && isStepUnderEdit(stepRef.getSnapshot())
+    );
+
+    if (!currentProcessorRef) return undefined;
+
+    const step = currentProcessorRef.getSnapshot().context.step;
+
+    if (!isActionBlock(step)) return undefined;
+
+    return getSourceField(step);
+  });
+
+  const allColumns = useMemo(() => {
+    return getAllFieldsInOrder(previewDocuments, detectedFields);
+  }, [detectedFields, previewDocuments]);
+
+  const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
+    selectDraftProcessor(snapshot.context)
+  );
+
+  const grokMode =
+    draftProcessor?.processor &&
+    'action' in draftProcessor.processor &&
+    draftProcessor.processor.action === 'grok' &&
+    !isEmpty(draftProcessor.processor.from) &&
+    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
+      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
+      const fieldName = draftProcessor.processor?.from;
+      return Array.from(grokExpression.getFields().values()).some(
+        (field) => field.name === fieldName
+      );
+    });
+
+  const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
+  const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
+
+  const validCurrentProcessorSourceField =
+    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
+      ? currentProcessorSourceField
+      : undefined;
+
+  const isViewModeToggleDisabled = Boolean(
+    grokMode || validCurrentProcessorSourceField || validGrokField
+  );
+
+  const viewModeOptions = [
+    {
+      id: 'columns',
+      label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.columns', {
+        defaultMessage: 'Columns',
+      }),
+    },
+    {
+      id: 'summary',
+      label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
+        defaultMessage: 'Summary',
+      }),
+    },
+  ];
+
+  return (
+    <EuiButtonGroup
+      legend={i18n.translate('xpack.streams.processorOutcomePreview.viewModeToggle.legend', {
+        defaultMessage: 'Preview view mode',
+      })}
+      options={viewModeOptions}
+      idSelected={viewMode}
+      onChange={(id) => setViewMode(id as PreviewTableMode)}
+      buttonSize="compressed"
+      isDisabled={isViewModeToggleDisabled}
+    />
+  );
+};
+
+const OutcomePreviewTable = ({
+  previewDocuments,
+  viewMode,
+}: {
+  previewDocuments: FlattenRecord[];
+  viewMode: PreviewTableMode;
+}) => {
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
@@ -258,27 +364,10 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       ? currentProcessorSourceField
       : undefined;
 
-  // Determine if view mode toggle should be disabled
-  // Disable when in grok mode or when a processor defines specific columns
-  const isViewModeToggleDisabled = Boolean(
-    grokMode || validCurrentProcessorSourceField || validGrokField
-  );
-
-  // View mode toggle options
-  const viewModeOptions = [
-    {
-      id: 'columns',
-      label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.columns', {
-        defaultMessage: 'Columns',
-      }),
-    },
-    {
-      id: 'summary',
-      label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
-        defaultMessage: 'Summary',
-      }),
-    },
-  ];
+  const effectiveViewMode =
+    validGrokField || validCurrentProcessorSourceField || (detectedFields?.length ?? 0) > 0
+      ? 'columns'
+      : viewMode;
 
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
@@ -416,21 +505,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.streams.processorOutcomePreview.viewModeToggle.legend', {
-              defaultMessage: 'Preview view mode',
-            })}
-            options={viewModeOptions}
-            idSelected={viewMode}
-            onChange={(id) => setViewMode(id as PreviewTableMode)}
-            buttonSize="compressed"
-            isDisabled={isViewModeToggleDisabled}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
       <RowSelectionContext.Provider value={rowSelectionContextValue}>
         <MemoPreviewTable
           documents={previewDocuments}
@@ -444,7 +518,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setSorting={setPreviewColumnsSorting}
           columnOrderHint={previewColumnsOrder}
           renderCellValue={renderCellValue}
-          mode={viewMode}
+          mode={effectiveViewMode}
           streamName={streamName}
         />
       </RowSelectionContext.Provider>

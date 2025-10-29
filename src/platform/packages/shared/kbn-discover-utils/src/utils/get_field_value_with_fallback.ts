@@ -7,51 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EcsFlat } from '@elastic/ecs';
-
-/**
- * Builds a map of ECS field names to their OpenTelemetry equivalent field names.
- * Uses the ECS schema's built-in otel mappings to support OTel field lookups.
- */
-function buildOtelEquivalentMap(): Map<string, string[]> {
-  const otelEquivalentMap = new Map<string, string[]>();
-
-  Object.entries(EcsFlat).forEach(([fieldName, field]) => {
-    if (!('otel' in field) || !field.otel || field.otel.length === 0) {
-      return;
-    }
-
-    const otelEquivalents: string[] = [];
-
-    // Check for equivalent relation
-    const equivalentMapping = field.otel.find(
-      (otelProperty) => otelProperty.relation === 'equivalent'
-    );
-    if (
-      equivalentMapping &&
-      'attribute' in equivalentMapping &&
-      typeof equivalentMapping.attribute === 'string'
-    ) {
-      otelEquivalents.push(equivalentMapping.attribute);
-    }
-
-    // Check for otlp relation (body.text case)
-    const otlpMapping = field.otel.find((otelProperty) => otelProperty.relation === 'otlp');
-    if (otlpMapping && 'otlp_field' in otlpMapping && typeof otlpMapping.otlp_field === 'string') {
-      const otlpField = otlpMapping.otlp_field === 'body' ? 'body.text' : otlpMapping.otlp_field;
-      otelEquivalents.push(otlpField);
-    }
-
-    if (otelEquivalents.length > 0) {
-      otelEquivalentMap.set(fieldName, otelEquivalents);
-    }
-  });
-
-  return otelEquivalentMap;
-}
-
 // Build the map once at module load time
-const OTEL_EQUIVALENT_MAP = buildOtelEquivalentMap();
+const OTEL_EQUIVALENT_MAP: Partial<Record<string, string>> = {
+  message: 'body.text',
+  'log.level': 'severity_text',
+  'service.name': 'resource.attributes.service.name',
+  'host.name': 'resource.attributes.host.name',
+  'container.name': 'resource.attributes.container.name',
+  'orchestrator.cluster.name': 'resource.attributes.cluster.name',
+  'kubernetes.namespace': 'attributes.kubernetes.namespace',
+  'kubernetes.container.name': 'attributes.kubernetes.container.name',
+  'kubernetes.deployment.name': 'attributes.kubernetes.deployment.name',
+};
 
 /**
  * Gets a field value from a document, checking both ECS and OpenTelemetry field names.
@@ -84,12 +51,10 @@ export function getFieldValueWithFallback(
   }
 
   // Then check OTel equivalent fields
-  const otelEquivalents = OTEL_EQUIVALENT_MAP.get(ecsFieldName);
-  if (otelEquivalents) {
-    for (const otelField of otelEquivalents) {
-      if (document[otelField] !== undefined) {
-        return { field: otelField, value: document[otelField] };
-      }
+  const otelEquivalent = OTEL_EQUIVALENT_MAP[ecsFieldName];
+  if (otelEquivalent) {
+    if (document[otelEquivalent] !== undefined) {
+      return { field: otelEquivalent, value: document[otelEquivalent] };
     }
   }
 
