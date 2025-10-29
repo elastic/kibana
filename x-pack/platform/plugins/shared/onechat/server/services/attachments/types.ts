@@ -13,7 +13,7 @@ import type {
 import type { ValidateAttachmentResult } from './validate_attachment';
 
 export interface AttachmentServiceSetup {
-  register(attachmentType: AttachmentTypeDefinition): void;
+  registerType(attachmentType: AttachmentTypeDefinition): void;
 }
 
 export interface AttachmentServiceStart {

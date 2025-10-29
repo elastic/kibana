@@ -34,7 +34,7 @@ export class AttachmentServiceImpl implements AttachmentService {
     registerAttachmentTypes({ registry: this.attachmentTypeRegistry });
 
     return {
-      register: (attachmentType) => this.attachmentTypeRegistry.register(attachmentType),
+      registerType: (attachmentType) => this.attachmentTypeRegistry.register(attachmentType),
     };
   }
 

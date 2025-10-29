@@ -6,12 +6,13 @@
  */
 
 import type { ConversationRound, RoundInput } from '@kbn/onechat-common';
-import type { AttachmentInput } from '@kbn/onechat-common/artifacts/attachments';
+import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
+import { getToolResultId } from '@kbn/onechat-server/tools';
 import type { AttachmentRepresentation } from '@kbn/onechat-server/artifacts';
 
 export interface ProcessedAttachment {
-  attachment: AttachmentInput;
+  attachment: Attachment;
   representation: AttachmentRepresentation;
 }
 
@@ -92,7 +93,14 @@ const prepareAttachment = async ({
 }): Promise<ProcessedAttachment> => {
   const representation = await attachmentsService.format(attachment);
   return {
-    attachment,
+    attachment: inputToFinal(attachment),
     representation,
+  };
+};
+
+const inputToFinal = (input: AttachmentInput): Attachment => {
+  return {
+    ...input,
+    id: input.id ?? getToolResultId(),
   };
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/onechat-common/artifacts';
+import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { AttachmentRepresentation } from '@kbn/onechat-server/artifacts';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 

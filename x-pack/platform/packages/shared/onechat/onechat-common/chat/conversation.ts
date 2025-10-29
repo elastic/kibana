@@ -7,7 +7,7 @@
 
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
-import type { AttachmentInput } from '../artifacts';
+import type { AttachmentInput } from '../attachments';
 
 /**
  * Represents a user input that initiated a conversation round.

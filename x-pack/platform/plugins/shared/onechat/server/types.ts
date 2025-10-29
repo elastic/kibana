@@ -36,7 +36,7 @@ export interface AttachmentsSetup {
   /**
    * Register an attachment type to be available in onechat.
    */
-  register: AttachmentServiceSetup['register'];
+  registerType: AttachmentServiceSetup['registerType'];
 }
 
 /**

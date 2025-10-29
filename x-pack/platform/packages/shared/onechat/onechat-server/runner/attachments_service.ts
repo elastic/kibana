@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/onechat-common/artifacts';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentRepresentation } from '../artifacts';
 
 export interface AttachmentsService {
-  format(attachment: Attachment): Promise<AttachmentRepresentation>;
+  format(attachment: AttachmentInput): Promise<AttachmentRepresentation>;
 }
