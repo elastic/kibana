@@ -7,15 +7,16 @@
 
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { isHumanMessage, isAIMessage } from '@langchain/core/messages';
-import type { ToolCallWithResult, ToolCallStep, ConversationRound } from '@kbn/onechat-common';
+import type { ToolCallWithResult, ToolCallStep } from '@kbn/onechat-common';
 import { ConversationRoundStepType } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { conversationToLangchainMessages } from './to_langchain_messages';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { ProcessedConversationRound } from './prepare_conversation';
 
 describe('conversationLangchainMessages', () => {
-  const makeRoundInput = (message: string) => ({ message });
+  const makeRoundInput = (message: string) => ({ message, attachments: [] });
   const makeAssistantResponse = (message: string) => ({ message });
   const makeToolCallWithResult = (
     id: string,
@@ -35,14 +36,16 @@ describe('conversationLangchainMessages', () => {
 
   it('returns only the user message if no previous rounds', () => {
     const nextInput = makeRoundInput('hello');
-    const result = conversationToLangchainMessages({ previousRounds: [], nextInput });
+    const result = conversationToLangchainMessages({
+      conversation: { previousRounds: [], nextInput },
+    });
     expect(result).toHaveLength(1);
     expect(isHumanMessage(result[0])).toBe(true);
     expect(result[0].content).toBe('hello');
   });
 
   it('handles a round with only user and assistant messages', () => {
-    const previousRounds: ConversationRound[] = [
+    const previousRounds: ProcessedConversationRound[] = [
       {
         id: 'round-1',
         input: makeRoundInput('hi'),
@@ -51,7 +54,9 @@ describe('conversationLangchainMessages', () => {
       },
     ];
     const nextInput = makeRoundInput('how are you?');
-    const result = conversationToLangchainMessages({ previousRounds, nextInput });
+    const result = conversationToLangchainMessages({
+      conversation: { previousRounds, nextInput },
+    });
 
     expect(result).toHaveLength(3);
 
@@ -74,7 +79,7 @@ describe('conversationLangchainMessages', () => {
         },
       },
     ]);
-    const previousRounds: ConversationRound[] = [
+    const previousRounds: ProcessedConversationRound[] = [
       {
         id: 'round-1',
         input: makeRoundInput('find foo'),
@@ -83,7 +88,9 @@ describe('conversationLangchainMessages', () => {
       },
     ];
     const nextInput = makeRoundInput('next');
-    const result = conversationToLangchainMessages({ previousRounds, nextInput });
+    const result = conversationToLangchainMessages({
+      conversation: { previousRounds, nextInput },
+    });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
     const [
@@ -120,7 +127,7 @@ describe('conversationLangchainMessages', () => {
   });
 
   it('handles multiple rounds', () => {
-    const previousRounds: ConversationRound[] = [
+    const previousRounds: ProcessedConversationRound[] = [
       {
         id: 'round-1',
         input: makeRoundInput('hi'),
@@ -141,7 +148,9 @@ describe('conversationLangchainMessages', () => {
       },
     ];
     const nextInput = makeRoundInput('bye');
-    const result = conversationToLangchainMessages({ previousRounds, nextInput });
+    const result = conversationToLangchainMessages({
+      conversation: { previousRounds, nextInput },
+    });
     // 1 user + 1 assistant + 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(7);
     const [
@@ -186,7 +195,7 @@ describe('conversationLangchainMessages', () => {
         },
       },
     ]);
-    const previousRounds: ConversationRound[] = [
+    const previousRounds: ProcessedConversationRound[] = [
       {
         id: 'round-1',
         input: makeRoundInput('find foo'),
@@ -195,7 +204,9 @@ describe('conversationLangchainMessages', () => {
       },
     ];
     const nextInput = makeRoundInput('next');
-    const result = conversationToLangchainMessages({ previousRounds, nextInput });
+    const result = conversationToLangchainMessages({
+      conversation: { previousRounds, nextInput },
+    });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
     const [_human, toolCallAIMessage] = result;
