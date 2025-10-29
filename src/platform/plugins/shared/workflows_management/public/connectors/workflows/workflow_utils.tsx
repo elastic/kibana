@@ -12,7 +12,7 @@ import type { WorkflowListDto } from '@kbn/workflows';
 import { TagsBadge } from './tags_badge';
 
 export interface WorkflowValidationResult {
-  severity: 'error' | 'warning' | 'info';
+  severity: 'error' | 'warning';
   message: string;
 }
 export interface WorkflowOption {
