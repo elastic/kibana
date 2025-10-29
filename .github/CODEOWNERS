@@ -1893,7 +1893,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/services/global_nav.ts @elastic/appex-qa
 /src/platform/test/functional/services/flyout.ts @elastic/appex-qa
 /src/platform/test/functional/services/filter_bar.ts @elastic/appex-qa
-/src/platform/test/functional/services/field_editor.ts @elastic/appex-qa
+/src/platform/test/functional/services/field_editor.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/services/embedding.ts @elastic/appex-qa
 /src/platform/test/functional/services/data_grid.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/services/combo_box.ts @elastic/appex-qa
