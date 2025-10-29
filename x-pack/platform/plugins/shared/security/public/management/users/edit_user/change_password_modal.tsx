@@ -318,9 +318,10 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
           isLoading={form.isSubmitting}
           isDisabled={
             isLoading ||
+            form.isInvalid ||
             !form.values.password ||
-            form.values.password.length < MIN_PASSWORD_LENGTH ||
-            (form.isSubmitted && form.isInvalid)
+            !form.values.confirm_password ||
+            (isCurrentUser && !form.values.current_password)
           }
           color={isSystemUser ? 'danger' : undefined}
           fill
