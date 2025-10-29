@@ -15,6 +15,7 @@ import type { AutocompleteContext, MinimalWorkflowDetailState } from './autocomp
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
 import { parseLineForCompletion } from './parse_line_for_completion';
+import { isInScheduledTriggerWithBlock } from './triggers_utils';
 import { getCurrentPath } from '../../../../../common/lib/yaml';
 import { getSchemaAtPath } from '../../../../../common/lib/zod';
 import { getContextSchemaForPath } from '../../../../features/workflow_context/lib/get_context_for_path';
@@ -105,6 +106,10 @@ export function buildAutocompleteContext({
 
   // Check if we're actually inside a liquid block
   const isInLiquidBlock = isInsideLiquidBlock(model.getValue(), position);
+  const _isInScheduledTriggerWithBlock = isInScheduledTriggerWithBlock(
+    yamlDocument,
+    absolutePosition
+  );
 
   return {
     triggerCharacter: completionContext.triggerCharacter ?? null,
@@ -122,6 +127,7 @@ export function buildAutocompleteContext({
     absolutePosition,
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
     isInLiquidBlock,
+    isInScheduledTriggerWithBlock: _isInScheduledTriggerWithBlock,
     shouldUseCurlyBraces,
     shouldBeQuoted,
   };

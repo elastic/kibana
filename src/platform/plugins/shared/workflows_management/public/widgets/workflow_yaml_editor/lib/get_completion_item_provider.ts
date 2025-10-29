@@ -16,13 +16,11 @@ import { getRRuleSchedulingSuggestions } from './autocomplete/get_rrule_scheduli
 import { getTimezoneSuggestions } from './autocomplete/get_timezone_suggestions';
 import { getVariableSuggestions } from './autocomplete/get_variable_suggestions';
 import { getWithBlockSuggestions } from './autocomplete/get_with_block_suggestions';
-import { isInScheduledTriggerWithBlock } from './autocomplete/triggers_utils';
 import {
   createLiquidBlockKeywordCompletions,
   createLiquidFilterCompletions,
   createLiquidSyntaxCompletions,
 } from './liquid_completions';
-import { z } from '@kbn/zod';
 
 export function getCompletionItemProvider(
   getState: () => MinimalWorkflowDetailState | undefined
@@ -38,7 +36,6 @@ export function getCompletionItemProvider(
     provideCompletionItems: (model, position, completionContext) => {
       const editorState = getState();
       if (!editorState) {
-        console.error('No editor state found');
         return {
           suggestions: [],
           incomplete: false,
@@ -51,27 +48,11 @@ export function getCompletionItemProvider(
         completionContext,
       });
       if (!autocompleteContext) {
-        console.error('No autocomplete context built');
         return {
           suggestions: [],
           incomplete: false,
         };
       }
-      console.log('autocompleteContext:', {
-        lineParseResult: autocompleteContext.lineParseResult,
-        lineUpToCursor: autocompleteContext.lineUpToCursor,
-        line: autocompleteContext.line,
-        triggerCharacter: autocompleteContext.triggerCharacter,
-        triggerKind: autocompleteContext.triggerKind,
-        range: autocompleteContext.range,
-        absolutePosition: autocompleteContext.absolutePosition,
-        path: autocompleteContext.path,
-        contextSchema:
-          autocompleteContext.contextSchema instanceof z.ZodObject
-            ? autocompleteContext.contextSchema.shape
-            : undefined,
-        focusedStepInfo: autocompleteContext.focusedStepInfo,
-      });
 
       const { lineParseResult } = autocompleteContext;
 
@@ -164,12 +145,7 @@ export function getCompletionItemProvider(
       }
 
       // Check if we're in a scheduled trigger's with block for RRule suggestions
-      if (
-        isInScheduledTriggerWithBlock(
-          autocompleteContext.yamlDocument,
-          autocompleteContext.absolutePosition
-        )
-      ) {
+      if (autocompleteContext.isInScheduledTriggerWithBlock) {
         // We're in a scheduled trigger's with block - provide RRule suggestions
         const rruleSuggestions = getRRuleSchedulingSuggestions(autocompleteContext.range);
 

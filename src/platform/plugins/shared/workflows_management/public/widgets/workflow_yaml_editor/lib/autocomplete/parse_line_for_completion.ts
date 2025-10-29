@@ -69,7 +69,6 @@ export type LineParseResult =
   | TypeLineParseResult
   | TimezoneLineParseResult;
 
-// eslint-disable-next-line complexity
 export function parseLineForCompletion(lineUpToCursor: string): LineParseResult | null {
   const timezoneFieldMatch = lineUpToCursor.match(/^\s*(?:tzid|timezone)\s*:\s*(.*)$/);
   if (timezoneFieldMatch) {

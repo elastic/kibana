@@ -12,7 +12,7 @@ import { monaco } from '@kbn/monaco';
 import * as generateBuiltInStepSnippetModule from './generate_builtin_step_snippet';
 import * as generateConnectorSnippetModule from './generate_connector_snippet';
 import { insertStepSnippet } from './insert_step_snippet';
-import { createMockModel } from '../../../../../common/mocks/monaco_model';
+import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
 import { prependIndentToLines } from '../prepend_indent_to_lines';
 
 describe('insertStepSnippet', () => {
@@ -32,7 +32,7 @@ describe('insertStepSnippet', () => {
 
   it('should insert the "steps:" section if it does not exist', () => {
     const inputYaml = `name: one_step_workflow`;
-    const model = createMockModel(inputYaml);
+    const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
     expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
@@ -63,7 +63,7 @@ steps:
     type: http
     with:
       url: https://google.com`;
-    const model = createMockModel(inputYaml);
+    const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
     expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
@@ -98,7 +98,7 @@ steps:
         type: http
         with:
           url: https://google.com # <- cursor is here`;
-    const model = createMockModel(inputYaml);
+    const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
     expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
@@ -138,7 +138,7 @@ steps:
         with:
           message: "{{ steps.get_google.output|json }}"
 `;
-    const model = createMockModel(inputYaml);
+    const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
@@ -174,7 +174,7 @@ steps:
     type: http
     with:
       url: https://google.com`;
-    const model = createMockModel(inputYaml);
+    const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
@@ -189,7 +189,7 @@ steps:
 
   it('should call pushUndoStop when editor is provided', () => {
     const inputYaml = `name: one_step_workflow`;
-    const model = createMockModel(inputYaml);
+    const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
     const mockEditor = {
       pushUndoStop: jest.fn(),

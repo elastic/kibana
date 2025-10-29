@@ -37,6 +37,7 @@ export interface AutocompleteContext {
   absolutePosition: number;
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
   isInLiquidBlock: boolean;
+  isInScheduledTriggerWithBlock: boolean;
   shouldUseCurlyBraces: boolean;
   shouldBeQuoted: boolean;
 }
