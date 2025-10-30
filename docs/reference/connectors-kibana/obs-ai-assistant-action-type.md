@@ -9,7 +9,7 @@ mapped_pages:
 
 # Observability AI Assistant connector and action [obs-ai-assistant-action-type]
 
-The Observability AI Assistant connector adds AI-driven insights and custom actions to your workflow.
+The Observability AI Assistant connector sends alerts to the AI Assistant, to enable adding AI-driven insights and custom actions to your workflows.
 
 To learn how to interact with the assistant through this connector, refer to the [Observability AI Assistant](docs-content://explore-analyze/ai-assistant.md) documentation.
 
