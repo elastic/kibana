@@ -47,6 +47,7 @@ import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_gua
 import { ESQLEditor } from './esql_editor';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { getOpenLayerSettingsAction } from './layer_actions/open_layer_settings';
+import { getRemoveLayerAction } from './layer_actions/remove_layer_action';
 
 export function LayerPanel(props: LayerPanelProps) {
   const { datasourceMap } = useEditorFrameService();
@@ -328,6 +329,35 @@ export function LayerPanel(props: LayerPanelProps) {
     [hasLayerSettings]
   );
 
+  const clearLayerAction = useMemo(() => {
+    // Only show clear layer button for single layer visualizations
+    // Multi-layer visualizations have this action in the tabs
+    // isOnlyLayer already accounts for hidden layers via getRemoveOperation
+    const supportsMultipleLayers = Boolean(activeVisualization.getAddLayerButtonComponent);
+
+    if (supportsMultipleLayers || !isOnlyLayer) {
+      return null;
+    }
+
+    const layerType = activeVisualization.getLayerType(layerId, visualizationState);
+    return getRemoveLayerAction({
+      execute: () => onRemoveLayer(layerId),
+      layerIndex,
+      layerType,
+      isOnlyLayer: true,
+      core,
+      customModalText: activeVisualization.getCustomRemoveLayerText?.(layerId, visualizationState),
+    });
+  }, [
+    activeVisualization,
+    isOnlyLayer,
+    layerId,
+    visualizationState,
+    layerIndex,
+    core,
+    onRemoveLayer,
+  ]);
+
   return (
     <>
       <section
@@ -385,6 +415,17 @@ export function LayerPanel(props: LayerPanelProps) {
                     aria-label={layerSettingsAction.displayName}
                     onClick={() => layerSettingsAction.execute(null)}
                     data-test-subj={layerSettingsAction['data-test-subj']}
+                  />
+                </EuiFlexItem>
+              )}
+              {clearLayerAction && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType={clearLayerAction.icon}
+                    color={clearLayerAction.color}
+                    aria-label={clearLayerAction.displayName}
+                    onClick={() => clearLayerAction.execute(null)}
+                    data-test-subj={clearLayerAction['data-test-subj']}
                   />
                 </EuiFlexItem>
               )}
