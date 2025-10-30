@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../config.base';
+import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/functional/config.base';
+import { services } from '../services';
 
 export default createTestConfig({
-  serverlessProject: 'workplace_ai',
-  testFiles: [
-    require.resolve('../../test_suites/core'),
-    require.resolve('../../test_suites/elasticsearch_api'),
-  ],
+  serverlessProject: 'workplaceai',
+  services,
+  testFiles: [require.resolve('.')],
   junit: {
-    reportName: 'Serverless Workplace AI Platform API Integration Tests - Common Group 1',
+    reportName: 'Serverless Workplace AI Functional Tests',
   },
   suiteTags: { exclude: ['skipSvlWorkplaceAI'] },
 
   // include settings from project controller
   esServerArgs: [],
   kbnServerArgs: [],
+
+  apps: {},
 });

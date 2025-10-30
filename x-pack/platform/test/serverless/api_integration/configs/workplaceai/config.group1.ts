@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { createTestConfig } from './config.base';
+import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'workplaceai',
-  testFiles: [],
+  testFiles: [
+    require.resolve('../../test_suites/core'),
+    require.resolve('../../test_suites/elasticsearch_api'),
+  ],
   junit: {
-    reportName: 'Serverless Workplace AI Base Config',
+    reportName: 'Serverless Workplace AI Platform API Integration Tests - Common Group 1',
   },
   suiteTags: { exclude: ['skipSvlWorkplaceAI'] },
 
   // include settings from project controller
   esServerArgs: [],
   kbnServerArgs: [],
-
-  apps: {},
 });

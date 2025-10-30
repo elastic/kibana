@@ -30,7 +30,7 @@ export class WorkplaceAIAppPlugin
 
   constructor(context: PluginInitializerContext) {
     this.services = {};
-    this.logger = context.logger.get('workplace_ai.app.public');
+    this.logger = context.logger.get('workplaceai.app.public');
   }
 
   public setup(

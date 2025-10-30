@@ -8,18 +8,26 @@
 import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/functional/config.base';
 import { services } from '../services';
 
+/**
+ * Make sure to create a MKI deployment with custom Kibana image, that includes feature flags arguments
+ * These tests most likely will fail on default MKI project
+ */
 export default createTestConfig({
-  serverlessProject: 'workplace_ai',
+  serverlessProject: 'workplaceai',
   services,
-  testFiles: [require.resolve('.')],
   junit: {
-    reportName: 'Serverless Workplace AI Functional Tests',
+    reportName: 'Serverless Workplace AI Feature Flags Functional Tests',
   },
   suiteTags: { exclude: ['skipSvlWorkplaceAI'] },
+  // add feature flags
+  kbnServerArgs: [
+    // e.g. `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
+  ],
+  // load tests in the index file
+  testFiles: [require.resolve('./index.feature_flags.ts')],
 
   // include settings from project controller
   esServerArgs: [],
-  kbnServerArgs: [],
 
   apps: {},
 });

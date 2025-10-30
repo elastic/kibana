@@ -5,7 +5,7 @@
     "@elastic/search-kibana",
     "@elastic/workchat-eng"
    ],
-  "group": "workplace_ai",
+  "group": "workplaceai",
   "visibility": "private",
   "description": "Serverless customizations for workplace AI.",
   "plugin": {

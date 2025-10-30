@@ -8,6 +8,6 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/workplace_ai/plugins/workplace_ai_app'],
+  roots: ['<rootDir>/x-pack/solutions/workplaceai/plugins/workplace_ai_app'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
 };
