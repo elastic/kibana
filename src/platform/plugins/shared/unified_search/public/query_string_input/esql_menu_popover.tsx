@@ -28,10 +28,10 @@ import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_regis
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
 import { prettifyQueryTemplate } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries/utils';
-import type { IUnifiedSearchPluginServices } from '../types';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
+import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface ESQLMenuPopoverProps {
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
