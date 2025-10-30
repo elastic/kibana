@@ -98,10 +98,7 @@ export function StreamsSettingsFlyout({
         setLoading(true);
         await enableWiredMode(signal);
         telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: true });
-        // Refetch status to ensure UI is in sync
-        const status = await getWiredStatus();
-        setWiredChecked(status.enabled === true);
-        setCanManageWiredElasticsearch(Boolean(status.can_manage));
+        setWiredChecked(true);
         refreshStreams();
       } catch (error) {
         core.notifications.toasts.addError(error, {
@@ -123,10 +120,7 @@ export function StreamsSettingsFlyout({
     try {
       await disableWiredMode(signal);
       telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: false });
-      // Refetch status to ensure UI is in sync
-      const status = await getWiredStatus();
-      setWiredChecked(status.enabled === true);
-      setCanManageWiredElasticsearch(Boolean(status.can_manage));
+      setWiredChecked(false);
       refreshStreams();
       setShowDisableModal(false);
       setDisableConfirmChecked(false);

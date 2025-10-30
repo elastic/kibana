@@ -162,15 +162,10 @@ describe('StreamsSettingsFlyout', () => {
 
   describe('Enabling Wired Streams', () => {
     it('should enable wired mode when switch is clicked from disabled state', async () => {
-      mockGetWiredStatus
-        .mockResolvedValueOnce({
-          enabled: false,
-          can_manage: true,
-        })
-        .mockResolvedValueOnce({
-          enabled: true,
-          can_manage: true,
-        });
+      mockGetWiredStatus.mockResolvedValue({
+        enabled: false,
+        can_manage: true,
+      });
 
       mockEnableWiredMode.mockResolvedValue({});
 
@@ -186,9 +181,10 @@ describe('StreamsSettingsFlyout', () => {
 
       await waitFor(() => {
         expect(mockEnableWiredMode).toHaveBeenCalled();
-        expect(mockGetWiredStatus).toHaveBeenCalledTimes(2); // Initial + after enable
+        expect(mockGetWiredStatus).toHaveBeenCalledTimes(1); // Only on initial mount
         expect(mockTrackWiredStreamsStatusChanged).toHaveBeenCalledWith({ is_enabled: true });
         expect(mockRefreshStreams).toHaveBeenCalled();
+        expect(screen.getByTestId('streamsWiredSwitch')).toBeChecked();
       });
     });
 
@@ -306,15 +302,10 @@ describe('StreamsSettingsFlyout', () => {
     });
 
     it('should disable wired streams when confirmed', async () => {
-      mockGetWiredStatus
-        .mockResolvedValueOnce({
-          enabled: true,
-          can_manage: true,
-        })
-        .mockResolvedValueOnce({
-          enabled: false,
-          can_manage: true,
-        });
+      mockGetWiredStatus.mockResolvedValue({
+        enabled: true,
+        can_manage: true,
+      });
 
       mockDisableWiredMode.mockResolvedValue({});
 
@@ -337,9 +328,10 @@ describe('StreamsSettingsFlyout', () => {
 
       await waitFor(() => {
         expect(mockDisableWiredMode).toHaveBeenCalled();
-        expect(mockGetWiredStatus).toHaveBeenCalledTimes(2); // Initial + after disable
+        expect(mockGetWiredStatus).toHaveBeenCalledTimes(1); // Only on initial mount
         expect(mockTrackWiredStreamsStatusChanged).toHaveBeenCalledWith({ is_enabled: false });
         expect(mockRefreshStreams).toHaveBeenCalled();
+        expect(screen.getByTestId('streamsWiredSwitch')).not.toBeChecked();
       });
 
       // Modal should be closed
