@@ -52,7 +52,7 @@ export function LogsOverviewHeader({
 }: LogsOverviewHeaderProps) {
   const hasLogLevel = Boolean(formattedDoc[fieldConstants.LOG_LEVEL_FIELD]);
   const hasTimestamp = Boolean(formattedDoc[fieldConstants.TIMESTAMP_FIELD]);
-  const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(hit.flattened, {
     includeFormattedValue: true,
   });
   const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
