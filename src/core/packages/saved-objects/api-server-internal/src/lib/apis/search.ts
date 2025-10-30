@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { castArray } from 'lodash';
-import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import {
@@ -23,6 +22,7 @@ import type {
 import type { ApiExecutionContext } from './types';
 import { getNamespacesBoolFilter } from '../search';
 import type { NamespacesBoolFilter } from '../search/search_dsl/query_params';
+import { isForbiddenSpacesError } from './utils';
 
 export interface PerformSearchParams {
   options: SavedObjectsSearchOptions;
@@ -73,7 +73,7 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
     namespaces =
       (await spacesExtension?.getSearchableNamespaces(requestedNamespaces)) ?? requestedNamespaces;
   } catch (error) {
-    if (Boom.isBoom(error) && error.output.payload.statusCode === 403) {
+    if (isForbiddenSpacesError(error)) {
       // The user is not authorized to access any space, return an empty response.
       return createEmptySearchResponse();
     }

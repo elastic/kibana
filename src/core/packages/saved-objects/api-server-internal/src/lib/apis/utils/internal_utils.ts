@@ -9,6 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Payload } from '@hapi/boom';
+import Boom from '@hapi/boom';
 import {
   SavedObjectsErrorHelpers,
   type ISavedObjectTypeRegistry,
@@ -293,4 +294,8 @@ export const errorContent = (error: DecoratedError) => error.output.payload;
 
 export function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
+}
+
+export function isForbiddenSpacesError(error: unknown): boolean {
+  return Boom.isBoom(error) && error.output.payload.statusCode === 403;
 }

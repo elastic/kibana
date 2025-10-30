@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
@@ -36,6 +35,7 @@ import {
   validateAndConvertAggregations,
 } from '../search';
 import { includedFields } from '../utils';
+import { isForbiddenSpacesError } from './utils';
 
 export interface PerformFindParams {
   options: SavedObjectsFindOptions;
@@ -144,7 +144,7 @@ export const performFind = async <T = unknown, A = unknown>(
     try {
       namespaces = await spacesExtension.getSearchableNamespaces(options.namespaces);
     } catch (err) {
-      if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+      if (isForbiddenSpacesError(err)) {
         // The user is not authorized to access any space, return an empty response.
         return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
       }
