@@ -335,7 +335,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         await verifyNoAgentActions();
         actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
-        expect(actionStatus.items.length).to.eql(2);
+        expect(actionStatus.items.length).to.eql(3);
         actionStatus.items.forEach((item) => {
           expect(item.nbAgentsActioned).to.eql(1);
           expect(item.nbAgentsActionCreated).to.eql(1);
