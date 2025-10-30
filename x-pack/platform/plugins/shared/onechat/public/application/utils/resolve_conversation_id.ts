@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-interface UseResolveConversationIdParams {
-  newConversation?: boolean;
+interface ResolveConversationIdParams {
+  isNewConversation?: boolean;
   conversationId?: string;
   persistedConversationId?: string;
 }
 
-export const useResolveConversationId = ({
-  newConversation,
+export const resolveConversationId = ({
+  isNewConversation,
   conversationId,
   persistedConversationId,
-}: UseResolveConversationIdParams) => {
-  if (newConversation === true) {
-    return undefined;
-  }
-
-  if (conversationId) {
-    return conversationId;
-  }
-
+}: ResolveConversationIdParams): string | undefined => {
+  if (isNewConversation) return undefined;
+  if (conversationId) return conversationId;
   return persistedConversationId;
 };

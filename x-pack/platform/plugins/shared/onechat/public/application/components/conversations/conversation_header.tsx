@@ -18,21 +18,20 @@ import { ConversationSidebarToggle } from './conversation_sidebar/conversation_s
 import { ConversationTitle } from './conversation_title';
 
 interface ConversationHeaderProps {
-  isSidebarOpen?: boolean;
-  onToggleSidebar?: () => void;
+  sidebar?: {
+    isOpen: boolean;
+    onToggle: () => void;
+  };
 }
 
-export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
-  isSidebarOpen,
-  onToggleSidebar,
-}) => {
+export const ConversationHeader: React.FC<ConversationHeaderProps> = ({ sidebar }) => {
   const hasActiveConversation = useHasActiveConversation();
-  const showSidebarToggle = isSidebarOpen !== undefined && onToggleSidebar !== undefined;
+
   return (
     <ConversationGrid>
-      {showSidebarToggle && (
+      {sidebar && (
         <ConversationLeft>
-          <ConversationSidebarToggle isSidebarOpen={isSidebarOpen} onToggle={onToggleSidebar} />
+          <ConversationSidebarToggle isSidebarOpen={sidebar.isOpen} onToggle={sidebar.onToggle} />
         </ConversationLeft>
       )}
       {hasActiveConversation && (
