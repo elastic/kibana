@@ -803,7 +803,7 @@ export class AlertsClient {
     removeTags,
   }: BulkUpdateOptions<Params>) {
     const scriptOps: string[] = [];
-    const params: Record<string, any> = {};
+    const params: Record<string, string[]> = {};
 
     if (status != null) {
       scriptOps.push(getStatusUpdateScript(status));
@@ -826,7 +826,7 @@ export class AlertsClient {
     const script = {
       source: scriptOps.join('\n'),
       lang: 'painless',
-      params,
+      params: Object.keys(params).length > 0 ? params : undefined,
     };
 
     // rejects at the route level if more than 1000 id's are passed in
