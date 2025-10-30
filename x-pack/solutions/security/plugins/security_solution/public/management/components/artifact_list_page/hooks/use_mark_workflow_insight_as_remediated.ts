@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { WORKFLOW_INSIGHTS } from '../../../pages/endpoint_hosts/view/translations';
 import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
 import { ActionType } from '../../../../../common/endpoint/types/workflow_insights';

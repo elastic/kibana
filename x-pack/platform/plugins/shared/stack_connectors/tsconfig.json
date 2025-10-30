@@ -45,6 +45,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/deeplinks-analytics",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

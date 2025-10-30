@@ -6,7 +6,7 @@
  */
 
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { QUERY_RULES_QUERY_RULESET_FETCH_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';

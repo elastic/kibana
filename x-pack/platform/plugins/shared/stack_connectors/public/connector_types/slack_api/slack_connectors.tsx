@@ -19,7 +19,7 @@ import { DocLinksStart } from '@kbn/core/public';
 
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { debounce, isEmpty, isEqual } from 'lodash';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as i18n from './translations';
 import { useValidChannels } from './use_valid_channels';
 

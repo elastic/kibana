@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { sendPostHealthCheck, useGetFleetServerHosts } from '../../../hooks';
 import type { FleetServerHost, PostHealthCheckResponse } from '../../../types';

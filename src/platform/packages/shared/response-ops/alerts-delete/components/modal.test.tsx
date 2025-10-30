@@ -12,7 +12,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AlertDeleteModal } from './modal';
 import * as i18n from '../translations';
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 

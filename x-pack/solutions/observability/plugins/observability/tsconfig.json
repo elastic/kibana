@@ -122,7 +122,8 @@
     "@kbn/response-ops-rule-params",
     "@kbn/controls-plugin",
     "@kbn/core-http-browser",
-    "@kbn/esql"
+    "@kbn/esql",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"

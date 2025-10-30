@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { queryClient } from '../utils/query_client';
 import { FormProvider } from './form_provider';
 

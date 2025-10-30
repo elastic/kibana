@@ -12,7 +12,7 @@ import {
   RuleExecutionStatusWarningReasons,
 } from '@kbn/alerting-plugin/common';
 import { RuleStatus } from '../../types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../common/lib/kibana';
 import { IToasts } from '@kbn/core-notifications-browser';
 

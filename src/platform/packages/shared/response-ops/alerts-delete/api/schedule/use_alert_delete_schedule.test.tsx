@@ -12,7 +12,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useAlertDeleteSchedule } from './use_alert_delete_schedule';
 import { createAlertDeleteSchedule } from './create_alert_delete_schedule';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { AlertDeleteParams } from '@kbn/alerting-types';
 

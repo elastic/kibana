@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';

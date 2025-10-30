@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@kbn/react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryDslQueryContainerBool } from '../../../types';
