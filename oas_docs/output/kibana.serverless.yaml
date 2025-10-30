@@ -15870,6 +15870,40 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/entity_store/engines:
+    delete:
+      operationId: DeleteEntityEngines
+      parameters:
+        - description: The entity type of the engine ('user', 'host', 'service', 'generic').
+          in: query
+          name: entityTypes
+          required: true
+          schema:
+            description: Array of engine types to delete. Defaults to an empty array.
+            items:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+            type: array
+        - description: Control flag to also delete the entity data.
+          in: query
+          name: data
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+          description: Successful response
+      summary: Delete Entity Engines
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
     get:
       operationId: ListEntityEngines
       responses:
