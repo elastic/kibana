@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any, complexity */
 
-import { Frequency } from '@kbn/rrule';
+import { Frequency, RRule } from '@kbn/rrule';
 
 // Define the trigger type based on the schema
 export interface WorkflowTrigger {
@@ -168,7 +168,7 @@ export function convertRRuleToTaskSchedule(rruleConfig: WorkflowRRuleConfig) {
     if (isNaN(date.getTime())) {
       throw new Error(`Invalid RRule dtstart: "${rruleConfig.dtstart}"`);
     }
-    rrule.dtstart = rruleConfig.dtstart;
+    rrule.dtstart = date;
   }
 
   if (rruleConfig.byhour && rruleConfig.byhour.length > 0) {
@@ -227,4 +227,88 @@ export function convertRRuleToTaskSchedule(rruleConfig: WorkflowRRuleConfig) {
   }
 
   return { rrule };
+}
+
+/**
+ * Converts interval string to milliseconds
+ * @param interval - Interval string like "5m", "2h", "1d", "30s"
+ * @returns Number of milliseconds
+ */
+export function parseIntervalToMilliseconds(interval: string): number {
+  const parsed = parseIntervalString(interval);
+  if (!parsed) {
+    throw new Error(
+      `Invalid interval format: "${interval}". Use format like "5m", "2h", "1d", "30s"`
+    );
+  }
+
+  const { value, unit } = parsed;
+  const multipliers: Record<string, number> = {
+    s: 1000, // seconds
+    m: 60 * 1000, // minutes
+    h: 60 * 60 * 1000, // hours
+    d: 24 * 60 * 60 * 1000, // days
+  };
+
+  return value * multipliers[unit];
+}
+
+/**
+ * Calculates the next run time for a scheduled trigger
+ * @param trigger - The scheduled trigger configuration
+ * @param fromTime - Time to calculate from (defaults to current time)
+ * @returns Next run time or null if no next run
+ */
+export function calculateNextRunTime(
+  trigger: WorkflowTrigger,
+  fromTime: Date = new Date()
+): Date | null {
+  if (trigger.type !== 'scheduled') {
+    return null;
+  }
+
+  const config = trigger.with || {};
+
+  // Handle RRule-based scheduling
+  if (config.rrule) {
+    try {
+      const rrule = convertRRuleToTaskSchedule(config.rrule);
+
+      // Add dtstart if not provided (required by RRule library)
+      if (!rrule.rrule.dtstart) {
+        rrule.rrule.dtstart = fromTime;
+      }
+
+      const rruleInstance = new RRule(rrule.rrule);
+
+      // Get the next occurrence after fromTime
+      const nextOccurrence = rruleInstance.after(fromTime);
+      return nextOccurrence;
+    } catch (error) {
+      // If RRule calculation fails, return null
+      return null;
+    }
+  }
+
+  // Handle interval-based scheduling
+  if (config.every) {
+    let interval: string;
+
+    if (typeof config.every === 'string') {
+      interval = config.every;
+    } else if (config.unit) {
+      interval = `${config.every}${config.unit}`;
+    } else {
+      return null;
+    }
+
+    try {
+      const intervalMs = parseIntervalToMilliseconds(interval);
+      return new Date(fromTime.getTime() + intervalMs);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  return null;
 }

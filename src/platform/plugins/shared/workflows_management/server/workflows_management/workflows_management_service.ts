@@ -226,7 +226,27 @@ export class WorkflowsService {
     if (this.taskScheduler && workflowToCreate.definition.triggers) {
       for (const trigger of workflowToCreate.definition.triggers) {
         if (trigger.type === 'scheduled') {
-          await this.taskScheduler.scheduleWorkflowTask(id, spaceId, trigger, request);
+          const workflowForScheduler: EsWorkflow = {
+            id,
+            name: workflowToCreate.name,
+            description: workflowToCreate.description,
+            enabled: workflowToCreate.enabled,
+            tags: workflowToCreate.tags || [],
+            valid: true,
+            createdAt: now,
+            createdBy: authenticatedUser,
+            lastUpdatedAt: now,
+            lastUpdatedBy: authenticatedUser,
+            definition: workflowToCreate.definition,
+            deleted_at: null,
+            yaml: workflow.yaml,
+          };
+          await this.taskScheduler.scheduleWorkflowTask(
+            workflowForScheduler,
+            spaceId,
+            trigger,
+            request
+          );
         }
       }
     }
@@ -476,6 +496,17 @@ export class WorkflowsService {
             id,
             document: updatedData,
           });
+
+          // Remove scheduled tasks for deleted workflow
+          if (this.taskScheduler) {
+            try {
+              await this.taskScheduler.unscheduleWorkflowTasks(id);
+              this.logger.info(`Removed scheduled tasks for deleted workflow ${id}`);
+            } catch (error) {
+              this.logger.error(`Failed to unschedule tasks for deleted workflow ${id}: ${error}`);
+              // Don't throw the error - the workflow deletion should succeed even if scheduler update fails
+            }
+          }
         }
       } catch (error) {
         if (error.statusCode !== 404) {

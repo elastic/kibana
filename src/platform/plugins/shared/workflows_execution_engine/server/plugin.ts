@@ -360,7 +360,7 @@ export class WorkflowsExecutionEnginePlugin
             lastRunStatus: null,
             lastRunError: null,
           },
-          scope: ['workflows'],
+          scope: ['workflows', workflow.id],
           enabled: true,
         };
 

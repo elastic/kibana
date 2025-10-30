@@ -11,9 +11,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import agent from 'elastic-apm-node';
-import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EsWorkflowExecution, StackFrame, WorkflowRepository } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  calculateNextRunTime,
+  getScheduledTriggers,
+} from '@kbn/workflows-management-plugin/server/lib/schedule_utils';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
@@ -23,6 +28,8 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecution: EsWorkflowExecution;
   workflowExecutionGraph: WorkflowGraph;
   workflowLogger: IWorkflowEventLogger;
+  taskManager?: TaskManagerStartContract;
+  workflowRepository?: WorkflowRepository;
 }
 
 /**
@@ -52,6 +59,8 @@ export class WorkflowExecutionRuntimeManager {
   private workflowTransaction?: any; // APM transaction instance
   private workflowGraph: WorkflowGraph;
   private nextNodeId: string | undefined;
+  private taskManager?: TaskManagerStartContract;
+  private workflowRepository?: WorkflowRepository;
 
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
@@ -63,6 +72,8 @@ export class WorkflowExecutionRuntimeManager {
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
     this.workflowExecutionState = workflowExecutionRuntimeManagerInit.workflowExecutionState;
+    this.taskManager = workflowExecutionRuntimeManagerInit.taskManager;
+    this.workflowRepository = workflowExecutionRuntimeManagerInit.workflowRepository;
   }
 
   public get workflowExecution() {
@@ -382,11 +393,14 @@ export class WorkflowExecutionRuntimeManager {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
     }
 
-    if (
-      [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
-        workflowExecutionUpdate.status as ExecutionStatus
-      )
-    ) {
+    const isTerminalState = [
+      ExecutionStatus.COMPLETED,
+      ExecutionStatus.FAILED,
+      ExecutionStatus.TIMED_OUT,
+      ExecutionStatus.CANCELLED,
+    ].includes(workflowExecutionUpdate.status as ExecutionStatus);
+
+    if (isTerminalState) {
       const startedAt = new Date(workflowExecution.startedAt);
       const completeDate = new Date();
       workflowExecutionUpdate.finishedAt = completeDate.toISOString();
@@ -415,6 +429,9 @@ export class WorkflowExecutionRuntimeManager {
           );
         }
       }
+
+      // Schedule next execution if this was a scheduled workflow and it's still enabled
+      await this.scheduleNextExecution(workflowExecution);
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
@@ -440,5 +457,117 @@ export class WorkflowExecutionRuntimeManager {
         tags: ['workflow', 'execution', 'complete'],
       }
     );
+  }
+
+  /**
+   * Schedules the next execution for scheduled workflows
+   */
+  private async scheduleNextExecution(workflowExecution: EsWorkflowExecution): Promise<void> {
+    // Only schedule next execution if taskManager is available and this was a scheduled execution
+    if (!this.taskManager || workflowExecution.triggeredBy !== 'scheduled') {
+      return;
+    }
+
+    try {
+      const workflowDefinition = workflowExecution.workflowDefinition;
+      const scheduledTriggers = getScheduledTriggers(workflowDefinition.triggers || []);
+
+      // Only schedule if workflow has scheduled triggers
+      if (scheduledTriggers.length === 0) {
+        this.workflowLogger?.logDebug(
+          'Skipping next execution scheduling - no scheduled triggers',
+          {
+            workflow: {
+              id: workflowExecution.workflowId,
+            },
+          }
+        );
+        return;
+      }
+
+      // Check if workflow is still enabled by looking up the current state
+      // We need to verify the current enabled state, not the one from execution context
+      if (this.workflowRepository) {
+        const isWorkflowStillEnabled = await this.workflowRepository.isWorkflowEnabled(
+          workflowExecution.workflowId,
+          workflowExecution.spaceId
+        );
+        if (!isWorkflowStillEnabled) {
+          this.workflowLogger?.logDebug(
+            'Skipping next execution scheduling - workflow is disabled',
+            {
+              workflow: {
+                id: workflowExecution.workflowId,
+              },
+            }
+          );
+          return;
+        }
+      } else {
+        // Fallback: use the workflow definition from execution context
+        if (!workflowDefinition.enabled) {
+          this.workflowLogger?.logDebug(
+            'Skipping next execution scheduling - workflow is disabled (using execution context)',
+            {
+              workflow: {
+                id: workflowExecution.workflowId,
+              },
+            }
+          );
+          return;
+        }
+      }
+
+      // For each scheduled trigger, calculate next run time and schedule
+      for (const trigger of scheduledTriggers) {
+        const nextRunTime = calculateNextRunTime(trigger);
+        if (nextRunTime) {
+          // Create workflow execution model for the next run
+          const workflowExecutionModel = {
+            id: workflowExecution.workflowId,
+            name: workflowDefinition.name,
+            enabled: workflowDefinition.enabled,
+            definition: workflowDefinition,
+            yaml: workflowExecution.yaml,
+          };
+
+          // Generate unique task ID with timestamp
+          const timestamp = Date.now();
+          const taskInstance = {
+            id: `workflow:${workflowExecution.workflowId}:scheduled:${timestamp}`,
+            taskType: 'workflow:scheduled',
+            runAt: nextRunTime,
+            params: {
+              workflow: workflowExecutionModel,
+              spaceId: workflowExecution.spaceId,
+              triggerType: trigger.type,
+              trigger, // Store the original trigger for next run calculation
+            },
+            state: {
+              lastRunAt: null,
+              lastRunStatus: null,
+              lastRunError: null,
+            },
+            scope: ['workflows', workflowExecution.workflowId], // Include workflowId for queryability
+            enabled: true,
+          };
+
+          await this.taskManager.schedule(taskInstance);
+
+          this.workflowLogger?.logInfo('Scheduled next workflow execution', {
+            workflow: { id: workflowExecution.workflowId },
+            nextRun: { time: nextRunTime.toISOString() },
+            trigger: { type: trigger.type },
+          });
+        } else {
+          this.workflowLogger?.logWarn('Could not calculate next run time for trigger', {
+            workflow: { id: workflowExecution.workflowId },
+            trigger: { type: trigger.type, with: trigger.with },
+          });
+        }
+      }
+    } catch (error) {
+      this.workflowLogger?.logError('Failed to schedule next workflow execution', error as Error);
+    }
   }
 }

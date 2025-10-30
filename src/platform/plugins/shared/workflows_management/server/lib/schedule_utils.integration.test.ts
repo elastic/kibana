@@ -109,7 +109,7 @@ describe('RRule Scheduling Integration', () => {
 
       const result = convertRRuleToTaskSchedule(rruleConfig);
 
-      expect(result.rrule.dtstart).toBe('2024-01-15T09:00:00Z');
+      expect(result.rrule.dtstart).toEqual(new Date('2024-01-15T09:00:00Z'));
     });
 
     it('should validate required fields', () => {
@@ -203,7 +203,7 @@ describe('RRule Scheduling Integration', () => {
           byweekday: ['MO', 'WE', 'FR'],
           byhour: [8, 17],
           byminute: [0],
-          dtstart: '2024-01-15T08:00:00-05:00',
+          dtstart: new Date('2024-01-15T08:00:00-05:00'),
         },
       });
     });

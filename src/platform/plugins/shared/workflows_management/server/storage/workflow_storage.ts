@@ -10,13 +10,10 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import type { WorkflowYaml } from '@kbn/workflows';
-import { workflowSystemIndex } from './indices';
-
-export const workflowIndexName = workflowSystemIndex('workflows');
+import { WORKFLOW_INDEX_NAME, type WorkflowYaml } from '@kbn/workflows';
 
 const storageSettings = {
-  name: workflowIndexName,
+  name: WORKFLOW_INDEX_NAME,
   schema: {
     properties: {
       // ONLY map fields we actively search/filter/aggregate on

@@ -27,6 +27,7 @@ const mockLogger: Logger = {
 // Mock TaskManager
 const mockTaskManager: TaskManagerStartContract = {
   schedule: jest.fn().mockResolvedValue({ id: 'test-task-id' }),
+  ensureScheduled: jest.fn().mockResolvedValue({ id: 'test-task-id' }),
   fetch: jest.fn().mockResolvedValue({ docs: [] }),
   bulkRemove: jest.fn().mockResolvedValue(undefined),
 } as any;
@@ -63,7 +64,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
           ],
           steps: [],
           name: 'Test Workflow',
-          enabled: false,
+          enabled: true,
           version: '1',
         },
         yaml: '',
@@ -78,13 +79,21 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).resolves.toEqual([
         'test-task-id',
       ]);
-      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
 
       // Verify the task instance structure includes workflow object
-      expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: 'workflow:test-workflow:scheduled',
+          id: 'workflow:test-workflow:scheduled', // Non-unique ID
           taskType: 'workflow:scheduled',
+          runAt: expect.any(Date),
+          scope: ['workflows', 'test-workflow'],
+          enabled: true,
+          state: expect.objectContaining({
+            lastRunAt: null,
+            lastRunStatus: null,
+            lastRunError: null,
+          }),
           params: expect.objectContaining({
             workflow: expect.objectContaining({
               id: 'test-workflow',
@@ -95,6 +104,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
             }),
             spaceId: 'default',
             triggerType: 'scheduled',
+            trigger: expect.any(Object),
           }),
         })
       );
@@ -449,7 +459,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).resolves.toEqual([
         'test-task-id',
       ]);
-      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
     });
   });
 
