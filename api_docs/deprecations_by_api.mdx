@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2025-10-27
+date: 2025-10-30
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -26,6 +26,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectsType.migrations" text="migrations"/> | @kbn/core, taskManager, links, dataViews, ml, spaces, data, actions, share, alerting, fleet, apmSourcesAccess, lens, savedSearch, maps, dashboard, canvas, graph, cases, @kbn/test-suites-xpack-platform, uptime, apm, visualizations, infra, slo, synthetics, cloudSecurityPosture, lists, securitySolution, eventAnnotation, savedObjectsManagement | - |
 | <DocLink id="kibKbnMlAnomalyUtilsPluginApi" section="def-common.ML_SEVERITY_COLORS" text="ML_SEVERITY_COLORS"/> | ml | - |
 | <DocLink id="kibKbnMlAnomalyUtilsPluginApi" section="def-common.getSeverityColor" text="getSeverityColor"/> | apm, ml, uptime | - |
+| <DocLink id="kibKbnSharedUxLinkRedirectAppPluginApi" section="def-public.RedirectAppLinks" text="RedirectAppLinks"/> | @kbn/core, kibanaReact, home, management, data, esUiShared, spaces, savedObjectsManagement, @kbn/content-management-table-list-view-table, visualizations, lens, security, ml, discover, upgradeAssistant, fleet, indexManagement, indexLifecycleManagement, monitoring, onechat, streamsApp, exploratoryView, observability, profiling, apm, infra, observabilityAIAssistantApp, observabilityOnboarding, slo, synthetics, uptime, ux, enterpriseSearch, searchAssistant, cloudSecurityPosture, workplaceAIApp, kibanaOverview, dataViewManagement, visTypeTimeseries, @kbn/test-suites-src, @kbn/shared-ux-card-no-data | - |
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.fieldFormats" text="fieldFormats"/> | dataVisualizer, stackAlerts, expressionPartitionVis | - |
 | <DocLink id="kibDataPluginApi" section="def-common.SearchSource.fetch" text="fetch"/> | stackAlerts, alerting, securitySolution, inputControlVis | - |
@@ -40,8 +41,10 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectsType.convertToMultiNamespaceTypeVersion" text="convertToMultiNamespaceTypeVersion"/> | @kbn/core, dataViews, data, savedObjectsTagging, actions, alerting, lens, savedSearch, maps, dashboard, canvas, graph, cases, @kbn/test-suites-xpack-platform, visualizations, lists, securitySolution | - |
 | <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginStart.userProfiles" text="userProfiles"/> | security, cases, @kbn/test-suites-xpack-platform, searchPlayground, securitySolution | - |
 | <DocLink id="kibAlertingPluginApi" section="def-common.MaintenanceWindow" text="MaintenanceWindow"/> | @kbn/response-ops-alerts-table, triggersActionsUi | - |
+| <DocLink id="kibKbnReactQueryPluginApi" section="def-common.QueryObserverOptions.onError" text="onError"/> | @kbn/alerts-ui-shared, @kbn/response-ops-rules-apis, alerting, triggersActionsUi, @kbn/response-ops-alerts-apis, @kbn/response-ops-alerts-table, cases, @kbn/elastic-assistant, @kbn/inference-endpoint-ui-common, osquery, stackConnectors, @kbn/securitysolution-list-hooks, observability, infra, slo, searchPlayground, @kbn/cloud-security-posture-graph, cloudSecurityPosture, @kbn/cloud-security-posture, securitySolution | - |
 | <DocLink id="kibManagementPluginApi" section="def-public.ManagementAppMountParams.theme$" text="theme$"/> | triggersActionsUi | - |
 | <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.parse" text="parse"/> | @kbn/esql-validation-autocomplete, @kbn/esql-utils, @kbn/esql-composer, inference, triggersActionsUi, discover, @kbn/securitysolution-utils, securitySolution | - |
+| <DocLink id="kibKbnReactQueryPluginApi" section="def-common.QueryObserverOptions.onSuccess" text="onSuccess"/> | @kbn/alerts-ui-shared, triggersActionsUi, cases, osquery, @kbn/securitysolution-list-hooks, infra, slo, securitySolution | - |
 | <DocLink id="kibKbnSecurityPluginTypesServerPluginApi" section="def-server.SecurityPluginSetup.audit" text="audit"/> | security, actions, alerting, files, fleet, ruleRegistry, cases, securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSource.create" text="create"/> | alerting, securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.SavedObject.migrationVersion" text="migrationVersion"/> | @kbn/core, fleet, graph, osquery, lists, searchPlayground, securitySolution | - |
@@ -63,7 +66,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnCoreSavedObjectsApiServerPluginApi" section="def-server.SavedObject.migrationVersion" text="migrationVersion"/> | @kbn/core, fleet, graph, osquery, lists, searchPlayground, securitySolution | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiServerPluginApi" section="def-server.SavedObjectAttributes" text="SavedObjectAttributes"/> | @kbn/core, @kbn/alerting-types, alerting, actions, savedSearch, canvas, taskManager, enterpriseSearch, securitySolution | - |
 | <DocLink id="kibKbnLensCommonPluginApi" section="def-common.LensPartitionVisualizationState.palette" text="palette"/> | lens, securitySolution, visTypePie, @kbn/lens-embeddable-utils | - |
-| <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginStart.authc" text="authc"/> | security, cloudLinks, securitySolution, cases, securitySolutionServerless | - |
+| <DocLink id="kibKbnSecurityPluginTypesPublicPluginApi" section="def-public.SecurityPluginStart.authc" text="authc"/> | security, cloudLinks, securitySolution, cases | - |
 | <DocLink id="kibKbnSecuritysolutionListConstantsPluginApi" section="def-common.ENDPOINT_LIST_ID" text="ENDPOINT_LIST_ID"/> | lists, securitySolution, @kbn/securitysolution-io-ts-list-types, @kbn/test-suites-xpack-security | - |
 | <DocLink id="kibKbnSecuritysolutionListConstantsPluginApi" section="def-common.ENDPOINT_TRUSTED_APPS_LIST_ID" text="ENDPOINT_TRUSTED_APPS_LIST_ID"/> | lists, securitySolution, @kbn/securitysolution-io-ts-list-types, @kbn/test-suites-xpack-security | - |
 | <DocLink id="kibKbnSecuritysolutionListConstantsPluginApi" section="def-common.ENDPOINT_TRUSTED_APPS_LIST_NAME" text="ENDPOINT_TRUSTED_APPS_LIST_NAME"/> | lists, @kbn/securitysolution-io-ts-list-types, securitySolution | - |
@@ -222,6 +225,7 @@ Safe to remove.
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.ConcreteTaskInstance.numSkippedRuns" text="numSkippedRuns"/> | taskManager | 
 | <DocLink id="kibVisualizationsPluginApi" section="def-public.VisualizeEmbeddable" text="VisualizeEmbeddable"/> | visualizations | 
 | <DocLink id="kibKbnEsqlAstPluginApi" section="def-common.ESQLAst" text="ESQLAst"/> | @kbn/esql-ast | 
+| <DocLink id="kibKbnReactQueryPluginApi" section="def-common.QueryObserverOptions.onSettled" text="onSettled"/> | @kbn/react-query | 
 | <DocLink id="kibKbnScoutPluginApi" section="def-common.Locator.check.$1.noWaitAfter" text="noWaitAfter"/> | @kbn/scout | 
 | <DocLink id="kibKbnScoutPluginApi" section="def-common.Locator.clear.$1.noWaitAfter" text="noWaitAfter"/> | @kbn/scout | 
 | <DocLink id="kibKbnScoutPluginApi" section="def-common.Locator.click.$1.noWaitAfter" text="noWaitAfter"/> | @kbn/scout | 
@@ -271,6 +275,9 @@ Safe to remove.
 | <DocLink id="kibKbnScoutSecurityPluginApi" section="def-common.Locator.tap.$1.noWaitAfter" text="noWaitAfter"/> | @kbn/scout-security | 
 | <DocLink id="kibKbnScoutSecurityPluginApi" section="def-common.Locator.type.$2.noWaitAfter" text="noWaitAfter"/> | @kbn/scout-security | 
 | <DocLink id="kibKbnScoutSecurityPluginApi" section="def-common.Locator.uncheck.$1.noWaitAfter" text="noWaitAfter"/> | @kbn/scout-security | 
+| <DocLink id="kibKbnSharedUxLinkRedirectAppPluginApi" section="def-public.RedirectAppLinksServices" text="RedirectAppLinksServices"/> | @kbn/shared-ux-link-redirect-app | 
+| <DocLink id="kibKbnSharedUxLinkRedirectAppPluginApi" section="def-public.RedirectAppLinksKibanaDependencies" text="RedirectAppLinksKibanaDependencies"/> | @kbn/shared-ux-link-redirect-app | 
+| <DocLink id="kibKbnSharedUxLinkRedirectAppPluginApi" section="def-public.RedirectAppLinksProps" text="RedirectAppLinksProps"/> | @kbn/shared-ux-link-redirect-app | 
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.renderWithIntl" text="renderWithIntl"/> | @kbn/test-jest-helpers | 
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.shallowWithI18nProvider" text="shallowWithI18nProvider"/> | @kbn/test-jest-helpers | 
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.mountWithI18nProvider" text="mountWithI18nProvider"/> | @kbn/test-jest-helpers | 
