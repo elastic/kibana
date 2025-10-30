@@ -714,7 +714,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "gap_auto_fill_scheduler|global: 71ebab8e87dcd17601e47579a55e971dcc3edfca",
         "gap_auto_fill_scheduler|mappings: 800c685b626327132da7ac2e515cf9bafa1ffd82",
         "gap_auto_fill_scheduler|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "gap_auto_fill_scheduler|10.1.0: 66d061b88fde36fcbc800c291beaec77abeba178",
+        "gap_auto_fill_scheduler|10.1.0: d328c3f9596c4c94414e2ab8c4fc8c81baa2ce01",
         "========================================================================",
         "graph-workspace|global: 9075e5123e3beea7a32a2c152795934ee0239f11",
         "graph-workspace|mappings: e17cff9e8b39b979f3067f55bbcf7c998d602648",
