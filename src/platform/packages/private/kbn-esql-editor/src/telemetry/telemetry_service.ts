@@ -9,6 +9,11 @@
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
+import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
+import {
+  hasLimitBeforeAggregate,
+  missingSortBeforeLimit,
+} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import {
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_QUERY_HISTORY_CLICKED,
@@ -20,11 +25,6 @@ import {
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../custom_commands/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../custom_commands/use_lookup_index_editor';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
-import {
-  hasLimitBeforeAggregate,
-  missingSortBeforeLimit,
-} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 
 export class ESQLEditorTelemetryService {
   constructor(private readonly _analytics: AnalyticsServiceStart) {}
