@@ -58,12 +58,10 @@ describe('getFetchObservable', () => {
 
     const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
     const refetch$: DataRefetch$ = new Subject();
-    const lastReloadRequestTime$ = new Subject<number | undefined>();
     const fetch$ = getFetch$({
       setAutoRefreshDone: jest.fn(),
       main$,
       refetch$,
-      lastReloadRequestTime$,
       data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
       searchSessionManager: searchSessionManagerMock.searchSessionManager,
       searchSource: savedSearchMock.searchSource,
@@ -81,7 +79,6 @@ describe('getFetchObservable', () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
       const searchSessionManagerMock = createSearchSessionMock();
       const autoRefreshFetch$ = new Subject();
-      const lastReloadRequestTime$ = new Subject<number | undefined>();
 
       const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
       const refetch$: DataRefetch$ = new Subject();
@@ -96,7 +93,6 @@ describe('getFetchObservable', () => {
         setAutoRefreshDone,
         main$,
         refetch$,
-        lastReloadRequestTime$,
         data: dataMock,
         searchSessionManager: searchSessionManagerMock.searchSessionManager,
         searchSource: savedSearchMockWithTimeField.searchSource,
