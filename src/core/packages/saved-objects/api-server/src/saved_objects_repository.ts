@@ -189,6 +189,8 @@ export interface ISavedObjectsRepository {
    * Performs a raw search against the saved objects indices, returning the raw Elasticsearch response
    * @param options {@link SavedObjectsSearchOptions} - options for the search operation
    * @returns the {@link SavedObjectsSearchResponse}
+   *
+   * @deprecated This method is experimental, please do not adopt it for production use cases yet!
    */
   search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
     options: SavedObjectsSearchOptions
