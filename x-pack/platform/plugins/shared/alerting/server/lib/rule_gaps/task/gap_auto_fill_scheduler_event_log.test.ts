@@ -12,7 +12,6 @@ import { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler
 
 describe('gap_auto_fill_scheduler_event_log', () => {
   const fixedStart = new Date('2024-01-01T00:00:00.000Z');
-
   let eventLogger: jest.Mocked<IEventLogger>;
 
   beforeEach(() => {
@@ -28,23 +27,23 @@ describe('gap_auto_fill_scheduler_event_log', () => {
     jest.clearAllMocks();
   });
 
-  const makeArgs = () =>
-    ({
-      eventLogger: eventLogger as unknown as IEventLogger,
-      context: { spaceId: 'default' },
-      taskInstance: { id: 'task-123', scheduledAt: new Date('2024-01-01T00:00:05.000Z') },
-      startTime: fixedStart,
-      config: {
-        name: 'gap-fill-auto-fill-name',
-        enabled: true,
-        amountOfRetries: 3,
-        gapFillRange: 'now-7d',
-        maxBackfills: 10,
-        schedule: { interval: '1h' },
-        createdAt: '2024-01-01T00:00:00.000Z',
-        updatedAt: '2024-01-01T00:00:00.000Z',
-      },
-    } as const);
+  const makeArgs = () => ({
+    eventLogger: eventLogger as unknown as IEventLogger,
+    context: { spaceId: 'default' },
+    taskInstance: { id: 'task-123', scheduledAt: new Date('2024-01-01T00:00:05.000Z') },
+    startTime: fixedStart,
+    config: {
+      name: 'gap-fill-auto-fill-name',
+      enabled: true,
+      amountOfRetries: 3,
+      gapFillRange: 'now-7d',
+      maxBackfills: 10,
+      ruleTypes: [],
+      schedule: { interval: '1h' },
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    },
+  });
 
   it('logs expected event with results and summary', () => {
     const log = createGapAutoFillSchedulerEventLogger(makeArgs());

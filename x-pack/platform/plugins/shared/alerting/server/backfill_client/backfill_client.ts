@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import pMap from 'p-map';
 import type {
   ISavedObjectsRepository,
   Logger,
@@ -189,13 +189,54 @@ export class BackfillClient {
     const chunkSize = 10;
     const allSavedObjects: Array<SavedObject<AdHocRunSO>> = [];
 
+    const totalStartMs = Date.now();
+    const chunks: Array<{
+      startIndex: number;
+      items: Array<SavedObjectsBulkCreateObject<AdHocRunSO>>;
+    }> = [];
     for (let i = 0; i < adHocSOsToCreate.length; i += chunkSize) {
-      const chunk = adHocSOsToCreate.slice(i, i + chunkSize);
-      const bulkCreateChunkResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
-        chunk
-      );
-      allSavedObjects.push(...bulkCreateChunkResponse.saved_objects);
+      chunks.push({ startIndex: i, items: adHocSOsToCreate.slice(i, i + chunkSize) });
     }
+
+    // Pre-size result array to preserve original order regardless of parallel completion order
+    const orderedResults: Array<SavedObject<AdHocRunSO>> = new Array(adHocSOsToCreate.length);
+
+    const chunkConcurrency = 10;
+    await pMap(
+      chunks,
+      async ({ startIndex, items }, idx) => {
+        const chunkStartMs = Date.now();
+        const response = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(items);
+        const chunkEndMs = Date.now();
+        const elapsedMs = chunkEndMs - chunkStartMs;
+
+        // Place results in the correct positions
+        response.saved_objects.forEach((so, j) => {
+          orderedResults[startIndex + j] = so;
+        });
+
+        // Logging per-chunk and per-SO average timings
+        this.logger.info(
+          `backfillClient.bulkQueue: created ${items.length} SOs in ${elapsedMs}ms (chunk ${
+            idx + 1
+          }/${chunks.length}, range ${startIndex}-${startIndex + items.length - 1}, avg ~${(
+            elapsedMs / items.length
+          ).toFixed(2)}ms/SO)`
+        );
+      },
+      { concurrency: chunkConcurrency }
+    );
+
+    const totalElapsedMs = Date.now() - totalStartMs;
+    this.logger.info(
+      `backfillClient.bulkQueue: created ${adHocSOsToCreate.length} SOs across ${
+        chunks.length
+      } chunks in ${totalElapsedMs}ms (avg ~${(totalElapsedMs / adHocSOsToCreate.length).toFixed(
+        2
+      )}ms/SO)`
+    );
+
+    allSavedObjects.push(...orderedResults);
 
     const transformedResponse: ScheduleBackfillResults = allSavedObjects.map(
       (so: SavedObject<AdHocRunSO>, index: number) => {
