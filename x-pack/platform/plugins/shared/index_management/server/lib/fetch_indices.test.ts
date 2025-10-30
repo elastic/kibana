@@ -20,6 +20,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
 
   const getIndices = router.getMockESApiFn('indices.get');
   const getIndicesStats = router.getMockESApiFn('indices.stats');
+  const getCount = router.getMockESApiFn('count');
   const getMeteringStats = router.getMockESApiFnAsSecondaryAuthUser('transport.request');
   const mockRequest: RequestMock = {
     method: 'get',
@@ -43,6 +44,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
       getIndices.mockResolvedValue({
         regular_index: createTestIndexState(),
       });
+      getCount.mockResolvedValue({ count: 1 });
       getIndicesStats.mockResolvedValue({
         indices: {
           regular_index: createTestIndexStats({ uuid: 'regular_index' }),
@@ -59,6 +61,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           aliases: { test_alias: {}, another_alias: {} },
         }),
       });
+      getCount.mockResolvedValue({ count: 1 });
       getIndicesStats.mockResolvedValue({
         indices: {
           index_with_aliases: createTestIndexStats({ uuid: 'index_with_aliases' }),
@@ -81,6 +84,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           settings: { index: { number_of_shards: 1, number_of_replicas: 1, frozen: 'true' } },
         }),
       });
+      getCount.mockResolvedValue({ count: 1 });
       getIndicesStats.mockResolvedValue({
         indices: {
           frozen_index: createTestIndexStats({ uuid: 'frozen_index' }),
@@ -103,6 +107,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           settings: { index: { number_of_shards: 1, number_of_replicas: 1, hidden: 'true' } },
         }),
       });
+      getCount.mockResolvedValue({ count: 1 });
       getIndicesStats.mockResolvedValue({
         indices: {
           hidden_index: createTestIndexStats({ uuid: 'hidden_index' }),
@@ -125,6 +130,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           data_stream: 'test_data_stream',
         }),
       });
+      getCount.mockResolvedValue({ count: 1 });
       getIndicesStats.mockResolvedValue({
         indices: {
           data_stream_index: createTestIndexStats({ uuid: 'data_stream_index' }),
@@ -145,6 +151,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
       getIndices.mockResolvedValue({
         index_missing_stats: createTestIndexState(),
       });
+      getCount.mockResolvedValue({ count: 0 });
       // simulates when an index has been deleted after get indices call
       // deleted index won't be present in the indices stats call response
       getIndicesStats.mockResolvedValue({
