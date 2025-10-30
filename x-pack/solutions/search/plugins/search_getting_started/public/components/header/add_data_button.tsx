@@ -32,7 +32,7 @@ export const AddDataButton: React.FC = () => {
       data-test-subj="gettingStartedUploadMenuItem"
       onClick={() => {
         closePopover();
-        application.navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
+        application.navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' });
       }}
     >
       {i18n.translate('xpack.search.gettingStarted.addDataButton.uploadFile', {
