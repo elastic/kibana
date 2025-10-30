@@ -15,7 +15,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { ReportTypeData, ScheduledReport } from '../../types';
 import { getReportingHealth } from '../apis/get_reporting_health';
 import { testQueryClient } from '../test_utils/test_query_client';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
 import { scheduleReport } from '../apis/schedule_report';
 import type { ScheduledReportApiJSON } from '../../../server/types';

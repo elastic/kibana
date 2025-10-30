@@ -130,7 +130,7 @@ export const initRoutes = (
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
+  registerEntityAnalyticsRoutes({ router, config, getStartServices, logger, ml });
   registerSiemMigrationsRoutes(router, config, logger);
 
   // Security Integrations

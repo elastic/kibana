@@ -276,6 +276,13 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.uiState.searchDraft = action.payload.searchDraftUiState;
       }),
+    setMetricsGridState: (
+      state,
+      action: TabAction<{ metricsGridState: Partial<TabState['uiState']['metricsGrid']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.metricsGrid = action.payload.metricsGridState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {

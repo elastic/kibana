@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { IsolationRouteRequestBody } from '../../../../common/api/endpoint';
 import { isolateHost } from '../../../common/lib/endpoint/endpoint_isolation';

@@ -14,12 +14,12 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, merge, map, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
 import type {
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,
   LensSerializedState,
   LensUnifiedSearchContext,
-} from '../types';
+} from '@kbn/lens-common';
+import type { LensEmbeddableStartServices } from '../types';
 
 export const searchContextComparators: StateComparators<LensUnifiedSearchContext> = {
   ...timeRangeComparators,

@@ -35,6 +35,12 @@
       "end": {
         "type": "date"
       },
+      "initiator": {
+        "type": "keyword"
+      },
+      "initiatorId": {
+        "type": "keyword"
+      },
       "rule": {
         "properties": {
           "alertTypeId": {
@@ -3147,6 +3153,17 @@
       "filter": {
         "dynamic": false,
         "properties": {}
+      },
+      "filters": {
+        "properties": {
+          "entity_types": {
+            "type": "keyword"
+          },
+          "filter": {
+            "type": "text"
+          }
+        },
+        "type": "nested"
       },
       "identifierType": {
         "type": "keyword"
