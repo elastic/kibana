@@ -25,6 +25,7 @@
       "licensing",
       "management",
       "share",
+      "spaces",
       "stackConnectors",
       "licensing",
       "triggersActionsUi"
@@ -35,7 +36,6 @@
     "optionalPlugins": [
       "cloud",
       "licenseManagement",
-      "spaces",
       "workflowsManagement"
     ],
     "extraPublicDirs": []
