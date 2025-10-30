@@ -6089,6 +6089,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-connectors-plugin@link:x-pack/platform/plugins/shared/data_connectors":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-forge@link:x-pack/platform/packages/shared/kbn-data-forge":
   version "0.0.0"
   uid ""
@@ -6181,11 +6185,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/deeplinks-agent-builder@link:src/platform/packages/shared/deeplinks/agent_builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/deeplinks-analytics@link:src/platform/packages/shared/deeplinks/analytics":
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-chat@link:src/platform/packages/shared/deeplinks/chat":
+"@kbn/deeplinks-data-connectors@link:src/platform/packages/shared/deeplinks/data_connectors":
   version "0.0.0"
   uid ""
 
@@ -6222,6 +6230,10 @@
   uid ""
 
 "@kbn/deeplinks-workflows@link:src/platform/packages/shared/deeplinks/workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-workplace-ai@link:src/platform/packages/shared/deeplinks/workplace_ai":
   version "0.0.0"
   uid ""
 
