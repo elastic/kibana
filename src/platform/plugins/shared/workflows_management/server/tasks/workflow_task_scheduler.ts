@@ -34,7 +34,7 @@ export class WorkflowTaskScheduler {
     spaceId: string,
     request?: KibanaRequest
   ): Promise<string[]> {
-    const scheduledTriggers = getScheduledTriggers(workflow.definition.triggers);
+    const scheduledTriggers = getScheduledTriggers(workflow.definition?.triggers ?? []);
     const scheduledTaskIds: string[] = [];
 
     for (const trigger of scheduledTriggers) {
