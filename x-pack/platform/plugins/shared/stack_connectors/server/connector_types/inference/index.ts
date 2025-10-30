@@ -72,13 +72,17 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       // Until the services endpoint is updated to reflect that, there is no way for the form UI to know where to put max_tokens. This can be removed once that update is made.
       if (
         config?.provider === ServiceProviderKeys.anthropic &&
+        // @ts-ignore max_tokens is not defined in the type, but we allow it in the schema
         config?.providerConfig?.max_tokens
       ) {
+        // @ts-ignore
         config.taskTypeConfig = {
           ...(config.taskTypeConfig ?? {}),
+          // @ts-ignore
           max_tokens: config.providerConfig.max_tokens,
         };
         // This field is unknown to the anthropic service config, so we remove it
+        // @ts-ignore
         delete config.providerConfig.max_tokens;
       }
 
