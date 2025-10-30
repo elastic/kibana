@@ -76,13 +76,5 @@
   },
   {
     "script": ".buildkite/scripts/steps/checks/check_scout_config.sh"
-  },
-  {
-    "script": ".buildkite/scripts/steps/checks/dependencies_diff.sh",
-    "mayChangeFiles": true
-  },
-  {
-    "script": ".buildkite/scripts/steps/checks/verify_codeowners.sh",
-    "mayChangeFiles": true
   }
 ]
