@@ -26162,6 +26162,267 @@
         ]
       }
     },
+    "/api/fleet/epm/packages/_bulk_rollback": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
+        "operationId": "post-fleet-epm-packages-bulk-rollback",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "bulkRollbackRequest": {
+                  "value": {
+                    "packages": [
+                      {
+                        "name": "system"
+                      }
+                    ]
+                  }
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "packages": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "description": "Package name to rollback",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "type": "object"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "packages"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "taskId": "taskId"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "taskId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "taskId"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK: A successful request."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A bad request."
+          }
+        },
+        "summary": "Bulk rollback packages",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
+    "/api/fleet/epm/packages/_bulk_rollback/{taskId}": {
+      "get": {
+        "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
+        "operationId": "get-fleet-epm-packages-bulk-rollback-taskid",
+        "parameters": [
+          {
+            "description": "Task ID of the bulk operation",
+            "in": "path",
+            "name": "taskId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "status": "success"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "message"
+                      ],
+                      "type": "object"
+                    },
+                    "results": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "error": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "message"
+                            ],
+                            "type": "object"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "success": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "success"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK: A successful request."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A bad request."
+          }
+        },
+        "summary": "Get Bulk rollback packages details",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
     "/api/fleet/epm/packages/_bulk_uninstall": {
       "post": {
         "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
@@ -26281,6 +26542,7 @@
         "operationId": "get-fleet-epm-packages-bulk-uninstall-taskid",
         "parameters": [
           {
+            "description": "Task ID of the bulk operation",
             "in": "path",
             "name": "taskId",
             "required": true,
@@ -26515,6 +26777,7 @@
         "operationId": "get-fleet-epm-packages-bulk-upgrade-taskid",
         "parameters": [
           {
+            "description": "Task ID of the bulk operation",
             "in": "path",
             "name": "taskId",
             "required": true,
@@ -26924,6 +27187,109 @@
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
+      }
+    },
+    "/api/fleet/epm/packages/{pkgName}/rollback": {
+      "post": {
+        "description": "[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.",
+        "operationId": "post-fleet-epm-packages-pkgname-rollback",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Package name to roll back",
+            "in": "path",
+            "name": "pkgName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "successResponse": {
+                    "value": {
+                      "success": true,
+                      "version": "1.0.0"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "version": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "version",
+                    "success"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK: A successful request."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "badRequestResponse": {
+                    "value": {
+                      "message": "Bad Request"
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A bad request."
+          }
+        },
+        "summary": "Rollback a package to previous version",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
+        "x-state": "Technical Preview"
       }
     },
     "/api/fleet/epm/packages/{pkgName}/stats": {
