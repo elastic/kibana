@@ -29,7 +29,7 @@
           "\nBuilds a Kibana HTTP request from connector definitions\nThis is shared between the execution engine and the YAML editor copy functionality"
         ],
         "signature": [
-          "(actionType: string, params: Record<string, unknown>) => { method: string; path: string; body?: Record<string, unknown> | undefined; query?: Record<string, unknown> | undefined; headers?: Record<string, string> | undefined; }"
+          "(actionType: string, params: Record<string, unknown>, spaceId: string | undefined) => { method: string; path: string; body?: Record<string, unknown> | undefined; query?: Record<string, unknown> | undefined; headers?: Record<string, string> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/common/kibana_request_builder.ts",
         "deprecated": false,
@@ -64,6 +64,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.buildKibanaRequestFromAction.$3",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/common/kibana_request_builder.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -5154,6 +5169,30 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WorkflowsManagementApiActions",
+        "type": "Enum",
+        "tags": [],
+        "label": "WorkflowsManagementApiActions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows/common/privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WorkflowsManagementUiActions",
+        "type": "Enum",
+        "tags": [],
+        "label": "WorkflowsManagementUiActions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows/common/privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -5851,6 +5890,23 @@
           "{ 'max-attempts': number; delay?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WORKFLOWS_MANAGEMENT_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_MANAGEMENT_FEATURE_ID",
+        "description": [
+          "\nFeature ID for the workflows management feature"
+        ],
+        "signature": [
+          "\"workflowsManagement\""
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
