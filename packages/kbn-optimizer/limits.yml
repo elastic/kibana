@@ -47,7 +47,7 @@ pageLoadAssetSize:
   embeddable: 18810
   embeddableAlertsTable: 6524
   embeddableEnhanced: 10332
-  enterpriseSearch: 38000
+  enterpriseSearch: 38500
   esql: 16289
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -56,11 +56,11 @@ pageLoadAssetSize:
   exploratoryView: 45126
   expressionGauge: 15748
   expressionHeatmap: 17563
-  expressionLegacyMetricVis: 11834
-  expressionMetricVis: 17559
+  expressionLegacyMetricVis: 13200
+  expressionMetricVis: 18000
   expressionPartitionVis: 29826
   expressions: 105113
-  expressionTagcloud: 12643
+  expressionTagcloud: 14000
   expressionXY: 45000
   features: 4145
   fieldFormats: 64634
@@ -69,14 +69,14 @@ pageLoadAssetSize:
   filesManagement: 5270
   fileUpload: 20700
   fleet: 187942
-  genAiSettings: 5003
+  genAiSettings: 5050
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
   graph: 10006
   grokdebugger: 5484
   home: 13621
-  imageEmbeddable: 6000
+  imageEmbeddable: 6300
   indexLifecycleManagement: 29870
   indexManagement: 35522
   inference: 10368
@@ -113,7 +113,7 @@ pageLoadAssetSize:
   observability: 109574
   observabilityAIAssistant: 52556
   observabilityAIAssistantApp: 18553
-  observabilityAiAssistantManagement: 6438
+  observabilityAiAssistantManagement: 6500
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
@@ -146,7 +146,7 @@ pageLoadAssetSize:
   searchInferenceEndpoints: 8071
   searchNavigation: 7404
   searchNotebooks: 18826
-  searchPlayground: 10993
+  searchPlayground: 11050
   searchprofiler: 6509
   searchQueryRules: 6689
   searchSynonyms: 6371
@@ -186,12 +186,12 @@ pageLoadAssetSize:
   visDefaultEditor: 35080
   visTypeGauge: 13006
   visTypeHeatmap: 12457
-  visTypeMarkdown: 8817
+  visTypeMarkdown: 9300
   visTypeMetric: 11966
   visTypePie: 9939
-  visTypeTable: 18999
+  visTypeTable: 19300
   visTypeTagcloud: 7876
-  visTypeTimelion: 12512
+  visTypeTimelion: 12800
   visTypeTimeseries: 19665
   visTypeVega: 38538
   visTypeVislib: 14679

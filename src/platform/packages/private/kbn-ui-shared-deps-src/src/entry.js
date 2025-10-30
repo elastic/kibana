@@ -55,11 +55,13 @@ export const ReactUse = {
   useDeepCompareEffect: require('react-use/lib/useDeepCompareEffect'),
   useEffectOnce: require('react-use/lib/useEffectOnce'),
   useEvent: require('react-use/lib/useEvent'),
+  useIsomorphicLayoutEffect: require('react-use/lib/useIsomorphicLayoutEffect'),
   useLatest: require('react-use/lib/useLatest'),
   useList: require('react-use/lib/useList'),
   useLocalStorage: require('react-use/lib/useLocalStorage'),
   useMount: require('react-use/lib/useMount'),
   useMountedState: require('react-use/lib/useMountedState'),
+  useObservable: require('react-use/lib/useObservable'),
   usePrevious: require('react-use/lib/usePrevious'),
   useSessionStorage: require('react-use/lib/useSessionStorage'),
   useTimeoutFn: require('react-use/lib/useTimeoutFn'),
@@ -116,4 +118,5 @@ export const KbnReactKibanaContextRender = require('@kbn/react-kibana-context-re
 export const KbnReactKibanaContextTheme = require('@kbn/react-kibana-context-theme');
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
 export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');
-export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
+export const KbnChalk = require('chalk');
+export const KbnJestDiff = require('jest-diff');
