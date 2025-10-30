@@ -161,5 +161,6 @@
     "@kbn/ml-plugin-contracts",
     "@kbn/ml-node-checks",
     "@kbn/ml-server-services",
+    "@kbn/ml-common-api-schemas",
   ]
 }
