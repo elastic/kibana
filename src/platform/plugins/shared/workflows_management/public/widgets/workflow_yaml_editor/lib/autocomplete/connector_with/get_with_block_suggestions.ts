@@ -9,7 +9,7 @@
 
 import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
-import { getConnectorParamsSchemaWithCache } from './get_connector_with_schema';
+import { getConnectorParamsSchema } from './get_connector_with_schema';
 import { getExistingParametersInWithBlock } from './get_existing_parameters_in_with_block';
 import { getEnhancedTypeInfo } from '../../snippets/generate_connector_snippet';
 import type { ExtendedAutocompleteContext } from '../autocomplete.types';
@@ -144,7 +144,7 @@ export function getWithBlockSuggestions(autocompleteContext: ExtendedAutocomplet
     return [];
   }
 
-  schemaToUse = getConnectorParamsSchemaWithCache(connectorType, dynamicConnectorTypes);
+  schemaToUse = getConnectorParamsSchema(connectorType, dynamicConnectorTypes);
   // Schema lookup for connector type
 
   // Connector registry lookup
