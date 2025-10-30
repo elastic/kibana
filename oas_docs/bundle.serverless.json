@@ -2230,7 +2230,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "maxLength": 1000,
+                            "maxLength": 10000,
                             "type": "string"
                           }
                         },
@@ -3868,7 +3868,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "maxLength": 1000,
+                            "maxLength": 10000,
                             "type": "string"
                           }
                         },
@@ -42154,6 +42154,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "additional_yaml_config": {
+                    "deprecated": true,
                     "type": "string"
                   },
                   "delete_unenrolled_agents": {
@@ -42173,12 +42174,15 @@
                     "type": "object"
                   },
                   "has_seen_add_data_notice": {
+                    "deprecated": true,
                     "type": "boolean"
                   },
                   "kibana_ca_sha256": {
+                    "deprecated": true,
                     "type": "string"
                   },
                   "kibana_urls": {
+                    "deprecated": true,
                     "items": {
                       "format": "uri",
                       "type": "string"
