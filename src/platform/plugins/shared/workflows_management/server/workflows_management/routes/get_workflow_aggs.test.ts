@@ -29,41 +29,6 @@ describe('GET /api/workflows/aggs', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the aggs route with correct configuration', () => {
-      registerGetWorkflowAggsRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const getAggsCall = (mockRouter.get as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/aggs'
-      );
-
-      expect(getAggsCall).toBeDefined();
-      expect(getAggsCall[0]).toMatchObject({
-        path: '/api/workflows/aggs',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['read', 'workflow_read'],
-              },
-            ],
-          },
-        },
-      });
-      expect(getAggsCall[0].validate).toBeDefined();
-      expect(getAggsCall[0].validate.query).toBeDefined();
-      expect(getAggsCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 

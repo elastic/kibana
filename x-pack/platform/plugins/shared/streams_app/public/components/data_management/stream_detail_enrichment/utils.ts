@@ -13,6 +13,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
+  ConvertProcessor,
   GrokProcessor,
   ProcessorType,
   StreamlangProcessorDefinition,
@@ -37,6 +38,7 @@ import type {
   EnrichmentDataSourceWithUIAttributes,
   SetFormState,
   WhereBlockFormState,
+  ConvertFormState,
 } from './types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
@@ -49,7 +51,7 @@ import type { ProcessorResources } from './state_management/steps_state_machine'
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['date', 'dissect', 'grok', 'set'];
+export const SPECIALISED_TYPES = ['convert', 'date', 'dissect', 'grok', 'set'];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -100,6 +102,16 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: str
   const mostCommonField = sortedFields[0];
   return mostCommonField ? mostCommonField[0] : '';
 };
+
+const defaultConvertProcessorFormState = (): ConvertFormState => ({
+  action: 'convert' as const,
+  from: '',
+  to: '',
+  type: 'string',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
 
 const defaultDateProcessorFormState = (sampleDocs: FlattenRecord[]): DateFormState => ({
   action: 'date',
@@ -162,6 +174,7 @@ const defaultProcessorFormStateByType: Record<
   ProcessorType,
   (sampleDocs: FlattenRecord[], formStateDependencies: FormStateDependencies) => ProcessorFormState
 > = {
+  convert: defaultConvertProcessorFormState,
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
@@ -194,10 +207,6 @@ export const getFormStateFromActionStep = (
     clone.patterns = step.patterns.map(
       (pattern) => new DraftGrokExpression(formStateDependencies.grokCollection, pattern)
     );
-    // Ensure Advanced settings shows the condition editor even when not prepopulated
-    if (clone.where === undefined) {
-      clone.where = ALWAYS_CONDITION;
-    }
 
     return clone;
   }
@@ -206,13 +215,12 @@ export const getFormStateFromActionStep = (
     step.action === 'dissect' ||
     step.action === 'manual_ingest_pipeline' ||
     step.action === 'date' ||
-    step.action === 'set'
+    step.action === 'set' ||
+    step.action === 'convert'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
       ...restStep,
-      // Ensure condition editor is available when not prepopulated
-      where: restStep.where ?? ALWAYS_CONDITION,
     });
   }
 
@@ -343,14 +351,27 @@ export const convertFormStateToProcessor = (
       };
     }
 
-    if (formState.action === 'rename') {
+    if (formState.action === 'convert') {
+      const { from, type, to, ignore_failure, ignore_missing } = formState;
+
       return {
-        processorDefinition: configDrivenProcessors.rename.convertFormStateToConfig(formState),
+        processorDefinition: {
+          action: 'convert',
+          from,
+          type,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ConvertProcessor,
       };
     }
-    if (formState.action === 'append') {
+
+    if (configDrivenProcessors[formState.action]) {
       return {
-        processorDefinition: configDrivenProcessors.append.convertFormStateToConfig(formState),
+        processorDefinition: configDrivenProcessors[formState.action].convertFormStateToConfig(
+          formState as any
+        ),
       };
     }
   }
