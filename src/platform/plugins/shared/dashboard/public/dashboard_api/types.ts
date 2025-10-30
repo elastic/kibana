@@ -34,6 +34,7 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
+  PublishesPauseFetch,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
@@ -46,15 +47,17 @@ import type {
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
-import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
-import type { DashboardAttributes, GridData } from '../../server/content_management';
+import type { DashboardLocatorParams } from '../../common';
+import type { DashboardState, GridData } from '../../server/content_management';
 import type {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
 import type { DashboardLayout } from './layout_manager/types';
+import type { DashboardSettings } from './settings_manager';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -65,7 +68,7 @@ export interface DashboardCreationOptions {
 
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
-  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
+  getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
@@ -105,7 +108,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesDescription &
-  Pick<PublishesTitle, 'title$'> &
+  Pick<PublishesTitle, 'title$' | 'hideTitle$'> &
   PublishesReload &
   PublishesSavedObjectId &
   PublishesESQLVariables &
@@ -114,6 +117,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesUnifiedSearch &
   PublishesViewMode &
   PublishesWritableViewMode &
+  PublishesPauseFetch &
   TrackContentfulRender &
   TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;
@@ -124,12 +128,12 @@ export type DashboardApi = CanExpandPanels &
     forceRefresh: () => void;
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
-      attributes: DashboardAttributes;
+      attributes: DashboardState;
       references: Reference[];
     };
     getDashboardPanelFromId: (id: string) => {
       type: string;
-      gridData: GridData;
+      grid: GridData;
       serializedState: SerializedPanelState;
     };
     hasOverlays$: PublishingSubject<boolean>;
@@ -168,4 +172,8 @@ export interface DashboardInternalApi {
   isSectionCollapsed: (sectionId?: string) => boolean;
   dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
   setDashboardContainerRef: (ref: HTMLElement | null) => void;
+  serializeControls: () => {
+    controlGroupInput: ControlsGroupState | undefined;
+    controlGroupReferences: Reference[];
+  };
 }

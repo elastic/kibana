@@ -212,5 +212,5 @@ const TAB_COMPARATORS: TabComparators = {
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
   visContext: visContextComparator,
-  controlGroupJson: fieldComparator('controlGroupJson', ''),
+  controlGroupJson: fieldComparator('controlGroupJson', '{}'),
 };

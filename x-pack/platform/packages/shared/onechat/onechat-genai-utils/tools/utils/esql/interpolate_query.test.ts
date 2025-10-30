@@ -18,7 +18,7 @@ describe('interpolateEsqlQuery', () => {
   it('should correctly interpolate boolean parameters', () => {
     const template = 'FROM nodes | WHERE is_active == ?active AND is_primary == ?primary';
     const params = { active: true, primary: false };
-    const expected = 'FROM nodes | WHERE is_active == true AND is_primary == false';
+    const expected = 'FROM nodes | WHERE is_active == TRUE AND is_primary == FALSE';
     expect(interpolateEsqlQuery(template, params)).toBe(expected);
   });
 
@@ -68,8 +68,8 @@ describe('interpolateEsqlQuery', () => {
     const template =
       'FROM telemetry | WHERE device_id == ?device AND temp > ?temp AND enabled == ?enabled';
     const params = { device: 'sensor-3-14', temp: 25.5, enabled: true };
-    const expected =
-      'FROM telemetry | WHERE device_id == "sensor-3-14" AND temp > 25.5 AND enabled == true';
+    const expected = `FROM telemetry
+| WHERE device_id == "sensor-3-14" AND temp > 25.5 AND enabled == TRUE`;
     expect(interpolateEsqlQuery(template, params)).toBe(expected);
   });
 });

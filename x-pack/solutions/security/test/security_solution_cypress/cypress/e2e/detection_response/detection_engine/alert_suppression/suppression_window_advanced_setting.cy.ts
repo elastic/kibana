@@ -62,10 +62,6 @@ describe(
     };
 
     const confirmAlertCloseModal = () => {
-      // TODO remove this if statement when the FF continueSuppressionWindowAdvancedSettingEnabled is GA.
-      if (Cypress.env('CLOUD_SERVERLESS')) {
-        return;
-      }
       cy.get('[data-test-subj="confirmModalConfirmButton"]').click();
       cy.get('[data-test-subj="alertCloseInfoModal"]').should('not.exist');
     };
@@ -77,12 +73,12 @@ describe(
       [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: {
         title: 'Closing alert restarts alert suppression',
         message:
-          'Some of the alerts being closed were created while a suppression window was active. If suppression remains active, any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert. Learn more.',
+          'Some of the alerts being closed were created while a suppression window was active. If suppression remains active, any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert.',
       },
       [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: {
         title: "Closing alert doesn't interrupt alert suppression",
         message:
-          "Some of the alerts being closed were created while a suppression window was active. If suppression remains active, duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups. Learn more.",
+          "Some of the alerts being closed were created while a suppression window was active. If suppression remains active, duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups.",
       },
     };
 

@@ -920,7 +920,7 @@ export const deleteAllCaseAnalyticsItems = async (es: Client) => {
 
 export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: ['.internal.cases.default-securitysolution', '.internal.cases.space1-securitysolution'],
+    index: ['.internal.cases.securitysolution-default', '.internal.cases.securitysolution-space1'],
     query: { match_all: {} },
     wait_for_completion: true,
     refresh: true,
@@ -931,8 +931,8 @@ export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
 export const deleteAttachmentsAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: [
-      '.internal.cases-attachments.default-securitysolution',
-      '.internal.cases-attachments.space1-securitysolution',
+      '.internal.cases-attachments.securitysolution-default',
+      '.internal.cases-attachments.securitysolution-space1',
     ],
     query: { match_all: {} },
     wait_for_completion: true,
@@ -944,8 +944,8 @@ export const deleteAttachmentsAnalytics = async (es: Client): Promise<void> => {
 export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: [
-      '.internal.cases-comments.default-securitysolution',
-      '.internal.cases-comments.space1-securitysolution',
+      '.internal.cases-comments.securitysolution-default',
+      '.internal.cases-comments.securitysolution-space1',
     ],
     query: { match_all: {} },
     wait_for_completion: true,
@@ -957,8 +957,8 @@ export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
 export const deleteActivityAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: [
-      '.internal.cases-activity.default-securitysolution',
-      '.internal.cases-activity.space1-securitysolution',
+      '.internal.cases-activity.securitysolution-default',
+      '.internal.cases-activity.securitysolution-space1',
     ],
     query: { match_all: {} },
     wait_for_completion: true,

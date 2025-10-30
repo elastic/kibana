@@ -7,17 +7,16 @@
 
 import { ONBOARDING_CALLOUT } from '../../../screens/privileged_user_monitoring';
 import { cleanFleet } from '../../../tasks/api_calls/fleet';
-import {
-  clickOktaCard,
-  togglePrivilegedUserMonitoring,
-} from '../../../tasks/entity_analytics/privmon';
+import { clickOktaCard } from '../../../tasks/entity_analytics/privmon';
 import { installIntegration } from '../../../tasks/integrations';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { deletePrivMonEngine } from '../../../tasks/privileged_user_monitoring';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../../urls/navigation';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/236985
+// FLAKY: https://github.com/elastic/kibana/issues/236986
+describe.skip(
   'Privileged User Monitoring - Integrations onboarding',
   {
     tags: ['@ess'],
@@ -30,11 +29,9 @@ describe(
 
     beforeEach(() => {
       login();
-      togglePrivilegedUserMonitoring();
     });
 
     afterEach(() => {
-      togglePrivilegedUserMonitoring();
       deletePrivMonEngine();
       cleanFleet();
     });

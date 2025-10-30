@@ -8,6 +8,7 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useLensProps } from './use_lens_props';
 import { useChartLayers } from './use_chart_layers';
@@ -36,12 +37,11 @@ describe('useLensProps', () => {
       yAxis: [{ value: 'foo' }],
     },
   ];
-  const discoverFetch$ = new BehaviorSubject<UnifiedHistogramInputMessage>({ type: 'fetch' });
+  let discoverFetch$: BehaviorSubject<UnifiedHistogramInputMessage>;
   const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
 
   const createMockChartRef = () => {
-    const div = document.createElement('div');
-    return { current: div };
+    return React.createRef<HTMLDivElement>();
   };
 
   const createIntersectionObserverMock = () => {
@@ -70,6 +70,9 @@ describe('useLensProps', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Create a fresh Subject for each test to prevent memory leaks
+    discoverFetch$ = new BehaviorSubject({ type: 'fetch' });
+
     const { MockIntersectionObserver } = createIntersectionObserverMock();
 
     Object.assign(window, {
@@ -86,6 +89,11 @@ describe('useLensProps', () => {
     useChartLayersMock.mockReturnValue(mockChartLayers);
   });
 
+  afterEach(() => {
+    // Complete the Subject to prevent memory leaks
+    discoverFetch$.complete();
+  });
+
   it('returns undefined initially before Lens attributes are built', async () => {
     const chartRef = createMockChartRef();
 
@@ -93,15 +101,20 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef,
+        chartLayers: mockChartLayers,
       })
     );
 
     expect(result.current).toBeUndefined();
+
+    // Trigger a fetch to load attributes
+    act(() => {
+      discoverFetch$.next({ type: 'fetch' });
+    });
 
     await waitFor(() => {
       expect(result.current).toBeDefined();
@@ -120,13 +133,18 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef,
+        chartLayers: mockChartLayers,
       })
     );
+
+    // Trigger a fetch to call build
+    act(() => {
+      discoverFetch$.next({ type: 'fetch' });
+    });
 
     await waitFor(() => {
       expect(LensConfigBuilder.prototype.build).toHaveBeenCalledWith(
@@ -162,11 +180,11 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef,
+        chartLayers: mockChartLayers,
       })
     );
 
@@ -192,13 +210,18 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
-        chartRef: { current: null },
+        chartRef: undefined,
+        chartLayers: mockChartLayers,
       })
     );
+
+    // Trigger a fetch
+    act(() => {
+      discoverFetch$.next({ type: 'fetch' });
+    });
 
     await waitFor(() => {
       expect(result.current).not.toBeUndefined();

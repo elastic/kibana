@@ -199,7 +199,7 @@ export class SyncIntegrationsTask {
     soClient: SavedObjectsClient,
     abortController: AbortController
   ) => {
-    const outputs = await outputService.list(soClient);
+    const outputs = await outputService.list();
     const remoteESOutputs = outputs.items.filter(
       (output) => output.type === outputType.RemoteElasticsearch
     );
@@ -240,15 +240,22 @@ export class SyncIntegrationsTask {
       perPage: SO_SEARCH_LIMIT,
       sortOrder: 'asc',
     });
-    newDoc.integrations = packageSavedObjects.saved_objects.map((item) => {
-      return {
-        package_name: item.attributes.name,
-        package_version: item.attributes.version,
-        updated_at: item.updated_at ?? new Date().toISOString(),
-        install_status: item.attributes.install_status,
-        install_source: item.attributes.install_source,
-      };
-    });
+    newDoc.integrations = packageSavedObjects.saved_objects
+      .filter(
+        (item) =>
+          item.attributes.install_source === 'registry' ||
+          item.attributes.install_source === 'bundled'
+      ) // not included install sources: 'custom' and 'upload'
+      .map((item) => {
+        return {
+          package_name: item.attributes.name,
+          package_version: item.attributes.version,
+          updated_at: item.updated_at ?? new Date().toISOString(),
+          install_status: item.attributes.install_status,
+          install_source: item.attributes.install_source,
+          rolled_back: item.attributes.rolled_back,
+        };
+      });
 
     const isSyncUninstalledEnabled = remoteESOutputs.some(
       (output) => (output as NewRemoteElasticsearchOutput).sync_uninstalled_integrations

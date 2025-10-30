@@ -32,7 +32,7 @@ export const v2EaseFooterItems: NodeDefinition<AppDeepLinkId, string, string>[] 
         ],
       },
       {
-        title: i18nStrings.ingestAndManageData.indicesDsAndRollups.title,
+        title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
         children: [
           { link: 'management:index_management' },
           { link: 'management:transform' },
@@ -62,7 +62,6 @@ export const v2EaseFooterItems: NodeDefinition<AppDeepLinkId, string, string>[] 
           },
           {
             cloudLink: 'userAndRoles',
-            title: i18nStrings.stackManagement.access.usersAndRoles,
           },
         ],
       },

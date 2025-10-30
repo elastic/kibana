@@ -68,6 +68,7 @@ export async function getErrorGroupSampleIds({
       },
     },
     fields: requiredFields,
+    _source: false,
     sort: asMutableArray([
       { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
       { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error

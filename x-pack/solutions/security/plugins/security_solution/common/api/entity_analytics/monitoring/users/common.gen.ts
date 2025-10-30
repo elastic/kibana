@@ -56,6 +56,13 @@ export const UserName = z.object({
     .optional(),
 });
 
+export type MonitoringLabel = z.infer<typeof MonitoringLabel>;
+export const MonitoringLabel = z.object({
+  field: z.string(),
+  value: z.string(),
+  source: z.string(),
+});
+
 export type MonitoredUserUpdateDoc = z.infer<typeof MonitoredUserUpdateDoc>;
 export const MonitoredUserUpdateDoc = z.object({
   id: z.string().optional(),
@@ -77,15 +84,7 @@ export const MonitoredUserUpdateDoc = z.object({
     .optional(),
   entity_analytics_monitoring: z
     .object({
-      labels: z
-        .array(
-          z.object({
-            field: z.string().optional(),
-            value: z.string().optional(),
-            source: z.string().optional(),
-          })
-        )
-        .optional(),
+      labels: z.array(MonitoringLabel).optional(),
     })
     .optional(),
 });
@@ -97,6 +96,28 @@ export const MonitoredUserDoc = MonitoredUserUpdateDoc.merge(
       .object({
         ingested: z.string().datetime().optional(),
         '@timestamp': z.string().datetime().optional(),
+      })
+      .optional(),
+    '@timestamp': z.string().datetime().optional(),
+    user: z
+      .object({
+        name: z.string().optional(),
+        /**
+         * Indicates if the user is privileged.
+         */
+        is_privileged: z.boolean().optional(),
+        entity: z
+          .object({
+            attributes: z
+              .object({
+                /**
+                 * Indicates if the user is privileged.
+                 */
+                Privileged: z.boolean().optional(),
+              })
+              .optional(),
+          })
+          .optional(),
       })
       .optional(),
   })

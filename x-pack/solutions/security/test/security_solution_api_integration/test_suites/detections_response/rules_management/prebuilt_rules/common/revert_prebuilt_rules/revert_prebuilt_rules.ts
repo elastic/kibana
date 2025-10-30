@@ -75,6 +75,8 @@ export default ({ getService }: FtrProviderContext): void => {
                   rule_source: {
                     is_customized: false,
                     type: 'external',
+                    customized_fields: [],
+                    has_base_version: true,
                   },
                   description: nonCustomizedPrebuiltRule.description, // Modified field should be set to its original asset value
                   revision: ++customizedPrebuiltRule.revision, // We increment the revision number during reversion
@@ -122,6 +124,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               exceptions_list: [
                 expect.objectContaining({
@@ -163,6 +167,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               actions: [
                 expect.objectContaining({
@@ -216,6 +222,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               execution_summary: body.execution_summary,
             })
@@ -242,6 +250,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               enabled: true,
             }),

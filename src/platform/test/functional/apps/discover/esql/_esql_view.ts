@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -225,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await cell.getVisibleText()).to.be(' - ');
+        expect(await cell.getVisibleText()).to.be(NULL_LABEL);
         expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
@@ -377,7 +378,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const availableDataViews = await unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );
-        expect(availableDataViews).to.eql(['All logs', 'kibana_sample_data_flights', 'logstash-*']);
+        ['All logs', 'kibana_sample_data_flights', 'logstash-*'].forEach((item) => {
+          expect(availableDataViews).to.contain(item);
+        });
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });

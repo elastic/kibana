@@ -1,7 +1,0 @@
-{
-  "prefix": "workflowsExample",
-  "paths": {
-    "workflowsExample": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}

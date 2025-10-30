@@ -7,49 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useState, useCallback } from 'react';
-import { useEuiTheme, logicalCSS, useGeneratedHtmlId, useMutationObserver } from '@elastic/eui';
+import { useState, useCallback, useMemo } from 'react';
+import { logicalCSS, useEuiTheme, useGeneratedHtmlId, useMutationObserver } from '@elastic/eui';
 import { css } from '@emotion/css';
 import {
-  METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
   METRICS_GRID_FULL_SCREEN_CLASS,
   METRICS_GRID_RESTRICT_BODY_CLASS,
+  METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
 } from '../common/constants';
 
-export const useFullScreenStyles = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return useMemo(() => {
-    const fullScreenZIndex = Number(euiTheme.levels.header) - 1;
-    return {
-      [METRICS_GRID_FULL_SCREEN_CLASS]: css`
-        z-index: ${fullScreenZIndex} !important;
-        position: fixed;
-        inset: 0;
-        background-color: ${euiTheme.colors.backgroundBasePlain};
-      `,
-      [METRICS_GRID_RESTRICT_BODY_CLASS]: css`
-        ${logicalCSS('height', '100vh')}
-        overflow: hidden;
-
-        .euiHeader[data-fixed-header] {
-          z-index: ${fullScreenZIndex - 1} !important;
-        }
-
-        .euiOverlayMask[data-relative-to-header='below'] {
-          ${logicalCSS('top', '0')}
-        }
-
-        .euiFlyout {
-          ${logicalCSS('top', '0')}
-          ${logicalCSS('height', '100%')}
-        }
-      `,
-    };
-  }, [euiTheme]);
-};
-
-// Ensure full screen metrics grids are not covered by elements with a z-index
 const fullScreenBodyStyles = css`
   *:not(
       .euiFlyout,
@@ -57,11 +23,12 @@ const fullScreenBodyStyles = css`
       [data-euiportal='true'],
       [data-euiportal='true'] *
     ) {
-    z-index: unset !important;
+    z-index: unset;
   }
 `;
 
 const bodyClassesToToggle = [fullScreenBodyStyles, METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS];
+
 export const toggleMetricsGridFullScreen = (metricsGrid: HTMLElement) => {
   const hasFullScreenClass = metricsGrid.classList.contains(METRICS_GRID_FULL_SCREEN_CLASS);
 
@@ -72,8 +39,9 @@ export const toggleMetricsGridFullScreen = (metricsGrid: HTMLElement) => {
   }
 };
 
-export const useMetricsGridFullScreen = () => {
-  const metricsGridId = useGeneratedHtmlId({ prefix: 'metricsExperienceGrid' });
+export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
+  const { euiTheme } = useEuiTheme();
+  const metricsGridId = useGeneratedHtmlId({ prefix });
   const [metricsGridWrapper, setMetricsGridWrapper] = useState<HTMLElement | null>(null);
   const [metricsGrid, setMetricsGrid] = useState<HTMLElement | null>(null);
 
@@ -105,5 +73,34 @@ export const useMetricsGridFullScreen = () => {
     attributeFilter: ['class'],
   });
 
-  return { metricsGridId, metricsGridWrapper, setMetricsGridWrapper };
+  const styles = useMemo(() => {
+    const fullScreenZIndex = Number(euiTheme.levels.header) - 1;
+    return {
+      [METRICS_GRID_FULL_SCREEN_CLASS]: css`
+        z-index: ${fullScreenZIndex} !important;
+        position: fixed;
+        inset: 0;
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+      `,
+      [METRICS_GRID_RESTRICT_BODY_CLASS]: css`
+        ${logicalCSS('height', '100vh')}
+        overflow: hidden;
+
+        .euiHeader[data-fixed-header] {
+          z-index: ${fullScreenZIndex - 1} !important;
+        }
+
+        .euiOverlayMask[data-relative-to-header='below'] {
+          ${logicalCSS('top', '0')}
+        }
+
+        .euiFlyout {
+          ${logicalCSS('top', '0')}
+          ${logicalCSS('height', '100%')}
+        }
+      `,
+    };
+  }, [euiTheme]);
+
+  return { metricsGridId, metricsGridWrapper, setMetricsGridWrapper, styles };
 };

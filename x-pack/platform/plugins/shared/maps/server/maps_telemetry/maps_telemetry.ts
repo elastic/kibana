@@ -9,13 +9,16 @@ import { getSavedObjectClient } from '../kibana_server_services';
 import type { MapStats } from './map_stats';
 import { MapStatsCollector } from './map_stats';
 import { findMaps } from './find_maps';
+import { transformMapAttributesOut } from '../../common/content_management/transform_map_attributes_out';
 
 export type MapsUsage = MapStats;
 
 export async function getMapsTelemetry(): Promise<MapsUsage> {
   const mapStatsCollector = new MapStatsCollector();
-  await findMaps(getSavedObjectClient(), async (savedObject) => {
-    mapStatsCollector.push(savedObject.attributes);
+  await findMaps(getSavedObjectClient(), (savedObject) => {
+    mapStatsCollector.push(
+      transformMapAttributesOut(savedObject.attributes, savedObject.references)
+    );
   });
 
   return {

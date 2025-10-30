@@ -142,6 +142,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
               getPreviewData={() =>
                 TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)]
               }
+              onEBTEvent={() => {}}
               renderContent={({ label }) => {
                 return (
                   <EuiFlexGroup direction="column" gutterSize="none">

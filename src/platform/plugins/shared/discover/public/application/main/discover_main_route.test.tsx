@@ -81,6 +81,7 @@ function getServicesMock(
     location: {
       state: locationState,
     },
+    replace: jest.fn(),
   });
   return discoverServiceMock;
 }

@@ -17,14 +17,19 @@ import {
   buildDatasetState,
   isSingleLayer,
   generateLayer,
+  filtersAndQueryToLensState,
+  filtersAndQueryToApiFormat,
 } from './utils';
 import type {
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
   FormBasedLayer,
-} from '@kbn/lens-plugin/public';
-import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
+import type { TextBasedLayer } from '@kbn/lens-common';
 import type { LensApiState } from '../schema';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { LensAttributes } from '../types';
+import type { LensApiFilterType } from '../schema/filter';
 
 const dataView = 'test-dataview';
 
@@ -398,5 +403,132 @@ describe('generateLayer', () => {
         },
       }
     `);
+  });
+});
+
+describe('filtersAndQueryToLensState', () => {
+  test('converts API filters and query to Lens state format', () => {
+    const apiState: LensApiState = {
+      type: 'metric',
+      title: 'test metric',
+      dataset: {
+        type: 'esql',
+        query: 'from test | limit 10',
+      },
+      metric: {
+        operation: 'value',
+        label: 'test',
+        column: 'test',
+        fit: false,
+        alignments: { labels: 'left', value: 'left' },
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+      filters: [
+        { language: 'kuery', query: 'category: "shoes"' },
+        { language: 'lucene', query: 'price > 100' },
+      ] as LensApiFilterType[],
+    };
+
+    const result = filtersAndQueryToLensState(apiState);
+
+    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    expect(result.filters).toHaveLength(2);
+    for (const [index, filter] of Object.entries(result.filters ?? [])) {
+      expect(filter).toEqual(
+        expect.objectContaining({ query: apiState.filters?.[index as unknown as number] })
+      );
+    }
+  });
+
+  test('handles missing filters and query gracefully', () => {
+    const apiState: LensApiState = {
+      type: 'metric',
+      title: 'test metric',
+      dataset: {
+        type: 'esql',
+        query: 'from test | limit 10',
+      },
+      metric: {
+        operation: 'value',
+        label: 'test',
+        column: 'test',
+        fit: false,
+        alignments: { labels: 'left', value: 'left' },
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+    };
+
+    const result = filtersAndQueryToLensState(apiState);
+
+    expect(result.query).toEqual({ esql: 'from test | limit 10' });
+    expect(result).not.toHaveProperty('filters');
+  });
+});
+
+describe('filtersAndQueryToApiFormat', () => {
+  test('converts Lens state filters and query to API format', () => {
+    const lensState: LensAttributes = {
+      state: {
+        filters: [
+          {
+            query: { language: 'kuery', query: 'category: "electronics"' },
+            meta: { disabled: false },
+          },
+          {
+            query: { language: 'lucene', query: 'price:[100 TO *]' },
+            meta: { negate: true },
+          },
+        ] as Filter[],
+        query: { language: 'kuery', query: 'brand: "apple"' } as Query,
+      },
+    } as LensAttributes;
+
+    const result = filtersAndQueryToApiFormat(lensState);
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "filters": Array [
+          Object {
+            "language": "kuery",
+            "meta": Object {},
+            "query": "category: \\"electronics\\"",
+          },
+          Object {
+            "language": "lucene",
+            "meta": Object {},
+            "query": "price:[100 TO *]",
+          },
+        ],
+        "query": Object {
+          "language": "kuery",
+          "query": "brand: \\"apple\\"",
+        },
+      }
+    `);
+  });
+
+  test('handles non-string query gracefully', () => {
+    const lensState = {
+      state: {
+        filters: [] as Filter[],
+        query: { language: 'kuery', query: { bool: { must: [] } } } as Query,
+      },
+    } as LensAttributes;
+
+    const result = filtersAndQueryToApiFormat(lensState);
+
+    expect(result).toEqual({});
+  });
+
+  test('should not include filters if empty and query if ES|QL', () => {
+    const lensState = {
+      state: { filters: [] as Filter[], query: { esql: 'FROM ...' } as AggregateQuery },
+    } as LensAttributes;
+
+    const result = filtersAndQueryToApiFormat(lensState);
+
+    expect(result).toEqual({});
   });
 });

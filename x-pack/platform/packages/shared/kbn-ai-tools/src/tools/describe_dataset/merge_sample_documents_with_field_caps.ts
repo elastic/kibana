@@ -39,9 +39,7 @@ export function mergeSampleDocumentsWithFieldCaps({
 
   for (const document of samples) {
     Object.keys(document).forEach((field) => {
-      if (!nonEmptyFields.has(field)) {
-        nonEmptyFields.add(field);
-      }
+      nonEmptyFields.add(field);
 
       if (!typesByFields.has(field)) {
         typesByFields.set(field, []);

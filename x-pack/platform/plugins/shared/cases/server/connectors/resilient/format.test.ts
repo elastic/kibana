@@ -10,7 +10,7 @@ import { format } from './format';
 
 describe('IBM Resilient formatter', () => {
   const theCase = {
-    connector: { fields: { incidentTypes: ['2'], severityCode: '2' } },
+    connector: { fields: { incidentTypes: ['2'], severityCode: '2', additionalFields: '{}' } },
   } as Case;
 
   it('it formats correctly', async () => {
@@ -21,6 +21,6 @@ describe('IBM Resilient formatter', () => {
   it('it formats correctly when fields do not exist ', async () => {
     const invalidFields = { tags: ['a tag'], connector: { fields: null } } as Case;
     const res = await format(invalidFields, []);
-    expect(res).toEqual({ incidentTypes: null, severityCode: null });
+    expect(res).toEqual({ incidentTypes: null, severityCode: null, additionalFields: null });
   });
 });

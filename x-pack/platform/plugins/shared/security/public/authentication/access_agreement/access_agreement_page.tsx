@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './access_agreement_page.scss';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -15,7 +13,9 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
+  useEuiOverflowScroll,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FormEvent, MouseEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -51,6 +51,8 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
       .catch((err) => fatalErrors.add(err));
   }, [http, fatalErrors]);
 
+  const overFlowMixin = useEuiOverflowScroll('y', true);
+
   const onAcknowledge = useCallback(
     async (e: MouseEvent<HTMLButtonElement> | FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -76,15 +78,37 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
     <form onSubmit={onAcknowledge}>
       <EuiPanel paddingSize="none">
         <EuiFlexGroup gutterSize="none" direction="column">
-          <EuiFlexItem className="secAccessAgreementPage__textWrapper">
-            <div className="secAccessAgreementPage__text">
+          <EuiFlexItem
+            css={css`
+              overflow-y: hidden;
+            `}
+          >
+            <div
+              css={({ euiTheme }) =>
+                css`
+                  max-height: '400px';
+                  padding: ${euiTheme.size.base} ${euiTheme.size.l} 0;
+                  ${overFlowMixin};
+                `
+              }
+            >
               <EuiText textAlign="left">
                 <ReactMarkdown>{accessAgreement}</ReactMarkdown>
               </EuiText>
             </div>
           </EuiFlexItem>
-          <EuiFlexItem className="secAccessAgreementPage__footer">
-            <div className="secAccessAgreementPage__footerInner">
+          <EuiFlexItem
+            css={({ euiTheme }) =>
+              css`
+                padding: ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
+              `
+            }
+          >
+            <div
+              css={css`
+                text-align: left;
+              `}
+            >
               <EuiButton
                 fill
                 type="submit"
@@ -112,7 +136,9 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
 
   return (
     <AuthenticationStatePage
-      className="secAccessAgreementPage"
+      cssStyles={css`
+        max-width: 600px;
+      `}
       title={
         <FormattedMessage
           id="xpack.security.accessAgreement.title"

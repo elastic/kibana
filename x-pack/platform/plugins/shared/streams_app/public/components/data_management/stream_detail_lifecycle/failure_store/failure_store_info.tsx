@@ -5,15 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { TimeState } from '@kbn/es-query';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
 import { FailureStoreIngestionRate } from './ingestion_rate';
-import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
+import type { StreamAggregations } from '../hooks/use_ingestion_rate';
+import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 
 export const FailureStoreInfo = ({
   openModal,
@@ -22,17 +24,21 @@ export const FailureStoreInfo = ({
   isLoadingStats,
   stats,
   config,
+  timeState,
+  aggregations,
 }: {
   openModal: (show: boolean) => void;
   definition: Streams.ingest.all.GetResponse;
   statsError: Error | undefined;
   isLoadingStats: boolean;
-  stats?: FailureStoreStats;
+  stats?: EnhancedFailureStoreStats;
   config?: FailureStore;
+  timeState: TimeState;
+  aggregations?: StreamAggregations;
 }) => {
   return (
     <>
-      <EuiText>
+      <EuiTitle size="xs">
         <h4>
           {i18n.translate('xpack.streams.streamDetailView.failureStoreEnabled.title', {
             defaultMessage: 'Failure store ',
@@ -45,22 +51,39 @@ export const FailureStoreInfo = ({
             position="right"
           />
         </h4>
-      </EuiText>
+      </EuiTitle>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <RetentionCard openModal={openModal} definition={definition} failureStore={config} />
+          <RetentionCard
+            openModal={openModal}
+            canManageFailureStore={definition.privileges?.manage_failure_store}
+            isWired={Streams.WiredStream.GetResponse.is(definition)}
+            streamName={definition.stream.name}
+            failureStore={config}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <StorageSizeCard stats={stats} definition={definition} statsError={statsError} />
+          <StorageSizeCard
+            stats={stats}
+            hasPrivileges={definition.privileges?.manage_failure_store}
+            statsError={statsError}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <IngestionCard stats={stats} definition={definition} statsError={statsError} />
+          <IngestionCard
+            stats={stats}
+            hasPrivileges={definition.privileges?.manage_failure_store}
+            statsError={statsError}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <FailureStoreIngestionRate
         definition={definition}
         isLoadingStats={isLoadingStats}
         stats={stats}
+        timeState={timeState}
+        statsError={statsError}
+        aggregations={aggregations}
       />
     </>
   );

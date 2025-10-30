@@ -164,6 +164,7 @@ export const DashboardMigrationResultPanel = React.memo<DashboardMigrationResult
                           <SecuritySolutionLinkButton
                             deepLinkId={SecurityPageName.siemMigrationsDashboards}
                             path={migrationStats.id}
+                            data-test-subj="viewDashboardsButton"
                           >
                             {i18n.DASHBOARD_MIGRATION_VIEW_TRANSLATED_DASHBOARDS_BUTTON}
                           </SecuritySolutionLinkButton>

@@ -199,9 +199,10 @@ export class RuleTypeRunner<
       async () => {
         const checkHasReachedAlertLimit = () => {
           const reachedLimit = alertsClient.hasReachedAlertLimit() || false;
+          const maxAlerts = alertsClient.getMaxAlertLimit();
           if (reachedLimit) {
             context.logger.warn(
-              `rule execution generated greater than ${this.options.context.maxAlerts} alerts: ${context.ruleLogPrefix}`
+              `rule execution generated greater than ${maxAlerts} alerts: ${context.ruleLogPrefix}`
             );
             context.ruleRunMetricsStore.setHasReachedAlertLimit(true);
           }

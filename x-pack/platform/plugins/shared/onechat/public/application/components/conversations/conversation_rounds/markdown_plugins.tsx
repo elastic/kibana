@@ -8,10 +8,12 @@ import type { Code, InlineCode, Parent, Text } from 'mdast';
 import type { Node } from 'unist';
 import { css } from '@emotion/css';
 import React from 'react';
-import type { VisualizationElementAttributes } from '@kbn/onechat-common/tools/tool_result';
 import {
   visualizationElement,
+  type VisualizationElementAttributes,
   type TabularDataResult,
+  type VisualizationResult,
+  ToolResultType,
 } from '@kbn/onechat-common/tools/tool_result';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import classNames from 'classnames';
@@ -19,6 +21,7 @@ import { EuiCode, EuiText, useEuiTheme } from '@elastic/eui';
 
 import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
+import { VisualizeLens } from '../../tools/esql/visualize_lens';
 
 type MutableNode = Node & {
   value?: string;
@@ -133,21 +136,45 @@ export function createVisualizationRenderer({
 
     const steps = [...stepsFromPrevRounds, ...stepsFromCurrentRound];
 
-    const toolResult = steps
-      .filter((s) => s.type === 'tool_call')
-      .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-      .find((r) => r.type === 'tabular_data' && r.tool_result_id === toolResultId) as
-      | TabularDataResult
-      | undefined;
-
     const ToolResultAttribute = (
       <EuiCode>
         {visualizationElement.attributes.toolResultId}={toolResultId}
       </EuiCode>
     );
 
+    // First, look for tabular data results (from execute_esql)
+    let toolResult: TabularDataResult | VisualizationResult | undefined = steps
+      .filter((s) => s.type === 'tool_call')
+      .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
+      .find((r) => r.type === ToolResultType.tabularData && r.tool_result_id === toolResultId) as
+      | TabularDataResult
+      | undefined;
+
+    // If not found, look for visualization results (from create_visualization)
+    if (!toolResult) {
+      toolResult = steps
+        .filter((s) => s.type === 'tool_call')
+        .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
+        .find(
+          (r) => r.type === ToolResultType.visualization && r.tool_result_id === toolResultId
+        ) as VisualizationResult | undefined;
+    }
+
     if (!toolResult) {
       return <EuiText>Unable to find visualization for {ToolResultAttribute}.</EuiText>;
+    }
+
+    // Handle visualization result (pre-built Lens config)
+    if (toolResult.type === 'visualization') {
+      const { visualization } = toolResult.data;
+      return (
+        <VisualizeLens
+          lensConfig={visualization}
+          dataViews={startDependencies.dataViews}
+          lens={startDependencies.lens}
+          uiActions={startDependencies.uiActions}
+        />
+      );
     }
 
     const { columns, query } = toolResult.data;
@@ -160,6 +187,7 @@ export function createVisualizationRenderer({
       <VisualizeESQL
         lens={startDependencies.lens}
         dataViews={startDependencies.dataViews}
+        uiActions={startDependencies.uiActions}
         esqlQuery={query}
         esqlColumns={columns}
         preferredChartType={chartType}

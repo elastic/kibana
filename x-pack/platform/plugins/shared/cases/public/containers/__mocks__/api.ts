@@ -31,8 +31,6 @@ import {
   getCaseUsersMockResponse,
   customFieldsMock,
   allCasesSnake,
-  mockCaseSummary,
-  mockInferenceConnectors,
 } from '../mock';
 import type {
   CaseConnectors,
@@ -46,8 +44,6 @@ import type {
   CasePostRequest,
   CasePatchRequest,
   AttachmentRequest,
-  CaseSummaryResponse,
-  InferenceConnectorsResponse,
 } from '../../../common/types/api';
 import { CaseStatuses } from '../../../common/types/domain';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
@@ -62,16 +58,6 @@ export const getSingleCaseMetrics = async (
   caseId: string,
   signal: AbortSignal
 ): Promise<SingleCaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
-
-export const getCaseSummary = async (
-  caseId: string,
-  connectorId: string,
-  signal: AbortSignal
-): Promise<CaseSummaryResponse> => Promise.resolve(mockCaseSummary);
-
-export const getInferenceConnectors = async (
-  signal: AbortSignal
-): Promise<InferenceConnectorsResponse> => Promise.resolve(mockInferenceConnectors);
 
 export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise.resolve(tags);
 
@@ -199,5 +185,6 @@ export const getSimilarCases = async () => allCasesSnake;
 export const postObservable = jest.fn();
 export const patchObservable = jest.fn();
 export const deleteObservable = jest.fn();
+export const bulkPostObservables = jest.fn();
 
 export const searchEvents = jest.fn();
