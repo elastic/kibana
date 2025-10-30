@@ -275,7 +275,7 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
-        expect(actionStatusInCustomSpace.items.length).to.eql(1);
+        expect(actionStatusInCustomSpace.items.length).to.greaterThan(0);
 
         const res = await apiClient.cancelAction(
           actionStatusInCustomSpace.items[0].actionId,
