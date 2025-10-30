@@ -83,7 +83,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should ask for confirmation before resetting filters when switching solution', async () => {
         await pageObjects.dashboard.gotoDashboardURL();
-        await dashboardAddPanel.openAddPanelFlyout();
+        await dashboardAddPanel.clickEditorMenuButton();
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
 
         await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
