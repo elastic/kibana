@@ -101,7 +101,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.allow_cloud_features',
       {
         defaultMessage:
-          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated value's are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
+          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated values are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
       }
     ),
   },
@@ -200,7 +200,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_env_vars',
       {
         defaultMessage:
-          'Provide a comma-separated list of up to five environment variables to capture in process create events. Default: none.',
+          'Provide a comma-separated list of up to five environment variables to capture in process creation events. Default: none.',
       }
     ),
   },
@@ -320,7 +320,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.channel',
       {
         defaultMessage:
-          "Modify the release channel for protection artifact updates. The 'default' is staged rollout, 'rapid' receives candidate artifacts as soon as available, and 'stable' only receives artifact updates after staged rollout has finished. Default: 'default'.",
+          "Modify the release channel for protection artifact updates. The 'default' is staged rollout, 'rapid' receives candidate artifacts as soon as available, and 'stable' only receives artifact updates after staged rollout has finished. Default: default.",
       }
     ),
   },
@@ -342,7 +342,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.allow_cloud_features',
       {
         defaultMessage:
-          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated value's are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
+          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated values are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
       }
     ),
   },
@@ -430,7 +430,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.malware.threshold',
       {
         defaultMessage:
-          "Control the threshold that should be used for evaluating malware. Allowed values are 'normal', 'conservative', and 'aggressive'. Default: 'normal'.",
+          "Control the threshold that should be used for evaluating malware. Allowed values are 'normal', 'conservative', and 'aggressive'. Default: normal.",
       }
     ),
   },
@@ -638,7 +638,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.allow_cloud_features',
       {
         defaultMessage:
-          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated value's are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
+          "Explicitly define which cloud services are permitted. Valid services are 'sample-collection', 'reputation-lookup', 'malware-lookup', 'artifacts-update', 'staged-artifacts-rollout'. If any comma-separated values are provided, all other services are disabled. To disallow all, use the keyword 'none'. Warning: this may reduce protection efficacy and increase false positive rates. Default: all services are permitted.",
       }
     ),
   },
