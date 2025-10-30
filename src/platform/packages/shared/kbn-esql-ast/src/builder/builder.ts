@@ -16,6 +16,7 @@ import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLAstCommentSingleLine,
+  ESQLAstExpression,
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
@@ -28,6 +29,7 @@ import type {
   ESQLLocation,
   ESQLNamedParamLiteral,
   ESQLParam,
+  ESQLParens,
   ESQLPositionalParamLiteral,
   ESQLOrderExpression,
   ESQLSource,
@@ -185,15 +187,20 @@ export namespace Builder {
       };
     }
 
-    export const subquery = (
-      queryExpression: ESQLAstQueryExpression,
+    export const parens = (
+      child: ESQLAstExpression,
+      locations?: {
+        openParen?: ESQLLocation;
+        closeParen?: ESQLLocation;
+      },
       fromParser?: Partial<AstNodeParserFields>
-    ): ESQLSource => {
+    ): ESQLParens => {
       return {
-        type: 'source',
-        sourceType: 'subquery',
+        type: 'parens',
         name: '',
-        subquery: queryExpression,
+        child,
+        openParenLocation: locations?.openParen ?? { min: 0, max: 0 },
+        closeParenLocation: locations?.closeParen,
         ...Builder.parserFields(fromParser),
       };
     };

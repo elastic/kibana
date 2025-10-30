@@ -34,6 +34,7 @@ export type ESQLSingleAstItem =
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
+  | ESQLParens
   | ESQLColumn
   | ESQLDatePeriodLiteral
   | ESQLTimeDurationLiteral
@@ -340,7 +341,7 @@ export interface ESQLUnknownItem extends ESQLAstBaseItem {
 
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
-  sourceType: 'index' | 'policy' | 'subquery';
+  sourceType: 'index' | 'policy';
 
   /**
    * Represents the prefix part of the source identifier. Empty string if not
@@ -370,15 +371,20 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * ```
    */
   selector?: ESQLStringLiteral | undefined;
+}
 
-  /**
-   * Represents a subquery when sourceType is 'query'.
-   *
-   * ```
-   * FROM index1, (FROM index2 | WHERE a > 10)
-   * ```
-   */
-  subquery?: ESQLAstQueryExpression | undefined;
+/**
+ * Represents any expression wrapped in parentheses.
+ *
+ * ```
+ * FROM ( <query> )
+ * ```
+ */
+export interface ESQLParens extends ESQLAstBaseItem {
+  type: 'parens';
+  child: ESQLAstExpression;
+  openParenLocation: ESQLLocation;
+  closeParenLocation?: ESQLLocation;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {

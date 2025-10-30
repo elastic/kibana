@@ -93,10 +93,13 @@ export const isColumn = (node: unknown): node is types.ESQLColumn =>
 export const isSource = (node: unknown): node is types.ESQLSource =>
   isProperNode(node) && node.type === 'source';
 
-export const isSubQuerySource = (
+export const isParens = (node: unknown): node is types.ESQLParens =>
+  isProperNode(node) && node.type === 'parens';
+
+export const isSubQuery = (
   node: unknown
-): node is types.ESQLSource & { subquery: types.ESQLAstQueryExpression } =>
-  isSource(node) && node.sourceType === 'subquery' && node.subquery !== undefined;
+): node is types.ESQLParens & { child: types.ESQLAstQueryExpression } =>
+  isParens(node) && isQuery(node.child);
 
 export const isMap = (node: unknown): node is types.ESQLMap =>
   isProperNode(node) && node.type === 'map';

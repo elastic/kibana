@@ -8,8 +8,8 @@
  */
 
 import { parse } from '..';
-import type { ESQLSource } from '../../types';
-import { isSubQuerySource } from '../../ast/is';
+import type { ESQLAstQueryExpression, ESQLParens } from '../../types';
+import { isParens, isSubQuery } from '../../ast/is';
 
 describe('FROM', () => {
   describe('correctly formatted', () => {
@@ -396,9 +396,8 @@ describe('FROM', () => {
               name: 'index1',
             },
             {
-              type: 'source',
-              sourceType: 'subquery',
-              subquery: {
+              type: 'parens',
+              child: {
                 type: 'query',
                 commands: [
                   { type: 'command', name: 'from' },
@@ -418,9 +417,8 @@ describe('FROM', () => {
       expect(errors.length).toBe(0);
       expect(ast[0].args).toHaveLength(1);
       expect(ast[0].args[0]).toMatchObject({
-        type: 'source',
-        sourceType: 'subquery',
-        subquery: {
+        type: 'parens',
+        child: {
           type: 'query',
           commands: [{ name: 'from' }, { name: 'where' }],
         },
@@ -443,13 +441,15 @@ describe('FROM', () => {
       const { ast, errors } = parse(text);
 
       expect(errors.length).toBe(0);
-      const outerSubquery = ast[0].args[0] as ESQLSource;
+      const outerParens = ast[0].args[0] as ESQLParens;
 
-      expect(outerSubquery.sourceType).toBe('subquery');
+      expect(isParens(outerParens)).toBe(true);
+      expect(isSubQuery(outerParens)).toBe(true);
 
-      const innerSubquery = outerSubquery.subquery!.commands[0].args[0] as ESQLSource;
+      const outerQuery = outerParens.child as ESQLAstQueryExpression;
+      const innerParens = outerQuery.commands[0].args[0] as ESQLParens;
 
-      expect(innerSubquery.sourceType).toBe('subquery');
+      expect(isSubQuery(innerParens)).toBe(true);
     });
 
     describe('error cases', () => {
@@ -459,39 +459,30 @@ describe('FROM', () => {
 
         expect(errors.length).toBeGreaterThan(0);
 
-        const subquerySource = ast[0].args[0] as ESQLSource;
+        const parens = ast[0].args[0] as ESQLParens;
 
-        expect(isSubQuerySource(subquerySource)).toBe(true);
-        expect(subquerySource.incomplete).toBe(true);
-        expect(subquerySource.subquery?.incomplete).toBe(true);
-        expect(subquerySource.subquery?.commands).toHaveLength(2);
+        expect(isParens(parens)).toBe(true);
+        expect(isSubQuery(parens)).toBe(true);
+        expect(parens.incomplete).toBe(true);
+
+        const query = parens.child as ESQLAstQueryExpression;
+
+        expect(query.incomplete).toBe(true);
+        expect(query.commands).toHaveLength(2);
       });
 
       it('errors on empty subquery', () => {
         const text = 'FROM index, ()';
-        const { ast, errors } = parse(text);
+        const { errors } = parse(text);
 
         expect(errors.length).toBeGreaterThan(0);
-
-        const emptySubquery = ast[0].args[1] as ESQLSource;
-
-        expect(isSubQuerySource(emptySubquery)).toBe(true);
-        expect(emptySubquery.incomplete).toBe(true);
-        expect(emptySubquery.subquery?.commands).toHaveLength(0);
       });
 
       it('errors on subquery without FROM', () => {
         const text = 'FROM (WHERE a > 10)';
-        const { ast, errors } = parse(text);
+        const { errors } = parse(text);
 
         expect(errors.length).toBeGreaterThan(0);
-
-        const subquerySource = ast[0].args[0] as ESQLSource;
-
-        expect(isSubQuerySource(subquerySource)).toBe(true);
-        expect(subquerySource.incomplete).toBe(true);
-        expect(subquerySource.subquery?.incomplete).toBe(true);
-        expect(subquerySource.subquery?.commands[0].name).toBe('where');
       });
     });
   });

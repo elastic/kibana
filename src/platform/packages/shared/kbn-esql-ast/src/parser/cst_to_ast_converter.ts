@@ -567,7 +567,7 @@ export class CstToAstConverter {
     return command;
   }
 
-  private fromSubquery(ctx: cst.SubqueryContext): ast.ESQLSource {
+  private fromSubquery(ctx: cst.SubqueryContext): ast.ESQLParens {
     const fromCommandCtx = ctx.fromCommand();
     const processingCommandCtxs = ctx.processingCommand_list();
     const commands: ast.ESQLCommand[] = [];
@@ -588,9 +588,29 @@ export class CstToAstConverter {
       }
     }
 
-    const query = Builder.expression.query(commands, this.getParserFields(ctx));
+    const openParen = ctx.LP();
+    const closeParen = ctx.RP();
 
-    return Builder.expression.subquery(query, { incomplete: query.incomplete });
+    // ANTLR inserts tokens with text like "<missing ')'>" when they're missing
+    const closeParenText = closeParen?.getText() ?? '';
+    const hasCloseParen = closeParen && !/<missing /.test(closeParenText);
+
+    // We need BOTH checks because ANTLR's error recovery can insert missing tokens
+    const parensHasError = Boolean(ctx.exception) || !hasCloseParen;
+
+    const query = Builder.expression.query(commands, {
+      ...this.getParserFields(ctx),
+      incomplete: parensHasError,
+    });
+
+    return Builder.expression.parens(
+      query,
+      {
+        openParen: openParen ? getPosition(openParen.symbol) : undefined,
+        closeParen: hasCloseParen ? getPosition(closeParen.symbol) : undefined,
+      },
+      { incomplete: parensHasError || query.incomplete }
+    );
   }
 
   // ---------------------------------------------------------------------- ROW
