@@ -88,6 +88,8 @@ export function FlyoutContainer({
     return null;
   }
 
+  const hideShadow = isInlineEditing || isFullscreen;
+
   return (
     <div ref={panelRef}>
       <EuiFocusTrap
@@ -107,7 +109,7 @@ export function FlyoutContainer({
           aria-labelledby="lnsDimensionContainerTitle"
           css={[
             css`
-              box-shadow: ${isInlineEditing || isFullscreen ? 'none !important' : 'inherit'};
+              box-shadow: ${hideShadow ? 'none !important' : 'inherit'};
             `,
             flyoutContainerStyles(euiThemeContext),
             dimensionContainerStyles.self(euiThemeContext),
