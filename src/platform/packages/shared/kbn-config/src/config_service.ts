@@ -213,13 +213,13 @@ export class ConfigService {
 
     let validatedConfig = hasSchema
       ? await firstValueFrom(
-          this.getValidatedConfigAtPath$(
-            path,
-            // At this point we don't care about how valid the config is: we just want to read `enabled`
-            { stripUnknownKeys: true }
-          ) as Observable<{ enabled?: boolean }>,
-          { defaultValue: undefined }
-        )
+        this.getValidatedConfigAtPath$(
+          path,
+          // At this point we don't care about how valid the config is: we just want to read `enabled`
+          { stripUnknownKeys: true }
+        ) as Observable<{ enabled?: boolean }>,
+        { defaultValue: undefined }
+      )
       : undefined;
 
     // Special use case: when the provided config includes `enabled` and the validated config doesn't,
@@ -230,10 +230,24 @@ export class ConfigService {
       typeof config.get(path)?.enabled !== 'undefined' &&
       typeof validatedConfig?.enabled === 'undefined'
     ) {
-      validatedConfig = await firstValueFrom(
-        this.getValidatedConfigAtPath$(path) as Observable<{ enabled?: boolean }>,
-        { defaultValue: undefined }
-      );
+      try {
+        validatedConfig = await firstValueFrom(
+          this.getValidatedConfigAtPath$(path) as Observable<{ enabled?: boolean }>,
+          { defaultValue: undefined }
+        );
+      } catch (error) {
+        const namespace = pathToString(path);
+        // If validation fails, it's likely because the `enabled` field is not allowed in the schema
+        if (error instanceof ValidationError) {
+          throw new ValidationError(
+            new SchemaTypeError(
+              `enabled status cannot be changed. Please, remove [${namespace}.enabled] from the configuration file.`,
+              [namespace]
+            )
+          );
+        }
+        throw error;
+      }
     }
 
     const isDisabled = validatedConfig?.enabled === false;

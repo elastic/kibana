@@ -402,7 +402,7 @@ test('throws if reading "enabled" when it is not present in the schema', async (
   await expect(
     async () => await configService.isEnabledAtPath('foo')
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[config validation of [foo].enabled]: definition for this key is missing"`
+    `"[foo]: enabled status cannot be changed. Please, remove [foo.enabled] from the configuration file."`
   );
 });
 
