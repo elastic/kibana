@@ -174,10 +174,47 @@ export class WorkflowTaskScheduler {
     spaceId: string,
     request?: KibanaRequest
   ): Promise<void> {
+    // Check if there are any running executions for this workflow
+    const hasRunningExecutions = await this.hasWaitingExecutions(workflow.id);
+
+    if (hasRunningExecutions) {
+      this.logger.info(
+        `Skipping scheduled task update for workflow ${workflow.id} - workflow has running executions`
+      );
+      return;
+    }
+
     // First, unschedule all existing tasks
     await this.unscheduleWorkflowTasks(workflow.id);
 
     // Then, schedule new tasks for scheduled triggers
     await this.scheduleWorkflowTasks(workflow, spaceId, request);
+  }
+
+  /**
+   * Check if there are any running executions for a workflow
+   */
+  private async hasWaitingExecutions(workflowId: string): Promise<boolean> {
+    try {
+      const response = await this.taskManager.fetch({
+        query: {
+          bool: {
+            must: [
+              { term: { 'task.taskType': 'workflow:resume' } },
+              { term: { 'task.scope': workflowId } },
+            ],
+          },
+        },
+        size: 1,
+      });
+
+      // If there are any resume tasks, there are running executions
+      return response.docs.length > 0;
+    } catch (error) {
+      this.logger.error(
+        `Failed to check for running executions for workflow ${workflowId}: ${error}`
+      );
+      return true;
+    }
   }
 }
