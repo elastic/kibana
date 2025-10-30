@@ -13,13 +13,12 @@ import type { ResponseActionApiResponse } from '../../../../common/endpoint/type
 import { KibanaServices } from '../../../common/lib/kibana';
 import { MEMORY_DUMP_ROUTE } from '../../../../common/endpoint/constants';
 
-type MemoryDumpRequestOptions = UseMutationOptions<
-  ResponseActionApiResponse,
-  IHttpFetchError,
-  MemoryDumpActionRequestBody
+export type MemoryDumpRequestOptions = Omit<
+  UseMutationOptions<ResponseActionApiResponse, IHttpFetchError, MemoryDumpActionRequestBody>,
+  'mutationFn'
 >;
 
-type UseSendMemoryDumpRequestResult = UseMutationResult<
+export type UseSendMemoryDumpRequestResult = UseMutationResult<
   ResponseActionApiResponse,
   IHttpFetchError,
   MemoryDumpActionRequestBody
