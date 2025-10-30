@@ -10,6 +10,8 @@
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import type { ApplicationUsageTelemetryReport } from './types';
 
+// Introduce change to test ownership
+
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
   appId: { type: 'keyword', _meta: { description: 'The application being tracked' } },
   viewId: { type: 'keyword', _meta: { description: 'Always `main`' } },
