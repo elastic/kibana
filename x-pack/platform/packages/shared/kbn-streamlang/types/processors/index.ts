@@ -121,6 +121,8 @@ export interface DateProcessor extends ProcessorBaseWithWhere {
   to?: string;
   formats: string[];
   output_format?: string;
+  timezone?: string;
+  locale?: string;
 }
 
 export const dateProcessorSchema = processorBaseWithWhereSchema.extend({
@@ -129,6 +131,8 @@ export const dateProcessorSchema = processorBaseWithWhereSchema.extend({
   to: z.optional(StreamlangTargetField),
   formats: z.array(NonEmptyString),
   output_format: z.optional(NonEmptyString),
+  timezone: z.optional(NonEmptyString),
+  locale: z.optional(NonEmptyString),
 }) satisfies z.Schema<DateProcessor>;
 
 /**
