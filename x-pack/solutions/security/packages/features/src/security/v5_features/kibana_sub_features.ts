@@ -64,7 +64,9 @@ export const getSecurityV5SubFeaturesMap = ({
     [SecuritySubFeatureId.scanAction, scanActionSubFeature()],
   ];
 
-  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(securitySubFeaturesList);
+  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
+    securitySubFeaturesList
+  );
 
   // Remove disabled experimental features
   if (!experimentalFeatures.defendInsightsPolicyResponseFailure) {
