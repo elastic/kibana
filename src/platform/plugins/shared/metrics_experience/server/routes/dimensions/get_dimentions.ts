@@ -18,6 +18,7 @@ interface CreateDimensionsParams {
   indices: string[];
   from: number;
   to: number;
+
   logger: Logger;
 }
 
@@ -28,12 +29,81 @@ export const getDimensions = async ({
   from,
   to,
   logger,
-}: CreateDimensionsParams): Promise<Array<{ value: string; field: string }>> => {
+}: CreateDimensionsParams): Promise<Array<{ value: string; field: string; scopes: string[] }>> => {
   if (!dimensions || dimensions.length === 0) {
     return [];
   }
 
+  // const source = fromCommand(indices);
+  // const query = source
+  //   .pipe(
+  //     evaluate('??dim = ??dim::string', { dim: dimensions[0] }),
+  //     where('??dim IS NOT NULL', { dim: dimensions[0] }),
+  //     stats('distinct_datasets = VALUES(data_stream.dataset) BY ??dim', {
+  //       dim: dimensions[0],
+  //     }),
+  //     sort('??dim', { dim: dimensions[0] }),
+  //     limit(1000)
+  //   )
+  //   .toString();
+
+  // try {
+  //   const response = await esClient.esql(
+  //     'get_dimensions',
+  //     {
+  //       query: query.toString(),
+  //       filter: {
+  //         bool: {
+  //           filter: [...dateRangeQuery(from, to)],
+  //         },
+  //       },
+  //     },
+  //     {
+  //       transform: 'plain',
+  //     }
+  // );
+
+  // return response.hits.map((hit) => ({
+  //   value: String(hit[dimensions[0]]),
+  //   field: dimensions[0],
+  //   dataSets: hit.distinct_datasets as string[],
+  // }));
+
   try {
+    const dimensionAggs = dimensions.reduce((acc, currDimension) => {
+      acc[currDimension] = {
+        terms: {
+          field: currDimension,
+          size: 1000,
+          order: {
+            _key: 'asc',
+          },
+        },
+        aggs: {
+          by_scope: {
+            multi_terms: {
+              terms: [
+                // Semconv: scope.name identifies specific instrumentation library
+                // Examples: io.opentelemetry.contrib.mongodb, io.opentelemetry.contrib.redis
+                {
+                  field: 'scope.name',
+                  missing: '_none_',
+                },
+                // ECS: data_stream.dataset identifies the data source/scraper
+                // Examples: system.cpu, kubernetes.pod, docker.container
+                {
+                  field: 'data_stream.dataset',
+                },
+              ],
+              size: 50,
+            },
+          },
+        },
+      };
+
+      return acc;
+    }, {} as Record<string, Pick<estypes.AggregationsAggregationContainer, 'terms' | 'aggs'>>);
+
     const response = await esClient.search('get_dimensions', {
       index: indices.join(','),
       track_total_hits: false,
@@ -43,29 +113,36 @@ export const getDimensions = async ({
           filter: [...dateRangeQuery(from, to)],
         },
       },
-      // Create aggregations for each dimension
-      aggs: dimensions.reduce((acc, currDimension) => {
-        acc[currDimension] = {
-          terms: {
-            field: currDimension,
-            size: 20,
-            order: { _key: 'asc' },
-          },
-        };
-
-        return acc;
-      }, {} as Record<string, Pick<estypes.AggregationsAggregationContainer, 'terms'>>),
+      aggs: dimensionAggs,
     });
 
-    const aggregations = response.aggregations;
+    const aggregations = response.aggregations as Record<
+      string,
+      estypes.AggregationsMultiBucketAggregateBase<
+        estypes.AggregationsStringTermsBucket & {
+          by_scope?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucket>;
+        }
+      >
+    >;
 
     const values = dimensions.flatMap((dimension) => {
       const agg = aggregations?.[dimension];
+      const buckets = Array.isArray(agg?.buckets) ? agg.buckets : [];
+
       return (
-        agg?.buckets?.map((bucket) => ({
-          value: String(bucket.key ?? ''),
-          field: dimension,
-        })) ?? []
+        buckets
+          .filter((bucket) => !!bucket.key)
+          .map((bucket) => {
+            const byScopeBuckets = Array.isArray(bucket.by_scope?.buckets)
+              ? bucket.by_scope?.buckets
+              : [];
+
+            return {
+              value: String(bucket.key ?? ''),
+              field: dimension,
+              scopes: byScopeBuckets.map((scope) => String(scope.key_as_string ?? '')),
+            };
+          }) ?? []
       );
     });
 

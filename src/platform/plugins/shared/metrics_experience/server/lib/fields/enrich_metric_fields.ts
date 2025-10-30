@@ -22,6 +22,8 @@ import { normalizeUnit } from './normalize_unit';
 export interface MetricMetadata {
   dimensions: string[];
   unitFromSample?: string;
+
+  scope?: string;
 }
 export type MetricMetadataMap = Map<string, MetricMetadata>;
 
@@ -61,11 +63,22 @@ function buildMetricMetadataMap(
       }
 
       const fields = searchResult.hits.hits[0].fields ?? {};
-      const { dimensions, unitFromSample } = Object.entries(fields).reduce<MetricMetadata>(
+      const { dimensions, unitFromSample, scopeName, dataSet } = Object.entries(fields).reduce(
         (acc, [fieldName, fieldValue]) => {
-          if (fieldName === semconvFlat.unit.name) {
-            const value = Array.isArray(fieldValue) ? fieldValue[0] : fieldValue;
+          const value = Array.isArray(fieldValue) ? fieldValue[0] : fieldValue;
+          if (fieldName === 'scope.name') {
+            if (typeof value === 'string') {
+              acc.scopeName = value;
+            }
+          }
 
+          if (fieldName === 'data_stream.dataset') {
+            if (typeof value === 'string') {
+              acc.dataSet = value;
+            }
+          }
+
+          if (fieldName === semconvFlat.unit.name) {
             if (typeof value === 'string') {
               acc.unitFromSample = value;
             }
@@ -75,7 +88,12 @@ function buildMetricMetadataMap(
 
           return acc;
         },
-        { dimensions: [], unitFromSample: undefined }
+        { dimensions: [], unitFromSample: undefined, scopeName: undefined, dataSet: '' } as {
+          dimensions: string[];
+          unitFromSample?: string | undefined;
+          scopeName?: string | undefined;
+          dataSet: string;
+        }
       );
 
       return [
@@ -83,6 +101,7 @@ function buildMetricMetadataMap(
         {
           dimensions,
           unitFromSample,
+          scope: `${scopeName ?? '_none_'}|${dataSet}`,
         },
       ];
     })
@@ -127,7 +146,11 @@ export async function sampleMetricMetadata({
           },
         },
         _source: false,
-        fields: dimensions.map((dimension) => dimension.name).concat(semconvFlat.unit.name),
+        fields: dimensions
+          .map((dimension) => dimension.name)
+          .concat(semconvFlat.unit.name)
+          .concat('scope.name')
+          .concat('data_stream.dataset'),
       });
     }
     const response = await esClient.msearch<{ fields: Record<string, any> }>(
@@ -158,7 +181,7 @@ export async function enrichMetricFields({
   indexFieldCapsMap: IndexFieldCapsMap;
   logger: Logger;
   timerange: EpochTimeRange;
-}) {
+}): Promise<MetricField[]> {
   if (metricFields.length === 0) {
     return metricFields;
   }
@@ -172,25 +195,28 @@ export async function enrichMetricFields({
 
   const uniqueDimensionSets = new Map<string, Array<Dimension>>();
 
-  return metricFields.map((field) => {
-    const { dimensions, unitFromSample } =
-      metricMetadataMap.get(generateMapKey(field.index, field.name)) || {};
-    const fieldCaps = indexFieldCapsMap.get(field.index);
+  return metricFields
+    .map((field) => {
+      const { dimensions, unitFromSample } =
+        metricMetadataMap.get(generateMapKey(field.index, field.name)) || {};
+      const fieldCaps = indexFieldCapsMap.get(field.index);
 
-    if (!dimensions || dimensions.length === 0) {
-      return { ...field, dimensions: [], noData: true };
-    }
+      if (!dimensions || dimensions.length === 0) {
+        return;
+      }
 
-    const cacheKey = [...dimensions].sort().join(',');
-    if (!uniqueDimensionSets.has(cacheKey) && fieldCaps) {
-      uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, dimensions));
-    }
+      const cacheKey = [...dimensions].sort().join(',');
+      if (!uniqueDimensionSets.has(cacheKey) && fieldCaps) {
+        uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, dimensions));
+      }
 
-    return {
-      ...field,
-      dimensions: uniqueDimensionSets.get(cacheKey)!,
-      noData: false,
-      unit: normalizeUnit({ fieldName: field.name, unit: field.unit ?? unitFromSample }),
-    };
-  });
+      return {
+        ...field,
+        dimensions: uniqueDimensionSets.get(cacheKey)!,
+        noData: false,
+        unit: normalizeUnit({ fieldName: field.name, unit: field.unit ?? unitFromSample }),
+        scope,
+      };
+    })
+    .filter((field): field is MetricField => field !== undefined);
 }

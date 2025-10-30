@@ -55,6 +55,9 @@ export const useToolbarActions = ({
     () => (isFullscreen ? undefined : renderToggleActions()),
     [isFullscreen, renderToggleActions]
   );
+  const indices = useMemo(() => {
+    return [...new Set(fields.map((field) => field.index))];
+  }, [fields]);
 
   const leftSideActions = useMemo(
     () => [
@@ -73,7 +76,7 @@ export const useToolbarActions = ({
           selectedValues={valueFilters}
           onChange={onValuesChange}
           disabled={dimensions.length === 0}
-          indices={[indexPattern]}
+          indices={indices}
           timeRange={requestParams.getTimeRange()}
           onClear={onClearValues}
           fullWidth={isSmallScreen}
@@ -84,7 +87,7 @@ export const useToolbarActions = ({
       isSmallScreen,
       dimensions,
       fields,
-      indexPattern,
+      indices,
       onClearValues,
       onDimensionsChange,
       onValuesChange,

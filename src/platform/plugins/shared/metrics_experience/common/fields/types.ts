@@ -17,9 +17,10 @@ export interface MetricField {
   dimensions: Dimension[];
   type: string;
   instrument?: MappingTimeSeriesMetricType;
-  unit?: MetricUnit;
+  unit: MetricUnit;
   display?: string;
-  noData?: boolean;
+  noData: boolean;
+  scope: string;
 }
 
 export interface MetricFieldsResponse {
