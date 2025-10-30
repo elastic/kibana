@@ -204,6 +204,8 @@ export function getTraceWaterfall({
 }): TraceWaterfallItem[] {
   const rootStartMicroseconds = rootItem.timestampUs;
 
+  const visitor = new Set<string>([rootItem.id]);
+
   reparentOrphansToRoot(rootItem, parentChildMap, orphans);
 
   function getTraceWaterfallItem(
@@ -227,9 +229,20 @@ export function getTraceWaterfall({
     const sortedChildren =
       parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) || [];
 
-    const flattenedChildren = sortedChildren.flatMap((child) =>
-      getTraceWaterfallItem(child, depth + 1, traceWaterfallItem)
-    );
+    const flattenedChildren = sortedChildren.flatMap((child) => {
+      // Check if we have encountered the trace item before.
+      // If we haven't, then we can process the waterfall item.
+      if (!visitor.has(child.id)) {
+        visitor.add(child.id);
+
+        return getTraceWaterfallItem(child, depth + 1, traceWaterfallItem);
+      }
+
+      // If we have visited the trace item before, then the child waterfall items are already
+      // present in the flattened list, so we return an empty array so we don't duplicate
+      // spans. This should guard against circular or unusual links between spans.
+      return [];
+    });
 
     return [traceWaterfallItem, ...flattenedChildren];
   }
