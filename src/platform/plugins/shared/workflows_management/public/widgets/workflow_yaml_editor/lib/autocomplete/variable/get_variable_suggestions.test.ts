@@ -13,8 +13,8 @@ import { z } from '@kbn/zod';
 import { getVariableSuggestions } from './get_variable_suggestions';
 import type { AutocompleteContext } from '../autocomplete.types';
 import type {
-  VariableLineParseResult,
   ForeachVariableLineParseResult,
+  VariableLineParseResult,
 } from '../parse_line_for_completion';
 
 describe('getVariableSuggestions', () => {
