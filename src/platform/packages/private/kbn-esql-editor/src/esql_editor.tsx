@@ -26,7 +26,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import { type FieldType } from '@kbn/esql-ast';
+import type { FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import {
