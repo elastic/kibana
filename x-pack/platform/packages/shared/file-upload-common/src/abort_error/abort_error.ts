@@ -6,8 +6,7 @@
  */
 
 /**
- * Class used to signify that something was aborted. Useful for applications to conditionally handle
- * this type of error differently than other errors.
+ * Error thrown when a file upload is aborted.
  */
 export class AbortError extends Error {
   constructor(message = 'Aborted') {
