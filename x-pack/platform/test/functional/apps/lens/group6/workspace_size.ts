@@ -263,26 +263,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('gauge size (absolute pixels) - arc', async () => {
-      await lens.openStyleSettingsFlyout();
       await lens.setGaugeShape('Minor arc');
-      await lens.closeFlyoutWithBackButton();
-
       await assertWorkspaceDimensions('600px', '375px');
     });
 
     it('gauge size (absolute pixels) - major arc', async () => {
-      await lens.openStyleSettingsFlyout();
       await lens.setGaugeShape('Major arc');
-      await lens.closeFlyoutWithBackButton();
-
       await assertWorkspaceDimensions('600px', '430px');
     });
 
     it('gauge size (absolute pixels) - circle', async () => {
-      await lens.openStyleSettingsFlyout();
       await lens.setGaugeShape('Circle');
-      await lens.closeFlyoutWithBackButton();
-
       await assertWorkspaceDimensions('600px', '430px');
     });
 

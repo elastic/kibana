@@ -94,9 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
     it('should seamlessly switch to vertical bullet chart without losing configuration', async () => {
-      await lens.openStyleSettingsFlyout();
-
-      await testSubjects.click('lns_gaugeOrientation_verticalBullet');
+      await lens.setGaugeOrientation('vertical');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
       expect(debugData?.subtype).to.be(BulletSubtype.vertical);
@@ -105,12 +103,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.value).to.be(14005);
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
-
-      await lens.closeFlyoutWithBackButton();
     });
     it('should seamlessly switch to minor arc gauge chart without losing configuration', async () => {
-      await lens.openStyleSettingsFlyout();
-
       await lens.setGaugeShape('Minor arc');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
@@ -120,12 +114,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.value).to.be(14005);
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
-
-      await lens.closeFlyoutWithBackButton();
     });
     it('should seamlessly switch to arc gauge chart without losing configuration', async () => {
-      await lens.openStyleSettingsFlyout();
-
       await lens.setGaugeShape('Major arc');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
@@ -135,12 +125,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.value).to.be(14005);
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
-
-      await lens.closeFlyoutWithBackButton();
     });
     it('should seamlessly switch to circular gauge chart without losing configuration', async () => {
-      await lens.openStyleSettingsFlyout();
-
       await lens.setGaugeShape('Circle');
       const { bullet } = await elasticChart.getChartDebugData();
       const debugData = bullet?.rows[0][0];
@@ -150,8 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.value).to.be(14005);
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
-
-      await lens.closeFlyoutWithBackButton();
     });
     it('should switch to table chart and filter not supported static values', async () => {
       await lens.switchToVisualization('lnsDatatable');

@@ -846,36 +846,45 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await common.sleep(1000); // give time for debounced components to rerender
     },
-    async hasStyleButton() {
+    async hasStyleToolbarButton() {
       return find.existsByCssSelector('button[data-test-subj="style"][title="Style"]');
     },
-    async hasLegendButton() {
+    async hasLegendToolbarButton() {
       return find.existsByCssSelector('button[data-test-subj="legend"][title="Legend"]');
     },
     async openStyleSettingsFlyout() {
+      // Close dimension editor flyout
       if (await this.isDimensionEditorOpen()) {
         await this.closeDimensionEditor();
       }
 
-      if (await this.hasStyleButton()) {
-        const styleButton = await find.byCssSelector(
-          'button[data-test-subj="style"][title="Style"]'
-        );
-        await styleButton.click();
-      }
+      await find.clickByCssSelector('button[data-test-subj="style"][title="Style"]');
+      await retry.try(async () => {
+        const styleTitle = await find.byCssSelector('#lnsDimensionContainerTitle');
+        const titleText = await styleTitle.getVisibleText();
+        if (titleText !== 'Style') {
+          throw new Error(`Expected flyout title to be "Style", but got "${titleText}"`);
+        }
+      });
     },
+
     async openLegendSettingsFlyout() {
-      if (await this.hasLegendButton()) {
-        const legendButton = await find.byCssSelector(
-          'button[data-test-subj="legend"][title="Legend"]'
-        );
-        await legendButton.click();
+      // Close dimension editor flyout
+      if (await this.isDimensionEditorOpen()) {
+        await this.closeDimensionEditor();
+      }
+
+      if (await this.hasLegendToolbarButton()) {
+        const button = await find.byCssSelector('button[data-test-subj="legend"][title="Legend"]');
+        await button.click();
       }
     },
     async closeFlyoutWithBackButton() {
       await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerBack');
-        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+        if (await testSubjects.exists('lns-indexPattern-dimensionContainerBack')) {
+          await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+          await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+        }
       });
     },
 
@@ -990,22 +999,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async setDonutHoleSize(value: string) {
-      await retry.waitFor('visual options toolbar is open', async () => {
-        await this.openStyleSettingsFlyout();
-        return await testSubjects.exists('lnsEmptySizeRatioOption');
-      });
+      await this.openStyleSettingsFlyout();
       await comboBox.set('lnsEmptySizeRatioOption', value);
-
       await this.closeFlyoutWithBackButton();
     },
 
     async setGaugeShape(value: string) {
-      await retry.waitFor('visual options toolbar is open', async () => {
-        await this.openStyleSettingsFlyout();
-        return await testSubjects.exists('lnsToolbarGaugeAngleType');
-      });
+      await this.openStyleSettingsFlyout();
       await comboBox.set('lnsToolbarGaugeAngleType > comboBoxInput', value);
+      await this.closeFlyoutWithBackButton();
+    },
 
+    async setGaugeOrientation(value: 'horizontal' | 'vertical') {
+      await this.openStyleSettingsFlyout();
+      await testSubjects.click(`lns_gaugeOrientation_${value}Bullet`);
       await this.closeFlyoutWithBackButton();
     },
 
