@@ -9,7 +9,7 @@
 import React, { type FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { type CoreStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
@@ -92,19 +92,10 @@ export const SolutionEmptyPrompt: FC<Props> = ({ kibanaVersion, coreStart }) => 
           </p>
 
           <p>
-            <EuiButton
-              fill
-              iconType="spaces"
-              onClick={() => {
-                coreStart.chrome.sideNav.setPanelSelectedNode('stack_management');
-              }}
-              data-test-subj="viewAllStackMngtPagesButton"
-            >
-              <FormattedMessage
-                id="management.landing.solution.viewAllPagesButton"
-                defaultMessage="View all pages"
-              />
-            </EuiButton>
+            <FormattedMessage
+              id="management.landing.text"
+              defaultMessage="A complete list of apps is in the menu on the left."
+            />
           </p>
         </>
       }
