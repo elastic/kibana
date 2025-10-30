@@ -51,7 +51,7 @@ interface EditorFooterProps {
   warnings?: MonacoMessage[];
   detectedTimestamp?: string;
   onErrorClick: (error: MonacoMessage) => void;
-  runQuery: (source: TelemetryQuerySubmittedProps['query_source']) => void;
+  runQuery: (source: TelemetryQuerySubmittedProps['source']) => void;
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
