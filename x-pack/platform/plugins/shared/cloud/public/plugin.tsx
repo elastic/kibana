@@ -72,13 +72,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   public setup(core: CoreSetup): CloudSetup {
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
 
-    const {
-      id,
-      cname,
-      trial_end_date: trialEndDate,
-      is_elastic_staff_owned: isElasticStaffOwned,
-      csp,
-    } = this.config;
+    const { id, cname, is_elastic_staff_owned: isElasticStaffOwned, csp } = this.config;
 
     let decodedId: DecodedCloudId | undefined;
     if (id) {
@@ -96,7 +90,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       csp,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
-      trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
+      trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
       onboarding: {
@@ -121,6 +115,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -170,6 +165,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -195,5 +191,18 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         elasticsearchUrl: undefined,
       };
     }
+  }
+
+  private isInTrial(): boolean {
+    if (this.config.serverless?.in_trial) return true;
+    if (this.config.trial_end_date) {
+      const endDateMs = new Date(this.config.trial_end_date).getTime();
+      if (!Number.isNaN(endDateMs)) {
+        return Date.now() <= endDateMs;
+      } else {
+        this.logger.error('cloud.trial_end_date config value could not be parsed.');
+      }
+    }
+    return false;
   }
 }
