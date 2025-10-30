@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SharedGlobalConfigKeys = {
-  // We can add more if really needed
-  elasticsearch: ['shardTimeout', 'requestTimeout'] as const,
-  path: ['data'] as const,
-  savedObjects: ['maxImportPayloadBytes'] as const,
+export type { ImageConfig, ImageConfigState, ImageEmbeddableState } from './schemas';
+
+export const plugin = async () => {
+  const { ImageEmbeddablePlugin } = await import('./plugin');
+  return new ImageEmbeddablePlugin();
 };

@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SharedGlobalConfigKeys = {
-  // We can add more if really needed
-  elasticsearch: ['shardTimeout', 'requestTimeout'] as const,
-  path: ['data'] as const,
-  savedObjects: ['maxImportPayloadBytes'] as const,
-};
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+
+export interface SetupDeps {
+  embeddable: EmbeddableSetup;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartDeps {}
