@@ -99,6 +99,8 @@ export async function updateAgentTags(
         }
       },
       retries: 3,
+      minTimeout: 100,
+      maxTimeout: 200,
     }
   );
 }
