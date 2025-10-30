@@ -7,39 +7,10 @@
 
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 
-import type { TypeOf } from '@kbn/config-schema/src/types';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type {
-  anomalySwimlanePropsSchema,
-  anomalySwimlaneEmbeddableCustomInputOverallSchema,
-  anomalySwimlaneEmbeddableCustomInputSchema,
-  anomalySwimlaneEmbeddableCustomInputViewBySchema,
-  anomalySwimlaneEmbeddableUserInputSchema,
-  anomalySwimlaneInitialInputSchema,
-} from '@kbn/ml-plugin/server/embeddable/schemas';
+import type { AnomalySwimlaneProps as AnomalySwimlanePropsDefault } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
 
-/** Manual input by the user */
-export type AnomalySwimlaneEmbeddableUserInput = TypeOf<
-  typeof anomalySwimlaneEmbeddableUserInputSchema
->;
-
-export type AnomalySwimlaneInitialInput = TypeOf<typeof anomalySwimlaneInitialInputSchema>;
-
-export type AnomalySwimlaneEmbeddableCustomInputViewBy = TypeOf<
-  typeof anomalySwimlaneEmbeddableCustomInputViewBySchema
->;
-
-export type AnomalySwimlaneEmbeddableCustomInputOverall = TypeOf<
-  typeof anomalySwimlaneEmbeddableCustomInputOverallSchema
->;
-
-export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
-  typeof anomalySwimlaneEmbeddableCustomInputSchema
->;
-
-type AnomalySwimlaneEmbeddableCustomInputProps = TypeOf<typeof anomalySwimlanePropsSchema>;
-
-export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInputProps {
+export interface AnomalySwimLaneProps extends AnomalySwimlanePropsDefault {
   id?: string;
   executionContext: KibanaExecutionContext;
 }

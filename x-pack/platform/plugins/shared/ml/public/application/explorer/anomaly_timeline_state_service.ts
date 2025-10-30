@@ -28,11 +28,8 @@ import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { AnomalyExplorerSwimLaneUrlState } from '@kbn/ml-common-types/locator';
 import type { MlJobService } from '@kbn/ml-services/job_service';
-import {
-  ANOMALY_SWIM_LANE_HARD_LIMIT,
-  SWIMLANE_TYPE,
-  VIEW_BY_JOB_LABEL,
-} from '@kbn/ml-common-constants/explorer';
+import { ANOMALY_SWIM_LANE_HARD_LIMIT, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
 
 import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
 import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';

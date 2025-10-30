@@ -5,20 +5,21 @@
  * 2.0.
  */
 
+import deepEqual from 'fast-deep-equal';
+import { memoize } from 'lodash';
+import React from 'react';
+
 import { EuiDescriptionList } from '@elastic/eui';
+
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import deepEqual from 'fast-deep-equal';
-import { memoize } from 'lodash';
-import React from 'react';
 import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE } from '@kbn/ml-common-constants/cases';
-import type {
-  AnomalySwimLaneEmbeddableApi,
-  AnomalySwimLaneEmbeddableState,
-} from '../embeddables/anomaly_swimlane/types';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
+
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 
 export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
   return React.memo(

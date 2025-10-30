@@ -45,12 +45,13 @@ import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
-import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+import type { SwimlaneType } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
 
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/get_default_swimlane_panel_title';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import type { AnomalySwimLaneEmbeddableState } from '../..';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
 import {

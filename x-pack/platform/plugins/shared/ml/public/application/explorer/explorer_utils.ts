@@ -44,12 +44,9 @@ import { isSourceDataChartableForDetector } from '@kbn/ml-common-utils/job_utils
 import { isModelPlotChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_model_plot_chartable_for_detector';
 import { isModelPlotEnabled } from '@kbn/ml-common-utils/job_utils/is_model_plot_enabled';
 import { isTimeSeriesViewJob } from '@kbn/ml-common-utils/job_utils/is_time_series_view_job';
-import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
-import {
-  MAX_CATEGORY_EXAMPLES,
-  SWIMLANE_TYPE,
-  VIEW_BY_JOB_LABEL,
-} from '@kbn/ml-common-constants/explorer';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+import type { SwimlaneType } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+import { MAX_CATEGORY_EXAMPLES, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
 
 import type { GroupObj } from '../components/job_selector/job_selector';
 import type { TableSeverityState } from '../components/controls/select_severity';

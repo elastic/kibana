@@ -23,8 +23,3 @@ export const plugin: PluginInitializer<
 > = (initializerContext: PluginInitializerContext) => new MlPlugin(initializerContext);
 
 export type { MlPluginSetup, MlPluginStart };
-
-export type {
-  AnomalySwimLaneEmbeddableApi,
-  AnomalySwimLaneEmbeddableState,
-} from './embeddables/types';

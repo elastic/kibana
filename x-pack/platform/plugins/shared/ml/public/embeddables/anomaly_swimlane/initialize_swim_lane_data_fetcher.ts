@@ -27,8 +27,9 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { type TimeRange } from '@kbn/es-query';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import { ANOMALY_SWIM_LANE_HARD_LIMIT, SWIMLANE_TYPE } from '@kbn/ml-common-constants/explorer';
+import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '@kbn/ml-common-constants/explorer';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-ui-actions';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
 
 import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 

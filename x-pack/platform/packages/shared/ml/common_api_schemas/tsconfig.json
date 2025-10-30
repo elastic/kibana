@@ -15,5 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/config-schema",
+    "@kbn/data-service-server",
+    "@kbn/es-query-server",
   ]
 }

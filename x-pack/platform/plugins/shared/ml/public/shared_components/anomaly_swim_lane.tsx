@@ -15,11 +15,9 @@ import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishin
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
 import type { AnomalySwimLaneProps } from '@kbn/ml-common-types/anomaly_swim_lane';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
 
-import type {
-  AnomalySwimLaneEmbeddableApi,
-  AnomalySwimLaneEmbeddableState,
-} from '../embeddables/types';
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 
 export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   id,
