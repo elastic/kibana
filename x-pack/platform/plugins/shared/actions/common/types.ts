@@ -13,7 +13,7 @@ export type SubFeature = keyof typeof SUB_FEATURE;
 
 export interface PublicValidatorType {
   schema: {
-    validate(value: unknown): unknown;
+    parse(value: unknown): unknown;
   };
 }
 export interface ActionType {
@@ -26,6 +26,7 @@ export interface ActionType {
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
   subFeature?: SubFeature;
+  isDeprecated: boolean;
   validate?: {
     params: PublicValidatorType;
   };

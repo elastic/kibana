@@ -12,12 +12,19 @@ interface Props {
   error?: Error;
   body?: React.ReactNode;
   controls?: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
 export function MessagePanel(props: Props) {
   return (
     <>
       {props.body}
+      {props.footer && (
+        <>
+          <EuiSpacer size="m" />
+          {props.footer}
+        </>
+      )}
       {props.error ? (
         <span data-test-subj="message-error">
           {props.body ? <EuiSpacer size="xs" /> : null}

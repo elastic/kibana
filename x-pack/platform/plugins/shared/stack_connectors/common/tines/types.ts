@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   TinesConfigSchema,
   TinesSecretsSchema,
@@ -19,14 +19,14 @@ import type {
   TinesStoryObjectSchema,
 } from './schema';
 
-export type TinesConfig = TypeOf<typeof TinesConfigSchema>;
-export type TinesSecrets = TypeOf<typeof TinesSecretsSchema>;
-export type TinesRunActionParams = TypeOf<typeof TinesRunActionParamsSchema>;
-export type TinesRunActionResponse = TypeOf<typeof TinesRunActionResponseSchema>;
+export type TinesConfig = z.infer<typeof TinesConfigSchema>;
+export type TinesSecrets = z.infer<typeof TinesSecretsSchema>;
+export type TinesRunActionParams = z.infer<typeof TinesRunActionParamsSchema>;
+export type TinesRunActionResponse = z.infer<typeof TinesRunActionResponseSchema>;
 export type TinesStoriesActionParams = void;
-export type TinesStoryObject = TypeOf<typeof TinesStoryObjectSchema>;
-export type TinesStoriesActionResponse = TypeOf<typeof TinesStoriesActionResponseSchema>;
-export type TinesWebhooksActionParams = TypeOf<typeof TinesWebhooksActionParamsSchema>;
-export type TinesWebhooksActionResponse = TypeOf<typeof TinesWebhooksActionResponseSchema>;
-export type TinesWebhookActionConfig = TypeOf<typeof TinesWebhookActionConfigSchema>;
-export type TinesWebhookObject = TypeOf<typeof TinesWebhookObjectSchema>;
+export type TinesStoryObject = z.infer<typeof TinesStoryObjectSchema>;
+export type TinesStoriesActionResponse = z.infer<typeof TinesStoriesActionResponseSchema>;
+export type TinesWebhooksActionParams = z.infer<typeof TinesWebhooksActionParamsSchema>;
+export type TinesWebhooksActionResponse = z.infer<typeof TinesWebhooksActionResponseSchema>;
+export type TinesWebhookActionConfig = z.infer<typeof TinesWebhookActionConfigSchema>;
+export type TinesWebhookObject = z.infer<typeof TinesWebhookObjectSchema>;

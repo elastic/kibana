@@ -5,117 +5,127 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { DEFAULT_GEMINI_MODEL } from './constants';
 
-export const TelemtryMetadataSchema = schema.object({
-  pluginId: schema.maybe(schema.string()),
-  aggregateBy: schema.maybe(schema.string()),
+export const TelemetryMetadataSchema = z
+  .object({
+    pluginId: z.string().optional(),
+    aggregateBy: z.string().optional(),
+  })
+  .strict();
+
+export const ConfigSchema = z
+  .object({
+    apiUrl: z.string(),
+    defaultModel: z.string().default(DEFAULT_GEMINI_MODEL),
+    gcpRegion: z.string(),
+    gcpProjectID: z.string(),
+    contextWindowLength: z.coerce.number().optional(),
+    temperature: z.coerce.number().optional(),
+  })
+  .strict();
+
+export const SecretsSchema = z
+  .object({
+    credentialsJson: z.string(),
+  })
+  .strict();
+
+export const RunActionParamsSchema = z
+  .object({
+    body: z.any(),
+    model: z.string().optional(),
+    signal: z.any().optional(),
+    timeout: z.coerce.number().optional(),
+    temperature: z.coerce.number().optional(),
+    stopSequences: z.array(z.string()).optional(),
+    raw: z.boolean().optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
+
+export const RunApiResponseSchema = z.object({
+  candidates: z.any(),
+  usageMetadata: z.object({
+    promptTokenCount: z.coerce.number(),
+    candidatesTokenCount: z.coerce.number(),
+    totalTokenCount: z.coerce.number(),
+  }),
 });
 
-export const ConfigSchema = schema.object({
-  apiUrl: schema.string(),
-  defaultModel: schema.string({ defaultValue: DEFAULT_GEMINI_MODEL }),
-  gcpRegion: schema.string(),
-  gcpProjectID: schema.string(),
-  contextWindowLength: schema.maybe(schema.number({})),
+export const RunActionResponseSchema = z.object({
+  completion: z.string(),
+  stop_reason: z.string().optional(),
+  usageMetadata: z
+    .object({
+      promptTokenCount: z.coerce.number(),
+      candidatesTokenCount: z.coerce.number(),
+      totalTokenCount: z.coerce.number(),
+    })
+    .optional(),
 });
 
-export const SecretsSchema = schema.object({
-  credentialsJson: schema.string(),
-});
+export const RunActionRawResponseSchema = z.any();
 
-export const RunActionParamsSchema = schema.object({
-  body: schema.any(),
-  model: schema.maybe(schema.string()),
-  signal: schema.maybe(schema.any()),
-  timeout: schema.maybe(schema.number()),
-  temperature: schema.maybe(schema.number()),
-  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
-  raw: schema.maybe(schema.boolean()),
-  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
-});
-
-export const RunApiResponseSchema = schema.object(
-  {
-    candidates: schema.any(),
-    usageMetadata: schema.object({
-      promptTokenCount: schema.number(),
-      candidatesTokenCount: schema.number(),
-      totalTokenCount: schema.number(),
-    }),
-  },
-  { unknowns: 'ignore' } // unknown keys will NOT fail validation, but will be removed
-);
-
-export const RunActionResponseSchema = schema.object(
-  {
-    completion: schema.string(),
-    stop_reason: schema.maybe(schema.string()),
-    usageMetadata: schema.maybe(
-      schema.object({
-        promptTokenCount: schema.number(),
-        candidatesTokenCount: schema.number(),
-        totalTokenCount: schema.number(),
+export const InvokeAIActionParamsSchema = z
+  .object({
+    maxOutputTokens: z.coerce.number().optional(),
+    messages: z.any(),
+    systemInstruction: z.string().optional(),
+    model: z.string().optional(),
+    temperature: z.coerce.number().optional(),
+    stopSequences: z.array(z.string()).optional(),
+    signal: z.any().optional(),
+    timeout: z.coerce.number().optional(),
+    tools: z.array(z.any()).optional(),
+    toolConfig: z
+      .object({
+        mode: z.enum(['AUTO', 'ANY', 'NONE']),
+        allowedFunctionNames: z.array(z.string()).optional(),
       })
-    ),
-  },
-  { unknowns: 'ignore' }
-);
+      .strict()
+      .optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
-export const RunActionRawResponseSchema = schema.any();
+export const InvokeAIRawActionParamsSchema = z
+  .object({
+    maxOutputTokens: z.coerce.number().optional(),
+    messages: z.any(),
+    systemInstruction: z.string().optional(),
+    model: z.string().optional(),
+    temperature: z.coerce.number().optional(),
+    stopSequences: z.array(z.string()).optional(),
+    signal: z.any().optional(),
+    timeout: z.coerce.number().optional(),
+    tools: z.array(z.any()).optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
-export const InvokeAIActionParamsSchema = schema.object({
-  maxOutputTokens: schema.maybe(schema.number()),
-  messages: schema.any(),
-  systemInstruction: schema.maybe(schema.string()),
-  model: schema.maybe(schema.string()),
-  temperature: schema.maybe(schema.number()),
-  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
-  signal: schema.maybe(schema.any()),
-  timeout: schema.maybe(schema.number()),
-  tools: schema.maybe(schema.arrayOf(schema.any())),
-  toolConfig: schema.maybe(
-    schema.object({
-      mode: schema.oneOf([schema.literal('AUTO'), schema.literal('ANY'), schema.literal('NONE')]),
-      allowedFunctionNames: schema.maybe(schema.arrayOf(schema.string())),
+export const InvokeAIActionResponseSchema = z.object({
+  message: z.string(),
+  usageMetadata: z
+    .object({
+      promptTokenCount: z.coerce.number(),
+      candidatesTokenCount: z.coerce.number(),
+      totalTokenCount: z.coerce.number(),
     })
-  ),
-  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+    .optional(),
 });
 
-export const InvokeAIRawActionParamsSchema = schema.object({
-  maxOutputTokens: schema.maybe(schema.number()),
-  messages: schema.any(),
-  systemInstruction: schema.maybe(schema.string()),
-  model: schema.maybe(schema.string()),
-  temperature: schema.maybe(schema.number()),
-  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
-  signal: schema.maybe(schema.any()),
-  timeout: schema.maybe(schema.number()),
-  tools: schema.maybe(schema.arrayOf(schema.any())),
-  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
-});
+export const InvokeAIRawActionResponseSchema = z.any();
 
-export const InvokeAIActionResponseSchema = schema.object({
-  message: schema.string(),
-  usageMetadata: schema.maybe(
-    schema.object({
-      promptTokenCount: schema.number(),
-      candidatesTokenCount: schema.number(),
-      totalTokenCount: schema.number(),
-    })
-  ),
-});
+export const StreamingResponseSchema = z.any();
 
-export const InvokeAIRawActionResponseSchema = schema.any();
+export const DashboardActionParamsSchema = z
+  .object({
+    dashboardId: z.string(),
+  })
+  .strict();
 
-export const StreamingResponseSchema = schema.any();
-
-export const DashboardActionParamsSchema = schema.object({
-  dashboardId: schema.string(),
-});
-
-export const DashboardActionResponseSchema = schema.object({
-  available: schema.boolean(),
+export const DashboardActionResponseSchema = z.object({
+  available: z.boolean(),
 });

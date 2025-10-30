@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -153,14 +152,35 @@ export const filterFunctionDefinitions = (
 };
 
 export function getAllFunctions(options?: {
-  type: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+  type?: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+  includeOperators?: boolean;
 }) {
+  const { type, includeOperators = true } = options ?? {};
+
   const fns = buildFunctionLookup();
-  if (!options?.type) {
-    return Array.from(fns.values());
+  const seen = new Set<string>();
+  const uniqueFunctions: FunctionDefinition[] = [];
+
+  for (const fn of fns.values()) {
+    if (!seen.has(fn.name)) {
+      seen.add(fn.name);
+      uniqueFunctions.push(fn);
+    }
   }
-  const types = new Set(Array.isArray(options.type) ? options.type : [options.type]);
-  return Array.from(fns.values()).filter((fn) => types.has(fn.type));
+
+  let result = uniqueFunctions;
+
+  if (!includeOperators) {
+    result = result.filter((fn) => fn.type !== FunctionDefinitionTypes.OPERATOR);
+  }
+
+  if (!type) {
+    return result;
+  }
+
+  const types = new Set(Array.isArray(type) ? type : [type]);
+
+  return result.filter((fn) => types.has(fn.type));
 }
 
 export function printArguments(
@@ -227,16 +247,6 @@ export function getFunctionSignatures(
   });
 }
 
-const allFunctions = memoize(
-  () =>
-    aggFunctionDefinitions
-      .concat(scalarFunctionDefinitions)
-      .concat(groupingFunctionDefinitions)
-      .concat(getTestFunctions())
-      .concat(timeSeriesAggFunctionDefinitions),
-  () => getTestFunctions()
-);
-
 export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   let detail = fn.description;
   const labels = [];
@@ -284,25 +294,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     sortText: functionsPriority,
   });
 }
-
-/**
- * Builds suggestions for functions based on the provided predicates.
- *
- * @param predicates a set of conditions that must be met for a function to be included in the suggestions
- * @returns
- */
-export const getFunctionSuggestions = (
-  predicates?: FunctionFilterPredicates,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
-  activeProduct?: PricingProduct | undefined
-): ISuggestionItem[] => {
-  return filterFunctionDefinitions(
-    allFunctions(),
-    predicates,
-    hasMinimumLicenseRequired,
-    activeProduct
-  ).map(getFunctionSuggestion);
-};
 
 export function checkFunctionInvocationComplete(
   func: ESQLFunction,
@@ -395,6 +386,7 @@ export const buildColumnSuggestions = (
     addComma?: boolean;
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
+    supportsMultiValue?: boolean;
   },
   variables?: ESQLControlVariable[]
 ): ISuggestionItem[] => {
