@@ -52,6 +52,15 @@ export interface EmbeddableConversationProps {
    * Example: 'Show me error logs from the last hour'
    */
   initialMessage?: string;
+  /**
+   * Optional attachments with lazy content loading.
+   * Content will be fetched when starting a new conversation round.
+   */
+  attachments?: Array<{
+    id: string;
+    type: string;
+    getContent: () => Promise<Record<string, unknown>> | Record<string, unknown>;
+  }>;
 }
 
 export type EmbeddableConversationInternalProps = EmbeddableConversationDependencies &

@@ -29,10 +29,15 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
 
+  // Attachment content map for tracking attachment content changes
+  const attachmentContentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
+
   const kibanaServices = useMemo(
     () => ({
       ...coreStart,
-      plugins: services.startDependencies,
+      plugins: {
+        ...services.startDependencies,
+      },
     }),
     [coreStart, services.startDependencies]
   );
@@ -102,6 +107,14 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onConversationCreated,
   });
 
+  const getAttachmentContentMap = useCallback(() => {
+    return attachmentContentMapRef.current;
+  }, []);
+
+  const updateAttachmentContent = useCallback((id: string, content: Record<string, unknown>) => {
+    attachmentContentMapRef.current.set(id, content);
+  }, []);
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId: persistedConversationId,
@@ -111,14 +124,20 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       agentId: contextProps.agentId,
       initialMessage: contextProps.initialMessage,
       setConversationId,
+      attachments: contextProps.attachments,
       conversationActions,
+      getAttachmentContentMap,
+      updateAttachmentContent,
     }),
     [
       persistedConversationId,
       contextProps.sessionTag,
       contextProps.agentId,
       contextProps.initialMessage,
+      contextProps.attachments,
       conversationActions,
+      getAttachmentContentMap,
+      updateAttachmentContent,
       setConversationId,
     ]
   );

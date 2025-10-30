@@ -7,6 +7,7 @@
 
 import { createContext, useContext } from 'react';
 import type { ConversationActions } from './use_conversation_actions';
+import type { EmbeddableConversationProps } from '../../../embeddable/types';
 
 interface ConversationContextValue {
   conversationId?: string;
@@ -15,8 +16,11 @@ interface ConversationContextValue {
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;
+  attachments?: EmbeddableConversationProps['attachments'];
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
+  getAttachmentContentMap: () => Map<string, Record<string, unknown>>;
+  updateAttachmentContent: (id: string, content: Record<string, unknown>) => void;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(undefined);
