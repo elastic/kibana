@@ -22,6 +22,7 @@ import type {
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
+import type { AttachmentServiceStart } from '../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
 import { createEmptyRunContext } from './utils/run_context';
 import { createResultStore } from './tool_result_store';
@@ -36,6 +37,7 @@ export interface CreateScopedRunnerDeps {
   modelProviderFactory: ModelProviderFactoryFn;
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
+  attachmentsService: AttachmentServiceStart;
   // other deps
   logger: Logger;
   request: KibanaRequest;
@@ -109,7 +111,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     },
     runAgent: (params) => {
       const { request, defaultConnectorId, ...otherParams } = params;
-      const resultStore = createResultStore(params.agentParams.conversation);
+      const resultStore = createResultStore(params.agentParams.conversation?.rounds);
       const allDeps = { ...deps, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runAgent(otherParams);

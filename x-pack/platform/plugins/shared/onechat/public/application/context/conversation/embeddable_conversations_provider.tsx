@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -32,10 +32,15 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
 
+  // Attachment content map for tracking attachment content changes
+  const attachmentContentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
+
   const kibanaServices = useMemo(
     () => ({
       ...coreStart,
-      plugins: services.startDependencies,
+      plugins: {
+        ...services.startDependencies,
+      },
     }),
     [coreStart, services.startDependencies]
   );
@@ -104,6 +109,14 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onDeleteConversation,
   });
 
+  const getAttachmentContentMap = useCallback(() => {
+    return attachmentContentMapRef.current;
+  }, []);
+
+  const updateAttachmentContent = useCallback((id: string, content: Record<string, unknown>) => {
+    attachmentContentMapRef.current.set(id, content);
+  }, []);
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
@@ -112,17 +125,23 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       sessionTag: contextProps.sessionTag,
       agentId: contextProps.agentId,
       initialMessage: contextProps.initialMessage,
+      attachments: contextProps.attachments,
       setConversationId: (id: string) => {
         setConversationId(id);
       },
       conversationActions,
+      getAttachmentContentMap,
+      updateAttachmentContent,
     }),
     [
       conversationId,
       contextProps.sessionTag,
       contextProps.agentId,
       contextProps.initialMessage,
+      contextProps.attachments,
       conversationActions,
+      getAttachmentContentMap,
+      updateAttachmentContent,
     ]
   );
 

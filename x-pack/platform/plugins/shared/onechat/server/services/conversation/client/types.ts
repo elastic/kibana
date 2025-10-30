@@ -11,7 +11,22 @@ import type {
   ConversationRoundStepMixin,
   ReasoningStep,
   ConversationRoundStepType,
+  Conversation,
 } from '@kbn/onechat-common/chat/conversation';
+
+export type ConversationCreateRequest = Omit<
+  Conversation,
+  'id' | 'created_at' | 'updated_at' | 'user'
+> & {
+  id?: string;
+};
+
+export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
+  Partial<Pick<Conversation, 'title' | 'rounds'>>;
+
+export interface ConversationListOptions {
+  agentId?: string;
+}
 
 /**
  * A version of ToolCallWithResult where 'results' is a serialized string.
