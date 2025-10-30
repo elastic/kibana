@@ -41,6 +41,16 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
         border: none;
         border-radius: 0;
 
+        // Removes the border that appears on hover
+        &:hover {
+          z-index: 0 !important;
+
+          .euiFormControlLayout__childrenWrapper {
+            outline: none !important;
+          }
+        }
+      }
+
       .euiFormControlLayout__childrenWrapper {
         border: none;
         box-shadow: none;
