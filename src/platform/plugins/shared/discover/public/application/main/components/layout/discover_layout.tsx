@@ -129,11 +129,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
-  const cascadeConfig = useCurrentTabSelector((state) => state.uiState.cascade);
+  const cascadeConfig = useCurrentTabSelector((state) => state.uiState.cascadedDocuments);
 
   const cascadeLayoutSelected = useMemo(() => {
     return Boolean(cascadeConfig?.selectedCascadeGroups?.length);
-  }, [cascadeConfig?.selectedCascadeGroups?.length]);
+  }, [cascadeConfig]);
 
   const fetchCounter = useRef<number>(0);
 

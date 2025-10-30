@@ -35,8 +35,8 @@ import {
   type ESQLDataGroupNode,
   type DataTableRecord,
 } from './blocks';
-import { esqlCascadeStyles } from './esql_data_cascade.styles';
-import { type CascadeDocumentsRestorableState } from './esql_data_cascade_restorable_state';
+import { cascadedDocumentsStyles } from './cascaded_documents.styles';
+import { type CascadedDocumentsRestorableState } from './cascaded_documents_restorable_state';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
 
 export { getESQLStatsQueryMeta };
@@ -46,7 +46,7 @@ export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'>
   defaultFilters?: Filter[];
   viewModeToggle: React.ReactElement | undefined;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
-  cascadeConfig: CascadeDocumentsRestorableState;
+  cascadeConfig: CascadedDocumentsRestorableState;
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'];
 }
 
@@ -230,7 +230,7 @@ export const CascadedDocumentsLayout = React.memo(
     const { euiTheme } = useEuiTheme();
     const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
 
-    const styles = useMemo(() => esqlCascadeStyles({ euiTheme }), [euiTheme]);
+    const styles = useMemo(() => cascadedDocumentsStyles({ euiTheme }), [euiTheme]);
 
     const queryMeta = useMemo(() => {
       return getESQLStatsQueryMeta((query as AggregateQuery).esql);

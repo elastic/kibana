@@ -9,10 +9,10 @@
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 
-export interface CascadeDocumentsRestorableState {
+export interface CascadedDocumentsRestorableState {
   availableCascadeGroups: string[];
   selectedCascadeGroups: string[];
 }
 
 export const { withRestorableState, useRestorableState } =
-  createRestorableStateProvider<CascadeDocumentsRestorableState>();
+  createRestorableStateProvider<CascadedDocumentsRestorableState>();

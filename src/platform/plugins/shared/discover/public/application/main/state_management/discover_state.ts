@@ -584,20 +584,11 @@ export function getDiscoverStateContainer({
 
     const currentTabState = getCurrentTab();
 
-    // if no grouping is selected, user has opted out of cascade view
-    internalState.dispatch(
-      injectCurrentTab(internalStateActions.setLayoutUiState)({
-        layoutUiState: {
-          ...(currentTabState.uiState?.layout ?? {}),
-          cascadeEnabled: Boolean(cascadeGrouping.length),
-        },
-      })
-    );
-
     internalState.dispatch(
       injectCurrentTab(internalStateActions.setCascadeUiState)({
         cascadeUiState: {
-          availableCascadeGroups: currentTabState.uiState.cascade!.availableCascadeGroups.slice(0),
+          availableCascadeGroups:
+            currentTabState.uiState.cascadedDocuments!.availableCascadeGroups.slice(0),
           selectedCascadeGroups: cascadeGrouping,
         },
       })

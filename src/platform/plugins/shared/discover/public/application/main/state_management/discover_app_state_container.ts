@@ -235,23 +235,24 @@ export const getDiscoverAppStateContainer = ({
                 ).groupByFields.map((group) => group.field),
                 get selectedCascadeGroups() {
                   if (
-                    !currentTabState.uiState.cascade ||
-                    (currentTabState.uiState.cascade &&
+                    !currentTabState.uiState.cascadedDocuments ||
+                    (currentTabState.uiState.cascadedDocuments &&
                       // if the proposed available groups is different in length or contains a value the existing one doesn't have, we want to reset by defaulting to the first group
                       (this.availableCascadeGroups.length !==
-                        currentTabState.uiState.cascade.availableCascadeGroups.length ||
+                        currentTabState.uiState.cascadedDocuments.availableCascadeGroups.length ||
                         this.availableCascadeGroups.some(
                           (group) =>
-                            (currentTabState.uiState.cascade?.availableCascadeGroups ?? []).indexOf(
-                              group
-                            ) < 0
+                            (
+                              currentTabState.uiState.cascadedDocuments?.availableCascadeGroups ??
+                              []
+                            ).indexOf(group) < 0
                         )))
                   ) {
                     return [this.availableCascadeGroups[0]].filter(Boolean);
                   }
 
                   // return existing selection since we've asserted that there's been no change to the available groups default
-                  return currentTabState.uiState.cascade!.selectedCascadeGroups;
+                  return currentTabState.uiState.cascadedDocuments!.selectedCascadeGroups;
                 },
               },
             })

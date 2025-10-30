@@ -347,9 +347,7 @@ function DiscoverDocumentsComponent({
     [dispatch, setDataGridUiState]
   );
 
-  const [cascadeConfig, isCascadeLayoutSelected] = useCurrentTabSelector((state) => {
-    return [state.uiState.cascade, state.uiState.layout?.cascadeEnabled ?? true];
-  });
+  const cascadeConfig = useCurrentTabSelector((state) => state.uiState.cascadedDocuments);
 
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
   const cellRendererDensity = useMemo(
@@ -510,7 +508,6 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             viewModeToggle={viewModeToggle}
-            isCascadeLayoutSelected={isEsqlMode && isCascadeLayoutSelected}
             cascadeConfig={cascadeConfig}
             onCascadeGroupingChange={stateContainer.actions.onCascadeGroupingChange}
           />

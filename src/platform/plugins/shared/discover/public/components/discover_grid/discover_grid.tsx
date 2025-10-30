@@ -22,7 +22,7 @@ import {
   CascadedDocumentsLayout,
   useGroupBySelectorRenderer,
 } from '../../application/main/components/layout/cascaded_documents';
-import type { CascadeDocumentsRestorableState } from '../../application/main/components/layout/cascaded_documents/esql_data_cascade_restorable_state';
+import type { CascadedDocumentsRestorableState } from '../../application/main/components/layout/cascaded_documents/cascaded_documents_restorable_state';
 
 export type DiscoverGridProps = UnifiedDataTableProps & {
   query?: DiscoverAppState['query'];
@@ -31,14 +31,12 @@ export type DiscoverGridProps = UnifiedDataTableProps & {
     | {
         cascadeConfig?: undefined;
         onCascadeGroupingChange?: never;
-        isCascadeLayoutSelected?: never;
         viewModeToggle?: never;
       }
     | {
         // when cascade config is passed to the discover grid component, we expect that all it's supporting props are passed along
-        cascadeConfig?: CascadeDocumentsRestorableState;
+        cascadeConfig?: CascadedDocumentsRestorableState;
         onCascadeGroupingChange: DiscoverStateContainer['actions']['onCascadeGroupingChange'];
-        isCascadeLayoutSelected: boolean;
         viewModeToggle: React.ReactElement | undefined;
       }
   );
@@ -52,7 +50,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   cascadeConfig,
   onCascadeGroupingChange,
   query,
-  isCascadeLayoutSelected,
   viewModeToggle,
   externalAdditionalControls: customExternalAdditionalControls,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
@@ -131,7 +128,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     );
   }, [cascadeConfig, customExternalAdditionalControls, groupBySelectorRenderer]);
 
-  return isCascadeLayoutSelected && Boolean(cascadeConfig?.selectedCascadeGroups?.length) ? (
+  return props.isPlainRecord && Boolean(cascadeConfig?.selectedCascadeGroups?.length) ? (
     <CascadedDocumentsLayout
       {...props}
       dataView={dataView}
