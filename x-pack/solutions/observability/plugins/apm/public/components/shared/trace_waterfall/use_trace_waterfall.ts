@@ -231,17 +231,16 @@ export function getTraceWaterfall({
 
     const flattenedChildren = sortedChildren.flatMap((child) => {
       // Check if we have encountered the trace item before.
-      // If we haven't, then we can process the waterfall item.
-      if (!visitor.has(child.id)) {
-        visitor.add(child.id);
-
-        return getTraceWaterfallItem(child, depth + 1, traceWaterfallItem);
-      }
-
       // If we have visited the trace item before, then the child waterfall items are already
       // present in the flattened list, so we return an empty array so we don't duplicate
       // spans. This should guard against circular or unusual links between spans.
-      return [];
+      if (visitor.has(child.id)) {
+        return [];
+      }
+
+      // If we haven't visited it before, then we can process the waterfall item.
+      visitor.add(child.id);
+      return getTraceWaterfallItem(child, depth + 1, traceWaterfallItem);
     });
 
     return [traceWaterfallItem, ...flattenedChildren];
