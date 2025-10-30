@@ -12,6 +12,7 @@ import {
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -65,6 +66,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const backfillClient = backfillClientMock.create();
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
+const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -96,6 +98,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   eventLogger,
+  elasticsearchClient,
 };
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({

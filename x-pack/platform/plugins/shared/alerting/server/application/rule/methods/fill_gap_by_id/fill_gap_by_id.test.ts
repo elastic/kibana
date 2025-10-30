@@ -7,12 +7,13 @@
 
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
+  loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
@@ -80,6 +81,7 @@ describe('fillGapById', () => {
     jest.resetAllMocks();
     eventLogClient = eventLogClientMock.create();
     mockedGetRule.mockResolvedValue(mockRule);
+    const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
     const rulesClientParams: jest.Mocked<ConstructorOptions> = {
       taskManager: taskManagerMock.createStart(),
@@ -109,6 +111,7 @@ describe('fillGapById', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger: eventLoggerMock.create(),
+      elasticsearchClient,
     };
 
     rulesClient = new RulesClient(rulesClientParams);

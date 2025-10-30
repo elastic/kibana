@@ -13,12 +13,13 @@ import { alertingAuthorizationMock } from '../../../../authorization/alerting_au
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
+  loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
-} from '@kbn/core-saved-objects-api-server-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { fromKueryExpression } from '@kbn/es-query';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -45,6 +46,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const backfillClient = backfillClientMock.create();
 const eventLogger = eventLoggerMock.create();
 const eventLogClient = eventLogClientMock.create();
+const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const filter = fromKueryExpression(
   '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
@@ -78,6 +80,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   eventLogger,
+  elasticsearchClient,
 };
 
 const fakeRuleName = 'fakeRuleName';
