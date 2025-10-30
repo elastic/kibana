@@ -157,7 +157,12 @@ export const WorkflowDetailHeader = React.memo(
     return (
       <>
         <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
-          <EuiPageTemplate.Header css={styles.header} restrictWidth={false} bottomBorder={false}>
+          <EuiPageTemplate.Header
+            css={styles.header}
+            restrictWidth={false}
+            bottomBorder={false}
+            alignItems="bottom"
+          >
             <EuiPageHeaderSection css={styles.headerSection}>
               <EuiButtonEmpty
                 iconType="sortLeft"
