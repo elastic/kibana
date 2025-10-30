@@ -38,7 +38,7 @@ export const mockAgentToolCall = ({
 export const mockHandoverToAnswer = (llmProxy: LlmProxy, answer: string) => {
   void llmProxy
     .intercept({
-      name: 'final-assistant-response',
+      name: 'handover-to-answer',
       when: ({ messages }) => {
         const systemMessage = messages.find((message) => message.role === 'system');
         return (systemMessage?.content as string).includes(
