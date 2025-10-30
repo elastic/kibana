@@ -83,10 +83,20 @@ export const getValueInputPopover =
             return;
           }
 
-          dataTableRef?.current?.closeCellPopover();
-          if (columns.length > colIndex) {
+          const dataTable = dataTableRef?.current;
+          if (!dataTable) return;
+
+          dataTable.closeCellPopover();
+
+          // Calculate next cell position
+          const nextColIndex = colIndex + 1;
+          const nextRowIndex = nextColIndex > columns.length ? rowIndex + 1 : rowIndex;
+          const finalColIndex = nextColIndex > columns.length ? 1 : nextColIndex;
+
+          // Only navigate if there's a next row available
+          if (nextRowIndex < rows.length) {
             requestAnimationFrame(() => {
-              dataTableRef?.current?.openCellPopover({ rowIndex, colIndex: colIndex + 1 });
+              dataTable.openCellPopover({ rowIndex: nextRowIndex, colIndex: finalColIndex });
             });
           }
         }

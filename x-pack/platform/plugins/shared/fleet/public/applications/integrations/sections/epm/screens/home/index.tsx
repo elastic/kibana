@@ -66,18 +66,19 @@ export const EPMHomePage: React.FC = () => {
 
   const authz = useAuthz();
   const isAuthorizedToFetchSettings = authz.fleet.readSettings;
-  const { isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
+  const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
     enabled: isAuthorizedToFetchSettings,
   });
 
   const installedIntegrationsTabularUI =
     ExperimentalFeaturesService.get()?.installedIntegrationsTabularUI ?? false;
 
+  const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
   const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
   // loading packages to find installed ones
   const { data: allPackages, isLoading } = useGetPackagesQuery(
     {
-      prerelease: true,
+      prerelease: prereleaseIntegrationsEnabled,
     },
     {
       enabled: shouldFetchPackages,
@@ -122,7 +123,9 @@ export const EPMHomePage: React.FC = () => {
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
         <DefaultLayout section="manage" notificationsBySection={notificationsBySection}>
           {installedIntegrationsTabularUI ? (
-            <InstalledIntegrationsPage />
+            <InstalledIntegrationsPage
+              prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+            />
           ) : (
             <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
           )}
@@ -130,7 +133,7 @@ export const EPMHomePage: React.FC = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
         <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-          <AvailablePackages />
+          <AvailablePackages prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled} />
         </DefaultLayout>
       </Route>
     </Routes>

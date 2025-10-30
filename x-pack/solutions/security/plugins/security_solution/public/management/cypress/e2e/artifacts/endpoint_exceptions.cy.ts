@@ -6,7 +6,7 @@
  */
 import * as essSecurityHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/security_header';
 import * as serverlessSecurityHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/serverless_security_header';
-import { APP_MANAGE_PATH, APP_PATH } from '../../../../../common/constants';
+import { APP_MANAGE_PATH, APP_PATH, SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { login, ROLE } from '../../tasks/login';
 
 describe(
@@ -25,15 +25,21 @@ describe(
 
   () => {
     describe('ESS', { tags: ['@ess'] }, () => {
+      const loginWithReadAccess = () => {
+        login.withCustomKibanaPrivileges({
+          [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_read'],
+        });
+      };
+
       it('should display Endpoint Exceptions in Administration page', () => {
-        login(ROLE.t1_analyst);
+        loginWithReadAccess();
 
         cy.visit(APP_MANAGE_PATH);
         cy.getByTestSubj('pageContainer').contains('Endpoint exceptions');
       });
 
       it('should be able to navigate to Endpoint Exceptions from Administration page', () => {
-        login(ROLE.t1_analyst);
+        loginWithReadAccess();
         cy.visit(APP_MANAGE_PATH);
         cy.getByTestSubj('pageContainer').contains('Endpoint exceptions').click();
 
@@ -41,7 +47,7 @@ describe(
       });
 
       it('should display Endpoint Exceptions in Manage side panel', () => {
-        login(ROLE.t1_analyst);
+        loginWithReadAccess();
 
         cy.visit(APP_PATH);
 
@@ -50,7 +56,7 @@ describe(
       });
 
       it('should be able to navigate to Endpoint Exceptions from Manage side panel', () => {
-        login(ROLE.t1_analyst);
+        loginWithReadAccess();
         cy.visit(APP_PATH);
 
         essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
@@ -62,9 +68,11 @@ describe(
       // todo: add 'should NOT' test case when Endpoint Exceptions sub-feature privilege is separated from Security
     });
 
-    describe('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240814
+    describe.skip('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
       it('should display Endpoint Exceptions in Assets side panel ', () => {
-        login(ROLE.t1_analyst);
+        // testing with t3_analyst with WRITE access, as we don't support custom roles on serverless yet
+        login(ROLE.t3_analyst);
 
         cy.visit(APP_PATH);
 

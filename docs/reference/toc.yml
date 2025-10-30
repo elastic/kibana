@@ -72,3 +72,4 @@ toc:
       - file: commands/kibana-verification-code.md
   - file: osquery-exported-fields.md
   - file: osquery-manager-prebuilt-packs.md
+  - file: case-analytics-indices-schema.md
