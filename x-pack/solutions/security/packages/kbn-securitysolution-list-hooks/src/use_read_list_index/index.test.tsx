@@ -25,7 +25,8 @@ import { useReadListIndex } from '.';
 jest.mock('@kbn/securitysolution-list-api');
 
 const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const queryClient = new QueryClient();
+  const mockLogger = { error: jest.fn(), log: jest.fn(), warn: jest.fn() };
+  const queryClient = new QueryClient({ logger: mockLogger });
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
 
