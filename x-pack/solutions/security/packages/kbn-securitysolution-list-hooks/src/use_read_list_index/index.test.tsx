@@ -63,7 +63,46 @@ describe('useReadListIndex', () => {
     });
   });
 
-  describe('when an index does not exist', () => {
+  describe('error conditions', () => {
+    let mockOnError: jest.Mock;
+
+    beforeEach(() => {
+      mockOnError = jest.fn();
+    });
+
+    it('does not call onError for an expected 404 response', async () => {
+      const notFoundError: SecurityAppError = {
+        message: 'Error',
+        name: 'Error',
+        body: {
+          message: 'data stream .lists-default does not exist',
+          status_code: 404,
+        },
+      };
+      (Api.readListIndex as jest.Mock).mockRejectedValue(notFoundError);
+
+      const { result } = renderHook(
+        () =>
+          useReadListIndex({
+            http: httpMock,
+            isEnabled: true,
+            onError: mockOnError,
+          }),
+        { wrapper: customQueryProviderWrapper }
+      );
+
+      await waitFor(() => {
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            loading: false,
+            error: null,
+          })
+        );
+      });
+
+      expect(mockOnError).not.toHaveBeenCalled();
+    });
+
     it('returns the appropriate response when neither list index exists', async () => {
       const neitherFoundError: SecurityAppError = {
         message: 'Error',
@@ -155,6 +194,65 @@ describe('useReadListIndex', () => {
           })
         );
       });
+    });
+
+    it('calls onError with and returns a generic error', async () => {
+      const genericError = new Error('Generic error');
+      (Api.readListIndex as jest.Mock).mockRejectedValue(genericError);
+
+      const { result } = renderHook(
+        () =>
+          useReadListIndex({
+            http: httpMock,
+            isEnabled: true,
+            onError: mockOnError,
+          }),
+        { wrapper: customQueryProviderWrapper }
+      );
+
+      await waitFor(() => {
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            loading: false,
+            result: undefined,
+            error: genericError,
+          })
+        );
+      });
+      expect(mockOnError).toHaveBeenCalledWith(genericError);
+    });
+
+    it('calls onError with and returns a 404 error that does not mention an index not being found', async () => {
+      const genericNotFoundError: SecurityAppError = {
+        message: 'Error',
+        name: 'Error',
+        body: {
+          message: 'Not found',
+          status_code: 404,
+        },
+      };
+      (Api.readListIndex as jest.Mock).mockRejectedValue(genericNotFoundError);
+
+      const { result } = renderHook(
+        () =>
+          useReadListIndex({
+            http: httpMock,
+            isEnabled: true,
+            onError: mockOnError,
+          }),
+        { wrapper: customQueryProviderWrapper }
+      );
+
+      await waitFor(() => {
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            loading: false,
+            result: undefined,
+            error: genericNotFoundError,
+          })
+        );
+      });
+      expect(mockOnError).toHaveBeenCalledWith(genericNotFoundError);
     });
   });
 });

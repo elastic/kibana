@@ -42,7 +42,7 @@ export const useReadListIndex = ({
         if (isIndexNotCreatedError(err)) {
           return parseReadIndexResultFrom404Error(err);
         }
-        throw err;
+        return Promise.reject(err);
       }
     },
     {
@@ -61,12 +61,21 @@ export const useReadListIndex = ({
   };
 };
 
+const errorMentionsListsIndex = (error: SecurityAppError): boolean =>
+  error.body.message.includes('.lists-');
+const errorMentionsItemsIndex = (error: SecurityAppError): boolean =>
+  error.body.message.includes('.items-');
+
 /**
  * Determines whether an error response from the `readListIndex`
  * API call indicates that the index is not yet created.
  */
 export const isIndexNotCreatedError = (err: unknown): err is SecurityAppError => {
-  return isSecurityAppError(err) && isNotFoundError(err);
+  return (
+    isSecurityAppError(err) &&
+    isNotFoundError(err) &&
+    (errorMentionsListsIndex(err) || errorMentionsItemsIndex(err))
+  );
 };
 
 /**
@@ -81,11 +90,8 @@ export const isIndexNotCreatedError = (err: unknown): err is SecurityAppError =>
 export const parseReadIndexResultFrom404Error = (
   error: SecurityAppError
 ): Awaited<ReturnType<typeof readListIndexWithOptionalSignal>> => {
-  const errorMentionsListsIndex = error.body.message.includes('.lists-');
-  const errorMentionsItemsIndex = error.body.message.includes('.items-');
-
   return {
-    list_index: !errorMentionsListsIndex,
-    list_item_index: !errorMentionsItemsIndex,
+    list_index: !errorMentionsListsIndex(error),
+    list_item_index: !errorMentionsItemsIndex(error),
   };
 };
