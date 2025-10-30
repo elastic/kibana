@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin_mock';
-import { WorkflowRunFixture } from '../workflow_run_fixture';
 import type { JsonObject } from '@kbn/utility-types';
+import { ExecutionStatus } from '@kbn/workflows';
+import { FakeConnectors } from '../mocks/actions_plugin.mock';
+import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow with foreach', () => {
   let workflowRunFixture: WorkflowRunFixture;
@@ -29,7 +29,7 @@ consts:
   outerForeachArray: '${JSON.stringify(outerArray)}'
 steps:
   - name: outerForeachStep
-    foreach: consts.outerForeachArray
+    foreach: '{{consts.outerForeachArray}}'
     type: foreach
     steps:
       - name: outerForeachChildConnectorStep
@@ -38,7 +38,7 @@ steps:
         with:
           message: 'Foreach item: {{foreach.item}}; Foreach index: {{foreach.index}}; Foreach total: {{foreach.total}}'
       - name: innerForeachStep
-        foreach: inputs.innerArray
+        foreach: '{{inputs.innerArray}}'
         type: foreach
         steps:
           - name: innerForeachChildConnectorStep

@@ -95,8 +95,8 @@ describe('hidden functions', () => {
         signatures: [
           {
             params: [
-              { name: 'left', type: 'keyword' as const },
-              { name: 'right', type: 'keyword' as const },
+              { name: 'left', type: 'integer' as const },
+              { name: 'right', type: 'integer' as const },
             ],
             returnType: 'boolean',
           },
@@ -117,8 +117,8 @@ describe('hidden functions', () => {
         signatures: [
           {
             params: [
-              { name: 'left', type: 'keyword' as const },
-              { name: 'right', type: 'keyword' as const },
+              { name: 'left', type: 'integer' as const },
+              { name: 'right', type: 'integer' as const },
             ],
             returnType: 'boolean',
           },
@@ -127,7 +127,7 @@ describe('hidden functions', () => {
     ]);
 
     const { suggest } = await setup();
-    const suggestedFunctions = (await suggest('FROM index | EVAL keywordField /')).map(
+    const suggestedFunctions = (await suggest('FROM index | EVAL integerField /')).map(
       (s) => s.text
     );
     expect(suggestedFunctions).toContain('VISIBLE_OPERATOR $0');

@@ -37,11 +37,10 @@ export const PrevalenceOverview: FC = () => {
   const { dataFormattedForFieldBrowser, investigationFields, isPreviewMode } =
     useDocumentDetailsContext();
 
-  const { navigateToLeftPanel: goToPrevalenceTab, isEnabled: isLinkEnabled } =
-    useNavigateToLeftPanel({
-      tab: LeftPanelInsightsTab,
-      subTab: PREVALENCE_TAB_ID,
-    });
+  const goToPrevalenceTab = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: PREVALENCE_TAB_ID,
+  });
 
   const { loading, error, data } = usePrevalence({
     dataFormattedForFieldBrowser,
@@ -64,19 +63,16 @@ export const PrevalenceOverview: FC = () => {
     [data]
   );
   const link = useMemo(
-    () =>
-      isLinkEnabled
-        ? {
-            callback: goToPrevalenceTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTooltip"
-                defaultMessage="Show all prevalence"
-              />
-            ),
-          }
-        : undefined,
-    [goToPrevalenceTab, isLinkEnabled]
+    () => ({
+      callback: goToPrevalenceTab,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTooltip"
+          defaultMessage="Show all prevalence"
+        />
+      ),
+    }),
+    [goToPrevalenceTab]
   );
 
   return (

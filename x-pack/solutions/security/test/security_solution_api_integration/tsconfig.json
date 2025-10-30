@@ -16,11 +16,15 @@
     "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "config/services/detections_response/**/*"
   ],
   "kbn_references": [
     {
       "path": "../security_solution_endpoint/tsconfig.json"
+    },
+    {
+      "path": "config/services/detections_response/tsconfig.json"
     },
     "@kbn/dev-utils",
     "@kbn/test",
@@ -66,6 +70,7 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/std",
     "@kbn/securitysolution-utils",
-    "@kbn/security-solution-test-api-clients"
+    "@kbn/security-solution-test-api-clients",
+    "@kbn/cloud-security-posture-common"
   ]
 }

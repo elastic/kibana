@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+
+import type { Client } from '@elastic/elasticsearch';
+import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
   CoreStart,
@@ -18,10 +23,12 @@ import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/wor
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
-import type { Client } from '@elastic/elasticsearch';
-import { v4 as generateUuid } from 'uuid';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
+import { resumeWorkflow, runWorkflow } from './execution_functions';
+import { LogsRepository } from './repositories/logs_repository/logs_repository';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
+import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   ExecuteWorkflowStepResponse,
   WorkflowsExecutionEnginePluginSetup,
@@ -30,15 +37,11 @@ import type {
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
 
-import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import type { ContextDependencies } from './workflow_context_manager/types';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
-import { StepExecutionRepository } from './repositories/step_execution_repository';
-import { LogsRepository } from './repositories/logs_repository/logs_repository';
-import { resumeWorkflow, runWorkflow } from './execution_functions';
-import type { ContextDependencies } from './workflow_context_manager/types';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -76,7 +79,10 @@ export class WorkflowsExecutionEnginePlugin
       'workflow:run': {
         title: 'Run Workflow',
         description: 'Executes a workflow immediately',
-        timeout: '5m',
+        // Set high timeout for long-running workflows.
+        // This is high value to allow long-running workflows.
+        // The workflow timeout logic defined in workflow execution engine logic is the primary control.
+        timeout: '365d',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           const taskAbortController = new AbortController();
@@ -122,7 +128,10 @@ export class WorkflowsExecutionEnginePlugin
       'workflow:resume': {
         title: 'Resume Workflow',
         description: 'Resumes a paused workflow',
-        timeout: '5m',
+        // Set high timeout for long-running workflows.
+        // This is high value to allow long-running workflows.
+        // The workflow timeout logic defined in workflow execution engine logic is the primary control.
+        timeout: '365d',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
           const taskAbortController = new AbortController();
@@ -177,7 +186,7 @@ export class WorkflowsExecutionEnginePlugin
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, any>,
-      request?: any // KibanaRequest for user-scoped execution
+      request?: any
     ) => {
       const workflowCreatedAt = new Date();
 
