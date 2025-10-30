@@ -753,27 +753,49 @@ function createForeachGraphForStepWithForeach(
 }
 
 export function convertToWorkflowGraph(
-  workflowSchema: WorkflowYaml
+  workflowSchema: WorkflowYaml,
+  defaultSettings?: WorkflowSettings
 ): graphlib.Graph<GraphNodeUnion> {
+  const resolvedSettings = resolveWorklfowSettings(workflowSchema.settings, defaultSettings);
   const context: GraphBuildContext = {
-    settings: workflowSchema.settings,
+    settings: resolvedSettings,
     stack: [],
     parentKey: '',
   };
 
   let finalGraph = createStepsSequence(workflowSchema.steps, context);
 
-  if (workflowSchema.settings?.timeout) {
+  if (resolvedSettings?.timeout) {
     finalGraph = handleTimeout(
       'workflow_level_timeout',
       'workflow_level_timeout',
-      workflowSchema.settings.timeout,
+      resolvedSettings.timeout,
       finalGraph,
       context
     );
   }
 
   return finalGraph;
+}
+
+function resolveWorklfowSettings(
+  workflowSettings?: WorkflowSettings,
+  defaultSettings?: WorkflowSettings
+): WorkflowSettings | undefined {
+  if (!defaultSettings) {
+    return workflowSettings;
+  }
+
+  if (!workflowSettings) {
+    return defaultSettings;
+  }
+
+  return {
+    ...workflowSettings,
+    timeout: workflowSettings.timeout ?? defaultSettings.timeout,
+    'on-failure': workflowSettings['on-failure'] ?? defaultSettings['on-failure'],
+    timezone: workflowSettings.timeout ?? defaultSettings.timezone,
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
