@@ -242,6 +242,7 @@ export const useDiscoverHistogram = (
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
 
+  // TODO: Refetch when externalVisContext gets updated after reverting changes in discover session
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
       const visContext = latestFetchDetails?.visContext ?? savedSearchState?.visContext;
