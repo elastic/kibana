@@ -294,30 +294,33 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       }
     );
 
-    evaluate('LLM response is formulated using product docs instead of internal knowledge base when the user asks about the Elastic Stack', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'kb: Elastic stack questions',
-          description: 'Validates retrieve_elastic_doc usage for Kibana Lens guidance.',
-          examples: [
-            {
-              input: {
-                question:
-                  'What is Kibana Lens and how do I create a bar chart visualization with it?',
+    evaluate(
+      'LLM response is formulated using product docs instead of internal knowledge base when the user asks about the Elastic Stack',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'kb: Elastic stack questions',
+            description: 'Validates retrieve_elastic_doc usage for Kibana Lens guidance.',
+            examples: [
+              {
+                input: {
+                  question:
+                    'What is Kibana Lens and how do I create a bar chart visualization with it?',
+                },
+                output: {
+                  criteria: [
+                    'Does not use context function response to retrieve information about Kibana Lens',
+                    `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Kibana`,
+                    'Accurately explains what Kibana Lens is and provides steps for creating a visualization',
+                    `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
+                  ],
+                },
+                metadata: {},
               },
-              output: {
-                criteria: [
-                  'Does not use context function response to retrieve information about Kibana Lens',
-                  `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Kibana`,
-                  'Accurately explains what Kibana Lens is and provides steps for creating a visualization',
-                  `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
-                ],
-              },
-              metadata: {},
-            },
-          ],
-        },
-      });
-    });
+            ],
+          },
+        });
+      }
+    );
   });
 });
