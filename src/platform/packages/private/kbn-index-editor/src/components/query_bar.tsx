@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+/* eslint-disable @elastic/eui/href-or-on-click */
+
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -20,9 +22,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FilePicker } from './file_picker';
-import type { KibanaContextExtra } from '../types';
+import type { EditLookupIndexContentContext, KibanaContextExtra } from '../types';
 
-export const QueryBar = () => {
+export const QueryBar = ({
+  onOpenIndexInDiscover,
+}: {
+  onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover'];
+}) => {
   const {
     services: { share, data, indexUpdateService, indexEditorTelemetryService },
   } = useKibana<KibanaContextExtra>();
@@ -34,6 +40,7 @@ export const QueryBar = () => {
     indexUpdateService.indexCreated$,
     indexUpdateService.isIndexCreated()
   );
+  const indexName = useObservable(indexUpdateService.indexName$, null);
 
   const [queryError, setQueryError] = useState<string>('');
 
@@ -42,7 +49,7 @@ export const QueryBar = () => {
   }, [share?.url.locators]);
 
   const discoverLink =
-    isIndexCreated && esqlDiscoverQuery
+    !onOpenIndexInDiscover && isIndexCreated && esqlDiscoverQuery
       ? discoverLocator?.getRedirectUrl({
           timeRange: data.query.timefilter.timefilter.getTime(),
           query: {
@@ -50,6 +57,27 @@ export const QueryBar = () => {
           },
         })
       : null;
+
+  const openInDiscover = useCallback(
+    async (e: React.MouseEvent) => {
+      indexEditorTelemetryService.trackQueryThisIndexClicked(searchQuery);
+
+      // If no onOpenIndexInDiscover function is provided, we open discover in a new browser tab.
+      if (onOpenIndexInDiscover && indexName && esqlDiscoverQuery) {
+        e.preventDefault();
+        indexUpdateService.destroy();
+        await onOpenIndexInDiscover(indexName, esqlDiscoverQuery);
+      }
+    },
+    [
+      indexEditorTelemetryService,
+      searchQuery,
+      onOpenIndexInDiscover,
+      indexName,
+      esqlDiscoverQuery,
+      indexUpdateService,
+    ]
+  );
 
   if (!dataView) {
     return null;
@@ -84,10 +112,9 @@ export const QueryBar = () => {
         <EuiButton
           size={'s'}
           color={'text'}
-          isDisabled={!discoverLink}
-          href={discoverLink ?? undefined}
-          onClick={() => indexEditorTelemetryService.trackQueryThisIndexClicked(searchQuery)}
-          target="_blank"
+          isDisabled={!isIndexCreated || !esqlDiscoverQuery}
+          onClick={openInDiscover}
+          href={discoverLink || undefined}
           iconType={'discoverApp'}
         >
           <EuiText size="xs">

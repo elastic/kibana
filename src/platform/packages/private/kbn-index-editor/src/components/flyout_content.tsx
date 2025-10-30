@@ -138,7 +138,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
               {dataView ? (
                 <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
                   <EuiFlexItem grow={false}>
-                    <QueryBar />
+                    <QueryBar onOpenIndexInDiscover={props.onOpenIndexInDiscover} />
                   </EuiFlexItem>
 
                   <EuiFlexItem grow={true} css={{ minHeight: 0 }}>

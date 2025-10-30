@@ -99,6 +99,19 @@ export const DiscoverTopNav = ({
     onUpdateESQLQuery: stateContainer.actions.updateESQLQuery,
   });
 
+  // ES|QL lookup join index editor config
+  const openIndexInNewTab = useCallback(
+    async (indexName: string, esqlQuery: string) => {
+      dispatch(
+        internalStateActions.openInNewTab({
+          tabLabel: indexName,
+          appState: { query: { esql: esqlQuery } },
+        })
+      );
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
@@ -316,6 +329,9 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
+        esqlIndexEditorConfig={{
+          onOpenIndexInDiscover: openIndexInNewTab,
+        }}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

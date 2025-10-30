@@ -23,6 +23,7 @@ import type {
   RecommendedField,
 } from '@kbn/esql-types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type { EditLookupIndexContentContext } from '@kbn/index-editor';
 
 export interface ControlsContext {
   /** The editor supports the creation of controls,
@@ -33,6 +34,10 @@ export interface ControlsContext {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   /** Function to be called after cancelling the control creation **/
   onCancelControl: () => void;
+}
+
+export interface IndexEditorContext {
+  onOpenIndexInDiscover: EditLookupIndexContentContext['onOpenIndexInDiscover'];
 }
 
 export interface DataErrorsControl {
@@ -91,6 +96,8 @@ export interface ESQLEditorProps {
   disableAutoFocus?: boolean;
   /** Enables the creation of controls from the editor **/
   controlsContext?: ControlsContext;
+  /** Context for the lookup join index editor **/
+  indexEditorContext?: IndexEditorContext;
   /** The available ESQL variables from the page context this editor was opened in */
   esqlVariables?: ESQLControlVariable[];
   /** Resize the editor to fit the initially passed query on mount */

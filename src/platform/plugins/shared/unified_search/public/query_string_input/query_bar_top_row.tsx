@@ -49,6 +49,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
 
+import type { IndexEditorContext } from '@kbn/esql-editor';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -232,6 +233,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
      * additional elements around the controls.
      */
     controlsWrapper: React.ReactNode;
+  };
+  /** Optional configurations for the lookup join index editor */
+  esqlIndexEditorConfig?: {
+    /** Callback function invoked to open the current index in Discover */
+    onOpenIndexInDiscover: IndexEditorContext['onOpenIndexInDiscover'];
   };
   useBackgroundSearchButton?: boolean;
   showProjectPicker?: boolean;
@@ -922,6 +928,7 @@ export const QueryBarTopRow = React.memo(
                 : undefined
             }
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
+            indexEditorContext={props.esqlIndexEditorConfig}
           />
         )
       );
