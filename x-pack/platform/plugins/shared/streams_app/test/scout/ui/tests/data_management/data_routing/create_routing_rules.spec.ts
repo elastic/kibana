@@ -109,4 +109,17 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     const createButton = page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
     await expect(createButton).toBeHidden();
   });
+
+  test('should not allow creating a routing rule that is not a child of the current stream', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+
+    // Input invalid partition name that is not a direct child of the current stream
+    await pageObjects.streams.fillRoutingRuleName('nginx.access_logs');
+
+    const createButton = page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
+    await expect(createButton).toBeDisabled();
+  });
 });
