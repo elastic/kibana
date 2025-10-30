@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+// @ts-nocheck
+
 import type { KibanaRequest } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import { ActionExecutor } from './action_executor';

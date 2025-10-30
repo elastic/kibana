@@ -83,6 +83,7 @@ import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
+import type { GetAxiosParams } from '../lib/action_executor';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -501,10 +502,8 @@ export class ActionsClient {
     return execute(this.context, connectorExecuteParams);
   }
 
-  public async getAxiosInstance(
-    connectorExecuteParams: ConnectorExecuteParams
-  ): Promise<AxiosInstance> {
-    return getAxiosInstance(this.context, connectorExecuteParams);
+  public async getAxiosInstance(getAxiosParams: GetAxiosParams): Promise<AxiosInstance> {
+    return getAxiosInstance(this.context, getAxiosParams);
   }
 
   public async bulkEnqueueExecution(

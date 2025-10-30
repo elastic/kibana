@@ -6,15 +6,13 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import type { ILicenseState } from '../../../lib';
 
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
-import { asHttpRequestExecutionSource } from '../../../lib/action_execution_source';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
-import type { ExecuteConnectorRequestParamsV1 } from '../../../../common/routes/connector/apis/execute';
-import { executeConnectorRequestParamsSchemaV1 } from '../../../../common/routes/connector/apis/execute';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const axiosTestRoute = (
@@ -33,7 +31,13 @@ export const axiosTestRoute = (
       },
       validate: {
         request: {
-          params: executeConnectorRequestParamsSchemaV1,
+          params: schema.object({
+            id: schema.string({
+              meta: {
+                description: 'An identifier for the connector.',
+              },
+            }),
+          }),
         },
         response: {
           204: {
@@ -46,17 +50,11 @@ export const axiosTestRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
-        const { id }: ExecuteConnectorRequestParamsV1 = req.params;
+        const { id } = req.params;
 
-        if (actionsClient.isSystemAction(id)) {
-          return res.badRequest({ body: 'Execution of system action is not allowed' });
-        }
         try {
           const axiosInstance = await actionsClient.getAxiosInstance({
-            params: {},
             actionId: id,
-            source: asHttpRequestExecutionSource(req),
-            relatedSavedObjects: [],
           });
 
           // @ts-ignore

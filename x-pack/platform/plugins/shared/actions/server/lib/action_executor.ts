@@ -93,6 +93,10 @@ export interface ExecuteOptions<Source = unknown> {
   taskInfo?: TaskInfo;
 }
 
+export interface GetAxiosParams {
+  actionId: string;
+}
+
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
   currentUser?: AuthenticatedUser | null;
   checkCanExecuteFn?: (connectorTypeId: string) => Promise<void>;
@@ -141,9 +145,7 @@ export class ActionExecutor {
   public async getAxiosInstance({
     actionId,
     request,
-    params,
-    taskInfo,
-  }: ExecuteOptions): Promise<AxiosInstance> {
+  }: GetAxiosParams & { request: KibanaRequest }): Promise<AxiosInstance> {
     const { actionTypeRegistry, spaces } = this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
@@ -163,10 +165,9 @@ export class ActionExecutor {
         {
           actionId,
           actionType,
-          params,
+          params: {},
           config,
           secrets,
-          taskInfo,
         },
         { configurationUtilities }
       );
