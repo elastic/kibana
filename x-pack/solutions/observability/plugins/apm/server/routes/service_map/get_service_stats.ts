@@ -6,6 +6,8 @@
  */
 
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { ServicesResponse } from '../../../common/service_map/types';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -24,10 +26,19 @@ export async function getServiceStats({
   serviceName,
   kuery,
 }: IEnvOptions & { maxNumberOfServices: number }): Promise<ServicesResponse[]> {
+  const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
+  const shouldQueryMetrics = processorEvent === ProcessorEvent.metric;
   const params = {
-    apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
-    },
+    apm: shouldQueryMetrics
+      ? {
+          sources: [
+            {
+              documentType: ApmDocumentType.ServiceTransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+            },
+          ],
+        }
+      : { events: [processorEvent] },
     body: {
       track_total_hits: false,
       size: 0,
@@ -62,13 +73,12 @@ export async function getServiceStats({
 
   const response = await apmEventClient.search('get_service_stats_for_service_map', params);
 
-  return (
-    response.aggregations?.services.buckets.map((bucket) => {
-      return {
-        [SERVICE_NAME]: bucket.key as string,
-        [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
-      };
-    }) || []
-  );
+  const services =
+    response.aggregations?.services.buckets.map((bucket) => ({
+      [SERVICE_NAME]: bucket.key as string,
+      [AGENT_NAME]: (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
+      [SERVICE_ENVIRONMENT]: environment === ENVIRONMENT_ALL.value ? null : environment,
+    })) || [];
+
+  return services;
 }
