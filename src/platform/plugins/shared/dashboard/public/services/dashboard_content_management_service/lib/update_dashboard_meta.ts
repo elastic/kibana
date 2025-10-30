@@ -38,11 +38,9 @@ export const updateDashboardMeta = async ({
   await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     id,
-    data: { ...dashboard.attributes, title, description, tags },
+    data: { title, description, tags },
     options: {
       references: dashboard.references,
-      /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
-      mergeAttributes: false,
     },
   });
 
