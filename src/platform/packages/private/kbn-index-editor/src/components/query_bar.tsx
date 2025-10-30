@@ -30,7 +30,7 @@ export const QueryBar = ({
   onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover'];
 }) => {
   const {
-    services: { share, data, indexUpdateService, indexEditorTelemetryService },
+    services: { share, data, indexUpdateService, indexEditorTelemetryService, featureFlags },
   } = useKibana<KibanaContextExtra>();
 
   const dataView = useObservable(indexUpdateService.dataView$);
@@ -48,9 +48,14 @@ export const QueryBar = ({
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
   }, [share?.url.locators]);
 
-  // Only used as fallback if onOpenIndexInDiscover is not provided
+  const isOpeningInNewTabEnabled = useMemo(
+    () => featureFlags?.getBooleanValue('discover.tabsEnabled', true) ?? true,
+    [featureFlags]
+  );
+
+  // Only used as fallback if onOpenIndexInDiscover is not provided or tabs are disabled
   const discoverLink =
-    !onOpenIndexInDiscover && isIndexCreated && esqlDiscoverQuery
+    isIndexCreated && esqlDiscoverQuery
       ? discoverLocator?.getRedirectUrl({
           timeRange: data.query.timefilter.timefilter.getTime(),
           query: {
@@ -65,7 +70,7 @@ export const QueryBar = ({
 
       // If onOpenIndexInDiscover is provided, we let that handler to manage the navigation to Discover
       // If not, the button href will be executed
-      if (onOpenIndexInDiscover && indexName && esqlDiscoverQuery) {
+      if (isOpeningInNewTabEnabled && onOpenIndexInDiscover && indexName && esqlDiscoverQuery) {
         e.preventDefault();
         const onExitCallback = () => onOpenIndexInDiscover(indexName, esqlDiscoverQuery);
         indexUpdateService.exit(onExitCallback);
@@ -74,6 +79,7 @@ export const QueryBar = ({
     [
       indexEditorTelemetryService,
       searchQuery,
+      isOpeningInNewTabEnabled,
       onOpenIndexInDiscover,
       indexName,
       esqlDiscoverQuery,
@@ -112,12 +118,13 @@ export const QueryBar = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          size={'s'}
-          color={'text'}
+          size="s"
+          color="text"
           isDisabled={!isIndexCreated || !esqlDiscoverQuery}
           onClick={openInDiscover}
           href={discoverLink || undefined}
-          iconType={'discoverApp'}
+          target="_blank"
+          iconType="discoverApp"
         >
           <EuiText size="xs">
             <FormattedMessage
