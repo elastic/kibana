@@ -29,7 +29,7 @@ import {
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { LensApiState, MetricState } from '../../schema';
+import type { MetricState } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import type { LensApiBucketOperations } from '../../schema/bucket_ops';
@@ -467,9 +467,7 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
   };
 }
 
-export function fromLensStateToAPI(
-  config: LensAttributes
-): Extract<LensApiState, { type: 'metric' }> {
+export function fromLensStateToAPI(config: LensAttributes): MetricState {
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;
   const layers =

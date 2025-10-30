@@ -25,6 +25,10 @@ import {
   fromAPItoLensState as fromLegacyMetricAPItoLensState,
   fromLensStateToAPI as fromLegacyMetricLensStateToAPI,
 } from './transforms/charts/legacy_metric';
+import {
+  fromAPItoLensState as fromXYAPIToLensState,
+  fromLensStateToAPI as fromXYLensStateToAPI,
+} from './transforms/charts/xy';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
@@ -32,6 +36,7 @@ import { isLensLegacyFormat } from './utils';
 const compatibilityMap: Record<string, string> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
+  lnsXy: 'xy',
 };
 
 /**
@@ -64,6 +69,10 @@ export class LensConfigBuilder {
     legacy_metric: {
       fromAPItoLensState: fromLegacyMetricAPItoLensState,
       fromLensStateToAPI: fromLegacyMetricLensStateToAPI,
+    },
+    xy: {
+      fromAPItoLensState: fromXYAPIToLensState,
+      fromLensStateToAPI: fromXYLensStateToAPI,
     },
   } as const;
   private dataViewsAPI: DataViewsCommon | undefined;
