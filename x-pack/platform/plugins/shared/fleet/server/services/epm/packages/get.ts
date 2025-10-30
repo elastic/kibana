@@ -173,13 +173,44 @@ export async function getPackages(
   ).filter((p): p is Installable<any> => p !== null);
 
   const filteredPackages = getFilteredSearchPackages();
+
+  // For installed packages, fetch the correct latest version (including bundled packages)
+  // to ensure upgrade detection works correctly. Only do this when we need install status
+  // to avoid unnecessary overhead when excludeInstallStatus=true (cached responses).
+  const installedPackageNames = new Set(packageSavedObjects.saved_objects.map((pkg) => pkg.id));
+  const latestVersionsForInstalledPackages = new Map<string, string>();
+
+  if (!excludeInstallStatus && installedPackageNames.size > 0) {
+    await pMap(
+      Array.from(installedPackageNames),
+      async (pkgName) => {
+        // Only check packages that are in the registry
+        if (registryItems.some((item) => item.name === pkgName)) {
+          try {
+            const latestPackage = await Registry.fetchFindLatestPackageOrUndefined(pkgName, {
+              prerelease,
+            });
+            if (latestPackage) {
+              latestVersionsForInstalledPackages.set(pkgName, latestPackage.version);
+            }
+          } catch (err) {
+            logger.debug(`Failed to fetch latest version for ${pkgName}: ${err.message}`);
+          }
+        }
+      },
+      { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
+    );
+  }
+
   let packageList = registryItems
-    .map((item) =>
-      createInstallableFrom(
-        item,
-        packageSavedObjects.saved_objects.find(({ id }) => id === item.name)
-      )
-    )
+    .map((item) => {
+      const savedObject = packageSavedObjects.saved_objects.find(({ id }) => id === item.name);
+      // If this is an installed package and we have a correct latest version, use it
+      const latestVersion = latestVersionsForInstalledPackages.get(item.name);
+      const itemWithCorrectVersion = latestVersion ? { ...item, version: latestVersion } : item;
+
+      return createInstallableFrom(itemWithCorrectVersion, savedObject);
+    })
     .concat(uploadedPackagesNotInRegistry as Installable<any>)
     .filter((item) => !filteredPackages.includes(item.id))
     .sort(sortByName);
