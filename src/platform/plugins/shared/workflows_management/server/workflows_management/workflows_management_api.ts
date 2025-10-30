@@ -35,6 +35,7 @@ import type {
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -103,6 +104,14 @@ export interface GetAvailableConnectorsParams {
 export interface GetAvailableConnectorsResponse {
   connectorsByType: Record<string, ConnectorTypeInfo>;
   totalConnectors: number;
+}
+
+export interface TestWorkflowParams {
+  workflowId?: string;
+  workflowYaml?: string;
+  inputs: Record<string, any>;
+  spaceId: string;
+  request: KibanaRequest;
 }
 
 export class WorkflowsManagementApi {
@@ -200,18 +209,38 @@ export class WorkflowsManagementApi {
     return executeResponse.workflowExecutionId;
   }
 
-  public async testWorkflow(
-    workflowYaml: string,
-    inputs: Record<string, any>,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<string> {
+  public async testWorkflow({
+    workflowId,
+    workflowYaml,
+    inputs,
+    spaceId,
+    request,
+  }: TestWorkflowParams): Promise<string> {
+    let resolvedYaml = workflowYaml;
+    let resolvedWorkflowId = workflowId;
+
+    if (workflowId && !workflowYaml) {
+      const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
+      if (!existingWorkflow) {
+        throw new WorkflowNotFoundError(workflowId);
+      }
+      resolvedYaml = existingWorkflow.yaml;
+    }
+
+    if (!resolvedWorkflowId) {
+      resolvedWorkflowId = 'test-workflow';
+    }
+
+    if (!resolvedYaml) {
+      throw new Error('Either workflowId or workflowYaml must be provided');
+    }
+
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
       { loose: true },
       spaceId,
       request
     );
-    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, zodSchema);
+    const parsedYaml = parseWorkflowYamlToJSON(resolvedYaml, zodSchema);
 
     if (parsedYaml.error) {
       // TODO: handle error properly
@@ -239,11 +268,11 @@ export class WorkflowsManagementApi {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
-        id: 'test-workflow',
+        id: resolvedWorkflowId,
         name: workflowToCreate.name,
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
-        yaml: workflowYaml,
+        yaml: resolvedYaml,
         isTestRun: true,
       },
       context,
