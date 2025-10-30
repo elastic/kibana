@@ -332,7 +332,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
 
       return {
         conversationId: response.conversation.id,
-        data: last(response.messages),
+        data: last(response.messages)?.message.content,
         connectorId,
       };
     }

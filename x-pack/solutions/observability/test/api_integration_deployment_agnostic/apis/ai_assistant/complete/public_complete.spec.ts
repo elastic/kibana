@@ -4,14 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
-import type {
-  FunctionDefinition,
-  ConversationCreateRequest,
-} from '@kbn/observability-ai-assistant-plugin/common';
+import expect from '@kbn/expect/expect';
+import type { FunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { last } from 'lodash';
 import type { LlmProxy } from '../utils/create_llm_proxy';
 import { createLlmProxy } from '../utils/create_llm_proxy';
 import { clearConversations } from '../utils/conversation';
@@ -30,6 +26,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     const defaultUserPrompt = 'Good morning, bot!';
 
+    interface NonStreamingChatResponse {
+      conversationId: string;
+      connectorId: string;
+      data?: string;
+    }
+
     async function callPublicChatComplete({
       actions,
       instructions,
@@ -44,7 +46,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       isStream?: boolean;
       conversationId?: string;
       messages?: Message[];
-    }): Promise<string | ConversationCreateRequest> {
+    }): Promise<string | NonStreamingChatResponse> {
       const defaultMessages: Message[] = [
         {
           '@timestamp': new Date().toISOString(),
@@ -70,9 +72,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       });
 
-      const isStreamResponse = isStream ?? true;
-      // @ts-expect-error
-      return isStreamResponse ? String(body) : (body as ConversationCreateRequest);
+      return String(body);
     }
 
     before(async () => {
@@ -202,7 +202,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     // Skipped because `isStream` has been temporarily removed from the public API
     describe.skip('when isStream:false and persist:false', () => {
-      let conversationResponseBody: ConversationCreateRequest;
+      let conversationResponseBody: NonStreamingChatResponse;
 
       before(async () => {
         void llmProxy.interceptWithResponse('Hello sync');
@@ -210,14 +210,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         conversationResponseBody = (await callPublicChatComplete({
           isStream: false,
           persist: false,
-        })) as ConversationCreateRequest;
+        })) as NonStreamingChatResponse;
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
-      it('returns a single conversation payload', () => {
-        expect(conversationResponseBody.conversation.id).to.be.a('string');
-        expect(conversationResponseBody.messages).to.be.an('array');
+      it('returns the connector metadata and assistant response', () => {
+        expect(conversationResponseBody.conversationId).to.be.a('string');
+        expect(conversationResponseBody.connectorId).to.be(connectorId);
+        expect(conversationResponseBody.data).to.contain('Hello sync');
       });
     });
 
@@ -225,8 +226,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe.skip('when isStream:false for existing conversation', () => {
       const followUpQuestion = 'Can you give me more details?';
       const followUpAnswer = 'Yes John. Here are some more details: yadadada.';
-      let createdConversationResponse: ConversationCreateRequest;
-      let updatedConversationResponse: ConversationCreateRequest;
+      let createdConversationResponse: NonStreamingChatResponse;
+      let updatedConversationResponse: NonStreamingChatResponse;
+      let conversationMessages: Message[];
 
       before(async () => {
         await clearConversations(es);
@@ -234,30 +236,43 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptTitle('Conversation that will be updated');
         void llmProxy.interceptWithResponse('Good morning, John!');
 
+        conversationMessages = [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: defaultUserPrompt,
+            },
+          },
+        ];
+
         createdConversationResponse = (await callPublicChatComplete({
+          messages: conversationMessages,
           persist: true,
           isStream: false,
-        })) as ConversationCreateRequest;
+        })) as NonStreamingChatResponse;
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
         void llmProxy.interceptWithResponse(followUpAnswer);
 
-        updatedConversationResponse = (await callPublicChatComplete({
-          messages: [
-            ...createdConversationResponse.messages,
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.User,
-                content: followUpQuestion,
-              },
+        conversationMessages = [
+          ...conversationMessages,
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: followUpQuestion,
             },
-          ],
+          },
+        ];
+
+        updatedConversationResponse = (await callPublicChatComplete({
+          messages: conversationMessages,
           persist: true,
           isStream: false,
-          conversationId: createdConversationResponse.conversation.id,
-        })) as ConversationCreateRequest;
+          conversationId: createdConversationResponse.conversationId,
+        })) as NonStreamingChatResponse;
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
@@ -267,50 +282,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('retains the original conversation id', () => {
-        expect(updatedConversationResponse.conversation.id).to.be(
-          createdConversationResponse.conversation.id
-        );
-      });
-
-      it('includes the initial user message', () => {
-        const userMessages = updatedConversationResponse.messages.filter(
-          (message) => message.message.role === MessageRole.User
-        );
-
-        expect(userMessages.some((message) => message.message.content === defaultUserPrompt)).to.be(
-          true
-        );
-      });
-
-      it('includes the follow-up user message', () => {
-        const userMessages = updatedConversationResponse.messages.filter(
-          (message) => message.message.role === MessageRole.User
-        );
-
-        expect(userMessages.some((message) => message.message.content === followUpQuestion)).to.be(
-          true
+        expect(updatedConversationResponse.conversationId).to.be(
+          createdConversationResponse.conversationId
         );
       });
 
       it('includes the follow-up assistant response', () => {
-        const lastAssistantMessage = last(updatedConversationResponse.messages)?.message;
-        expect(lastAssistantMessage?.role).to.be(MessageRole.Assistant);
-        expect(lastAssistantMessage?.content).to.be(followUpAnswer);
-      });
-
-      it('the updated conversation has the expected properties', () => {
-        expect(updatedConversationResponse).to.have.keys([
-          '@timestamp',
-          'archived',
-          'conversation',
-          'labels',
-          'messages',
-          'namespace',
-          'numeric_labels',
-          'public',
-          'systemMessage',
-          'user',
-        ]);
+        expect(updatedConversationResponse.data).to.be(followUpAnswer);
+        expect(updatedConversationResponse.connectorId).to.be(connectorId);
       });
     });
   });
