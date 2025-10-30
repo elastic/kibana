@@ -9,9 +9,10 @@
 
 import { asyncMap } from '@kbn/std';
 import { dashboardClient } from './dashboard_client';
+import type { FindDashboardsByIdResponse } from './types';
 
-export const find = {
-  findDashboardById: async (id: string) => {
+export const findService = {
+  findById: async (id: string): Promise<FindDashboardsByIdResponse> => {
     try {
       const result = await dashboardClient.get(id);
       return {
@@ -21,12 +22,28 @@ export const find = {
         references: result.data.references ?? [],
       };
     } catch (error) {
-      return { status: 'error', error };
+      return { id, status: 'error', error };
     }
   },
-  findDashboardsByIds: async (ids: string[]) => {
+  findByIds: async (ids: string[]) => {
     return asyncMap(ids, async (id) => {
-      return find.findDashboardById(id);
+      return findService.findById(id);
     });
   },
+  findByTitle: async (title: string) => {
+    const { hits } = await dashboardClient.search({
+      search: title,
+      size: 10,
+      options: { onlyTitle: true },
+    });
+
+    // The search isn't an exact match, lets see if we can find a single exact match to use
+    const matchingDashboards = hits.filter(
+      (hit) => hit.attributes.title.toLowerCase() === title.toLowerCase()
+    );
+    if (matchingDashboards.length === 1) {
+      return { id: matchingDashboards[0].id };
+    }
+  },
+  search: dashboardClient.search,
 };

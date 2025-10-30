@@ -68,11 +68,11 @@ import type { DashboardMountContextProps } from './dashboard_app/types';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from '../common/constants';
 import type { GetPanelPlacementSettings } from './panel_placement';
 import { registerDashboardPanelSettings } from './panel_placement';
-import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
+import type { FindDashboardsService } from './dashboard_client/types';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -152,7 +152,7 @@ export class DashboardPlugin
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
             const [{ dashboardClient }] = await Promise.all([
-              import('./dashboard_client/dashboard_client'),
+              import('./dashboard_client'),
               untilPluginStartServicesReady(),
             ]);
             const result = await dashboardClient.get(dashboardId);
@@ -294,11 +294,10 @@ export class DashboardPlugin
 
     return {
       registerDashboardPanelSettings,
+      // TODO rename to getFindService
       findDashboardsService: async () => {
-        const { getDashboardContentManagementService } = await import(
-          './services/dashboard_content_management_service'
-        );
-        return getDashboardContentManagementService().findDashboards;
+        const { findService } = await import('./dashboard_client');
+        return findService;
       },
     };
   }

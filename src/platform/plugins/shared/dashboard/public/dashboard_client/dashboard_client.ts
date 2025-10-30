@@ -10,8 +10,13 @@
 import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { CONTENT_ID, DASHBOARD_API_VERSION } from '../../common/content_management/constants';
-import type { DashboardAPIGetOut } from '../../server/content_management';
-import { coreServices } from '../services/kibana_services';
+import type {
+  DashboardAPIGetOut,
+  DashboardSearchAPIResult,
+  DashboardSearchIn,
+} from '../../server/content_management';
+import { contentManagementService, coreServices } from '../services/kibana_services';
+import type { SearchDashboardsArgs } from './types';
 
 const CACHE_SIZE = 20; // only store a max of 20 dashboards
 const CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
@@ -53,5 +58,28 @@ export const dashboardClient = {
       cache.set(id, result);
     }
     return result;
+  },
+  search: async ({ hasNoReference, hasReference, options, search, size }: SearchDashboardsArgs) => {
+    // TODO replace with call to dashboard REST search endpoint when its implemented
+    // https://github.com/elastic/kibana/issues/241211
+    const {
+      hits,
+      pagination: { total },
+    } = await contentManagementService.client.search<DashboardSearchIn, DashboardSearchAPIResult>({
+      contentTypeId: CONTENT_ID,
+      query: {
+        text: search ? `${search}*` : undefined,
+        limit: size,
+        tags: {
+          included: (hasReference ?? []).map(({ id }) => id),
+          excluded: (hasNoReference ?? []).map(({ id }) => id),
+        },
+      },
+      options,
+    });
+    return {
+      total,
+      hits,
+    };
   },
 };

@@ -38,6 +38,7 @@ import type { DashboardSavedObjectUserContent } from '../types';
 import type { UpdateDashboardMetaProps } from '../../services/dashboard_content_management_service/lib/update_dashboard_meta';
 import { CONTENT_ID } from '../../../common/content_management';
 import { dashboardClient } from '../../dashboard_client/dashboard_client';
+import { findService } from '../../dashboard_client/find_service';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -149,8 +150,7 @@ export const useDashboardListingTable = ({
           fn: async (value: string, id: string) => {
             if (id) {
               try {
-                const [dashboard] =
-                  await dashboardContentManagementService.findDashboards.findByIds([id]);
+                const dashboard = await findService.findById(id);
                 if (dashboard.status === 'error') {
                   return;
                 }
@@ -210,7 +210,7 @@ export const useDashboardListingTable = ({
     ) => {
       const searchStartTime = window.performance.now();
 
-      return dashboardContentManagementService.findDashboards
+      return findService
         .search({
           search: searchTerm,
           size: listingLimit,
@@ -238,7 +238,7 @@ export const useDashboardListingTable = ({
           };
         });
     },
-    [listingLimit, dashboardContentManagementService]
+    [listingLimit]
   );
 
   const deleteItems = useCallback(

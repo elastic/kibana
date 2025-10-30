@@ -33,7 +33,7 @@ import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks
 import { setKibanaServices } from './kibana_services';
 import { setLogger } from './logger';
 import type { DashboardCapabilities } from '../../common';
-import type { SearchDashboardsResponse } from './dashboard_content_management_service/lib/find_dashboards';
+import type { SearchDashboardsResponse } from '../dashboard_client';
 
 const defaultDashboardCapabilities: DashboardCapabilities = {
   show: true,

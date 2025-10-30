@@ -9,12 +9,6 @@
 
 import { DashboardContentManagementCache } from './dashboard_content_management_cache';
 import { checkForDuplicateDashboardTitle } from './lib/check_for_duplicate_dashboard_title';
-import {
-  findDashboardById,
-  findDashboardIdByTitle,
-  findDashboardsByIds,
-  searchDashboards,
-} from './lib/find_dashboards';
 import { saveDashboardState } from './lib/save_dashboard_state';
 import { updateDashboardMeta } from './lib/update_dashboard_meta';
 
@@ -29,12 +23,6 @@ export const getDashboardContentManagementCache = () => {
 export const getDashboardContentManagementService = () => {
   return {
     saveDashboardState,
-    findDashboards: {
-      search: searchDashboards,
-      findById: findDashboardById,
-      findByIds: findDashboardsByIds,
-      findByTitle: findDashboardIdByTitle,
-    },
     checkForDuplicateDashboardTitle,
     updateDashboardMeta,
   };

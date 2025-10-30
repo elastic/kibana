@@ -12,7 +12,7 @@ import type {
   DashboardUpdateIn,
   DashboardUpdateOut,
 } from '../../../../server/content_management';
-import { findDashboardsByIds } from './find_dashboards';
+import { findService } from '../../../dashboard_client/find_service';
 import { contentManagementService } from '../../kibana_services';
 import { getDashboardContentManagementCache } from '..';
 import { CONTENT_ID } from '../../../../common/content_management';
@@ -30,7 +30,7 @@ export const updateDashboardMeta = async ({
   description = '',
   tags,
 }: UpdateDashboardMetaProps) => {
-  const [dashboard] = await findDashboardsByIds([id]);
+  const dashboard = await findService.findById(id);
   if (dashboard.status === 'error') {
     return;
   }
