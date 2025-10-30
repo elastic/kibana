@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Document } from 'langchain/document';
+import type { Document } from '@langchain/core/documents';
 import type { Logger } from '@kbn/core/server';
 import type { Metadata } from '@kbn/elastic-assistant-common';
 import { globSync } from 'fs';
