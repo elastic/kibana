@@ -44,6 +44,7 @@ export const registerTelemetryUsageCollector = (
           dlsEnabled: { type: 'boolean' },
           sslEnabled: { type: 'boolean' },
           fetchSelectively: { type: 'boolean' },
+          isThisACoolConnector: { type: 'boolean' },
           textExtractionServiceEnabled: { type: 'boolean' },
           documents: {
             total: { type: 'long' },

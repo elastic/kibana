@@ -197,7 +197,7 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
   //  In the meanwhile, we'll have to maintain these lists up to date (TS will remind us to update)
   services_per_agent: {
     'android/java': {
-      type: 'long',
+      type: 'byte',
       _meta: {
         description:
           'Total number of services utilizing the android/java agent within the last day',

@@ -15,6 +15,7 @@ export interface ConnectorStats {
   dlsEnabled?: boolean;
   sslEnabled?: boolean;
   fetchSelectively?: boolean;
+  isThisACoolConnector?: boolean;
   textExtractionServiceEnabled?: boolean;
   documents?: DocumentsStats;
   dataSourceSpecific?: DataSourceSpecificStats;
