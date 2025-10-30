@@ -112,8 +112,6 @@ Scout provides powerful debugging tools:
 - **State inspection** - Check URL, auth status, error messages
 - **Step-by-step execution** - Run test incrementally with screenshots
 
-See **DEBUGGING.md** for comprehensive debugging guide and **DEBUG_QUICK_REF.md** for quick reference commands.
-
 ## Troubleshooting
 
 **"No server info found"**

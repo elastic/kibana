@@ -21,6 +21,8 @@ export interface ScoutMcpConfig {
   configPath?: string;
   /** Scout test configuration */
   scoutConfig?: ScoutTestConfig;
+  /** Whether to ignore HTTPS errors (default: false, enabled for security) */
+  ignoreHTTPSErrors?: boolean;
 }
 
 export interface ScoutMcpOptions extends ScoutMcpConfig {
@@ -44,11 +46,19 @@ export interface NavigateParams {
 export interface ClickParams {
   testSubj?: string;
   selector?: string;
+  /** Element reference from ARIA snapshot (e.g., 'e1', 'e2') for precise targeting */
+  ref?: string;
+  /** Human-readable description of the element being clicked (for audit/permission) */
+  element?: string;
 }
 
 export interface TypeParams {
   testSubj?: string;
   selector?: string;
+  /** Element reference from ARIA snapshot (e.g., 'e1', 'e2') for precise targeting */
+  ref?: string;
+  /** Human-readable description of the element (for audit/permission) */
+  element?: string;
   text: string;
   submit?: boolean;
   slowly?: boolean;
@@ -70,6 +80,8 @@ export interface WaitForParams {
   text?: string;
   testSubj?: string;
   selector?: string;
+  /** Element reference from ARIA snapshot (e.g., 'e1', 'e2') for precise targeting */
+  ref?: string;
   state?: 'visible' | 'hidden' | 'attached' | 'detached';
 }
 

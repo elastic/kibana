@@ -16,6 +16,28 @@ import { success, error, executeSafely } from '../utils';
 // For now, we'll create a simplified implementation that wraps the page objects
 
 /**
+ * Whitelist of allowed methods per page object to prevent unauthorized method calls
+ */
+const ALLOWED_METHODS: Record<string, string[]> = {
+  discover: ['goto', 'selectDataView', 'clickNewSearch', 'saveSearch', 'waitForHistogramRendered'],
+  dashboard: [
+    'goto',
+    'waitForListingTableToLoad',
+    'openNewDashboard',
+    'saveDashboard',
+    'addPanelFromLibrary',
+    'customizePanel',
+    'removePanel',
+    'waitForPanelsToLoad',
+  ],
+  filterBar: ['addFilter', 'hasFilter'],
+  datePicker: ['setAbsoluteRange', 'setCommonlyUsedTime', 'setQuickTime'],
+  maps: ['goto', 'waitForLayersToLoad'],
+  collapsibleNav: ['open', 'close', 'clickLink', 'isOpen'],
+  toasts: ['getToasts', 'dismissAll', 'waitForToastCount', 'expectSuccess', 'expectError'],
+};
+
+/**
  * Use Scout page objects for high-level interactions
  */
 export async function scoutPageObject(
@@ -29,6 +51,16 @@ export async function scoutPageObject(
   const { pageObject, method, args = [] } = params;
 
   return executeSafely(async () => {
+    // Validate method is in whitelist
+    const allowedMethods = ALLOWED_METHODS[pageObject];
+    if (!allowedMethods || !allowedMethods.includes(method)) {
+      throw new Error(
+        `Method '${method}' is not allowed on page object '${pageObject}'. Allowed methods: ${
+          allowedMethods?.join(', ') || 'none'
+        }`
+      );
+    }
+
     // Get or create the page object instance
     let pageObjectInstance = session.getPageObject(pageObject);
 
@@ -49,7 +81,7 @@ export async function scoutPageObject(
       session.setPageObject(pageObject, pageObjectInstance);
     }
 
-    // Call the method on the page object
+    // Verify method exists and is callable
     if (typeof pageObjectInstance[method] !== 'function') {
       throw new Error(`Method '${method}' not found on page object '${pageObject}'`);
     }

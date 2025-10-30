@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import path from 'path';
+import fs from 'fs';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ScoutTestConfig } from '@kbn/scout';
-import { createScoutConfig } from '@kbn/scout/src/common/services';
 import type { ScoutMcpConfig } from './types';
+import { validateConfigPath } from './utils';
 
 /**
  * Load Scout MCP configuration from environment variables and options
@@ -32,19 +32,30 @@ export function loadScoutMcpConfig(options: Partial<ScoutMcpConfig> = {}): Scout
 
   const configPath = options.configPath || process.env.SCOUT_CONFIG_PATH || undefined;
 
+  // SSL validation: disabled only for localhost/development, enabled by default for security
+  const ignoreHTTPSErrors =
+    options.ignoreHTTPSErrors !== undefined
+      ? options.ignoreHTTPSErrors
+      : process.env.SCOUT_IGNORE_HTTPS_ERRORS === 'true'
+      ? true
+      : false; // Default: false (SSL validation enabled)
+
   // Try to load Scout config if configPath is provided, otherwise we'll create minimal config on demand
   let scoutConfig: ScoutTestConfig | undefined = options.scoutConfig;
 
   if (!scoutConfig && configPath) {
     try {
-      const configDir = path.dirname(configPath);
-      const configName = path.basename(configPath, path.extname(configPath));
-      // Create a minimal logger for config loading
-      const log = new ToolingLog({
-        level: 'info',
-        writeTo: process.stderr,
-      });
-      scoutConfig = createScoutConfig(configDir, configName, log as any);
+      // Validate config path to prevent path traversal
+      const validatedPath = validateConfigPath(configPath);
+
+      // Ensure the file exists
+      if (!fs.existsSync(validatedPath)) {
+        throw new Error(`Config file does not exist: ${validatedPath}`);
+      }
+
+      // Read and parse the config file
+      const configContent = fs.readFileSync(validatedPath, 'utf-8');
+      scoutConfig = JSON.parse(configContent) as ScoutTestConfig;
     } catch (error) {
       // If loading fails, we'll create a minimal config later
       scoutConfig = undefined;
@@ -57,6 +68,7 @@ export function loadScoutMcpConfig(options: Partial<ScoutMcpConfig> = {}): Scout
     projectType,
     configPath,
     scoutConfig,
+    ignoreHTTPSErrors,
   };
 }
 
@@ -108,17 +120,37 @@ export function createScoutTestConfig(config: ScoutMcpConfig, log: ToolingLog): 
   const kibanaUrl = new URL(config.targetUrl);
 
   // Get credentials from environment variables
+  // Allow default credentials for localhost/development, require explicit for remote
+  const isLocalhost = kibanaUrl.hostname === 'localhost' || kibanaUrl.hostname === '127.0.0.1';
+
+  // Normalize empty strings to undefined
+  const urlUsername = kibanaUrl.username || undefined;
+  const urlPassword = kibanaUrl.password || undefined;
+
   const username =
     process.env.ELASTICSEARCH_USERNAME ||
     process.env.KIBANA_USERNAME ||
-    kibanaUrl.username ||
-    'elastic';
+    urlUsername ||
+    (isLocalhost ? 'elastic' : undefined);
 
   const password =
     process.env.ELASTICSEARCH_PASSWORD ||
     process.env.KIBANA_PASSWORD ||
-    kibanaUrl.password ||
-    'changeme';
+    urlPassword ||
+    (isLocalhost ? 'changeme' : undefined);
+
+  // Require credentials for non-localhost deployments
+  if (!username || !password) {
+    if (!isLocalhost) {
+      throw new Error(
+        'Credentials must be provided via environment variables (ELASTICSEARCH_USERNAME/ELASTICSEARCH_PASSWORD or KIBANA_USERNAME/KIBANA_PASSWORD) or URL for remote deployments'
+      );
+    }
+    // This should not happen for localhost since we provide defaults, but handle edge case
+    throw new Error(
+      'Credentials must be provided via environment variables (ELASTICSEARCH_USERNAME/ELASTICSEARCH_PASSWORD or KIBANA_USERNAME/KIBANA_PASSWORD) or URL'
+    );
+  }
 
   // Determine Elasticsearch URL (usually Kibana URL without port or with different port)
   // For local development, ES is typically on port 9200

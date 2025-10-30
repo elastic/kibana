@@ -32,13 +32,8 @@ export { scoutPageObject, scoutListPageObjects, scoutGetPageObjectState } from '
 export { scoutEuiComponent, scoutListEuiComponents } from './eui';
 
 // API service tools
-export { scoutApiService, scoutListApiServices } from './api';
+export { scoutListApiServices } from './api';
 
-// Fixture tools
-export {
-  scoutEsQuery,
-  scoutKibanaApi,
-  scoutEsArchiver,
-  scoutGetConfig,
-  scoutListFixtures,
-} from './fixtures';
+// Note: Fixture tools (scoutEsQuery, scoutKibanaApi, scoutEsArchiver, scoutGetConfig, scoutListFixtures)
+// are not exported as they reference test infrastructure and are not yet implemented.
+// They are available in './fixtures' but should not be used until properly implemented.

@@ -234,15 +234,10 @@ export class ScoutMcpServer {
             inputSchema: { type: 'object', properties: {} },
           },
 
-          // Fixture tools (informational for now)
+          // API services (informational)
           {
             name: 'scout_list_api_services',
             description: 'List available API services',
-            inputSchema: { type: 'object', properties: {} },
-          },
-          {
-            name: 'scout_list_fixtures',
-            description: 'List available fixture operations',
             inputSchema: { type: 'object', properties: {} },
           },
         ],
@@ -316,12 +311,9 @@ export class ScoutMcpServer {
             result = await tools.scoutListEuiComponents();
             break;
 
-          // API services and fixtures (informational)
+          // API services (informational)
           case 'scout_list_api_services':
             result = await tools.scoutListApiServices();
-            break;
-          case 'scout_list_fixtures':
-            result = await tools.scoutListFixtures();
             break;
 
           default:

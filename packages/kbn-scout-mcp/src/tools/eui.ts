@@ -12,6 +12,27 @@ import type { EuiComponentParams, ToolResult } from '../types';
 import { success, error, executeSafely } from '../utils';
 
 /**
+ * Whitelist of allowed actions per EUI component
+ */
+const ALLOWED_EUI_ACTIONS: Record<string, string[]> = {
+  comboBox: [
+    'selectSingleOption',
+    'selectMultiOption',
+    'selectMultiOptions',
+    'setCustomSingleOption',
+    'setCustomMultiOption',
+    'removeOption',
+    'clear',
+    'getSelectedValue',
+    'getSelectedMultiOptions',
+  ],
+  checkBox: ['check', 'uncheck', 'isChecked'],
+  dataGrid: ['getRowCount', 'getColumnCount', 'getCellValue', 'clickCell', 'sortByColumn'],
+  selectable: ['selectOption', 'selectOptions', 'getSelectedOptions'],
+  toast: ['getText', 'dismiss'],
+};
+
+/**
  * Interact with EUI components
  */
 export async function scoutEuiComponent(
@@ -24,6 +45,16 @@ export async function scoutEuiComponent(
 
   if (!params.testSubj && !params.selector) {
     return error('Either testSubj or selector parameter must be provided');
+  }
+
+  // Validate action is in whitelist
+  const allowedActions = ALLOWED_EUI_ACTIONS[params.component];
+  if (!allowedActions || !allowedActions.includes(params.action)) {
+    return error(
+      `Action '${params.action}' is not allowed on component '${
+        params.component
+      }'. Allowed actions: ${allowedActions?.join(', ') || 'none'}`
+    );
   }
 
   return executeSafely(async () => {

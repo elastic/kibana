@@ -7,11 +7,83 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PROJECT_DEFAULT_ROLES } from '@kbn/scout/src/common';
 import type { KibanaRole } from '@kbn/scout';
 import type { ScoutSession } from '../session';
 import type { LoginParams, ToolResult } from '../types';
 import { success, error, executeSafely } from '../utils';
+
+/**
+ * Default roles for serverless project types
+ * Matches the mapping used in Scout's PROJECT_DEFAULT_ROLES
+ */
+const PROJECT_DEFAULT_ROLES = new Map<string, string>([
+  ['es', 'developer'],
+  ['security', 'editor'],
+  ['oblt', 'editor'],
+]);
+
+/**
+ * Validate custom role to prevent excessive permissions
+ */
+function validateCustomRole(role: LoginParams['customRole']): void {
+  if (!role) {
+    return;
+  }
+
+  // Limit the number of Kibana spaces (prevent excessive access)
+  if (role.kibana && role.kibana.length > 10) {
+    throw new Error('Custom role cannot have more than 10 Kibana space entries');
+  }
+
+  // Validate each Kibana entry
+  for (const entry of role.kibana || []) {
+    // Limit spaces per entry
+    if (entry.spaces && entry.spaces.length > 20) {
+      throw new Error('Kibana role entry cannot have more than 20 spaces');
+    }
+
+    // Limit base privileges
+    if (entry.base && entry.base.length > 10) {
+      throw new Error('Kibana role entry cannot have more than 10 base privileges');
+    }
+
+    // Validate feature privileges are reasonable
+    if (entry.feature) {
+      const featureKeys = Object.keys(entry.feature);
+      if (featureKeys.length > 50) {
+        throw new Error('Kibana role entry cannot have more than 50 feature privilege entries');
+      }
+      for (const featurePrivs of Object.values(entry.feature)) {
+        if (featurePrivs.length > 20) {
+          throw new Error('Feature cannot have more than 20 privilege entries');
+        }
+      }
+    }
+  }
+
+  // Validate Elasticsearch role if present
+  if (role.elasticsearch) {
+    // Limit cluster privileges
+    if (role.elasticsearch.cluster && role.elasticsearch.cluster.length > 20) {
+      throw new Error('Elasticsearch role cannot have more than 20 cluster privileges');
+    }
+
+    // Limit indices entries
+    if (role.elasticsearch.indices && role.elasticsearch.indices.length > 100) {
+      throw new Error('Elasticsearch role cannot have more than 100 index entries');
+    }
+
+    // Validate each index entry
+    for (const indexEntry of role.elasticsearch.indices || []) {
+      if (indexEntry.names && indexEntry.names.length > 50) {
+        throw new Error('Index entry cannot cover more than 50 index patterns');
+      }
+      if (indexEntry.privileges && indexEntry.privileges.length > 20) {
+        throw new Error('Index entry cannot have more than 20 privileges');
+      }
+    }
+  }
+}
 
 /**
  * Login with a role using Scout's SAML authentication
@@ -30,6 +102,11 @@ export async function scoutLogin(session: ScoutSession, params: LoginParams): Pr
     const context = session.getContext();
     if (!context) {
       throw new Error('Browser context not available');
+    }
+
+    // Validate custom role before using it
+    if (params.customRole) {
+      validateCustomRole(params.customRole);
     }
 
     // Determine the actual role to use
@@ -97,7 +174,7 @@ export async function scoutLogout(session: ScoutSession): Promise<ToolResult> {
     }
 
     // Navigate to logout or home
-    const baseUrl = page.context().options.baseURL || '';
+    const baseUrl = session.getTargetUrl();
     await page.goto(`${baseUrl}/logout`).catch(() => {
       // Logout endpoint might not exist, that's ok
     });
@@ -146,8 +223,8 @@ export async function scoutSetSessionCookie(
       const kbnUrl = await session.getKbnUrl();
       domain = kbnUrl.domain();
     } catch {
-      const page = await session.getPage();
-      const baseUrl = page.context().options.baseURL || '';
+      // Get baseURL from session config
+      const baseUrl = session.getTargetUrl();
       const url = new URL(baseUrl);
       domain = params.domain || url.hostname;
     }

@@ -18,7 +18,12 @@ import type {
   WaitForParams,
   ToolResult,
 } from '../types';
-import { error, executeSafely, formatScreenshotFilename } from '../utils';
+import {
+  formatScreenshotFilename,
+  validateAndSanitizeUrl,
+  validateTextInput,
+  ResponseBuilder,
+} from '../utils';
 
 /**
  * Navigate to a URL or Kibana app
@@ -27,83 +32,207 @@ export async function scoutNavigate(
   session: ScoutSession,
   params: NavigateParams
 ): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  try {
     const page = await session.getPage();
+    const baseUrl = session.getTargetUrl();
+    let targetUrl: string;
+    let codeSnippet: string;
 
     if (params.url) {
-      await page.goto(params.url);
-      return `Navigated to ${params.url}`;
+      // Validate URL to prevent SSRF
+      const sanitizedUrl = validateAndSanitizeUrl(params.url, baseUrl);
+      await page.goto(sanitizedUrl);
+      targetUrl = sanitizedUrl;
+      codeSnippet = `await page.goto('${sanitizedUrl}');`;
+      response.setResult(`Successfully navigated to ${sanitizedUrl}`);
+    } else if (params.app) {
+      // Validate app name contains only safe characters
+      if (!/^[a-zA-Z0-9_-]+$/.test(params.app)) {
+        throw new Error('Invalid app name: contains unsafe characters');
+      }
+
+      // Validate path parameter
+      let safePath = params.path || '';
+      if (safePath) {
+        // Ensure path doesn't contain path traversal
+        if (safePath.includes('..') || safePath.includes('//')) {
+          throw new Error('Invalid path: path traversal detected');
+        }
+        // Ensure path starts with /
+        if (!safePath.startsWith('/')) {
+          safePath = '/' + safePath;
+        }
+      }
+
+      targetUrl = `${baseUrl}/app/${params.app}${safePath}`;
+      await page.goto(targetUrl);
+      codeSnippet = `await page.goto('${baseUrl}/app/${params.app}${safePath}');`;
+      response.setResult(`Successfully navigated to Kibana app: ${params.app}${safePath}`);
+      response.setKibanaState(params.app, safePath);
+    } else {
+      return response.setError('Either url or app parameter must be provided').buildAsToolResult();
     }
 
-    if (params.app) {
-      const baseUrl = page.context().options.baseURL || '';
-      const path = params.path || '';
-      const url = `${baseUrl}/app/${params.app}${path}`;
-      await page.goto(url);
-      return `Navigated to Kibana app: ${params.app}${path}`;
-    }
+    // Add executed code for transparency
+    response.addCode(codeSnippet);
 
-    throw new Error('Either url or app parameter must be provided');
-  }, 'Navigation failed');
+    // Add current page state with ARIA snapshot
+    const title = await page.title();
+    const url = page.url();
+    const snapshot = await session.getAriaSnapshot();
+    response.setPageState(url, title, snapshot);
+
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return response.setError(`Navigation failed: ${message}`).buildAsToolResult();
+  }
 }
 
 /**
- * Click an element by test subject or selector
+ * Click an element by test subject, selector, or element reference
  */
 export async function scoutClick(session: ScoutSession, params: ClickParams): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  if (!params.testSubj && !params.selector) {
-    return error('Either testSubj or selector parameter must be provided');
+  // Validate at least one targeting method is provided
+  if (!params.ref && !params.testSubj && !params.selector) {
+    return response
+      .setError(
+        'Either ref, testSubj, or selector parameter must be provided. Run snapshot tool to get element refs.'
+      )
+      .buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  try {
     const page = await session.getPage();
+    let targetDescription: string;
+    let codeSnippet: string;
+
+    // Note: ref parameter is prepared for future Playwright API that supports querying by aria ref
+    // For now, we prioritize testSubj and selector
+    if (params.ref) {
+      // Future implementation: query by ARIA snapshot ref
+      return response
+        .setError(
+          'Element reference (ref) support is not yet implemented. Use testSubj or selector instead.'
+        )
+        .addSection(
+          'Tip',
+          'You can use testSubj parameter with Kibana test subjects, or selector with CSS/ARIA selectors.'
+        )
+        .buildAsToolResult();
+    }
 
     if (params.testSubj) {
       const selector = subj(params.testSubj);
       await page.locator(selector).click();
-      return `Clicked element with test subject: ${params.testSubj}`;
+      targetDescription = params.element || `element with test subject: ${params.testSubj}`;
+      codeSnippet = `await page.locator('[data-test-subj="${params.testSubj}"]').click();`;
+      response.setResult(`Successfully clicked ${targetDescription}`);
+    } else if (params.selector) {
+      await page.locator(params.selector).click();
+      targetDescription = params.element || `element with selector: ${params.selector}`;
+      codeSnippet = `await page.locator('${params.selector}').click();`;
+      response.setResult(`Successfully clicked ${targetDescription}`);
     }
 
-    if (params.selector) {
-      await page.locator(params.selector).click();
-      return `Clicked element with selector: ${params.selector}`;
+    // Add executed code
+    response.addCode(codeSnippet!);
+
+    // Add updated page state
+    const title = await page.title();
+    const url = page.url();
+    const snapshot = await session.getAriaSnapshot();
+    response.setPageState(url, title, snapshot);
+
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+
+    // Provide helpful error guidance based on the error type
+    if (message.includes('Timeout') || message.includes('not found')) {
+      return response
+        .setError(`Click failed: Element not found - ${message}`)
+        .addSection(
+          'Suggestion',
+          'The element may not be visible or the page may have changed. Use the snapshot tool to see the current page state and available elements.'
+        )
+        .buildAsToolResult();
     }
-  }, 'Click failed');
+
+    return response.setError(`Click failed: ${message}`).buildAsToolResult();
+  }
 }
 
 /**
  * Type text into an element
  */
 export async function scoutType(session: ScoutSession, params: TypeParams): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  if (!params.testSubj && !params.selector) {
-    return error('Either testSubj or selector parameter must be provided');
+  // Validate at least one targeting method is provided
+  if (!params.ref && !params.testSubj && !params.selector) {
+    return response
+      .setError(
+        'Either ref, testSubj, or selector parameter must be provided. Run snapshot tool to get element refs.'
+      )
+      .buildAsToolResult();
   }
 
   if (!params.text) {
-    return error('text parameter is required');
+    return response.setError('text parameter is required').buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  // Validate text input length
+  try {
+    validateTextInput(params.text);
+  } catch (err) {
+    return response
+      .setError(err instanceof Error ? err.message : 'Invalid text input')
+      .buildAsToolResult();
+  }
+
+  try {
     const page = await session.getPage();
+    let targetDescription: string = '';
+    let codeSnippet: string = '';
     let locator;
+
+    // Note: ref parameter is prepared for future Playwright API
+    if (params.ref) {
+      return response
+        .setError(
+          'Element reference (ref) support is not yet implemented. Use testSubj or selector instead.'
+        )
+        .addSection(
+          'Tip',
+          'You can use testSubj parameter with Kibana test subjects, or selector with CSS/ARIA selectors.'
+        )
+        .buildAsToolResult();
+    }
 
     if (params.testSubj) {
       const selector = subj(params.testSubj);
       locator = page.locator(selector);
+      targetDescription = params.element || `element with test subject: ${params.testSubj}`;
     } else if (params.selector) {
       locator = page.locator(params.selector);
+      targetDescription = params.element || `element with selector: ${params.selector}`;
     }
 
     if (!locator) {
@@ -113,64 +242,101 @@ export async function scoutType(session: ScoutSession, params: TypeParams): Prom
     // Clear existing content first
     await locator.clear();
 
+    const locatorStr = params.selector || `[data-test-subj="${params.testSubj}"]`;
+
     // Type the text
     if (params.slowly) {
       await locator.pressSequentially(params.text, { delay: 100 });
+      codeSnippet = `await page.locator('${locatorStr}').pressSequentially('${params.text}', { delay: 100 });`;
     } else {
       await locator.fill(params.text);
+      codeSnippet = `await page.locator('${locatorStr}').fill('${params.text}');`;
     }
 
     // Submit if requested
     if (params.submit) {
       await locator.press('Enter');
+      codeSnippet += `\nawait page.keyboard.press('Enter');`;
     }
 
-    const target = params.testSubj || params.selector;
-    return `Typed text into ${target}${params.submit ? ' and submitted' : ''}`;
-  }, 'Type failed');
+    response.setResult(
+      `Successfully typed text into ${targetDescription}${params.submit ? ' and submitted' : ''}`
+    );
+    response.addCode(codeSnippet);
+
+    // Add updated page state
+    const title = await page.title();
+    const url = page.url();
+    const snapshot = await session.getAriaSnapshot();
+    response.setPageState(url, title, snapshot);
+
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+
+    // Provide helpful error guidance
+    if (message.includes('Timeout') || message.includes('not found')) {
+      return response
+        .setError(`Type failed: Element not found - ${message}`)
+        .addSection(
+          'Suggestion',
+          'The input field may not be visible or interactable. Use the snapshot tool to see the current page state.'
+        )
+        .buildAsToolResult();
+    }
+
+    return response.setError(`Type failed: ${message}`).buildAsToolResult();
+  }
 }
 
 /**
- * Get accessibility snapshot of the current page
+ * Get ARIA accessibility snapshot of the current page with element references
  */
 export async function scoutSnapshot(
   session: ScoutSession,
   params: SnapshotParams
 ): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  try {
     const page = await session.getPage();
-    const snapshot = await page.accessibility.snapshot();
+
+    // Get ARIA snapshot with element references
+    const ariaSnapshot = await session.getAriaSnapshot();
 
     if (params.format === 'json') {
-      return snapshot;
+      // Return legacy JSON format if specifically requested
+      const legacySnapshot = await session.getSnapshot();
+      response.setResult('Page snapshot (JSON format)');
+      response.addCode('await page.accessibility.snapshot();');
+      response.addSection('Snapshot', `\`\`\`json\n${legacySnapshot}\n\`\`\``);
+    } else {
+      // Return ARIA snapshot with element references (default, AI-optimized)
+      response.setResult('Page snapshot with element references');
+      response.addCode("await page.locator('body').ariaSnapshot();");
+      response.addSection(
+        'Snapshot',
+        `\`\`\`yaml\n${ariaSnapshot}\n\`\`\`\n\nElements are marked with [ref=eN]. Use these refs in click/type commands for precise targeting (when supported).`
+      );
     }
 
-    // Convert to readable text format
-    function formatNode(node: any, indent: string = ''): string {
-      let result = `${indent}- ${node.role}`;
-      if (node.name) {
-        result += ` "${node.name}"`;
-      }
-      if (node.value) {
-        result += `: ${node.value}`;
-      }
-      result += '\n';
+    // Add page context
+    const title = await page.title();
+    const url = page.url();
+    response.setPageState(url, title);
 
-      if (node.children) {
-        for (const child of node.children) {
-          result += formatNode(child, indent + '  ');
-        }
-      }
-
-      return result;
-    }
-
-    return snapshot ? formatNode(snapshot) : 'No snapshot available';
-  }, 'Snapshot failed');
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return response
+      .setError(`Snapshot failed: ${message}`)
+      .addSection('Suggestion', 'The page may not be fully loaded. Try using waitFor tool first.')
+      .buildAsToolResult();
+  }
 }
 
 /**
@@ -180,152 +346,317 @@ export async function scoutScreenshot(
   session: ScoutSession,
   params: ScreenshotParams
 ): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  try {
     const page = await session.getPage();
     const filename = formatScreenshotFilename(params.filename);
-
     let screenshot: Buffer;
+    let codeSnippet: string;
+    let targetDescription: string;
 
     if (params.testSubj) {
       const selector = subj(params.testSubj);
       const element = page.locator(selector);
       screenshot = await element.screenshot({ path: filename });
+      targetDescription = `element with test subject: ${params.testSubj}`;
+      codeSnippet = `await page.locator('[data-test-subj="${params.testSubj}"]').screenshot({ path: '${filename}' });`;
     } else if (params.selector) {
       const element = page.locator(params.selector);
       screenshot = await element.screenshot({ path: filename });
+      targetDescription = `element with selector: ${params.selector}`;
+      codeSnippet = `await page.locator('${params.selector}').screenshot({ path: '${filename}' });`;
     } else {
       screenshot = await page.screenshot({
         path: filename,
         fullPage: params.fullPage || false,
       });
+      targetDescription = params.fullPage ? 'full page' : 'visible viewport';
+      codeSnippet = `await page.screenshot({ path: '${filename}', fullPage: ${
+        params.fullPage || false
+      } });`;
     }
 
-    return {
-      filename,
-      size: screenshot.length,
-      message: `Screenshot saved to ${filename}`,
-    };
-  }, 'Screenshot failed');
+    const sizeKB = (screenshot.length / 1024).toFixed(2);
+    response.setResult(`Screenshot of ${targetDescription} saved successfully`);
+    response.addCode(codeSnippet);
+    response.addSection(
+      'Screenshot details',
+      `- File: ${filename}\n- Size: ${sizeKB} KB\n- Dimensions: ${targetDescription}`
+    );
+
+    // Add page context
+    const title = await page.title();
+    const url = page.url();
+    response.setPageState(url, title);
+
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+
+    // Provide helpful error guidance
+    if (message.includes('not found') || message.includes('Timeout')) {
+      return response
+        .setError(`Screenshot failed: Element not found - ${message}`)
+        .addSection(
+          'Suggestion',
+          'The element may not be visible. Use the snapshot tool to verify the element exists.'
+        )
+        .buildAsToolResult();
+    }
+
+    return response.setError(`Screenshot failed: ${message}`).buildAsToolResult();
+  }
 }
 
 /**
- * Wait for an element or condition
+ * Wait for an element, text, or time duration
  */
 export async function scoutWaitFor(
   session: ScoutSession,
   params: WaitForParams
 ): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  try {
     const page = await session.getPage();
+    let codeSnippet: string;
+    let resultMessage: string;
 
     // Wait for time
     if (params.time) {
       await page.waitForTimeout(params.time * 1000);
-      return `Waited for ${params.time} seconds`;
+      resultMessage = `Successfully waited for ${params.time} seconds`;
+      codeSnippet = `await page.waitForTimeout(${params.time * 1000});`;
+      response.setResult(resultMessage);
+      response.addCode(codeSnippet);
+      return response.buildAsToolResult();
+    }
+
+    // Note: ref parameter prepared for future implementation
+    if (params.ref) {
+      return response
+        .setError(
+          'Element reference (ref) support is not yet implemented. Use testSubj, selector, or text instead.'
+        )
+        .buildAsToolResult();
     }
 
     // Wait for text
     if (params.text) {
+      validateTextInput(params.text);
       await page.getByText(params.text).waitFor({ state: 'visible' });
-      return `Waited for text: ${params.text}`;
+      resultMessage = `Successfully waited for text: "${params.text}"`;
+      codeSnippet = `await page.getByText('${params.text}').waitFor({ state: 'visible' });`;
     }
-
     // Wait for element by test subject
-    if (params.testSubj) {
+    else if (params.testSubj) {
       const selector = subj(params.testSubj);
       const state = params.state || 'visible';
       await page.locator(selector).waitFor({ state });
-      return `Waited for test subject ${params.testSubj} to be ${state}`;
+      resultMessage = `Successfully waited for element (${params.testSubj}) to be ${state}`;
+      codeSnippet = `await page.locator('[data-test-subj="${params.testSubj}"]').waitFor({ state: '${state}' });`;
     }
-
     // Wait for element by selector
-    if (params.selector) {
+    else if (params.selector) {
       const state = params.state || 'visible';
       await page.locator(params.selector).waitFor({ state });
-      return `Waited for selector ${params.selector} to be ${state}`;
+      resultMessage = `Successfully waited for element (${params.selector}) to be ${state}`;
+      codeSnippet = `await page.locator('${params.selector}').waitFor({ state: '${state}' });`;
+    } else {
+      return response
+        .setError(
+          'No valid wait condition provided. Specify time, text, testSubj, or selector parameter.'
+        )
+        .buildAsToolResult();
     }
 
-    throw new Error('No valid wait condition provided');
-  }, 'Wait failed');
+    response.setResult(resultMessage);
+    response.addCode(codeSnippet);
+
+    // Add page state after wait (element may now be visible)
+    const title = await page.title();
+    const url = page.url();
+    const snapshot = await session.getAriaSnapshot();
+    response.setPageState(url, title, snapshot);
+
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+
+    // Provide helpful error guidance
+    if (message.includes('Timeout')) {
+      return response
+        .setError(`Wait failed: Timeout exceeded - ${message}`)
+        .addSection(
+          'Suggestion',
+          'The element may never appear or take longer than expected. Try:\n- Increasing timeout in Playwright config\n- Checking if element selector is correct\n- Using snapshot tool to verify page state'
+        )
+        .buildAsToolResult();
+    }
+
+    return response.setError(`Wait failed: ${message}`).buildAsToolResult();
+  }
 }
 
 /**
  * Get current page URL
  */
 export async function scoutGetUrl(session: ScoutSession): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  try {
     const page = await session.getPage();
-    return page.url();
-  }, 'Get URL failed');
+    const url = page.url();
+
+    response.setResult(`Current page URL: ${url}`);
+    response.addCode('const url = page.url();');
+    response.addSection('URL', url);
+
+    // Add minimal context
+    const title = await page.title();
+    response.setPageState(url, title);
+
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return response.setError(`Get URL failed: ${message}`).buildAsToolResult();
+  }
 }
 
 /**
  * Get page title
  */
 export async function scoutGetTitle(session: ScoutSession): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  try {
     const page = await session.getPage();
-    return page.title();
-  }, 'Get title failed');
+    const title = await page.title();
+    const url = page.url();
+
+    response.setResult(`Current page title: ${title}`);
+    response.addCode('const title = await page.title();');
+    response.addSection('Title', title);
+
+    // Add minimal context
+    response.setPageState(url, title);
+
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return response.setError(`Get title failed: ${message}`).buildAsToolResult();
+  }
 }
 
 /**
  * Go back in browser history
  */
 export async function scoutGoBack(session: ScoutSession): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  try {
     const page = await session.getPage();
     await page.goBack();
-    return 'Navigated back';
-  }, 'Go back failed');
+
+    response.setResult('Successfully navigated back in history');
+    response.addCode('await page.goBack();');
+
+    // Add updated page state
+    const title = await page.title();
+    const url = page.url();
+    const snapshot = await session.getAriaSnapshot();
+    response.setPageState(url, title, snapshot);
+
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return response
+      .setError(`Go back failed: ${message}`)
+      .addSection('Suggestion', 'There may be no previous page in the browser history.')
+      .buildAsToolResult();
+  }
 }
 
 /**
  * Go forward in browser history
  */
 export async function scoutGoForward(session: ScoutSession): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  try {
     const page = await session.getPage();
     await page.goForward();
-    return 'Navigated forward';
-  }, 'Go forward failed');
+
+    response.setResult('Successfully navigated forward in history');
+    response.addCode('await page.goForward();');
+
+    // Add updated page state
+    const title = await page.title();
+    const url = page.url();
+    const snapshot = await session.getAriaSnapshot();
+    response.setPageState(url, title, snapshot);
+
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return response
+      .setError(`Go forward failed: ${message}`)
+      .addSection('Suggestion', 'There may be no forward page in the browser history.')
+      .buildAsToolResult();
+  }
 }
 
 /**
  * Reload the current page
  */
 export async function scoutReload(session: ScoutSession): Promise<ToolResult> {
+  const response = new ResponseBuilder();
+
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return response.setError('Session not initialized. Use login tool first.').buildAsToolResult();
   }
 
-  return executeSafely(async () => {
+  try {
     const page = await session.getPage();
     await page.reload();
-    return 'Page reloaded';
-  }, 'Reload failed');
+
+    response.setResult('Successfully reloaded the page');
+    response.addCode('await page.reload();');
+
+    // Add updated page state
+    const title = await page.title();
+    const url = page.url();
+    const snapshot = await session.getAriaSnapshot();
+    response.setPageState(url, title, snapshot);
+
+    return response.buildAsToolResult();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return response.setError(`Reload failed: ${message}`).buildAsToolResult();
+  }
 }
