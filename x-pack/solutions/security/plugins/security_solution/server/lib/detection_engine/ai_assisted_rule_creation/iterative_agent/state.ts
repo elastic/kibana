@@ -7,6 +7,12 @@
 
 import { Annotation } from '@langchain/langgraph';
 
+export interface KnowledgeBaseDocument {
+  id: string;
+  text: string;
+  name: string;
+}
+
 export const RuleCreationAnnotation = Annotation.Root({
   userQuery: Annotation<string>(),
   answer: Annotation<string>(),
@@ -22,7 +28,7 @@ export const RuleCreationAnnotation = Annotation.Root({
   }>(),
   validationErrors: Annotation<{ esqlErrors: string }>(),
   queryFixRetries: Annotation<number>(),
-  knowledgeBaseContext: Annotation<string>(),
+  knowledgeBase: Annotation<{ documents: KnowledgeBaseDocument[]; insights: string }>(),
 });
 
 export type RuleCreationState = typeof RuleCreationAnnotation.State;

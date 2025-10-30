@@ -27,15 +27,11 @@ interface CreateEsqlRuleNodeParams {
 }
 
 export const nlToEsqlQueryNode = async ({
-  model,
-  esClient,
   connectorId,
   inference,
   logger,
   request,
-  createLlmInstance,
 }: CreateEsqlRuleNodeParams) => {
-  // const ruleCreationChain = CREATE_ESQL_RULE_PROMPT.pipe(model).pipe(jsonParser);
   return async (state: typeof RuleCreationAnnotation.State) => {
     try {
       const indexPatternsContext = Object.values(state.indices.indexPatternAnalysis).map(
@@ -73,16 +69,13 @@ export const nlToEsqlQueryNode = async ({
               - use only full name of the fields in referred index patterns context. Name should contain all parent nodes separated by dot. For example use "host.name" instead of just "name". Each new line separated by new line symbol in index patterns context represents a full branch of fields hierarchy.
               - Do not include any fields that do not exist in the provided index patterns context.
               - Use knowledge base context to enhance the query if it is available and relevant to the user query.
-              Knowledge base context: ${state.knowledgeBaseContext ?? 'N/A'}`
+              Knowledge base context: ${state.knowledgeBase.insights ?? 'N/A'}`
             ),
             new HumanMessage({ content: state.userQuery }),
           ]).messages,
         })
       );
-      //   return content;
 
-      //   const { messages } = result;
-      //   const lastMessage = messages[messages.length - 1];
       return { ...state, rule: { query: content, language: 'esql', type: 'esql' } };
     } catch (e) {
       return { ...state, error: e.message };
