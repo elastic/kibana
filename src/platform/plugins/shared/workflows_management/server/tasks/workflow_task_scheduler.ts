@@ -175,11 +175,11 @@ export class WorkflowTaskScheduler {
     request?: KibanaRequest
   ): Promise<void> {
     // Check if there are any running executions for this workflow
-    const hasRunningExecutions = await this.hasWaitingExecutions(workflow.id);
+    const hasWaitingExecutions = await this.hasWaitingExecutions(workflow.id);
 
-    if (hasRunningExecutions) {
+    if (hasWaitingExecutions) {
       this.logger.info(
-        `Skipping scheduled task update for workflow ${workflow.id} - workflow has running executions`
+        `Skipping scheduled task update for workflow ${workflow.id} - workflow has waiting executions`
       );
       return;
     }
