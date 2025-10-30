@@ -16,23 +16,23 @@ import {
   type SavedObjectsRawDoc,
   type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
-import type {
-  SavedObjectsChangeAccessControlResponse,
-  SavedObjectsChangeAccessControlObject,
-  SavedObjectsChangeAccessControlOptions,
-  SavedObjectsChangeAccessModeOptions,
-  SavedObjectsChangeOwnershipOptions,
+import {
+  type SavedObjectsChangeAccessControlResponse,
+  type SavedObjectsChangeAccessControlObject,
+  type SavedObjectsChangeAccessControlOptions,
+  type SavedObjectsChangeAccessModeOptions,
+  type SavedObjectsChangeOwnershipOptions,
+  type Either,
+  left,
+  right,
+  isRight,
+  isLeft,
 } from '@kbn/core-saved-objects-api-server';
 
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
   rawDocExistsInNamespace,
-  type Either,
-  isLeft,
-  isRight,
-  left,
-  right,
 } from '../utils';
 import type { ApiExecutionContext } from '../types';
 import { type GetBulkOperationErrorRawResponse, isMgetError } from '../utils/internal_utils';

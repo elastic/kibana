@@ -42,10 +42,11 @@ describe('AccessControlService', () => {
           accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
         },
       ];
-      const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({
-        objects,
-        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
-      });
+      const { types: typesRequiringAccessControl, objects: results } =
+        service.getObjectsRequiringPrivilegeCheck({
+          objects,
+          actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
+        });
       expect(typesRequiringAccessControl.has('dashboard')).toBe(true);
       expect(results).toEqual([
         {
@@ -65,10 +66,11 @@ describe('AccessControlService', () => {
           accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
         },
       ];
-      const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({
-        objects,
-        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
-      });
+      const { types: typesRequiringAccessControl, objects: results } =
+        service.getObjectsRequiringPrivilegeCheck({
+          objects,
+          actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
+        });
       expect(typesRequiringAccessControl.size).toBe(0);
       expect(results).toEqual([
         {
@@ -87,10 +89,11 @@ describe('AccessControlService', () => {
           type: 'dashboard',
         },
       ];
-      const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({
-        objects,
-        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
-      });
+      const { types: typesRequiringAccessControl, objects: results } =
+        service.getObjectsRequiringPrivilegeCheck({
+          objects,
+          actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
+        });
       expect(typesRequiringAccessControl.size).toBe(0);
       expect(results).toEqual([
         {
@@ -110,10 +113,11 @@ describe('AccessControlService', () => {
           accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
         },
       ];
-      const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({
-        objects,
-        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
-      });
+      const { types: typesRequiringAccessControl, objects: results } =
+        service.getObjectsRequiringPrivilegeCheck({
+          objects,
+          actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
+        });
       expect(typesRequiringAccessControl.size).toBe(0);
       expect(results).toEqual([
         {
@@ -133,10 +137,11 @@ describe('AccessControlService', () => {
           accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
         },
       ];
-      const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({
-        objects,
-        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
-      });
+      const { types: typesRequiringAccessControl, objects: results } =
+        service.getObjectsRequiringPrivilegeCheck({
+          objects,
+          actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
+        });
       expect(typesRequiringAccessControl.size).toBe(0);
       expect(results).toEqual([
         {
@@ -180,10 +185,11 @@ describe('AccessControlService', () => {
           accessControl: { accessMode: 'write_restricted' as const, owner: 'bob' }, // user is owner
         },
       ];
-      const { typesRequiringAccessControl, results } = service.getTypesRequiringPrivilegeCheck({
-        objects,
-        actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
-      });
+      const { types: typesRequiringAccessControl, objects: results } =
+        service.getObjectsRequiringPrivilegeCheck({
+          objects,
+          actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
+        });
       expect(typesRequiringAccessControl.has('dashboard')).toBe(true);
       expect(typesRequiringAccessControl.has('visualization')).toBe(false);
       expect(typesRequiringAccessControl.size).toBe(1);
@@ -231,7 +237,7 @@ describe('AccessControlService', () => {
             accessControl: { accessMode: 'default' as const, owner: 'alice' },
           },
         ];
-        const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
+        const { types: typesRequiringAccessControl } = service.getObjectsRequiringPrivilegeCheck({
           objects,
           actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
         });
@@ -247,7 +253,7 @@ describe('AccessControlService', () => {
             accessControl: { accessMode: 'default' as const, owner: 'alice' },
           },
         ];
-        const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
+        const { types: typesRequiringAccessControl } = service.getObjectsRequiringPrivilegeCheck({
           objects,
           actions: new Set([SecurityAction.CHANGE_ACCESS_MODE]),
         });

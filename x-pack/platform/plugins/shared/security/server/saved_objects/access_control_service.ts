@@ -8,10 +8,10 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
-  AccessControlAuthorizeResult,
   AuthorizeObject,
   CheckAuthorizationResult,
-  GetTypesRequiringAccessControlCheckResult,
+  GetObjectsRequiringPrivilegeCheckResult,
+  ObjectRequiringPrivilegeCheckResult,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
@@ -78,21 +78,20 @@ export class AccessControlService {
     return accessControl.owner !== currentUser.profile_uid;
   }
 
-  getTypesRequiringPrivilegeCheck({
+  getObjectsRequiringPrivilegeCheck({
     objects,
     actions,
   }: {
     objects: AuthorizeObject[];
-
     actions: Set<SecurityAction>;
-  }): GetTypesRequiringAccessControlCheckResult {
+  }): GetObjectsRequiringPrivilegeCheckResult {
     if (!this.typeRegistry) {
-      return { typesRequiringAccessControl: new Set<string>(), results: [] };
+      return { types: new Set<string>(), objects: [] };
     }
     const currentUser = this.userForOperation;
     const typesRequiringAccessControl = new Set<string>();
 
-    const results: AccessControlAuthorizeResult[] = objects.map((object) => {
+    const results: ObjectRequiringPrivilegeCheckResult[] = objects.map((object) => {
       const requiresManageAccessControl = this.shouldObjectRequireAccessControl({
         object,
         currentUser,
@@ -111,9 +110,7 @@ export class AccessControlService {
       };
     });
 
-    // ToDo: potentially return an array of which objects specifically require manage access control so we can use that from places like import/export
-    // or for surfacing better messages to the user.
-    return { typesRequiringAccessControl, results };
+    return { types: typesRequiringAccessControl, objects: results };
   }
 
   enforceAccessControl<A extends string>({

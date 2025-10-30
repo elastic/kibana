@@ -140,6 +140,8 @@ function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: b
   return { actions, auditLogger, errors, checkPrivileges, securityExtension };
 }
 
+// ToDo: test inaccessible objects when authorizing objects with access control
+
 describe('#authorize (unpublished by interface)', () => {
   beforeEach(() => {
     checkAuthorizationSpy.mockClear();
@@ -281,6 +283,7 @@ describe('#authorize (unpublished by interface)', () => {
             bulk_update: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
+        inaccessibleObjects: new Set(),
       });
     });
 
@@ -337,6 +340,7 @@ describe('#authorize (unpublished by interface)', () => {
             create: { authorizedSpaces: ['x'] },
             ['login:']: { authorizedSpaces: ['x', 'y'] },
           }),
+        inaccessibleObjects: new Set(),
       });
     });
 
@@ -384,6 +388,7 @@ describe('#authorize (unpublished by interface)', () => {
           .set('a', { ['login:']: { authorizedSpaces: ['y'] } })
           .set('b', { ['login:']: { authorizedSpaces: ['y'] } })
           .set('c', { ['login:']: { authorizedSpaces: ['y'] } }),
+        inaccessibleObjects: new Set(),
       });
     });
 
@@ -411,6 +416,7 @@ describe('#authorize (unpublished by interface)', () => {
         typeMap: new Map().set('b', {
           bulk_update: { authorizedSpaces: ['y'] }, // should NOT be authorized for conflicted privilege
         }),
+        inaccessibleObjects: new Set(),
       });
     });
   });
@@ -1450,6 +1456,7 @@ describe('#create', () => {
           create: { isGloballyAuthorized: true, authorizedSpaces: [] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -1720,6 +1727,7 @@ describe('#create', () => {
       expect(result).toEqual({
         status: 'fully_authorized',
         typeMap: expectedTypeMap,
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -1765,6 +1773,7 @@ describe('#create', () => {
             bulk_create: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -1971,6 +1980,7 @@ describe('update', () => {
           update: { isGloballyAuthorized: true, authorizedSpaces: [] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -2239,6 +2249,7 @@ describe('update', () => {
       expect(result).toEqual({
         status: 'fully_authorized',
         typeMap: expectedTypeMap,
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -2284,6 +2295,7 @@ describe('update', () => {
             bulk_update: { authorizedSpaces: ['x', 'y'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -2485,6 +2497,7 @@ describe('delete', () => {
           delete: { isGloballyAuthorized: true, authorizedSpaces: [] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -2717,6 +2730,7 @@ describe('delete', () => {
       expect(result).toEqual({
         status: 'fully_authorized',
         typeMap: expectedTypeMap,
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -2761,6 +2775,7 @@ describe('delete', () => {
             bulk_delete: { authorizedSpaces: ['x'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -2972,6 +2987,7 @@ describe('get', () => {
           get: { isGloballyAuthorized: true, authorizedSpaces: [] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -2990,6 +3006,7 @@ describe('get', () => {
           get: { isGloballyAuthorized: true, authorizedSpaces: [] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -3296,6 +3313,7 @@ describe('get', () => {
       expect(result).toEqual({
         status: 'fully_authorized',
         typeMap: expectedTypeMap,
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -3330,6 +3348,7 @@ describe('get', () => {
             bulk_get: { authorizedSpaces: ['x', 'z'] },
             ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
           }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
@@ -3613,6 +3632,7 @@ describe(`#authorizeCheckConflicts`, () => {
     expect(result).toEqual({
       status: 'fully_authorized',
       typeMap: expectedTypeMap,
+      inaccessibleObjects: new Set(),
     });
     expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
   });
@@ -3657,6 +3677,7 @@ describe(`#authorizeCheckConflicts`, () => {
           bulk_create: { authorizedSpaces: ['x'] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
+      inaccessibleObjects: new Set(),
     });
     expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
   });
@@ -3819,6 +3840,7 @@ describe(`#authorizeRemoveReferences`, () => {
     expect(result).toEqual({
       status: 'fully_authorized',
       typeMap: expectedTypeMap,
+      inaccessibleObjects: new Set(),
     });
     expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
   });
@@ -3844,6 +3866,7 @@ describe(`#authorizeRemoveReferences`, () => {
       typeMap: new Map().set(obj1.type, {
         delete: { isGloballyAuthorized: true, authorizedSpaces: [] },
       }),
+      inaccessibleObjects: new Set(),
     });
     expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
   });
@@ -4055,6 +4078,7 @@ describe(`#authorizeOpenPointInTime`, () => {
     expect(result).toEqual({
       status: 'fully_authorized',
       typeMap: expectedTypeMap,
+      inaccessibleObjects: new Set(),
     });
     expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
   });
@@ -4080,6 +4104,7 @@ describe(`#authorizeOpenPointInTime`, () => {
       typeMap: new Map().set(obj1.type, {
         open_point_in_time: { isGloballyAuthorized: true, authorizedSpaces: [] },
       }),
+      inaccessibleObjects: new Set(),
     });
     expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
   });
@@ -5472,6 +5497,7 @@ describe('#authorizeUpdateSpaces', () => {
     expect(result).toEqual({
       status: 'fully_authorized',
       typeMap: expectedTypeMap,
+      inaccessibleObjects: new Set(),
     });
     expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
   });
@@ -5535,6 +5561,7 @@ describe('#authorizeUpdateSpaces', () => {
           share_to_space: { authorizedSpaces: ['x', ...spacesToAdd, ...spacesToRemove] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
+      inaccessibleObjects: new Set(),
     });
     expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
   });
@@ -5756,6 +5783,7 @@ describe('find', () => {
       expect(result).toEqual({
         status: 'fully_authorized',
         typeMap: expectedTypeMap,
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
     });
@@ -5781,6 +5809,7 @@ describe('find', () => {
         typeMap: new Map().set(obj1.type, {
           find: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
     });
@@ -5812,6 +5841,7 @@ describe('find', () => {
         typeMap: new Map().set(obj1.type, {
           'login:': { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
+        inaccessibleObjects: new Set(),
       });
       expect(enforceAuthorizationSpy).not.toHaveBeenCalled();
     });
