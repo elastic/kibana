@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.assertMissingValues('Linear');
 
-      await PageObjects.lens.closeFlyout();
+      await PageObjects.lens.closeFlyoutWithBackButton();
 
       await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await PageObjects.lens.assertColor('#ff0000');
@@ -258,7 +258,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // enable value labels
       await PageObjects.lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
-      await PageObjects.lens.closeFlyout();
+      await PageObjects.lens.closeFlyoutWithBackButton();
 
       // check for value labels
       const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
@@ -281,7 +281,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
 
-      await PageObjects.lens.closeFlyout();
+      await PageObjects.lens.closeFlyoutWithBackButton();
     });
 
     it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {
@@ -753,7 +753,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const donutHole = await PageObjects.lens.getDonutHoleSize();
       expect(donutHole).to.be('None');
 
-      await PageObjects.lens.closeFlyout();
+      await PageObjects.lens.closeFlyoutWithBackButton();
     });
 
     it('switches donut hole size', async () => {

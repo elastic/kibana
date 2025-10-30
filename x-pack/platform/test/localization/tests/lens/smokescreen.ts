@@ -415,7 +415,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.assertMissingValues(termTranslator('Linear'));
 
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
 
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await lens.assertColor('#ff0000');
@@ -497,7 +497,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // enable value labels
       await lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
 
       // check for value labels
       let data = await lens.getCurrentChartDebugState('xyVisChart');
@@ -527,7 +527,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
 
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
     });
 
     it('should transition from line chart to pie chart and to bar chart', async () => {

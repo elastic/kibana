@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'minimum',
           'maximum',
         ]);
-        await lens.closeFlyout();
+        await lens.closeFlyoutWithBackButton();
 
         const tableText = `Avg
 Min

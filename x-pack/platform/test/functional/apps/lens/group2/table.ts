@@ -45,21 +45,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.openStyleSettingsFlyout();
       await lens.setDataTableDensity('compact');
       expect(await lens.checkDataTableDensity('s')).to.be(true);
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
     });
 
     it('should apply expanded density correctly', async () => {
       await lens.openStyleSettingsFlyout();
       await lens.setDataTableDensity('expanded');
       expect(await lens.checkDataTableDensity('l')).to.be(true);
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
     });
 
     it('should apply normal density correctly', async () => {
       await lens.openStyleSettingsFlyout();
       await lens.setDataTableDensity('normal');
       expect(await lens.checkDataTableDensity('m')).to.be(true);
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
     });
 
     it('should able to sort a last_value column correctly in a table', async () => {

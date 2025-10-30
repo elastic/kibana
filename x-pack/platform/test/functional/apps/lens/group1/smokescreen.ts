@@ -296,7 +296,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // enable value labels
       await lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
 
       // check for value labels
       const data = await lens.getCurrentChartDebugState('xyVisChart');
@@ -319,7 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
 
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
     });
 
     it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {

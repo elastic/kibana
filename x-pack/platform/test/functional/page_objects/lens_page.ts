@@ -872,7 +872,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await legendButton.click();
       }
     },
-    async closeFlyout() {
+    async closeFlyoutWithBackButton() {
       await retry.try(async () => {
         await testSubjects.click('lns-indexPattern-dimensionContainerBack');
         await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');

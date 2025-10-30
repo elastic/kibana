@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title');
       await lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom', {});
       await lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
 
       await lens.waitForVisualization('gaugeChart');
       await lens.openDimensionEditor('lnsGauge_goalDimensionPanel > lns-empty-dimension');
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
 
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
     });
     it('should seamlessly switch to minor arc gauge chart without losing configuration', async () => {
       await lens.openStyleSettingsFlyout();
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
 
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
     });
     it('should seamlessly switch to arc gauge chart without losing configuration', async () => {
       await lens.openStyleSettingsFlyout();
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
 
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
     });
     it('should seamlessly switch to circular gauge chart without losing configuration', async () => {
       await lens.openStyleSettingsFlyout();
@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
 
-      await lens.closeFlyout();
+      await lens.closeFlyoutWithBackButton();
     });
     it('should switch to table chart and filter not supported static values', async () => {
       await lens.switchToVisualization('lnsDatatable');
