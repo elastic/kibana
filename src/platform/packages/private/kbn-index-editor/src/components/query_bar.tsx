@@ -48,6 +48,7 @@ export const QueryBar = ({
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
   }, [share?.url.locators]);
 
+  // Only used as fallback if onOpenIndexInDiscover is not provided
   const discoverLink =
     !onOpenIndexInDiscover && isIndexCreated && esqlDiscoverQuery
       ? discoverLocator?.getRedirectUrl({
@@ -63,7 +64,7 @@ export const QueryBar = ({
       indexEditorTelemetryService.trackQueryThisIndexClicked(searchQuery);
 
       // If onOpenIndexInDiscover is provided, we let that handler to manage the navigation to Discover
-      // If not the button href will be executed
+      // If not, the button href will be executed
       if (onOpenIndexInDiscover && indexName && esqlDiscoverQuery) {
         e.preventDefault();
         const onExitCallback = () => onOpenIndexInDiscover(indexName, esqlDiscoverQuery);
