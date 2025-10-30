@@ -1,13 +1,13 @@
 # Workplace AI Project Config
 
 # Make sure the plugins belonging to this project type are loaded
-plugins.allowlistPluginGroups: ['platform', 'workplace_ai']
+plugins.allowlistPluginGroups: ['platform', 'workplaceai']
 
 ## Enable the Serverless Workplace AI plugin
 xpack.serverless.workplaceAI.enabled: true
 
 ## Cloud settings
-xpack.cloud.serverless.project_type: workplace_ai
+xpack.cloud.serverless.project_type: workplaceai
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/workplace_ai

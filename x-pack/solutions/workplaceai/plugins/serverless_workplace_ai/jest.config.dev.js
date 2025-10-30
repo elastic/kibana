@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../',
-  roots: ['<rootDir>/x-pack/solutions/workplace_ai/plugins/serverless_workplace_ai'],
+  roots: ['<rootDir>/x-pack/solutions/workplaceai/plugins/serverless_workplace_ai'],
 };

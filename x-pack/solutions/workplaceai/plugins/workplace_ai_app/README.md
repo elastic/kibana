@@ -2,6 +2,23 @@
 
 Workplace AI application plugin
 
+## Quickstart:
+
+### Setup
+```yaml
+nvm use
+yarn kbn bootstrap
+```
+
+### Start ES
+```yaml
+yarn es serverless --projectType workplaceai
+```
+
+### Start Workplace AI in Kibana
+```yaml
+yarn serverless-workplace-ai
+```
 
 ## Enabling tracing
 
