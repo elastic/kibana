@@ -35,7 +35,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  describe('alerts only', () => {
+  describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
     const objectRemover = new ObjectRemover(supertest);
