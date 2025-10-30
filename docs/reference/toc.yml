@@ -37,14 +37,14 @@ toc:
           - file: connectors-kibana/bedrock-action-type.md
           - file: connectors-kibana/elastic-managed-llm.md
           - file: connectors-kibana/gemini-action-type.md
-          - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/openai-action-type.md
       - file: connectors-kibana/elastic-connectors.md
         children:
           - file: connectors-kibana/cases-action-type.md
           - file: connectors-kibana/index-action-type.md
+          - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
-      - file: connectors-kibana/third-party-connectors.md
+      - file: connectors-kibana/alerting-cases-connectors.md
         children:
           - file: connectors-kibana/xsoar-action-type.md
           - file: connectors-kibana/crowdstrike-action-type.md

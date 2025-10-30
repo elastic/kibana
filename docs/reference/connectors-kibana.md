@@ -14,9 +14,11 @@ These Kibana connectors are used to connect to external services for GenAI, aler
 To learn about connectors for syncing data to {{es}} for search use cases, refer to [content connectors](elasticsearch://reference/search-connectors/index.md).
 :::
 
-Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
+Connectors provide a central place to store connection information for services and integrations with Elastic or third-party systems.
 
-Actions are instantiations of a connector that are linked to rules and run as background tasks on the {{kib}} server when rule conditions are met.
+If you're using connectors for alerting or case management, you can [create rules](docs-content://explore-analyze/alerts-cases/alerts/create-manage-rules.md) and [add actions](docs-content://explore-analyze/alerts-cases/alerts/create-manage-rules.md#defining-rules-actions-details) that use connectors to send notifications when conditions are met.
+
+{{kib}} provides connectors for LLM providers, Elastic Stack features, and third-party alerting and case management platforms.
 
 ## Required permissions [_required_permissions_2]
 
@@ -28,48 +30,23 @@ Access to connectors is granted based on your privileges to alerting-enabled fea
 
 :::{dropdown} Generative AI
 
-* [AI Connector](/reference/connectors-kibana/ai-connector.md): Connect to third-party LLM services including {{bedrock}}, Azure, {{gemini}}, OpenAI, and Elastic Inference Service.
-* [{{bedrock}}](/reference/connectors-kibana/bedrock-action-type.md): Send a request to {{bedrock}}.
-* [Elastic Managed LLM](/reference/connectors-kibana/elastic-managed-llm.md): Send a request to Elastic Managed LLM.
-* [{{gemini}}](/reference/connectors-kibana/gemini-action-type.md): Send a request to {{gemini}}.
-* [Observability AI Assistant](/reference/connectors-kibana/obs-ai-assistant-action-type.md): Add AI-driven insights and custom actions to your workflow.
-* [OpenAI](/reference/connectors-kibana/openai-action-type.md): Send a request to OpenAI.
+```{include} connectors-kibana/_snippets/gen-ai-connectors-list.md
+```
 
 :::
 
 :::{dropdown} Elastic Stack
 
-* [Cases](/reference/connectors-kibana/cases-action-type.md): Add alerts to [Cases](docs-content://explore-analyze/alerts-cases/cases.md).
-* [Index](/reference/connectors-kibana/index-action-type.md): Index data into Elasticsearch.
-* [ServerLog](/reference/connectors-kibana/server-log-action-type.md): Add a message to a Kibana log.
+```{include} connectors-kibana/_snippets/elastic-connectors-list.md
+```
 
 :::
 
-:::{dropdown} Third-party services
+:::{dropdown} Alerting and case management
 
-* [{{xsoar}}](/reference/connectors-kibana/xsoar-action-type.md): Create an incident in Cortex {{xsoar}}.
-* [CrowdStrike](/reference/connectors-kibana/crowdstrike-action-type.md): Send a request to CrowdStrike.
-* [D3 Security](/reference/connectors-kibana/d3security-action-type.md): Send a request to D3 Security.
-* [Email](/reference/connectors-kibana/email-action-type.md): Send email from your server.
-* [{{ibm-r}}](/reference/connectors-kibana/resilient-action-type.md): Create an incident in {{ibm-r}}.
-* [Jira](/reference/connectors-kibana/jira-action-type.md): Create an incident in Jira.
-* [{{jsm}}](/reference/connectors-kibana/jsm-action-type.md): Create or close an alert in {{jsm}}.
-* [Microsoft Defender for Endpoint](/reference/connectors-kibana/defender-action-type.md): Send requests to Microsoft Defender-enrolled hosts.
-* [Microsoft Teams](/reference/connectors-kibana/teams-action-type.md): Send a message to a Microsoft Teams channel.
-* [{{opsgenie}}](/reference/connectors-kibana/opsgenie-action-type.md): Create or close an alert in {{opsgenie}}.
-* [PagerDuty](/reference/connectors-kibana/pagerduty-action-type.md): Send an event in PagerDuty.
-* [SentinelOne](/reference/connectors-kibana/sentinelone-action-type.md): Send a request to SentinelOne.
-* [{{sn-itsm}}](/reference/connectors-kibana/servicenow-action-type.md): Create an incident in {{sn}}.
-* [{{sn-itom}}](/reference/connectors-kibana/servicenow-itom-action-type.md): Create an event in {{sn}}.
-* [{{sn-sir}}](/reference/connectors-kibana/servicenow-sir-action-type.md): Create a security incident in {{sn}}.
-* [Slack](/reference/connectors-kibana/slack-action-type.md): Send a message to a Slack channel or user.
-* [{{swimlane}}](/reference/connectors-kibana/swimlane-action-type.md): Create an incident in {{swimlane}}.
-* [{{hive}}](/reference/connectors-kibana/thehive-action-type.md): Create cases and alerts in {{hive}}.
-* [Tines](/reference/connectors-kibana/tines-action-type.md): Send events to a Tines Story.
-* [Torq](/reference/connectors-kibana/torq-action-type.md): Trigger a Torq workflow.
-* [{{webhook}}](/reference/connectors-kibana/webhook-action-type.md): Send a request to a web service.
-* [{{webhook-cm}}](/reference/connectors-kibana/cases-webhook-action-type.md): Send a request to a Case Management web service.
-* [xMatters](/reference/connectors-kibana/xmatters-action-type.md): Send actionable alerts to on-call xMatters resources.
+```{include} connectors-kibana/_snippets/alerting-cases-connectors-list.md
+```
+
 :::
 
 ::::{note}

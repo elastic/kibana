@@ -1,14 +1,13 @@
 ---
+applies_to:
+  serverless: preview
+  stack: preview
 navigation_title: "Observability AI Assistant"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/obs-ai-assistant-action-type.html
 ---
 
 # Observability AI Assistant connector and action [obs-ai-assistant-action-type]
-
-::::{warning}
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-::::
 
 The Observability AI Assistant connector adds AI-driven insights and custom actions to your workflow.
 
