@@ -35,6 +35,7 @@ export const ConfigSchema = z.union([
       defaultModel: z.string().default(DEFAULT_OPENAI_MODEL),
       headers: z.record(z.string(), z.string()).optional(),
       contextWindowLength: z.coerce.number().optional(),
+      temperature: z.coerce.number().optional(),
     })
     .strict(),
   z
@@ -46,6 +47,7 @@ export const ConfigSchema = z.union([
       headers: z.record(z.string(), z.string()).optional(),
       contextWindowLength: z.coerce.number().optional(),
       enableNativeFunctionCalling: z.boolean().optional(),
+      temperature: z.coerce.number().optional(),
     })
     .strict(),
 ]);
