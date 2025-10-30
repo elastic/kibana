@@ -23,7 +23,6 @@ export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext)
     Boolean(process.env.GITHUB_PR_BASE_OWNER) &&
     Boolean(process.env.GITHUB_PR_BASE_REPO) &&
     Boolean(process.env.GITHUB_PR_NUMBER);
-  const isOnMergePipeline = !isPullRequestPipeline;
 
   return [
     ...roots.flatMap((root): ListrTask[] => {
@@ -47,7 +46,7 @@ export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext)
             });
           },
           title: `Downloading /${baselineSha}/${path} from Github`,
-          enabled: (_) => Boolean(isOnMergePipeline || root.configChanged),
+          enabled: (_) => Boolean(!isPullRequestPipeline || root.configChanged),
         },
         {
           task: async () => {
@@ -59,7 +58,7 @@ export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext)
             }
           },
           title: `PR checks in modified attributes in ${path}`,
-          enabled: (_) => Boolean(isOnMergePipeline || root.configChanged),
+          enabled: (_) => Boolean(!isPullRequestPipeline || root.configChanged),
         },
       ];
     }),
