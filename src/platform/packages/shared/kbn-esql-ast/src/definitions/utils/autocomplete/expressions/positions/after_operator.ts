@@ -160,14 +160,16 @@ function handleCompleteOperator(
     });
   }
 
-  // Add comma using decision engine for boolean operators in functions
-  if (operatorReturnType === 'boolean' && options.functionParameterContext) {
+  // Add comma using decision engine for all operators in function context
+  if (options.functionParameterContext) {
     const analyzer = SignatureAnalyzer.from(options.functionParameterContext);
 
     if (analyzer) {
+      const typeMatches = analyzer.typeMatches(operatorReturnType, false);
+
       builder.addCommaIfNeeded({
-        position: 'after_complete', // Boolean operator expression is complete
-        typeMatches: true,
+        position: 'after_complete',
+        typeMatches,
         isLiteral: false,
         hasMoreParams: analyzer.hasMoreParams,
         isVariadic: analyzer.isVariadic,
