@@ -28,6 +28,7 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import {
   selectWorkflowDefinition,
+  selectWorkflowGraph,
   selectYamlString,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
@@ -52,6 +53,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const { uiSettings } = useKibana().services;
   const workflowYaml = useSelector(selectYamlString) ?? '';
   const workflowDefinition = useSelector(selectWorkflowDefinition);
+  const workflowGraph = useSelector(selectWorkflowGraph);
 
   const { activeTab, selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
@@ -84,9 +86,15 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 
   const handleStepRun = useCallback(
     async (params: { stepId: string; actionType: string }) => {
-      if (params.actionType === 'run' && workflowDefinition) {
-        const contextOverrideData = buildContextOverrideForStep(workflowDefinition, params.stepId);
+      if (params.actionType === 'run' && workflowGraph && workflowDefinition) {
+        const contextOverrideData = buildContextOverrideForStep(
+          workflowGraph,
+          workflowDefinition,
+          params.stepId
+        );
 
+        // In case when a step does not reference any other data/steps
+        // we submit step run without additional actions from the user
         if (!Object.keys(contextOverrideData.stepContext).length) {
           submitStepRun(params.stepId, {});
           return;
@@ -96,7 +104,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         setTestStepId(params.stepId);
       }
     },
-    [workflowDefinition, submitStepRun]
+    [workflowGraph, workflowDefinition, submitStepRun]
   );
 
   const isVisualEditorEnabled = uiSettings?.get<boolean>(

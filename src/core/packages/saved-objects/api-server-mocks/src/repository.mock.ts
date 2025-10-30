@@ -21,6 +21,7 @@ const create = () => {
     delete: jest.fn(),
     bulkGet: jest.fn(),
     find: jest.fn(),
+    search: jest.fn(),
     get: jest.fn(),
     closePointInTime: jest.fn(),
     createPointInTimeFinder: jest.fn(),

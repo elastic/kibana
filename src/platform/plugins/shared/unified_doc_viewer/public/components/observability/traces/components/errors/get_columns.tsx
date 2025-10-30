@@ -13,7 +13,14 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ErrorData, ErrorsByTraceId } from '@kbn/apm-types';
-import { TRACE_ID, SPAN_ID, PROCESSOR_EVENT, EVENT_NAME, ERROR_ID } from '@kbn/apm-types';
+import {
+  TRACE_ID,
+  SPAN_ID,
+  PROCESSOR_EVENT,
+  EVENT_NAME,
+  ERROR_ID,
+  EXCEPTION_MESSAGE,
+} from '@kbn/apm-types';
 import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 
@@ -52,7 +59,12 @@ export const getColumns = ({
         [TRACE_ID]: traceId,
         ...(docId && { [SPAN_ID]: docId }),
         ...(source === 'apm' ? { [PROCESSOR_EVENT]: 'error', [ERROR_ID]: item.error.id } : null),
-        ...(source === 'unprocessedOtel' ? { [EVENT_NAME]: 'exception' } : null),
+        ...(source === 'unprocessedOtel'
+          ? {
+              [EVENT_NAME]: item?.eventName,
+              [EXCEPTION_MESSAGE]: item?.error?.exception?.message,
+            }
+          : null),
       });
 
       const content = (

@@ -53,12 +53,6 @@ describe('UpdateSourceEditor', () => {
       const sourceDescriptor = ESQLSource.createDescriptor({
         dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
-        columns: [
-          {
-            name: 'location',
-            type: 'geo_point',
-          },
-        ],
         narrowByMapBounds: false,
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
@@ -77,12 +71,6 @@ describe('UpdateSourceEditor', () => {
       const sourceDescriptor = ESQLSource.createDescriptor({
         dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
-        columns: [
-          {
-            name: 'location',
-            type: 'geo_point',
-          },
-        ],
         geoField: 'dest_location',
         narrowByMapBounds: false,
       });
@@ -105,12 +93,6 @@ describe('UpdateSourceEditor', () => {
       const sourceDescriptor = ESQLSource.createDescriptor({
         dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
-        columns: [
-          {
-            name: 'location',
-            type: 'geo_point',
-          },
-        ],
         narrowByGlobalTime: false,
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
@@ -129,12 +111,6 @@ describe('UpdateSourceEditor', () => {
       const sourceDescriptor = ESQLSource.createDescriptor({
         dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
-        columns: [
-          {
-            name: 'location',
-            type: 'geo_point',
-          },
-        ],
         dateField: 'utc_timestamp',
         narrowByGlobalTime: false,
       });

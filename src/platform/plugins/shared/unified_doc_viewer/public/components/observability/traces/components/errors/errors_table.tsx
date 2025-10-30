@@ -26,7 +26,7 @@ import { useFetchErrorsByTraceId } from './use_fetch_errors_by_trace_id';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
-import { createTraceContextWhereClause } from '../../common/create_trace_context_where_clause';
+import { createTraceContextWhereClauseForErrors } from '../../common/create_trace_context_where_clause';
 import {
   ScrollableSectionWrapper,
   type ScrollableSectionWrapperApi,
@@ -56,7 +56,9 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
     const { columns, openInDiscoverLink } = useMemo(() => {
       const cols = getColumns({ traceId, docId, generateDiscoverLink, source: response.source });
 
-      const link = generateDiscoverLink(createTraceContextWhereClause({ traceId, spanId: docId }));
+      const link = generateDiscoverLink(
+        createTraceContextWhereClauseForErrors({ traceId, spanId: docId })
+      );
 
       return { columns: cols, openInDiscoverLink: link };
     }, [traceId, docId, generateDiscoverLink, response.source]);

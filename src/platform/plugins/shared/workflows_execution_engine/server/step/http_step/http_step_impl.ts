@@ -11,7 +11,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import https from 'https';
+import type { FetcherConfigSchema } from '@kbn/workflows';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
+import type { z } from '@kbn/zod';
 import type { UrlValidator } from '../../lib/url_validator';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -21,6 +24,15 @@ import { BaseAtomicNodeImplementation } from '../node_implementation';
 
 type HttpHeaders = Record<string, string | number | boolean>;
 
+/**
+ * Fetcher configuration options for customizing HTTP requests
+ * Derived from the Zod schema to ensure type safety and avoid duplication
+ */
+type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
+  // Allow additional options to be passed through
+  [key: string]: any;
+};
+
 // Extend BaseStep for HTTP-specific properties
 export interface HttpStep extends BaseStep {
   with: {
@@ -28,6 +40,7 @@ export interface HttpStep extends BaseStep {
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     headers?: HttpHeaders;
     body?: any;
+    fetcher?: FetcherOptions;
   };
 }
 
@@ -54,13 +67,14 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   }
 
   public getInput() {
-    const { url, method = 'GET', headers = {}, body } = this.step.with;
+    const { url, method = 'GET', headers = {}, body, fetcher } = this.step.with;
 
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext({
       url,
       method,
       headers,
       body,
+      fetcher,
     });
   }
 
@@ -73,7 +87,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   }
 
   private async executeHttpRequest(input?: any): Promise<RunStepResult> {
-    const { url, method, headers, body } = input;
+    const { url, method, headers, body, fetcher: fetcherOptions } = input;
 
     // Validate that the URL is allowed based on the allowedHosts configuration
     try {
@@ -106,6 +120,40 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
 
     if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
       config.data = body;
+    }
+
+    // Apply fetcher options if provided
+    if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
+      const {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        skip_ssl_verification,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        follow_redirects,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        max_redirects,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        keep_alive,
+      } = fetcherOptions;
+
+      // Configure HTTPS agent for SSL and keep-alive options
+      const httpsAgentOptions: https.AgentOptions = {};
+
+      if (skip_ssl_verification) {
+        httpsAgentOptions.rejectUnauthorized = false;
+      }
+
+      if (keep_alive !== undefined) {
+        httpsAgentOptions.keepAlive = keep_alive;
+      }
+
+      config.httpsAgent = new https.Agent(httpsAgentOptions);
+
+      // Configure redirect behavior
+      if (follow_redirects === false) {
+        config.maxRedirects = 0;
+      } else if (max_redirects !== undefined) {
+        config.maxRedirects = max_redirects;
+      }
     }
 
     const response: AxiosResponse = await axios(config);

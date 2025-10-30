@@ -7,71 +7,98 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Liquid } from 'liquidjs';
+
+const liquidEngine = new Liquid({
+  strictFilters: false,
+  strictVariables: false,
+});
+
+function isLiteral(value: string): boolean {
+  // Check if it's a string literal (quoted with ' or ")
+  if (
+    (value.startsWith("'") && value.endsWith("'")) ||
+    (value.startsWith('"') && value.endsWith('"'))
+  ) {
+    return true;
+  }
+
+  return !Number.isNaN(Number.parseFloat(value));
+}
+
+/**
+ * Extracts template variables from a Liquid template string.
+ *
+ * This function parses a Liquid template and returns an array of variable paths that are referenced
+ * in the template. It handles various Liquid constructs including conditionals, loops, filters, and
+ * more, while filtering out local variables (like loop iterators) and correctly handling array/object
+ * access patterns.
+ *
+ * **Key behaviors:**
+ * - **Local variables are excluded**: Variables created by `for`, `assign`, `capture`, and `tablerow`
+ *   tags are not included in the output since they're not external inputs to the template.
+ * - **Literal array/object access is preserved**: When accessing arrays or objects with literal indices
+ *   (numbers or quoted strings), the full path is returned.
+ * - **Variable references in brackets are truncated**: When a variable is used as an index/key
+ *   (e.g., `items[i]` where `i` is a variable), the path is truncated at that point since the full
+ *   path cannot be statically determined.
+ *
+ * @param template - A Liquid template string to parse
+ * @returns An array of unique variable paths referenced in the template
+ *
+ * @example
+ * ```typescript
+ * // Returns: ['user.name', 'order.id']
+ * extractTemplateVariables('Hello {{ user.name }}, order {{ order.id }}');
+ *
+ * // Returns: ['items[0].name', 'items[1].price']
+ * extractTemplateVariables('{{ items[0].name }} - {{ items[1].price }}');
+ *
+ * // Returns: ['items'] (i is a local loop variable)
+ * extractTemplateVariables('{% for i in (1..5) %}{{ items[i] }}{% endfor %}');
+ *
+ * // Returns: ['users.info.addresses'] (name is a variable reference)
+ * extractTemplateVariables('{{ users.info.addresses[name].postalCode }}');
+ *
+ * // Returns: ['data.items["key"].value'] ("key" is a string literal)
+ * extractTemplateVariables('{{ data.items["key"].value }}');
+ * ```
+ */
 export function extractTemplateVariables(template: string): string[] {
-  const variables: string[] = [];
-  const seen = new Set<string>();
+  const globalVars = liquidEngine.globalFullVariablesSync(template);
+  const truncatedVars: string[] = [];
 
-  // Combined regex to match all Nunjucks patterns in order of appearance
-  const allPatternsRegex = /\{\{\s*([^}]+?)\s*\}\}|\{\%\s*(if|elif|for|set)\s+([^%]+?)\s*\%\}/g;
+  // Truncate variable paths at dynamic bracket accesses
+  // e.g., items[i].name  =>  items
+  globalVars.forEach((varPath) => {
+    let isBracketOpen = false;
+    let valueInBrackets = '';
+    let resultVariable = '';
 
-  // Function to extract variable names from expressions
-  function extractVariableFromExpression(expression: string): string[] {
-    const vars: string[] = [];
+    for (let i = 0; i < varPath.length; i++) {
+      const currentChar = varPath[i];
 
-    // Handle 'for' loops: "item in collection" -> extract "collection"
-    const forMatch = expression.match(/^\s*(\w+)\s+in\s+(.+)$/);
-    if (forMatch) {
-      const [, , collection] = forMatch;
-      vars.push(collection.trim());
-      return vars;
-    }
+      if (currentChar === '[') {
+        isBracketOpen = true;
+      } else if (currentChar === ']') {
+        isBracketOpen = false;
+        if (!isLiteral(valueInBrackets)) {
+          break;
+        }
 
-    // For other expressions, extract all variable-like patterns
-    // This pattern matches:
-    // - Simple variables: user, name
-    // - Nested properties: user.name, user.profile.firstName
-    // - Array access: items[0], user.items[0].name
-    // - Function calls: user.getFullName()
-    const variablePattern =
-      /\b([a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[[^\]]+\]|\(\))*)/g;
-
-    let match;
-    while ((match = variablePattern.exec(expression)) !== null) {
-      const variable = match[1];
-      // Skip common keywords and operators
-      if (
-        !['in', 'and', 'or', 'not', 'is', 'true', 'false', 'null', 'undefined'].includes(variable)
-      ) {
-        vars.push(variable);
+        resultVariable += `[${valueInBrackets}]`;
+        valueInBrackets = '';
+      } else if (isBracketOpen) {
+        valueInBrackets += currentChar;
+      } else {
+        resultVariable += currentChar;
       }
     }
 
-    return vars;
-  }
-
-  // Process all patterns in order of appearance
-  let match;
-  while ((match = allPatternsRegex.exec(template)) !== null) {
-    let expression: string | undefined;
-
-    if (match[1]) {
-      // Variable output: {{ variable }}
-      expression = match[1];
-    } else if (match[3]) {
-      // Control statement: {% keyword expression %}
-      expression = match[3];
+    if (resultVariable) {
+      truncatedVars.push(resultVariable);
     }
+  });
 
-    if (expression) {
-      const vars = extractVariableFromExpression(expression);
-      vars.forEach((variable) => {
-        if (!seen.has(variable)) {
-          seen.add(variable);
-          variables.push(variable);
-        }
-      });
-    }
-  }
-
-  return variables;
+  return Array.from(new Set(truncatedVars));
 }

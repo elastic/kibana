@@ -11,7 +11,14 @@ import type { SupportedDataType } from '../../../../../types';
 import { supportsArithmeticOperations } from '../../../../../types';
 import type { ExpressionContext, FunctionParameterContext } from '../../types';
 import { SignatureAnalyzer } from '../../signature_analyzer';
-import { arithmeticOperators, logicalOperators } from '../../../../../all_operators';
+import {
+  arithmeticOperators,
+  comparisonFunctions,
+  logicalOperators,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '../../../../../all_operators';
 
 export interface OperatorRuleContext {
   expressionType: SupportedDataType | 'unknown';
@@ -47,19 +54,117 @@ type Rule = (context: OperatorRuleContext) => OperatorDecision | null;
 // Rule ordering logic:
 // 1. Context-based rules (no function context, any type, boolean)
 // 2. Homogeneous function rules (first param, subsequent params)
-// 3. Type-specific rules (numeric, single string)
+// 3. Type-specific rules (numeric, string/text, single string)
 // 4. Default fallback
 
 const rules: Rule[] = [
-  // Rule 1: No function context - always allow operators
+  // Rule 1: No function context - allow operators (filtered by type and expression preference)
   (ctx) => {
     if (!ctx.functionParameterContext) {
+      const { expressionType } = ctx;
+      const preferredType = ctx.ctx.options.preferredExpressionType;
+
+      if (expressionType === 'text' || expressionType === 'keyword') {
+        const isBooleanContext = preferredType === 'boolean' || preferredType === 'any';
+
+        const stringOperators = [
+          ...(isBooleanContext ? comparisonFunctions.map(({ name }) => name) : []),
+          ...patternMatchOperators.map(({ name }) => name),
+          ...inOperators.map(({ name }) => name),
+          ...nullCheckOperators.map(({ name }) => name),
+        ];
+
+        return {
+          shouldSuggest: true,
+          allowedOperators: stringOperators,
+          reason: isBooleanContext
+            ? 'Boolean/any context - all operators for text/keyword fields'
+            : 'Non-boolean context - string operators only',
+        };
+      }
+
+      // For other types, allow all operators
       return { shouldSuggest: true, reason: 'Not inside function parameter' };
     }
     return null;
   },
 
-  // Rule 2: Parameter accepts 'any' type - always allow operators
+  // Rule 2: String operators for text/keyword types
+  // MUST come before "Parameter accepts 'any'" to limit operators for strings
+  (ctx) => {
+    const { expressionType, functionParameterContext } = ctx;
+
+    // Only apply to text/keyword types
+    if (expressionType !== 'text' && expressionType !== 'keyword') {
+      return null;
+    }
+
+    // functionParameterContext is guaranteed to exist (Rule 1 already handled the case where it doesn't)
+    const analyzer = SignatureAnalyzer.from(functionParameterContext);
+    if (!analyzer) {
+      return null;
+    }
+
+    const acceptedTypes = analyzer.getAcceptedTypes();
+    const acceptsBoolean = acceptedTypes.includes('boolean');
+    const acceptsAny = acceptedTypes.includes('any');
+
+    // Special case: for homogeneous functions at first parameter, check if ANY signature accepts boolean
+    // (not just validSignatures which may be filtered by current field type)
+    const isFirstParamOfHomogeneous =
+      analyzer.isHomogeneous && (functionParameterContext?.currentParameterIndex ?? 0) === 0;
+
+    if (isFirstParamOfHomogeneous && functionParameterContext) {
+      const allSignatures = functionParameterContext.functionDefinition?.signatures || [];
+      const hasBooleanSignature = allSignatures.some((sig) => sig.params[0]?.type === 'boolean');
+
+      if (hasBooleanSignature) {
+        const stringOperators = [
+          ...patternMatchOperators.map(({ name }) => name),
+          ...inOperators.map(({ name }) => name),
+          ...nullCheckOperators.map(({ name }) => name),
+        ];
+
+        return {
+          shouldSuggest: true,
+          allowedOperators: stringOperators,
+          reason:
+            'Homogeneous function first parameter - string operators for boolean expression creation',
+        };
+      }
+    }
+    const acceptsCurrentType =
+      acceptedTypes.includes(expressionType) || acceptedTypes.includes('any');
+
+    // If parameter accepts boolean OR any, suggest string-specific operators
+    // (any includes boolean, so we can create boolean expressions)
+    if (acceptsBoolean || acceptsAny) {
+      const stringOperators = [
+        ...patternMatchOperators.map(({ name }) => name), // LIKE, NOT LIKE, RLIKE, NOT RLIKE
+        ...inOperators.map(({ name }) => name), // IN, NOT IN
+        ...nullCheckOperators.map(({ name }) => name), // IS NULL, IS NOT NULL
+      ];
+
+      return {
+        shouldSuggest: true,
+        allowedOperators: stringOperators,
+        reason: 'String operators: pattern matching (LIKE), membership (IN), null checks',
+      };
+    }
+
+    // If parameter accepts current type but NOT boolean, block operators
+    // Example: TRIM(textField) - accepts text/keyword directly, not boolean → no operators
+    if (acceptsCurrentType && !acceptsBoolean) {
+      return {
+        shouldSuggest: false,
+        reason: 'Function accepts string directly without boolean expressions',
+      };
+    }
+
+    return null;
+  },
+
+  // Rule 3: Parameter accepts 'any' type - allow all operators
   (ctx) => {
     const paramDefs = ctx.functionParameterContext?.paramDefinitions;
     if (paramDefs?.some((def) => def.type === 'any')) {
@@ -68,7 +173,7 @@ const rules: Rule[] = [
     return null;
   },
 
-  // Rule 3: Boolean expression - allow logical operators
+  // Rule 4: Boolean expression - allow logical operators
   (ctx) => {
     if (ctx.expressionType === 'boolean') {
       return { shouldSuggest: true, reason: 'Boolean expression allows logical operators' };
@@ -76,7 +181,7 @@ const rules: Rule[] = [
     return null;
   },
 
-  // Rule 4: Homogeneous function - first parameter
+  // Rule 5: Homogeneous function - first parameter
   // Check if boolean signature exists to allow operator-based type switching
   (ctx) => {
     const { functionParameterContext } = ctx;
@@ -105,13 +210,35 @@ const rules: Rule[] = [
 
     const hasBooleanSig = signatures.some((sig) => sig.params[0]?.type === 'boolean');
 
+    if (!hasBooleanSig) {
+      return {
+        shouldSuggest: false,
+        reason: 'No boolean signature available',
+      };
+    }
+
+    // For text/keyword fields, limit to string-specific operators
+    if (ctx.expressionType === 'text' || ctx.expressionType === 'keyword') {
+      const stringOperators = [
+        ...patternMatchOperators.map(({ name }) => name), // LIKE, NOT LIKE, RLIKE, NOT RLIKE
+        ...inOperators.map(({ name }) => name), // IN, NOT IN
+        ...nullCheckOperators.map(({ name }) => name), // IS NULL, IS NOT NULL
+      ];
+
+      return {
+        shouldSuggest: true,
+        allowedOperators: stringOperators,
+        reason: 'Homogeneous function with boolean signature - string operators only',
+      };
+    }
+
     return {
-      shouldSuggest: hasBooleanSig ?? false,
-      reason: hasBooleanSig ? 'Can switch to boolean signature' : 'No boolean signature available',
+      shouldSuggest: true,
+      reason: 'Can switch to boolean signature',
     };
   },
 
-  // Rule 5: Homogeneous function - subsequent parameters
+  // Rule 6: Homogeneous function - subsequent parameters
   // Constrain operators based on first parameter type
   (ctx) => {
     const { functionParameterContext, expressionType } = ctx;
@@ -192,8 +319,8 @@ const rules: Rule[] = [
     };
   },
 
-  // Rule 6: Numeric context - restrict to arithmetic operators only
-  // Skip for homogeneous first param (already handled by Rule 4)
+  // Rule 7: Numeric context - restrict to arithmetic operators only
+  // Skip for homogeneous first param (already handled by Rule 5)
   (ctx) => {
     const { expressionType, functionParameterContext } = ctx;
 
@@ -221,42 +348,6 @@ const rules: Rule[] = [
         allowedOperators: arithmeticOperators.map(({ name }) => name),
         reason: 'Numeric parameter context',
       };
-    }
-
-    return null;
-  },
-
-  // Rule 7: Single-parameter string function - no operators
-  // Functions like TRIM(text) shouldn't suggest operators
-  (ctx) => {
-    const { functionParameterContext } = ctx;
-    if (!functionParameterContext) {
-      return null;
-    }
-
-    const fnDef = functionParameterContext.functionDefinition;
-    const signatures = fnDef?.signatures;
-
-    if (!signatures || signatures.length === 0) {
-      return null;
-    }
-
-    // Must be non-variadic and exactly 1 parameter of type text/keyword
-    const isSingleStringFunction = signatures.every(({ minParams, params }) => {
-      if (minParams != null) {
-        return false;
-      }
-
-      if (!params || params.length !== 1) {
-        return false;
-      }
-
-      const type = params[0].type;
-      return type === 'text' || type === 'keyword';
-    });
-
-    if (isSingleStringFunction) {
-      return { shouldSuggest: false, reason: 'Single-parameter string function' };
     }
 
     return null;

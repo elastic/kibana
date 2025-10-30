@@ -356,7 +356,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async expectPanelExists(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectPanelExists', sectionId);
-        await testSubjects.existOrFail(`~sideNavPanel-id-${sectionId}`, {
+        await testSubjects.existOrFail(`~side-navigation-panel_${sectionId}`, {
           timeout: TIMEOUT_CHECK,
         });
       },

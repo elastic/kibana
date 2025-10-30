@@ -254,7 +254,6 @@ export class CoreUsageDataService
           customHeadersConfigured: isConfigured.record(es.customHeaders),
           healthCheckDelayMs: es.healthCheck.delay.asMilliseconds(),
           logQueries: es.logQueries,
-          pingTimeoutMs: es.pingTimeout.asMilliseconds(),
           requestHeadersWhitelistConfigured: isConfigured.stringOrArray(
             es.requestHeadersWhitelist,
             ['authorization', 'es-client-authentication']
