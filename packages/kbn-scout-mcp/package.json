@@ -1,0 +1,16 @@
+{
+  "name": "@kbn/scout-mcp",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Model Context Protocol server for Scout test framework",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "@kbn/scout": "link:../shared/kbn-scout",
+    "@kbn/tooling-log": "link:../../platform/packages/shared/kbn-tooling-log",
+    "@kbn/test": "link:../../platform/packages/shared/kbn-test",
+    "@kbn/test-subj-selector": "link:../../platform/packages/shared/kbn-test-subj-selector",
+    "@playwright/test": "^1.48.2",
+    "playwright": "^1.48.2"
+  }
+}
