@@ -520,13 +520,13 @@ paths:
 
   it('should inject package meta varaible', () => {
     const streamTemplate = `
-input: {{input.id}}
-package_name: {{package.name}}
-package_title: {{package.title}}
-package_version: {{package.version}}
-stream_id: {{stream.id}}
-dataset: {{stream.data_stream.dataset}}
-type: {{stream.data_stream.type}}
+input: {{_meta.input.id}}
+package_name: {{_meta.package.name}}
+package_title: {{_meta.package.title}}
+package_version: {{_meta.package.version}}
+stream_id: {{_meta.stream.id}}
+dataset: {{_meta.stream.data_stream.dataset}}
+type: {{_meta.stream.data_stream.type}}
       `;
 
     const vars = {};

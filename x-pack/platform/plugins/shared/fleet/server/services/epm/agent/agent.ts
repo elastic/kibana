@@ -24,7 +24,6 @@ import {
   getHandlebarsCompiledTemplateCache,
   setHandlebarsCompiledTemplateCache,
 } from '../packages/cache';
-import deepmerge from 'deepmerge';
 
 const handlebars = Handlebars.create();
 
@@ -148,7 +147,7 @@ function buildTemplateVariables(
   metaVariable: MetaVariable
 ) {
   const yamlValues: { [k: string]: any } = {};
-  let vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
+  const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop();
@@ -188,7 +187,7 @@ function buildTemplateVariables(
     return acc;
   }, {} as { [k: string]: any });
 
-  vars = deepmerge(vars, metaVariable);
+  vars._meta = metaVariable;
 
   return { vars, yamlValues };
 }
