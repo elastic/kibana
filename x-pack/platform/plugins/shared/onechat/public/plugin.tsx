@@ -34,6 +34,8 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
+import { openConversationFlyout } from './flyout/open_conversation_flyout';
+import type { EmbeddableConversationProps } from './embeddable/types';
 
 export class OnechatPlugin
   implements
@@ -45,6 +47,7 @@ export class OnechatPlugin
     >
 {
   logger: Logger;
+  private conversationFlyoutActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: OnechatInternalService;
   private setupServices?: {
     navigationService: NavigationService;
@@ -115,7 +118,7 @@ export class OnechatPlugin
 
     const { navigationService } = this.setupServices;
 
-    this.internalServices = {
+    const internalServices: OnechatInternalService = {
       agentService,
       chatService,
       conversationsService,
@@ -125,8 +128,23 @@ export class OnechatPlugin
       accessChecker,
     };
 
+    this.internalServices = internalServices;
+
     return {
       tools: createPublicToolContract({ toolsService }),
+      setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
+        this.conversationFlyoutActiveConfig = config;
+      },
+      clearConversationFlyoutActiveConfig: () => {
+        this.conversationFlyoutActiveConfig = {};
+      },
+      openConversationFlyout: (options) => {
+        const config = options ?? this.conversationFlyoutActiveConfig;
+        return openConversationFlyout(config, {
+          coreStart: core,
+          services: internalServices,
+        });
+      },
     };
   }
 }

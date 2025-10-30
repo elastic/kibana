@@ -48,7 +48,8 @@ export async function autocomplete(
     suggestions.push(
       ...getSourceSuggestions(
         context?.sources ?? [],
-        indexes.map(({ name }) => name)
+        indexes.map(({ name }) => name),
+        innerText
       )
     );
   }
