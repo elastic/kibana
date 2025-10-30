@@ -11,12 +11,11 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import type { Dispatch, ReactElement, SetStateAction } from 'react';
 import React, { useState } from 'react';
-import { EuiCallOut, EuiCheckbox, EuiFlexGrid, EuiFlexItem, EuiFormFieldset } from '@elastic/eui';
+import { EuiCheckbox, EuiFlexGrid, EuiFlexItem, EuiFormFieldset } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
 import type { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 
@@ -201,7 +200,7 @@ export function ShowShareModal({
     asExport,
     objectId: savedObjectId,
     objectType: 'dashboard',
-    onSave: saveDashboard,
+    onSave: canSave ? saveDashboard : undefined,
     objectTypeMeta: {
       title: i18n.translate('dashboard.share.shareModal.title', {
         defaultMessage: 'Share dashboard',
@@ -235,42 +234,10 @@ export function ShowShareModal({
         integration: {
           export: {
             pdfReports: {
-              draftModeCallOut: (
-                <EuiCallOut
-                  color="warning"
-                  iconType="warning"
-                  title={
-                    <FormattedMessage
-                      id="dashboard.exports.pdfReports.warning.title"
-                      defaultMessage="Unsaved changes"
-                    />
-                  }
-                >
-                  <FormattedMessage
-                    id="dashboard.exports.pdfReports.postURLWatcherMessage.unsavedChanges"
-                    defaultMessage="URL may change if you upgrade Kibana."
-                  />
-                </EuiCallOut>
-              ),
+              draftModeCallOut: true,
             },
             imageReports: {
-              draftModeCallOut: (
-                <EuiCallOut
-                  color="warning"
-                  iconType="warning"
-                  title={
-                    <FormattedMessage
-                      id="dashboard.exports.imageReports.warning.title"
-                      defaultMessage="Unsaved changes"
-                    />
-                  }
-                >
-                  <FormattedMessage
-                    id="dashboard.exports.imageReports.postURLWatcherMessage.unsavedChanges"
-                    defaultMessage="URL may change if you upgrade Kibana."
-                  />
-                </EuiCallOut>
-              ),
+              draftModeCallOut: true,
             },
           },
         },

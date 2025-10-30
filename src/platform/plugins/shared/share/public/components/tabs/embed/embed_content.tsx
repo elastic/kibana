@@ -29,7 +29,6 @@ import type { AnonymousAccessState } from '../../../../common';
 
 import { useShareContext, type IShareContext } from '../../context';
 import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
-import type { DraftModeCalloutProps } from '../../common/draft_mode_callout';
 import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type EmbedProps = Pick<
@@ -84,16 +83,7 @@ export const EmbedContent = ({
     computeAnonymousCapabilities,
     embedUrlParamExtensions: urlParamExtensions,
   } = objectConfig;
-  // TODO Remove node override logic https://github.com/elastic/kibana/issues/238877
-  const isValidCalloutOverride = React.isValidElement(draftModeCallOut);
-  const draftModeCalloutContent = isValidCalloutOverride
-    ? // Retro-compatible case
-      { node: draftModeCallOut }
-    : typeof draftModeCallOut === 'object'
-    ? // Custom content callout
-      (draftModeCallOut as DraftModeCalloutProps)
-    : // Default content callout
-      {};
+  const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};
 
   useEffect(() => {
     if (computeAnonymousCapabilities && anonymousAccess) {
