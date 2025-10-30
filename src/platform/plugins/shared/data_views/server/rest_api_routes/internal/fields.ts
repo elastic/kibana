@@ -18,7 +18,7 @@ import { parseFields, querySchema, validate } from './fields_for';
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 
 export function calculateHash(srcBuffer: Buffer) {
-  const hash = createHash('sha512');
+  const hash = createHash('sha256');
   hash.update(srcBuffer);
   return hash.digest('hex');
 }
