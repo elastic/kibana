@@ -702,6 +702,11 @@ describe('custom assets', () => {
               },
             ],
             version: 1,
+            description: 'description pipeline',
+            created_date: '2024-01-01T12:00:00.000Z',
+            created_date_millis: 1704110400000,
+            modified_date: '2025-01-01T12:00:00.000Z',
+            modified_date_millis: 1735732800000,
           },
           type: 'ingest_pipeline',
         },
@@ -721,6 +726,7 @@ describe('custom assets', () => {
             },
           ],
           version: 1,
+          description: 'description pipeline',
         },
         expect.anything()
       );
