@@ -249,7 +249,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
         await evaluateDataset({
           dataset: {
             name: 'kb: Elastic stack questions',
-            description: 'Validates retrieve_elastic_doc usage for Kibana Lens guidance.',
+            description: `Validates ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} usage for Kibana Lens guidance.`,
             examples: [
               {
                 input: {
