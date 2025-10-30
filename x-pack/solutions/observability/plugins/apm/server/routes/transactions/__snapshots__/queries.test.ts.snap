@@ -39,6 +39,9 @@ Object {
       "server.address",
       "server.port",
       "user_agent.version",
+      "kubernetes.pod.uid",
+      "host.hostname",
+      "container.id",
     ],
     "query": Object {
       "bool": Object {
