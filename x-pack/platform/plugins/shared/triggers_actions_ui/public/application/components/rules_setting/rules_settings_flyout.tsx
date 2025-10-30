@@ -176,9 +176,9 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   const canShowQueryDelaySettings = readQueryDelaySettingsUI;
   const canShowAlertDeleteSettings = readAlertDeleteSettingsUI;
 
-  const shouldDisableSaveButton =
-    (!canWriteFlappingSettings && !canWriteQueryDelaySettings) ||
-    (!hasFlappingChanged && !hasQueryDelayChanged);
+  const isChanged = hasFlappingChanged || hasQueryDelayChanged;
+  const hasMinimumWritePermissions = canWriteFlappingSettings || canWriteQueryDelaySettings;
+  const shouldDisableSaveButton = !isChanged || !hasMinimumWritePermissions;
 
   const handleSettingsChange = (
     setting: keyof RulesSettingsProperties,
