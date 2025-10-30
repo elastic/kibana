@@ -708,6 +708,8 @@ export interface Installation {
   latest_executed_state?: InstallLatestExecutedState;
   latest_custom_asset_install_failed_attempts?: { [asset: string]: CustomAssetFailedAttempt };
   previous_version?: string | null;
+  rolled_back?: boolean;
+  is_rollback_ttl_expired?: boolean;
 }
 
 export interface PackageUsageStats {

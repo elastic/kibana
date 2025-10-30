@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { MachineImplementationsFrom, ActorRefFrom, SnapshotFrom } from 'xstate5';
+import { htmlIdGenerator } from '@elastic/eui';
 import {
   assign,
   enqueueActions,
@@ -28,6 +29,7 @@ import {
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
@@ -71,6 +73,8 @@ import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
+
+const createId = htmlIdGenerator();
 
 export const streamEnrichmentMachine = setup({
   types: {
@@ -144,6 +148,34 @@ export const streamEnrichmentMachine = setup({
         };
       }
     ),
+    duplicateProcessor: assign((assignArgs, params: { processorStepId: string }) => {
+      const targetStepUIDefinition = assignArgs.context.stepRefs
+        .map((stepRef) => stepRef.getSnapshot().context.step)
+        .find((stepDefinition) => {
+          return stepDefinition.customIdentifier === params.processorStepId;
+        });
+
+      if (!targetStepUIDefinition) {
+        return {};
+      }
+
+      const parentId = targetStepUIDefinition.parentId;
+      const newProcessorRef = spawnStep(
+        {
+          ...targetStepUIDefinition,
+          customIdentifier: createId(),
+        },
+        assignArgs,
+        {
+          isNew: true,
+        }
+      );
+      const insertIndex = findInsertIndex(assignArgs.context.stepRefs, parentId);
+
+      return {
+        stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
+      };
+    }),
     addCondition: assign(
       (
         assignArgs,
@@ -282,6 +314,7 @@ export const streamEnrichmentMachine = setup({
       input: {
         steps: [],
         streamName: input.definition.stream.name,
+        streamType: getStreamTypeFromDefinition(input.definition.stream),
       },
     }),
   }),
@@ -472,9 +505,21 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.delete': {
                       target: 'idle',
+                      guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
+                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+                      ],
+                    },
+                    'step.duplicateProcessor': {
+                      target: 'creating',
+                      guard: 'hasManagePrivileges',
+                      actions: [
+                        {
+                          type: 'duplicateProcessor',
+                          params: ({ event }) => event,
+                        },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
@@ -502,6 +547,7 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.delete': {
                       target: 'idle',
+                      guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
@@ -525,6 +571,7 @@ export const streamEnrichmentMachine = setup({
                     'step.cancel': 'idle',
                     'step.delete': {
                       target: 'idle',
+                      guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },

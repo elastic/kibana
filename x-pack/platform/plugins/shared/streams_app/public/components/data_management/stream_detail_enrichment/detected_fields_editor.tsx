@@ -49,8 +49,7 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields.noResults.content',
               {
-                defaultMessage:
-                  'No fields were detected during the simulation. You can add fields manually in the Schema Editor.',
+                defaultMessage: 'No fields were detected. Add fields manually from the Schema tab.',
               }
             )}
           </p>
@@ -73,14 +72,13 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFieldsHeadline',
             {
-              defaultMessage:
-                'You can review and adjust saved fields further in the Schema Editor.',
+              defaultMessage: 'You can review and adjust saved fields further in the Schema tab.',
             }
           )}
         </EuiText>
       )}
       <SchemaEditor
-        defaultColumns={['name', 'type', 'format', 'status']}
+        defaultColumns={['name', 'type', 'format', 'status', 'source']}
         fields={detectedFields}
         stream={definition.stream}
         onFieldUpdate={(field) => {

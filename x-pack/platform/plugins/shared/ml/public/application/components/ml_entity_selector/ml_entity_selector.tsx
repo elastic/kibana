@@ -213,6 +213,9 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
       fullWidth
       data-test-subj={`mlEntitySelector_${isLoading ? 'loading' : 'loaded'}`}
       isInvalid={false}
+      aria-label={i18n.translate('xpack.ml.mlEntitySelector.comboBoxAriaLabel', {
+        defaultMessage: 'Machine learning entities',
+      })}
     />
   );
 };

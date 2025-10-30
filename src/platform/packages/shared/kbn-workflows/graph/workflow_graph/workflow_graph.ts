@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { GraphEdge } from '@dagrejs/dagre';
 import { graphlib } from '@dagrejs/dagre';
-import type { GraphNodeUnion } from '../types';
-import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import { createTypedGraph } from './create_typed_graph';
+import type { WorkflowSettings, WorkflowYaml } from '../..';
+import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
+import type { GraphNodeUnion } from '../types';
 
 /**
  * A class that encapsulates the logic of workflow graph operations and provides
@@ -35,13 +37,16 @@ export class WorkflowGraph {
     this.graph = graph;
   }
 
-  public static fromWorkflowDefinition(workflowDefinition: any): WorkflowGraph {
-    return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition));
+  public static fromWorkflowDefinition(
+    workflowDefinition: WorkflowYaml,
+    defaultSettings?: WorkflowSettings
+  ): WorkflowGraph {
+    return new WorkflowGraph(convertToWorkflowGraph(workflowDefinition, defaultSettings));
   }
 
   public get topologicalOrder(): string[] {
     if (!this.__topologicalOrder) {
-      this.__topologicalOrder = graphlib.alg.topsort(this.graph!);
+      this.__topologicalOrder = graphlib.alg.topsort(this.graph);
     }
     return this.__topologicalOrder;
   }
@@ -74,6 +79,10 @@ export class WorkflowGraph {
     return this.graph.edges().map((edge) => ({ v: edge.v, w: edge.w }));
   }
 
+  public getEdge(edgeMetadata: { v: string; w: string }): GraphEdge {
+    return this.graph.edge(edgeMetadata);
+  }
+
   public hasStep(stepId: string): boolean {
     if (!this.stepIdsSet) {
       this.stepIdsSet = new Set(this.getAllNodes().map((node) => node.stepId));
@@ -85,6 +94,7 @@ export class WorkflowGraph {
   public getStepGraph(stepId: string): WorkflowGraph {
     // Find the boundaries of the step in topological order
     const beginNodeIndex = this.topologicalOrder.findIndex(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (id) => (this.getNode(id) as any).stepId === stepId
     );
 
@@ -96,6 +106,7 @@ export class WorkflowGraph {
     let endNodeIndex = -1;
     for (let i = this.topologicalOrder.length - 1; i >= beginNodeIndex; i--) {
       const nodeId = this.topologicalOrder[i];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((this.getNode(nodeId) as any).stepId === stepId) {
         endNodeIndex = i;
         break;

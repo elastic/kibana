@@ -11,19 +11,18 @@ import type { FieldCapsFieldCapability, Fields } from '@elastic/elasticsearch/li
 import { type ElasticsearchClient } from '@kbn/core/server';
 import { dateRangeQuery } from '@kbn/es-query';
 import { DIMENSION_TYPES, NUMERIC_TYPES } from '../../../common/fields/constants';
+import type { EpochTimeRange } from '../../types';
 
 export async function retrieveFieldCaps({
   esClient,
   indexPattern,
   fields = '*',
-  to,
-  from,
+  timerange: { from, to },
 }: {
   esClient: ElasticsearchClient;
   indexPattern: string;
   fields?: Fields;
-  to: number;
-  from: number;
+  timerange: EpochTimeRange;
 }) {
   const dataStreamFieldCapsMap = new Map<
     string,
@@ -33,7 +32,7 @@ export async function retrieveFieldCaps({
   // First, resolve the index pattern to get data streams
   const resolveResponse = await esClient.indices.resolveIndex({
     name: indexPattern,
-    expand_wildcards: 'all',
+    expand_wildcards: 'open',
   });
 
   // Extract data stream names

@@ -123,7 +123,9 @@ export const EPMHomePage: React.FC = () => {
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
         <DefaultLayout section="manage" notificationsBySection={notificationsBySection}>
           {installedIntegrationsTabularUI ? (
-            <InstalledIntegrationsPage />
+            <InstalledIntegrationsPage
+              prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+            />
           ) : (
             <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
           )}

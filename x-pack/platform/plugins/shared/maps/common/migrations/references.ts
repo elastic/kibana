@@ -9,7 +9,7 @@
 
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type { MapAttributes } from '../content_management';
+import type { StoredMapAttributes } from '../../server';
 import type { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 
 interface IndexPatternReferenceDescriptor {
@@ -21,7 +21,7 @@ export function extractReferences({
   attributes,
   references = [],
 }: {
-  attributes: MapAttributes;
+  attributes: StoredMapAttributes;
   references?: SavedObjectReference[];
 }) {
   if (!attributes.layerListJSON) {
@@ -120,7 +120,7 @@ export function injectReferences({
   attributes,
   references,
 }: {
-  attributes: MapAttributes;
+  attributes: StoredMapAttributes;
   references: SavedObjectReference[];
 }) {
   if (!attributes.layerListJSON) {

@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -162,12 +163,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionLabel('Test of label');
       await PageObjects.lens.editDimensionFormat('Percent');
       await PageObjects.lens.editDimensionColor('#ff0000');
+      await PageObjects.lens.closeDimensionEditor();
+
       await PageObjects.lens.openVisualOptions();
 
       await PageObjects.lens.setCurvedLines('CURVE_MONOTONE_X');
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');
+
+      await PageObjects.lens.closeVisualOptionsPopover();
 
       await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await PageObjects.lens.assertColor('#ff0000');
@@ -254,6 +259,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // enable value labels
       await PageObjects.lens.openTextOptions();
       await testSubjects.click('lns_valueLabels_inside');
+      await PageObjects.lens.closeTitlesAndTextOptionsPopover();
 
       // check for value labels
       const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
@@ -505,7 +511,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
-        '-',
+        NULL_LABEL,
         '222,420.00',
         '702,050.00',
         '1,879,613.33',

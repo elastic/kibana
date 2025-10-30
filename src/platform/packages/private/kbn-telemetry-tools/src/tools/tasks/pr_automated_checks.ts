@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UPSTREAM_BRANCH, REPO_ROOT } from '@kbn/repo-info';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ListrTask } from 'listr2';
 import path from 'node:path';
 import { readFile } from 'fs/promises';
@@ -17,23 +17,26 @@ import type {
 } from '../../schema_ftr_validations/schema_to_config_schema';
 import type { TaskContext } from './task_context';
 
-const GIT_BASE_URL = 'https://raw.githubusercontent.com/elastic/kibana/refs/heads/';
+const GIT_BASE_URL = 'https://raw.githubusercontent.com/elastic/kibana';
 
-export function prAutomatedChecks({ roots, reporter }: TaskContext): ListrTask[] {
+export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext): ListrTask[] {
   return [
     ...roots.flatMap((root): ListrTask[] => {
       const relativePath = path.relative(REPO_ROOT, root.config.output);
       return [
         {
           task: async () => {
-            const url = `${GIT_BASE_URL}${UPSTREAM_BRANCH}/${relativePath}`;
+            if (!baselineSha) {
+              throw new Error('Cannot fetch the baseline for comparison, no SHA specified.');
+            }
+            const url = `${GIT_BASE_URL}/${baselineSha}/${relativePath}`;
             const response = await fetch(url);
             if (!response.ok) {
               throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
             }
             root.upstreamMapping = await response.json();
           },
-          title: `Downloading ${relativePath} from ${UPSTREAM_BRANCH} branch`,
+          title: `Downloading /${baselineSha}/${relativePath} from ${GIT_BASE_URL}`,
         },
         {
           task: async () => {
@@ -114,13 +117,17 @@ function validateSchemaDiff(
       }
 
       // Modified field. Make sure that the description is present
-      if (!newSchema._meta?.description) {
-        errors.push(`The _meta.description of ${fullKey} is missing. Please add it.`);
+      if (newSchema.type !== 'array' && !newSchema._meta?.description) {
+        errors.push(
+          `The _meta.description of ${fullKey} is missing. Please add it in the '.ts' file where you updated the field, and then run the 'scripts/telemetry_check --fix' to automatically update the JSON files.`
+        );
       }
     } else {
       // New field. Make sure that the description is present
-      if (!newSchema._meta?.description) {
-        errors.push(`The _meta.description of ${fullKey} is missing. Please add it.`);
+      if (newSchema.type !== 'array' && !newSchema._meta?.description) {
+        errors.push(
+          `The _meta.description of ${fullKey} is missing. Please add it in the '.ts' file where you added the new field, and then run the 'scripts/telemetry_check --fix' to automatically update the JSON files.`
+        );
       }
     }
   } else {

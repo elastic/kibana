@@ -24,7 +24,7 @@
             "id": "def-public.DataViewSelectPopover.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dependencies: { dataViews, dataViewEditor },\n  metadata = { adHocDataViewList: [], isManagementPage: true },\n  dataView,\n  onSelectDataView,\n  onChangeMetaData,\n}",
+            "label": "{\n  dependencies: { dataViews, dataViewEditor },\n  metadata,\n  dataView,\n  onSelectDataView,\n  onChangeMetaData,\n}",
             "description": [],
             "signature": [
               "DataViewSelectPopoverProps"
@@ -351,19 +351,19 @@
       },
       {
         "parentPluginId": "stackAlerts",
-        "id": "def-common.transformDatatableToEsqlTable",
+        "id": "def-common.transformToEsqlTable",
         "type": "Function",
         "tags": [],
-        "label": "transformDatatableToEsqlTable",
+        "label": "transformToEsqlTable",
         "description": [],
         "signature": [
           "(datatable: ",
           {
-            "pluginId": "expressions",
+            "pluginId": "@kbn/es-types",
             "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
+            "docId": "kibKbnEsTypesPluginApi",
+            "section": "def-common.ESQLSearchResponse",
+            "text": "ESQLSearchResponse"
           },
           ") => ",
           {
@@ -380,18 +380,18 @@
         "children": [
           {
             "parentPluginId": "stackAlerts",
-            "id": "def-common.transformDatatableToEsqlTable.$1",
+            "id": "def-common.transformToEsqlTable.$1",
             "type": "Object",
             "tags": [],
             "label": "datatable",
             "description": [],
             "signature": [
               {
-                "pluginId": "expressions",
+                "pluginId": "@kbn/es-types",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-common.ESQLSearchResponse",
+                "text": "ESQLSearchResponse"
               }
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",

@@ -239,7 +239,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             input={input}
           />
         )}
-
         <EuiSpacer />
       </>
     );

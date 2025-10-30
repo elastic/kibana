@@ -7,16 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonGroup, EuiSpacer, EuiFieldSearch } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import useWindowSize from 'react-use/lib/useWindowSize';
-import { css } from '@emotion/react';
+import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 import { JsonDataCode } from './json_data_code';
 import { JSONDataTable } from './json_data_table';
 
-// Displayed margin of the tab content to the window bottom
-const DEFAULT_MARGIN_BOTTOM = 16;
+const SearchTermStorageKey = 'workflows_management.step_execution.searchTerm';
+
+const ViewModeOptions: EuiButtonGroupOptionProps[] = [
+  {
+    id: 'table',
+    label: i18n.translate('workflows.jsonDataTable.viewMode.table', {
+      defaultMessage: 'Table',
+    }),
+    iconType: 'tableDensityNormal',
+  },
+  {
+    id: 'json',
+    label: i18n.translate('workflows.jsonDataTable.viewMode.json', {
+      defaultMessage: 'JSON',
+    }),
+    iconType: 'code',
+  },
+];
+const TableDisabledTooltip = i18n.translate(
+  'workflows.jsonDataTable.viewMode.tableDisabledTooltip',
+  { defaultMessage: 'Primitive data cannot be rendered in a table view' }
+);
 
 export interface JSONDataViewProps {
   /**
@@ -24,164 +46,129 @@ export interface JSONDataViewProps {
    * If an array is provided, only the first object will be displayed.
    * If a primitive value is provided, it will be wrapped in an object.
    */
-  data: Record<string, unknown> | Record<string, unknown>[] | unknown;
-
-  /**
-   * Optional title for the data view. Defaults to 'JSON Data'
-   */
+  data: JsonValue;
+  /** Optional title for the data view. Defaults to 'JSON Data' */
   title?: string;
-
-  /**
-   * Optional columns to display. If not provided, all keys from the data will be used.
-   */
-  columns?: string[];
-
-  /**
-   * Optional search term to filter the data.
-   */
-  searchTerm?: string;
-
-  /**
-   * Optional function to set the search term.
-   */
-  onSearchTermChange?: (value: string) => void;
-
-  /**
-   * Test subject for testing purposes
-   */
-  'data-test-subj'?: string;
+  /** Optional prefix for the field path actions, such as the copy the field path to the clipboard. */
+  fieldPathActionsPrefix?: string;
 }
 
-export function JSONDataView({
-  data,
-  title = 'JSON Data',
-  columns,
-  searchTerm,
-  onSearchTermChange,
-  'data-test-subj': dataTestSubj = 'jsonDataTable',
-}: JSONDataViewProps) {
-  const [viewMode, setViewMode] = useState<'table' | 'json'>('table');
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const { height: windowHeight } = useWindowSize();
-  const [contentTop, setContentTop] = useState(0);
+export const JSONDataView = React.memo<JSONDataViewProps>(
+  ({ data, title, fieldPathActionsPrefix }) => {
+    const [selectedViewMode, setSelectedViewMode] = useState<'table' | 'json'>('table');
 
-  useLayoutEffect(() => {
-    if (contentRef.current) {
-      setContentTop(contentRef.current.getBoundingClientRect().top ?? 0);
-    }
-  }, []);
+    const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(SearchTermStorageKey, '');
+    const [searchTerm, setSearchTerm] = useState(storedSearchTerm ?? '');
 
-  // Set the height of the content container to available space in flyout, the data table and the json editor will handle the overflow
-  const contentHeight = contentRef.current ? windowHeight - contentTop - DEFAULT_MARGIN_BOTTOM : 0;
+    const setStoredSearchTermDebounced = useMemo(
+      () => debounce(setStoredSearchTerm, 500),
+      [setStoredSearchTerm]
+    );
 
-  // Convert data to object format if needed
-  const jsonObject = useMemo(() => {
-    if (Array.isArray(data)) {
-      return data[0] || {};
-    }
+    const handleViewModeChange = useCallback((id: string) => {
+      setSelectedViewMode(id as 'table' | 'json');
+    }, []);
 
-    // If data is already an object, use it directly
-    if (data && typeof data === 'object' && data !== null) {
-      return data as Record<string, unknown>;
-    }
+    const handleSearchTermChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { value } = e.target;
+        setSearchTerm(value);
+        setStoredSearchTermDebounced(value);
+      },
+      [setStoredSearchTermDebounced]
+    );
 
-    // For primitive values, wrap them in an object
-    if (data !== undefined && data !== null) {
-      return { value: data };
-    }
+    // This prevents data from being displayed as a table if it is not tabular.
+    const tabularData = useMemo<JsonArray | JsonObject | undefined>(() => {
+      if (data == null) {
+        return undefined;
+      }
+      if (Array.isArray(data) || typeof data === 'object') {
+        return data;
+      }
+      return undefined; // Data cannot be displayed as a table, so return undefined.
+    }, [data]);
 
-    return {};
-  }, [data]);
+    const viewModeOptions = useMemo<EuiButtonGroupOptionProps[]>(() => {
+      if (tabularData) {
+        return ViewModeOptions;
+      }
+      // Data cannot be displayed as a table, so disable the table view mode and show a tooltip.
+      return ViewModeOptions.map<EuiButtonGroupOptionProps>((option) => ({
+        ...option,
+        ...(option.id === 'table' && { disabled: true, toolTipContent: TableDisabledTooltip }),
+      }));
+    }, [tabularData]);
 
-  return (
-    <EuiFlexGroup
-      data-test-subj={dataTestSubj}
-      direction="column"
-      gutterSize="none"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false} gutterSize="s">
-          {viewMode === 'table' && onSearchTermChange && (
-            <EuiFlexItem>
-              <EuiFieldSearch
-                compressed
-                fullWidth
-                placeholder="Filter by field, value"
-                value={searchTerm}
-                onChange={(e) => onSearchTermChange(e.target.value)}
-                isClearable
-                aria-label={i18n.translate('workflows.jsonDataTable.searchAriaLabel', {
-                  defaultMessage: 'Search fields and values',
+    const viewMode = useMemo(() => {
+      if (selectedViewMode === 'table' && tabularData) {
+        return 'table';
+      }
+      return 'json';
+    }, [selectedViewMode, tabularData]);
+
+    return (
+      <EuiFlexGroup
+        data-test-subj={'jsonDataTable'}
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+        style={{ height: '100%' }}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} gutterSize="s">
+            {viewMode === 'table' && (
+              <EuiFlexItem>
+                <EuiFieldSearch
+                  compressed
+                  fullWidth
+                  placeholder="Filter by field, value"
+                  value={searchTerm}
+                  onChange={handleSearchTermChange}
+                  isClearable
+                  aria-label={i18n.translate('workflows.jsonDataTable.searchAriaLabel', {
+                    defaultMessage: 'Search fields and values',
+                  })}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem
+              grow={false}
+              css={{
+                justifySelf: 'flex-end',
+                marginLeft: 'auto',
+              }}
+            >
+              <EuiButtonGroup
+                isIconOnly
+                buttonSize="compressed"
+                color="primary"
+                type="single"
+                idSelected={viewMode}
+                legend={i18n.translate('workflows.jsonDataTable.viewMode', {
+                  defaultMessage: 'View mode',
                 })}
+                onChange={handleViewModeChange}
+                options={viewModeOptions}
               />
             </EuiFlexItem>
-          )}
-          <EuiFlexItem
-            grow={false}
-            css={{
-              justifySelf: 'flex-end',
-              marginLeft: 'auto',
-            }}
-          >
-            <EuiButtonGroup
-              isIconOnly
-              buttonSize="compressed"
-              color="primary"
-              type="single"
-              idSelected={viewMode}
-              legend={i18n.translate('workflows.jsonDataTable.viewMode', {
-                defaultMessage: 'View mode',
-              })}
-              onChange={(id) => setViewMode(id as 'table' | 'json')}
-              options={[
-                {
-                  id: 'table',
-                  label: i18n.translate('workflows.jsonDataTable.viewMode.table', {
-                    defaultMessage: 'Table',
-                  }),
-                  iconType: 'tableDensityNormal',
-                },
-                {
-                  id: 'json',
-                  label: i18n.translate('workflows.jsonDataTable.viewMode.json', {
-                    defaultMessage: 'JSON',
-                  }),
-                  iconType: 'code',
-                },
-              ]}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-      <EuiFlexItem grow={true}>
-        <EuiSpacer size="s" />
-        <div
-          ref={contentRef}
-          css={
-            contentHeight
-              ? css({
-                  minBlockSize: 0,
-                  height: contentHeight + 'px',
-                  overflow: 'hidden',
-                })
-              : css({
-                  display: 'block',
-                })
-          }
-        >
-          {viewMode === 'table' && (
+        <EuiFlexItem grow={true}>
+          <EuiSpacer size="s" />
+          {viewMode === 'table' && tabularData && (
             <JSONDataTable
-              data={jsonObject}
+              data={tabularData}
               title={title}
-              columns={columns}
               searchTerm={searchTerm}
+              fieldPathActionsPrefix={fieldPathActionsPrefix}
             />
           )}
-          {viewMode === 'json' && <JsonDataCode json={jsonObject} />}
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
+          {viewMode === 'json' && <JsonDataCode json={data} />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+JSONDataView.displayName = 'JSONDataView';

@@ -69,8 +69,9 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Optionally set Discover tab state.
    * Use `new` as value for `id` to indicate that a new tab should be created.
    * Once created, the new tab will have a unique id which can be referenced too if necessary.
+   * Use `label` to set a fallback tab label if it was not defined before yet.
    */
-  tab?: { id: typeof NEW_TAB_ID; label?: string } | { id: string };
+  tab?: { id: typeof NEW_TAB_ID | string; label?: string };
 
   /**
    * Columns displayed in the table
@@ -108,6 +109,14 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Breakdown field
    */
   breakdownField?: string;
+  /**
+   * Used to force the chart to be hidden or visible
+   */
+  hideChart?: boolean;
+  /**
+   * Number of rows to sample for Discover grid
+   */
+  sampleSize?: number;
   /**
    * Used when navigating to particular alert results
    */

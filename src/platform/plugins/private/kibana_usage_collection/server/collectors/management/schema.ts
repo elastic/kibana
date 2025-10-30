@@ -110,6 +110,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableEsqlRiskScoring': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:defaultAnomalyScore': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -500,6 +504,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     },
   },
   'agentBuilder:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:dashboardTools': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

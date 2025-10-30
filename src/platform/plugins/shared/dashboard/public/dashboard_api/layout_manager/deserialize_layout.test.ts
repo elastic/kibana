@@ -14,7 +14,7 @@ describe('deserializeLayout', () => {
     const { layout, childState } = deserializeLayout(
       [
         {
-          grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+          grid: { x: 0, y: 0, w: 6, h: 6 },
           config: { title: 'panel One' },
           uid: '1',
           type: 'testPanelType',
@@ -24,11 +24,11 @@ describe('deserializeLayout', () => {
           collapsed: true,
           grid: {
             y: 6,
-            i: 'section1',
           },
+          uid: 'section1',
           panels: [
             {
-              grid: { x: 0, y: 0, w: 6, h: 6, i: '3' },
+              grid: { x: 0, y: 0, w: 6, h: 6 },
               config: { title: 'panel Three' },
               uid: '3',
               type: 'testPanelType',
@@ -43,7 +43,6 @@ describe('deserializeLayout', () => {
         "1": Object {
           "grid": Object {
             "h": 6,
-            "i": "1",
             "w": 6,
             "x": 0,
             "y": 0,
@@ -53,7 +52,6 @@ describe('deserializeLayout', () => {
         "3": Object {
           "grid": Object {
             "h": 6,
-            "i": "3",
             "sectionId": "section1",
             "w": 6,
             "x": 0,
@@ -68,7 +66,6 @@ describe('deserializeLayout', () => {
         "section1": Object {
           "collapsed": true,
           "grid": Object {
-            "i": "section1",
             "y": 6,
           },
           "title": "Section One",

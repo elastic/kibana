@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  type CasesPublicSetup,
-  CasesDeepLinkId,
-  type CasesPublicStart,
-  getCasesDeepLinks,
-} from '@kbn/cases-plugin/public';
+import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
+import { CasesDeepLinkId, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -98,7 +94,6 @@ import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
-import { getPageAttachmentType } from './attachments/page/attachment';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
@@ -271,13 +266,6 @@ export class Plugin
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
-
-    if (
-      pluginsSetup.cases &&
-      pluginsSetup.observabilityShared.config.unsafe?.investigativeExperienceEnabled
-    ) {
-      pluginsSetup.cases.attachmentFramework.registerPersistableState(getPageAttachmentType());
-    }
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -485,7 +473,6 @@ export class Plugin
                       }),
                       app: 'streams',
                       path: '/',
-                      isTechnicalPreview: true,
                       matchPath(currentPath: string) {
                         return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
                       },

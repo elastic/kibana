@@ -45,6 +45,7 @@ exports[`renderLegendDetailRow categorical Should render categorical legend with
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -112,6 +113,7 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -177,6 +179,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -308,6 +311,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -417,6 +421,7 @@ exports[`renderLegendDetailRow ordinal Should render single band when interpolat
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>

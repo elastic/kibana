@@ -23,6 +23,7 @@ import type {
   MigrationResult,
   IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { Histogram } from '@opentelemetry/api/build/src/metrics/Metric';
 import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';
 
@@ -49,6 +50,8 @@ export interface RunZeroDowntimeMigrationOpts {
   nodeRoles: NodeRoles;
   /** Capabilities of the ES cluster we're using */
   esCapabilities: ElasticsearchCapabilities;
+  /** The OTel Histogram metric to record the duration of each migrator */
+  meter: Histogram;
 }
 
 export const runZeroDowntimeMigration = async (
@@ -60,11 +63,26 @@ export const runZeroDowntimeMigration = async (
   });
 
   return await Promise.all(
-    migratorConfigs.map((migratorConfig) => {
-      return migrateIndex({
-        ...options,
-        ...migratorConfig,
-      });
+    migratorConfigs.map(async (migratorConfig) => {
+      const startTime = performance.now();
+      try {
+        const result = await migrateIndex({
+          ...options,
+          ...migratorConfig,
+        });
+        const duration = performance.now() - startTime;
+        options.meter.record(duration, {
+          'kibana.saved_objects.migrations.migrator': migratorConfig.indexPrefix,
+        });
+        return result;
+      } catch (error) {
+        const duration = performance.now() - startTime;
+        options.meter.record(duration, {
+          'kibana.saved_objects.migrations.migrator': migratorConfig.indexPrefix,
+          'error.type': error.message, // Ideally, we had codes for each error instead.
+        });
+        throw error;
+      }
     })
   );
 };

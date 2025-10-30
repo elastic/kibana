@@ -968,6 +968,20 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.discoverFeatureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "discoverFeatureFlags",
+            "description": [],
+            "signature": [
+              "DiscoverFeatureFlags"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.DiscoverServices.docLinks",
             "type": "Object",
             "tags": [],
@@ -2152,69 +2166,6 @@
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverServices.apmSourcesAccess",
-            "type": "Object",
-            "tags": [],
-            "label": "apmSourcesAccess",
-            "description": [],
-            "signature": [
-              "{ getApmIndices: (options?: Omit<",
-              {
-                "pluginId": "apmSourcesAccess",
-                "scope": "public",
-                "docId": "kibApmSourcesAccessPluginApi",
-                "section": "def-public.SourcesApiOptions",
-                "text": "SourcesApiOptions"
-              },
-              ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
-              {
-                "pluginId": "apmSourcesAccess",
-                "scope": "public",
-                "docId": "kibApmSourcesAccessPluginApi",
-                "section": "def-public.SourcesApiOptions",
-                "text": "SourcesApiOptions"
-              },
-              ", \"body\"> | undefined) => Promise<",
-              "ApmIndexSettingsResponse",
-              ">; saveApmIndices: (options: ",
-              {
-                "pluginId": "apmSourcesAccess",
-                "scope": "public",
-                "docId": "kibApmSourcesAccessPluginApi",
-                "section": "def-public.SourcesApiOptions",
-                "text": "SourcesApiOptions"
-              },
-              " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
-              "SavedObject",
-              "<{}>>; } | undefined"
-            ],
-            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverServices.metricsExperience",
-            "type": "Object",
-            "tags": [],
-            "label": "metricsExperience",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "metricsExperience",
-                "scope": "public",
-                "docId": "kibMetricsExperiencePluginApi",
-                "section": "def-public.MetricsExperiencePluginStart",
-                "text": "MetricsExperiencePluginStart"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2347,7 +2298,15 @@
               "TabState",
               "[]; selectedTabId: string; recentlyClosedTabs: ",
               "RecentlyClosedTabState",
-              "[]; }], void>; updateTabs: ",
+              "[]; updatedDiscoverSession?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; }], void>; updateTabs: ",
               "InternalStateThunkActionCreator",
               "<[{ items: ",
               "TabState",
@@ -2369,7 +2328,15 @@
                 "section": "def-public.TabItem",
                 "text": "TabItem"
               },
-              " | null; }], Promise<void>>; disconnectTab: ",
+              " | null; updatedDiscoverSession?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; }, void], Promise<void>>; disconnectTab: ",
               "InternalStateThunkActionCreator",
               "<[{ tabId: string; }], void>; setDataView: ",
               "InternalStateThunkActionCreator",
@@ -2453,7 +2420,19 @@
               },
               " | undefined; globalState?: ",
               "TabStateGlobalState",
-              " | undefined; searchSessionId?: string | undefined; }], void>; clearAllTabs: ",
+              " | undefined; searchSessionId?: string | undefined; dataViewSpec?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              " | undefined; }], void>; openSearchSessionInNewTab: ",
+              "InternalStateThunkActionCreator",
+              "<[{ searchSession: ",
+              "UISession",
+              "; }], void>; clearRecentlyClosedTabs: ",
               "InternalStateThunkActionCreator",
               "<[], void>; initializeTabs: ",
               "AsyncThunk",
@@ -2495,7 +2474,7 @@
                 "section": "def-common.DiscoverSession",
                 "text": "DiscoverSession"
               },
-              " | undefined; }, ",
+              " | undefined; nextSelectedTabId: string; }, ",
               "SaveDiscoverSessionThunkParams",
               ", { state: ",
               "DiscoverInternalState",
@@ -2527,7 +2506,7 @@
                 "section": "def-common.DiscoverSession",
                 "text": "DiscoverSession"
               },
-              " | undefined; } | undefined, { state: ",
+              " | undefined; nextSelectedTabId?: string | undefined; } | undefined, { state: ",
               "DiscoverInternalState",
               "; dispatch: ((action: ",
               "Action",
@@ -2693,7 +2672,19 @@
                 "section": "def-public.UnifiedSearchDraft",
                 "text": "UnifiedSearchDraft"
               },
-              "> | undefined>; }>, \"internalState/setSearchDraftUiState\">; }"
+              "> | undefined>; }>, \"internalState/setSearchDraftUiState\">; setMetricsGridState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<{ metricsGridState: Partial<Partial<",
+              {
+                "pluginId": "@kbn/unified-metrics-grid",
+                "scope": "public",
+                "docId": "kibKbnUnifiedMetricsGridPluginApi",
+                "section": "def-public.UnifiedMetricsGridRestorableState",
+                "text": "UnifiedMetricsGridRestorableState"
+              },
+              "> | undefined>; }>, \"internalState/setMetricsGridState\">; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": true,
@@ -2968,7 +2959,15 @@
                 "section": "def-public.SavedSearch",
                 "text": "SavedSearch"
               },
-              ">; updateAdHocDataViewId: () => Promise<",
+              ">; updateAdHocDataViewId: (editedDataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4202,17 +4201,17 @@
         "signature": [
           "Omit<",
           "SearchEmbeddableState",
-          ", \"rows\" | \"searchSource\" | \"inspectorAdapters\" | \"columnsMeta\" | \"totalHitCount\"> & Pick<",
+          ", \"rows\" | \"inspectorAdapters\" | \"searchSource\" | \"columnsMeta\" | \"totalHitCount\"> & Pick<",
           "SerializableSavedSearch",
           ", \"serializedSearchSource\"> & ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & ",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -4254,13 +4253,13 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & ",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -5108,14 +5107,14 @@
           {
             "parentPluginId": "discover",
             "id": "def-common.DiscoverAppLocatorParams.tab",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "tab",
             "description": [
-              "\nOptionally set Discover tab state.\nUse `new` as value for `id` to indicate that a new tab should be created.\nOnce created, the new tab will have a unique id which can be referenced too if necessary."
+              "\nOptionally set Discover tab state.\nUse `new` as value for `id` to indicate that a new tab should be created.\nOnce created, the new tab will have a unique id which can be referenced too if necessary.\nUse `label` to set a fallback tab label if it was not defined before yet."
             ],
             "signature": [
-              "{ id: \"new\"; label?: string | undefined; } | { id: string; } | undefined"
+              "{ id: string; label?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,
@@ -5252,6 +5251,38 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-common.DiscoverAppLocatorParams.hideChart",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideChart",
+            "description": [
+              "\nUsed to force the chart to be hidden or visible"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-common.DiscoverAppLocatorParams.sampleSize",
+            "type": "number",
+            "tags": [],
+            "label": "sampleSize",
+            "description": [
+              "\nNumber of rows to sample for Discover grid"
+            ],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,

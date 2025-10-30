@@ -40,9 +40,7 @@ export const SurveyKubernetes = () => {
         isCloudEnv={isCloudEnv}
         isServerlessEnv={isServerlessEnv}
         surveyButtonText={FEEDBACK_BUTTON_KUBERNETES_TEXT}
-        formConfig={{
-          kibanaVersionQueryParam: 'entry.184582718',
-        }}
+        sanitizedPath={document.location.pathname}
       />
       {!isToastSeen && (
         <EuiGlobalToastList
@@ -73,11 +71,12 @@ export const SurveyKubernetes = () => {
                         formUrl={KUBERNETES_FEEDBACK_LINK}
                         data-test-subj="infra-toast-kubernetes-survey-start"
                         onClickCapture={markToastAsSeen}
-                        defaultButton={true}
+                        defaultButton
                         kibanaVersion={kibanaVersion}
                         isCloudEnv={isCloudEnv}
                         isServerlessEnv={isServerlessEnv}
                         surveyButtonText={START_SURVEY_BUTTON_TEXT}
+                        sanitizedPath={document.location.pathname}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

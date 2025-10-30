@@ -54,12 +54,7 @@ export async function getServiceAgent({
   const params = {
     terminate_after: 1,
     apm: {
-      events: [
-        ProcessorEvent.span,
-        ProcessorEvent.error,
-        ProcessorEvent.transaction,
-        ProcessorEvent.metric,
-      ],
+      events: [ProcessorEvent.error, ProcessorEvent.transaction, ProcessorEvent.metric],
     },
     track_total_hits: 1,
     size: 1,

@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
-import React, { useMemo, useState, useCallback } from 'react';
-import { css } from '@emotion/css';
+import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
+import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
 import type {
   IgnoredField,
   DocumentWithIgnoredFields,
@@ -37,6 +37,38 @@ import { useDataSourceSelectorById } from '../stream_detail_enrichment/state_man
 import type { EnrichmentDataSourceWithUIAttributes } from '../stream_detail_enrichment/types';
 
 const emptyCell = <>&nbsp;</>;
+
+interface RowSelectionContextType {
+  selectedRowIndex?: number;
+  onRowSelected?: (rowIndex: number) => void;
+}
+
+export const RowSelectionContext = createContext<RowSelectionContextType>({});
+
+const useRowSelection = () => useContext(RowSelectionContext);
+
+function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
+  const { selectedRowIndex, onRowSelected } = useRowSelection();
+
+  return (
+    <EuiButtonIcon
+      onClick={() => {
+        if (onRowSelected) {
+          onRowSelected(rowIndex);
+        }
+      }}
+      aria-label={i18n.translate(
+        'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
+        {
+          defaultMessage: 'Select row {rowIndex}',
+          values: { rowIndex: rowIndex + 1 },
+        }
+      )}
+      iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
+      color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
+    />
+  );
+}
 
 export const MemoPreviewTable = React.memo(PreviewTable);
 
@@ -57,11 +89,9 @@ export function PreviewTable({
   toolbarVisibility = false,
   setVisibleColumns,
   columnOrderHint = [],
-  selectedRowIndex,
   showRowSourceAvatars = false,
   showLeadingControlColumns = true,
   originalSamples,
-  onRowSelected,
   cellActions,
 }: {
   documents: SampleDocument[] | DocumentWithIgnoredFields[];
@@ -78,11 +108,9 @@ export function PreviewTable({
   columnOrderHint?: string[];
   sorting?: SimulationContext['previewColumnsSorting'];
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
-  selectedRowIndex?: number;
   showRowSourceAvatars?: boolean;
   showLeadingControlColumns?: boolean;
   originalSamples?: SampleDocumentWithUIAttributes[];
-  onRowSelected?: (rowIndex: number) => void;
   cellActions?: EuiDataGridColumnCellAction[];
 }) {
   const { euiTheme: theme } = useEuiTheme();
@@ -163,26 +191,25 @@ export function PreviewTable({
         id: 'selection',
         width: showRowSourceAvatars ? 72 : 36,
         headerCellRender: () => null,
-        rowCellRender: ({ rowIndex }) => {
+        rowCellRender: ({ rowIndex, setCellProps }) => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          const { selectedRowIndex } = useRowSelection();
+
+          if (selectedRowIndex === rowIndex) {
+            setCellProps({
+              style: {
+                backgroundColor: theme.colors.highlight,
+              },
+            });
+          } else {
+            setCellProps({
+              style: {},
+            });
+          }
           const originalSample = originalSamples?.[rowIndex];
           return (
             <EuiFlexGroup gutterSize="s">
-              <EuiButtonIcon
-                onClick={() => {
-                  if (onRowSelected) {
-                    onRowSelected(rowIndex);
-                  }
-                }}
-                aria-label={i18n.translate(
-                  'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
-                  {
-                    defaultMessage: 'Select row {rowIndex}',
-                    values: { rowIndex: rowIndex + 1 },
-                  }
-                )}
-                iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
-                color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
-              />
+              <RowSelectionButton rowIndex={rowIndex} />
               {showRowSourceAvatars && originalSample && (
                 <RowSourceAvatar originalSample={originalSample} />
               )}
@@ -191,7 +218,7 @@ export function PreviewTable({
         },
       },
     ],
-    [onRowSelected, showRowSourceAvatars, selectedRowIndex, originalSamples]
+    [showRowSourceAvatars, originalSamples, theme.colors.highlight]
   );
 
   // Derive visibleColumns from canonical order
@@ -218,23 +245,38 @@ export function PreviewTable({
   );
 
   const gridColumns = useMemo(() => {
-    return canonicalColumnOrder.map((column) => ({
-      id: column,
-      displayAsText: column,
-      actions:
-        Boolean(setVisibleColumns) || Boolean(setSorting)
-          ? {
-              showHide: Boolean(setVisibleColumns),
-              showMoveLeft: Boolean(setVisibleColumns),
-              showMoveRight: Boolean(setVisibleColumns),
-              showSortAsc: Boolean(setSorting),
-              showSortDesc: Boolean(setSorting),
-            }
-          : (false as false),
-      initialWidth: columnWidths[column],
-      cellActions,
-    }));
-  }, [canonicalColumnOrder, setVisibleColumns, setSorting, columnWidths, cellActions]);
+    return canonicalColumnOrder.map((column) => {
+      const columnparts = column.split('.');
+      // interlave the columnparts with a dot and a breakable non-whitespace character
+      const interleavedColumnParts = columnparts.reduce((acc, part, index) => {
+        if (index === 0) {
+          return [part];
+        }
+        return [...acc, '.', <wbr key={index} />, part];
+      }, [] as React.ReactNode[]);
+
+      return {
+        id: column,
+        display: (
+          <ColumnHeaderTruncateContainer wordBreak="normal">
+            {interleavedColumnParts}
+          </ColumnHeaderTruncateContainer>
+        ),
+        actions:
+          Boolean(setVisibleColumns) || Boolean(setSorting)
+            ? {
+                showHide: Boolean(setVisibleColumns),
+                showMoveLeft: Boolean(setVisibleColumns),
+                showMoveRight: Boolean(setVisibleColumns),
+                showSortAsc: Boolean(setSorting),
+                showSortDesc: Boolean(setSorting),
+              }
+            : (false as false),
+        initialWidth: columnWidths[column],
+        cellActions,
+      };
+    });
+  }, [cellActions, canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
 
   return (
     <EuiDataGrid
@@ -250,17 +292,6 @@ export function PreviewTable({
         setVisibleColumns: setVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
-      gridStyle={
-        selectedRowIndex !== undefined
-          ? {
-              rowClasses: {
-                [String(selectedRowIndex)]: css`
-                  background-color: ${theme.colors.highlight};
-                `,
-              },
-            }
-          : undefined
-      }
       sorting={sortingConfig}
       inMemory={sortingConfig ? { level: 'sorting' } : undefined}
       height={height}
@@ -268,7 +299,22 @@ export function PreviewTable({
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
       onColumnResize={onColumnResize}
-      renderCellValue={({ rowIndex, columnId }) => {
+      renderCellValue={({ rowIndex, columnId, setCellProps }) => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const { selectedRowIndex } = useRowSelection();
+
+        if (selectedRowIndex === rowIndex) {
+          setCellProps({
+            style: {
+              backgroundColor: theme.colors.highlight,
+            },
+          });
+        } else {
+          setCellProps({
+            style: {},
+          });
+        }
+
         const doc = documents[rowIndex];
         const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
         const ignoredFields = isDocumentWithIgnoredFields(doc) ? doc.ignored_fields : [];

@@ -256,7 +256,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
-      const checkMappings = (contentPack: ContentPack, fields: FieldDefinition) => {
+      const expectMappings = (contentPack: ContentPack, fields: FieldDefinition) => {
         expect(contentPack.entries).to.have.length(1);
 
         const rootEntry = contentPack.entries.find(
@@ -283,7 +283,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             })
           )
         );
-        checkMappings(contentPackWithoutMappings, {});
+        expectMappings(contentPackWithoutMappings, {});
 
         const contentPackWithMappings = await parseArchive(
           Readable.from(
@@ -302,7 +302,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )
         );
 
-        checkMappings(contentPackWithMappings, {
+        expectMappings(contentPackWithMappings, {
           'resource.attributes.foo.bar': { type: 'keyword' },
         });
       });
@@ -316,17 +316,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               version: '1.0.0',
               include: {
-                objects: {
-                  mappings: true,
-                  queries: [],
-                  routing: [],
-                },
+                objects: { mappings: true, queries: [], routing: [] },
               },
             })
           )
         );
 
-        checkMappings(contentPack, { 'resource.attributes.foo.bar': { type: 'keyword' } });
+        expectMappings(contentPack, { 'resource.attributes.foo.bar': { type: 'keyword' } });
+      });
+
+      it('does not export base fields', async () => {
+        const contentPack = await parseArchive(
+          Readable.from(
+            await exportContent(apiClient, 'logs', {
+              name: 'check-mappings',
+              description: '',
+              version: '1.0.0',
+              include: {
+                objects: { mappings: true, queries: [], routing: [] },
+              },
+            })
+          )
+        );
+
+        expectMappings(contentPack, {});
       });
 
       it('fails when trying to export a stream thats not a descendant', async () => {

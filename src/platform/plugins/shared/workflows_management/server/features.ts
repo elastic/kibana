@@ -8,175 +8,119 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowsManagementPluginServerDependenciesSetup } from './types';
+import {
+  WORKFLOWS_MANAGEMENT_FEATURE_ID,
+  WorkflowsManagementApiActions,
+  WorkflowsManagementUiActions,
+} from '@kbn/workflows';
 
-/**
- * The order of appearance in the feature privilege page
- * under the management section.
- */
-const FEATURE_ORDER = 3000;
-
-export const registerFeatures = (plugins: WorkflowsManagementPluginServerDependenciesSetup) => {
-  plugins.features?.registerKibanaFeature({
-    app: [],
-    category: DEFAULT_APP_CATEGORIES.kibana,
-    id: 'workflowsManagement',
-    name: i18n.translate(
-      'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementFeatureName',
-      {
-        defaultMessage: 'Workflows',
-      }
-    ),
-    order: FEATURE_ORDER,
-    privileges: {
-      all: {
-        app: [],
-        api: ['create', 'update', 'delete', 'read'],
-        savedObject: {
-          all: ['workflows', 'workflow_executions'],
-          read: [],
+// The kibana feature configuration for the Workflows Management plugin.
+export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
+  id: WORKFLOWS_MANAGEMENT_FEATURE_ID,
+  name: i18n.translate(
+    'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementFeatureName',
+    { defaultMessage: 'Workflows' }
+  ),
+  category: DEFAULT_APP_CATEGORIES.kibana,
+  app: [],
+  order: 3000,
+  privileges: {
+    // Nothing at top level privileges, all specific actions are managed by sub_features privileges below
+    all: { app: [], api: [], savedObject: { all: [], read: [] }, ui: [] },
+    read: { app: [], api: [], savedObject: { all: [], read: [] }, ui: [] },
+  },
+  subFeatures: [
+    {
+      name: i18n.translate(
+        'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementSubFeatureName',
+        { defaultMessage: 'Workflows Actions' }
+      ),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'workflow_create',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.createWorkflowSubFeaturePrivilege',
+                { defaultMessage: 'Create' }
+              ),
+              includeIn: 'all',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.create],
+              ui: [WorkflowsManagementUiActions.create],
+            },
+            {
+              id: 'workflow_update',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.updateWorkflowSubFeaturePrivilege',
+                { defaultMessage: 'Update' }
+              ),
+              includeIn: 'all',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.update],
+              ui: [WorkflowsManagementUiActions.update],
+            },
+            {
+              id: 'workflow_delete',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.deleteWorkflowSubFeaturePrivilege',
+                { defaultMessage: 'Delete' }
+              ),
+              includeIn: 'all',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.delete],
+              ui: [WorkflowsManagementUiActions.delete],
+            },
+            {
+              id: 'workflow_execute',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.executeWorkflowSubFeaturePrivilege',
+                { defaultMessage: 'Execute' }
+              ),
+              includeIn: 'all',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.execute],
+              ui: [WorkflowsManagementUiActions.execute],
+            },
+            {
+              id: 'workflow_read',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.readWorkflowSubFeaturePrivilege',
+                { defaultMessage: 'Read' }
+              ),
+              includeIn: 'read',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.read],
+              ui: [WorkflowsManagementUiActions.read],
+            },
+            {
+              id: 'workflow_execution_read',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.readWorkflowExecutionSubFeaturePrivilege',
+                { defaultMessage: 'Read Workflow Execution' }
+              ),
+              includeIn: 'read',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.readExecution],
+              ui: [WorkflowsManagementUiActions.readExecution],
+            },
+            {
+              id: 'workflow_execution_cancel',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.cancelWorkflowExecutionSubFeaturePrivilege',
+                { defaultMessage: 'Cancel Workflow Execution' }
+              ),
+              includeIn: 'all',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.cancelExecution],
+              ui: [WorkflowsManagementUiActions.cancelExecution],
+            },
+          ],
         },
-        ui: ['create', 'update', 'delete', 'read', 'execute'],
-      },
-      read: {
-        app: [],
-        api: ['read'],
-        savedObject: {
-          all: [],
-          read: ['workflows', 'workflow_executions'],
-        },
-        ui: ['read'],
-      },
+      ],
     },
-    subFeatures: [
-      {
-        name: i18n.translate(
-          'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementSubFeatureName',
-          {
-            defaultMessage: 'Workflows Actions',
-          }
-        ),
-        privilegeGroups: [
-          {
-            groupType: 'independent',
-            privileges: [
-              {
-                api: ['workflow:create'],
-                id: 'workflow_create',
-                name: i18n.translate(
-                  'platform.plugins.shared.workflows_management.featureRegistry.createWorkflowSubFeaturePrivilege',
-                  {
-                    defaultMessage: 'Create',
-                  }
-                ),
-                includeIn: 'all',
-                savedObject: {
-                  all: ['workflow'],
-                  read: [],
-                },
-                ui: ['createWorkflow'],
-              },
-              {
-                api: ['workflow:update'],
-                id: 'workflow_update',
-                name: i18n.translate(
-                  'platform.plugins.shared.workflows_management.featureRegistry.updateWorkflowSubFeaturePrivilege',
-                  {
-                    defaultMessage: 'Update',
-                  }
-                ),
-                includeIn: 'all',
-                savedObject: {
-                  all: ['workflow'],
-                  read: [],
-                },
-                ui: ['updateWorkflow'],
-              },
-              {
-                api: ['workflow:delete'],
-                id: 'workflow_delete',
-                name: i18n.translate(
-                  'platform.plugins.shared.workflows_management.featureRegistry.deleteWorkflowSubFeaturePrivilege',
-                  {
-                    defaultMessage: 'Delete',
-                  }
-                ),
-                includeIn: 'all',
-                savedObject: {
-                  all: ['workflow'],
-                  read: [],
-                },
-                ui: ['deleteWorkflow'],
-              },
-              {
-                api: ['workflow:execute'],
-                id: 'workflow_execute',
-                name: i18n.translate(
-                  'platform.plugins.shared.workflows_management.featureRegistry.executeWorkflowSubFeaturePrivilege',
-                  {
-                    defaultMessage: 'Execute',
-                  }
-                ),
-                includeIn: 'all',
-                savedObject: {
-                  all: ['workflow_execution'],
-                  read: ['workflow'],
-                },
-                ui: ['executeWorkflow'],
-              },
-              {
-                api: ['workflow:read'],
-                id: 'workflow_read',
-                name: i18n.translate(
-                  'platform.plugins.shared.workflows_management.featureRegistry.readWorkflowSubFeaturePrivilege',
-                  {
-                    defaultMessage: 'Read',
-                  }
-                ),
-                includeIn: 'read',
-                savedObject: {
-                  read: ['workflow'],
-                  all: [],
-                },
-                ui: ['readWorkflow'],
-              },
-              {
-                api: ['workflow_execution:read'],
-                id: 'workflow_execution_read',
-                name: i18n.translate(
-                  'platform.plugins.shared.workflows_management.featureRegistry.readWorkflowExecutionSubFeaturePrivilege',
-                  {
-                    defaultMessage: 'Read Workflow Execution',
-                  }
-                ),
-                includeIn: 'read',
-                savedObject: {
-                  read: ['workflow_execution'],
-                  all: [],
-                },
-                ui: ['readWorkflowExecution'],
-              },
-              {
-                api: ['workflow_execution:cancel'],
-                id: 'workflow_execution_cancel',
-                name: i18n.translate(
-                  'platform.plugins.shared.workflows_management.featureRegistry.cancelWorkflowExecutionSubFeaturePrivilege',
-                  {
-                    defaultMessage: 'Cancel Workflow Execution',
-                  }
-                ),
-                includeIn: 'all',
-                savedObject: {
-                  read: ['workflow_execution'],
-                  all: [],
-                },
-                ui: ['cancelWorkflowExecution'],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  });
+  ],
 };

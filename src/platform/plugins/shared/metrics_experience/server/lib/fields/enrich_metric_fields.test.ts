@@ -9,12 +9,13 @@
 
 import { enrichMetricFields } from './enrich_metric_fields';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import type { DataStreamFieldCapsMap } from '../../types';
+import type { DataStreamFieldCapsMap, EpochTimeRange } from '../../types';
 import type { MetricField } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import type { Logger } from '@kbn/core/server';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { normalizeUnit } from './normalize_unit';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../dimensions/extract_dimensions');
 jest.mock('./normalize_unit');
@@ -23,6 +24,7 @@ const extractDimensionsMock = extractDimensions as jest.MockedFunction<typeof ex
 const msearchMock = jest.fn() as jest.MockedFunction<TracedElasticsearchClient['msearch']>;
 const esClientMock = { msearch: msearchMock } as unknown as TracedElasticsearchClient;
 const normalizeUnitMock = normalizeUnit as jest.MockedFunction<typeof normalizeUnit>;
+const timeRangeFixture: EpochTimeRange = { from: Date.now() - 300_000, to: Date.now() };
 
 describe('enrichMetricFields', () => {
   let logger: Logger;
@@ -42,7 +44,7 @@ describe('enrichMetricFields', () => {
     name,
     index,
     type: 'long',
-    dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword' }],
+    dimensions: [{ name: TEST_HOST_FIELD, type: ES_FIELD_TYPES.KEYWORD }],
     ...overrides,
   });
 
@@ -70,7 +72,6 @@ describe('enrichMetricFields', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
     logger = {
       info: jest.fn(),
       error: jest.fn(),
@@ -79,9 +80,8 @@ describe('enrichMetricFields', () => {
     } as unknown as Logger;
 
     dataStreamFieldCapsMap = new Map();
-
     extractDimensionsMock.mockImplementation(
-      (_caps, names) => names?.map((name) => ({ name, type: 'keyword' })) ?? []
+      (_caps, names) => names?.map((name) => ({ name, type: ES_FIELD_TYPES.KEYWORD })) ?? []
     );
   });
 
@@ -92,6 +92,7 @@ describe('enrichMetricFields', () => {
         metricFields: [],
         dataStreamFieldCapsMap,
         logger,
+        timerange: timeRangeFixture,
       });
       expect(result).toEqual([]);
     });
@@ -137,6 +138,7 @@ describe('enrichMetricFields', () => {
           metricFields,
           dataStreamFieldCapsMap,
           logger,
+          timerange: timeRangeFixture,
         });
 
         expect(result[0]).toMatchObject(expectedResult);
@@ -161,6 +163,7 @@ describe('enrichMetricFields', () => {
         metricFields,
         dataStreamFieldCapsMap,
         logger,
+        timerange: timeRangeFixture,
       });
 
       expect(result).toMatchObject([
@@ -202,6 +205,7 @@ describe('enrichMetricFields', () => {
         metricFields,
         dataStreamFieldCapsMap,
         logger,
+        timerange: timeRangeFixture,
       });
 
       expect(normalizeUnitMock).toHaveBeenCalledWith({
@@ -231,6 +235,7 @@ describe('enrichMetricFields', () => {
         metricFields,
         dataStreamFieldCapsMap,
         logger,
+        timerange: timeRangeFixture,
       });
 
       expect(normalizeUnitMock).toHaveBeenCalledWith({

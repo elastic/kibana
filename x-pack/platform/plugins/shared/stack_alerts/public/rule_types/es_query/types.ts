@@ -42,6 +42,7 @@ export interface CommonEsQueryRuleParams extends RuleTypeParams, CommonRuleParam
 export interface EsQueryRuleMetaData {
   adHocDataViewList: DataView[];
   isManagementPage?: boolean;
+  isEdit?: boolean;
 }
 
 export type EsQueryRuleParams<T = SearchType> = T extends SearchType.searchSource

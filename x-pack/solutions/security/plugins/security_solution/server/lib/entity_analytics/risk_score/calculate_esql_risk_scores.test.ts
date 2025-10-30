@@ -22,11 +22,11 @@ describe('Calculate risk scores with ESQL', () => {
   describe('buildRiskScoreBucket', () => {
     it('parses esql results into RiskScoreBucket', () => {
       const inputs = [
-        '{ "score": "50", "time": "2021-08-23T18:00:05.000Z", "rule_name": "Test rule 5", "id": "test_id_5" }',
-        '{ "score": "40", "time": "2021-08-22T18:00:04.000Z", "rule_name": "Test rule 4", "id": "test_id_4" }',
-        '{ "score": "30", "time": "2021-08-21T18:00:03.000Z", "rule_name": "Test rule 3", "id": "test_id_3" }',
-        '{ "score": "20", "time": "2021-08-20T18:00:02.000Z", "rule_name": "Test rule 2", "id": "test_id_2" }',
-        '{ "score": "10", "time": "2021-08-19T18:00:01.000Z", "rule_name": "Test rule 1", "id": "test_id_1" }',
+        '{ "risk_score": "50", "time": "2021-08-23T18:00:05.000Z", "rule_name": "Test rule 5", "id": "test_id_5" }',
+        '{ "risk_score": "40", "time": "2021-08-22T18:00:04.000Z", "rule_name": "Test rule 4", "id": "test_id_4" }',
+        '{ "risk_score": "30", "time": "2021-08-21T18:00:03.000Z", "rule_name": "Test rule 3", "id": "test_id_3" }',
+        '{ "risk_score": "20", "time": "2021-08-20T18:00:02.000Z", "rule_name": "Test rule 2", "id": "test_id_2" }',
+        '{ "risk_score": "10", "time": "2021-08-19T18:00:01.000Z", "rule_name": "Test rule 1", "id": "test_id_1" }',
       ];
       const alertCount = 10;
       const riskScore = 100;
@@ -49,8 +49,8 @@ describe('Calculate risk scores with ESQL', () => {
               score: riskScore,
               normalized_score: riskScore / RIEMANN_ZETA_VALUE,
               notes: [],
-              category_1_score: riskScore / RIEMANN_ZETA_VALUE,
-              category_1_count: 1,
+              category_1_score: riskScore, // Don't normalize here - will be normalized in calculate_risk_scores.ts
+              category_1_count: alertCount,
               risk_inputs: [
                 {
                   index: '.alerts-security.alerts-default',

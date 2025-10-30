@@ -19,7 +19,7 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiText size="s">
+        <EuiText size="s" data-test-subj="migrationCopyExportQueryDescription">
           <FormattedMessage
             id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.copyExportQuery.description"
             defaultMessage="From you admin Splunk account, go to the {section} app and run the above query. Export your results as {format}."

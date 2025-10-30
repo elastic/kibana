@@ -215,10 +215,14 @@ describe(
         scanButtonShouldBe('enabled');
 
         // ensure that GET workflow insights is not called again
-        cy.get('@getWorkflowInsights.all').should('have.length', 3);
+        cy.get('@getWorkflowInsights.all').its('length').as('getWorkflowInsightsRequestCount');
         // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(3000);
-        cy.get('@getWorkflowInsights.all').should('have.length', 3);
+        cy.get('@getWorkflowInsights.all').then(($requests) => {
+          cy.get('@getWorkflowInsightsRequestCount').then((initialCount) => {
+            expect($requests.length).to.equal(initialCount);
+          });
+        });
       });
 
       it('should render existing Insights', () => {

@@ -7,14 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiCheckbox,
-  EuiConfirmModal,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiCheckbox, EuiConfirmModal, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import {
@@ -23,34 +16,21 @@ import {
 } from '../../../common/constants';
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../../common/lib/kibana';
 import * as i18n from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { fetchQueryAlerts } from '../containers/detection_engine/alerts/api';
 
 const DO_NOT_SHOW_AGAIN_SETTING_KEY = 'securitySolution.alertCloseInfoModal.doNotShowAgain';
 
-const learnMoreLink = (
-  <EuiLink data-test-subj="AlertCloseInfoModalLearnMoreLink" target="_blank">
-    {i18n.ALERT_CLOSE_INFO_MODAL_LEARN_MORE_LINK}
-  </EuiLink>
-);
-
 const restartSuppressionMessageComponent = (
   <FormattedMessage
     id="xpack.securitySolution.alert.closeInfoModal.restartSuppressionMessage"
-    defaultMessage="Some of the alerts being closed were created while a suppression window was active. If suppression remains active, any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert. {link}."
-    values={{
-      link: learnMoreLink,
-    }}
+    defaultMessage="Some of the alerts being closed were created while a suppression window was active. If suppression remains active, any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert."
   />
 );
 
 const continueSuppressionMessageComponent = (
   <FormattedMessage
     id="xpack.securitySolution.alert.closeInfoModal.continueSuppressionMessage"
-    defaultMessage="Some of the alerts being closed were created while a suppression window was active. If suppression remains active, duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups. {link}."
-    values={{
-      link: learnMoreLink,
-    }}
+    defaultMessage="Some of the alerts being closed were created while a suppression window was active. If suppression remains active, duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups."
   />
 );
 
@@ -161,9 +141,6 @@ const AlertCloseConfirmationModal = ({
  * continues even in failure scenarios.
  */
 export const useAlertCloseInfoModal = () => {
-  const experimentalFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'continueSuppressionWindowAdvancedSettingEnabled'
-  );
   const [shouldShowModal, setShouldShowModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [resolveUserConfirmation, setUserConfirmationResolver] = useState<
@@ -175,10 +152,6 @@ export const useAlertCloseInfoModal = () => {
   const promptAlertCloseConfirmation = useCallback(
     async (params: { query?: string; ids?: string[] }): Promise<boolean> => {
       try {
-        if (!experimentalFeatureEnabled) {
-          return Promise.resolve(true);
-        }
-
         if (storage.get(DO_NOT_SHOW_AGAIN_SETTING_KEY)) {
           return Promise.resolve(true);
         }
@@ -197,7 +170,7 @@ export const useAlertCloseInfoModal = () => {
         return Promise.resolve(true);
       }
     },
-    [storage, experimentalFeatureEnabled]
+    [storage]
   );
 
   const handleConfirmationResult = useCallback(

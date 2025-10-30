@@ -4,29 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBottomBar, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import {
+  EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { uniq } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SchemaEditor } from '../schema_editor';
-import { SUPPORTED_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
+import { DEFAULT_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
 import { getDefinitionFields, useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 
 interface SchemaEditorProps {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
 
-const wiredDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES;
-const classicDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES.filter((column) => column !== 'parent');
+const wiredDefaultColumns = DEFAULT_TABLE_COLUMN_NAMES;
+const classicDefaultColumns = DEFAULT_TABLE_COLUMN_NAMES.filter((column) => column !== 'parent');
 
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
   const context = useKibana();
@@ -47,6 +58,11 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     refreshDefinition,
   });
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
+  const definitionFieldMap = React.useMemo(() => {
+    const map: Set<string> = new Set();
+    definitionFields.forEach((field) => map.add(field.name));
+    return map;
+  }, [definitionFields]);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: pendingChangesCount > 0,
@@ -66,7 +82,10 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
       toMountPoint(
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
-            fields={fields}
+            fields={fields.filter(
+              (field) => field.status !== 'unmapped' || definitionFieldMap.has(field.name)
+            )}
+            streamType={getStreamTypeFromDefinition(definition.stream)}
             definition={definition}
             storedFields={definitionFields}
             submitChanges={submitChanges}
@@ -86,6 +105,20 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+      {isRootStream && (
+        <>
+          <EuiCallOut
+            iconType="info"
+            title={i18n.translate('xpack.streams.schemaEditor.rootStreamReadOnlyMode', {
+              defaultMessage:
+                'Root streams are selectively immutable and their schema cannot be modified. To modify the schema or to add processing steps, partition a new child stream first.',
+            })}
+            announceOnMount={false}
+            size="s"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFlexItem grow={1} css={{ minHeight: 0 }}>
         <SchemaEditor
           fields={fields}

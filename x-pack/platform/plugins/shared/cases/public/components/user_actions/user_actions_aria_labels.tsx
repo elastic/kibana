@@ -24,6 +24,7 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     delete_case: i18n.CASE_DELETED,
     category: i18n.CATEGORY,
     customFields: i18n.CUSTOM_FIELDS,
+    observables: i18n.OBSERVABLES,
   };
 
   switch (type) {
