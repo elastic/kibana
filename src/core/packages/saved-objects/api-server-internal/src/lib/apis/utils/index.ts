@@ -11,7 +11,6 @@ export { isFoundGetResponse, type GetResponseFound } from './es_responses';
 export { findSharedOriginObjects } from './find_shared_origin_objects';
 export {
   rawDocExistsInNamespace,
-  errorContent,
   rawDocExistsInNamespaces,
   isMgetDoc,
   getCurrentTime,

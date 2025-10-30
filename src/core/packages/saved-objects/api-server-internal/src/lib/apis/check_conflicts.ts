@@ -10,7 +10,7 @@
 import type { Payload } from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsRawDocSource, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, errorContent } from '@kbn/core-saved-objects-server';
 import {
   type SavedObjectsCheckConflictsObject,
   type SavedObjectsBaseOptions,
@@ -21,7 +21,7 @@ import {
   isRight,
   isLeft,
 } from '@kbn/core-saved-objects-api-server';
-import { errorContent, isMgetDoc, rawDocExistsInNamespace } from './utils';
+import { isMgetDoc, rawDocExistsInNamespace } from './utils';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformCheckConflictsParams<T = unknown> {

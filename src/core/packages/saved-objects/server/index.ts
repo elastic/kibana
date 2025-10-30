@@ -126,6 +126,7 @@ export {
 } from './src/extensions/extensions';
 export {
   SavedObjectsErrorHelpers,
+  errorContent,
   type DecoratedError,
   type BulkResolveError,
 } from './src/saved_objects_error_helpers';

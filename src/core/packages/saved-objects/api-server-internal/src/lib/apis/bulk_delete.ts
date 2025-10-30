@@ -14,7 +14,7 @@ import type {
   SavedObjectsRawDoc,
   ISavedObjectsSecurityExtension,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, errorContent } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   isLeft,
@@ -27,7 +27,6 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING, MAX_CONCURRENT_ALIAS_DELETIONS } from '../constants';
 import {
-  errorContent,
   getBulkOperationError,
   getExpectedVersionProperties,
   isMgetDoc,
