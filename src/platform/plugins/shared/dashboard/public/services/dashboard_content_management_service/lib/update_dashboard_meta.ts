@@ -35,8 +35,6 @@ export const updateDashboardMeta = async ({
     return;
   }
 
-  console.log('dashboard', dashboard);
-
   await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     id,
