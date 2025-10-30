@@ -20,7 +20,7 @@ import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
-const FIELD_SIMULATION_TIMEOUT = '5s';
+const FIELD_SIMULATION_TIMEOUT = '3s';
 
 export const unmappedFieldsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/schema/unmapped_fields',
