@@ -22,8 +22,6 @@ export interface Attachment<
   data: DataType;
   /** should the attachment be hidden from the user - e.g. for screen context */
   hidden?: boolean;
-  /** transient attachments are only exposed during the round they were added in */
-  transient?: boolean;
 }
 
 // Strongly typed sub-types for known attachment types

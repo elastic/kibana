@@ -8,7 +8,6 @@
 export type {
   AttachmentTypeDefinition,
   InlineAttachmentTypeDefinition,
-  ReferenceAttachmentTypeDefinition,
   AttachmentRepresentation,
   TextAttachmentRepresentation,
   AttachmentParseResult,

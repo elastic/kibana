@@ -42,24 +42,5 @@ export interface InlineAttachmentTypeDefinition<TContent = unknown> {
   format: (input: TContent) => MaybePromise<AttachmentRepresentation>;
 }
 
-/**
- * Server-side definition of a reference attachment type.
- *
- * Reference attachments are referencing an external resource.
- */
-export interface ReferenceAttachmentTypeDefinition<TContent = unknown> {
-  /** the type of attachment to register  */
-  id: string;
-  /** Inline attachment type - the content is embedded  */
-  type: 'reference';
-  /** validation function, used to validate the input when attachment is added to a conversation */
-  validate: (input: unknown) => MaybePromise<AttachmentParseResult<TContent>>;
-  /** resolve the attachment to a value that can be used by the LLM */
-  // resolve: (input: unknown) => MaybePromise<unknown>;
-  /** format the attachment to presented to the LLM */
-  format: (input: unknown) => MaybePromise<AttachmentRepresentation>;
-}
-
-export type AttachmentTypeDefinition<TContent = unknown> =
-  | InlineAttachmentTypeDefinition<TContent>
-  | ReferenceAttachmentTypeDefinition<TContent>;
+// will support other sub types later
+export type AttachmentTypeDefinition<TContent = unknown> = InlineAttachmentTypeDefinition<TContent>;

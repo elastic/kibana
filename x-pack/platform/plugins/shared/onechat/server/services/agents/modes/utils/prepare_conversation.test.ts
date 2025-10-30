@@ -214,12 +214,11 @@ describe('prepareConversation', () => {
       expect(mockAttachmentsService.format).toHaveBeenCalledTimes(3);
     });
 
-    it('should preserve attachment properties like hidden and transient', async () => {
+    it('should preserve attachment properties', async () => {
       const attachment: AttachmentInput = {
         type: 'text',
         data: { content: 'test' },
         hidden: true,
-        transient: true,
       };
 
       const mockRepresentation: AttachmentRepresentation = {
@@ -244,7 +243,6 @@ describe('prepareConversation', () => {
         ...attachment,
         id: 'generated-id-1',
         hidden: true,
-        transient: true,
       });
     });
   });

@@ -80,14 +80,6 @@ export function registerChatRoutes({
               meta: { description: 'When true, the attachment will not be displayed in the UI.' },
             })
           ),
-          transient: schema.maybe(
-            schema.boolean({
-              meta: {
-                description:
-                  'When true, the attachment will only be exposed to the agent in the current round of conversation.',
-              },
-            })
-          ),
         }),
         { meta: { description: 'Optional attachments to send with the message.' } }
       )

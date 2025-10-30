@@ -35,7 +35,6 @@ export const validateAttachment = async ({
         id: attachment.id ?? getToolResultId(),
         data: typeValidation.data,
         hidden: attachment.hidden,
-        transient: attachment.transient,
       },
     };
   } else {
