@@ -148,7 +148,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('The first request', () => {
         it('contains the correct number of messages', () => {
-          expect(firstRequestBody.messages.length).to.be(4);
+          expect(firstRequestBody.messages.length).to.be(2);
         });
 
         it('contains the `get_dataset_info` tool', () => {
@@ -183,7 +183,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('The second request', () => {
         it('contains the correct number of messages', () => {
-          expect(secondRequestBody.messages.length).to.be(5);
+          expect(secondRequestBody.messages.length).to.be(3);
         });
 
         it('contains a system generated user message with a list of field candidates', () => {
@@ -211,7 +211,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('The third request', () => {
         it('contains the correct number of messages', () => {
-          expect(thirdRequestBody.messages.length).to.be(6);
+          expect(thirdRequestBody.messages.length).to.be(4);
         });
 
         it('contains the `get_dataset_info` request', () => {
