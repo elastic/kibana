@@ -7,7 +7,6 @@
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../api_integration/services/ml/security_common';
-import { logRateAnalysisTestData } from '../log_rate_analysis_test_data';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
@@ -17,8 +16,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const selectedField = '@message';
   const totalDocCount = 14005;
   const cases = getService('cases');
-
-  const testData = logRateAnalysisTestData[0];
 
   describe('log pattern analysis in cases', function () {
     before(async () => {
