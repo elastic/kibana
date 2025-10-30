@@ -30,7 +30,6 @@ import { getCategorizationField } from '@kbn/aiops-utils';
 import { prettifyQueryTemplate } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries/utils';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface ESQLMenuPopoverProps {
@@ -57,7 +56,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     RecommendedQuery[]
   >([]);
 
-  const { current: telemetryService } = useRef(new ESQLEditorTelemetryService(analytics));
+  const telemetryServiceRef = useRef(new ESQLEditorTelemetryService(analytics));
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField } = useMemo(() => {
     if (adHocDataview && typeof adHocDataview !== 'string') {
@@ -249,9 +248,9 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
           return {
             name: query.label,
             onClick: () => {
-              telemetryService.trackRecommendedQueryClicked(QuerySource.HELP);
+              telemetryServiceRef.current.trackRecommendedQueryClicked(QuerySource.HELP);
               onESQLQuerySubmit?.(query.queryString);
-              telemetryService.trackQuerySubmitted({
+              telemetryServiceRef.current.trackQuerySubmitted({
                 source: QuerySource.HELP,
                 query: query.queryString,
               });
@@ -271,7 +270,6 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     toggleLanguageComponent,
     solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
     categorizationField,
-    telemetryService,
   ]);
 
   const esqlMenuPopoverStyles = css`
