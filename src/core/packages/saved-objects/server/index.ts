@@ -87,6 +87,7 @@ export type {
 } from './src/extensions/encryption';
 export type {
   AuthorizeObject,
+  AuthorizationResult,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
@@ -124,6 +125,7 @@ export {
 } from './src/extensions/extensions';
 export {
   SavedObjectsErrorHelpers,
+  errorContent,
   type DecoratedError,
   type BulkResolveError,
 } from './src/saved_objects_error_helpers';

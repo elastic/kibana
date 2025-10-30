@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { incrementCounterInternal } from './increment_counter_internal';
-export {
-  internalBulkResolve,
-  type InternalBulkResolveParams,
-  type InternalSavedObjectsBulkResolveResponse,
-} from './internal_bulk_resolve';
+export { type Left, type Either, type Right, isLeft, isRight, left, right } from './either';

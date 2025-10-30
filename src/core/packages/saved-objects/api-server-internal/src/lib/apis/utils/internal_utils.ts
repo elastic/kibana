@@ -16,7 +16,6 @@ import {
   type SavedObjectsRawDocSource,
   type SavedObject,
   type SavedObjectsRawDocParseOptions,
-  type DecoratedError,
   type SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -290,11 +289,6 @@ export function getSavedObjectNamespaces(
   }
   return [SavedObjectsUtils.namespaceIdToString(namespace)];
 }
-
-/**
- * Extracts the contents of a decorated error to return the attributes for bulk operations.
- */
-export const errorContent = (error: DecoratedError) => error.output.payload;
 
 export function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
