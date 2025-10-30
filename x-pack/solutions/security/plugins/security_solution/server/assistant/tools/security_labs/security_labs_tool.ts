@@ -52,6 +52,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
       async (input) => {
         const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
           kbResource: SECURITY_LABS_RESOURCE,
+          // @ts-expect-error upgrade typescript v5.9.3
           query: input.question,
         });
 

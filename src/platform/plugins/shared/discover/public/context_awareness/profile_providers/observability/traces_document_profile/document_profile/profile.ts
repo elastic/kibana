@@ -75,6 +75,5 @@ const getFieldValues = <TRecord extends DataTableRecord, TField extends string>(
   field: TField & keyof TRecord['flattened']
 ): TRecord['flattened'][TField][] => {
   const value = record.flattened[field];
-  // @ts-expect-error upgrade typescript v5.9.3
-  return Array.isArray(value) ? value : [value];
+  return (Array.isArray(value) ? value : [value]) as TRecord['flattened'][TField][];
 };

@@ -62,6 +62,7 @@ export const ASK_ABOUT_ESQL_TOOL: AssistantTool = {
 
     return tool(
       async (input) => {
+        // @ts-expect-error upgrade typescript v5.9.3
         const generateEvent = await callNaturalLanguageToEsql(input.question);
         const answer = generateEvent.content ?? 'An error occurred in the tool';
 

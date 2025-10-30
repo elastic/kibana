@@ -37,7 +37,7 @@ export const toolDefinitionToInference = (
     } else if (isToolDefinition(tool)) {
       definitions[tool.function.name] = {
         description: tool.function.description ?? tool.function.name,
-        schema: isZodSchema(tool.function.parameters)
+        schema: isZodSchema(tool.function.parameters) // @ts-expect-error upgrade typescript v5.9.3
           ? zodSchemaToInference(tool.function.parameters)
           : (pick(tool.function.parameters, ['type', 'properties', 'required']) as ToolSchema),
       };
