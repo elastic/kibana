@@ -214,6 +214,8 @@ const createSecuritySolutionRequestContextMock = (
       validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
     })),
     getInferenceService: jest.fn(),
+    getAIAssistantKnowledgeBaseDataClient: jest.fn(),
+    getAIAssistantService: jest.fn(),
   };
 };
 
