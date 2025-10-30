@@ -16,6 +16,9 @@ import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 import { useEditorActionContext } from '../../../contexts';
 
+const httpsProtocol = 'https:';
+const elasticHostname = 'www.elastic.co';
+
 interface QueryParams {
   load_from: string;
 }
@@ -49,9 +52,6 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
   const { localStorageValue, setValue, toasts } = params;
   const isInitialValueSet = useRef<boolean>(false);
   const editorDispatch = useEditorActionContext();
-
-  const httpsProtocol = 'https:';
-  const elasticHostname = 'www.elastic.co';
 
   useEffect(() => {
     const ALLOWED_PATHS = ['/guide/', '/docs/'];
