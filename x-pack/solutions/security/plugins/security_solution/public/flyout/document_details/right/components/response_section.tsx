@@ -62,7 +62,6 @@ export const ResponseSection = memo(() => {
     if (!isNewNavigationEnabled && isPreviewMode) {
       return (
         <EuiCallOut
-          announceOnMount={false}
           iconType="documentation"
           size="s"
           title={

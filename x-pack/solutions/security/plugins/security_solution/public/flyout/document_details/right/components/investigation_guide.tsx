@@ -80,7 +80,6 @@ export const InvestigationGuide: React.FC = () => {
     if (hasInvestigationGuide && !isLinkEnabled) {
       return (
         <EuiCallOut
-          announceOnMount={false}
           iconType="documentation"
           size="s"
           title={
