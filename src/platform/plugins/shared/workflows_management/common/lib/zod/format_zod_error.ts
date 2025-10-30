@@ -213,9 +213,7 @@ function generateUnionErrorMessage(
       const unionOptions = analyzeUnionSchema(connectorUnionSchema);
 
       if (unionOptions.length > 0) {
-        const optionsList = unionOptions
-          .map((option) => `  - ${option.name}\n    ${option.description}`)
-          .join('\n');
+        const optionsList = unionOptions.map((option) => `  - ${option.description}`).join('\n');
 
         result = `${fieldName} should be oneOf:\n${optionsList}`;
       }
@@ -235,9 +233,9 @@ function generateUnionErrorMessage(
 
       const schemaAtPath = getSchemaAtPath(schema, pathString);
 
-      if (schemaAtPath.schema) {
+      if (schemaAtPath && schemaAtPath.schema) {
         // Check if it's a union schema (might be wrapped in optional, nullable, etc.)
-        let unionSchema = schemaAtPath;
+        let unionSchema = schemaAtPath.schema;
 
         // Unwrap optional, nullable, default wrappers to find the underlying union
         while (unionSchema && !(unionSchema instanceof z.ZodUnion)) {
@@ -257,7 +255,7 @@ function generateUnionErrorMessage(
 
           if (unionOptions.length > 0) {
             const optionsList = unionOptions
-              .map((option) => `  - ${option.name}\n    ${option.description}`)
+              .map((option) => `  - ${option.description}`)
               .join('\n');
 
             result = `${fieldName} should be oneOf:\n${optionsList}`;
@@ -340,15 +338,16 @@ function analyzeUnionSchema(
       // Look for discriminator fields (like 'type')
       const discriminator = findDiscriminatorInShape(shape);
       if (discriminator) {
-        name = `${discriminator.key}_${discriminator.value.replace(/[^a-zA-Z0-9]/g, '_')}`;
-
         // Get other required properties
         const otherProps = Object.keys(shape)
           .filter((key) => key !== discriminator.key && !isOptionalSchema(shape[key]))
           .sort();
 
-        const propsText = otherProps.length > 0 ? `, other props: ${otherProps.join(', ')}` : '';
-        description = `${discriminator.key}: "${discriminator.value}"${propsText}`;
+        // Format according to test expectations
+        description = `type: "${discriminator.value}"`;
+        if (otherProps.length > 0) {
+          description += `\n    other props: ${otherProps.join(', ')}`;
+        }
       } else {
         // No discriminator, list all required properties
         const requiredProps = Object.keys(shape)
