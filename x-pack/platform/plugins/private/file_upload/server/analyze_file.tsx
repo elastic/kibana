@@ -36,7 +36,6 @@ export async function analyzeFile(
   includePreview: boolean
 ): Promise<AnalysisResult> {
   overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
-
   const results = await client.asInternalUser.textStructure.findStructure(
     {
       body: data,
