@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonObject } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin_mock';
+import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow with foreach', () => {
@@ -28,7 +29,7 @@ consts:
   outerForeachArray: '${JSON.stringify(outerArray)}'
 steps:
   - name: outerForeachStep
-    foreach: consts.outerForeachArray
+    foreach: '{{consts.outerForeachArray}}'
     type: foreach
     steps:
       - name: outerForeachChildConnectorStep
@@ -37,7 +38,7 @@ steps:
         with:
           message: 'Foreach item: {{foreach.item}}; Foreach index: {{foreach.index}}; Foreach total: {{foreach.total}}'
       - name: innerForeachStep
-        foreach: inputs.innerArray
+        foreach: '{{inputs.innerArray}}'
         type: foreach
         steps:
           - name: innerForeachChildConnectorStep
@@ -73,7 +74,7 @@ steps:
       ).filter((se) => se.stepId === 'outerForeachChildConnectorStep');
       expect(outerForeachChildConnectorStepExecutions.length).toBe(2);
       outerArray.forEach((item, index) => {
-        expect(outerForeachChildConnectorStepExecutions[index].input?.message).toBe(
+        expect((outerForeachChildConnectorStepExecutions[index].input as JsonObject).message).toBe(
           `Foreach item: ${item}; Foreach index: ${index}; Foreach total: 2`
         );
         expect(outerForeachChildConnectorStepExecutions[index].status).toBe(
