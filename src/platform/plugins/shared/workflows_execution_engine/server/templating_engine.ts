@@ -29,33 +29,30 @@ export class WorkflowTemplatingEngine {
         return value;
       }
     });
-
-    // register base64 filters for data processing
-    this.engine.registerFilter('base64_encode', (value: unknown): string => {
-      if (typeof value !== 'string') {
-        return '';
-      }
-      try {
-        return Buffer.from(value, 'utf8').toString('base64');
-      } catch (error) {
-        return '';
-      }
-    });
-
-    this.engine.registerFilter('base64_decode', (value: unknown): string => {
-      if (typeof value !== 'string') {
-        return '';
-      }
-      try {
-        return Buffer.from(value, 'base64').toString('utf8');
-      } catch (error) {
-        return '';
-      }
-    });
   }
 
   public render<T>(obj: T, context: Record<string, unknown>): T {
     return this.renderValueRecursively(obj, context) as T;
+  }
+
+  public evaluateExpression(template: string, context: Record<string, unknown>): unknown {
+    let resolvedExpression = template.trim();
+    const openExpressionIndex = resolvedExpression.indexOf('{{');
+    const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
+
+    if (!openExpressionIndex && !closeExpressionIndex) {
+      throw new Error(`The provided expression is invalid. Got: ${template}.`);
+    }
+
+    resolvedExpression = resolvedExpression
+      .substring(openExpressionIndex + 2, closeExpressionIndex)
+      .trim();
+
+    try {
+      return this.engine.evalValueSync(resolvedExpression, context);
+    } catch (err) {
+      throw new Error(`The provided expression is invalid. Got: ${template}.`);
+    }
   }
 
   private renderValueRecursively(value: unknown, context: Record<string, unknown>): unknown {
@@ -87,7 +84,7 @@ export class WorkflowTemplatingEngine {
     return value;
   }
 
-  public renderString(template: string, context: Record<string, unknown>): string {
+  private renderString(template: string, context: Record<string, unknown>): string {
     try {
       return this.engine.parseAndRenderSync(template, context);
     } catch (error) {
