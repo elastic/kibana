@@ -5,22 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under on    apiTest('should remove a field and all nested fields (flattened)', async ({ testBed }) => {
-      const indexName = 'streams-e2e-test-remove-by-prefix-flattened';
-
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'remove_by_prefix',
-            from: 'labels',
-          } as RemoveByPrefixProcessor,
-        ],
-      };e contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { expect } from '@kbn/scout';
 import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';

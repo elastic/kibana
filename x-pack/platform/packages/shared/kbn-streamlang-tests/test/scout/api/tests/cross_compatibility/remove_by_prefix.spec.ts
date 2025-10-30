@@ -14,7 +14,6 @@ apiTest.describe(
   'Cross-compatibility - RemoveByPrefix Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    // *** Compatible Cases ***
     apiTest(
       'should remove nested fields in both ingest pipeline and ES|QL',
       async ({ testBed, esql }) => {
@@ -138,10 +137,6 @@ apiTest.describe(
         }
       );
     });
-
-    // *** Incompatible / Partially Compatible Cases ***
-    // Note that the Incompatible test suite doesn't necessarily mean the features are functionally incompatible,
-    // rather it highlights the nuanced behavioral differences in certain edge cases among transpilers.
 
     apiTest(
       'should consistently remove parent field and nested fields',

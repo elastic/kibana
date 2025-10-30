@@ -27,9 +27,9 @@ import type { RemoveByPrefixProcessor } from '../../../../types/processors';
  *    };
  *    ```
  *
- *    Generates (conceptually):
+ *    Generates:
  *    ```txt
- *    | DROP host.*  // Removes all host.* fields; parent field 'host' is removed too if no other fields remain
+ *    | DROP host.*
  *    ```
  */
 export function convertRemoveByPrefixProcessorToESQL(
@@ -40,6 +40,8 @@ export function convertRemoveByPrefixProcessorToESQL(
   // Use DROP command to remove all nested fields (field.*)
   // This handles both subobjects and flattened fields
   // The parent field itself is NOT removed
+  // TODO also remove the parent field once we have support for unmapped fields so we can
+  // make sure it exists before trying to drop it, which would otherwise cause an error
   const dropCommand = Builder.command({
     name: 'drop',
     args: [
