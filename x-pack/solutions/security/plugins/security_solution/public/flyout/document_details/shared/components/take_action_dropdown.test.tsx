@@ -382,7 +382,9 @@ describe('take action dropdown', () => {
       const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
 
       beforeEach(() => {
-        (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue({ rulesPrivileges: { read: true, edit: true } }));
+        (useUserPrivileges as jest.Mock).mockReturnValue(
+          getUserPrivilegesMockDefaultValue({ rulesPrivileges: { read: true, edit: true } })
+        );
       });
 
       test('should enable the "Add Endpoint exception" button if provided endpoint alert and has right privileges', async () => {
