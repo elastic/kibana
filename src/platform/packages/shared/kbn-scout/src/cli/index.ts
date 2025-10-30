@@ -13,7 +13,7 @@ import { runTestsCmd } from './run_tests';
 import { runPlaywrightTestCheckCmd } from './run_playwright_test_check';
 import { discoverPlaywrightConfigsCmd } from './config_discovery';
 import { createTestTrack } from './create_test_track';
-import { codegenCmd } from './codegen';
+import { recordCmd } from './record';
 
 export async function run() {
   await new RunWithCommands(
@@ -23,13 +23,13 @@ export async function run() {
     [
       startServerCmd,
       runTestsCmd,
-      codegenCmd,
       runPlaywrightTestCheckCmd,
       discoverPlaywrightConfigsCmd,
       reportingCLI.initializeReportDatastream,
       reportingCLI.uploadEvents,
       reportingCLI.updateTestConfigStats,
       createTestTrack,
+      recordCmd,
     ]
   ).execute();
 }

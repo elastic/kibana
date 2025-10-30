@@ -338,24 +338,27 @@ node scripts/scout.js start-server [--stateful|--serverless=[es|oblt|security]]
 
 This command is useful for manual testing or running tests via an IDE.
 
-#### Generating Tests with Codegen
+#### Generating Tests with Scout Recorder
 
-Scout provides a `codegen` command that uses Playwright's test recorder to generate Scout-compatible tests. This is a great way to quickly create test scaffolding by recording your interactions with Kibana.
+Scout provides a `record` command that uses Playwright's test recorder to generate Scout-compatible tests. This is a great way to quickly create test scaffolding by recording your interactions with Kibana.
 
 **Basic Usage:**
 
 ```bash
-node scripts/scout.js codegen --stateful --plugin x-pack/platform/plugins/shared/maps --output my_test
+node scripts/scout.js record --stateful --plugin apm-plugin --role admin
 ```
+
+Please note that the plugin name is the name of the plugin as defined in the `package.json` file, without the `@kbn` scope.
 
 **Available Options:**
 
 - **`--stateful`** or **`--serverless=[es|oblt|security]`**: Specifies the deployment type (required)
-- **`--plugin`**: Path to your plugin relative to repo root (required)
-- **`--output`**: Name of the test file without extension (default: `recorded_test`)
+- **`--plugin`**: Plugin name as defined in package.json, without the @kbn scope (e.g., `maps-plugin`, `apm-plugin`) (required)
 - **`--role`**: Role to authenticate as during recording (default: `admin`)
+- **`--url`**: Starting URL path to navigate to when recorder starts (e.g., `/app/maps`). Will attempt to auto-detect from plugin.ts if not provided (optional)
+- **`--testDirectory`**: Test directory to save the test file to (default: `test/scout/ui`)
+- **`--output`**: Output test file name with extension (default: `recorded_test.spec.ts`)
 - **`--parallel`**: Generate test using `spaceTest` for parallel execution (default: `false`)
-- **`--url`**: Starting URL path to navigate to (e.g., `/app/maps`) - saves manual navigation (optional)
 
 **How It Works:**
 

@@ -24,56 +24,56 @@ import { loadServersConfig } from '../config';
 import { silence } from '../common';
 import { createSamlSessionManager } from '../common/services/saml_auth';
 import { ScoutLogger } from '../common/services/logger';
-import type { CodegenOptions } from './codegen/types';
-import { transformPlaywrightCode } from './codegen/transformer';
-import { buildSelectorMappings } from './codegen/selector_detector';
-import { postProcessCode } from './codegen/post_processor';
-import { ensurePlaywrightConfig, detectScoutPackage } from './codegen/create_config';
-import { getAppRouteFromPlugin, getPluginPath } from './codegen/get_plugin_app_path';
+import type { RecorderOptions } from './record/types';
+import { transformPlaywrightCode } from './record/transformer';
+import { buildSelectorMappings } from './record/selector_detector';
+import { postProcessCode } from './record/post_processor';
+import { ensurePlaywrightConfig, detectScoutPackage } from './record/create_config';
+import { getAppRouteFromPlugin, getPluginPath } from './record/get_plugin_app_path';
 
-const CODEGEN_FLAG_OPTIONS: FlagOptions = {
+const RECORDER_FLAG_OPTIONS: FlagOptions = {
   ...SERVER_FLAG_OPTIONS,
   string: [...(SERVER_FLAG_OPTIONS.string || []), 'plugin', 'output', 'role', 'url'],
   boolean: [...(SERVER_FLAG_OPTIONS.boolean || []), 'parallel'],
   default: { output: 'recorded_test.spec.ts', role: 'admin', parallel: false },
   help: `${SERVER_FLAG_OPTIONS.help}
-    --plugin             Plugin name as defined in package.json, without the @kbn scope (e.g. maps, apm, etc.)
-    --url                Starting URL path to navigate to (e.g., /app/maps) - Optional
+    --plugin             Plugin name as defined in package.json, without the @kbn scope (e.g. maps-plugin, apm-plugin, etc.) - Required
+    --role               Pre-authenticate as role before recording (default: admin)
+    --url                Starting URL path to navigate to when recorder starts (e.g., /app/maps). We will attempt to get it from the Plugin.ts file if not provided. - Optional
     --testDirectory      Test directory to save the test file to (default: test/scout/ui)
     --output             Output test file name with extension (default: recorded_test.spec.ts)
     --role               Pre-authenticate as role before recording (default: admin)
     --parallel           Generate test using spaceTest for parallel execution (default: false)
-    --role               Pre-authenticate as role before recording (default: admin)
   `,
 };
 
-export const codegenCmd: Command<void> = {
-  name: 'codegen',
+export const recordCmd: Command<void> = {
+  name: 'record',
   description: `
   Generate Scout tests using Playwright's test recorder.
 
   This command:
   1. Starts Kibana and Elasticsearch
-  2. Opens Playwright's test generator
-  3. Transforms recorded actions to Scout format
+  2. Opens Playwright's test generator (codegen)
+  3. Writes the recorded test to a file
   4. Saves the test file to your plugin's test directory
 
   Example usage:
-    node scripts/scout.js codegen --stateful --plugin maps --output my_test
-    node scripts/scout.js codegen --stateful --plugin maps --url /app/maps
-    node scripts/scout.js codegen --serverless=oblt --plugin apm-plugin --url /app/apm
-    node scripts/scout.js codegen --stateful --plugin my_plugin --parallel --role editor
+    node scripts/scout.js record --stateful --plugin maps-plugin --role admin                            <-- will start with Maps app, logged in as admin
+    node scripts/scout.js record --stateful --plugin maps-plugin                                         <-- will start with login page
+    node scripts/scout.js record --serverless=oblt --plugin apm-plugin --url /app/apm/some-other-path    <-- will start with defined URL, logged in as admin
+    node scripts/scout.js record --stateful --plugin my-plugin --parallel --role editor                  <-- will start with login page, logged in as editor
   `,
-  flags: CODEGEN_FLAG_OPTIONS,
+  flags: RECORDER_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {
     const options = await parseCodegenFlags(flagsReader);
-    await runCodegen(log, options);
+    await runRecorder(log, options);
   },
 };
 
 async function parseCodegenFlags(
   flags: FlagsReader
-): Promise<CodegenOptions & { startUrl?: string }> {
+): Promise<RecorderOptions & { startUrl?: string }> {
   const serverOptions = parseServerFlags(flags);
 
   const plugin = flags.string('plugin');
@@ -116,7 +116,7 @@ async function parseCodegenFlags(
   };
 }
 
-async function runCodegen(log: ToolingLog, options: CodegenOptions) {
+async function runRecorder(log: ToolingLog, options: RecorderOptions) {
   const kibanaBaseUrl = 'http://localhost:5620';
 
   const {
@@ -132,7 +132,7 @@ async function runCodegen(log: ToolingLog, options: CodegenOptions) {
     testDirectory,
   } = options;
 
-  log.info('Starting Scout codegen...');
+  log.info('Starting Scout Recorder...');
   log.info(`Plugin: ${pluginPath}`);
   log.info(`Start URL: ${startUrl}`);
   log.info(`Role: ${role}`);
@@ -214,14 +214,12 @@ async function runCodegen(log: ToolingLog, options: CodegenOptions) {
       } catch (error) {
         log.error('Failed to create authenticated session:');
         log.error(error);
-        log.warning('Codegen will start unauthenticated - you will need to log in manually.');
+        log.warning('Recorder will start unauthenticated - you will need to log in manually.');
       }
       log.info('');
 
       // Main recording loop
       let continueRecording = true;
-
-      const currentStartUrl = startUrl;
 
       let testCount = 0;
 
@@ -234,22 +232,24 @@ async function runCodegen(log: ToolingLog, options: CodegenOptions) {
       while (continueRecording) {
         testCount++;
 
-        // Build URL for this session
-        const sessionKibanaUrl = currentStartUrl
-          ? `${kibanaBaseUrl}${currentStartUrl.startsWith('/') ? '' : '/'}${currentStartUrl}`
-          : kibanaBaseUrl;
-
-        // Use a temporary filename during recording
+        // Use a temporary filename during recording.
+        // We will move it to the final location after the user has named it.
         const tempFilename = `temp_recording_${Date.now()}.spec.ts`;
         const tempTestPath = path.join(REPO_ROOT, pluginPath, testDirectory, tempFilename);
 
         log.info(`\nRecording session #${testCount}`);
-        if (currentStartUrl) {
+
+        // Build URL for this session
+        const sessionKibanaUrl = `${kibanaBaseUrl}${
+          startUrl?.startsWith('/') ? '' : '/'
+        }${startUrl}`;
+
+        if (sessionKibanaUrl) {
           log.info(`Starting URL: ${sessionKibanaUrl}`);
         }
 
         // Run the codegen session with temp file
-        await runSingleCodegen({
+        await runSingleRecorder({
           deploymentTags,
           fullTestPath: tempTestPath,
           kibanaUrl: sessionKibanaUrl,
@@ -265,8 +265,8 @@ async function runCodegen(log: ToolingLog, options: CodegenOptions) {
         // Now ask the user what to name this test
         log.info('');
         log.info('========================================');
-        const defaultFilename = testCount === 1 ? outputFileName : `test_${testCount}.spec.ts`;
 
+        const defaultFilename = testCount === 1 ? outputFileName : `test_${testCount}.spec.ts`;
         const finalFilename = await promptUser(`Name test file (default: ${defaultFilename}): `);
         const actualFilename = finalFilename.trim() || defaultFilename;
 
@@ -278,6 +278,9 @@ async function runCodegen(log: ToolingLog, options: CodegenOptions) {
         const normalizedFilename = actualFilename.endsWith('.spec.ts')
           ? actualFilename
           : `${actualFilename}.spec.ts`;
+
+        // Keep track of what files were created for the summary
+        recordedTests.push(normalizedFilename);
 
         // Move from temp to final location
         const finalTestPath = path.join(
@@ -292,7 +295,9 @@ async function runCodegen(log: ToolingLog, options: CodegenOptions) {
 
         // Replace the generic test name with the user's description
         let testContent = await fs.readFile(finalTestPath, 'utf-8');
+
         testContent = testContent.replace(/test\('test',/g, `test('${actualTestDescription}',`);
+
         await fs.writeFile(finalTestPath, testContent, 'utf-8');
 
         log.success(`✅ Test saved as ${pluginPath}/${testDirectory}/tests/${normalizedFilename}.`);
@@ -308,36 +313,33 @@ async function runCodegen(log: ToolingLog, options: CodegenOptions) {
           } --testFiles ${pluginPath}/${testDirectory}/tests/${normalizedFilename}`
         );
         log.info('');
-
-        // Ask if user wants to record another test
         log.info('');
         log.info('========================================');
 
-        const answer = await promptUser('Record another? (y/n): ');
+        const answer = await promptUser('Record another? (y/n) (default: yes): ');
 
-        recordedTests.push(normalizedFilename);
-
-        if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+        if (
+          answer.trim() === '' ||
+          answer.trim().toLowerCase() === 'y' ||
+          answer.trim().toLowerCase() === 'yes'
+        ) {
           log.info('');
           log.info('Starting new recording session...');
         } else {
           continueRecording = false;
           log.info('');
 
-          log.info('Exiting codegen. Shutting down servers...');
-
-          // Summarize the tests that were recorded
-          log.info('Recorded tests:');
-
-          recordedTests.forEach((test) => {
-            log.info(`  - ${pluginPath}/${testDirectory}/tests/${test}`);
-          });
-          log.info('');
+          log.info('Exiting recorder...');
         }
       }
 
+      // Summarize the tests that were recorded
       log.info('');
       log.info(`✅ Recorded ${testCount} test${testCount > 1 ? 's' : ''} successfully!`);
+      recordedTests.forEach((test) => {
+        log.info(`  - ${pluginPath}/${testDirectory}/tests/${test}`);
+      });
+      log.info('');
     } finally {
       // Clean up storage state file
       if (storageStatePath && existsSync(storageStatePath)) {
@@ -363,9 +365,9 @@ async function runCodegen(log: ToolingLog, options: CodegenOptions) {
 }
 
 /**
- * Runs a single codegen session
+ * Runs a single recorder session
  */
-async function runSingleCodegen({
+async function runSingleRecorder({
   deploymentTags,
   fullTestPath,
   kibanaUrl,
@@ -390,7 +392,7 @@ async function runSingleCodegen({
 }): Promise<boolean> {
   log.info('');
   log.info('========================================');
-  log.info('Launching Playwright codegen...');
+  log.info('Launching Scout Recorder...');
   log.info('========================================');
   log.info(`Output file: ${fullTestPath}`);
   log.info(`Starting URL: ${kibanaUrl}`);
@@ -399,7 +401,7 @@ async function runSingleCodegen({
   }
   log.info('');
 
-  await new Promise<void>((resolveCodegen, rejectCodegen) => {
+  await new Promise<void>((resolveRecorder, rejectRecoder) => {
     const codegenArgs = [
       'codegen',
       kibanaUrl,
@@ -416,7 +418,7 @@ async function runSingleCodegen({
       codegenArgs.push('--load-storage', storageStatePath);
     }
 
-    const codegenProcess = spawn(playwrightBin, codegenArgs, {
+    const recorderProcess = spawn(playwrightBin, codegenArgs, {
       stdio: ['inherit', 'pipe', 'pipe'],
       cwd: REPO_ROOT,
     });
@@ -424,27 +426,27 @@ async function runSingleCodegen({
     // Capture stderr for any error messages
     let stderrOutput = '';
 
-    codegenProcess.stderr.on('data', (data: Buffer) => {
+    recorderProcess.stderr.on('data', (data: Buffer) => {
       stderrOutput += data.toString();
       log.debug(`Playwright: ${data.toString().trim()}`);
     });
 
-    codegenProcess.on('spawn', () => {
-      log.success('Playwright codegen started successfully!');
+    recorderProcess.on('spawn', () => {
+      log.success('Scout Recorder started successfully!');
       log.info('Browser and Inspector windows should now be open.');
       log.info('Record your test actions, then close the Playwright Inspector window.');
     });
 
-    codegenProcess.on('close', (code) => {
-      log.info(`Playwright codegen closed with code: ${code}`);
+    recorderProcess.on('close', (code) => {
+      log.debug(`Playwright codegen closed with code: ${code}`);
 
       if (code === 0 || code === null) {
-        log.info('Playwright codegen closed.');
-        resolveCodegen();
+        log.info('Scout Recorder closed.');
+        resolveRecorder();
       } else {
-        rejectCodegen(
+        rejectRecoder(
           new Error(
-            `Playwright codegen exited with code ${code}${
+            `Scout Recorder exited with code ${code}${
               stderrOutput ? `\nError output: ${stderrOutput}` : ''
             }`
           )
@@ -452,10 +454,10 @@ async function runSingleCodegen({
       }
     });
 
-    codegenProcess.on('error', (err) => {
-      log.error('Failed to start Playwright codegen:');
+    recorderProcess.on('error', (err) => {
+      log.error('Failed to start Scout Recorder:');
       log.error(err.message);
-      rejectCodegen(err);
+      rejectRecoder(err);
     });
   });
 
@@ -478,7 +480,7 @@ async function runSingleCodegen({
     selectorMappings
   );
 
-  const finalCode = await postProcessCode(transformResult, fullTestPath);
+  const finalCode = await postProcessCode(transformResult, fullTestPath, scoutPackage);
 
   // Ensure config exists
   await ensurePlaywrightConfig(pluginPath, parallel);
@@ -492,14 +494,6 @@ async function runSingleCodegen({
   log.success('');
   log.success(`Location: ${fullTestPath}`);
   log.success('');
-
-  if (transformResult.detectedPatterns.length > 0) {
-    log.info('Detected patterns:');
-    transformResult.detectedPatterns.forEach((pattern) => {
-      log.info(`  - ${pattern}`);
-    });
-    log.info('');
-  }
 
   if (transformResult.warnings.length > 0) {
     log.warning('Please review these warnings:');

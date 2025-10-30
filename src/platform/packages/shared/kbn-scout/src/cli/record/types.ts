@@ -9,7 +9,7 @@
 
 import type { CliSupportedServerModes } from '../../types';
 
-export interface CodegenOptions {
+export interface RecorderOptions {
   esFrom: 'serverless' | 'source' | 'snapshot' | undefined;
   installDir: string | undefined;
   logsDir: string | undefined;
@@ -17,8 +17,8 @@ export interface CodegenOptions {
   outputFileName: string;
   parallel: boolean;
   pluginPath: string;
-  startUrl?: string | undefined;
   role: string;
+  startUrl?: string | undefined;
   testDirectory: string;
 }
 
