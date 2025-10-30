@@ -7,6 +7,10 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,15 +25,14 @@ import {
   EuiFieldText,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import useMountedState from 'react-use/lib/useMountedState';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+
 import type { MlApi } from '../../application/services/ml_api_service';
-import type { SingleMetricViewerEmbeddableInput } from '..';
 import { SeriesControls } from '../../application/timeseriesexplorer/components/series_controls';
 import {
   APP_STATE_ACTION,
@@ -37,8 +40,11 @@ import {
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
 import { useMlLink } from '../../application/contexts/kibana';
 import { JobSelectorControl } from '../../alerting/job_selector';
+
 import type { SingleMetricViewerEmbeddableUserInput, MlEntity } from '..';
+
 import { getDefaultSingleMetricViewerPanelTitle } from './get_default_panel_title';
+import type { SingleMetricViewerEmbeddableInput } from './types';
 
 export interface SingleMetricViewerInitializerProps {
   bounds: TimeRangeBounds;

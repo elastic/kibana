@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';

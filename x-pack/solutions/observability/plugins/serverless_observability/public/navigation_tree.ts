@@ -8,6 +8,7 @@
 import { lazy } from 'react';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
 const LazyIconBriefcase = lazy(() =>
   import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
@@ -143,15 +144,7 @@ export const createNavigationTree = ({
           ...filterForFeatureAvailability(
             {
               link: 'streams' as const,
-              withBadge: true,
               iconV2: LazyIconProductStreamsWired,
-              badgeOptions: {
-                icon: 'beaker',
-                tooltip: i18n.translate('xpack.serverlessObservability.nav.streamsBadgeTooltip', {
-                  defaultMessage:
-                    'This functionality is experimental and not supported. It may change or be removed at any time.',
-                }),
-              },
             },
             streamsAvailable
           ),
@@ -397,7 +390,7 @@ export const createNavigationTree = ({
             icon: 'code',
           },
           {
-            id: 'ingest_and_manage_data',
+            id: DATA_MANAGEMENT_NAV_ID,
             title: i18n.translate('xpack.serverlessObservability.nav.dataManagement', {
               defaultMessage: 'Data management',
             }),
@@ -436,12 +429,13 @@ export const createNavigationTree = ({
                   { link: 'management:transform' },
                   { link: 'management:rollup_jobs' },
                   { link: 'management:data_quality' },
+                  { link: 'management:data_usage' },
                 ],
               },
             ],
           },
           {
-            id: 'admin_and_settings_project_nav',
+            id: 'admin_and_settings',
             title: i18n.translate('xpack.serverlessObservability.nav.adminAndSettings', {
               defaultMessage: 'Admin and Settings',
             }),
@@ -472,13 +466,7 @@ export const createNavigationTree = ({
                     cloudLink: 'billingAndSub',
                   },
                   {
-                    cloudLink: 'performance',
-                  },
-                  {
                     cloudLink: 'userAndRoles',
-                    title: i18n.translate('xpack.serverlessObservability.navLinks.usersAndRoles', {
-                      defaultMessage: 'Members',
-                    }),
                   },
                 ],
               },
@@ -495,19 +483,29 @@ export const createNavigationTree = ({
                   { link: 'management:triggersActionsAlerts' },
                   { link: 'management:triggersActions' },
                   { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
+                  { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
                 ],
               },
-              {
-                id: 'machine_learning',
-                title: i18n.translate(
-                  'xpack.serverlessObservability.nav.projectSettings.machineLearning',
-                  {
-                    defaultMessage: 'Machine Learning',
-                  }
-                ),
-                breadcrumbStatus: 'hidden',
-                children: [{ link: 'management:trained_models' }],
-              },
+              ...filterForFeatureAvailability(
+                {
+                  id: 'machine_learning',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.projectSettings.machineLearning',
+                    {
+                      defaultMessage: 'Machine Learning',
+                    }
+                  ),
+                  breadcrumbStatus: 'hidden',
+                  children: [
+                    { link: 'management:overview' },
+                    { link: 'management:anomaly_detection' },
+                    { link: 'management:analytics' },
+                    { link: 'management:trained_models' },
+                    { link: 'management:supplied_configurations' },
+                  ],
+                },
+                overviewAvailable
+              ),
               ...filterForFeatureAvailability(
                 {
                   title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
@@ -526,14 +524,6 @@ export const createNavigationTree = ({
                 },
                 overviewAvailable
               ),
-              {
-                id: 'data',
-                title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.data', {
-                  defaultMessage: 'Data',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [{ link: 'management:data_usage' }],
-              },
               {
                 id: 'content',
                 title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.content', {
@@ -556,6 +546,12 @@ export const createNavigationTree = ({
                 }),
                 breadcrumbStatus: 'hidden',
                 children: [{ link: 'management:settings' }],
+              },
+              {
+                // We include this link here to ensure that sidenav panel opens when user lands to legacy management landing page
+                // https://github.com/elastic/kibana/issues/240275
+                link: 'management',
+                sideNavStatus: 'hidden',
               },
             ],
           },
@@ -605,10 +601,6 @@ export const createNavigationTree = ({
                       { link: 'management:roles', breadcrumbStatus: 'hidden' },
                       {
                         cloudLink: 'userAndRoles',
-                        title: i18n.translate(
-                          'xpack.serverlessObservability.navLinks.projectSettings.mngt.usersAndRoles',
-                          { defaultMessage: 'Manage organization members' }
-                        ),
                       },
                     ],
                   },

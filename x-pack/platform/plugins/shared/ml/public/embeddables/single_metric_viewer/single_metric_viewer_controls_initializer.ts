@@ -11,7 +11,7 @@ import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type {
   SingleMetricViewerEmbeddableState,
   SingleMetricViewerEmbeddableUserInput,
-} from '../types';
+} from './types';
 
 export type AnomalySwimLaneControlsState = Pick<
   SingleMetricViewerEmbeddableState,

@@ -255,10 +255,10 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
-    "@kbn/spaces-utils",
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
+    "@kbn/core-elasticsearch-server-utils",
     "@kbn/rrule",
     "@kbn/onechat-genai-utils",
     "@kbn/onechat-server",
@@ -266,5 +266,6 @@
     "@kbn/object-utils",
     "@kbn/core-ui-settings-common",
     "@kbn/ml-common-types",
+    "@kbn/react-query"
   ]
 }

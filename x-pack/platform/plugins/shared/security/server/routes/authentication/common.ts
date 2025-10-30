@@ -20,6 +20,7 @@ import {
   TokenAuthenticationProvider,
 } from '../../authentication';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import { securityTelemetry } from '../../otel/instrumentation';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
@@ -67,13 +68,23 @@ export function defineCommonRoutes({
       try {
         const deauthenticationResult = await getAuthenticationService().logout(request);
         if (deauthenticationResult.failed()) {
+          securityTelemetry.recordLogoutAttempt({
+            outcome: 'failure',
+          });
           return response.customError(wrapIntoCustomErrorResponse(deauthenticationResult.error));
         }
+
+        securityTelemetry.recordLogoutAttempt({
+          outcome: 'success',
+        });
 
         return response.redirected({
           headers: { location: deauthenticationResult.redirectURL || `${serverBasePath}/` },
         });
       } catch (error) {
+        securityTelemetry.recordLogoutAttempt({
+          outcome: 'failure',
+        });
         return response.customError(wrapIntoCustomErrorResponse(error));
       }
     }
@@ -163,6 +174,7 @@ export function defineCommonRoutes({
     createLicensedRouteHandler(async (context, request, response) => {
       const { providerType, providerName, currentURL, params } = request.body;
       const redirectURL = parseNextURL(currentURL, basePath.serverBasePath);
+
       const authenticationResult = await getAuthenticationService().login(request, {
         provider: { name: providerName },
         redirectURL,

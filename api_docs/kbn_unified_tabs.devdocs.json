@@ -74,7 +74,7 @@
         "label": "TabbedContent",
         "description": [],
         "signature": [
-          "({ items: managedItems, selectedItemId: managedSelectedItemId, recentlyClosedItems, unsavedItemIds, maxItemsCount, services, hideTabsBar, renderContent, createItem, onChanged, onClearRecentlyClosed, getPreviewData, onEBTEvent, }: ",
+          "({ items: managedItems, selectedItemId: managedSelectedItemId, recentlyClosedItems, unsavedItemIds, maxItemsCount, services, hideTabsBar, renderContent, createItem, onChanged, onClearRecentlyClosed, getPreviewData, onEBTEvent, customNewTabButton, disableCloseButton, disableInlineLabelEditing, disablePreview, disableDragAndDrop, disableTabsBarMenu, }: ",
           {
             "pluginId": "@kbn/unified-tabs",
             "scope": "public",
@@ -93,7 +93,7 @@
             "id": "def-public.TabbedContent.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  items: managedItems,\n  selectedItemId: managedSelectedItemId,\n  recentlyClosedItems,\n  unsavedItemIds,\n  maxItemsCount = MAX_ITEMS_COUNT,\n  services,\n  hideTabsBar = false,\n  renderContent,\n  createItem,\n  onChanged,\n  onClearRecentlyClosed,\n  getPreviewData,\n  onEBTEvent,\n}",
+            "label": "{\n  items: managedItems,\n  selectedItemId: managedSelectedItemId,\n  recentlyClosedItems,\n  unsavedItemIds,\n  maxItemsCount = MAX_ITEMS_COUNT,\n  services,\n  hideTabsBar = false,\n  renderContent,\n  createItem,\n  onChanged,\n  onClearRecentlyClosed,\n  getPreviewData,\n  onEBTEvent,\n  customNewTabButton,\n  disableCloseButton = false,\n  disableInlineLabelEditing = false,\n  disablePreview = false,\n  disableDragAndDrop = false,\n  disableTabsBarMenu = false,\n}",
             "description": [],
             "signature": [
               {
@@ -182,7 +182,7 @@
           },
           " extends Pick<",
           "TabsBarProps",
-          ", \"unsavedItemIds\" | \"maxItemsCount\" | \"onClearRecentlyClosed\">"
+          ", \"disableCloseButton\" | \"disableInlineLabelEditing\" | \"disablePreview\" | \"disableDragAndDrop\" | \"unsavedItemIds\" | \"maxItemsCount\" | \"onClearRecentlyClosed\" | \"disableTabsBarMenu\">"
         ],
         "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
         "deprecated": false,
@@ -354,6 +354,20 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabbedContentProps.customNewTabButton",
+            "type": "Object",
+            "tags": [],
+            "label": "customNewTabButton",
+            "description": [],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/components/tabbed_content/tabbed_content.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/unified-tabs",
@@ -547,6 +561,20 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabItem.customMenuButton",
+            "type": "Object",
+            "tags": [],
+            "label": "customMenuButton",
+            "description": [],
+            "signature": [
+              "React.JSX.Element | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
             "deprecated": false,

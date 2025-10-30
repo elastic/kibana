@@ -9,14 +9,13 @@ import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 
 import type { TypeOf } from '@kbn/config-schema/src/types';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-
 import type {
   anomalySwimlaneEmbeddableCustomInputOverallSchema,
   anomalySwimlaneEmbeddableCustomInputSchema,
   anomalySwimlaneEmbeddableCustomInputViewBySchema,
   anomalySwimlaneEmbeddableUserInputSchema,
   anomalySwimlaneInitialInputSchema,
-} from '../../server/embeddable/schemas';
+} from '@kbn/ml-plugin/server/embeddable/schemas';
 
 /** Manual input by the user */
 export type AnomalySwimlaneEmbeddableUserInput = TypeOf<

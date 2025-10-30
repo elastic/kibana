@@ -20,11 +20,11 @@ import {
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+import type { CriteriaField, Influencer } from '@kbn/ml-anomaly-utils';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
   DatafeedResultsChartDataParams,
-  CriteriaField,
 } from '@kbn/ml-common-types/results';
 import { defaultSearchQuery } from '@kbn/ml-common-types/results';
 import { getIndicesOptions } from '../../../common/util/datafeed_utils';
@@ -40,11 +40,6 @@ import { anomalyChartsDataProvider } from './anomaly_charts';
 // ML Results dashboards.
 
 const DEFAULT_MAX_EXAMPLES = 500;
-
-interface Influencer {
-  fieldName: string;
-  fieldValue: any;
-}
 
 /**
  * Extracts typical and actual values from the anomaly record.

@@ -588,6 +588,20 @@ FROM index
           // d.1
           /* d.2 */ d /* d.3 */`);
     });
+
+    test('supports binary expressions', () => {
+      assertReprint(
+        `FROM employees
+  | LEFT JOIN
+      asdf
+        ON
+          // hello world
+          /*1*/ aaaaaaaaaaaaaaaaaaaaaaaaa /*2*/ >
+              /*3*/ bbbbbbbbbbbbbbbbbbbbb /*4*/ AND
+            /*5*/ ccccccccccccccccccc /*6*/ ==
+              /*7*/ dddddddddddddddddddddddddddddddddddddddd /*8*/`
+      );
+    });
   });
 
   describe('function call expressions', () => {
