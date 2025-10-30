@@ -135,7 +135,6 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
                   index={i}
                   lite={true}
                   showFileContentPreview={flyoutContent?.showFileContentPreview}
-                  showFileSummary={flyoutContent?.showFileSummary}
                   showOverrideButton={false}
                 />
               ))}
