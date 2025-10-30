@@ -32,6 +32,7 @@ interface TutorialDirectoryUiProps {
   openTab: string;
   isCloudEnabled: boolean;
   intl: InjectedIntl;
+  history?: any;
 }
 interface TutorialCard extends Pick<TutorialType, 'id' | 'category' | 'name'> {
   url: string;
@@ -186,6 +187,10 @@ class TutorialDirectoryUi extends React.Component<
     this.setState({
       selectedTabId: id,
     });
+    // Update URL to reflect the selected tab
+    if (this.props.history) {
+      this.props.history.push(`/tutorial_directory/${id}`);
+    }
   };
 
   getTabs = () => {

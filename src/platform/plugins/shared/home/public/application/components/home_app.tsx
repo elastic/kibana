@@ -47,6 +47,7 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
         addBasePath={addBasePath}
         openTab={tabId}
         isCloudEnabled={isCloudEnabled}
+        history={props.history}
       />
     );
   };
