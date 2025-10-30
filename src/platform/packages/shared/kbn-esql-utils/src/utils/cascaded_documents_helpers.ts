@@ -594,11 +594,11 @@ export const appendFilteringWhereClauseForCascadeLayout = <
       : Builder.expression.func.binary(operator as BinaryExpressionComparisonOperator, [
           Builder.identifier({ name: fieldName! }),
           fieldType && isSupportedFieldType(fieldType)
-            ? // @ts-expect-error - this works but needs more type improvements
-              Builder.expression.literal[fieldType].call(
-                null,
-                value as FieldValue<typeof fieldType>
-              )
+            ? fieldType === 'boolean'
+              ? Builder.expression.literal.boolean(value as boolean)
+              : fieldType === 'string'
+              ? Builder.expression.literal.string(value as string)
+              : Builder.expression.literal[fieldType](value as number)
             : // when fieldType is not provided or supported, we default to string
               Builder.expression.literal.string(value as string),
         ]);
@@ -616,7 +616,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
   const filteringWhereCommand = commandsBeforeInsertionAnchor[filteringWhereCommandIndex];
 
-  let modifiedFilteringWhereCommand: ESQLCommand<'where'> | null = null;
+  let modifiedFilteringWhereCommand: ESQLCommand | null = null;
 
   // the where command itself typically only accepts a single expression as its argument
   // if it's not a named "and" binary expression, we'll treat it as a command that has only one expression,
@@ -629,40 +629,16 @@ export const appendFilteringWhereClauseForCascadeLayout = <
       .args[0] as ESQLBinaryExpression<BinaryExpressionWhereOperator>;
     const [left] = binaryExpression.args;
 
-    modifiedFilteringWhereCommand = Builder.command({
-      name: 'where',
-      args:
-        (left as ESQLColumn).name !== fieldName
-          ? [
-              Builder.expression.func.binary('and', [
-                computedFilteringExpression,
-                synth.exp(BasicPrettyPrinter.print(binaryExpression), {
-                  withFormatting: false,
-                }),
-              ]),
-            ]
-          : [
-              // when the expression's left hand's value matches the target field we're trying to filter on, we simply replace it with the new expression
-              computedFilteringExpression,
-            ],
-    });
+    modifiedFilteringWhereCommand =
+      (left as ESQLColumn).name === fieldName
+        ? // when the expression's left hand's value matches the target field we're trying to filter on, we simply replace it with the new expression
+          synth.cmd`WHERE ${computedFilteringExpression}`
+        : synth.cmd`WHERE ${computedFilteringExpression} AND ${binaryExpression}`;
   } else if (
     isBinaryExpression(filteringWhereCommand.args[0]) &&
     filteringWhereCommand.args[0].name === 'and'
   ) {
-    modifiedFilteringWhereCommand = Builder.command({
-      name: 'where',
-      args: [
-        Builder.expression.func.binary('and', [
-          computedFilteringExpression,
-          // we select the arguments text from the current where command as is to avoid parsing,
-          // else we'll need to treat it's arguments as an infinitely nested case and handle it accordingly
-          synth.exp(BasicPrettyPrinter.print(filteringWhereCommand.args[0]), {
-            withFormatting: false,
-          }),
-        ]),
-      ],
-    });
+    modifiedFilteringWhereCommand = synth.cmd`WHERE ${computedFilteringExpression} AND ${filteringWhereCommand.args[0]}`;
   }
 
   // if we where able to create a new filtering where command, we need to add it in and remove the old one
