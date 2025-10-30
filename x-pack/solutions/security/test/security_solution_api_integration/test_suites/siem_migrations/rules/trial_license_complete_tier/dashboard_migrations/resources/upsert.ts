@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body).toEqual({
           error: 'Internal Server Error',
           message:
-            'Failed to process lookups: Error: Error creating lookup index from lookup: -. It does not conformto index naming rules. No valid characters in input string',
+            'Failed to process lookups: Error: Error creating lookup index from lookup: -. It does not conform to index naming rules. No valid characters in input string',
           statusCode: 500,
         });
       });

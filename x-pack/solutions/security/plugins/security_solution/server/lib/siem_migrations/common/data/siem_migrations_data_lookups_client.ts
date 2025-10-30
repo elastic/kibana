@@ -75,7 +75,7 @@ export class SiemMigrationsDataLookupsClient {
     try {
       return toValidIndexName(lookupName);
     } catch (error) {
-      const message = `Error creating lookup index from lookup: ${lookupName}. It does not conformto index naming rules. ${error.message}`;
+      const message = `Error creating lookup index from lookup: ${lookupName}. It does not conform to index naming rules. ${error.message}`;
       this.logger.error(message);
       throw new Error(message);
     }
