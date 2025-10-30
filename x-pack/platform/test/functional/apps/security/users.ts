@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await toasts.dismissAll();
         });
         afterEach(async () => {
-          await PageObjects.security.submitUpdateUserForm();
+          await PageObjects.security.backToUsersList();
           await toasts.dismissAll();
         });
         after(async () => {
