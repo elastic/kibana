@@ -172,6 +172,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   if (isError) {
     return (
       <EuiCallOut
+        announceOnMount
         data-test-subj="risk-preview-error"
         title={i18n.PREVIEW_ERROR_TITLE}
         color="danger"
