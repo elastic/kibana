@@ -30,7 +30,7 @@ interface IndexActionMetadata extends CommonActionMetadata {
 }
 
 interface DataStreamActionMetadata extends CommonActionMetadata {
-  excludedActions?: Array<'readOnly' | 'reindex'>;
+  excluded_actions?: Array<'readOnly' | 'reindex'>;
   total_backing_indices: number;
   reindex_required: boolean;
 
@@ -89,6 +89,7 @@ export const getCorrectiveAction = (deprecation: BaseDeprecation): CorrectiveAct
     return {
       type: 'dataStream',
       metadata: {
+        excludedActions: (metadata as DataStreamActionMetadata)?.excluded_actions || [],
         ignoredIndicesRequiringUpgrade,
         ignoredIndicesRequiringUpgradeCount,
         totalBackingIndices,
