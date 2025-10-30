@@ -13,9 +13,9 @@ import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ProjectRouting } from '@kbn/es-query';
-import { ProjectPicker } from './project_picker';
+import { ProjectPickerComponent } from './project_picker_component';
 
-describe('ProjectPicker', () => {
+describe('ProjectPickerComponent', () => {
   const defaultProps = {
     projectRouting: undefined as ProjectRouting | undefined,
     onProjectRoutingChange: jest.fn(),
@@ -25,7 +25,7 @@ describe('ProjectPicker', () => {
     return render(
       <I18nProvider>
         <EuiThemeProvider>
-          <ProjectPicker {...defaultProps} {...props} />
+          <ProjectPickerComponent {...defaultProps} {...props} />
         </EuiThemeProvider>
       </I18nProvider>
     );

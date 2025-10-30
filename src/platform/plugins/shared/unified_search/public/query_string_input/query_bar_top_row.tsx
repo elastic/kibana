@@ -54,8 +54,7 @@ import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { NoDataPopover } from './no_data_popover';
-import { ProjectPickerWrapper } from './project_picker_wrapper';
-import type { ProjectPickerProps } from '@kbn/cps-utils';
+import { ProjectPicker, type ProjectPickerProps } from '@kbn/cps-utils';
 import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
@@ -942,9 +941,10 @@ export const QueryBarTopRow = React.memo(
               wrap
             >
               {props.showProjectPicker && (
-                <ProjectPickerWrapper
+                <ProjectPicker
                   projectRouting={props.projectRouting}
                   onProjectRoutingChange={props.onProjectRoutingChange}
+                  wrappingContainer={(children: React.ReactNode) => <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
                 />
               )}
               {props.dataViewPickerOverride || renderDataViewsPicker()}

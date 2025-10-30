@@ -9,22 +9,12 @@
 
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
+export type { Project } from './components/project_picker_component';
+export type { ProjectPickerProps } from './components/project_picker';
 
-/**
- * The Lazily-loaded `ProjectPicker` component. Consumers should use `React.Suspense` or
- * the `withSuspense` HOC to load this component.
- */
-export const ProjectPickerLazy = React.lazy(async () => {
+const ProjectPickerLazy = React.lazy(async () => {
   const { ProjectPicker: Component } = await import('./components/project_picker');
   return { default: Component };
 });
 
-/**
- * A `ProjectPicker` component that is wrapped by the `withSuspense` HOC. This component can
- * be used directly by consumers and will load the `ProjectPickerLazy` component lazily with
- * a predefined fallback and error boundary.
- */
 export const ProjectPicker = withSuspense(ProjectPickerLazy);
-
-export type { ProjectPickerProps, Project } from './components/project_picker';
-export { ProjectListItem } from './components/project_list_item';

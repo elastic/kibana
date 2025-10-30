@@ -21,8 +21,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Project } from './project_picker';
-import { strings } from './project_picker';
+import type { Project } from './project_picker_component';
+import { strings } from './strings';
 
 interface ProjectListItemProps {
   project: Project;
