@@ -31,8 +31,7 @@ export {
   buildDataTableRecordList,
   convertValueToString,
   createLogsContextService,
-  createTracesContextService,
-  createApmErrorsContextService,
+  createApmContextService,
   createMetricsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
@@ -60,6 +59,7 @@ export {
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  prepareDataViewForEditing,
   LogLevelBadge,
   getDefaultSort,
   getSort,
@@ -72,8 +72,7 @@ export {
 
 export type {
   LogsContextService,
-  TracesContextService,
-  ApmErrorsContextService,
+  ApmContextService,
   MetricsContextService,
   SortOrder,
   SortInput,

@@ -5,11 +5,21 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
-import agentsIcon from './assets/robot.svg';
-import playgroundIcon from './assets/playground.svg';
+
+const LazyIconAgents = lazy(() =>
+  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
+);
+
+const LazyIconPlayground = lazy(() =>
+  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
+    default: m.iconPlayground,
+  }))
+);
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
   defaultMessage: 'Elasticsearch',
@@ -17,12 +27,6 @@ const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
 const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.performance', {
   defaultMessage: 'Performance',
 });
-const MANAGE_ORG_MEMBERS_TITLE = i18n.translate(
-  'xpack.serverlessSearch.nav.mngt.access.userAndRoles',
-  {
-    defaultMessage: 'Manage Organization Members',
-  }
-);
 const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
   'xpack.serverlessSearch.nav.mngt.alertsAndInsights',
   {
@@ -68,6 +72,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             renderAs: 'home',
             sideNavVersion: 'v2',
             title: NAV_TITLE,
+            breadcrumbStatus: 'hidden',
           },
           {
             id: 'home',
@@ -88,7 +93,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             },
           },
           {
-            iconV2: agentsIcon, // Temp svg until we have icon in EUI
+            iconV2: LazyIconAgents, // Temp svg until we have icon in EUI
             link: 'agent_builder',
             withBadge: true,
             badgeTypeV2: 'techPreview',
@@ -135,7 +140,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 }),
                 link: 'searchPlayground' as AppDeepLinkId,
                 breadcrumbStatus: 'hidden' as 'hidden',
-                iconV2: playgroundIcon, // Temp svg until we have icon in EUI
+                iconV2: LazyIconPlayground, // Temp svg until we have icon in EUI
               }),
             ],
           },
@@ -262,11 +267,12 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                       );
                     },
                     link: 'management:index_management',
+                    breadcrumbStatus: 'hidden',
                   },
-                  { link: 'management:index_lifecycle_management' },
-                  { link: 'management:snapshot_restore' },
-                  { link: 'management:transform' },
-                  { link: 'management:rollup_jobs' },
+                  { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
+                  { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
+                  { link: 'management:transform', breadcrumbStatus: 'hidden' },
+                  { link: 'management:rollup_jobs', breadcrumbStatus: 'hidden' },
                   { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
                   { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
                 ],
@@ -276,23 +282,27 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               },
               {
                 children: [
-                  { link: 'management:ingest_pipelines' },
-                  { link: 'management:pipelines' },
+                  { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
+                  { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.pipelines.title', {
                   defaultMessage: 'Ingest',
                 }),
               },
               {
-                children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
+                children: [
+                  { link: 'searchSynonyms:synonyms', breadcrumbStatus: 'hidden' },
+                  { link: 'searchQueryRules' },
+                ],
                 id: 'search_relevance',
+                breadcrumbStatus: 'hidden',
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.relevance.title', {
                   defaultMessage: 'Relevance',
                 }),
               },
             ],
             iconV2: 'database',
-            id: 'data_management',
+            id: DATA_MANAGEMENT_NAV_ID, // important for tour
             sideNavVersion: 'v2',
             renderAs: 'panelOpener',
             title: i18n.translate('xpack.serverlessSearch.nav.dataManagement', {
@@ -347,7 +357,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                       { link: 'management:roles', breadcrumbStatus: 'hidden' },
                       {
                         cloudLink: 'userAndRoles',
-                        title: MANAGE_ORG_MEMBERS_TITLE,
                       },
                     ],
                   },
@@ -441,12 +450,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   },
                   {
                     cloudLink: 'userAndRoles',
-                    title: i18n.translate(
-                      'xpack.serverlessSearch.nav.adminAndSettings.org.members.title',
-                      {
-                        defaultMessage: 'Members',
-                      }
-                    ),
                   },
                 ],
               },
@@ -508,6 +511,12 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 ),
                 breadcrumbStatus: 'hidden',
                 children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
+              },
+              {
+                // We include this link here to ensure that sidenav panel opens when user lands to legacy management landing page
+                // https://github.com/elastic/kibana/issues/240275
+                link: 'management',
+                sideNavStatus: 'hidden',
               },
             ],
           },
