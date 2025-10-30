@@ -1802,7 +1802,6 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error readonly prop assignment
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         false;
-
       await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
         `'runscript' response action not supported for [sentinel_one]. Feature disabled`
       );
@@ -1838,9 +1837,7 @@ describe('SentinelOneActionsClient class', () => {
         if (options.params.subAction === SUB_ACTION.GET_REMOTE_SCRIPTS) {
           const scriptsApiResponse = sentinelOneMock.createSentinelOneGetRemoteScriptsApiResponse();
 
-          // @ts-expect-error TS2540: Cannot assign to read-only property.
           scriptsApiResponse.data[0].osTypes = ['windows'];
-          // @ts-expect-error TS2540: Cannot assign to read-only property.
           scriptsApiResponse.data[0].scriptName = 'terminate something';
 
           return responseActionsClientMock.createConnectorActionExecuteResponse({
@@ -1950,24 +1947,10 @@ describe('SentinelOneActionsClient class', () => {
     let killProcessActionRequest: KillOrSuspendProcessRequestBody;
 
     beforeEach(() => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
-        true;
-
       killProcessActionRequest = responseActionsClientMock.createKillProcessOptions({
         // @ts-expect-error TS2322 due to type being overloaded to handle kill/suspend process and specific option for S1
         parameters: { process_name: 'foo' },
       });
-    });
-
-    it('should throw an error if feature flag is disabled', async () => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
-        false;
-
-      await expect(s1ActionsClient.killProcess(killProcessActionRequest)).rejects.toThrow(
-        `kill-process not supported for sentinel_one agent type. Feature disabled`
-      );
     });
 
     it('should throw an error if `process_name` is not defined (manual mode)', async () => {
@@ -2325,7 +2308,6 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error update readonly property
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         false;
-
       await expect(s1ActionsClient.getCustomScripts()).rejects.toThrow(
         "'runscript' response action not supported for [sentinel_one]"
       );
@@ -2387,10 +2369,6 @@ describe('SentinelOneActionsClient class', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assignment to readonly prop
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       getActionDetailsByIdMock.mockResolvedValue({});
 
       (

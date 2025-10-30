@@ -37,11 +37,6 @@ export const i18nStrings = {
         'This functionality is experimental and not supported. It may change or be removed at any time.',
     }),
   },
-  launchpad: {
-    title: i18n.translate('securitySolutionPackages.navLinks.launchpad', {
-      defaultMessage: 'Security launchpad',
-    }),
-  },
   assets: {
     title: i18n.translate('securitySolutionPackages.navLinks.assets', {
       defaultMessage: 'Assets',
@@ -195,9 +190,6 @@ export const i18nStrings = {
     access: {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.access', {
         defaultMessage: 'Access',
-      }),
-      usersAndRoles: i18n.translate('securitySolutionPackages.navLinks.mngt.usersAndRoles', {
-        defaultMessage: 'Manage organization members',
       }),
     },
     alertsAndInsights: {

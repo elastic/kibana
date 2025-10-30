@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { css } from '@emotion/react';
-import { useMetricsGridState } from '../../../hooks';
+import { useMetricsExperienceState } from '../../../context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
+import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   fields: MetricField[];
   indexPattern: string;
   hideDimensionsSelector?: boolean;
+  hideRightSideActions?: boolean;
 }
 export const useToolbarActions = ({
   fields,
@@ -30,19 +32,27 @@ export const useToolbarActions = ({
   indexPattern,
   renderToggleActions,
   hideDimensionsSelector = false,
+  hideRightSideActions = false,
 }: UseToolbarActionsProps) => {
   const {
     dimensions,
     valueFilters,
     onDimensionsChange,
     onValuesChange,
-    onClearValues,
-    onClearAllDimensions,
     isFullscreen,
     onToggleFullscreen,
-  } = useMetricsGridState();
+  } = useMetricsExperienceState();
 
   const { euiTheme } = useEuiTheme();
+
+  const onClearAllDimensions = useCallback(() => {
+    onDimensionsChange([]);
+    onValuesChange([]);
+  }, [onDimensionsChange, onValuesChange]);
+
+  const onClearValues = useCallback(() => {
+    onValuesChange([]);
+  }, [onValuesChange]);
 
   const leftSideActions = useMemo(
     () => [
@@ -53,6 +63,7 @@ export const useToolbarActions = ({
           onChange={onDimensionsChange}
           selectedDimensions={dimensions}
           onClear={onClearAllDimensions}
+          singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
         />
       ),
       dimensions.length > 0 ? (
@@ -84,6 +95,10 @@ export const useToolbarActions = ({
   );
 
   const rightSideActions: IconButtonGroupProps['buttons'] = useMemo(() => {
+    if (hideRightSideActions) {
+      return [];
+    }
+
     const fullscreenButtonLabel = isFullscreen
       ? i18n.translate('metricsExperience.fullScreenExitButton', {
           defaultMessage: 'Exit fullscreen (esc)',
@@ -109,7 +124,7 @@ export const useToolbarActions = ({
         `,
       },
     ];
-  }, [isFullscreen, onToggleFullscreen, euiTheme.border.thin]);
+  }, [isFullscreen, hideRightSideActions, onToggleFullscreen, euiTheme.border.thin]);
 
   return {
     leftSideActions,

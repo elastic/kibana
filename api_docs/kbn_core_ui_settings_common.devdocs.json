@@ -819,7 +819,7 @@
         "label": "UiSettingsSolutions",
         "description": [],
         "signature": [
-          "(\"security\" | \"chat\" | \"oblt\" | \"es\" | \"classic\")[]"
+          "(\"security\" | \"workplace_ai\" | \"oblt\" | \"es\" | \"classic\")[]"
         ],
         "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,

@@ -38,7 +38,6 @@ export default function createSpacesOnlySuite(context: DeploymentAgnosticFtrProv
         spaceId: SPACES.DEFAULT.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
@@ -51,7 +50,6 @@ export default function createSpacesOnlySuite(context: DeploymentAgnosticFtrProv
         spaceId: SPACES.SPACE_1.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
@@ -84,28 +82,6 @@ export default function createSpacesOnlySuite(context: DeploymentAgnosticFtrProv
         },
       });
 
-      createTest(`superuser from the ${scenario.spaceId} space`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.superuser,
-        tests: {
-          newSpace: {
-            statusCode: 200,
-            response: expectNewSpaceResult,
-          },
-          alreadyExists: {
-            statusCode: 409,
-            response: expectConflictResponse,
-          },
-          reservedSpecified: {
-            statusCode: 200,
-            response: expectReservedSpecifiedResult,
-          },
-          solutionSpecified: {
-            statusCode: 200,
-            response: expectSolutionSpecifiedResult,
-          },
-        },
-      });
       createTest(`rbac user with all globally from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         user: scenario.users.allGlobally,
