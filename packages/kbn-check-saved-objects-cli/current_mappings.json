@@ -1100,32 +1100,10 @@
         "type": "nested"
       },
       "metadata": {
-        "properties": {
-          "created_at": {
-            "index": false,
-            "type": "date"
-          },
-          "sample_count": {
-            "index": false,
-            "type": "integer"
-          },
-          "version": {
-            "index": false,
-            "type": "keyword"
-          }
-        }
+        "properties": {}
       },
       "result": {
-        "properties": {
-          "field_mapping": {
-            "index": false,
-            "type": "flattened"
-          },
-          "ingest_pipeline": {
-            "index": false,
-            "type": "text"
-          }
-        }
+        "properties": {}
       }
     }
   },
@@ -2687,25 +2665,7 @@
         "type": "keyword"
       },
       "metadata": {
-        "properties": {
-          "created_at": {
-            "index": false,
-            "type": "date"
-          },
-          "description": {
-            "index": false,
-            "type": "text"
-          },
-          "title": {
-            "index": false,
-            "type": "keyword"
-          },
-          "version": {
-            "index": false,
-            "type": "keyword"
-          }
-        },
-        "type": "object"
+        "properties": {}
       },
       "status": {
         "type": "keyword"
