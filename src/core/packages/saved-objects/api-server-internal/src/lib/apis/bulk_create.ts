@@ -11,6 +11,7 @@ import type { Payload } from '@hapi/boom';
 import type { AuthorizeCreateObject, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
+  errorContent,
   type SavedObject,
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
@@ -33,7 +34,6 @@ import {
   getExpectedVersionProperties,
   normalizeNamespace,
   setManaged,
-  errorContent,
 } from './utils';
 import { getSavedObjectNamespaces } from './utils';
 import type { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
@@ -223,12 +223,11 @@ export const performBulkCreate = async <T>(
     ? Array.from(authorizationResult.inaccessibleObjects)
     : [];
 
-  const expectredAuthorizedResults =
-    await securityExtension?.filterInaccessibleObjectsForBulkAction(
-      expectedResults,
-      inaccessibleObjects,
-      'bulk_create'
-    );
+  const expectedAuthorizedResults = await securityExtension?.filterInaccessibleObjectsForBulkAction(
+    expectedResults,
+    inaccessibleObjects,
+    'bulk_create'
+  );
 
   let bulkRequestIndexCounter = 0;
   const bulkCreateParams: object[] = [];
@@ -237,7 +236,7 @@ export const performBulkCreate = async <T>(
     { esRequestIndex: number; requestedId: string; rawMigratedDoc: SavedObjectsRawDoc }
   >;
   const expectedBulkResults = await Promise.all(
-    (expectredAuthorizedResults ?? expectedResults).map<Promise<ExpectedBulkResult>>(
+    (expectedAuthorizedResults ?? expectedResults).map<Promise<ExpectedBulkResult>>(
       async (expectedBulkGetResult) => {
         if (isLeft(expectedBulkGetResult)) {
           return expectedBulkGetResult;

@@ -15,7 +15,11 @@ import type {
   SavedObjectsRawDocSource,
   AuthorizeBulkGetObject,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers, type SavedObject } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  errorContent,
+  type SavedObject,
+} from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   isLeft,
@@ -28,7 +32,7 @@ import {
   type SavedObjectsGetOptions,
 } from '@kbn/core-saved-objects-api-server';
 import { includedFields } from '../utils';
-import { errorContent, getSavedObjectFromSource, rawDocExistsInNamespaces } from './utils';
+import { getSavedObjectFromSource, rawDocExistsInNamespaces } from './utils';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformBulkGetParams<T = unknown> {

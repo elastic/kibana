@@ -49,6 +49,9 @@ import type {
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessModeOptions,
   SavedObjectsChangeOwnershipOptions,
+  SavedObjectsRawDocSource,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
 } from '@kbn/core-saved-objects-api-server';
 
 /**
@@ -105,6 +108,13 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>> {
     return await this._repository.find(options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.search} */
+  async search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
+    options: SavedObjectsSearchOptions
+  ): Promise<SavedObjectsSearchResponse<T, A>> {
+    return await this._repository.search(options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.bulkGet} */

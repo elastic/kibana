@@ -73,7 +73,6 @@ export type {
 } from './src/saved_objects_type';
 export type {
   ISavedObjectsSerializer,
-  SavedObjectsRawDocSource,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
@@ -126,6 +125,7 @@ export {
 } from './src/extensions/extensions';
 export {
   SavedObjectsErrorHelpers,
+  errorContent,
   type DecoratedError,
   type BulkResolveError,
 } from './src/saved_objects_error_helpers';
@@ -161,4 +161,5 @@ export type {
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-api-server';

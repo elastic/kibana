@@ -78,13 +78,6 @@ export interface InternalSavedObjectsBulkResolveResponse<T = unknown> {
   resolved_objects: Array<SavedObjectsResolveResponse<T> | BulkResolveError>;
 }
 
-/** Type guard used in the repository. */
-export function isBulkResolveError<T>(
-  result: SavedObjectsResolveResponse<T> | BulkResolveError
-): result is BulkResolveError {
-  return !!(result as BulkResolveError).error;
-}
-
 type AliasInfo = Pick<LegacyUrlAlias, 'targetId' | 'purpose'>;
 
 export async function internalBulkResolve<T>(

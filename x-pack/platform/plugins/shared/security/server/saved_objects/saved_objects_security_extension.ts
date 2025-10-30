@@ -8,6 +8,7 @@
 import type { EcsEvent } from '@elastic/ecs';
 import type { Payload } from '@hapi/boom';
 
+import type { SavedObjectsClient } from '@kbn/core/server';
 import {
   type Either,
   isLeft,
@@ -17,12 +18,9 @@ import {
   type SavedObjectsFindResult,
   type SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
-import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/internals/internal_bulk_resolve';
-import { errorContent } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { errorContent, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
@@ -703,7 +701,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         inaccessibleObjects.size > 0
           ? ', access control restrictions for ' + inaccessibleObjectsString
           : ''
-      }`; // could potnentially include the list of objects that were inaccessible
+      }`;
       // if we are bypassing all auditing, or bypassing failure auditing, do not log the event
       const error = this.errors.decorateForbiddenError(new Error(msg));
       if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
@@ -1485,7 +1483,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     for (const result of objects) {
       let auditableObject: SavedObjectAudit | undefined;
-      if (isBulkResolveError(result)) {
+      if (SavedObjectsErrorHelpers.isBulkResolveError(result)) {
         const { type, id, error } = result;
         if (!SavedObjectsErrorHelpers.isBadRequestError(error)) {
           // Only "not found" errors should show up as audit events (not "unsupported type" errors)
@@ -1527,7 +1525,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
 
     return objects.map((result) => {
-      if (isBulkResolveError(result)) {
+      if (SavedObjectsErrorHelpers.isBulkResolveError(result)) {
         return result;
       }
 

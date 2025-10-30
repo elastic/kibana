@@ -17,7 +17,11 @@ import type {
   SavedObjectSanitizedDoc,
   WithAuditName,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers, type SavedObject } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  errorContent,
+  type SavedObject,
+} from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import {
@@ -32,7 +36,6 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
-  errorContent,
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
