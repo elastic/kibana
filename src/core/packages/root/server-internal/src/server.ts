@@ -210,8 +210,12 @@ export class Server {
       const contextServicePreboot = this.context.preboot({
         pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
       });
+      const docLinksPreboot = this.docLinks.setup();
 
-      const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
+      const httpPreboot = await this.http.preboot({
+        context: contextServicePreboot,
+        docLinks: docLinksPreboot,
+      });
 
       // setup i18n prior to any other service, to have translations ready
       const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });

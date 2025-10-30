@@ -21,3 +21,6 @@ export interface DocLinksServiceSetup {
 
 /** @public */
 export type DocLinksServiceStart = DocLinksServiceSetup;
+
+/** @public */
+export type DocLinksServicePreboot = DocLinksServiceSetup;
