@@ -9,19 +9,10 @@
 
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import { z } from '@kbn/zod';
-import * as generateConnectorSnippetModule from '../../snippets/generate_connector_snippet';
 import { getFakeAutocompleteContextParams } from '../context/build_autocomplete_context.test';
 import { getCompletionItemProvider } from '../get_completion_item_provider';
-import * as getConnectorWithSchemaModule from '../suggestions/connector_with/get_connector_with_schema';
 import * as getExistingParametersModule from '../suggestions/connector_with/get_existing_parameters_in_with_block';
 import * as getWithBlockSuggestionsModule from '../suggestions/connector_with/get_with_block_suggestions';
-
-// Mock the modules
-jest.mock('../suggestions/connector_with/get_with_block_suggestions');
-jest.mock('../suggestions/connector_with/get_connector_with_schema');
-jest.mock('../suggestions/connector_with/get_existing_parameters_in_with_block');
-jest.mock('../../snippets/generate_connector_snippet');
 
 async function getSuggestions(
   yamlContent: string,
@@ -51,68 +42,6 @@ async function getSuggestions(
 }
 
 describe('getCompletionItemProvider - With block suggestions', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    // Reset all mocks to their default implementations
-    jest.mocked(getWithBlockSuggestionsModule.getWithBlockSuggestions).mockReturnValue([]);
-    jest.mocked(getConnectorWithSchemaModule.getConnectorParamsSchema).mockReturnValue(null);
-    jest
-      .mocked(getExistingParametersModule.getExistingParametersInWithBlock)
-      .mockReturnValue(new Set());
-    jest.mocked(generateConnectorSnippetModule.getEnhancedTypeInfo).mockImplementation((schema) => {
-      // Basic type info implementation
-      if (schema instanceof z.ZodString) {
-        return {
-          type: 'string',
-          isRequired: false,
-          isOptional: true,
-          description: undefined,
-          example: undefined,
-        };
-      } else if (schema instanceof z.ZodNumber) {
-        return {
-          type: 'number',
-          isRequired: false,
-          isOptional: true,
-          description: undefined,
-          example: undefined,
-        };
-      } else if (schema instanceof z.ZodBoolean) {
-        return {
-          type: 'boolean',
-          isRequired: false,
-          isOptional: true,
-          description: undefined,
-          example: undefined,
-        };
-      } else if (schema instanceof z.ZodObject) {
-        return {
-          type: 'object',
-          isRequired: false,
-          isOptional: true,
-          description: undefined,
-          example: undefined,
-        };
-      } else if (schema instanceof z.ZodArray) {
-        return {
-          type: 'string[]',
-          isRequired: false,
-          isOptional: true,
-          description: undefined,
-          example: undefined,
-        };
-      }
-      return {
-        type: 'unknown',
-        isRequired: false,
-        isOptional: true,
-        description: undefined,
-        example: undefined,
-      };
-    });
-  });
-
   describe('Basic with block functionality', () => {
     it('should handle with blocks gracefully without dynamic connectors', async () => {
       const yamlContent = `
@@ -191,47 +120,6 @@ steps:
       },
     };
 
-    beforeEach(() => {
-      // Mock Slack connector schema
-      jest
-        .mocked(getConnectorWithSchemaModule.getConnectorParamsSchema)
-        .mockImplementation((connectorType, _dynamicConnectorTypes) => {
-          if (connectorType === 'slack') {
-            return {
-              channel: z.string().describe('The Slack channel to post to'),
-              message: z.string().describe('The message to send'),
-              thread_ts: z.string().optional().describe('Thread timestamp for replies'),
-              icon_url: z.string().optional().describe('Icon URL for the message'),
-              username: z.string().optional().describe('Username to display'),
-            };
-          }
-          return null;
-        });
-
-      // Mock enhanced type info for better documentation
-      jest
-        .mocked(generateConnectorSnippetModule.getEnhancedTypeInfo)
-        .mockImplementation((schema) => {
-          if (schema instanceof z.ZodString) {
-            const description = schema.description;
-            return {
-              type: 'string',
-              isRequired: !schema.isOptional(),
-              isOptional: schema.isOptional(),
-              description,
-              example: description?.includes('channel') ? '#general' : undefined,
-            };
-          }
-          return {
-            type: 'unknown',
-            isRequired: false,
-            isOptional: true,
-            description: undefined,
-            example: undefined,
-          };
-        });
-    });
-
     it('should suggest Slack message parameters in a notification workflow', async () => {
       const yamlContent = `
 version: "1"
@@ -245,67 +133,6 @@ steps:
     with:
       |<-
 `.trim();
-
-      // Mock getWithBlockSuggestions to return Slack parameter suggestions
-      // jest.mocked(getWithBlockSuggestionsModule.getWithBlockSuggestions).mockReturnValue([
-      //   {
-      //     label: 'channel',
-      //     kind: monaco.languages.CompletionItemKind.Variable,
-      //     insertText: 'channel: "${1:#general}"',
-      //     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-      //     range: {
-      //       startLineNumber: 10,
-      //       endLineNumber: 10,
-      //       startColumn: 1,
-      //       endColumn: 100,
-      //     },
-      //     sortText: '!channel',
-      //     detail: 'string (required)',
-      //     documentation: {
-      //       value:
-      //         '**slack Parameter: channel**\n\n**Type:** `string`\n**Required:** Yes\n\n**Description:** The Slack channel to post to\n\n**Example:** `#general`\n\n*This parameter is specific to the slack connector.*',
-      //     },
-      //     preselect: true,
-      //   },
-      //   {
-      //     label: 'message',
-      //     kind: monaco.languages.CompletionItemKind.Variable,
-      //     insertText: 'message: "${1:}"',
-      //     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-      //     range: {
-      //       startLineNumber: 10,
-      //       endLineNumber: 10,
-      //       startColumn: 1,
-      //       endColumn: 100,
-      //     },
-      //     sortText: '!message',
-      //     detail: 'string (required)',
-      //     documentation: {
-      //       value:
-      //         '**slack Parameter: message**\n\n**Type:** `string`\n**Required:** Yes\n\n**Description:** The message to send\n\n*This parameter is specific to the slack connector.*',
-      //     },
-      //     preselect: true,
-      //   },
-      //   {
-      //     label: 'thread_ts',
-      //     kind: monaco.languages.CompletionItemKind.Variable,
-      //     insertText: 'thread_ts: "${1:}"',
-      //     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-      //     range: {
-      //       startLineNumber: 10,
-      //       endLineNumber: 10,
-      //       startColumn: 1,
-      //       endColumn: 100,
-      //     },
-      //     sortText: '!thread_ts',
-      //     detail: 'string (optional)',
-      //     documentation: {
-      //       value:
-      //         '**slack Parameter: thread_ts**\n\n**Type:** `string`\n**Required:** No\n\n**Description:** Thread timestamp for replies\n\n*This parameter is specific to the slack connector.*',
-      //     },
-      //     preselect: true,
-      //   },
-      // ]);
 
       const suggestions = await getSuggestions(yamlContent, slackConnectorType);
 
@@ -580,54 +407,54 @@ steps:
       },
     };
 
-    beforeEach(() => {
-      // Mock Email connector schema
-      jest
-        .mocked(getConnectorWithSchemaModule.getConnectorParamsSchema)
-        .mockImplementation((connectorType, _dynamicConnectorTypes) => {
-          if (connectorType === 'email') {
-            return {
-              to: z.array(z.string()).describe('Recipients email addresses'),
-              cc: z.array(z.string()).optional().describe('CC recipients'),
-              bcc: z.array(z.string()).optional().describe('BCC recipients'),
-              subject: z.string().describe('Email subject'),
-              message: z.string().describe('Email message body'),
-              messageHTML: z.string().optional().describe('HTML version of the message'),
-            };
-          }
-          return null;
-        });
+    // beforeEach(() => {
+    //   // Mock Email connector schema
+    //   jest
+    //     .mocked(getConnectorWithSchemaModule.getConnectorParamsSchema)
+    //     .mockImplementation((connectorType, _dynamicConnectorTypes) => {
+    //       if (connectorType === 'email') {
+    //         return {
+    //           to: z.array(z.string()).describe('Recipients email addresses'),
+    //           cc: z.array(z.string()).optional().describe('CC recipients'),
+    //           bcc: z.array(z.string()).optional().describe('BCC recipients'),
+    //           subject: z.string().describe('Email subject'),
+    //           message: z.string().describe('Email message body'),
+    //           messageHTML: z.string().optional().describe('HTML version of the message'),
+    //         };
+    //       }
+    //       return null;
+    //     });
 
-      // Mock enhanced type info
-      jest
-        .mocked(generateConnectorSnippetModule.getEnhancedTypeInfo)
-        .mockImplementation((schema) => {
-          if (schema instanceof z.ZodArray) {
-            return {
-              type: 'string[]',
-              isRequired: !schema.isOptional(),
-              isOptional: schema.isOptional(),
-              description: schema.description,
-              example: undefined,
-            };
-          } else if (schema instanceof z.ZodString) {
-            return {
-              type: 'string',
-              isRequired: !schema.isOptional(),
-              isOptional: schema.isOptional(),
-              description: schema.description,
-              example: schema.description?.includes('subject') ? 'Alert: System Error' : undefined,
-            };
-          }
-          return {
-            type: 'unknown',
-            isRequired: false,
-            isOptional: true,
-            description: undefined,
-            example: undefined,
-          };
-        });
-    });
+    //   // Mock enhanced type info
+    //   jest
+    //     .mocked(generateConnectorSnippetModule.getEnhancedTypeInfo)
+    //     .mockImplementation((schema) => {
+    //       if (schema instanceof z.ZodArray) {
+    //         return {
+    //           type: 'string[]',
+    //           isRequired: !schema.isOptional(),
+    //           isOptional: schema.isOptional(),
+    //           description: schema.description,
+    //           example: undefined,
+    //         };
+    //       } else if (schema instanceof z.ZodString) {
+    //         return {
+    //           type: 'string',
+    //           isRequired: !schema.isOptional(),
+    //           isOptional: schema.isOptional(),
+    //           description: schema.description,
+    //           example: schema.description?.includes('subject') ? 'Alert: System Error' : undefined,
+    //         };
+    //       }
+    //       return {
+    //         type: 'unknown',
+    //         isRequired: false,
+    //         isOptional: true,
+    //         description: undefined,
+    //         example: undefined,
+    //       };
+    //     });
+    // });
 
     it('should suggest email parameters for incident notification', async () => {
       const yamlContent = `
