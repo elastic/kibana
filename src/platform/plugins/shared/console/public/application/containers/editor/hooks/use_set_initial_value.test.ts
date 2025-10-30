@@ -99,7 +99,11 @@ describe('useSetInitialValue', () => {
       );
     });
 
-    expect(fetch).toHaveBeenCalledWith(new URL('https://www.elastic.co/some-data'));
+    // Verify fetch was called with the correct URL
+    expect(fetch).toHaveBeenCalled();
+    const fetchCall = (fetch as jest.Mock).mock.calls[0];
+    expect(fetchCall[0].href).toBe('https://www.elastic.co/docs/some-data');
+
     // The remote data should be appended to the initial value in the editor
     expect(setValueMock).toHaveBeenCalledWith('initial value\n\nremote data');
   });

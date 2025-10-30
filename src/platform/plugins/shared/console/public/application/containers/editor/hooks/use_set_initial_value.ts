@@ -15,6 +15,9 @@ import { i18n } from '@kbn/i18n';
 import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
 
+const httpsProtocol = 'https:';
+const elasticHostname = 'www.elastic.co';
+
 interface QueryParams {
   load_from: string;
 }
@@ -60,7 +63,12 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         // Parse the URL to avoid issues with spaces and other special characters.
         const parsedURL = new URL(url);
         if (parsedURL.origin === 'https://www.elastic.co') {
-          const resp = await fetch(parsedURL);
+          // Construct a safe URL from validated components to prevent request forgery
+          const safeURL = new URL(parsedURL.href);
+          safeURL.protocol = httpsProtocol;
+          safeURL.hostname = elasticHostname;
+
+          const resp = await fetch(safeURL);
           const data = await resp.text();
           setValue(`${localStorageValue ?? ''}\n\n${data}`);
         } else {
