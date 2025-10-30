@@ -19,3 +19,23 @@ export interface CPSConfigType {
 export interface CPSServerStart {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CPSServerStop {}
+import type { CPSManager } from './services/cps_manager';
+
+export interface Project {
+  _id: string;
+  _alias: string;
+  _type: string;
+  _csp: string;
+  _region: string;
+  [key: string]: string;
+}
+
+export interface ProjectTagsResponse {
+  origin: Record<string, Project>;
+  linked_projects: Record<string, Project>;
+}
+
+
+export interface CPSPluginStart {
+  cpsManager?: CPSManager;
+}

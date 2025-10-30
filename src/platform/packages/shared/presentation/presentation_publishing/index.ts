@@ -49,12 +49,14 @@ export {
   apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
   apiPublishesWritableUnifiedSearch,
+  apiPublishesProjectRouting,
   useSearchApi,
   type PublishesFilters,
   type PublishesTimeRange,
   type PublishesTimeslice,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
+  type PublishesProjectRouting,
 } from './interfaces/fetch/publishes_unified_search';
 export {
   apiHasAppContext,

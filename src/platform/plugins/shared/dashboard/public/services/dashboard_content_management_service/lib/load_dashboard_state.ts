@@ -96,6 +96,7 @@ export const loadDashboardState = async ({
     timeRange,
     title,
     tags,
+    projectRouting,
   } = attributes;
 
   return {
@@ -109,6 +110,7 @@ export const loadDashboardState = async ({
       description,
       timeRange,
       filters,
+      projectRouting,
       panels,
       query,
       title,

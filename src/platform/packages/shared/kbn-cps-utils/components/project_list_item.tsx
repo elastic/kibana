@@ -21,8 +21,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Project } from './project_picker';
-import { strings } from './project_picker';
+import type { Project } from './project_picker_component';
+import { strings } from './strings';
 
 interface ProjectListItemProps {
   project: Project;
@@ -91,13 +91,13 @@ export const ProjectListItem = ({ project, index, originProjectId }: ProjectList
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
-                {`${getCSPLabel(project._csp)}, ${project._region}`}
+                {`${getCSPLabel(project._csp || project._id)}, ${project._region}`}
               </EuiText>
             </EuiFlexItem>
             {tags.length ? (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  title={i18n.translate('unifiedSearch.projectPicker.tagTooltipTitle', {
+                  title={i18n.translate('cpsUtils.projectPicker.tagTooltipTitle', {
                     defaultMessage: 'Custom tags',
                   })}
                   content={tags.map((tag) => (

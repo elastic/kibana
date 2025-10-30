@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { projectRoutingSchema } from '@kbn/es-query';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from '../v2';
 
 // sections only include y + i for grid data
@@ -33,6 +34,7 @@ export const sectionSchema = schema.object({
 export const dashboardAttributesSchema = dashboardAttributesSchemaV2.extends(
   {
     sections: schema.maybe(schema.arrayOf(sectionSchema)),
+    projectRouting: schema.maybe(projectRoutingSchema),
   },
   { unknowns: 'ignore' }
 );

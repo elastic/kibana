@@ -7,10 +7,20 @@
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type { AggregateQuery, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
+import type {
+  AggregateQuery,
+  EsQueryConfig,
+  Filter,
+  ProjectRouting,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import { isOfQueryType } from '@kbn/es-query';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import {
+  apiPublishesProjectRouting,
+  apiPublishesUnifiedSearch,
+} from '@kbn/presentation-publishing';
 import type {
   DynamicActionsSerializedState,
   EmbeddableDynamicActionsManager,
@@ -50,6 +60,7 @@ function getViewUnderlyingDataArgs({
   filters,
   timeRange,
   esQueryConfig,
+  projectRouting,
 }: {
   activeDatasource: Datasource;
   activeDatasourceState: unknown;
@@ -68,6 +79,7 @@ function getViewUnderlyingDataArgs({
   filters: Filter[];
   timeRange: TimeRange;
   esQueryConfig: EsQueryConfig;
+  projectRouting?: ProjectRouting;
 }) {
   const { error, meta } = getLayerMetaInfo(
     activeDatasource,
@@ -157,12 +169,17 @@ function loadViewUnderlyingDataArgs(
     ? parentApi
     : { filters$: undefined, query$: undefined, timeRange$: undefined };
 
+  const { projectRouting$ } = apiPublishesProjectRouting(parentApi)
+    ? parentApi
+    : { projectRouting$: undefined };
+
   const mergedSearchContext = getMergedSearchContext(
     state,
     {
       filters: filters$?.getValue(),
       query: query$?.getValue(),
       timeRange: timeRange$?.getValue(),
+      projectRouting: projectRouting$?.getValue(),
     },
     searchContextApi.timeRange$,
     parentApi,
@@ -192,6 +209,7 @@ function loadViewUnderlyingDataArgs(
     query: mergedSearchContext.query,
     filters: mergedSearchContext.filters || [],
     timeRange: mergedSearchContext.timeRange,
+    projectRouting: mergedSearchContext.projectRouting,
     esQueryConfig: getEsQueryConfig(uiSettings),
     dataViews: indexPatterns,
   });

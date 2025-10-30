@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-service-server';
 import type { QueryState } from '../query_state';
 import type { TimeRange } from '../../../common/types';
@@ -28,4 +28,5 @@ export interface GlobalQueryStateFromUrl {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
   filters?: Filter[];
+  projectRouting?: ProjectRouting;
 }
