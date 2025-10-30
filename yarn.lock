@@ -8437,7 +8437,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-workplace-ai@link:x-pack/solutions/workplace_ai/plugins/serverless_workplace_ai":
+"@kbn/serverless-workplace-ai@link:x-pack/solutions/workplaceai/plugins/serverless_workplace_ai":
   version "0.0.0"
   uid ""
 
@@ -8897,7 +8897,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-suites-xpack-workplace-ai@link:x-pack/solutions/workplace_ai/test":
+"@kbn/test-suites-xpack-workplace-ai@link:x-pack/solutions/workplaceai/test":
   version "0.0.0"
   uid ""
 
@@ -9261,7 +9261,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/workplace-ai-app@link:x-pack/solutions/workplace_ai/plugins/workplace_ai_app":
+"@kbn/workplace-ai-app@link:x-pack/solutions/workplaceai/plugins/workplace_ai_app":
   version "0.0.0"
   uid ""
 
