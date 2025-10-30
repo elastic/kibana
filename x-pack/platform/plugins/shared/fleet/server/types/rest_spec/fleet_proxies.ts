@@ -50,7 +50,7 @@ export const PutFleetProxyRequestSchema = {
   body: schema.object({
     name: schema.maybe(schema.string()),
     url: schema.maybe(schema.string({ validate: validateUrl })),
-    proxy_headers: schema.nullable(ProxyHeadersSchema),
+    proxy_headers: schema.maybe(ProxyHeadersSchema),
     certificate_authorities: schema.nullable(schema.string()),
     certificate: schema.nullable(schema.string()),
     certificate_key: schema.nullable(schema.string()),
