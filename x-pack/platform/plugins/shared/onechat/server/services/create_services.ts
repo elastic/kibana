@@ -70,6 +70,8 @@ export class ServiceManager {
       spaces,
       elasticsearch,
       actions,
+      uiSettings,
+      savedObjects,
     });
 
     const agents = this.services.agents.start({

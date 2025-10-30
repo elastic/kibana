@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchServiceStart,
+  Logger,
+  UiSettingsServiceStart,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
@@ -35,6 +40,8 @@ export interface ToolsServiceStartDeps {
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export class ToolsService {
@@ -62,7 +69,14 @@ export class ToolsService {
     };
   }
 
-  start({ getRunner, elasticsearch, spaces, actions }: ToolsServiceStartDeps): ToolsServiceStart {
+  start({
+    getRunner,
+    elasticsearch,
+    spaces,
+    actions,
+    uiSettings,
+    savedObjects,
+  }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement } = this.setupDeps!;
 
     const toolTypes = getToolTypeDefinitions({ workflowsManagement });
@@ -70,6 +84,8 @@ export class ToolsService {
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
+      uiSettings,
+      savedObjects,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,
