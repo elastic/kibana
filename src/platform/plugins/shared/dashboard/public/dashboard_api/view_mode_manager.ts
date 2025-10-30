@@ -10,17 +10,40 @@
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
+import type { DashboardUser } from './types';
+import { getAccessControlClient } from '../services/access_control_service';
 import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export function initializeViewModeManager(
+  user?: DashboardUser,
   incomingEmbeddables?: EmbeddablePackageState[],
   savedObjectResult?: LoadDashboardReturn
 ) {
   const dashboardBackupService = getDashboardBackupService();
+  const accessControlClient = getAccessControlClient();
+
+  const isDashboardInEditAccessMode = accessControlClient.isInEditAccessMode(
+    savedObjectResult?.accessControl
+  );
+
+  const canUserManageAccessControl =
+    user?.hasGlobalAccessControlPrivilege ||
+    accessControlClient.checkUserAccessControl({
+      accessControl: savedObjectResult?.accessControl,
+      createdBy: savedObjectResult?.createdBy,
+      userId: user?.uid,
+    });
+
+  const canUserEditDashboard = isDashboardInEditAccessMode || canUserManageAccessControl;
+
   function getInitialViewMode() {
-    if (savedObjectResult?.managed || !getDashboardCapabilities().showWriteControls) {
+    if (
+      savedObjectResult?.managed ||
+      !getDashboardCapabilities().showWriteControls ||
+      !canUserEditDashboard
+    ) {
       return 'view';
     }
 

@@ -83,7 +83,8 @@ export const loadDashboardState = async ({
     };
   }
 
-  const { references, attributes, managed, version } = rawDashboardContent;
+  const { references, attributes, managed, version, accessControl, createdBy } =
+    rawDashboardContent;
 
   const {
     refreshInterval,
@@ -117,5 +118,7 @@ export const loadDashboardState = async ({
     },
     dashboardFound: true,
     dashboardId: savedObjectId,
+    accessControl,
+    createdBy,
   };
 };

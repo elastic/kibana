@@ -49,30 +49,30 @@ export const performDelete = async <T>(
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
 
   if (securityExtension) {
-    let name;
+    const nameAttribute = registry.getNameAttribute(type);
 
-    if (securityExtension.includeSavedObjectNames()) {
-      const nameAttribute = registry.getNameAttribute(type);
+    const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
+      {
+        index: commonHelper.getIndexForType(type),
+        id: serializer.generateRawId(namespace, type, id),
+        _source_includes: [
+          ...SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
+          'accessControl',
+        ],
+      },
+      { ignore: [404], meta: true }
+    );
 
-      const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
-        {
-          index: commonHelper.getIndexForType(type),
-          id: serializer.generateRawId(namespace, type, id),
-          _source_includes: SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
-        },
-        { ignore: [404], meta: true }
-      );
-
-      const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
-
-      name = SavedObjectsUtils.getName(nameAttribute, saveObject);
-    }
-
+    const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
+    const name = securityExtension.includeSavedObjectNames()
+      ? SavedObjectsUtils.getName(nameAttribute, saveObject)
+      : undefined;
+    const accessControl = savedObjectResponse.body._source?.accessControl;
     // we don't need to pass existing namespaces in because we're only concerned with authorizing
     // the current space. This saves us from performing the preflight check if we're unauthorized
     await securityExtension?.authorizeDelete({
       namespace,
-      object: { type, id, name },
+      object: { type, id, name, accessControl },
     });
   }
 
