@@ -75,7 +75,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
     const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
-    const blurPanel = focusedPanelId !== undefined && focusedPanelId !== id;
+    const blurPanel =
+      focusedPanelId !== undefined &&
+      focusedPanelId !== id &&
+      !dashboardInternalApi.arePanelsRelated(id, focusedPanelId);
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,

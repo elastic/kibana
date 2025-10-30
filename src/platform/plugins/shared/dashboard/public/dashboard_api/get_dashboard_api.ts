@@ -124,6 +124,20 @@ export function getDashboardApi({
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
 
+  const getRelatedPanels = (uuid: string) => {
+    const relatedPanelUUIDs = [];
+
+    const esqlRelatedPanelUUIDs =
+      esqlVariablesManager.internalApi.esqlRelatedPanels$.value.get(uuid);
+    if (esqlRelatedPanelUUIDs) {
+      for (const relatedUUID of esqlRelatedPanelUUIDs) {
+        relatedPanelUUIDs.push(relatedUUID);
+      }
+    }
+
+    return relatedPanelUUIDs;
+  };
+
   const dashboardApi = {
     ...viewModeManager.api,
     ...dataLoadingManager.api,
@@ -215,6 +229,7 @@ export function getDashboardApi({
     ...unifiedSearchManager.internalApi,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
+    arePanelsRelated: (uuidA: string, uuidB: string) => getRelatedPanels(uuidA).includes(uuidB),
     // serializeControls: () => controlGroupManager.internalApi.serializeControlGroup(),
     // untilControlsInitialized: controlGroupManager.internalApi.untilControlsInitialized,
   };
