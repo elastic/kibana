@@ -10,6 +10,8 @@
 /** @jsx jsx */
 import { jsx } from '@emotion/react';
 import { useState } from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -20,9 +22,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiTitle,
-  useEuiTheme,
-  useEuiOverflowScroll,
 } from '@elastic/eui';
+import type { Project } from '@kbn/cps/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -30,33 +31,58 @@ import type { ProjectRouting } from '@kbn/es-query';
 import { ProjectListItem } from './project_list_item';
 import { strings } from './strings';
 
-export interface Project {
-  _id: string;
-  _alias: string;
-  _type: string;
-  _csp: string;
-  _region: string;
-  [key: string]: string;
-}
-
 export interface ProjectPickerComponentProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  originProject: Project | null;
+  originProject: Project;
   linkedProjects: Project[];
 }
 
-export const ProjectPickerComponent = ({ projectRouting, onProjectRoutingChange, originProject, linkedProjects }: ProjectPickerComponentProps) => {
+const projectPickerStyles = {
+  popover: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: euiTheme.base * 35,
+    }),
+  button: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend,
+      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+    }),
+  container: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      maxHeight: euiTheme.base * 25,
+      overflow: 'hidden',
+    }),
+  buttonGroup: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: euiTheme.size.s,
+    }),
+  projectCountHeader: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+    }),
+  projectCountTitle: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.s,
+    }),
+  listContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    }),
+};
+
+export const ProjectPickerComponent = ({
+  projectRouting,
+  onProjectRoutingChange,
+  originProject,
+  linkedProjects,
+}: ProjectPickerComponentProps) => {
   const [showProjectPickerPopover, setShowProjectPickerPopover] = useState(false);
+  const styles = useMemoCss(projectPickerStyles);
 
-  const { euiTheme } = useEuiTheme();
-
-  let projects: Project[] = [];
-
-  if (!originProject) {
-  } else {
-    projects = projectRouting === '_alias:_origin' ? [originProject] : [originProject, ...linkedProjects];
-  }
+  const projects =
+    projectRouting === '_alias:_origin' ? [originProject] : [originProject, ...linkedProjects];
 
   const button = (
     <EuiToolTip
@@ -69,13 +95,10 @@ export const ProjectPickerComponent = ({ projectRouting, onProjectRoutingChange,
         display="base"
         iconType="cluster" // TODO: replace with cross project icon when available in EUI
         aria-label={strings.getProjectPickerButtonAriaLabel()}
-        data-test-subj="addFilter"
+        data-test-subj="project-picker-button"
         onClick={() => setShowProjectPickerPopover(!showProjectPickerPopover)}
         size="s"
-        css={{
-          backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend,
-          border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-        }}
+        css={styles.button}
       />
     </EuiToolTip>
   );
@@ -103,18 +126,9 @@ export const ProjectPickerComponent = ({ projectRouting, onProjectRoutingChange,
       anchorPosition="downLeft"
       ownFocus
       panelPaddingSize="none"
-      panelProps={{
-        css: {
-          width: '560px',
-        },
-      }}
+      panelProps={{ css: styles.popover }}
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        direction="column"
-        responsive={false}
-        css={{ maxHeight: '400px', overflow: 'hidden' }}
-      >
+      <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
         <EuiFlexItem grow={false}>
           <EuiPopoverTitle paddingSize="s">
             <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
@@ -168,22 +182,16 @@ export const ProjectPickerComponent = ({ projectRouting, onProjectRoutingChange,
               } else {
                 newProjectRouting = undefined;
               }
-              onProjectRoutingChange?.(newProjectRouting);
+              onProjectRoutingChange(newProjectRouting);
             }}
-            css={{ margin: '8px' }}
+            css={styles.buttonGroup}
             buttonSize="compressed"
           />
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={{
-            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-            borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-          }}
-        >
+        <EuiFlexItem grow={false} css={styles.projectCountHeader}>
           <EuiTitle size="xxxs">
-            <h6 css={{ padding: `${euiTheme.size.s}` }}>
+            <h6 css={styles.projectCountTitle}>
               <FormattedMessage
                 id="cpsUtils.projectPicker.numberOfProjectsDescription"
                 defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
@@ -195,12 +203,7 @@ export const ProjectPickerComponent = ({ projectRouting, onProjectRoutingChange,
             </h6>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem
-          css={css`
-            ${useEuiOverflowScroll('y', true)}
-            background-color: ${euiTheme.colors.backgroundBaseSubdued};
-          `}
-        >
+        <EuiFlexItem css={styles.listContainer} className="eui-yScroll">
           <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
             {renderProjectsList()}
           </EuiFlexGroup>

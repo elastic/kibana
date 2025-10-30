@@ -19,6 +19,29 @@ describe('ProjectPickerComponent', () => {
   const defaultProps = {
     projectRouting: undefined as ProjectRouting | undefined,
     onProjectRoutingChange: jest.fn(),
+    originProject: {
+      _id: 'origin',
+      _alias: 'Origin Project',
+      _type: 'observability',
+      _csp: 'aws',
+      _region: 'us-east-1',
+    },
+    linkedProjects: [
+      {
+        _id: 'linked1',
+        _alias: 'Linked Project 1',
+        _type: 'security',
+        _csp: 'azure',
+        _region: 'eastus',
+      },
+      {
+        _id: 'linked2',
+        _alias: 'Linked Project 2',
+        _type: 'elasticsearch',
+        _csp: 'gcp',
+        _region: 'us-central1',
+      },
+    ],
   };
 
   const renderProjectPicker = (props: Partial<typeof defaultProps> = {}) => {
@@ -141,7 +164,8 @@ describe('ProjectPickerComponent', () => {
       rerender(
         <I18nProvider>
           <EuiThemeProvider>
-            <ProjectPicker
+            <ProjectPickerComponent
+              {...defaultProps}
               projectRouting="_alias:_origin"
               onProjectRoutingChange={onProjectRoutingChange}
             />

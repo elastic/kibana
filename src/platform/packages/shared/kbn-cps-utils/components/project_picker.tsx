@@ -1,4 +1,3 @@
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -11,9 +10,8 @@
 import React, { useState, useEffect } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CPSPluginStart } from '@kbn/cps/public';
-import { identity } from 'lodash';
-import { ProjectPickerComponent, type Project } from './project_picker_component';
+import type { CPSPluginStart, Project } from '@kbn/cps/public';
+import { ProjectPickerComponent } from './project_picker_component';
 
 interface CPSServices {
   cps: CPSPluginStart;
@@ -28,7 +26,7 @@ export interface ProjectPickerProps {
 export const ProjectPicker: React.FC<ProjectPickerProps> = ({
   projectRouting,
   onProjectRoutingChange,
-  wrappingContainer = identity,
+  wrappingContainer = (children) => children as React.ReactElement,
 }) => {
   const { cps } = useKibana<CPSServices>().services;
   const [originProject, setOriginProject] = useState<Project | null>(null);
@@ -38,18 +36,19 @@ export const ProjectPicker: React.FC<ProjectPickerProps> = ({
     // Only fetch projects in serverless environments where cpsManager is available
     if (!cps?.cpsManager) return;
 
-    const subscription = cps.cpsManager.projects$.subscribe((projectsData: { origin: Project | null; linkedProjects: Project[] }) => {
-      setOriginProject(projectsData.origin);
-      setLinkedProjects(projectsData.linkedProjects);
-    });
-
+    const subscription = cps.cpsManager.projects$.subscribe(
+      (projectsData: { origin: Project | null; linkedProjects: Project[] }) => {
+        setOriginProject(projectsData.origin);
+        setLinkedProjects(projectsData.linkedProjects);
+      }
+    );
     return () => subscription.unsubscribe();
   }, [cps]);
 
-  if (!cps?.cpsManager) return null;
-  if (!onProjectRoutingChange) return null;
-  if (!originProject || linkedProjects.length === 0) return null;
-  console.log('Rendering ProjectPicker', { projectRouting, originProject, linkedProjects });
+  // do not render the component if cpsManager is not available or required props are missing or there aren't linked projects
+  if (!cps?.cpsManager || !onProjectRoutingChange || !originProject || linkedProjects.length === 0) {
+    return null;
+  }
 
   return wrappingContainer(
     <ProjectPickerComponent
