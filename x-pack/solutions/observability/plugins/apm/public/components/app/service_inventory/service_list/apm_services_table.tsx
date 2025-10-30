@@ -298,6 +298,7 @@ interface Props {
   initialSortDirection: 'asc' | 'desc';
   sortFn: SortFunction<ServiceListItem>;
   serviceOverflowCount: number;
+  maxCountExceeded: boolean;
   onChangeSearchQuery?: (searchQuery: string) => void;
   onChangeRenderedItems?: (renderedItems: ServiceListItem[]) => void;
   onChangeItemIndices?: (range: VisibleItemsStartEnd) => void;
@@ -315,6 +316,7 @@ export function ApmServicesTable({
   initialPageSize,
   sortFn,
   serviceOverflowCount,
+  maxCountExceeded,
   onChangeSearchQuery,
   onChangeRenderedItems,
   onChangeItemIndices,
@@ -365,14 +367,14 @@ export function ApmServicesTable({
     return {
       isEnabled: isTableSearchBarEnabled,
       fieldsToSearch: ['serviceName'],
-      maxCountExceeded: false,
+      maxCountExceeded,
       onChangeSearchQuery,
       placeholder: i18n.translate('xpack.apm.servicesTable.filterServicesPlaceholder', {
         defaultMessage: 'Search services by name',
       }),
       techPreview: true,
     };
-  }, [isTableSearchBarEnabled, onChangeSearchQuery]);
+  }, [isTableSearchBarEnabled, maxCountExceeded, onChangeSearchQuery]);
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -381,6 +383,19 @@ export function ApmServicesTable({
           {fallbackToTransactions && (
             <EuiFlexItem>
               <AggregatedTransactionsBadge />
+            </EuiFlexItem>
+          )}
+          {maxCountExceeded && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                position="top"
+                type="warning"
+                color="danger"
+                content={i18n.translate('xpack.apm.servicesTable.tooltip.maxCountExceededWarning', {
+                  defaultMessage:
+                    'The limit of 1,000 services is exceeded. Please use the query bar to narrow down the results or create service groups.',
+                })}
+              />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>

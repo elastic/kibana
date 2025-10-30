@@ -24,6 +24,7 @@ export const MAX_NUMBER_OF_SERVICES = 1_000;
 
 export interface ServicesItemsResponse {
   items: MergedServiceStat[];
+  maxCountExceeded: boolean;
   serviceOverflowCount: number;
 }
 
@@ -73,8 +74,8 @@ export async function getServicesItems({
       searchQuery,
     };
 
-    const [{ serviceStats, serviceOverflowCount }, healthStatuses, alertCounts] = await Promise.all(
-      [
+    const [{ serviceStats, serviceOverflowCount, maxCountExceeded }, healthStatuses, alertCounts] =
+      await Promise.all([
         getServiceTransactionStats({
           ...commonParams,
           apmEventClient,
@@ -87,8 +88,7 @@ export async function getServicesItems({
           logger.debug(err);
           return [];
         }),
-      ]
-    );
+      ]);
 
     return {
       items:
@@ -97,6 +97,7 @@ export async function getServicesItems({
           healthStatuses,
           alertCounts,
         }) ?? [],
+      maxCountExceeded,
       serviceOverflowCount,
     };
   });

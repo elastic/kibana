@@ -38,6 +38,7 @@ const INITIAL_DATA: MainStatisticsApiResponse & { requestId: string } = {
   requestId: '',
   items: [],
   serviceOverflowCount: 0,
+  maxCountExceeded: false,
 };
 
 function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
@@ -309,6 +310,7 @@ export function ServiceInventory() {
             serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
             onChangeRenderedItems={setRenderedItems}
+            maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
