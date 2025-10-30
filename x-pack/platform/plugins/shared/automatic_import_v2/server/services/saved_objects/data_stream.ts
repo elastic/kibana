@@ -43,21 +43,12 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
       },
       metadata: {
         properties: {
-          sample_count: { type: 'integer', index: false },
-          version: { type: 'keyword', index: false },
-          created_at: { type: 'date', index: false },
+          // sample_count , version , created_at etc.,
         },
       },
       result: {
         properties: {
-          ingest_pipeline: {
-            type: 'text',
-            index: false,
-          },
-          field_mapping: {
-            type: 'flattened',
-            index: false,
-          },
+          // ingest_pipeline , field_mapping etc.,
         },
       },
     },
