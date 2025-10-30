@@ -71,7 +71,9 @@ describe('Save dashboard state', () => {
     expect(result.redirectRequired).toBe(true);
     expect(contentManagementService.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        options: { references: [] },
+        options: expect.objectContaining({
+          references: [],
+        }),
       })
     );
     expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -105,6 +107,54 @@ describe('Save dashboard state', () => {
         }),
       })
     );
+  });
+
+  it('should include accessControl when creating a new dashboard but not when updating', async () => {
+    const createResult = await saveDashboardState({
+      dashboardState: {
+        ...getSampleDashboardState(),
+        title: 'New Dashboard',
+      },
+      saveOptions: { saveAsCopy: true },
+      accessMode: 'write_restricted',
+    });
+
+    expect(createResult.id).toBe('newlyGeneratedId');
+    expect(contentManagementService.client.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          accessControl: {
+            accessMode: 'write_restricted',
+          },
+        }),
+      })
+    );
+
+    jest.clearAllMocks();
+
+    const updateResult = await saveDashboardState({
+      dashboardState: {
+        ...getSampleDashboardState(),
+        title: 'Updated Dashboard',
+      },
+      lastSavedId: 'existing-dashboard-id',
+      saveOptions: {},
+      accessMode: 'write_restricted', // Should be ignored for updates
+    });
+
+    expect(updateResult.id).toBe('existing-dashboard-id');
+    expect(contentManagementService.client.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'existing-dashboard-id',
+        options: expect.objectContaining({
+          mergeAttributes: false,
+        }),
+      })
+    );
+
+    // Verify that accessControl is not included in update options
+    const updateCall = (contentManagementService.client.update as jest.Mock).mock.calls[0][0];
+    expect(updateCall.options).not.toHaveProperty('accessControl');
   });
 
   it('should return an error when the save fails.', async () => {

@@ -27,6 +27,7 @@ export const saveDashboardState = async ({
   saveOptions,
   dashboardState,
   panelReferences,
+  accessMode,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   const dashboardContentManagementCache = getDashboardContentManagementCache();
 
@@ -58,6 +59,9 @@ export const saveDashboardState = async ({
           data: attributes,
           options: {
             references,
+            accessControl: {
+              accessMode,
+            },
           },
         });
     const newId = result.item.id;
