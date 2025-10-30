@@ -53,6 +53,7 @@ export interface TabbedContentProps
   onChanged: (state: TabbedContentState) => void;
   getPreviewData?: (item: TabItem) => TabPreviewData;
   onEBTEvent: (event: TabsEBTEvent) => void;
+  tabContentIdOverride?: string;
 }
 
 export interface TabbedContentState {
@@ -71,6 +72,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   renderContent,
   createItem,
   onChanged,
+  tabContentIdOverride,
   onClearRecentlyClosed,
   getPreviewData,
   onEBTEvent,
@@ -81,7 +83,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableTabsBarMenu = false,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
-  const [tabContentId] = useState(() => htmlIdGenerator()());
+  const [generatedId] = useState(() => tabContentIdOverride ?? htmlIdGenerator()());
+  const tabContentId = tabContentIdOverride ?? generatedId;
   const state = useMemo(
     () => prepareStateFromProps(managedItems, managedSelectedItemId),
     [managedItems, managedSelectedItemId]
