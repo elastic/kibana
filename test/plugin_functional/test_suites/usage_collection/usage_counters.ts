@@ -16,6 +16,7 @@ import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   async function getSavedObjectCounters() {
     // wait until ES indexes the counter SavedObject;
@@ -39,7 +40,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   }
 
   // Failing: See https://github.com/elastic/kibana/issues/238414
-  describe.skip('Usage Counters service', () => {
+  describe('Usage Counters service', () => {
     before(async () => {
       const key = serializeCounterKey({
         domainId: 'usageCollectionTestPlugin',
@@ -60,10 +61,21 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('stores usage counters triggered by runtime activities', async () => {
+      // Pull initial values
+      const initialCounters = await getSavedObjectCounters();
+      const initialRouteAccessed = initialCounters.routeAccessed || 0;
+      expect(initialRouteAccessed).to.be(0);
+
+      // Send the request
       await supertest.get('/api/usage_collection_test_plugin').set('kbn-xsrf', 'true').expect(200);
 
-      const { routeAccessed } = await getSavedObjectCounters();
-      expect(routeAccessed).to.be(1);
+      // Check routeAccessed counter was updated
+      let routeAccessed: number | undefined;
+      await retry.waitFor('routeAccessed counter is incremented', async () => {
+        ({ routeAccessed } = await getSavedObjectCounters());
+        return routeAccessed !== undefined && routeAccessed > initialRouteAccessed;
+      });
+      expect(routeAccessed).to.be(initialRouteAccessed + 1);
     });
   });
 }
