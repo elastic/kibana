@@ -230,8 +230,8 @@ export function HeaderActions({
             <EuiButton
               color={'primary'}
               title={buttonText}
-              className="ruleSidebarItem__action"
-              data-test-subj="editActionHoverButton"
+              className="ruleViewLinkedObjectButton"
+              data-test-subj="ruleViewLinkedObjectButton"
               iconType={'eye'}
               aria-label={buttonText}
               onClick={() => {
