@@ -19,16 +19,8 @@ import type { ExtendedAutocompleteContext } from '../autocomplete.types';
 // eslint-disable-next-line complexity
 export function getWithBlockSuggestions(autocompleteContext: ExtendedAutocompleteContext) {
   const suggestions: monaco.languages.CompletionItem[] = [];
-  const {
-    triggerKind,
-    line,
-    lineUpToCursor,
-    range,
-    dynamicConnectorTypes,
-    focusedStepInfo,
-    model,
-    position,
-  } = autocompleteContext;
+  const { line, lineUpToCursor, range, dynamicConnectorTypes, focusedStepInfo, model, position } =
+    autocompleteContext;
 
   const connectorType = focusedStepInfo?.stepType ?? null;
 
@@ -173,16 +165,6 @@ export function getWithBlockSuggestions(autocompleteContext: ExtendedAutocomplet
     // Skip if parameter already exists (unless it's an empty value)
     if (existingParams.has(key)) {
       // Skipping existing parameter
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-
-    // If manually triggered (Ctrl+Space) or no filter, show all parameters
-    const isManualTrigger = triggerKind === monaco.languages.CompletionTriggerKind.Invoke;
-    const lastPathSegment = autocompleteContext.lineParseResult?.pathSegments?.pop() ?? null;
-    const shouldSkip = lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger;
-
-    if (shouldSkip) {
       // eslint-disable-next-line no-continue
       continue;
     }

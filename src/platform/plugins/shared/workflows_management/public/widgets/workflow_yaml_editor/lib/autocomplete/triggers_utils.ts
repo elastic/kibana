@@ -68,7 +68,7 @@ export function isInScheduledTriggerWithBlock(
           const triggerItemIndex = node.items.indexOf(withPair);
           if (triggerItemIndex < node.items.length - 1) {
             const nextItem = node.items[triggerItemIndex + 1];
-            if (isPair(nextItem) && nextItem.key?.range) {
+            if (isPair(nextItem) && isScalar(nextItem.key) && nextItem.key?.range) {
               boundaryPosition = nextItem.key.range[0];
             }
           }
@@ -76,7 +76,6 @@ export function isInScheduledTriggerWithBlock(
           // If no boundary found yet, look at the parent context
           if (!boundaryPosition && ancestors.length > 1) {
             // Get the trigger's parent (triggers array) and grandparent (document)
-            const triggersArray = ancestors[ancestors.length - 1];
             const document = ancestors[ancestors.length - 2];
 
             if (isMap(document) && document.items) {
@@ -87,7 +86,7 @@ export function isInScheduledTriggerWithBlock(
 
               if (triggersIndex !== -1 && triggersIndex < document.items.length - 1) {
                 const nextDocItem = document.items[triggersIndex + 1];
-                if (isPair(nextDocItem) && nextDocItem.key?.range) {
+                if (isPair(nextDocItem) && isScalar(nextDocItem.key) && nextDocItem.key?.range) {
                   boundaryPosition = nextDocItem.key.range[0];
                 }
               }
@@ -107,7 +106,7 @@ export function isInScheduledTriggerWithBlock(
 
         if (isInWithBlock) {
           // Check if there's already an existing rrule or every configuration
-          if (hasExistingScheduleConfiguration(withPair.value)) {
+          if (withPair.value && hasExistingScheduleConfiguration(withPair.value)) {
             // Don't show rrule suggestions if there's already a schedule configuration
             result = false;
             return visit.BREAK;
