@@ -95,8 +95,7 @@
     "**/typescript": "5.9.3",
     "**/util": "^0.12.5",
     "**/yauzl": "^3.2.0",
-    "**/zod": "3.24.2",
-    "**/zod-to-json-schema": "3.24.6",
+    "**/zod": "3.25.9",
     "@aws-sdk/client-bedrock-agent-runtime": "^3.879.0",
     "@aws-sdk/client-bedrock-runtime": "^3.879.0",
     "@aws-sdk/client-kendra": "3.879.0",
@@ -1432,7 +1431,7 @@
     "yaml": "^2.5.1",
     "yauzl": "^3.2.0",
     "yazl": "^3.3.1",
-    "zod": "^3.24.2",
+    "zod": "^3.25.9",
     "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
