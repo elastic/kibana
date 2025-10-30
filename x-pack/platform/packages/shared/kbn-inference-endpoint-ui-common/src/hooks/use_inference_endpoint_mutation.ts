@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import type { IToasts } from '@kbn/core/public';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
