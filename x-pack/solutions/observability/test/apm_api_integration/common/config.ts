@@ -120,7 +120,7 @@ export function createTestConfig(
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
+          waitForLogLineTimeoutMs: 10 * 60 * 1000, // 10 minutes
         },
       }),
       testFiles: [require.resolve('../tests')],
