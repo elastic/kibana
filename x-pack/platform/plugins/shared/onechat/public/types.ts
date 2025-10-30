@@ -20,7 +20,6 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
