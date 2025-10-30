@@ -314,7 +314,7 @@ and how it is rendered in the UI.
 
 ### Server-side registration
 
-Registering an attachment type can be done using the `attachments.registerType` API of the `onechat` plugin's setup contract.
+You can register an attachment type by using the `attachments.registerType` API of the `onechat` plugin's setup contract.
 
 ```ts
 class MyPlugin {
@@ -326,8 +326,8 @@ class MyPlugin {
 
 There are two main categories of attachment types:
 - `inline`: attachment is self-contained, with the data attached to it.
-- `reference`: reference a persisted resource (e.g a dashboard, an alert, etc) by its id, and resolve it dynamically when needed.
-  - (Not fully implemented yet)
+  `reference`: reference a persisted resource (for example, a dashboard, an alert, etc) by its id, and resolve it dynamically when needed.
+  - (Not implemented yet)
 
 **Example of inline attachment type definition:**
 
