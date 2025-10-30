@@ -28,6 +28,7 @@ export interface DashboardPinnableControl {
   type: DashboardPanel['type'];
   grow?: boolean;
   width?: ControlWidth;
+  order?: number;
 }
 
 export interface DashboardLayout {

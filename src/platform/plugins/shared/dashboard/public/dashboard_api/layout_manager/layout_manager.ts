@@ -317,15 +317,22 @@ export function initializeLayoutManager(
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
     const existingGridData = layout$.value.panels[idToRemove]?.grid;
-    if (!existingGridData) throw new PanelNotFoundError();
+    const existingControlData = layout$.value.controls[idToRemove];
+    if (!existingGridData && !existingControlData) throw new PanelNotFoundError();
 
     removePanel(idToRemove);
-    const newPanel = await addNewPanel<DefaultEmbeddableApi>(
-      panelPackage,
-      { displaySuccessMessage: false },
-      existingGridData
-    );
-    return newPanel.uuid;
+    if (existingGridData) {
+      const newPanel = await addNewPanel<DefaultEmbeddableApi>(
+        panelPackage,
+        { displaySuccessMessage: false },
+        existingGridData
+      );
+      return newPanel.uuid;
+    } else {
+      const prevLayoutState = pick(existingControlData, 'grow', 'width', 'order');
+      const newPanel = await addPinnedPanel(panelPackage, prevLayoutState);
+      return newPanel.uuid;
+    }
   };
 
   const duplicatePanel = async (uuidToDuplicate: string) => {
@@ -380,7 +387,7 @@ export function initializeLayoutManager(
 
     newControls[uuid] = {
       type: controlToPin.type as StickyControlLayoutState['type'],
-      order: Object.keys(newControls).length,
+      order: controlToPin.order ?? Object.keys(newControls).length,
       width: controlToPin.width ?? DEFAULT_CONTROL_WIDTH,
       grow: controlToPin.grow ?? DEFAULT_CONTROL_GROW,
     };
@@ -389,6 +396,24 @@ export function initializeLayoutManager(
 
     // update the layout with the control panel removed and added as a pinned control
     layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
+  };
+
+  const addPinnedPanel = async (
+    panelPackage: PanelPackage,
+    prevLayoutState?: Partial<StickyControlLayoutState>
+  ) => {
+    const newPanelUuid = createPanel(panelPackage);
+    const { serializedState } = panelPackage;
+    const layoutState = {
+      ...(serializedState ? pick(serializedState.rawState, 'grow', 'width') : {}),
+      ...prevLayoutState,
+    };
+    const panelToPin = {
+      type: panelPackage.panelType,
+      ...layoutState,
+    };
+    pinPanel(newPanelUuid, panelToPin);
+    return (await getChildApi(newPanelUuid)) ?? { uuid: newPanelUuid };
   };
 
   const getChildApi = async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
@@ -533,19 +558,7 @@ export function initializeLayoutManager(
 
         pinPanel(uuid, controlToPin);
       },
-      addPinnedPanel: async (panelPackage: PanelPackage) => {
-        const newPanelUuid = createPanel(panelPackage);
-        const { serializedState } = panelPackage;
-        const displaySettings = serializedState
-          ? pick(serializedState.rawState, 'grow', 'width')
-          : {};
-        const panelToPin = {
-          type: panelPackage.panelType,
-          ...displaySettings,
-        };
-        pinPanel(newPanelUuid, panelToPin);
-        return await getChildApi(newPanelUuid);
-      },
+      addPinnedPanel,
 
       /** Sections */
       addNewSection: () => {

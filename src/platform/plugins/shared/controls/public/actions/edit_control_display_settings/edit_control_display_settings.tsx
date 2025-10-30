@@ -19,7 +19,7 @@ import {
   type EmbeddableApiContext,
 } from '@kbn/presentation-publishing';
 import type { FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
+import { type Action } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_EDIT_CONTROL_DISPLAY_SETTINGS } from '../constants';
 import { apiIsPinnableControlApi } from './types';
@@ -36,7 +36,7 @@ export class EditControlDisplaySettingsAction
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     const { embeddable } = context;
-    if (!apiIsPinnableControlApi(embeddable)) throw new IncompatibleActionError();
+    if (!apiIsPinnableControlApi(embeddable)) return null;
 
     return (
       <ControlDisplaySettingsPopover
