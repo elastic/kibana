@@ -199,7 +199,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.inferenceEndpointUICommon.components.additionalInfo.temperatureHelpInfo"
-              defaultMessage="Controls the randomness of the model's output. Lower values make the output more deterministic, while higher values make it more creative."
+              defaultMessage="Controls the randomness of the model's output. Changing the temperature can affect the general performance of AI Assistant and AI-driven features in Kibana, and we recommend keeping the default value."
             />
           </EuiText>
           <EuiSpacer size="m" />
@@ -265,7 +265,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           <EuiSpacer size="m" />
         </>
       ) : null,
-    [setFieldValue, config.temperature, selectedTaskType, isEdit, taskTypeOptions]
+    [setFieldValue, config.temperature, selectedTaskType]
   );
 
   const taskTypeSettings = useMemo(
