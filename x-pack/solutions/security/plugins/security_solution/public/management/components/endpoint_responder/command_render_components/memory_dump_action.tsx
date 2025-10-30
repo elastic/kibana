@@ -31,9 +31,9 @@ export const MemoryDumpActionResult = memo<
   >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendMemoryDumpRequest();
+  const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
 
   const actionRequestBody = useMemo<undefined | MemoryDumpActionRequestBody>(() => {
-    const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
     const { comment, type, pid, entityId } = command.args.args;
 
     if (!endpointId) {
@@ -52,7 +52,7 @@ export const MemoryDumpActionResult = memo<
     };
 
     return reqBody;
-  }, [command.args.args, command.commandDefinition?.meta]);
+  }, [agentType, command.args.args, endpointId]);
 
   const { result, actionDetails } = useConsoleActionSubmitter<
     MemoryDumpActionRequestBody,
@@ -72,7 +72,8 @@ export const MemoryDumpActionResult = memo<
   if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
     return (
       <ResultComponent>
-        <MemoryDumpResponseActionOutputResult action={actionDetails} />
+        {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+        <MemoryDumpResponseActionOutputResult action={actionDetails} agentId={endpointId!} />
       </ResultComponent>
     );
   }

@@ -308,6 +308,22 @@ export const CONSOLE_COMMANDS = {
           'Process Entity ID to generate a memory dump for. Valid only when "type" is "process"',
       }
     ),
+    agentResultMissing: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.agentResultMissing',
+      { defaultMessage: 'Agent result missing' }
+    ),
+    resultFileLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultFileLabel',
+      { defaultMessage: 'File' }
+    ),
+    resultFileSizeLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultFileSizeLabel',
+      { defaultMessage: 'Size' }
+    ),
+    resultRemainingFreeDiskSpaceLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultRemainingFreeDiskSpaceLabel',
+      { defaultMessage: 'Remaining disk space' }
+    ),
   },
 };
 
@@ -464,3 +480,20 @@ export const ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE = (count: 
       'This artifact is associated with {count} {count, plural, =1 {policy that is} other {policies that are}} not accessible in active space',
     values: { count },
   });
+
+/**
+ * Labels for the response action status (as defined in ResponseActionStatus)
+ */
+export const RESPONSE_ACTION_STATUS = Object.freeze({
+  failedMessage: i18n.translate('xpack.securitySolution.responseActionStatus.failed', {
+    defaultMessage: 'Action failed',
+  }),
+
+  pendingMessage: i18n.translate('xpack.securitySolution.responseActionStatus.pending', {
+    defaultMessage: 'Action pending',
+  }),
+
+  successMessage: i18n.translate('xpack.securitySolution.responseActionStatus.success', {
+    defaultMessage: 'Action successful',
+  }),
+});

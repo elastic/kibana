@@ -371,8 +371,8 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
           content: {
             code: 'ra_memory-dump_success_done',
             file_size: 2322000,
-            path: '/path/to/file/on/host',
-            disk_free: 123456789,
+            path: `/tmp/elastic_defend/memory_dump/dump.${new Date().toISOString()}.zip`,
+            disk_free_space: 123045678009,
           },
         },
       } as unknown as ResponseOutput;
