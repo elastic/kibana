@@ -12,9 +12,9 @@
  * See README.md for detailed examples and documentation.
  */
 
-const { shouldSkipIdentifier, detectModuleLevelUsage } = require('./helpers');
+const { shouldSkipIdentifier, detectModuleLevelUsage, detectJsxUsage } = require('./helpers');
 
-module.exports = function lazyRequirePlugin({ types: t }) {
+module.exports = function lazyRequirePlugin({ types: t }, options = {}) {
   /**
    * Check if an expression is a direct require() call with a string literal
    */
@@ -30,7 +30,13 @@ module.exports = function lazyRequirePlugin({ types: t }) {
   return {
     name: 'kbn-lazy-require',
     visitor: {
-      Program(programPath) {
+      Program(programPath, state) {
+        // Skip transformation for mock files - they need immediate access to all imports
+        // for jest.mock() and jest.doMock() factory functions to work correctly
+        const filename = state.filename || state.file.opts.filename || '';
+        if (filename.includes('.mock.') || filename.includes('.mocks.')) {
+          return;
+        }
         // State tracking
         const modules = new Map(); // requirePath -> { cacheId, requirePath, outerFunc? }
         const properties = new Map(); // varName -> { moduleRequirePath, propertyKey, isConst, needsInterop? }
@@ -184,6 +190,11 @@ module.exports = function lazyRequirePlugin({ types: t }) {
               return;
             }
 
+            // Skip imports from mock files - they contain jest.doMock() setup that must run immediately
+            if (importPath.includes('.test.mocks') || importPath.includes('.test.mock')) {
+              return;
+            }
+
             // Handle different import types
             for (const specifier of path.node.specifiers) {
               const varName = specifier.local.name;
@@ -231,6 +242,33 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         for (const varName of importsUsedInModuleLevelCode) {
           properties.delete(varName);
           declarationsToRemove.delete(varName);
+        }
+
+        // =================================================================
+        // PHASE 1.6: Detect and exclude JSX usage
+        // =================================================================
+        // JSX transforms happen at compile time, so components need direct access
+        const importsUsedInJsx = detectJsxUsage(programPath, properties, t);
+
+        // Exclude JSX components from transformation
+        for (const varName of importsUsedInJsx) {
+          properties.delete(varName);
+          declarationsToRemove.delete(varName);
+        }
+
+        // =================================================================
+        // PHASE 1.7: Always exclude React (required for JSX runtime)
+        // =================================================================
+        // React must always be available for JSX to work, even if not explicitly used
+        for (const [varName, propInfo] of properties) {
+          // Check if this is a React import (default, named, or namespace)
+          if (
+            propInfo.moduleRequirePath === 'react' ||
+            propInfo.moduleRequirePath === 'React'
+          ) {
+            properties.delete(varName);
+            declarationsToRemove.delete(varName);
+          }
         }
 
         // Remove orphaned modules (no properties left)

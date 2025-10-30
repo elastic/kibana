@@ -120,6 +120,30 @@ function shouldSkipIdentifier(path, properties, programPath, t) {
 }
 
 /**
+ * Detect which imports are used in JSX syntax anywhere in the file
+ * Returns a Set of variable names that should not be lazy-loaded
+ * JSX transforms happen at compile time, so components need to be directly available
+ */
+function detectJsxUsage(programPath, properties, t) {
+  const importsUsedInJsx = new Set();
+
+  programPath.traverse({
+    JSXIdentifier(jsxIdPath) {
+      const name = jsxIdPath.node.name;
+      // Only care about opening/closing element names, not attribute names
+      if (
+        properties.has(name) &&
+        (t.isJSXOpeningElement(jsxIdPath.parent) || t.isJSXClosingElement(jsxIdPath.parent))
+      ) {
+        importsUsedInJsx.add(name);
+      }
+    },
+  });
+
+  return importsUsedInJsx;
+}
+
+/**
  * Detect which imports are used in module-level code that runs at initialization
  * Returns a Set of variable names that should not be lazy-loaded
  */
@@ -227,4 +251,5 @@ module.exports = {
   isInTypeContext,
   shouldSkipIdentifier,
   detectModuleLevelUsage,
+  detectJsxUsage,
 };

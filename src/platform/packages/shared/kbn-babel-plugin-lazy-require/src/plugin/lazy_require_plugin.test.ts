@@ -144,6 +144,43 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       expect(result).toContain(expected);
       expect(result).not.toContain('_imports');
     });
+
+    it('does not transform mock files (*.mock.ts, *.mocks.ts)', () => {
+      const code = 'import { something } from "./module"; export const mockValue = something;';
+      
+      // Transform with mock filename
+      const result = transform(code, {
+        plugins: [lazyRequirePlugin],
+        filename: 'test.mock.ts',
+      });
+      
+      // Should not be transformed
+      expect(result?.code).toContain('import');
+      expect(result?.code).not.toContain('_imports');
+    });
+
+    it('does not transform imports from .test.mocks files (jest.doMock setup needs immediate access)', () => {
+      const code = `
+        import { MockService, mockHelper } from './service.test.mocks';
+        import { realModule } from './real_module';
+        
+        test('example', () => {
+          expect(MockService).toBeDefined();
+          expect(realModule).toBeDefined();
+        });
+      `;
+      
+      const result = transformCode(code);
+      
+      // Imports from .test.mocks should NOT be lazy
+      expect(result).toContain('MockService');
+      expect(result).toContain('mockHelper');
+      expect(result).not.toContain('get MockService');
+      expect(result).not.toContain('get mockHelper');
+      
+      // But other imports should be lazy
+      expect(result).toContain('get realModule');
+    });
   });
 
   describe('scope handling', () => {
@@ -307,10 +344,10 @@ describe('@kbn/babel-plugin-lazy-require', () => {
     it('shares cache for mixed default and named imports from same module', () => {
       const loadLog: string[] = [];
       const code = `
-        import React, { useState } from 'react';
+        import utils, { helper } from './utils';
         function Component() {
-          const [state] = useState(0);
-          return React.createElement('div', null, state);
+          const result = helper();
+          return utils.process(result);
         }
         module.exports = Component;
       `;
@@ -323,12 +360,12 @@ describe('@kbn/babel-plugin-lazy-require', () => {
           if (path === '@babel/runtime/helpers/interopRequireDefault') {
             return (obj: any) => (obj && obj.__esModule ? obj : { default: obj });
           }
-          if (path === 'react') {
-            loadLog.push('react');
+          if (path === './utils') {
+            loadLog.push('./utils');
             return {
               __esModule: true,
-              default: { createElement: () => 'element' },
-              useState: () => ['state', () => {}],
+              default: { process: (x: any) => x },
+              helper: () => 'result',
             };
           }
           throw new Error(`Unexpected: ${path}`);
@@ -338,12 +375,12 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       runInNewContext(transformed, context);
       context.module.exports();
 
-      // Critical: React should only load once despite being accessed via default and named
-      expect(loadLog).toEqual(['react']);
+      // Critical: module should only load once despite being accessed via default and named
+      expect(loadLog).toEqual(['./utils']);
 
       // Verify both getters use the same module cache
       const moduleCaches = transformed.match(/const _module\d* = \{/g);
-      expect(moduleCaches).toHaveLength(1); // Only one cache for both React and useState
+      expect(moduleCaches).toHaveLength(1); // Only one cache for both utils and helper
     });
   });
 
@@ -371,7 +408,7 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       expect(code).not.toContain('_imports');
     });
 
-    it('partially transforms imports when some used at module-level', () => {
+    it('does not transform imports used in JSX (components need direct access for JSX transform)', () => {
       const code = transformCode(`
         import { EuiCode, EuiButton } from '@elastic/eui';
         const directive = <EuiCode>test</EuiCode>;
@@ -380,12 +417,12 @@ describe('@kbn/babel-plugin-lazy-require', () => {
         }
       `);
 
-      // EuiCode should be kept as import (used in module-level const)
+      // Both components should be kept as imports (both used in JSX)
       expect(code).toContain('EuiCode');
+      expect(code).toContain('EuiButton');
       expect(code).not.toContain('get EuiCode');
-
-      // EuiButton should be lazy (used in function)
-      expect(code).toContain('get EuiButton');
+      expect(code).not.toContain('get EuiButton');
+      expect(code).not.toContain('_imports');
     });
 
     it('transforms imports used only in functions', () => {
@@ -417,6 +454,161 @@ describe('@kbn/babel-plugin-lazy-require', () => {
 
       // Other lazy (used in method)
       expect(code).toContain('get Other');
+    });
+  });
+
+  describe('JSX and React handling', () => {
+    it('never transforms React imports (always needed for JSX runtime)', () => {
+      const code = transformCode(`
+        import React from 'react';
+        function Component() {
+          return React.createElement('div', null, 'test');
+        }
+      `);
+
+      expect(code).toContain('React');
+      expect(code).not.toContain('get React');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('never transforms React named imports', () => {
+      const code = transformCode(`
+        import { useState, useEffect } from 'react';
+        function useCustomHook() {
+          const [state] = useState(0);
+          useEffect(() => {}, []);
+        }
+      `);
+
+      expect(code).toContain('useState');
+      expect(code).toContain('useEffect');
+      expect(code).not.toContain('get useState');
+      expect(code).not.toContain('get useEffect');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('never transforms React namespace imports', () => {
+      const code = transformCode(`
+        import * as React from 'react';
+        function Component() {
+          return React.createElement('div');
+        }
+      `);
+
+      expect(code).toContain('React');
+      expect(code).not.toContain('get React');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('does not transform components used in JSX syntax', () => {
+      const code = transformCode(`
+        import { Button, Icon } from '@elastic/eui';
+        function MyComponent() {
+          return (
+            <Button>
+              <Icon type="check" />
+            </Button>
+          );
+        }
+      `);
+
+      expect(code).toContain('Button');
+      expect(code).toContain('Icon');
+      expect(code).not.toContain('get Button');
+      expect(code).not.toContain('get Icon');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('does not transform components in self-closing JSX tags', () => {
+      const code = transformCode(`
+        import { Spinner } from './components';
+        const Loading = () => <Spinner />;
+      `);
+
+      expect(code).toContain('Spinner');
+      expect(code).not.toContain('get Spinner');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('transforms non-JSX imports even when file contains JSX', () => {
+      const code = transformCode(`
+        import { Button } from '@elastic/eui';
+        import { processData } from './utils';
+        function Component() {
+          const data = processData();
+          return <Button>{data}</Button>;
+        }
+      `);
+
+      // Button used in JSX - not transformed
+      expect(code).toContain('Button');
+      expect(code).not.toContain('get Button');
+
+      // processData not used in JSX - transformed
+      expect(code).toContain('get processData');
+    });
+
+    it('handles mixed React default and named imports', () => {
+      const code = transformCode(`
+        import React, { useState, useCallback } from 'react';
+        function Component() {
+          const [count, setCount] = useState(0);
+          const increment = useCallback(() => setCount(c => c + 1), []);
+          return React.createElement('div', { onClick: increment }, count);
+        }
+      `);
+
+      // All React imports should be kept
+      expect(code).toContain('React');
+      expect(code).toContain('useState');
+      expect(code).toContain('useCallback');
+      expect(code).not.toContain('get React');
+      expect(code).not.toContain('get useState');
+      expect(code).not.toContain('get useCallback');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('does not transform JSX components used in nested elements', () => {
+      const code = transformCode(`
+        import { Panel, Header, Body, Footer } from './components';
+        export default () => (
+          <Panel>
+            <Header title="Test" />
+            <Body>
+              <p>Content</p>
+            </Body>
+            <Footer />
+          </Panel>
+        );
+      `);
+
+      expect(code).toContain('Panel');
+      expect(code).toContain('Header');
+      expect(code).toContain('Body');
+      expect(code).toContain('Footer');
+      expect(code).not.toContain('get Panel');
+      expect(code).not.toContain('get Header');
+      expect(code).not.toContain('get Body');
+      expect(code).not.toContain('get Footer');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('handles JSX fragments without breaking', () => {
+      const code = transformCode(`
+        import React from 'react';
+        import { Item } from './components';
+        export default () => (
+          <>
+            <Item />
+            <Item />
+          </>
+        );
+      `);
+
+      expect(code).toContain('React');
+      expect(code).toContain('Item');
+      expect(code).not.toContain('get React');
+      expect(code).not.toContain('get Item');
     });
   });
 });
