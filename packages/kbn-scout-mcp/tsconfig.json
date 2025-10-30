@@ -15,5 +15,7 @@
     "@kbn/scout",
     "@kbn/test",
     "@kbn/test-subj-selector",
+    "@kbn/es",
+    "@kbn/repo-info",
   ]
 }
