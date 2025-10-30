@@ -17,18 +17,32 @@ export const usePaginatedFields = ({
   pageSize,
   currentPage,
   searchTerm,
+  valueMetrics,
 }: {
   fields: MetricField[];
   searchTerm: string;
   dimensions: string[];
   pageSize: number;
   currentPage: number;
+  valueMetrics: string[];
 }) => {
   const dimensionsSet = useMemo(() => new Set(dimensions), [dimensions]);
+  const valueMetricsSet = useMemo(() => new Set(valueMetrics), [valueMetrics]);
   const searchTermLower = useMemo(() => searchTerm.toLowerCase(), [searchTerm]);
 
   const buildPaginatedFields = useCallback(() => {
-    const filteredFields = fields.filter((field) => {
+    const dimensionFilteredFields = fields.filter((field) => {
+      if (dimensionsSet.size > 0) {
+        const hasMatchingDimension = field.dimensions.some((d) => dimensionsSet.has(d.name));
+        if (!hasMatchingDimension) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    const filteredFields = dimensionFilteredFields.filter((field) => {
       if (
         field.noData ||
         (searchTermLower && !field.name.toLowerCase().includes(searchTermLower))
@@ -36,9 +50,9 @@ export const usePaginatedFields = ({
         return false;
       }
 
-      if (dimensionsSet.size > 0) {
-        const hasMatchingDimension = field.dimensions.some((d) => dimensionsSet.has(d.name));
-        if (!hasMatchingDimension) {
+      if (valueMetricsSet.size > 0) {
+        const hasMatchingMetric = valueMetricsSet.has(field.name);
+        if (!hasMatchingMetric) {
           return false;
         }
       }
@@ -53,9 +67,13 @@ export const usePaginatedFields = ({
     return {
       currentPageFields: filteredFields.slice(start, end),
       filteredFieldsCount: filteredFields.length,
+      dimensionFilteredMetrics: dimensionFilteredFields.map((field) => ({
+        name: field.name,
+        index: field.index,
+      })),
       totalPages,
     };
-  }, [fields, dimensionsSet, searchTermLower, pageSize, currentPage]);
+  }, [fields, dimensionsSet, searchTermLower, pageSize, currentPage, valueMetricsSet]);
 
   const [paginatedFieldsContext, setPaginatedFieldsContext] =
     useState<ReturnType<typeof buildPaginatedFields>>();

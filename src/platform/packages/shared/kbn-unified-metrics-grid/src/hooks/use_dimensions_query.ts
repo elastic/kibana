@@ -8,10 +8,12 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider';
 
 export const useDimensionsQuery = (params: {
   dimensions: string[];
+  metrics: Pick<MetricField, 'name' | 'index'>[];
   indices?: string[];
   from?: string;
   to?: string;
@@ -21,10 +23,11 @@ export const useDimensionsQuery = (params: {
   return useQuery({
     queryKey: ['dimensionValues', params],
     queryFn: async ({ signal }) => {
-      const { dimensions, ...rest } = params;
+      const { dimensions, metrics, ...rest } = params;
       const response = await client.getDimensions(
         {
-          dimensions: JSON.stringify(dimensions),
+          dimensions,
+          metrics,
           ...rest,
         },
         signal

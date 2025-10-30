@@ -135,10 +135,11 @@ describe('MetricsExperienceGrid', () => {
       totalPages: 1,
       filteredFieldsCount: 1,
       currentPageFields: [allFields[0]],
+      dimensionFilteredMetrics: [{ name: allFields[0].name, index: allFields[0].index }],
     });
 
     useDimensionsQueryMock.mockReturnValue({
-      data: dimensions,
+      data: dimensions.map((d) => ({ value: d.name, field: d.name, valueMetrics: ['avg'] })),
     } as unknown as ReturnType<typeof hooks.useDimensionsQuery>);
 
     useMetricFieldsQueryMock.mockReturnValue({
@@ -215,6 +216,7 @@ describe('MetricsExperienceGrid', () => {
       totalPages: 0,
       currentPageFields: [],
       filteredFieldsCount: 0,
+      dimensionFilteredMetrics: [],
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -242,7 +244,9 @@ describe('MetricsExperienceGrid', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       dimensions: ['foo'],
-      valueFilters: [`foo${FIELD_VALUE_SEPARATOR}bar`],
+      valueFilters: [
+        `foo${FIELD_VALUE_SEPARATOR}bar${FIELD_VALUE_SEPARATOR}${JSON.stringify(['avg'])}`,
+      ],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onValuesChange: jest.fn(),
@@ -361,10 +365,13 @@ describe('MetricsExperienceGrid', () => {
       onToggleFullscreen: jest.fn(),
     });
 
+    const fieldsWithCpu = allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).slice(0, 5);
+
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 2,
       filteredFieldsCount: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).length,
-      currentPageFields: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).slice(0, 5),
+      currentPageFields: fieldsWithCpu,
+      dimensionFilteredMetrics: fieldsWithCpu.map((f) => ({ name: f.name, index: f.index })),
     });
 
     const { getByText } = render(<MetricsExperienceGrid {...defaultProps} />, {

@@ -93,13 +93,6 @@ export const MetricsExperienceGrid = ({
     timeRange,
   });
 
-  const { leftSideActions, rightSideActions } = useToolbarActions({
-    fields,
-    indexPattern,
-    renderToggleActions,
-    requestParams,
-  });
-
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLElement>) => {
       if (e.key === keys.ESCAPE && isFullscreen && !areSelectorPortalsOpen()) {
@@ -110,24 +103,38 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
+  const filters = useValueFilters(valueFilters);
+
+  const valueMetrics = useMemo(() => {
+    return filters?.flatMap((filter) => filter.valueMetrics);
+  }, [filters]);
+
   const {
     currentPageFields = [],
     totalPages = 0,
     filteredFieldsCount = 0,
+    dimensionFilteredMetrics = [],
   } = usePaginatedFields({
     fields,
     dimensions,
     pageSize: PAGE_SIZE,
     currentPage,
     searchTerm,
+    valueMetrics,
   }) ?? {};
+
+  const { leftSideActions, rightSideActions } = useToolbarActions({
+    fields,
+    indexPattern,
+    renderToggleActions,
+    requestParams,
+    dimensionFilteredMetrics,
+  });
 
   const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
     () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
     [filteredFieldsCount]
   );
-
-  const filters = useValueFilters(valueFilters);
 
   if (fields.length === 0) {
     return <EmptyState isLoading={isFieldsLoading} />;

@@ -29,12 +29,14 @@ describe('usePaginatedFields', () => {
       createField('field4'),
     ];
     const dimensions: string[] = [];
+    const valueMetrics: string[] = [];
 
     const { result } = renderHook(() =>
       usePaginatedFields({
         fields,
         searchTerm: '',
         dimensions,
+        valueMetrics,
         pageSize: 2,
         currentPage: 0,
       })
@@ -55,12 +57,14 @@ describe('usePaginatedFields', () => {
       createField('field44'),
     ];
     const dimensions: string[] = [];
+    const valueMetrics: string[] = [];
 
     const { result } = renderHook(() =>
       usePaginatedFields({
         fields,
         searchTerm: '4',
         dimensions,
+        valueMetrics,
         pageSize: 2,
         currentPage: 0,
       })
@@ -80,12 +84,14 @@ describe('usePaginatedFields', () => {
       createField('field4'),
     ];
     const dimensions: string[] = [];
+    const valueMetrics: string[] = [];
 
     const { result } = renderHook(() =>
       usePaginatedFields({
         fields,
         searchTerm: '',
         dimensions,
+        valueMetrics,
         pageSize: 2,
         currentPage: 1,
       })
@@ -105,11 +111,14 @@ describe('usePaginatedFields', () => {
       createField('field4', []),
     ];
     const dimensions: string[] = ['foo'];
+    const valueMetrics: string[] = [];
+
     const { result } = renderHook(() =>
       usePaginatedFields({
         fields,
         searchTerm: '',
         dimensions,
+        valueMetrics,
         pageSize: 10,
         currentPage: 0,
       })
@@ -117,6 +126,43 @@ describe('usePaginatedFields', () => {
 
     await waitFor(() => {
       expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['field1', 'field3']);
+      expect(result.current?.dimensionFilteredMetrics).toEqual([
+        { name: 'field1', index: 'metrics-*' },
+        { name: 'field3', index: 'metrics-*' },
+      ]);
+      expect(result.current?.totalPages).toBe(1);
+    });
+  });
+
+  it('filters fields based on valueMetrics', async () => {
+    const fields = [
+      createField('metric1', ['foo']),
+      createField('metric2', ['bar']),
+      createField('metric3', ['foo', 'bar']),
+      createField('metric4', ['foo']),
+    ];
+    const dimensions: string[] = ['foo'];
+    const valueMetrics: string[] = ['metric1', 'metric3'];
+
+    const { result } = renderHook(() =>
+      usePaginatedFields({
+        fields,
+        searchTerm: '',
+        dimensions,
+        valueMetrics,
+        pageSize: 10,
+        currentPage: 0,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current?.currentPageFields.map((f) => f.name)).toEqual(['metric1', 'metric3']);
+      expect(result.current?.dimensionFilteredMetrics).toEqual([
+        { name: 'metric1', index: 'metrics-*' },
+        { name: 'metric3', index: 'metrics-*' },
+        { name: 'metric4', index: 'metrics-*' },
+      ]);
+      expect(result.current?.filteredFieldsCount).toBe(2);
       expect(result.current?.totalPages).toBe(1);
     });
   });
@@ -124,11 +170,13 @@ describe('usePaginatedFields', () => {
   it('ignores fields with noData', async () => {
     const fields = [createField('field1'), createField('field2', [], true)];
     const dimensions: string[] = [];
+    const valueMetrics: string[] = [];
 
     const { result } = renderHook(() =>
       usePaginatedFields({
         fields,
         dimensions,
+        valueMetrics,
         pageSize: 10,
         currentPage: 0,
         searchTerm: '',

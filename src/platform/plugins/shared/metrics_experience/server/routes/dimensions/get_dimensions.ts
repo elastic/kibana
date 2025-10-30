@@ -19,6 +19,7 @@ interface CreateDimensionsParams {
   from: number;
   to: number;
   logger: Logger;
+  metrics: Array<{ name: string; index: string }>;
 }
 
 export const getDimensions = async ({
@@ -28,7 +29,10 @@ export const getDimensions = async ({
   from,
   to,
   logger,
-}: CreateDimensionsParams): Promise<Array<{ value: string; field: string }>> => {
+  metrics,
+}: CreateDimensionsParams): Promise<
+  Array<{ value: string; field: string; valueMetrics: string[] }>
+> => {
   if (!dimensions || dimensions.length === 0) {
     return [];
   }
@@ -44,17 +48,27 @@ export const getDimensions = async ({
         },
       },
       // Create aggregations for each dimension
-      aggs: dimensions.reduce((acc, currDimension) => {
-        acc[currDimension] = {
+      aggs: dimensions.reduce((dimAcc, currDimension) => {
+        dimAcc[currDimension] = {
           terms: {
             field: currDimension,
             size: 20,
             order: { _key: 'asc' },
           },
+          aggs: metrics.reduce((metAcc, metric) => {
+            metAcc[metric.name] = {
+              filter: {
+                bool: {
+                  must: [{ exists: { field: metric.name } }, { term: { _index: metric.index } }],
+                },
+              },
+            };
+            return metAcc;
+          }, {} as Record<string, Pick<estypes.AggregationsAggregationContainer, 'filter'>>),
         };
 
-        return acc;
-      }, {} as Record<string, Pick<estypes.AggregationsAggregationContainer, 'terms'>>),
+        return dimAcc;
+      }, {} as Record<string, Pick<estypes.AggregationsAggregationContainer, 'terms'> & { aggs: Record<string, Pick<estypes.AggregationsAggregationContainer, 'filter'>> }>),
     });
 
     const aggregations = response.aggregations;
@@ -65,6 +79,13 @@ export const getDimensions = async ({
         agg?.buckets?.map((bucket) => ({
           value: String(bucket.key ?? ''),
           field: dimension,
+          valueMetrics: [
+            ...new Set(
+              metrics
+                .filter((metric) => bucket[metric.name]?.doc_count > 0)
+                .map((metric) => metric.name)
+            ),
+          ],
         })) ?? []
       );
     });

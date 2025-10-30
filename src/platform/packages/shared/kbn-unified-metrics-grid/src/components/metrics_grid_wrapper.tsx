@@ -27,7 +27,6 @@ export interface MetricsGridWrapperProps {
   toolbar?: ChartSectionTemplateProps['toolbar'];
   isFullscreen?: boolean;
   isComponentVisible?: boolean;
-  onToggleFullscreen?: () => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 

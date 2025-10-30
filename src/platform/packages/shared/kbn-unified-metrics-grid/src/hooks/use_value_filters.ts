@@ -18,8 +18,8 @@ export const useValueFilters = (valueFilters?: string[]) => {
 
     return valueFilters
       .map((selectedValue) => {
-        const [field, value] = selectedValue.split(FIELD_VALUE_SEPARATOR);
-        return { field, value };
+        const [field, value, valueMetrics] = selectedValue.split(FIELD_VALUE_SEPARATOR);
+        return { field, value, valueMetrics: JSON.parse(valueMetrics) };
       })
       .filter((filter) => filter.field !== '');
   }, [valueFilters]);
