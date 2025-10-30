@@ -57,7 +57,7 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
     canWriteIndex: null,
   });
 
-  const { listPrivileges, siemPrivileges } = useUserPrivileges();
+  const { listPrivileges, rulesPrivileges } = useUserPrivileges();
 
   // handleReadResult
   useEffect(() => {
@@ -72,16 +72,16 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
         isAuthenticated,
         canReadIndex: canReadIndex(listsPrivileges) && canReadIndex(listItemsPrivileges),
         canManageIndex:
-          siemPrivileges.crud &&
+          rulesPrivileges.edit &&
           canManageIndex(listsPrivileges) &&
           canManageIndex(listItemsPrivileges),
         canWriteIndex:
-          siemPrivileges.crud &&
+          rulesPrivileges.edit &&
           canWriteIndex(listsPrivileges) &&
           canWriteIndex(listItemsPrivileges),
       });
     }
-  }, [listPrivileges.result, siemPrivileges.crud]);
+  }, [listPrivileges.result, rulesPrivileges.edit]);
 
   // handleReadError
   useEffect(() => {
