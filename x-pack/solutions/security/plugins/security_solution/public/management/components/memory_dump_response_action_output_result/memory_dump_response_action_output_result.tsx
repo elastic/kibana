@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KeyValueDisplay } from '../key_value_display';
 import { CONSOLE_COMMANDS, RESPONSE_ACTION_STATUS } from '../../common/translations';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -61,6 +62,13 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
           <div data-test-subj={testId('success')}>
             {agentActionResult?.content ? (
               <div>
+                <div>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpointResponseActions.memoryDumpAction.successTitle"
+                    defaultMessage="Memory dump file as created on host:"
+                  />
+                </div>
+                <EuiSpacer size="xs" />
                 <KeyValueDisplay
                   name={CONSOLE_COMMANDS.memoryDump.resultFileLabel}
                   value={agentActionResult.content.path}
