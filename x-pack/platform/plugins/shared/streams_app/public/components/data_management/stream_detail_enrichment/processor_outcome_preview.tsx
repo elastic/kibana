@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
-  EuiButtonGroup,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -136,26 +135,19 @@ export const ProcessorOutcomePreview = () => {
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
-          <EuiFlexItem>
-            <PreviewDocumentsGroupBy />
-          </EuiFlexItem>
-          {!isEmpty(previewDocuments) && (
-            <EuiFlexItem grow={false}>
-              <ViewModeToggle
-                viewMode={effectiveViewMode}
-                setViewMode={setViewMode}
-                isDisabled={isViewModeForced}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <PreviewDocumentsGroupBy />
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isEmpty(previewDocuments) ? (
         <NoPreviewDocumentsEmptyPrompt />
       ) : (
-        <OutcomePreviewTable previewDocuments={previewDocuments} viewMode={effectiveViewMode} />
+        <OutcomePreviewTable
+          previewDocuments={previewDocuments}
+          viewMode={effectiveViewMode}
+          userSelectedViewMode={viewMode}
+          setViewMode={setViewMode}
+          isViewModeDisabled={isViewModeForced}
+        />
       )}
     </>
   );
@@ -237,50 +229,18 @@ const PreviewDocumentsGroupBy = () => {
   );
 };
 
-const ViewModeToggle = ({
-  viewMode,
-  setViewMode,
-  isDisabled,
-}: {
-  viewMode: PreviewTableMode;
-  setViewMode: (mode: PreviewTableMode) => void;
-  isDisabled: boolean;
-}) => {
-  const viewModeOptions = [
-    {
-      id: 'columns',
-      label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.columns', {
-        defaultMessage: 'Columns',
-      }),
-    },
-    {
-      id: 'summary',
-      label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
-        defaultMessage: 'Summary',
-      }),
-    },
-  ];
-
-  return (
-    <EuiButtonGroup
-      legend={i18n.translate('xpack.streams.processorOutcomePreview.viewModeToggle.legend', {
-        defaultMessage: 'Preview view mode',
-      })}
-      options={viewModeOptions}
-      idSelected={viewMode}
-      onChange={(id) => setViewMode(id as PreviewTableMode)}
-      buttonSize="compressed"
-      isDisabled={isDisabled}
-    />
-  );
-};
-
 const OutcomePreviewTable = ({
   previewDocuments,
   viewMode,
+  userSelectedViewMode,
+  setViewMode,
+  isViewModeDisabled,
 }: {
   previewDocuments: FlattenRecord[];
   viewMode: PreviewTableMode;
+  userSelectedViewMode: PreviewTableMode;
+  setViewMode: (mode: PreviewTableMode) => void;
+  isViewModeDisabled: boolean;
 }) => {
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
@@ -508,6 +468,11 @@ const OutcomePreviewTable = ({
           renderCellValue={renderCellValue}
           mode={viewMode}
           streamName={streamName}
+          viewModeToggle={{
+            currentMode: userSelectedViewMode,
+            setViewMode,
+            isDisabled: isViewModeDisabled,
+          }}
         />
       </RowSelectionContext.Provider>
       <DocViewerContext.Provider value={docViewerContext}>

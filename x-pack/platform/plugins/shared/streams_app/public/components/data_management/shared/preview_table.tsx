@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiToolTip,
   useEuiTheme,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
@@ -108,6 +109,7 @@ export function PreviewTable({
   cellActions,
   mode = 'columns',
   streamName,
+  viewModeToggle,
 }: {
   documents: SampleDocument[] | DocumentWithIgnoredFields[];
   displayColumns?: string[];
@@ -129,6 +131,11 @@ export function PreviewTable({
   cellActions?: EuiDataGridColumnCellAction[];
   mode?: PreviewTableMode;
   streamName?: string;
+  viewModeToggle?: {
+    currentMode: PreviewTableMode;
+    setViewMode: (mode: PreviewTableMode) => void;
+    isDisabled: boolean;
+  };
 }) {
   const { euiTheme: theme } = useEuiTheme();
   const {
@@ -340,6 +347,53 @@ export function PreviewTable({
     EuiDataGridRowHeightsOptions | undefined
   >(rowHeightsOptions);
 
+  const toolbarVisibilityConfig = useMemo(() => {
+    if (!toolbarVisibility) {
+      return false;
+    }
+
+    if (!viewModeToggle) {
+      return true;
+    }
+
+    const viewModeOptions = [
+      {
+        id: 'columns' as const,
+        label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.columns', {
+          defaultMessage: 'Columns',
+        }),
+      },
+      {
+        id: 'summary' as const,
+        label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
+          defaultMessage: 'Summary',
+        }),
+      },
+    ];
+
+    return {
+      additionalControls: {
+        left: {
+          append: (
+            <EuiButtonGroup
+              legend={i18n.translate(
+                'xpack.streams.processorOutcomePreview.viewModeToggle.legend',
+                {
+                  defaultMessage: 'Preview view mode',
+                }
+              )}
+              options={viewModeOptions}
+              idSelected={viewModeToggle.currentMode}
+              onChange={(id) => viewModeToggle.setViewMode(id as PreviewTableMode)}
+              buttonSize="compressed"
+              isDisabled={viewModeToggle.isDisabled}
+            />
+          ),
+        },
+      },
+    };
+  }, [toolbarVisibility, viewModeToggle]);
+
   return (
     <EuiDataGrid
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
@@ -357,7 +411,7 @@ export function PreviewTable({
       sorting={sortingConfig}
       inMemory={sortingConfig ? { level: 'sorting' } : undefined}
       height={height}
-      toolbarVisibility={toolbarVisibility}
+      toolbarVisibility={toolbarVisibilityConfig}
       rowCount={documents.length}
       rowHeightsOptions={{
         ...currentRowHeights,
