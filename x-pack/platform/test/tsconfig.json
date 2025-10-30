@@ -162,5 +162,6 @@
     "@kbn/management-settings-ids",
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/reporting-test-routes",
+    "@kbn/alerting-types",
   ]
 }
