@@ -31,6 +31,8 @@ export async function previewTikaContents(
     ],
   };
 
+  // await new Promise((resolve) => setTimeout(resolve, 10000));
+
   const resp = await client.asInternalUser.ingest.simulate({
     pipeline,
     docs: [

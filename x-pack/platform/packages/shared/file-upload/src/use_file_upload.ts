@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { Index } from '@kbn/index-management-shared-types/src/types';
 import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FileUploadResults } from '@kbn/file-upload-common';
+import { isAbortError, type FileUploadResults } from '@kbn/file-upload-common';
 import useMountedState from 'react-use/lib/useMountedState';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { CLASH_ERROR_TYPE, STATUS, type FileUploadManager } from '../file_upload_manager';
@@ -148,7 +148,8 @@ export function useFileUpload(
   const uploadStarted =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
     uploadStatus.overallImportStatus === STATUS.COMPLETED ||
-    uploadStatus.overallImportStatus === STATUS.FAILED;
+    uploadStatus.overallImportStatus === STATUS.FAILED ||
+    uploadStatus.overallImportStatus === STATUS.ABORTED;
 
   const onImportClick = useCallback(async () => {
     const existingIndex = fileUploadManager.getExistingIndexName();
@@ -164,11 +165,17 @@ export function useFileUpload(
       }
       setImportResults(res);
     } catch (e) {
-      notifications.toasts.addError(e, {
-        title: i18n.translate('xpack.dataVisualizer.file.importView.importErrorNotificationTitle', {
-          defaultMessage: 'Error performing import',
-        }),
-      });
+      if (isAbortError(e) === false) {
+        // don't show a notification if the import was aborted
+        notifications.toasts.addError(e, {
+          title: i18n.translate(
+            'xpack.dataVisualizer.file.importView.importErrorNotificationTitle',
+            {
+              defaultMessage: 'Error performing import',
+            }
+          ),
+        });
+      }
     }
   }, [
     dataViewName,
@@ -233,6 +240,14 @@ export function useFileUpload(
 
   const pipelines = useObservable(fileUploadManager.filePipelines$, []);
 
+  const abortAllAnalysis = useCallback(() => {
+    fileUploadManager.abortAnalysis();
+  }, [fileUploadManager]);
+
+  const abortImport = useCallback(() => {
+    fileUploadManager.abortImport();
+  }, [fileUploadManager]);
+
   return {
     fileUploadManager,
     indexName,
@@ -259,6 +274,8 @@ export function useFileUpload(
     indices,
     existingIndexName,
     setExistingIndexName,
+    abortAllAnalysis,
+    abortImport,
   };
 }
 
