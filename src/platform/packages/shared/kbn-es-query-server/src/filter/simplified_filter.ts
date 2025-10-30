@@ -69,11 +69,6 @@ export const filterValueSchema = schema.oneOf(
  * Base properties shared by all simplified filters
  */
 const baseFilterPropertiesSchema = {
-  id: schema.maybe(
-    schema.string({
-      meta: { description: 'Unique identifier for the filter' },
-    })
-  ),
   pinned: schema.maybe(
     schema.boolean({
       meta: { description: 'Whether the filter is pinned' },
@@ -89,7 +84,7 @@ const baseFilterPropertiesSchema = {
       meta: { description: 'Owner that manages this filter' },
     })
   ),
-  indexPattern: schema.maybe(
+  dataViewId: schema.maybe(
     schema.string({
       meta: { description: 'Data view ID that this filter applies to' },
     })
