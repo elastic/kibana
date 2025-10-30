@@ -616,12 +616,13 @@ export const getEndpointConsoleCommands = ({
         }
 
         const argsInterface = enteredCommand.args;
-        const memoryDumpType = argsInterface.args.type.at(0);
 
         // Nothing to do if all the user did was `--help`
         if (argsInterface.hasArg('help')) {
           return true;
         }
+
+        const memoryDumpType = argsInterface.args.type.at(0);
 
         // PID and Entity ID are only supported for process memory dumps
         if (
