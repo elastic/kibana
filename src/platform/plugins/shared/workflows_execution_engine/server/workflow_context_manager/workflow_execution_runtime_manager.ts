@@ -531,10 +531,9 @@ export class WorkflowExecutionRuntimeManager {
             yaml: workflowExecution.yaml,
           };
 
-          // Generate unique task ID with timestamp
-          const timestamp = Date.now();
+          // Use non-unique task ID to match WorkflowTaskScheduler format
           const taskInstance = {
-            id: `workflow:${workflowExecution.workflowId}:scheduled:${timestamp}`,
+            id: `workflow:${workflowExecution.workflowId}:scheduled`,
             taskType: 'workflow:scheduled',
             runAt: nextRunTime,
             params: {
@@ -552,7 +551,7 @@ export class WorkflowExecutionRuntimeManager {
             enabled: true,
           };
 
-          await this.taskManager.schedule(taskInstance);
+          await this.taskManager.ensureScheduled(taskInstance);
 
           this.workflowLogger?.logInfo('Scheduled next workflow execution', {
             workflow: { id: workflowExecution.workflowId },
