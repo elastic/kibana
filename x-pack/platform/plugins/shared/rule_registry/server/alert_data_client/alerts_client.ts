@@ -537,6 +537,7 @@ export class AlertsClient {
           index,
           operation,
           lastSortIds,
+          size: 1000,
         });
 
         if (lastSortIds != null && result?.hits.hits.length === 0) {
