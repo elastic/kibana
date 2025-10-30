@@ -7,5 +7,5 @@ Use these connectors to integrate with third-party services for alerting, incide
 
 ## Available connectors
 
-```{include} _snippets/alerting-cases-connectors-list.md
-```
+:::{include} _snippets/alerting-cases-connectors-list.md
+:::

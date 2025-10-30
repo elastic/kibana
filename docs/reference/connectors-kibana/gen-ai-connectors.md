@@ -7,5 +7,5 @@ Use these connectors to connect to third-party large language model (LLM) servic
 
 ## Available connectors
 
-```{include} _snippets/gen-ai-connectors-list.md
-```
+:::{include} _snippets/gen-ai-connectors-list.md
+:::

@@ -30,22 +30,22 @@ Access to connectors is granted based on your privileges to alerting-enabled fea
 
 :::{dropdown} Generative AI
 
-```{include} connectors-kibana/_snippets/gen-ai-connectors-list.md
-```
+:::{include} connectors-kibana/_snippets/gen-ai-connectors-list.md
+:::
 
 :::
 
 :::{dropdown} Elastic Stack
 
-```{include} connectors-kibana/_snippets/elastic-connectors-list.md
-```
+:::{include} connectors-kibana/_snippets/elastic-connectors-list.md
+:::
 
 :::
 
 :::{dropdown} Alerting and case management
 
-```{include} connectors-kibana/_snippets/alerting-cases-connectors-list.md
-```
+:::{include} connectors-kibana/_snippets/alerting-cases-connectors-list.md
+:::
 
 :::
 
