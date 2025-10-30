@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, Subject, combineLatestWith } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  PluginInitializerContext,
   Plugin as IPlugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -30,20 +30,20 @@ import type {
   PluginSetup,
   PluginStart,
   SetupPlugins,
+  StartedSubPlugins,
   StartPlugins,
+  StartPluginsDependencies,
   StartServices,
   SubPlugins,
-  StartedSubPlugins,
-  StartPluginsDependencies,
 } from './types';
-import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations';
+import { ASSISTANT_MANAGEMENT_TITLE, SOLUTION_NAME } from './common/translations';
 
-import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
+import { APP_ICON_SOLUTION, APP_ID, APP_PATH, APP_UI_ID } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
 import {
-  applicationLinksUpdater,
   type ApplicationLinksUpdateParams,
+  applicationLinksUpdater,
 } from './app/links/application_links_updater';
 import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from './common/types';
 
@@ -344,9 +344,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       rules: subPlugins.rules.start(storage),
       threatIntelligence: subPlugins.threatIntelligence.start(),
       timelines: subPlugins.timelines.start(),
-      entityAnalytics: subPlugins.entityAnalytics.start(
-        this.experimentalFeatures.riskScoringRoutesEnabled
-      ),
+      entityAnalytics: subPlugins.entityAnalytics.start(),
       siemMigrations: subPlugins.siemMigrations.start(this.experimentalFeatures),
       siemReadiness: subPlugins.siemReadiness.start(),
       configurations: subPlugins.configurations.start(),
