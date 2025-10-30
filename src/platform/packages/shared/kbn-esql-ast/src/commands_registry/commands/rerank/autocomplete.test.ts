@@ -22,17 +22,24 @@ import {
 import { expectSuggestions, suggest } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
+import {
+  logicalOperators,
+  comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '../../../definitions/all_operators';
 
 // ============================================================================
-// Single Source of Truth - Operator Suggestions by Group
+// Operator Suggestions - Derived from Real Definitions
 // ============================================================================
 
 const OPERATOR_SUGGESTIONS = {
-  LOGICAL: ['AND', 'OR'],
-  COMPARISON: ['!=', '==', '>', '>=', '<', '<='],
-  PATTERN: ['LIKE', 'NOT LIKE', 'RLIKE', 'NOT RLIKE', ':'],
-  SET: ['IN', 'NOT IN'],
-  EXISTENCE: ['IS NULL', 'IS NOT NULL'],
+  LOGICAL: logicalOperators.map(({ name }) => name.toUpperCase()),
+  COMPARISON: comparisonFunctions.map(({ name }) => name.toUpperCase()),
+  PATTERN: [...patternMatchOperators.map(({ name }) => name.toUpperCase()), ':'], // ':' is assignment, keep for now
+  SET: inOperators.map(({ name }) => name.toUpperCase()),
+  EXISTENCE: nullCheckOperators.map(({ name }) => name.toUpperCase()),
 };
 
 // Helper to add placeholder to operator labels for test expectations
@@ -339,9 +346,13 @@ describe('RERANK Autocomplete', () => {
       await expectRerankSuggestions(query, {
         contains: [
           addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[0]])[0],
-          ...addPlaceholder(OPERATOR_SUGGESTIONS.COMPARISON.slice(0, 2)),
+          ...addPlaceholder(OPERATOR_SUGGESTIONS.SET.slice(0, 1)),
+          OPERATOR_SUGGESTIONS.EXISTENCE[0],
         ],
-        notContains: NEXT_ACTIONS_EXPRESSIONS,
+        notContains: [
+          ...NEXT_ACTIONS_EXPRESSIONS,
+          ...addPlaceholder(OPERATOR_SUGGESTIONS.COMPARISON),
+        ],
       });
     });
   });
