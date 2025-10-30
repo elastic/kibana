@@ -11,10 +11,10 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
-import { TrustedAppsForm } from './form';
+import { TrustedAppsForm, validateValues } from './form'; // validateValues is tested in its own describe block below
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
@@ -82,7 +82,7 @@ describe('Trusted apps form', () => {
     overrides: Partial<ArtifactFormComponentProps['item']> = {}
   ): ArtifactFormComponentProps['item'] {
     const defaults: ArtifactFormComponentProps['item'] = {
-      list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       name: '',
       description: '',
       os_types: [OperatingSystem.WINDOWS],
@@ -773,6 +773,112 @@ describe('Trusted apps form', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('validateValues function', () => {
+    it('should not crash when validating advanced mode entries with nested types', () => {
+      const item: ArtifactFormComponentProps['item'] = {
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+        name: 'Test with nested entries',
+        description: 'Testing nested entry validation',
+        os_types: [OperatingSystem.WINDOWS],
+        tags: ['policy:all', 'form_mode:advanced'],
+        type: 'simple',
+        entries: [
+          // Nested entry - no top-level 'value' property
+          {
+            field: 'file.Ext',
+            type: 'nested',
+            entries: [
+              {
+                field: 'malware_signature.primary_signature.hash',
+                operator: 'included',
+                type: 'match',
+                value: 'abc123',
+              },
+            ],
+          },
+          // Non-nested entry with empty value
+          {
+            field: 'process.hash.sha256',
+            operator: 'included',
+            type: 'match',
+            value: '',
+          },
+        ],
+      };
+
+      // This should not throw when encountering nested entries
+      expect(() => validateValues(item)).not.toThrow();
+
+      // Should return invalid because of empty sha256 value
+      const result = validateValues(item);
+      expect(result.isValid).toBe(false);
+    });
+
+    it('should validate advanced mode entries with only nested entries as valid', () => {
+      const item: ArtifactFormComponentProps['item'] = {
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+        name: 'Test with only nested entries',
+        description: '',
+        os_types: [OperatingSystem.WINDOWS],
+        tags: ['policy:all', 'form_mode:advanced'],
+        type: 'simple',
+        entries: [
+          {
+            field: 'file.Ext',
+            type: 'nested',
+            entries: [
+              {
+                field: 'code_signature.subject_name',
+                operator: 'included',
+                type: 'match',
+                value: 'SomeSigner',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = validateValues(item);
+      // Should be valid - nested entries are skipped in the empty value check
+      expect(result.isValid).toBe(true);
+    });
+
+    it('should validate advanced mode with mixed nested and non-nested entries', () => {
+      const item: ArtifactFormComponentProps['item'] = {
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+        name: 'Test mixed entries',
+        description: '',
+        os_types: [OperatingSystem.WINDOWS],
+        tags: ['policy:all', 'form_mode:advanced'],
+        type: 'simple',
+        entries: [
+          {
+            field: 'file.Ext',
+            type: 'nested',
+            entries: [
+              {
+                field: 'code_signature.subject_name',
+                operator: 'included',
+                type: 'match',
+                value: 'SomeSigner',
+              },
+            ],
+          },
+          {
+            field: 'process.hash.sha256',
+            operator: 'included',
+            type: 'match',
+            value: 'valid-hash-value',
+          },
+        ],
+      };
+
+      const result = validateValues(item);
+      // Should be valid - all non-nested entries have values
+      expect(result.isValid).toBe(true);
     });
   });
 });

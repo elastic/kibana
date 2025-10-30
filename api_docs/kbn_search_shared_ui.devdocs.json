@@ -212,6 +212,21 @@
       },
       {
         "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.GETTING_STARTED_LOCALSTORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "GETTING_STARTED_LOCALSTORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"gettingStartedVisited\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.GLOBAL_EMPTY_STATE_SKIP_KEY",
         "type": "string",
         "tags": [],
@@ -219,6 +234,21 @@
         "description": [],
         "signature": [
           "\"search_onboarding_global_empty_state_skip\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.SEARCH_GETTING_STARTED_FEATURE_FLAG",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_GETTING_STARTED_FEATURE_FLAG",
+        "description": [],
+        "signature": [
+          "\"searchSolution.gettingStartedEnabled\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
         "deprecated": false,
