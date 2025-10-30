@@ -1480,7 +1480,8 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
-        "@seriousme/openapi-schema-validator"
+        "ajv-draft-04",
+        "ajv-formats"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -4739,7 +4740,7 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:current-major"
+        "backport:previous-minor"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true

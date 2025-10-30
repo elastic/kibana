@@ -10,10 +10,10 @@ import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useConversationId } from '../../../hooks/use_conversation_id';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
-import { useConversationActions } from '../../../hooks/use_conversation_actions';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 interface ConversationItemProps {
   conversation: ConversationWithoutRounds;
@@ -22,22 +22,31 @@ interface ConversationItemProps {
 export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation }) => {
   const { createOnechatUrl } = useNavigation();
   const currentConversationId = useConversationId();
-  const { deleteConversation } = useConversationActions();
+  const { conversationActions, isEmbeddedContext, setConversationId } = useConversationContext();
   const isActive = currentConversationId === conversation.id;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
 
   const handleDelete = useCallback(async () => {
     setShowDeleteModal(false);
-    await deleteConversation(conversation.id);
-  }, [conversation.id, deleteConversation]);
+    await conversationActions.deleteConversation(conversation.id);
+  }, [conversation.id, conversationActions]);
+
+  const handleClick = useCallback(() => {
+    setConversationId?.(conversation.id);
+  }, [setConversationId, conversation.id]);
 
   return (
     <>
       <EuiListGroupItem
         color="text"
         size="s"
-        href={createOnechatUrl(appPaths.chat.conversation({ conversationId: conversation.id }))}
+        href={
+          isEmbeddedContext
+            ? undefined
+            : createOnechatUrl(appPaths.chat.conversation({ conversationId: conversation.id }))
+        }
+        onClick={isEmbeddedContext ? handleClick : undefined}
         data-test-subj={`conversationItem-${conversation.id}`}
         label={conversation.title}
         isActive={isActive}
