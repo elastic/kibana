@@ -1745,10 +1745,6 @@
                           "description": "Optional id for the attachment.",
                           "type": "string"
                         },
-                        "transient": {
-                          "description": "When true, the attachment will only be exposed to the agent in the current round of conversation.",
-                          "type": "boolean"
-                        },
                         "type": {
                           "description": "Type of the attachment.",
                           "type": "string"
@@ -1902,10 +1898,6 @@
                         "id": {
                           "description": "Optional id for the attachment.",
                           "type": "string"
-                        },
-                        "transient": {
-                          "description": "When true, the attachment will only be exposed to the agent in the current round of conversation.",
-                          "type": "boolean"
                         },
                         "type": {
                           "description": "Type of the attachment.",
