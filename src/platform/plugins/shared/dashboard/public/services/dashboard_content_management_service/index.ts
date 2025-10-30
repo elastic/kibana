@@ -9,16 +9,7 @@
 
 import { DashboardContentManagementCache } from './dashboard_content_management_cache';
 import { checkForDuplicateDashboardTitle } from './lib/check_for_duplicate_dashboard_title';
-import { deleteDashboards } from './lib/delete_dashboards';
-import {
-  findDashboardById,
-  findDashboardIdByTitle,
-  findDashboardsByIds,
-  searchDashboards,
-} from './lib/find_dashboards';
-import { loadDashboardState } from './lib/load_dashboard_state';
 import { saveDashboardState } from './lib/save_dashboard_state';
-import { updateDashboardMeta } from './lib/update_dashboard_meta';
 
 let dashboardContentManagementCache: DashboardContentManagementCache;
 
@@ -30,16 +21,7 @@ export const getDashboardContentManagementCache = () => {
 
 export const getDashboardContentManagementService = () => {
   return {
-    loadDashboardState,
     saveDashboardState,
-    findDashboards: {
-      search: searchDashboards,
-      findById: findDashboardById,
-      findByIds: findDashboardsByIds,
-      findByTitle: findDashboardIdByTitle,
-    },
     checkForDuplicateDashboardTitle,
-    deleteDashboards,
-    updateDashboardMeta,
   };
 };

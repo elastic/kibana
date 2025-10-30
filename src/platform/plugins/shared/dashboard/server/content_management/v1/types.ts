@@ -12,7 +12,6 @@ import type {
   CreateIn,
   CreateResult,
   GetIn,
-  GetResult,
   SearchIn,
   SearchResult,
   UpdateIn,
@@ -39,11 +38,13 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
 
 export type GridData = TypeOf<typeof schema.panelGridDataSchema>;
 
+// TODO rename to DashboardGetRequestBody
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
-export type DashboardAPIGetOut = GetResult<
-  TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>,
-  TypeOf<typeof schema.dashboardGetResultMetaSchema>
->;
+// REST API Get response body
+// TODO rename to DashboardGetResponseBody
+export type DashboardAPIGetOut = TypeOf<typeof schema.getDashboardAPIGetResultSchema>;
+// RPC Get response body
+// TODO remove and have RPC endpoints return same shape as REST API or remove RPC routes altogether
 export type DashboardGetOut = TypeOf<ReturnType<typeof schema.getDashboardGetResultSchema>>;
 
 export type DashboardCreateIn = CreateIn<typeof CONTENT_ID, DashboardState>;

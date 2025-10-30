@@ -13,20 +13,10 @@ import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import type { DashboardState, DashboardAPIGetOut } from '../../../server/content_management';
 import type { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
-import type {
-  FindDashboardsByIdResponse,
-  SearchDashboardsArgs,
-  SearchDashboardsResponse,
-} from './lib/find_dashboards';
-import type { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
 
 export interface DashboardContentManagementService {
-  findDashboards: FindDashboardsService;
-  deleteDashboards: (ids: string[]) => Promise<void>;
-  loadDashboardState: (props: { id?: string }) => Promise<LoadDashboardReturn>;
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
-  updateDashboardMeta: (props: UpdateDashboardMetaProps) => Promise<void>;
 }
 
 /**
@@ -80,19 +70,4 @@ export interface SaveDashboardReturn {
   error?: string;
   references?: Reference[];
   redirectRequired?: boolean;
-}
-
-/**
- * Types for Finding Dashboards
- */
-export interface FindDashboardsService {
-  search: (
-    props: Pick<
-      SearchDashboardsArgs,
-      'hasReference' | 'hasNoReference' | 'search' | 'size' | 'options'
-    >
-  ) => Promise<SearchDashboardsResponse>;
-  findById: (id: string) => Promise<FindDashboardsByIdResponse>;
-  findByIds: (ids: string[]) => Promise<FindDashboardsByIdResponse[]>;
-  findByTitle: (title: string) => Promise<{ id: string } | undefined>;
 }
