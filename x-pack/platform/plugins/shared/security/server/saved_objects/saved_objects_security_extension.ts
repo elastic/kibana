@@ -1240,8 +1240,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
      * authorization checks.
      */
 
+    let authorizationResult: CheckAuthorizationResult<A>;
     if (typesRequiringAccessControl.size > 0) {
-      const authorizationResult = await this.checkAuthorization({
+      authorizationResult = await this.checkAuthorization({
         types: new Set(typesRequiringAccessControl),
         spaces: spacesToAuthorize,
         actions: new Set<A>([]),
@@ -1268,13 +1269,21 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           });
         },
       });
-
-      return authorizationResult;
+    } else {
+      authorizationResult = {
+        status: 'fully_authorized',
+        typeMap: new Map(),
+      };
     }
-    return {
-      status: 'fully_authorized',
-      typeMap: new Map(),
-    };
+    if (auditAction) {
+      this.auditHelper({
+        action: auditAction,
+        objects,
+        useSuccessOutcome: true,
+      });
+    }
+
+    return authorizationResult;
   }
 
   auditClosePointInTime() {
