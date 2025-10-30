@@ -11,30 +11,19 @@ import type { ComponentType, ReactElement, Ref } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { State } from '../../../../common/store';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   EqlEventsCountBadge,
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store';
 import type { CellValueElementProps } from '../cell_rendering';
-import {
-  getActiveTabSelector,
-  getEventIdToNoteIdsSelector,
-  getNoteIdsSelector,
-  getNotesSelector,
-  getPinnedEventSelector,
-  getShowTimelineSelector,
-} from './selectors';
+import { getActiveTabSelector, getPinnedEventSelector, getShowTimelineSelector } from './selectors';
 import * as i18n from './translations';
 import { initializeTimelineSettings } from '../../../store/actions';
 import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
@@ -211,17 +200,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
   const getNumberOfPinnedEvents = useMemo(() => getPinnedEventSelector(), []);
-  const getAppNotes = useMemo(() => getNotesSelector(), []);
-  const getTimelineNoteIds = useMemo(() => getNoteIdsSelector(), []);
-  const getTimelinePinnedEventNotes = useMemo(() => getEventIdToNoteIdsSelector(), []);
   const { isEsqlAdvancedSettingEnabled } = useEsqlAvailability();
 
   const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
     selectTimelineESQLSavedSearchId(state, timelineId)
-  );
-
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
   );
 
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
@@ -233,29 +215,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const numberOfPinnedEvents = useShallowEqualSelector((state) =>
     getNumberOfPinnedEvents(state, timelineId)
-  );
-  const globalTimelineNoteIds = useDeepEqualSelector((state) =>
-    getTimelineNoteIds(state, timelineId)
-  );
-  const eventIdToNoteIds = useDeepEqualSelector((state) =>
-    getTimelinePinnedEventNotes(state, timelineId)
-  );
-  const appNotes = useDeepEqualSelector((state) => getAppNotes(state));
-
-  // old notes system (through timeline)
-  const allTimelineNoteIds = useMemo(() => {
-    const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
-      (acc, v) => [...acc, ...v],
-      []
-    );
-    return [...globalTimelineNoteIds, ...eventNoteIds];
-  }, [globalTimelineNoteIds, eventIdToNoteIds]);
-
-  const numberOfNotesOldSystem = useMemo(
-    () =>
-      appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote.id)).length +
-      (isEmpty(timelineDescription) ? 0 : 1),
-    [appNotes, allTimelineNoteIds, timelineDescription]
   );
 
   const timeline = useSelector((state: State) => selectTimelineById(state, timelineId));
@@ -289,11 +248,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const numberOfNotesNewSystem = useMemo(
     () => notesNewSystem.length + (isEmpty(timelineDescription) ? 0 : 1),
     [notesNewSystem, timelineDescription]
-  );
-
-  const numberOfNotes = useMemo(
-    () => (securitySolutionNotesDisabled ? numberOfNotesOldSystem : numberOfNotesNewSystem),
-    [numberOfNotesNewSystem, numberOfNotesOldSystem, securitySolutionNotesDisabled]
   );
 
   const setActiveTab = useCallback(
@@ -382,9 +336,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
-            {showTimeline && numberOfNotes > 0 && timelineType === TimelineTypeEnum.default && (
-              <CountBadge>{numberOfNotes}</CountBadge>
-            )}
+            {showTimeline &&
+              numberOfNotesNewSystem > 0 &&
+              timelineType === TimelineTypeEnum.default && (
+                <CountBadge>{numberOfNotesNewSystem}</CountBadge>
+              )}
           </StyledEuiTab>
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
