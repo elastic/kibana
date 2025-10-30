@@ -20613,10 +20613,10 @@ executable@^4.1.1:
   dependencies:
     pify "^2.2.0"
 
-exit-hook@2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-2.2.0.tgz#f5502f92179018e867f2d8ee4428392da7f3894e"
-  integrity sha512-YFH+2oGdldRH5GqGpnaiKbBxWHMmuXHmKTMtUC58kWSOrnTf95rKITVSFTTtas14DWvWpih429+ffAvFetPwNA==
+exit-hook@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-5.0.0.tgz#9364b77b989c10ba92b19f8bbc90613683968ec0"
+  integrity sha512-Kz0x74pb0yYbEmcZ42QL5tPefRA/XqQKf2ZUD8isF6eOlpMB3F+HukHgdHVbFVB+k6DICCWnGS5qhynzxdXxqw==
 
 exit-on-epipe@~1.0.1:
   version "1.0.1"
