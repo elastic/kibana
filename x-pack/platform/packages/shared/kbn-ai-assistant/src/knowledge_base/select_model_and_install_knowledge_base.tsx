@@ -139,7 +139,7 @@ export function SelectModelAndInstallKnowledgeBase({
         </EuiLink>
       </EuiText>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false} css={{ width: 320 }}>
@@ -156,11 +156,12 @@ export function SelectModelAndInstallKnowledgeBase({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiButton
+            size="s"
             color="primary"
             fill
             isLoading={isInstalling}
@@ -174,6 +175,8 @@ export function SelectModelAndInstallKnowledgeBase({
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="l" />
     </>
   );
 }

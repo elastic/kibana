@@ -18,7 +18,7 @@ import {
 
 export const buildkiteMappings: ClusterPutComponentTemplateRequest = {
   name: 'scout-test-event.mappings.buildkite',
-  version: 1,
+  version: 2,
   template: {
     mappings: {
       properties: {

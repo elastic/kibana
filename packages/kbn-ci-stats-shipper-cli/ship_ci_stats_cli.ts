@@ -31,7 +31,7 @@ run(
     const reporter = CiStatsReporter.fromEnv(log);
 
     if (!reporter.isEnabled()) {
-      throw maybeFail('unable to initilize the CI Stats reporter');
+      throw maybeFail('unable to initialize the CI Stats reporter');
     }
 
     const overLimit: string[] = [];
@@ -50,7 +50,9 @@ run(
       for (const metric of metrics) {
         if (metric.limit !== undefined && metric.limit < metric.value) {
           overLimit.push(
-            `${metric.group} > ${metric.id} with value of ${metric.value} is greater than the limit of ${metric.limit}`
+            `${metric.group} for ${metric.id} plugin is greater than the limit of ${metric.limit}. The current value is ${metric.value}.`,
+            'To update the limit, run the following command locally:',
+            `node scripts/build_kibana_platform_plugins --focus ${metric.id} --update-limits`
           );
         }
       }
