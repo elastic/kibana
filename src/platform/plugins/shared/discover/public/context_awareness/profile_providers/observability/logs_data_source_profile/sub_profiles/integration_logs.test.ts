@@ -11,7 +11,7 @@ import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_wi
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import type { RootContext } from '../../../../profiles';
 import { SolutionType } from '../../../../profiles';
-import { createContextAwarenessMocks } from '../../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
@@ -22,7 +22,7 @@ const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
   profileId: OBSERVABILITY_ROOT_PROFILE_ID,
   solutionType: SolutionType.Observability,
 };
-const { profileProviderServices } = createContextAwarenessMocks();
+const profileProviderServices = createProfileProviderSharedServicesMock();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
 
 describe('createIntegrationLogsDataSourceProfileProviders', () => {

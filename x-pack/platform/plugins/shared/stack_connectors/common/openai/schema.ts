@@ -46,6 +46,7 @@ export const ConfigSchema = z.union([
       verificationMode: z.enum(['full', 'certificate', 'none']).default('full').optional(),
       headers: z.record(z.string(), z.string()).optional(),
       contextWindowLength: z.coerce.number().optional(),
+      temperature: z.coerce.number().optional(),
       enableNativeFunctionCalling: z.boolean().optional(),
       temperature: z.coerce.number().optional(),
     })

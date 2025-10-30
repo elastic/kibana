@@ -25,8 +25,7 @@ export default function (providerContext: FtrProviderContext) {
     expect(actionStatus.nbAgentsActioned).to.eql(agentCount);
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/238933
-  describe.skip('fleet_agents_change_privilege_level', () => {
+  describe('fleet_agents_change_privilege_level', () => {
     before(async () => {
       // Not strictly necessary, but allows automatic cleanup.
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
@@ -426,12 +425,14 @@ export default function (providerContext: FtrProviderContext) {
         expect(actionStatus.nbAgentsActionCreated).to.eql(1);
         expect(actionStatus.nbAgentsFailed).to.eql(2);
         expect(actionStatus.latestErrors.length).to.eql(2);
-        expect(actionStatus.latestErrors[0].agentId).to.eql('agent5');
-        expect(actionStatus.latestErrors[0].error).to.eql(
+        expect(
+          actionStatus.latestErrors.find((error: any) => error.agentId === 'agent5').error
+        ).to.eql(
           'Cannot remove root privilege. Privilege level change is supported from version 9.3.0.'
         );
-        expect(actionStatus.latestErrors[1].agentId).to.eql('agent6');
-        expect(actionStatus.latestErrors[1].error).to.eql(
+        expect(
+          actionStatus.latestErrors.find((error: any) => error.agentId === 'agent6').error
+        ).to.eql(
           `Agent agent6 is on policy ${policy2.id}, which contains integrations that require root privilege: system`
         );
       });
