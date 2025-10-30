@@ -13,7 +13,7 @@ import {
 import type { Readable } from 'stream';
 import { omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type {
   ChatCompletionChunkEvent,
   ConversationCreateEvent,
