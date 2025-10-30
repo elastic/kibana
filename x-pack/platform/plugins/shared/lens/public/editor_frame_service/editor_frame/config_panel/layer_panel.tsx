@@ -344,7 +344,7 @@ export function LayerPanel(props: LayerPanelProps) {
           <header
             className="lnsLayerPanel__layerHeader"
             css={css`
-              padding: ${euiTheme.size.base} 0;
+              padding: 0 0 ${euiTheme.size.base} 0;
               border-bottom: ${euiTheme.border.thin};
             `}
           >
