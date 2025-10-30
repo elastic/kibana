@@ -51,6 +51,9 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindInternalOptions,
+  SavedObjectsRawDocSource,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
   ISavedObjectsRepository,
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
@@ -90,6 +93,7 @@ import {
   performResolve,
   performUpdateObjectsSpaces,
   performCollectMultiNamespaceReferences,
+  performSearch,
 } from './apis';
 import { createRepositoryHelpers } from './utils';
 import { performChangeOwnership } from './apis/change_ownership';
@@ -334,6 +338,15 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       },
       this.apiExecutionContext
     );
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.search}
+   */
+  async search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
+    options: SavedObjectsSearchOptions
+  ): Promise<SavedObjectsSearchResponse<T, A>> {
+    return performSearch({ options }, this.apiExecutionContext);
   }
 
   /**

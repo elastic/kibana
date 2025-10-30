@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject } from '..';
+import type { SavedObject, SavedObjectsRawDocSource } from '..';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -51,6 +51,8 @@ import type {
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessModeOptions,
   SavedObjectsChangeOwnershipOptions,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
 } from './apis';
 
 /**
@@ -184,6 +186,15 @@ export interface SavedObjectsClientContract {
   find<T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>>;
+
+  /**
+   * Performs a raw search against the saved objects indices, returning the raw Elasticsearch response
+   * @param options {@link SavedObjectsSearchOptions} - options for the search operation
+   * @returns the {@link SavedObjectsSearchResponse}
+   */
+  search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
+    options: SavedObjectsSearchOptions
+  ): Promise<SavedObjectsSearchResponse<T, A>>;
 
   /**
    * Returns an array of objects by id

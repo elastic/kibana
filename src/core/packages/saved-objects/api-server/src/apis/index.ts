@@ -89,3 +89,4 @@ export type {
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsChangeAccessModeOptions,
 } from './change_access_control';
+export type { SavedObjectsSearchOptions, SavedObjectsSearchResponse } from './search';
