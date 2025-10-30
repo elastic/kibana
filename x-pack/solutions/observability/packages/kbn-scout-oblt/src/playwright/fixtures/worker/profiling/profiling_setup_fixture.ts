@@ -16,6 +16,9 @@ export interface ProfilingSetupFixture {
   loadData: () => Promise<void>;
 }
 
+// This fixture should be used only in the global setup hook
+// because it needs to be run before any other test
+// and it needs to be run only once
 export const profilingSetupFixture = base.extend<{}, { profilingSetup: ProfilingSetupFixture }>({
   profilingSetup: [
     async ({ kbnClient, esClient, log }, use) => {
