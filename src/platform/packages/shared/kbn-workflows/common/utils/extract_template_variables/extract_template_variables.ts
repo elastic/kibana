@@ -66,7 +66,7 @@ function isLiteral(value: string): boolean {
  */
 export function extractTemplateVariables(template: string): string[] {
   const globalVars = liquidEngine.globalFullVariablesSync(template);
-  const filteredVars: string[] = [];
+  const truncatedVars: string[] = [];
 
   // Truncate variable paths at dynamic bracket accesses
   // e.g., items[i].name  =>  items
@@ -96,9 +96,9 @@ export function extractTemplateVariables(template: string): string[] {
     }
 
     if (resultVariable) {
-      filteredVars.push(resultVariable);
+      truncatedVars.push(resultVariable);
     }
   });
 
-  return Array.from(new Set(filteredVars));
+  return Array.from(new Set(truncatedVars));
 }
