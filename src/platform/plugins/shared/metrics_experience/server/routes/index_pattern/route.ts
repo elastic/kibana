@@ -26,7 +26,7 @@ export const getIndexPatternMetadataRoute = createRoute({
       from: z.string().datetime().transform(isoToEpoch),
     }),
   }),
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ context, params, logger, request }) => {
     const { elasticsearch, featureFlags } = await context.core;
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
@@ -37,6 +37,7 @@ export const getIndexPatternMetadataRoute = createRoute({
 
     const indexPatternMetadata = await getIndexPatternMetadata({
       esClient: createTracedEsClient({
+        request,
         logger,
         client: esClient,
         plugin: 'metrics_experience',

@@ -32,7 +32,7 @@ export const getFieldsRoute = createRoute({
       size: z.coerce.number().int().positive().default(100),
     }),
   }),
-  handler: async ({ context, params, logger, response }) => {
+  handler: async ({ context, params, logger, request }) => {
     const { elasticsearch, featureFlags } = await context.core;
     await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
 
@@ -42,6 +42,7 @@ export const getFieldsRoute = createRoute({
 
     const { fields, total } = await getMetricFields({
       esClient: createTracedEsClient({
+        request,
         logger,
         client: esClient,
         plugin: 'metrics_experience',
