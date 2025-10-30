@@ -17,6 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import {
+  selectCurrentStream,
+  useStreamsRoutingSelector,
+} from './state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
   value: string;
@@ -36,6 +40,15 @@ export function StreamNameFormRow({
 }: StreamNameFormRowProps) {
   const descriptionId = useGeneratedHtmlId();
 
+  const parentStreamName = useStreamsRoutingSelector((snapshot) =>
+    selectCurrentStream(snapshot.context)
+  ).name;
+  const prefix = parentStreamName + '.';
+
+  const partitionName = useMemo(() => {
+    return value.replace(prefix, '');
+  }, [value, prefix]);
+
   const helpText =
     value.length >= MAX_NAME_LENGTH && !readOnly
       ? i18n.translate('xpack.streams.streamDetailRouting.nameHelpText', {
@@ -45,17 +58,16 @@ export function StreamNameFormRow({
           },
         })
       : undefined;
-
-  const { prefix, partitionName } = useMemo(() => {
-    const parts = value.split('.');
-    return {
-      prefix: parts.slice(0, -1).join('.').concat('.'),
-      partitionName: parts[parts.length - 1],
-    };
-  }, [value]);
+  const isInvalid = !readOnly && partitionName.includes('.');
+  const errorMessage = isInvalid
+    ? i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessage', {
+        defaultMessage: `Stream name cannot contain the "." character.`,
+      })
+    : undefined;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPartitionName = e.target.value;
+
     onChange(`${prefix}${newPartitionName}`);
   };
 
@@ -67,8 +79,11 @@ export function StreamNameFormRow({
       })}
       helpText={helpText}
       describedByIds={[descriptionId]}
+      isInvalid={isInvalid}
+      error={errorMessage}
     >
       <EuiFieldText
+        isInvalid={isInvalid}
         data-test-subj="streamsAppRoutingStreamEntryNameField"
         value={partitionName}
         fullWidth

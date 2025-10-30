@@ -39,3 +39,10 @@ export const selectPreviewDocuments = createSelector(
     return documents.map((doc) => flattenObject(doc)) as FlattenRecord[];
   }
 );
+
+export const selectCurrentStream = createSelector(
+  [(context: StreamRoutingContext) => context.definition],
+  (definition) => {
+    return definition.stream;
+  }
+);
