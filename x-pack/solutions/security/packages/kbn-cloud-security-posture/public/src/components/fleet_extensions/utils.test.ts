@@ -14,7 +14,7 @@ import {
   getCloudShellDefaultValue,
   findVariableDef,
   getDefaultAwsCredentialsType,
-  getDefaultAzureCredentialsType,
+  getDefaultAzureCredentialsConfig,
   getDefaultGcpHiddenVars,
 } from './utils';
 import { AWS_PROVIDER } from './constants';
@@ -325,7 +325,12 @@ describe('getDefaultAwsCredentialsType', () => {
       ],
     } as PackageInfo;
 
-    const result = getDefaultAwsCredentialsType({} as PackageInfo, false, setupTechnology);
+    const result = getDefaultAwsCredentialsType(
+      {} as PackageInfo,
+      false,
+      TEMPLATE_NAME,
+      setupTechnology
+    );
 
     expect(result).toBe('assume_role');
   });
@@ -338,7 +343,7 @@ describe('getDefaultAwsCredentialsType', () => {
   });
 });
 
-describe('getDefaultAzureCredentialsType', () => {
+describe('getDefaultAzureCredentialsConfig', () => {
   let packageInfo: PackageInfo;
 
   beforeEach(() => {
@@ -362,31 +367,18 @@ describe('getDefaultAzureCredentialsType', () => {
   });
 
   it('should return "service_principal_with_client_secret" for agentless', () => {
-    const setupTechnology = SetupTechnology.AGENTLESS;
-    const result = getDefaultAzureCredentialsType(
-      packageInfo,
-      TEMPLATE_NAME,
-      setupTechnology,
-      false
-    );
+    const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, true, false);
 
     expect(result['azure.credentials.type'].value).toBe('service_principal_with_client_secret');
   });
 
   it('should return "arm_template" for agent-based, when arm_template is available', () => {
-    const setupTechnology = SetupTechnology.AGENT_BASED;
-    const result = getDefaultAzureCredentialsType(
-      packageInfo,
-      TEMPLATE_NAME,
-      setupTechnology,
-      false
-    );
+    const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, false, false);
 
     expect(result['azure.credentials.type'].value).toBe('arm_template');
   });
 
   it('should return "managed_identity" for agent-based, when arm_template is not available', () => {
-    const setupTechnology = SetupTechnology.AGENT_BASED;
     packageInfo = {
       policy_templates: [
         {
@@ -404,13 +396,7 @@ describe('getDefaultAzureCredentialsType', () => {
         },
       ],
     } as PackageInfo;
-
-    const result = getDefaultAzureCredentialsType(
-      packageInfo,
-      TEMPLATE_NAME,
-      setupTechnology,
-      false
-    );
+    const result = getDefaultAzureCredentialsConfig(packageInfo, TEMPLATE_NAME, false, false);
 
     expect(result['azure.credentials.type'].value).toBe('managed_identity');
   });

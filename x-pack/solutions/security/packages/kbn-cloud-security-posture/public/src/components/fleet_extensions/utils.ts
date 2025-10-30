@@ -241,7 +241,7 @@ export const getDefaultCloudCredentialsType = (
         type: 'text',
       },
     },
-    azure: getDefaultAzureCredentialConfig(
+    azure: getDefaultAzureCredentialsConfig(
       packageInfo,
       templateName,
       isAgentless,
