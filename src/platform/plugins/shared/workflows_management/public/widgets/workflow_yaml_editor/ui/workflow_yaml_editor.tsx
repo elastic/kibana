@@ -165,9 +165,6 @@ export const WorkflowYAMLEditor = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
 
-  const statusBarWidgetDomNodeRef = useRef<HTMLDivElement | null>(null);
-  const statusBarWidgetRef = useRef<monaco.editor.IOverlayWidget | null>(null);
-
   // Refs / Keep stepExecutionsRef in sync
   useEffect(() => {
     stepExecutionsRef.current = stepExecutions;
@@ -338,31 +335,6 @@ export const WorkflowYAMLEditor = ({
         const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
         disposablesRef.current.push(hoverDisposable);
       }
-
-      statusBarWidgetRef.current = {
-        getId: () => 'cursor-position-widget',
-        getDomNode: () => {
-          statusBarWidgetDomNodeRef.current = document.createElement('div');
-          statusBarWidgetDomNodeRef.current.style.cssText =
-            'background: red; color: white; padding: 2px 10px;';
-          statusBarWidgetDomNodeRef.current.innerText = '';
-          return statusBarWidgetDomNodeRef.current;
-        },
-        getPosition: () => ({
-          preference: monaco.editor.OverlayWidgetPositionPreference.BOTTOM_RIGHT_CORNER,
-        }),
-      };
-
-      // Add the widget
-      editor.addOverlayWidget(statusBarWidgetRef.current!);
-
-      // Update position on cursor change
-      editor.onDidChangeCursorPosition((e) => {
-        const node = statusBarWidgetDomNodeRef.current;
-        if (node) {
-          node.innerText = `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
-        }
-      });
 
       onMount?.(editor, monaco);
     },
