@@ -185,4 +185,28 @@ apiTest.describe('Streamlang to ES|QL - Date Processor', () => {
       );
     }
   );
+
+  apiTest(
+    'should parse a date with locale and timezone',
+    { tag: ['@ess', '@svlOblt'] },
+    async ({ testBed, esql }) => {
+      const indexName = 'stream-e2e-test-locale-timezone';
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'date',
+            from: 'log.date',
+            formats: ['dd MMMM yyyy'],
+            locale: 'fr',
+            timezone: 'Europe/Paris',
+          } as DateProcessor,
+        ],
+      };
+      const { query } = transpile(streamlangDSL);
+      const docs = [{ log: { date: '10 septembre 2025' } }];
+      await testBed.ingest(indexName, docs);
+      const esqlResult = await esql.queryOnIndex(indexName, query);
+      expect(esqlResult.documents[0]['@timestamp']).toBe('2025-09-09T22:00:00.000Z');
+    }
+  );
 });

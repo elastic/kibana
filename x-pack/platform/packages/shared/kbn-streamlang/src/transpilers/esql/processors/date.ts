@@ -7,6 +7,7 @@
 
 import { Builder } from '@kbn/esql-ast';
 import type { ESQLAstCommand } from '@kbn/esql-ast';
+import type { ESQLMapEntry } from '@kbn/esql-ast/src/types';
 import type { CommonDatePreset } from '../../../../types/formats';
 import type { DateProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
@@ -17,6 +18,8 @@ export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCom
     to,
     formats, // eslint-disable-next-line @typescript-eslint/naming-convention
     output_format,
+    timezone,
+    locale,
     where,
   } = processor;
   const fromColumn = Builder.expression.column(from);
@@ -24,6 +27,19 @@ export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCom
   const fromAsString = Builder.expression.func.call('TO_STRING', [fromColumn]);
   const targetDateField = to ?? '@timestamp'; // As with Ingest Date Processor, default to @timestamp
   const toColumn = Builder.expression.column(targetDateField);
+  // TODO - need to use timezone and locale in DATE_PARSE, can probably clean up this logic
+  const dateParseNamedParamsEntries: ESQLMapEntry[] = [];
+  if (timezone !== undefined)
+    dateParseNamedParamsEntries.push(
+      Builder.expression.entry('time_zone', Builder.expression.literal.string(timezone))
+    );
+  if (locale !== undefined)
+    dateParseNamedParamsEntries.push(
+      Builder.expression.entry('locale', Builder.expression.literal.string(locale))
+    );
+  const dateParseNamedParams = Builder.expression.map({
+    entries: dateParseNamedParamsEntries,
+  });
 
   const resolvedInputFormats = formats.map((f) =>
     resolveCommonDatePresetsForESQL(f as CommonDatePreset)
@@ -33,7 +49,11 @@ export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCom
     : undefined;
 
   const dateParseExpressions = resolvedInputFormats.map((f) =>
-    Builder.expression.func.call('DATE_PARSE', [Builder.expression.literal.string(f), fromAsString])
+    Builder.expression.func.call('DATE_PARSE', [
+      Builder.expression.literal.string(f),
+      fromAsString,
+      dateParseNamedParams,
+    ])
   );
 
   const coalesceDateParse = Builder.expression.func.call('COALESCE', dateParseExpressions);
