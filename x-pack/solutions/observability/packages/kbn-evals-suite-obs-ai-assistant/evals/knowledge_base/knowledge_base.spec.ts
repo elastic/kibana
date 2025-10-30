@@ -294,10 +294,10 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       }
     );
 
-    evaluate('retrieves Kibana documentation', async ({ evaluateDataset }) => {
+    evaluate('LLM response is formulated using product docs instead of internal knowledge base when the user asks about the Elastic Stack', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'documentation: kibana lens',
+          name: 'kb: Elastic stack questions',
           description: 'Validates retrieve_elastic_doc usage for Kibana Lens guidance.',
           examples: [
             {
