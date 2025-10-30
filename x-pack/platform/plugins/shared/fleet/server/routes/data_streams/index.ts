@@ -70,9 +70,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ListDataStreamsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
