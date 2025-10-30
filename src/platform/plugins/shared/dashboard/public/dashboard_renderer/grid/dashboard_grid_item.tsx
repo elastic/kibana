@@ -62,6 +62,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       useMargins,
       viewMode,
       dashboardContainerRef,
+      arePanelsRelated,
     ] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
@@ -69,7 +70,8 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.focusedPanelId$,
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
-      dashboardInternalApi.dashboardContainerRef$
+      dashboardInternalApi.dashboardContainerRef$,
+      dashboardInternalApi.arePanelsRelated$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -78,7 +80,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const blurPanel =
       focusedPanelId !== undefined &&
       focusedPanelId !== id &&
-      !dashboardInternalApi.arePanelsRelated(id, focusedPanelId);
+      !arePanelsRelated(id, focusedPanelId);
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,

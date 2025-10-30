@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, debounceTime } from 'rxjs';
+import { BehaviorSubject, debounceTime, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { getReferencesForPanelId } from '../../common';
 import { DASHBOARD_APP_ID } from '../../common/constants';
@@ -124,19 +124,26 @@ export function getDashboardApi({
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
 
-  const getRelatedPanels = (uuid: string) => {
-    const relatedPanelUUIDs = [];
+  const arePanelsRelated$ = new BehaviorSubject<(a: string, b: string) => boolean>(() => false);
 
-    const esqlRelatedPanelUUIDs =
-      esqlVariablesManager.internalApi.esqlRelatedPanels$.value.get(uuid);
-    if (esqlRelatedPanelUUIDs) {
-      for (const relatedUUID of esqlRelatedPanelUUIDs) {
-        relatedPanelUUIDs.push(relatedUUID);
-      }
-    }
+  const relatedPanelSubscription = esqlVariablesManager.internalApi.esqlRelatedPanels$
+    .pipe(
+      map((esqlRelatedPanels) => (uuid: string) => {
+        const relatedPanelUUIDs = [];
 
-    return relatedPanelUUIDs;
-  };
+        const esqlRelatedPanelUUIDs = esqlRelatedPanels.get(uuid);
+        if (esqlRelatedPanelUUIDs) {
+          for (const relatedUUID of esqlRelatedPanelUUIDs) {
+            relatedPanelUUIDs.push(relatedUUID);
+          }
+        }
+
+        return relatedPanelUUIDs;
+      })
+    )
+    .subscribe((getRelatedPanels) =>
+      arePanelsRelated$.next((a: string, b: string) => getRelatedPanels(a).includes(b))
+    );
 
   const dashboardApi = {
     ...viewModeManager.api,
@@ -229,7 +236,7 @@ export function getDashboardApi({
     ...unifiedSearchManager.internalApi,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
-    arePanelsRelated: (uuidA: string, uuidB: string) => getRelatedPanels(uuidA).includes(uuidB),
+    arePanelsRelated$,
     // serializeControls: () => controlGroupManager.internalApi.serializeControlGroup(),
     // untilControlsInitialized: controlGroupManager.internalApi.untilControlsInitialized,
   };
@@ -256,6 +263,7 @@ export function getDashboardApi({
       layoutManager.cleanup();
       esqlVariablesManager.cleanup();
       timesliceManager.cleanup();
+      relatedPanelSubscription.unsubscribe();
     },
   };
 }

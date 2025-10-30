@@ -181,5 +181,5 @@ export interface DashboardInternalApi {
     controlGroupReferences: Reference[];
   };
   untilControlsInitialized: () => Promise<void>;
-  arePanelsRelated: (a: string, b: string) => boolean;
+  arePanelsRelated$: BehaviorSubject<(a: string, b: string) => boolean>;
 }
