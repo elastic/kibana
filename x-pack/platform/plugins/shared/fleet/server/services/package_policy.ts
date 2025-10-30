@@ -3996,15 +3996,24 @@ async function requireUniqueName(
 ) {
   const savedObjectType = await getPackagePolicySavedObjectType();
   const isMultiSpace = spaceIds.length > 1;
-  const _soClient = isMultiSpace
-    ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
-    : soClient;
-
-  const existingPoliciesWithName = await packagePolicyService.list(_soClient, {
+  const baseSearchParams = {
     perPage: SO_SEARCH_LIMIT,
     kuery: `${savedObjectType}.name:"${packagePolicy.name}"`,
-    spaceId: isMultiSpace ? '*' : undefined,
-  });
+  };
+
+  let existingPoliciesWithName;
+
+  if (isMultiSpace) {
+    existingPoliciesWithName = await packagePolicyService.list(
+      appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+      {
+        ...baseSearchParams,
+        spaceId: '*',
+      }
+    );
+  } else {
+    existingPoliciesWithName = await packagePolicyService.list(soClient, baseSearchParams);
+  }
 
   const policiesToCheck = id
     ? // Check that the name does not exist already but exclude the current package policy

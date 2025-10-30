@@ -20,16 +20,25 @@ export async function incrementPackageName(
   spaceIds: string[]
 ): Promise<string> {
   const isMultiSpace = spaceIds.length > 1;
-  const _soClient = isMultiSpace
-    ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
-    : soClient;
-
-  // Fetch all packagePolicies having the package name
-  const packagePoliciesResult = await packagePolicyService.list(_soClient, {
+  const baseSearchParams = {
     perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
-    spaceId: isMultiSpace ? '*' : undefined,
-  });
+  };
+
+  // Fetch all packagePolicies having the package name
+  let packagePoliciesResult;
+
+  if (isMultiSpace) {
+    packagePoliciesResult = await packagePolicyService.list(
+      appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+      {
+        ...baseSearchParams,
+        spaceId: '*',
+      }
+    );
+  } else {
+    packagePoliciesResult = await packagePolicyService.list(soClient, baseSearchParams);
+  }
 
   const packagePolicies = isMultiSpace
     ? packagePoliciesResult.items.filter((packagePolicy) => {
