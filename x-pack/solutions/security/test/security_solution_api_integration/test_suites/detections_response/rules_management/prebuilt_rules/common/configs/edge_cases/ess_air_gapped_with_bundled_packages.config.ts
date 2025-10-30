@@ -91,6 +91,9 @@ export const PREBUILT_RULE_ASSET_B: PrebuiltRuleAsset = {
   language: 'eql',
 };
 
+export const PREBUILT_RULE_A_ASSET_ID = `${PREBUILT_RULE_ID_A}_${PREBUILT_RULE_ASSET_A.version}`;
+export const PREBUILT_RULE_B_ASSET_ID = `${PREBUILT_RULE_ID_B}_${PREBUILT_RULE_ASSET_B.version}`;
+
 function cleanUpBundledPackagesFolder(): void {
   rmSync(BUNDLED_PACKAGE_DIR, { recursive: true, force: true });
 }
