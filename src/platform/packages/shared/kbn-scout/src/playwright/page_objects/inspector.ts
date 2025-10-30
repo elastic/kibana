@@ -18,18 +18,12 @@ export class Inspector {
   }
 
   async close() {
-    const isOpen = await this.page.testSubj.isVisible('inspectorPanel');
-    if (isOpen) {
-      await this.page.testSubj.click('euiFlyoutCloseButton');
-      await this.page.testSubj.waitForSelector('inspectorPanel', { state: 'hidden' });
-    }
+    await this.page.testSubj.click('euiFlyoutCloseButton');
+    await this.page.testSubj.waitForSelector('inspectorPanel', { state: 'hidden' });
   }
 
   async getRequestTimestamp(): Promise<string> {
     await this.page.testSubj.waitForSelector('inspectorPanel', { state: 'visible' });
-    const timeStamp = await this.page.testSubj
-      .locator('inspector.statistics.requestTimestamp')
-      .innerText();
-    return timeStamp;
+    return await this.page.testSubj.locator('inspector.statistics.requestTimestamp').innerText();
   }
 }

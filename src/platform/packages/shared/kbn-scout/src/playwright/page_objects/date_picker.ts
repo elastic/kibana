@@ -19,10 +19,6 @@ export enum DateUnitSelector {
 export class DatePicker {
   constructor(private readonly page: ScoutPage) {}
 
-  public readonly defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
-  public readonly defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
-  public readonly endTimeNoResults = 'Sep 19, 2015 @ 18:45:00.000';
-
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
     await this.page.testSubj.waitForSelector('superDatePickerToggleQuickMenuButton', {
@@ -53,7 +49,7 @@ export class DatePicker {
 
   async clickSubmitButton() {
     await this.page.testSubj.click('querySubmitButton');
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj.waitForSelector('unifiedHistogramRendered', { state: 'visible' });
   }
 
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
@@ -93,10 +89,7 @@ export class DatePicker {
     return { start, end };
   }
 
-  async startAutoRefresh(
-    interval: number = 5,
-    dateUnit: DateUnitSelector = DateUnitSelector.Seconds
-  ) {
+  async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
     await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
     // Check if refresh is already running
     const toggleButton = this.page.testSubj.locator('superDatePickerToggleRefreshButton');

@@ -59,7 +59,7 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('loadSearchForm', { state: 'visible' });
 
     // Filter for the search
-    const searchInput = this.page.locator('[data-test-subj="savedObjectFinderSearchInput"]');
+    const searchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
     await searchInput.fill(`"${searchName.replace('-', ' ')}"`);
 
     // Click the saved search
@@ -68,13 +68,9 @@ export class DiscoverApp {
     await this.page.waitForLoadingIndicatorHidden();
   }
 
-  async getHitCount(): Promise<string> {
-    await this.page.waitForLoadingIndicatorHidden();
-    return await this.page.testSubj.innerText('discoverQueryHits');
-  }
-
   async getHitCountInt(): Promise<number> {
-    const hitCount = await this.getHitCount();
+    await this.page.waitForLoadingIndicatorHidden();
+    const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
     return parseInt(hitCount.replace(/,/g, ''), 10);
   }
 
@@ -88,7 +84,6 @@ export class DiscoverApp {
 
   async clickHistogramBar() {
     const canvas = this.page.locator('[data-test-subj="unifiedHistogramChart"] canvas');
-    await canvas.waitFor({ state: 'visible', timeout: 5000 });
     // Click at the center of the canvas
     await canvas.click();
   }
@@ -103,7 +98,6 @@ export class DiscoverApp {
   async getDocTableIndex(index: number): Promise<string> {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
-    await row.waitFor({ state: 'visible' });
     return await row.innerText();
   }
 
@@ -131,7 +125,6 @@ export class DiscoverApp {
 
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
     const button = this.page.testSubj.locator('discoverNoResultsViewAllMatches');
-    await button.waitFor({ state: 'visible' });
     await button.click();
     await this.waitUntilSearchingHasFinished();
   }
@@ -145,8 +138,11 @@ export class DiscoverApp {
   }
 
   async clickFieldSort(field: string, sortOption: string) {
-    const header = this.page.locator(`[data-test-subj="dataGridHeaderCell-${field}"]`);
+    const header = this.page.testSubj.locator(`dataGridHeaderCell-${field}`);
     await header.click();
+    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
+      state: 'visible',
+    });
     await this.page.locator(`button:has-text("${sortOption}")`).click();
   }
 
