@@ -14,7 +14,7 @@
 
 const { shouldSkipIdentifier, detectModuleLevelUsage, detectJsxUsage } = require('./helpers');
 
-module.exports = function lazyRequirePlugin({ types: t }, options = {}) {
+module.exports = function lazyRequirePlugin({ types: t }) {
   /**
    * Check if an expression is a direct require() call with a string literal
    */
@@ -262,10 +262,7 @@ module.exports = function lazyRequirePlugin({ types: t }, options = {}) {
         // React must always be available for JSX to work, even if not explicitly used
         for (const [varName, propInfo] of properties) {
           // Check if this is a React import (default, named, or namespace)
-          if (
-            propInfo.moduleRequirePath === 'react' ||
-            propInfo.moduleRequirePath === 'React'
-          ) {
+          if (propInfo.moduleRequirePath === 'react' || propInfo.moduleRequirePath === 'React') {
             properties.delete(varName);
             declarationsToRemove.delete(varName);
           }

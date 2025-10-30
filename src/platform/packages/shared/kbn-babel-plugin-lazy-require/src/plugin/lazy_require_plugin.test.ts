@@ -147,13 +147,13 @@ describe('@kbn/babel-plugin-lazy-require', () => {
 
     it('does not transform mock files (*.mock.ts, *.mocks.ts)', () => {
       const code = 'import { something } from "./module"; export const mockValue = something;';
-      
+
       // Transform with mock filename
       const result = transform(code, {
         plugins: [lazyRequirePlugin],
         filename: 'test.mock.ts',
       });
-      
+
       // Should not be transformed
       expect(result?.code).toContain('import');
       expect(result?.code).not.toContain('_imports');
@@ -163,21 +163,21 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       const code = `
         import { MockService, mockHelper } from './service.test.mocks';
         import { realModule } from './real_module';
-        
+
         test('example', () => {
           expect(MockService).toBeDefined();
           expect(realModule).toBeDefined();
         });
       `;
-      
+
       const result = transformCode(code);
-      
+
       // Imports from .test.mocks should NOT be lazy
       expect(result).toContain('MockService');
       expect(result).toContain('mockHelper');
       expect(result).not.toContain('get MockService');
       expect(result).not.toContain('get mockHelper');
-      
+
       // But other imports should be lazy
       expect(result).toContain('get realModule');
     });
