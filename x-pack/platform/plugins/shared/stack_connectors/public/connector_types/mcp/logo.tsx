@@ -10,6 +10,7 @@ import type { LogoProps } from '../types';
 
 const Logo = (props: LogoProps) => (
   <svg
+    {...props}
     fill="currentColor"
     fillRule="evenodd"
     height="1em"
