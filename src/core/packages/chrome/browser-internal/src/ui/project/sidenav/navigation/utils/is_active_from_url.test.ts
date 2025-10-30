@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isActiveFromUrl } from './utils';
+import { isActiveFromUrl } from './is_active_from_url';
 
 describe('isActiveFromUrl()', () => {
   test('returns true if the nodePath is active', () => {

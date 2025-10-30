@@ -988,7 +988,6 @@
     "@kbn/shared-ux-button-toolbar": "link:src/platform/packages/shared/shared-ux/button_toolbar",
     "@kbn/shared-ux-card-no-data": "link:src/platform/packages/shared/shared-ux/card/no_data/impl",
     "@kbn/shared-ux-card-no-data-types": "link:src/platform/packages/shared/shared-ux/card/no_data/types",
-    "@kbn/shared-ux-chrome-navigation": "link:src/platform/packages/shared/shared-ux/chrome/navigation",
     "@kbn/shared-ux-error-boundary": "link:src/platform/packages/shared/shared-ux/error_boundary",
     "@kbn/shared-ux-feedback-snippet": "link:src/platform/packages/shared/shared-ux/feedback_snippet",
     "@kbn/shared-ux-file-context": "link:src/platform/packages/shared/shared-ux/file/context",

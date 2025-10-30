@@ -20,7 +20,7 @@ export interface Props {
   navProps: NavigationProps;
 }
 
-export const GridLayoutProjectSideNavV2 = ({ isCollapsed$, navProps }: Props) => {
+export const GridLayoutProjectSideNav = ({ isCollapsed$, navProps }: Props) => {
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
   const updateLayout = useLayoutUpdate();
   const setWidth = useCallback(

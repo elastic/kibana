@@ -260,11 +260,6 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   isExternalLink?: boolean;
 }
 
-export type PanelSelectedNode = Pick<
-  ChromeProjectNavigationNode,
-  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink' | 'title'
->;
-
 /** @public */
 export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
