@@ -39,7 +39,12 @@ export const getAvailableResourceFields = (resourceDoc: Record<string, unknown>)
   AVAILABLE_RESOURCE_FIELDS.reduce<string[]>((acc, fields) => {
     for (const fieldName of fields) {
       const result = getFieldValueWithFallback(resourceDoc, fieldName);
-      if (result.field && result.value !== undefined && result.value !== null) {
+      if (
+        result.field &&
+        result.value !== undefined &&
+        result.value !== null &&
+        result.value !== ''
+      ) {
         acc.push(result.field);
         break;
       }

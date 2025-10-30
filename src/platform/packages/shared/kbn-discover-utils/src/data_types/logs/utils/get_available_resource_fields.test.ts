@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  getAvailableResourceFields,
-  getAvailableResourceFields,
-} from './get_available_resource_fields';
-import type { ResourceFields } from '../../..';
+import { getAvailableResourceFields } from './get_available_resource_fields';
 
 describe('getAvailableResourceFields', () => {
   it('should return available fields', () => {
@@ -39,13 +35,14 @@ describe('getAvailableResourceFields', () => {
     const fields = getAvailableResourceFields({
       'service.name': '',
     });
+    // Empty string values should be filtered out
     expect(fields).toEqual([]);
   });
 
   it('should ignore unknown fields', () => {
     const fields = getAvailableResourceFields({
       unknown: 'no',
-    } as ResourceFields);
+    });
     expect(fields).toEqual([]);
   });
 
@@ -75,10 +72,8 @@ describe('getAvailableResourceFields', () => {
       'kubernetes.deployment.name',
     ]);
   });
-});
 
-describe('getAvailableResourceFields', () => {
-  it('should return available fields with their actual field names and values', () => {
+  it('should return available field names', () => {
     const doc = {
       'service.name': 'my-service',
       'container.name': 'my-container',
@@ -86,11 +81,7 @@ describe('getAvailableResourceFields', () => {
     };
 
     const fields = getAvailableResourceFields(doc);
-    expect(fields).toEqual([
-      { field: 'service.name', value: 'my-service' },
-      { field: 'container.name', value: 'my-container' },
-      { field: 'host.name', value: 'my-host' },
-    ]);
+    expect(fields).toEqual(['service.name', 'container.name', 'host.name']);
   });
 
   it('should check OTel fallbacks when ECS fields are not available', () => {
@@ -109,24 +100,18 @@ describe('getAvailableResourceFields', () => {
     };
 
     const fields = getAvailableResourceFields(doc);
-    expect(fields).toEqual([
-      { field: 'service.name', value: 'ecs-service' },
-      { field: 'container.name', value: 'ecs-container' },
-    ]);
+    expect(fields).toEqual(['service.name', 'container.name']);
   });
 
-  it('should include empty field values', () => {
+  it('should filter out empty field values', () => {
     const doc = {
       'service.name': '',
       'host.name': 'my-host',
     };
 
     const fields = getAvailableResourceFields(doc);
-    // Empty values are included, not filtered
-    expect(fields).toEqual([
-      { field: 'service.name', value: '' },
-      { field: 'host.name', value: 'my-host' },
-    ]);
+    // Empty string values are filtered out
+    expect(fields).toEqual(['host.name']);
   });
 
   it('should return empty array when no resource fields are available', () => {
@@ -145,7 +130,7 @@ describe('getAvailableResourceFields', () => {
     };
 
     const fields = getAvailableResourceFields(doc);
-    // Arrays are not extracted, returned as-is
-    expect(fields).toEqual([{ field: 'service.name', value: ['service1', 'service2'] }]);
+    // Arrays are not extracted, returned as field names
+    expect(fields).toEqual(['service.name']);
   });
 });
