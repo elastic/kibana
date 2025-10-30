@@ -30,7 +30,6 @@ import type {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
-  UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
   UnifiedHistogramHitsContext,
   UnifiedHistogramRequestContext,
@@ -66,7 +65,6 @@ export interface UnifiedHistogramChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   fetchParams: UnifiedHistogramFetchParams;
-  fetch$: UnifiedHistogramFetch$;
   lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined;
   dataLoading$: LensEmbeddableOutput['dataLoading$'] | undefined;
   isChartLoading?: boolean;
@@ -94,7 +92,6 @@ export function UnifiedHistogramChart({
   isPlainRecord,
   renderCustomChartToggleActions,
   fetchParams,
-  fetch$,
   lensAdapters,
   dataLoading$,
   isChartLoading,
