@@ -24,7 +24,7 @@ interface SLODefinitionParams {
   tags?: string[];
   page?: number;
   perPage?: number;
-  getHealth?: boolean;
+  includeHealth?: boolean;
 }
 
 export function useFetchSloDefinitions({
@@ -33,7 +33,7 @@ export function useFetchSloDefinitions({
   tags = [],
   page = 1,
   perPage = 100,
-  getHealth = false,
+  includeHealth = false,
 }: SLODefinitionParams): UseFetchSloDefinitionsResponse {
   const { sloClient } = usePluginContext();
   const search = name.endsWith('*') ? name : `${name}*`;
@@ -48,7 +48,7 @@ export function useFetchSloDefinitions({
             query: {
               ...(search !== undefined && { search }),
               ...(!!includeOutdatedOnly && { includeOutdatedOnly }),
-              ...(!!getHealth && { getHealth }),
+              ...(!!includeHealth && { includeHealth }),
               ...(validTags?.length && { tags: validTags }),
               ...(page !== undefined && { page: String(page) }),
               ...(perPage !== undefined && { perPage: String(perPage) }),

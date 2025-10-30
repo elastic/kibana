@@ -12,7 +12,7 @@ const findSloDefinitionsParamsSchema = t.partial({
   query: t.partial({
     search: t.string,
     includeOutdatedOnly: toBooleanRt,
-    getHealth: toBooleanRt,
+    includeHealth: toBooleanRt,
     tags: t.string,
     page: t.string,
     perPage: t.string,

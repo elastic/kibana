@@ -57,7 +57,7 @@ export class FindSLODefinitions {
       page: result.page,
       perPage: result.perPage,
       total: result.total,
-      results: params.getHealth ? resultsWithHealth : result.results,
+      results: params.includeHealth ? resultsWithHealth : result.results,
     });
   }
 }
