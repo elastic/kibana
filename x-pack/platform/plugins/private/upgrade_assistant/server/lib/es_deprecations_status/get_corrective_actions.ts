@@ -23,6 +23,7 @@ interface MlActionMetadata extends CommonActionMetadata {
 }
 
 interface IndexActionMetadata extends CommonActionMetadata {
+  excluded_actions?: Array<'readOnly' | 'reindex'>;
   reindex_required: boolean;
   transform_ids: string[];
   is_in_data_stream?: boolean;
@@ -103,6 +104,7 @@ export const getCorrectiveAction = (deprecation: BaseDeprecation): CorrectiveAct
     return {
       type: 'reindex',
       ...(transformIds?.length ? { transformIds } : {}),
+      excludedActions: (metadata as IndexActionMetadata)?.excluded_actions || [],
       metadata: {
         isClosedIndex: Boolean(deprecation.isClosedIndex),
         isFrozenIndex: Boolean(deprecation.isFrozenIndex),
