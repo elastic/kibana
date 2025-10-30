@@ -12,16 +12,12 @@ import {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import {
+  DEFAULT_ENGINE_METADATA_TYPE,
   DOCUMENT_TYPE_ENTITY,
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
-
-// Hardcoded default value for engineMetadata.type field
-// The entity.engineMetadata field is not currently exposed by the enrich policy
-// TODO: Remove hardcoded value once https://github.com/elastic/kibana/issues/232226 is implemented
-const DEFAULT_ENGINE_METADATA_TYPE = 'generic';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
