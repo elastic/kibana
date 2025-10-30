@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
+    "outDir": "target/types",
     "types": ["node"]
   },
   "include": [
@@ -9,5 +9,11 @@
   ],
   "exclude": [
     "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/tooling-log",
+    "@kbn/scout",
+    "@kbn/test",
+    "@kbn/test-subj-selector",
   ]
 }
