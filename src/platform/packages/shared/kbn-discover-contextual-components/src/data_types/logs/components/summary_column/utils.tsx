@@ -27,7 +27,7 @@ import {
   FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
   TRANSACTION_NAME_FIELD,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
-  getAvailableResourceFieldsWithActualNames,
+  getAvailableResourceFields,
 } from '@kbn/discover-utils';
 import type { TraceDocument } from '@kbn/discover-utils/src';
 import { formatFieldValue } from '@kbn/discover-utils/src';
@@ -194,10 +194,11 @@ export const createResourceFieldsWithOtelFallback = ({
   share,
   fieldFormats,
 }: Omit<ResourceFieldsProps, 'fields' | 'getAvailableFields'>): ResourceFieldDescriptor[] => {
-  const availableFields = getAvailableResourceFieldsWithActualNames(row.flattened);
+  const availableFields = getAvailableResourceFields(row.flattened);
 
-  return availableFields.map(({ field: name, value: rawValue }: { field: string; value: any }) => {
+  return availableFields.map((name) => {
     const property = dataView.getFieldByName(name);
+    const rawValue = row.flattened[name];
     const value = formatFieldValue(rawValue, row.raw, fieldFormats, dataView, property, 'html');
 
     return {

@@ -15,6 +15,7 @@ import {
   getLogLevelCoalescedValue,
   getLogLevelColor,
   LOG_LEVEL_REGEX,
+  OTEL_MESSAGE_FIELD,
 } from '@kbn/discover-utils';
 import { MESSAGE_FIELD } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
@@ -37,7 +38,7 @@ const LogMessage = ({
   value: string | HTMLElement;
   className: string;
 }) => {
-  const shouldRenderFieldName = field !== MESSAGE_FIELD;
+  const shouldRenderFieldName = field !== MESSAGE_FIELD && field !== OTEL_MESSAGE_FIELD;
 
   if (shouldRenderFieldName) {
     return (

@@ -9,7 +9,7 @@
 
 import {
   getAvailableResourceFields,
-  getAvailableResourceFieldsWithActualNames,
+  getAvailableResourceFields,
 } from './get_available_resource_fields';
 import type { ResourceFields } from '../../..';
 
@@ -77,7 +77,7 @@ describe('getAvailableResourceFields', () => {
   });
 });
 
-describe('getAvailableResourceFieldsWithActualNames', () => {
+describe('getAvailableResourceFields', () => {
   it('should return available fields with their actual field names and values', () => {
     const doc = {
       'service.name': 'my-service',
@@ -85,7 +85,7 @@ describe('getAvailableResourceFieldsWithActualNames', () => {
       'host.name': 'my-host',
     };
 
-    const fields = getAvailableResourceFieldsWithActualNames(doc);
+    const fields = getAvailableResourceFields(doc);
     expect(fields).toEqual([
       { field: 'service.name', value: 'my-service' },
       { field: 'container.name', value: 'my-container' },
@@ -98,7 +98,7 @@ describe('getAvailableResourceFieldsWithActualNames', () => {
       'other.field': 'value',
     };
 
-    const fields = getAvailableResourceFieldsWithActualNames(doc);
+    const fields = getAvailableResourceFields(doc);
     expect(fields).toEqual([]);
   });
 
@@ -108,7 +108,7 @@ describe('getAvailableResourceFieldsWithActualNames', () => {
       'container.name': 'ecs-container',
     };
 
-    const fields = getAvailableResourceFieldsWithActualNames(doc);
+    const fields = getAvailableResourceFields(doc);
     expect(fields).toEqual([
       { field: 'service.name', value: 'ecs-service' },
       { field: 'container.name', value: 'ecs-container' },
@@ -121,7 +121,7 @@ describe('getAvailableResourceFieldsWithActualNames', () => {
       'host.name': 'my-host',
     };
 
-    const fields = getAvailableResourceFieldsWithActualNames(doc);
+    const fields = getAvailableResourceFields(doc);
     // Empty values are included, not filtered
     expect(fields).toEqual([
       { field: 'service.name', value: '' },
@@ -135,7 +135,7 @@ describe('getAvailableResourceFieldsWithActualNames', () => {
       message: 'log message',
     };
 
-    const fields = getAvailableResourceFieldsWithActualNames(doc);
+    const fields = getAvailableResourceFields(doc);
     expect(fields).toEqual([]);
   });
 
@@ -144,7 +144,7 @@ describe('getAvailableResourceFieldsWithActualNames', () => {
       'service.name': ['service1', 'service2'],
     };
 
-    const fields = getAvailableResourceFieldsWithActualNames(doc);
+    const fields = getAvailableResourceFields(doc);
     // Arrays are not extracted, returned as-is
     expect(fields).toEqual([{ field: 'service.name', value: ['service1', 'service2'] }]);
   });

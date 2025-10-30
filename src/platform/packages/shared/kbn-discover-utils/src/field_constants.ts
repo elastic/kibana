@@ -12,6 +12,7 @@ export const TIMESTAMP_FIELD = '@timestamp';
 export const HOST_NAME_FIELD = 'host.name';
 export const LOG_LEVEL_FIELD = 'log.level';
 export const MESSAGE_FIELD = 'message';
+export const OTEL_MESSAGE_FIELD = 'body.text';
 export const ERROR_MESSAGE_FIELD = 'error.message';
 export const EVENT_ORIGINAL_FIELD = 'event.original';
 export const EVENT_OUTCOME_FIELD = 'event.outcome';

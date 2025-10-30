@@ -34,14 +34,14 @@ export function getFieldValueWithFallback(
     return { field: otelEquivalent, value: document[otelEquivalent] };
   }
   // check with attributes. prefix
-  const otelAttributesEquivalent = `attributes.${otelEquivalent}`;
-  if (otelEquivalent && document[otelAttributesEquivalent] !== undefined) {
+  const otelAttributesEquivalent = `attributes.${ecsFieldName}`;
+  if (document[otelAttributesEquivalent] !== undefined) {
     return { field: otelAttributesEquivalent, value: document[otelAttributesEquivalent] };
   }
 
   // check with resource.attributes. prefix
-  const otelResourceAttributesEquivalent = `resource.attributes.${otelEquivalent}`;
-  if (otelEquivalent && document[otelResourceAttributesEquivalent] !== undefined) {
+  const otelResourceAttributesEquivalent = `resource.attributes.${ecsFieldName}`;
+  if (document[otelResourceAttributesEquivalent] !== undefined) {
     return {
       field: otelResourceAttributesEquivalent,
       value: document[otelResourceAttributesEquivalent],

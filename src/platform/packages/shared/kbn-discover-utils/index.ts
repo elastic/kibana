@@ -44,7 +44,7 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
-  getAvailableResourceFieldsWithActualNames,
+  getAvailableResourceFields,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   usePager,
