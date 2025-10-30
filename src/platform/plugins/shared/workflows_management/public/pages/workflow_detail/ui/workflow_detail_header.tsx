@@ -161,6 +161,7 @@ export const WorkflowDetailHeader = React.memo(
             css={styles.header}
             restrictWidth={false}
             bottomBorder={false}
+            paddingSize="m"
             alignItems="bottom"
           >
             <EuiPageHeaderSection css={styles.headerSection}>
