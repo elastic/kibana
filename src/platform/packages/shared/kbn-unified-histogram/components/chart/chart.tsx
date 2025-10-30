@@ -9,7 +9,6 @@
 
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiProgress, EuiDelayRender, EuiSpacer } from '@elastic/eui';
@@ -19,17 +18,10 @@ import type {
   LensEmbeddableInput,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
-import type {
-  Datatable,
-  DatatableColumn,
-  DefaultInspectorAdapters,
-} from '@kbn/expressions-plugin/common';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState } from '@kbn/esql-types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
@@ -38,9 +30,9 @@ import type {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramFetch$,
+  UnifiedHistogramFetchParams,
   UnifiedHistogramHitsContext,
-  UnifiedHistogramInput$,
-  UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
@@ -48,14 +40,12 @@ import type {
 import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionType } from '../../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { TimeIntervalSelector } from './time_interval_selector';
-import { useTotalHits } from './hooks/use_total_hits';
+// import { useTotalHits } from './hooks/use_total_hits';
 import { useChartStyles } from './hooks/use_chart_styles';
 import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
-import { useFetch } from './hooks/use_fetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 import type { LensVisService } from '../../services/lens_vis_service';
-import type { UseRequestParamsResult } from '../../hooks/use_request_params';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
 import { useStableCallback } from '../../hooks/use_stable_callback';
@@ -63,25 +53,22 @@ import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
 
 export interface UnifiedHistogramChartProps {
-  abortController: AbortController | undefined;
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
   services: UnifiedHistogramServices;
-  dataView: DataView;
-  requestParams: UseRequestParamsResult;
-  isPlainRecord?: boolean;
+  isPlainRecord: boolean;
   lensVisService: LensVisService;
-  relativeTimeRange: TimeRange | undefined;
   request: UnifiedHistogramRequestContext | undefined;
-  hits?: UnifiedHistogramHitsContext;
-  chart?: UnifiedHistogramChartContext;
-  breakdown?: UnifiedHistogramBreakdownContext;
+  hits: UnifiedHistogramHitsContext | undefined;
+  chart: UnifiedHistogramChartContext | undefined;
+  breakdown: UnifiedHistogramBreakdownContext | undefined;
   renderCustomChartToggleActions?: () => ReactElement | undefined;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
-  input$?: UnifiedHistogramInput$;
-  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  dataLoading$?: LensEmbeddableOutput['dataLoading$'];
+  fetchParams: UnifiedHistogramFetchParams;
+  fetch$: UnifiedHistogramFetch$;
+  lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined;
+  dataLoading$: LensEmbeddableOutput['dataLoading$'] | undefined;
   isChartLoading?: boolean;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -91,8 +78,6 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
-  columns: DatatableColumn[] | undefined;
-  controlsState: ControlPanelsState<ESQLControlState> | undefined;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -101,9 +86,6 @@ const HistogramMemoized = memo(Histogram);
 export function UnifiedHistogramChart({
   isChartAvailable,
   services,
-  dataView,
-  requestParams,
-  relativeTimeRange: originalRelativeTimeRange,
   request,
   hits,
   chart,
@@ -111,7 +93,8 @@ export function UnifiedHistogramChart({
   lensVisService,
   isPlainRecord,
   renderCustomChartToggleActions,
-  input$: originalInput$,
+  fetchParams,
+  fetch$,
   lensAdapters,
   dataLoading$,
   isChartLoading,
@@ -120,8 +103,6 @@ export function UnifiedHistogramChart({
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
-  columns,
-  controlsState,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = useObservable(
@@ -140,33 +121,18 @@ export function UnifiedHistogramChart({
   const chartVisible =
     isChartAvailable && !!chart && !chart.hidden && !!visContext && !!visContext?.attributes;
 
-  const input$ = useMemo(
-    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
-    [originalInput$]
-  );
+  const { dataView, query, timeRange, relativeTimeRange, abortController, columns, controlsState } =
+    fetchParams;
 
-  const { filters, query, esqlVariables, getTimeRange, updateTimeRange, relativeTimeRange } =
-    requestParams;
-
-  const fetch$ = useFetch({
-    input$,
-    beforeFetch: updateTimeRange,
-  });
-
-  useTotalHits({
-    services,
-    dataView,
-    request,
-    hits,
-    chartVisible,
-    filters,
-    query,
-    getTimeRange,
-    fetch$,
-    onTotalHitsChange,
-    isPlainRecord,
-    abortController: histogramProps.abortController,
-  });
+  // TODO: keep only fetch$
+  // useTotalHits({
+  //   services,
+  //   hits,
+  //   chartVisible,
+  //   fetch$,
+  //   onTotalHitsChange,
+  //   isPlainRecord,
+  // });
 
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const onLoad = useStableCallback(
@@ -205,7 +171,7 @@ export function UnifiedHistogramChart({
           data: services.data,
           dataView,
           timeInterval: chart?.timeInterval,
-          timeRange: getTimeRange(),
+          timeRange,
           response,
         });
 
@@ -218,10 +184,8 @@ export function UnifiedHistogramChart({
 
   const lensPropsContext = useLensProps({
     request,
-    getTimeRange,
-    fetch$,
+    fetchParams,
     visContext,
-    esqlVariables,
     onLoad,
   });
 
@@ -247,7 +211,7 @@ export function UnifiedHistogramChart({
   const onEditVisualization = useEditVisualization({
     services,
     dataView,
-    relativeTimeRange: originalRelativeTimeRange ?? relativeTimeRange,
+    relativeTimeRange,
     lensAttributes: visContext?.attributes,
     isPlainRecord,
   });
@@ -404,9 +368,10 @@ export function UnifiedHistogramChart({
                   dataView={dataView}
                   chart={chart}
                   bucketInterval={bucketInterval}
-                  getTimeRange={getTimeRange}
+                  timeRange={timeRange}
                   visContext={visContext}
                   isPlainRecord={isPlainRecord}
+                  abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
                 />

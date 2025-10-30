@@ -14,11 +14,10 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { MutableRefObject } from 'react';
 import { useEffect, useRef, useCallback } from 'react';
-import type { Observable } from 'rxjs';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import type {
+  UnifiedHistogramFetch$,
   UnifiedHistogramHitsContext,
-  UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../../../types';
@@ -47,11 +46,12 @@ export const useTotalHits = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   getTimeRange: () => TimeRange;
-  fetch$: Observable<UnifiedHistogramInputMessage>;
+  fetch$: UnifiedHistogramFetch$;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   isPlainRecord?: boolean;
   abortController: AbortController | undefined;
 }) => {
+  // TODO: read from fetch$
   const abortController = useRef<AbortController>();
   const fetch = useStableCallback(() => {
     fetchTotalHits({

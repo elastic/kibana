@@ -25,7 +25,7 @@ import type {
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
   UnifiedHistogramVisContext,
-  UnifiedHistogramFetchParams,
+  UnifiedHistogramFetchParamsExternal,
 } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 import type {
@@ -85,7 +85,7 @@ export type UnifiedHistogramApi = {
   /**
    * Trigger a fetch of the data
    */
-  fetch: (params: UnifiedHistogramFetchParams) => void;
+  fetch: (params: UnifiedHistogramFetchParamsExternal) => void;
 } & Pick<
   UnifiedHistogramStateService,
   'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTimeInterval' | 'setTotalHits'
@@ -118,8 +118,7 @@ const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = 
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [lensVisService, setLensVisService] = useState<LensVisService>();
 
-  const { stateProps, requestParams, fetchParams, hasValidFetchParams, api, input$ } =
-    useServicesBootstrap(props);
+  const { stateProps, fetchParams, fetch$, hasValidFetchParams, api } = useServicesBootstrap(props);
 
   // Load async services and initialize API
   useMount(async () => {
@@ -143,12 +142,12 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       externalVisContext: fetchParams.externalVisContext,
       queryParams: {
         dataView: fetchParams.dataView,
-        query: requestParams.query,
-        filters: requestParams.filters,
+        query: fetchParams.query,
+        filters: fetchParams.filters,
         timeRange: fetchParams.timeRange,
-        isPlainRecord: stateProps.isPlainRecord,
+        isPlainRecord: stateProps.isPlainRecord, // TODO: move to fetchParams?
         columns: fetchParams.columns,
-        columnsMap: requestParams.columnsMap,
+        columnsMap: fetchParams.columnsMap,
       },
       timeInterval: stateProps.chart?.timeInterval,
       breakdownField: stateProps.breakdown?.field,
@@ -165,12 +164,12 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     fetchParams?.timeRange,
     fetchParams?.dataView,
     fetchParams?.externalVisContext,
+    fetchParams?.filters,
+    fetchParams?.query,
+    fetchParams?.columnsMap,
     isChartLoading,
     latestGetModifiedVisAttributes,
     lensVisService,
-    requestParams.filters,
-    requestParams.query,
-    requestParams.columnsMap,
     stateProps.breakdown?.field,
     stateProps.chart?.timeInterval,
     stateProps.isPlainRecord,
@@ -195,32 +194,14 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       ? {
           ...props,
           ...stateProps,
-          dataView: fetchParams.dataView,
-          controlsState: fetchParams?.controlsState,
-          columns: fetchParams?.columns,
-          relativeTimeRange: fetchParams?.relativeTimeRange,
-          abortController: fetchParams?.abortController,
-          input$,
+          fetchParams,
+          fetch$,
           chart,
           isChartAvailable,
-          requestParams,
           lensVisService,
         }
       : undefined;
-  }, [
-    lensVisService,
-    fetchParams?.dataView,
-    fetchParams?.controlsState,
-    fetchParams?.columns,
-    fetchParams?.relativeTimeRange,
-    fetchParams?.abortController,
-    props,
-    stateProps,
-    input$,
-    chart,
-    isChartAvailable,
-    requestParams,
-  ]);
+  }, [fetchParams, lensVisService, props, stateProps, fetch$, chart, isChartAvailable]);
 
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({

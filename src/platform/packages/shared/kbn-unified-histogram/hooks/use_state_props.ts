@@ -49,7 +49,7 @@ export const useStateProps = ({
   services: UnifiedHistogramServices;
   localStorageKeyPrefix: string | undefined;
   stateService: UnifiedHistogramStateService | undefined;
-  fetchParams: UnifiedHistogramFetchParams | null;
+  fetchParams: UnifiedHistogramFetchParams | undefined;
   initialBreakdownField: string | undefined;
   onBreakdownFieldChange: ((breakdownField: string | undefined) => void) | undefined;
   onVisContextChanged:
@@ -77,7 +77,7 @@ export const useStateProps = ({
    */
 
   const isPlainRecord = useMemo(() => {
-    return query && isOfAggregateQueryType(query);
+    return Boolean(query && isOfAggregateQueryType(query));
   }, [query]);
 
   const isTimeBased = useMemo(() => {

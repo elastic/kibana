@@ -23,13 +23,13 @@ import { useTimeRange } from './hooks/use_time_range';
 import type { LensProps } from './hooks/use_lens_props';
 
 export interface HistogramProps {
-  abortController?: AbortController;
+  abortController: AbortController | undefined;
   services: UnifiedHistogramServices;
   dataView: DataView;
   chart: UnifiedHistogramChartContext;
-  bucketInterval?: UnifiedHistogramBucketInterval;
-  isPlainRecord?: boolean;
-  getTimeRange: () => TimeRange;
+  bucketInterval: UnifiedHistogramBucketInterval | undefined;
+  isPlainRecord: boolean;
+  timeRange: TimeRange;
   requestData: string;
   lensProps: LensProps;
   visContext: UnifiedHistogramVisContext;
@@ -46,7 +46,7 @@ export function Histogram({
   chart: { timeInterval },
   bucketInterval,
   isPlainRecord,
-  getTimeRange,
+  timeRange,
   requestData,
   lensProps,
   visContext,
@@ -60,7 +60,7 @@ export function Histogram({
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
-    timeRange: getTimeRange(),
+    timeRange,
     timeInterval,
     isPlainRecord,
     timeField: dataView.timeFieldName,

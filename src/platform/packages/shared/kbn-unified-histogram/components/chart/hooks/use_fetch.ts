@@ -11,6 +11,7 @@ import { useMemo } from 'react';
 import { filter, share, tap } from 'rxjs';
 import type { UnifiedHistogramInput$ } from '../../../types';
 
+// TODO: remove
 export const useFetch = ({
   input$,
   beforeFetch,

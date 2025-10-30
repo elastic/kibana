@@ -9,17 +9,18 @@
 
 import { useMemo, useState } from 'react';
 import { pick } from 'lodash';
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
-import type { UnifiedHistogramInputMessage, UnifiedHistogramFetchParams } from '../types';
-import { useRequestParams } from './use_request_params';
+import type { UnifiedHistogramFetchParams } from '../types';
 import { getBreakdownField } from '../utils/local_storage_utils';
+import { processFetchParams } from '../utils/process_fetch_params';
 
 export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
-  const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
-  const [fetchParams, setFetchParams] = useState<UnifiedHistogramFetchParams | null>(null);
+  const [fetch$] = useState(() => new ReplaySubject<UnifiedHistogramFetchParams | undefined>(1));
+  const fetchParams = useObservable(fetch$);
 
   const [stateService] = useState(() => {
     const { services, initialState, localStorageKeyPrefix } = props;
@@ -33,8 +34,7 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
   const [api] = useState<UnifiedHistogramApi>(() => ({
     fetch: (params) => {
       console.log('UnifiedHistogramApi.fetch called with params:', params);
-      setFetchParams(params);
-      input$.next({ type: 'fetch' });
+      fetch$.next(processFetchParams({ params, services }));
     },
     ...pick(
       stateService,
@@ -66,16 +66,10 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     onVisContextChanged: props.onVisContextChanged,
   });
 
-  const requestParams = useRequestParams({
-    services,
-    fetchParams,
-  });
-
   return {
     api,
-    input$,
     stateProps,
-    requestParams,
+    fetch$,
     fetchParams,
     hasValidFetchParams: Boolean(
       fetchParams && (fetchParams.searchSessionId || stateProps.isPlainRecord)

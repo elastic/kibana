@@ -25,12 +25,14 @@ export interface UseRequestParamsResult {
   columnsMap?: Record<string, DatatableColumn>;
 }
 
+// TODO: remove
+
 export const useRequestParams = ({
   services,
   fetchParams,
 }: {
   services: UnifiedHistogramServices;
-  fetchParams: UnifiedHistogramFetchParams | null;
+  fetchParams: UnifiedHistogramFetchParams | undefined;
 }): UseRequestParamsResult => {
   const { data } = services;
   const {

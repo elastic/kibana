@@ -191,7 +191,7 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
     panelsToggle,
   });
 
-  console.log('Rendering default unified histogram with props:', unifiedHistogram);
+  // TODO: debug how many rerenders happen here
 
   if (!unifiedHistogram.isInitialized) {
     return null;
@@ -221,7 +221,7 @@ const CustomChartSectionWrapper = ({
     chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix;
 
   const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
-  const { api, stateProps, requestParams, hasValidFetchParams, input$ } = useServicesBootstrap({
+  const { api, stateProps, fetch$, fetchParams, hasValidFetchParams } = useServicesBootstrap({
     ...restProps,
     initialState: unifiedHistogramProps.initialState,
     localStorageKeyPrefix,
@@ -270,14 +270,6 @@ const CustomChartSectionWrapper = ({
     !!layoutProps.chart && !layoutProps.chart.hidden
   );
 
-  console.log(
-    'Rendering custom chart section component with config:',
-    hasValidFetchParams,
-    stateProps,
-    requestParams,
-    unifiedHistogramProps
-  );
-
   if (!api || !hasValidFetchParams) {
     return null;
   }
@@ -290,8 +282,8 @@ const CustomChartSectionWrapper = ({
       histogramCss={histogramCss}
       chartToolbarCss={chartToolbarCss}
       renderToggleActions={renderCustomChartToggleActions}
-      input$={input$}
-      requestParams={requestParams}
+      input$={fetch$} // TODO: continue the refactoring
+      requestParams={fetchParams}
       isComponentVisible={isComponentVisible}
       {...unifiedHistogramProps}
       initialState={metricsGridState}
