@@ -651,6 +651,9 @@
         },
         "type": "nested"
       },
+      "total_observables": {
+        "type": "integer"
+      },
       "owner": {
         "type": "keyword"
       },

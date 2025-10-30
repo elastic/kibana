@@ -6,24 +6,29 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import { casesSchemaV7 } from '../schemas';
+import { casesSchemaV8 } from '../schemas';
 
-export const modelVersion7: SavedObjectsModelVersion = {
+/**
+ * Adds the total_events field to the cases SO.
+ */
+export const modelVersion8: SavedObjectsModelVersion = {
   changes: [
     {
       type: 'mappings_addition',
       addedMappings: {
-        observables: {
-          properties: {
-            description: {
-              type: 'keyword',
-            },
-          },
+        total_observables: {
+          type: 'integer',
         },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (_doc) => {
+        return { attributes: { total_observables: 0 } };
       },
     },
   ],
   schemas: {
-    forwardCompatibility: casesSchemaV7.extends({}, { unknowns: 'ignore' }),
+    forwardCompatibility: casesSchemaV8.extends({}, { unknowns: 'ignore' }),
   },
 };

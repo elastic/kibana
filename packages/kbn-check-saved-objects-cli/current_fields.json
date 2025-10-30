@@ -186,6 +186,7 @@
     "observables.description",
     "observables.typeKey",
     "observables.value",
+    "total_observables",
     "owner",
     "settings",
     "settings.extractObservables",
