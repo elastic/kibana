@@ -2309,5 +2309,12 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
     });
+
+    describe('access control and RBAC', () => {
+      // ToDo:
+      // 1. Make a user with RBAC permissions for the ACCESS_CONTROL_TYPE and create some objects in default access mode.
+      // 2. Revoke access to the ACCESS_CONTROL_TYPE (e.g. remove the Editor role from simple_user)
+      // 3. Validate that the user cannot overwrite, update, or delete any of the object that they own due to RBAC
+    });
   });
 }
