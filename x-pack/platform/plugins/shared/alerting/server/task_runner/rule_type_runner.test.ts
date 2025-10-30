@@ -1004,7 +1004,6 @@ describe('RuleTypeRunner', () => {
       expect(alertsClient.determineFlappingAlerts).not.toHaveBeenCalled();
       expect(alertsClient.determineDelayedAlerts).not.toHaveBeenCalled();
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
@@ -1116,7 +1115,6 @@ describe('RuleTypeRunner', () => {
         ruleRunMetricsStore,
       });
       expect(alertsClient.persistAlerts).toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
@@ -1331,7 +1329,6 @@ describe('RuleTypeRunner', () => {
         ruleRunMetricsStore,
       });
       expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
-      expect(alertsClient.updatePersistedAlertsWithMaintenanceWindowIds).not.toHaveBeenCalled();
       expect(alertsClient.logAlerts).toHaveBeenCalledWith({
         ruleRunMetricsStore,
         shouldLogAlerts: false,

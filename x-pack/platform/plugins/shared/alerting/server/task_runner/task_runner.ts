@@ -383,17 +383,17 @@ export class TaskRunner<
       state: this.taskInstance.state,
       validatedParams: params,
     });
-    // Get alerts affected by maintenance windows here,
-    // so we can have the maintenance windows on in-memory alerts before scheduling actions
-
-    const alertsToUpdateWithMaintenanceWindows =
-      await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
     // if there was an error, save the stack trace and throw
     if (error) {
       this.stackTraceLog = stackTrace ?? null;
       throw error;
     }
+
+    // Get alerts affected by maintenance windows here,
+    // so we can have the maintenance windows on in-memory alerts before scheduling actions
+    const alertsToUpdateWithMaintenanceWindows =
+      await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
     const actionScheduler = new ActionScheduler({
       rule,
@@ -445,14 +445,21 @@ export class TaskRunner<
       alertsToUpdateWithLastScheduledActions =
         alertsClient.getAlertsToUpdateWithLastScheduledActions();
     }
-    await withAlertingSpan('alerting:update-alerts', () =>
-      this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
-        await alertsClient.updatePersistedAlerts({
-          alertsToUpdateWithLastScheduledActions,
-          alertsToUpdateWithMaintenanceWindows,
-        });
-      })
-    );
+
+    if (this.shouldLogAndScheduleActionsForAlerts()) {
+      await withAlertingSpan('alerting:update-alerts', () =>
+        this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
+          await alertsClient.updatePersistedAlerts({
+            alertsToUpdateWithLastScheduledActions,
+            alertsToUpdateWithMaintenanceWindows,
+          });
+        })
+      );
+    } else {
+      this.logger.debug(
+        `skipping updating alerts for rule ${ruleTypeRunnerContext.ruleLogPrefix}: rule execution has been cancelled.`
+      );
+    }
 
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
