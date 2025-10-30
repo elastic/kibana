@@ -86,16 +86,19 @@ const ruleParamsSchemasWithRuleTypeId: Record<string, Type<any>> = {
 };
 
 const buildKeyLiterals = () =>
-  schema.oneOf(
-    Object.keys(ruleParamsSchemasWithRuleTypeId).map((k) => schema.literal(k)) as [Type<string>]
-  );
+  schema.oneOf([
+    ...(Object.keys(ruleParamsSchemasWithRuleTypeId).map((k) => schema.literal(k)) as [
+      Type<string>
+    ]),
+    schema.string(),
+  ]);
 
 const buildParamsConditional = (key: string) =>
-  Object.entries(ruleParamsSchemasWithRuleTypeId).reduce<Type<any> | Type<never>>(
+  Object.entries(ruleParamsSchemasWithRuleTypeId).reduce<Type<any>>(
     (accSchema, [ruleTypeId, paramsSchema]) => {
       return schema.conditional(schema.siblingRef(key), ruleTypeId, paramsSchema, accSchema);
     },
-    schema.never()
+    schema.any()
   );
 
 export const ruleParamsSchemaWithRuleTypeId = (key: string = RULE_TYPE_ID) =>
