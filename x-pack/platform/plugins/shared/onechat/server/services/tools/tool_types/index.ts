@@ -8,8 +8,16 @@
 export type {
   ToolTypeDefinition,
   DisabledToolTypeDefinition,
+  BuiltinToolTypeDefinition,
+  McpToolTypeDefinition,
   AnyToolTypeDefinition,
   ToolHandlerDynamicProps,
   ToolHandlerDynamicPropsFn,
+} from './definitions';
+export {
+  isEnabledDefinition,
+  isBuiltinDefinition,
+  isMcpDefinition,
+  isDisabledDefinition,
 } from './definitions';
 export { getToolTypeDefinitions } from './get_tool_types';

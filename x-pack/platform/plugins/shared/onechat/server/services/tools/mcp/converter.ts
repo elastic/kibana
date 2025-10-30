@@ -8,6 +8,7 @@
 import { z, type ZodObject } from '@kbn/zod';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
+import type { CallToolResponse } from '@kbn/mcp-connector-common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ToolHandlerContext } from '@kbn/onechat-server';
 import type { InternalToolDefinition } from '../tool_provider';
@@ -29,19 +30,19 @@ import type { MCPToolWithMetadata } from './types';
  */
 export function convertMcpToolToAgentBuilderTool(
   mcpTool: MCPToolWithMetadata,
-  connectorId: string,
+  connectorId: string, // This is the actual connector.id for execution
   actionsClient: ActionsClient
 ): InternalToolDefinition {
   const { name, description, inputSchema, provider } = mcpTool;
 
   return {
-    id: provider.id,
-    type: ToolType.builtin,
+    id: provider.id, // This uses the uniqueId-based tool ID
+    type: ToolType.mcp,
     description: description || `Tool: ${name}`,
     readonly: true,
-    tags: ['mcp', `connector:${connectorId}`],
+    tags: ['mcp', `provider:${provider.name}`],
     configuration: {
-      connectorId,
+      connectorId, // Store the actual connector ID for execution
       toolName: name,
     },
 
@@ -83,7 +84,7 @@ export function convertMcpToolToAgentBuilderTool(
             };
           }
 
-          const mcpResponse = result.data as { content: Array<{ type: 'text'; text: string }> };
+          const mcpResponse = result.data as CallToolResponse;
           const textContent = mcpResponse.content
             .filter((part) => part.type === 'text')
             .map((part) => part.text)
@@ -95,7 +96,6 @@ export function convertMcpToolToAgentBuilderTool(
                 type: ToolResultType.other,
                 data: {
                   content: textContent,
-                  raw: mcpResponse,
                   provider,
                 },
               },
@@ -117,7 +117,5 @@ export function convertMcpToolToAgentBuilderTool(
         }
       };
     },
-
-    getLlmDescription: async () => description || `Tool: ${name}`,
   };
 }

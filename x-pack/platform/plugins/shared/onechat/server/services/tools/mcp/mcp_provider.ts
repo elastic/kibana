@@ -7,7 +7,9 @@
 
 import {
   MCP_CONNECTOR_TYPE_ID,
+  MCP_NAMESPACE_PREFIX,
   createMcpToolId,
+  parseMcpToolId,
   createProviderMetadata,
   type MCPConnectorConfig,
 } from '@kbn/mcp-connector-common';
@@ -80,12 +82,21 @@ export const createMcpToolProvider = ({
      * MCP tools use the format: mcp.{connectorId}.{toolName}
      */
     has: async (toolId: string) => {
-      if (!toolId.startsWith('mcp.')) {
+      if (!toolId.startsWith(`${MCP_NAMESPACE_PREFIX}.`)) {
+        return false;
+      }
+
+      const parsed = parseMcpToolId(toolId);
+      if (!parsed) {
         return false;
       }
 
       try {
-        const tools = await listAllMcpTools({ actionsClient, logger: loggerWithTags });
+        const tools = await getToolsFromConnector({
+          connectorId: parsed.uniqueId,
+          actionsClient,
+          logger: loggerWithTags,
+        });
         return tools.some((tool) => tool.id === toolId);
       } catch (error) {
         loggerWithTags.error(`Error checking if MCP tool exists: ${error.message}`);
@@ -100,16 +111,25 @@ export const createMcpToolProvider = ({
      * @returns Tool definition or throws if not found
      */
     get: async (toolId: string) => {
-      if (!toolId.startsWith('mcp.')) {
+      if (!toolId.startsWith(`${MCP_NAMESPACE_PREFIX}.`)) {
         throw new Error(`Tool ID "${toolId}" is not an MCP tool`);
       }
 
-      try {
-        const tools = await listAllMcpTools({ actionsClient, logger: loggerWithTags });
-        const tool = tools.find((t) => t.id === toolId);
+      const parsed = parseMcpToolId(toolId);
+      if (!parsed) {
+        throw new Error(`Invalid MCP tool ID format: "${toolId}"`);
+      }
 
+      try {
+        const tools = await getToolsFromConnector({
+          connectorId: parsed.uniqueId,
+          actionsClient,
+          logger: loggerWithTags,
+        });
+
+        const tool = tools.find((t) => t.id === toolId);
         if (!tool) {
-          throw new Error(`MCP tool "${toolId}" not found`);
+          throw new Error(`MCP tool "${toolId}" not found in connector "${parsed.uniqueId}"`);
         }
 
         return tool;
@@ -194,6 +214,51 @@ async function listAllMcpTools({
   } catch (error) {
     logger.error(`Failed to list MCP tools: ${error.message}`);
     throw error;
+  }
+}
+
+/**
+ * Get tools from a specific MCP connector by uniqueId.
+ *
+ * @param params Parameters
+ * @returns Array of tool definitions or empty array if connector not found
+ */
+async function getToolsFromConnector({
+  connectorId: uniqueId,
+  actionsClient,
+  logger,
+}: {
+  connectorId: string;
+  actionsClient: ActionsClient;
+  logger: Logger;
+}): Promise<InternalToolDefinition[]> {
+  try {
+    const allConnectors = await actionsClient.getAll();
+    const mcpConnectors = allConnectors.filter(
+      (connector) => connector.actionTypeId === MCP_CONNECTOR_TYPE_ID
+    );
+
+    const connector = mcpConnectors.find((c) => {
+      const config = c.config as MCPConnectorConfig | undefined;
+      const connectorUniqueId = config?.uniqueId || c.id;
+      return connectorUniqueId === uniqueId;
+    });
+
+    if (!connector) {
+      logger.debug(`MCP connector with uniqueId "${uniqueId}" not found`);
+      return [];
+    }
+
+    return await discoverToolsFromConnector({
+      connector: connector as MCPConnector,
+      actionsClient,
+      logger,
+    });
+  } catch (error) {
+    logger.debug(
+      `Failed to get tools from connector with uniqueId "${uniqueId}": ${error.message}`
+    );
+    return [];
   }
 }
 

@@ -57,4 +57,6 @@ export {
   MCPConnectorSecretsBasicSchema,
   MCPConnectorSecretsCustomHeadersSchema,
   MCPExecutorParamsSchema,
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
 } from './src/schema';

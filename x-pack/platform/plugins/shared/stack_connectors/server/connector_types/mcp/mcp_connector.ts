@@ -17,14 +17,12 @@ import type {
   CallToolResponse,
   ListToolsResponse,
   Tool,
-  CallToolRequest,
   MCPConnectorHTTPServiceConfig,
   ContentPart,
 } from '@kbn/mcp-connector-common';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@kbn/mcp-connector-common';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import type { Type } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import { format } from 'node:util';
 
 export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConnectorSecrets> {
@@ -110,6 +108,10 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     });
 
     await this.client.connect(transport);
+
+    transport.onclose = () => {
+      this.connected = false;
+    };
   }
 
   private async connect() {
@@ -132,18 +134,13 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     this.registerSubAction({
       method: 'listTools',
       name: 'listTools',
-      schema: null,
-    });
-
-    const callToolSchema: Type<CallToolRequest> = schema.object({
-      name: schema.string({ minLength: 1 }),
-      arguments: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+      schema: ListToolsRequestSchema,
     });
 
     this.registerSubAction({
       method: 'callTool',
       name: 'callTool',
-      schema: callToolSchema,
+      schema: CallToolRequestSchema,
     });
   }
 
@@ -156,32 +153,50 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
    * 3. On cache miss, fetch from MCP server and cache the result
    *
    * Cache TTL: 5 minutes
-   * Cache invalidation: Automatic on connector config/secret changes (new instance created)
+   * Cache invalidation:
+   *   - Automatic on connector config/secret changes (new instance created)
+   *   - Manual via forceRefresh parameter
    *
+   * @param params - Optional parameters
+   * @param params.forceRefresh - Force refresh the cache, bypassing cached values
    * @returns List of tools with their schemas
    */
-  public async listTools(): Promise<ListToolsResponse> {
+  public async listTools(params?: { forceRefresh?: boolean }): Promise<ListToolsResponse> {
     const connectorTokenClient = this.connectorTokenClient;
     const connectorId = this.connector.id;
+    const forceRefresh = params?.forceRefresh ?? false;
 
-    if (this.cachedTools) {
+    if (forceRefresh) {
+      this.logger.debug('Force refresh requested, clearing MCP tools cache');
+      this.cachedTools = null;
+
+      try {
+        await connectorTokenClient.deleteConnectorTokens({ connectorId });
+      } catch (error) {
+        this.logger.debug(`Failed to clear persistent cache: ${error.message}`);
+      }
+    }
+
+    if (this.cachedTools && !forceRefresh) {
       this.logger.debug('Using instance-cached MCP tools');
       return this.cachedTools;
     }
 
-    try {
-      const cached = await connectorTokenClient.get({
-        connectorId,
-        tokenType: this.CACHE_TOKEN_TYPE,
-      });
+    if (!forceRefresh) {
+      try {
+        const cached = await connectorTokenClient.get({
+          connectorId,
+          tokenType: this.CACHE_TOKEN_TYPE,
+        });
 
-      if (cached.connectorToken && !this.isExpired(cached.connectorToken)) {
-        this.logger.debug('Using persistent-cached MCP tools');
-        this.cachedTools = JSON.parse(cached.connectorToken.token);
-        return this.cachedTools!;
+        if (cached.connectorToken && !this.isExpired(cached.connectorToken)) {
+          this.logger.debug('Using persistent-cached MCP tools');
+          this.cachedTools = JSON.parse(cached.connectorToken.token);
+          return this.cachedTools!;
+        }
+      } catch (error) {
+        this.logger.debug(`Cache lookup failed: ${error.message}`);
       }
-    } catch (error) {
-      this.logger.debug(`Cache lookup failed: ${error.message}`);
     }
 
     this.logger.debug('Cache miss - fetching tools from MCP server');

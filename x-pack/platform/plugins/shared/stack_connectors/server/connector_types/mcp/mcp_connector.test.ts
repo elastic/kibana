@@ -19,6 +19,8 @@ import type {
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import type { ConnectorTokenClientContract, Services } from '@kbn/actions-plugin/server/types';
+import type { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
 
 // Mock the MCP SDK
 jest.mock('@modelcontextprotocol/sdk/client/index.js');
@@ -61,6 +63,12 @@ describe('MCPConnector authentication', () => {
   });
 
   const createConnector = (config: MCPConnectorConfig, secrets: MCPConnectorSecrets) => {
+    const mockConnectorTokenClient: ConnectorTokenClient = {
+      get: jest.fn().mockRejectedValue(new Error('No cache')),
+      updateOrReplace: jest.fn().mockResolvedValue(undefined),
+      deleteConnectorTokens: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ConnectorTokenClient;
+
     const params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets> = {
       connector: {
         id: 'test-connector-id',
@@ -70,7 +78,9 @@ describe('MCPConnector authentication', () => {
       secrets,
       logger: mockLogger,
       configurationUtilities: mockConfigurationUtilities,
-      services: {} as never,
+      services: {
+        connectorTokenClient: mockConnectorTokenClient,
+      } as unknown as Services,
     };
 
     return new MCPConnector(params);
@@ -393,6 +403,150 @@ describe('MCPConnector authentication', () => {
 
       // Verify config doesn't have token
       expect((config.service as { token?: string }).token).toBeUndefined();
+    });
+  });
+
+  describe('listTools caching with forceRefresh', () => {
+    let mockListTools: jest.Mock;
+    let mockConnectorTokenClient: jest.Mocked<ConnectorTokenClientContract>;
+
+    beforeEach(() => {
+      mockListTools = jest.fn().mockResolvedValue({
+        tools: [
+          { name: 'tool1', description: 'Test tool 1' },
+          { name: 'tool2', description: 'Test tool 2' },
+        ],
+        nextCursor: undefined,
+      });
+
+      (Client as jest.MockedClass<typeof Client>).mockImplementation(() => {
+        return {
+          connect: mockConnect,
+          listTools: mockListTools,
+          callTool: jest.fn(),
+        } as never;
+      });
+
+      mockConnectorTokenClient = {
+        get: jest.fn().mockRejectedValue(new Error('No cache')),
+        updateOrReplace: jest.fn().mockResolvedValue(undefined),
+        deleteConnectorTokens: jest.fn().mockResolvedValue(undefined),
+        getInstance: jest.fn(),
+      } as unknown as jest.Mocked<ConnectorTokenClientContract>;
+    });
+
+    it('should use cached tools on subsequent calls without forceRefresh', async () => {
+      const config: MCPConnectorConfig = {
+        service: {
+          http: { url: 'https://mcp.test' },
+          authType: 'none',
+        },
+      };
+
+      const secrets: MCPConnectorSecretsNone = {
+        authType: 'none',
+      };
+
+      const connector = createConnector(config, secrets);
+
+      const result1 = await connector.listTools();
+      expect(mockListTools).toHaveBeenCalledTimes(1);
+      expect(result1.tools).toHaveLength(2);
+
+      const result2 = await connector.listTools();
+      expect(mockListTools).toHaveBeenCalledTimes(1);
+      expect(result2.tools).toHaveLength(2);
+
+      const result3 = await connector.listTools();
+      expect(mockListTools).toHaveBeenCalledTimes(1);
+      expect(result3.tools).toHaveLength(2);
+    });
+
+    it('should force refresh cache when forceRefresh is true', async () => {
+      const config: MCPConnectorConfig = {
+        service: {
+          http: { url: 'https://mcp.test' },
+          authType: 'none',
+        },
+      };
+
+      const secrets: MCPConnectorSecretsNone = {
+        authType: 'none',
+      };
+
+      const params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets> = {
+        connector: {
+          id: 'test-connector-id',
+          type: '.mcp',
+        },
+        config,
+        secrets,
+        logger: mockLogger,
+        configurationUtilities: mockConfigurationUtilities,
+        services: {
+          connectorTokenClient: mockConnectorTokenClient,
+        } as unknown as Services,
+      };
+
+      const connector = new MCPConnector(params);
+
+      const result1 = await connector.listTools();
+      expect(mockListTools).toHaveBeenCalledTimes(1);
+      expect(result1.tools).toHaveLength(2);
+
+      const result2 = await connector.listTools({ forceRefresh: true });
+      expect(mockListTools).toHaveBeenCalledTimes(2); // Called again
+      expect(result2.tools).toHaveLength(2);
+      expect(mockConnectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+        connectorId: 'test-connector-id',
+      });
+
+      const result3 = await connector.listTools();
+      expect(mockListTools).toHaveBeenCalledTimes(2); // Not called again
+      expect(result3.tools).toHaveLength(2);
+    });
+
+    it('should handle cache deletion errors gracefully when forceRefresh is true', async () => {
+      const config: MCPConnectorConfig = {
+        service: {
+          http: { url: 'https://mcp.test' },
+          authType: 'none',
+        },
+      };
+
+      const secrets: MCPConnectorSecretsNone = {
+        authType: 'none',
+      };
+
+      mockConnectorTokenClient.deleteConnectorTokens.mockRejectedValue(
+        new Error('Failed to delete cache')
+      );
+
+      const params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets> = {
+        connector: {
+          id: 'test-connector-id',
+          type: '.mcp',
+        },
+        config,
+        secrets,
+        logger: mockLogger,
+        configurationUtilities: mockConfigurationUtilities,
+        services: {
+          connectorTokenClient: mockConnectorTokenClient,
+        } as unknown as Services,
+      };
+
+      const connector = new MCPConnector(params);
+
+      await connector.listTools();
+      expect(mockListTools).toHaveBeenCalledTimes(1);
+
+      const result = await connector.listTools({ forceRefresh: true });
+      expect(mockListTools).toHaveBeenCalledTimes(2); // Called again
+      expect(result.tools).toHaveLength(2);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringMatching(/Failed to clear persistent cache/)
+      );
     });
   });
 });

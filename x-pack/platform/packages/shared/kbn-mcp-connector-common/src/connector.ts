@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   MCPConnectorHTTPServiceConfigSchema,
   MCPConnectorConfigSchema,
@@ -29,43 +29,43 @@ export type MCPConnectorAuthType = 'none' | 'bearer' | 'apiKey' | 'basic' | 'cus
  * MCP connector HTTP service configuration.
  * Derived from schema.
  */
-export type MCPConnectorHTTPServiceConfig = TypeOf<typeof MCPConnectorHTTPServiceConfigSchema>;
+export type MCPConnectorHTTPServiceConfig = z.infer<typeof MCPConnectorHTTPServiceConfigSchema>;
 
 /**
  * MCP connector configuration.
  * Derived from schema.
  */
-export type MCPConnectorConfig = TypeOf<typeof MCPConnectorConfigSchema>;
+export type MCPConnectorConfig = z.infer<typeof MCPConnectorConfigSchema>;
 
 /**
  * No authentication secrets.
  * Derived from schema.
  */
-export type MCPConnectorSecretsNone = TypeOf<typeof MCPConnectorSecretsNoneSchema>;
+export type MCPConnectorSecretsNone = z.infer<typeof MCPConnectorSecretsNoneSchema>;
 
 /**
  * Bearer token authentication secrets.
  * Derived from schema.
  */
-export type MCPConnectorSecretsBearer = TypeOf<typeof MCPConnectorSecretsBearerSchema>;
+export type MCPConnectorSecretsBearer = z.infer<typeof MCPConnectorSecretsBearerSchema>;
 
 /**
  * API key authentication secrets.
  * Derived from schema.
  */
-export type MCPConnectorSecretsApiKey = TypeOf<typeof MCPConnectorSecretsApiKeySchema>;
+export type MCPConnectorSecretsApiKey = z.infer<typeof MCPConnectorSecretsApiKeySchema>;
 
 /**
  * Basic authentication secrets.
  * Derived from schema.
  */
-export type MCPConnectorSecretsBasic = TypeOf<typeof MCPConnectorSecretsBasicSchema>;
+export type MCPConnectorSecretsBasic = z.infer<typeof MCPConnectorSecretsBasicSchema>;
 
 /**
  * Custom headers authentication secrets.
  * Derived from schema.
  */
-export type MCPConnectorSecretsCustomHeaders = TypeOf<
+export type MCPConnectorSecretsCustomHeaders = z.infer<
   typeof MCPConnectorSecretsCustomHeadersSchema
 >;
 
@@ -73,7 +73,7 @@ export type MCPConnectorSecretsCustomHeaders = TypeOf<
  * MCP connector secrets (discriminated union).
  * Derived from schema.
  */
-export type MCPConnectorSecrets = TypeOf<typeof MCPConnectorSecretsSchema>;
+export type MCPConnectorSecrets = z.infer<typeof MCPConnectorSecretsSchema>;
 
 export const MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS = 'listTools';
 export const MCP_CONNECTOR_SUB_ACTION_TYPE_CALL_TOOL = 'callTool';
@@ -84,7 +84,9 @@ export type MCPConnectorSubActionType =
 
 export interface MCPListToolsParams {
   subAction: typeof MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS;
-  subActionParams: {};
+  subActionParams: {
+    forceRefresh?: boolean;
+  };
 }
 
 export interface MCPCallToolParams {

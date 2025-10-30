@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 /**
  * Schema for MCP connector HTTP service configuration.
@@ -12,9 +12,9 @@ import { schema } from '@kbn/config-schema';
  * Contains only non-sensitive metadata. Credentials are validated separately
  * via MCPConnectorSecretsSchema.
  */
-export const MCPConnectorHTTPServiceConfigSchema = schema.object({
-  http: schema.object({
-    url: schema.string(),
+export const MCPConnectorHTTPServiceConfigSchema = z.object({
+  http: z.object({
+    url: z.string(),
   }),
   /**
    * Authentication type selector (required).
@@ -22,19 +22,19 @@ export const MCPConnectorHTTPServiceConfigSchema = schema.object({
    * Determines which authentication method to use. The actual credentials
    * are stored in the secrets object and must match this type.
    */
-  authType: schema.oneOf([
-    schema.literal('none'),
-    schema.literal('bearer'),
-    schema.literal('apiKey'),
-    schema.literal('basic'),
-    schema.literal('customHeaders'),
+  authType: z.union([
+    z.literal('none'),
+    z.literal('bearer'),
+    z.literal('apiKey'),
+    z.literal('basic'),
+    z.literal('customHeaders'),
   ]),
   /**
    * Optional custom header name for API key authentication.
    *
    * Only used when authType is 'apiKey'. Defaults to 'X-API-Key' if not specified.
    */
-  apiKeyHeaderName: schema.maybe(schema.string({ minLength: 1 })),
+  apiKeyHeaderName: z.string().min(1).optional(),
 });
 
 /**
@@ -42,10 +42,10 @@ export const MCPConnectorHTTPServiceConfigSchema = schema.object({
  *
  * Top-level configuration object containing only non-sensitive metadata.
  */
-export const MCPConnectorConfigSchema = schema.object({
-  uniqueId: schema.maybe(schema.string({ minLength: 1 })),
-  description: schema.maybe(schema.string()),
-  version: schema.maybe(schema.string()),
+export const MCPConnectorConfigSchema = z.object({
+  uniqueId: z.string().min(1).optional(),
+  description: z.string().optional(),
+  version: z.string().optional(),
   service: MCPConnectorHTTPServiceConfigSchema,
 });
 
@@ -54,8 +54,8 @@ export const MCPConnectorConfigSchema = schema.object({
  *
  * Used when authType is 'none'.
  */
-export const MCPConnectorSecretsNoneSchema = schema.object({
-  authType: schema.literal('none'),
+export const MCPConnectorSecretsNoneSchema = z.object({
+  authType: z.literal('none'),
 });
 
 /**
@@ -63,9 +63,9 @@ export const MCPConnectorSecretsNoneSchema = schema.object({
  *
  * Used when authType is 'bearer'.
  */
-export const MCPConnectorSecretsBearerSchema = schema.object({
-  authType: schema.literal('bearer'),
-  token: schema.string({ minLength: 1 }),
+export const MCPConnectorSecretsBearerSchema = z.object({
+  authType: z.literal('bearer'),
+  token: z.string().min(1),
 });
 
 /**
@@ -73,9 +73,9 @@ export const MCPConnectorSecretsBearerSchema = schema.object({
  *
  * Used when authType is 'apiKey'.
  */
-export const MCPConnectorSecretsApiKeySchema = schema.object({
-  authType: schema.literal('apiKey'),
-  apiKey: schema.string({ minLength: 1 }),
+export const MCPConnectorSecretsApiKeySchema = z.object({
+  authType: z.literal('apiKey'),
+  apiKey: z.string().min(1),
 });
 
 /**
@@ -83,10 +83,10 @@ export const MCPConnectorSecretsApiKeySchema = schema.object({
  *
  * Used when authType is 'basic'.
  */
-export const MCPConnectorSecretsBasicSchema = schema.object({
-  authType: schema.literal('basic'),
-  username: schema.string({ minLength: 1 }),
-  password: schema.string({ minLength: 1 }),
+export const MCPConnectorSecretsBasicSchema = z.object({
+  authType: z.literal('basic'),
+  username: z.string().min(1),
+  password: z.string().min(1),
 });
 
 /**
@@ -94,15 +94,16 @@ export const MCPConnectorSecretsBasicSchema = schema.object({
  *
  * Used when authType is 'customHeaders'.
  */
-export const MCPConnectorSecretsCustomHeadersSchema = schema.object({
-  authType: schema.literal('customHeaders'),
-  headers: schema.arrayOf(
-    schema.object({
-      name: schema.string({ minLength: 1 }),
-      value: schema.string(),
-    }),
-    { minSize: 1 }
-  ),
+export const MCPConnectorSecretsCustomHeadersSchema = z.object({
+  authType: z.literal('customHeaders'),
+  headers: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        value: z.string(),
+      })
+    )
+    .min(1),
 });
 
 /**
@@ -111,7 +112,7 @@ export const MCPConnectorSecretsCustomHeadersSchema = schema.object({
  * Discriminated union that validates credentials based on authType.
  * The authType discriminator must match config.service.authType.
  */
-export const MCPConnectorSecretsSchema = schema.oneOf([
+export const MCPConnectorSecretsSchema = z.union([
   MCPConnectorSecretsNoneSchema,
   MCPConnectorSecretsBearerSchema,
   MCPConnectorSecretsApiKeySchema,
@@ -119,20 +120,24 @@ export const MCPConnectorSecretsSchema = schema.oneOf([
   MCPConnectorSecretsCustomHeadersSchema,
 ]);
 
-const MCPListToolsParamsSchema = schema.object({
-  subAction: schema.literal('listTools'),
-  subActionParams: schema.object({}),
+export const ListToolsRequestSchema = z.object({
+  forceRefresh: z.boolean().optional(),
 });
 
-const MCPCallToolParamsSchema = schema.object({
-  subAction: schema.literal('callTool'),
-  subActionParams: schema.object({
-    name: schema.string(),
-    arguments: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  }),
+const MCPListToolsParamsSchema = z.object({
+  subAction: z.literal('listTools'),
+  subActionParams: ListToolsRequestSchema,
 });
 
-export const MCPExecutorParamsSchema = schema.oneOf([
-  MCPListToolsParamsSchema,
-  MCPCallToolParamsSchema,
-]);
+// Schema for just the CallToolRequest params
+export const CallToolRequestSchema = z.object({
+  name: z.string(),
+  arguments: z.record(z.string(), z.any()).optional(),
+});
+
+const MCPCallToolParamsSchema = z.object({
+  subAction: z.literal('callTool'),
+  subActionParams: CallToolRequestSchema,
+});
+
+export const MCPExecutorParamsSchema = z.union([MCPListToolsParamsSchema, MCPCallToolParamsSchema]);
