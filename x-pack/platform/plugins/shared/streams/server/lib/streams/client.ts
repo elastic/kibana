@@ -422,20 +422,35 @@ export class StreamsClient {
    * - the user does not have access to the stream
    */
   async getStream(name: string): Promise<Streams.all.Definition> {
-    const rootStreamDefinition = ROOT_STREAM_DEFINITIONS.find(
-      (definition) => definition.name === name
-    );
-    if (rootStreamDefinition) {
-      const stored = await this.getStoredStreamDefinition(name).catch((error) => {
-        if (isDefinitionNotFoundError(error) || isNotFoundError(error)) {
-          return undefined;
+    try {
+      const response = await this.dependencies.storageClient.get({ id: name });
+
+      const streamDefinition = this.getStreamDefinitionFromSource(response._source);
+
+      if (Streams.ingest.all.Definition.is(streamDefinition)) {
+        const privileges = await checkAccess({
+          name,
+          scopedClusterClient: this.dependencies.scopedClusterClient,
+        });
+        if (!privileges.read) {
+          throw new SecurityError(`Cannot read stream, insufficient privileges`);
+        }
+      }
+      return streamDefinition;
+    } catch (error) {
+      try {
+        if (isNotFoundError(error)) {
+          const dataStream = await this.getDataStream(name);
+          return this.getDataStreamAsIngestStream(dataStream);
         }
         throw error;
-      });
-      return stored ?? rootStreamDefinition;
+      } catch (e) {
+        if (isNotFoundError(e)) {
+          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
+        }
+        throw e;
+      }
     }
-
-    return this.getStoredStreamDefinition(name);
   }
 
   private async getStoredStreamDefinition(name: string): Promise<Streams.all.Definition> {
