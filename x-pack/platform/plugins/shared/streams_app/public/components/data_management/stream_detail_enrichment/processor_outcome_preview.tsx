@@ -53,13 +53,10 @@ import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { RowSelectionContext } from '../shared/preview_table';
 
 export const ProcessorOutcomePreview = () => {
-  const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
-
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewRecords(snapshot.context)
   );
-  const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
 
   const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
     state.context.dataSourcesRefs.some((ref) => {
@@ -69,54 +66,6 @@ export const ProcessorOutcomePreview = () => {
       );
     })
   );
-
-  const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
-    const currentProcessorRef = state.context.stepRefs.find(
-      (stepRef) =>
-        isActionBlock(stepRef.getSnapshot().context.step) && isStepUnderEdit(stepRef.getSnapshot())
-    );
-
-    if (!currentProcessorRef) return undefined;
-
-    const step = currentProcessorRef.getSnapshot().context.step;
-
-    if (!isActionBlock(step)) return undefined;
-
-    return getSourceField(step);
-  });
-
-  const allColumns = useMemo(() => {
-    return getAllFieldsInOrder(previewDocuments, detectedFields);
-  }, [detectedFields, previewDocuments]);
-
-  const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
-    selectDraftProcessor(snapshot.context)
-  );
-
-  const grokMode =
-    draftProcessor?.processor &&
-    'action' in draftProcessor.processor &&
-    draftProcessor.processor.action === 'grok' &&
-    !isEmpty(draftProcessor.processor.from) &&
-    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
-      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
-      const fieldName = draftProcessor.processor?.from;
-      return Array.from(grokExpression.getFields().values()).some(
-        (field) => field.name === fieldName
-      );
-    });
-
-  const grokField = grokMode ? (draftProcessor.processor as GrokProcessor).from : undefined;
-  const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
-
-  const validCurrentProcessorSourceField =
-    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
-      ? currentProcessorSourceField
-      : undefined;
-
-  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
-
-  const effectiveViewMode = isViewModeForced ? 'columns' : viewMode;
 
   if (isEmpty(samples)) {
     if (areDataSourcesLoading) {
@@ -141,13 +90,7 @@ export const ProcessorOutcomePreview = () => {
       {isEmpty(previewDocuments) ? (
         <NoPreviewDocumentsEmptyPrompt />
       ) : (
-        <OutcomePreviewTable
-          previewDocuments={previewDocuments}
-          viewMode={effectiveViewMode}
-          userSelectedViewMode={viewMode}
-          setViewMode={setViewMode}
-          isViewModeDisabled={isViewModeForced}
-        />
+        <OutcomePreviewTable previewDocuments={previewDocuments} />
       )}
     </>
   );
@@ -229,19 +172,9 @@ const PreviewDocumentsGroupBy = () => {
   );
 };
 
-const OutcomePreviewTable = ({
-  previewDocuments,
-  viewMode,
-  userSelectedViewMode,
-  setViewMode,
-  isViewModeDisabled,
-}: {
-  previewDocuments: FlattenRecord[];
-  viewMode: PreviewTableMode;
-  userSelectedViewMode: PreviewTableMode;
-  setViewMode: (mode: PreviewTableMode) => void;
-  isViewModeDisabled: boolean;
-}) => {
+const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
+  const [userSelectedViewMode, setViewMode] = useState<PreviewTableMode>('summary');
+
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
@@ -322,6 +255,12 @@ const OutcomePreviewTable = ({
     currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
       ? currentProcessorSourceField
       : undefined;
+
+  // Calculate if view mode should be forced to 'columns'
+  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+
+  // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
+  const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode;
 
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
@@ -466,12 +405,12 @@ const OutcomePreviewTable = ({
           setSorting={setPreviewColumnsSorting}
           columnOrderHint={previewColumnsOrder}
           renderCellValue={renderCellValue}
-          mode={viewMode}
+          mode={effectiveViewMode}
           streamName={streamName}
           viewModeToggle={{
             currentMode: userSelectedViewMode,
             setViewMode,
-            isDisabled: isViewModeDisabled,
+            isDisabled: isViewModeForced,
           }}
         />
       </RowSelectionContext.Provider>
