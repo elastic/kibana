@@ -45,7 +45,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     return niceTimeFormatter([start, end]);
   }, [start, end]);
 
-  const { features, refresh, loading: featuresLoading } = useStreamFeatures(definition.stream);
+  const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream);
   const { identifyFeatures } = useStreamFeaturesApi(definition.stream);
   const [isFeatureDetectionFlyoutOpen, setIsFeatureDetectionFlyoutOpen] = useState(false);
   const [isFeatureDetectionLoading, setIsFeatureDetectionLoading] = useState(false);
@@ -85,9 +85,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       features={detectedFeatures}
       isLoading={isFeatureDetectionLoading}
       closeFlyout={() => {
-        refresh();
+        refreshFeatures();
         setIsFeatureDetectionFlyoutOpen(false);
       }}
+      setFeatures={setDetectedFeatures}
     />
   ) : null;
 

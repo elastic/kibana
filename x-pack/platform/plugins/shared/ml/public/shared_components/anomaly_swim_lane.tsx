@@ -31,9 +31,18 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
 
   const rawState: AnomalySwimLaneEmbeddableState = useMemo(() => {
+    if (swimlaneType === 'viewBy' && viewBy) {
+      return {
+        jobIds,
+        swimlaneType: 'viewBy',
+        refreshConfig,
+        viewBy,
+      };
+    }
+
     return {
       jobIds,
-      swimlaneType,
+      swimlaneType: 'overall',
       refreshConfig,
       viewBy,
       timeRange,

@@ -7,35 +7,35 @@
 
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 
+import type { TypeOf } from '@kbn/config-schema/src/types';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { RefreshInterval } from '@kbn/data-plugin/common';
 
-import type { JobId } from './anomaly_detection_jobs/job';
-
-// local definition to avoid circular dependency
-// import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
-type SwimlaneType = 'overall' | 'viewBy';
+import type {
+  anomalySwimlaneEmbeddableCustomInputOverallSchema,
+  anomalySwimlaneEmbeddableCustomInputSchema,
+  anomalySwimlaneEmbeddableCustomInputViewBySchema,
+  anomalySwimlaneEmbeddableUserInputSchema,
+  anomalySwimlaneInitialInputSchema,
+} from '../../server/embeddable/schemas';
 
 /** Manual input by the user */
-export interface AnomalySwimlaneEmbeddableUserInput {
-  jobIds: JobId[];
-  panelTitle?: string;
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-}
+export type AnomalySwimlaneEmbeddableUserInput = TypeOf<
+  typeof anomalySwimlaneEmbeddableUserInputSchema
+>;
 
-export interface AnomalySwimlaneEmbeddableCustomInput
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  perPage?: number;
+export type AnomalySwimlaneInitialInput = TypeOf<typeof anomalySwimlaneInitialInputSchema>;
 
-  // Embeddable inputs which are not included in the default interface
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange: TimeRange | undefined;
-}
+export type AnomalySwimlaneEmbeddableCustomInputViewBy = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputViewBySchema
+>;
+
+export type AnomalySwimlaneEmbeddableCustomInputOverall = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputOverallSchema
+>;
+
+export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputSchema
+>;
 
 export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInput {
   id?: string;

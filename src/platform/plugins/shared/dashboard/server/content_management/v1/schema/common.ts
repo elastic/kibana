@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
@@ -46,16 +47,15 @@ export const panelGridDataSchema = schema.object({
 
 export function getPanelSchema() {
   return schema.object({
-    // @ts-ignore
     config: schema.oneOf([
-      ...(embeddableService ? embeddableService.getEmbeddableSchemas() : []),
+      ...((embeddableService ? embeddableService.getEmbeddableSchemas() : []) as [ObjectType<{}>]),
       schema.object(
         {},
         {
           unknowns: 'allow',
         }
       ),
-    ]),
+    ]) as ObjectType<{}>,
     type: schema.string({ meta: { description: 'The embeddable type' } }),
     grid: panelGridDataSchema,
     /**

@@ -9,13 +9,14 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
-import { DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
+import { DEFAULT_FLEET_SERVER_HOST_ID, ECH_AGENTLESS_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import { FleetError } from '../../errors';
 
 import type { FleetServerHost } from '../../types';
 import { appContextService } from '../app_context';
 import { fleetServerHostService } from '../fleet_server_host';
+import { isAgentlessEnabled } from '../utils/agentless';
 
 import { agentPolicyService } from '../agent_policy';
 
@@ -45,6 +46,7 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
   const { fleetServerHosts: fleetServerHostsFromConfig } = config;
 
   const legacyFleetServerHostsConfig = getConfigFleetServerHosts(config);
+  const cloudServerHosts = getCloudFleetServersHosts();
 
   const fleetServerHosts: FleetServerHost[] = (fleetServerHostsFromConfig || []).concat([
     ...(legacyFleetServerHostsConfig
@@ -54,6 +56,18 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
             is_default: true,
             id: DEFAULT_FLEET_SERVER_HOST_ID,
             host_urls: legacyFleetServerHostsConfig,
+          },
+        ]
+      : []),
+    // Include agentless Fleet Server host in ECH
+    ...(isAgentlessEnabled() && cloudServerHosts
+      ? [
+          {
+            id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+            name: 'Internal Fleet Server for agentless',
+            host_urls: cloudServerHosts,
+            is_default: false,
+            is_preconfigured: true,
           },
         ]
       : []),

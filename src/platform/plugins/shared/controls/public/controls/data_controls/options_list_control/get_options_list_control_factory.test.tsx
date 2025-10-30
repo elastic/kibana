@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-
+import { EuiThemeProvider } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { render as rtlRender, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EuiThemeProvider } from '@elastic/eui';
-
+import React from 'react';
 import { coreServices, dataViewsService } from '../../../services/kibana_services';
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
@@ -29,7 +27,7 @@ describe('Options List Control Api', () => {
   const factory = getOptionsListControlFactory();
   const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
 
-  dataViewsService.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
+  const getDataView = async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
     }
@@ -59,9 +57,75 @@ describe('Options List Control Api', () => {
       };
     });
     return stubDataView;
+  };
+
+  describe('initialization', () => {
+    let dataviewDelayPromise: Promise<void> | undefined;
+
+    beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(async (id: string) => {
+        if (dataviewDelayPromise) await dataviewDelayPromise;
+        return getDataView(id);
+      });
+    });
+
+    it('returns api immediately when no initial selections are configured', async () => {
+      let resolveDataView: (() => void) | undefined;
+      let apiReturned = false;
+      dataviewDelayPromise = new Promise((res) => (resolveDataView = res));
+      (async () => {
+        await factory.buildControl({
+          initialState: {
+            dataViewId: 'myDataViewId',
+            fieldName: 'myFieldName',
+          },
+          finalizeApi,
+          uuid,
+          controlGroupApi,
+        });
+        apiReturned = true;
+      })();
+      await new Promise((r) => setTimeout(r, 1));
+      expect(apiReturned).toBe(true);
+      resolveDataView?.();
+      dataviewDelayPromise = undefined;
+    });
+
+    it('waits until data view is available before returning api when initial selections are configured', async () => {
+      let resolveDataView: (() => void) | undefined;
+      let apiReturned = false;
+      dataviewDelayPromise = new Promise((res) => (resolveDataView = res));
+      (async () => {
+        await factory.buildControl({
+          initialState: {
+            dataViewId: 'myDataViewId',
+            fieldName: 'myFieldName',
+            selectedOptions: ['cool', 'test'],
+          },
+          finalizeApi,
+          uuid,
+          controlGroupApi,
+        });
+        apiReturned = true;
+      })();
+
+      // even after 10ms the API should not have returned yet because the data view was not available
+      await new Promise((r) => setTimeout(r, 10));
+      expect(apiReturned).toBe(false);
+
+      // resolve the data view and ensure the api returns
+      resolveDataView?.();
+      await new Promise((r) => setTimeout(r, 10));
+      expect(apiReturned).toBe(true);
+      dataviewDelayPromise = undefined;
+    });
   });
 
   describe('filters$', () => {
+    beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(getDataView);
+    });
+
     test('should not set filters$ when selectedOptions is not provided', async () => {
       const { api } = await factory.buildControl({
         initialState: {
@@ -172,6 +236,7 @@ describe('Options List Control Api', () => {
 
   describe('make selection', () => {
     beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(getDataView);
       coreServices.http.fetch = jest.fn().mockResolvedValue({
         suggestions: [
           { value: 'woof', docCount: 10 },

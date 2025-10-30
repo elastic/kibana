@@ -9,14 +9,13 @@ import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import type { AnomalySwimlaneEmbeddableUserInput } from '@kbn/ml-common-types/anomaly_swim_lane';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { TypeOf } from '@kbn/config-schema';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../application/explorer/explorer_constants';
 import type { AnomalySwimLaneComponentApi, AnomalySwimLaneEmbeddableState } from './types';
+import type { anomalySwimLaneControlsStateSchema } from '../../../server/embeddable/schemas';
 
-export type AnomalySwimLaneControlsState = Pick<
-  AnomalySwimLaneEmbeddableState,
-  'jobIds' | 'swimlaneType' | 'viewBy' | 'perPage'
->;
+type AnomalySwimLaneControlsState = TypeOf<typeof anomalySwimLaneControlsStateSchema>;
 
 export const swimLaneComparators: StateComparators<AnomalySwimLaneControlsState> = {
   jobIds: 'deepEquality',
@@ -31,7 +30,9 @@ export const initializeSwimLaneControls = (
 ) => {
   const jobIds = new BehaviorSubject<JobId[]>(rawState.jobIds);
   const swimlaneType = new BehaviorSubject<SwimlaneType>(rawState.swimlaneType);
-  const viewBy = new BehaviorSubject<string | undefined>(rawState.viewBy);
+  const viewBy = new BehaviorSubject<string | undefined>(
+    rawState.swimlaneType === 'viewBy' ? rawState.viewBy : undefined
+  );
   const fromPage = new BehaviorSubject<number>(1);
   const perPage = new BehaviorSubject<number | undefined>(
     rawState.perPage ?? SWIM_LANE_DEFAULT_PAGE_SIZE

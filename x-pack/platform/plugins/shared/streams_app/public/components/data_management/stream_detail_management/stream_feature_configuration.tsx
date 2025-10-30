@@ -23,7 +23,11 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
   const { identifyFeatures } = useStreamFeaturesApi(definition);
   const aiFeatures = useAIFeatures();
   const [features, setFeatures] = useState<Feature[]>([]);
-  const { features: existingFeatures, refresh, loading } = useStreamFeatures(definition);
+  const {
+    features: existingFeatures,
+    refreshFeatures,
+    featuresLoading,
+  } = useStreamFeatures(definition);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -74,8 +78,8 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
         <StreamFeaturesAccordion
           definition={definition}
           features={existingFeatures}
-          loading={loading}
-          refresh={refresh}
+          loading={featuresLoading}
+          refresh={refreshFeatures}
         />
         {isFlyoutVisible && (
           <StreamFeaturesFlyout
@@ -83,9 +87,10 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
             features={features}
             isLoading={isLoading}
             closeFlyout={() => {
-              refresh();
+              refreshFeatures();
               setIsFlyoutVisible(false);
             }}
+            setFeatures={setFeatures}
           />
         )}
       </EuiFlexGroup>

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import { useEffect } from 'react';
-import {} from 'react';
-import React, { useState } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
+import React, { useState, useCallback, useMemo, type ReactNode } from 'react';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiScreenReaderOnly,
+  type EuiBasicTableColumn,
+} from '@elastic/eui';
 import { type Streams, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { ConditionPanel } from '../../shared';
@@ -18,26 +19,55 @@ import { FeatureEventsSparkline } from './feature_events_sparkline';
 import { FeatureDetailExpanded } from './feature_detail_expanded';
 import { TableTitle } from './table_title';
 
+// Helper function to generate unique copy name
+const generateCopyName = (originalName: string, existingFeatures: Feature[]) => {
+  const existingNames = new Set(existingFeatures.map((f) => f.name));
+  let copyNumber = 1;
+  let copyName = `${originalName}-copy-${copyNumber}`;
+
+  while (existingNames.has(copyName)) {
+    copyNumber++;
+    copyName = `${originalName}-copy-${copyNumber}`;
+  }
+
+  return copyName;
+};
+
 export function StreamFeaturesTable({
   definition,
-  features: initialFeatures,
-  selectedFeatures,
-  setSelectedFeatures,
+  features,
+  selectedFeatureNames,
+  setSelectedFeatureNames,
+  setFeatures,
 }: {
   definition: Streams.all.Definition;
   features: Feature[];
-  selectedFeatures: Feature[];
-  setSelectedFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
+  selectedFeatureNames: Set<string>;
+  setSelectedFeatureNames: React.Dispatch<React.SetStateAction<Set<string>>>;
+  setFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
 }) {
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
-    {}
+  const [expandedFeatureNames, setExpandedFeatureNames] = useState<Set<string>>(new Set());
+
+  const itemIdToExpandedRowMap = useMemo(() => {
+    const map: Record<string, ReactNode> = {};
+    features.forEach((f) => {
+      if (expandedFeatureNames.has(f.name)) {
+        map[f.name] = <FeatureDetailExpanded feature={f} setFeatures={setFeatures} />;
+      }
+    });
+    return map;
+  }, [expandedFeatureNames, features, setFeatures]);
+
+  const selectedFeatures = useMemo(() => {
+    return features.filter((f) => selectedFeatureNames.has(f.name));
+  }, [features, selectedFeatureNames]);
+
+  const onSelectionChange = useCallback(
+    (newSelectedFeatures: Feature[]) => {
+      setSelectedFeatureNames(new Set(newSelectedFeatures.map((f) => f.name)));
+    },
+    [setSelectedFeatureNames]
   );
-
-  const [features, setFeatures] = useState<Feature[]>(initialFeatures);
-
-  useEffect(() => {
-    setFeatures(initialFeatures);
-  }, [initialFeatures]);
 
   const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
@@ -96,8 +126,9 @@ export function StreamFeaturesTable({
           type: 'icon',
           icon: 'copy',
           onClick: (feature) => {
-            // clone the feature
-            setFeatures(features.concat({ ...feature, name: `${feature.name}-copy` }));
+            setFeatures((prev) =>
+              prev.concat({ ...feature, name: generateCopyName(feature.name, features) })
+            );
           },
         },
         {
@@ -111,15 +142,7 @@ export function StreamFeaturesTable({
           type: 'icon',
           icon: 'pencil',
           onClick: (feature) => {
-            // open expanded row
-            setItemIdToExpandedRowMap(
-              Object.keys(itemIdToExpandedRowMap).includes(feature.name)
-                ? itemIdToExpandedRowMap
-                : {
-                    ...itemIdToExpandedRowMap,
-                    [feature.name]: <FeatureDetailExpanded feature={feature} />,
-                  }
-            );
+            setExpandedFeatureNames((prev) => new Set(prev).add(feature.name));
           },
         },
         {
@@ -136,34 +159,38 @@ export function StreamFeaturesTable({
           type: 'icon',
           icon: 'trash',
           onClick: (feature) => {
-            // delete the feature
             setFeatures(
               features.filter((selectedFeature) => selectedFeature.name !== feature.name)
             );
-            setSelectedFeatures(
-              selectedFeatures.filter((selectedFeature) => selectedFeature.name !== feature.name)
+            setSelectedFeatureNames(
+              new Set(
+                Array.from(selectedFeatureNames).filter(
+                  (selectedFeatureName) => selectedFeatureName !== feature.name
+                )
+              )
             );
-            const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-            if (itemIdToExpandedRowMapValues[feature.name]) {
-              delete itemIdToExpandedRowMapValues[feature.name];
-              setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
-            }
+            setExpandedFeatureNames((prev) => {
+              const next = new Set(prev);
+              next.delete(feature.name);
+              return next;
+            });
           },
         },
       ],
     },
   ];
 
-  const toggleDetails = (feature: Feature) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-
-    if (itemIdToExpandedRowMapValues[feature.name]) {
-      delete itemIdToExpandedRowMapValues[feature.name];
-    } else {
-      itemIdToExpandedRowMapValues[feature.name] = <FeatureDetailExpanded feature={feature} />;
-    }
-    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
-  };
+  const toggleDetails = useCallback((feature: Feature) => {
+    setExpandedFeatureNames((prev) => {
+      const next = new Set(prev);
+      if (next.has(feature.name)) {
+        next.delete(feature.name);
+      } else {
+        next.add(feature.name);
+      }
+      return next;
+    });
+  }, []);
 
   const columnsWithExpandingRowToggle: Array<EuiBasicTableColumn<Feature>> = [
     {
@@ -181,13 +208,13 @@ export function StreamFeaturesTable({
       ),
       mobileOptions: { header: false },
       render: (feature: Feature) => {
-        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+        const isExpanded = expandedFeatureNames.has(feature.name);
 
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(feature)}
             aria-label={
-              itemIdToExpandedRowMapValues[feature.name]
+              isExpanded
                 ? i18n.translate('xpack.streams.streamFeaturesTable.columns.collapseDetails', {
                     defaultMessage: 'Collapse details',
                   })
@@ -195,7 +222,7 @@ export function StreamFeaturesTable({
                     defaultMessage: 'Expand details',
                   })
             }
-            iconType={itemIdToExpandedRowMapValues[feature.name] ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
           />
         );
       },
@@ -221,7 +248,10 @@ export function StreamFeaturesTable({
         itemId="name"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         columns={columnsWithExpandingRowToggle}
-        selection={{ selected: selectedFeatures, onSelectionChange: setSelectedFeatures }}
+        selection={{
+          selected: selectedFeatures,
+          onSelectionChange,
+        }}
       />
     </>
   );

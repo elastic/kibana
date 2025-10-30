@@ -47,10 +47,10 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
-  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY,
-  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT,
+  PROCESS_DESCENDANT_EXTRA_ENTRY,
+  PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
-import { isFilterProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
+import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   eventsIndexPattern,
@@ -156,7 +156,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
 
     const isFilterProcessDescendantsSelected = useMemo(
-      () => isFilterProcessDescendantsEnabled(exception),
+      () => isProcessDescendantsEnabled(exception),
       [exception]
     );
 
@@ -480,7 +480,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                   defaultMessage="Additional condition added:"
                 />
               </EuiText>
-              <code>{PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT}</code>
+              <code>{PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT}</code>
               <EuiSpacer size="m" />
             </>
           )}
@@ -506,7 +506,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
 
           if (isFilterProcessDescendantsFeatureEnabled && isFilterProcessDescendantsSelected) {
-            addedFields.push(PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.field);
+            addedFields.push(PROCESS_DESCENDANT_EXTRA_ENTRY.field);
           }
 
           setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));

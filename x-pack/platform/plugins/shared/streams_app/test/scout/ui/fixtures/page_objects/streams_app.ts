@@ -68,9 +68,32 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'advanced');
   }
 
+  async clickGoBackToStreams() {
+    await this.page.getByTestId('backToStreamsButton').click();
+  }
+
+  async clickStreamNameLink(streamName: string) {
+    await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
+  }
+
+  async clickDataQualityTab() {
+    await this.page.getByTestId('dataQualityTab').click();
+  }
+
   // Streams table utility methods
   async expectStreamsTableVisible() {
     await expect(this.page.getByTestId('streamsTable')).toBeVisible();
+  }
+
+  async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
+    await expect(
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      `Date picker 'start date' is incorrect`
+    ).toHaveText(expectedRange.from);
+    await expect(
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      `Date picker 'end date' is incorrect`
+    ).toHaveText(expectedRange.to);
   }
 
   async verifyDocCount(streamName: string, expectedCount: number) {

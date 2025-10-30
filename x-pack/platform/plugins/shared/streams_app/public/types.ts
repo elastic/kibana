@@ -30,7 +30,6 @@ import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -48,7 +47,6 @@ export type StreamsApplicationComponentType = React.FC<StreamsApplicationProps>;
 export interface StreamsAppSetupDependencies {
   data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
-  discover: DiscoverStart;
   discoverShared: DiscoverSharedPublicSetup;
   share: SharePublicSetup;
   unifiedSearch: {};
@@ -60,7 +58,6 @@ export interface StreamsAppStartDependencies {
   data: DataPublicPluginStart;
   datasetQuality: DatasetQualityPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  discover: DiscoverStart;
   discoverShared: DiscoverSharedPublicStart;
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;

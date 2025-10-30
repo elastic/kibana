@@ -12,7 +12,7 @@ import { EuiIconTip } from '@elastic/eui';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { formatBytes } from '../../helpers/format_bytes';
-import type { FailureStoreStats } from '../../hooks/use_failure_store_stats';
+import type { EnhancedFailureStoreStats } from '../../hooks/use_data_stream_stats';
 
 export const IngestionCard = ({
   definition,
@@ -20,7 +20,7 @@ export const IngestionCard = ({
   statsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  stats?: FailureStoreStats;
+  stats?: EnhancedFailureStoreStats;
   statsError?: Error;
 }) => {
   const hasPrivileges = definition.privileges?.manage_failure_store;

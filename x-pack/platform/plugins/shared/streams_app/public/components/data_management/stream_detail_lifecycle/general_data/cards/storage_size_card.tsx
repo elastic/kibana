@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { formatNumber } from '@elastic/eui';
+import { EuiIconTip, formatNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { Streams } from '@kbn/streams-schema';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { formatBytes } from '../../helpers/format_bytes';
@@ -46,9 +47,25 @@ export const StorageSizeCard = ({
     },
   ];
 
-  const title = i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.title', {
-    defaultMessage: 'Storage size',
-  });
+  const inaccurateMetric = Boolean(
+    stats?.hasFailureStore && !definition.privileges?.manage_failure_store
+  );
+  const title = (
+    <FormattedMessage
+      id="xpack.streams.streamDetailLifecycle.storageSize.title"
+      defaultMessage="Storage size {tooltipIcon}"
+      values={{
+        tooltipIcon: inaccurateMetric && (
+          <EuiIconTip
+            type="question"
+            content={i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.tooltip', {
+              defaultMessage: 'The storage size includes the failure store.',
+            })}
+          />
+        ),
+      }}
+    />
+  );
 
   return <BaseMetricCard title={title} metrics={metric} />;
 };
