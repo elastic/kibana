@@ -29,6 +29,7 @@ import {
   useFormData,
 } from '../../../../../shared_imports';
 import { getMessageVariables } from './message_variables';
+import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -48,12 +49,20 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
   const { initialValue, onChange, onFormMutated } = props;
   const {
     triggersActionsUi: { actionTypeRegistry },
+    http,
   } = useKibana().services;
+
+  const { data: connectors } = useLoadConnectors({ http });
+
+  const schema = useMemo(
+    () => getSchema({ actionTypeRegistry, connectors }),
+    [actionTypeRegistry, connectors]
+  );
 
   const { form } = useForm<AttackDiscoveryScheduleSchema>({
     defaultValue: initialValue,
     options: { stripEmptyFields: false },
-    schema: getSchema({ actionTypeRegistry }),
+    schema,
   });
 
   const [{ value }] = useFormData<{ value: AttackDiscoveryScheduleSchema }>({ form });
