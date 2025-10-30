@@ -68,6 +68,8 @@ export function extractTemplateVariables(template: string): string[] {
   const globalVars = liquidEngine.globalFullVariablesSync(template);
   const filteredVars: string[] = [];
 
+  // Truncate variable paths at dynamic bracket accesses
+  // e.g., items[i].name  =>  items
   globalVars.forEach((varPath) => {
     let isBracketOpen = false;
     let valueInBrackets = '';
