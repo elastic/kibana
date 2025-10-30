@@ -332,6 +332,9 @@ const extractPackagePolicyVars = (
       vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME];
 
     if (tenantId && clientId && azureCredentials) {
+      // Type assertions are needed because PackagePolicyConfigRecordEntry in packagePolicy.inputs.streams[0].vars has loose types (type?: string, value?: any)
+      // while CloudConnectorSecretVar/CloudConnectorVar in CloudConnectorVars expect specific literal types (type?: 'password' | 'text').
+      // Runtime validation occurs in cloudConnectorService.validateCloudConnectorDetails()
       const azureCloudConnectorVars: AzureCloudConnectorVars = {
         tenant_id: tenantId as CloudConnectorSecretVar,
         client_id: clientId as CloudConnectorSecretVar,

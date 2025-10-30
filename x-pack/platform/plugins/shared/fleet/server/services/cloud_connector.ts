@@ -31,7 +31,6 @@ import {
   CloudConnectorGetListError,
   CloudConnectorInvalidVarsError,
   CloudConnectorDeleteError,
-  CloudConnectorUpdateError,
 } from '../errors';
 
 import { appContextService } from './app_context';
@@ -95,17 +94,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const { isSpaceAwarenessEnabled } = await import('./spaces/helpers');
       const useSpaceAwareness = await isSpaceAwarenessEnabled();
       const namespace = useSpaceAwareness ? '*' : undefined;
-
-      // Validate cloud connector vars based on provider
-      const isValidVars =
-        (cloudProvider === 'aws' && isAwsCloudConnectorVars(vars)) ||
-        (cloudProvider === 'azure' && isAzureCloudConnectorVars(vars));
-
-      if (!isValidVars) {
-        throw new CloudConnectorCreateError(
-          `CloudConnectorService Missing required variables for ${cloudProvider} cloud connector`
-        );
-      }
 
       const cloudConnectorAttributes: CloudConnectorSOAttributes = {
         name,
@@ -230,18 +218,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       }
 
       if (cloudConnectorUpdate.vars) {
-        const cloudProvider = existingCloudConnector.attributes.cloudProvider;
-
-        const isValidVars =
-          (cloudProvider === 'aws' && isAwsCloudConnectorVars(cloudConnectorUpdate.vars)) ||
-          (cloudProvider === 'azure' && isAzureCloudConnectorVars(cloudConnectorUpdate.vars));
-
-        if (!isValidVars) {
-          throw new CloudConnectorUpdateError(
-            `CloudConnectorService Missing required variables for ${cloudProvider} cloud connector update`
-          );
-        }
-
         updateAttributes.vars = cloudConnectorUpdate.vars;
       }
 
