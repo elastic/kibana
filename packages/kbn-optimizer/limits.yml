@@ -11,7 +11,7 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 153204
   charts: 40269
-  cloud: 9300
+  cloud: 10648
   cloudDataMigration: 5687
   cloudExperiments: 103984
   cloudFullStory: 4752
@@ -22,6 +22,7 @@ pageLoadAssetSize:
   contentManagement: 8350
   controls: 12234
   core: 574609
+  cps: 1580
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -46,7 +47,7 @@ pageLoadAssetSize:
   embeddable: 18810
   embeddableAlertsTable: 6524
   embeddableEnhanced: 10332
-  enterpriseSearch: 37956
+  enterpriseSearch: 38000
   esql: 16289
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -72,7 +73,7 @@ pageLoadAssetSize:
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
-  graph: 10010
+  graph: 10006
   grokdebugger: 5484
   home: 13621
   imageEmbeddable: 6000
@@ -109,14 +110,14 @@ pageLoadAssetSize:
   navigation: 11684
   newsfeed: 12371
   noDataPage: 1749
-  observability: 109690
+  observability: 109574
   observabilityAIAssistant: 52556
   observabilityAIAssistantApp: 18553
   observabilityAiAssistantManagement: 6438
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 20161
+  onechat: 22883
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11484
@@ -139,7 +140,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 3252
   searchAssistant: 6150
-  searchGettingStarted: 6009
+  searchGettingStarted: 6600
   searchHomepage: 7962
   searchIndices: 9992
   searchInferenceEndpoints: 8071
@@ -154,7 +155,7 @@ pageLoadAssetSize:
   securitySolutionEss: 43319
   securitySolutionServerless: 62964
   serverless: 7854
-  serverlessObservability: 24297
+  serverlessObservability: 23996
   serverlessSearch: 33338
   serverlessWorkplaceAI: 6600
   sessionView: 47912
@@ -163,7 +164,7 @@ pageLoadAssetSize:
   snapshotRestore: 22068
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 74000
+  stackConnectors: 75538
   streams: 9000
   streamsApp: 17000
   synthetics: 31571
@@ -197,5 +198,5 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 41000
   watcher: 10485
-  workflowsManagement: 7268
+  workflowsManagement: 7267
   workplaceAIApp: 5822
