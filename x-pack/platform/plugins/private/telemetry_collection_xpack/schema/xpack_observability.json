@@ -5,7 +5,7 @@
         "services_per_agent": {
           "properties": {
             "android/java": {
-              "type": "long",
+              "type": "byte",
               "_meta": {
                 "description": "Total number of services utilizing the android/java agent within the last day"
               }
