@@ -65,7 +65,23 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   minimumLicenseRequired: 'enterprise' as const,
   preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
     const esClient = services.scopedClusterClient.asInternalUser;
+
     try {
+      // NOTE: This is a temporary workaround for anthropic max_tokens handling until the services endpoint is updated to reflect the correct structure.
+      // Anthropic is unique in that it requires max_tokens to be sent as part of the task_settings instead of the usual service_settings.
+      // Until the services endpoint is updated to reflect that, there is no way for the form UI to know where to put max_tokens. This can be removed once that update is made.
+      if (
+        config?.provider === ServiceProviderKeys.anthropic &&
+        config?.providerConfig?.max_tokens
+      ) {
+        config.taskTypeConfig = {
+          ...(config.taskTypeConfig ?? {}),
+          max_tokens: config.providerConfig.max_tokens,
+        };
+        // This field is unknown to the anthropic service config, so we remove it
+        delete config.providerConfig.max_tokens;
+      }
+
       const taskSettings = config?.taskTypeConfig
         ? {
             ...unflattenObject(config?.taskTypeConfig),

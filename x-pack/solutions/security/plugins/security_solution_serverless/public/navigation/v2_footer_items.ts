@@ -101,14 +101,11 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
           title: i18nStrings.stackManagementV2.organization.title,
           breadcrumbStatus: 'hidden',
           children: [
-            // TODO: verify visibility of Users and Roles link
             {
               cloudLink: 'billingAndSub',
             },
-            // TODO: verify visibility of Users and Roles link
             {
               cloudLink: 'userAndRoles',
-              title: i18nStrings.stackManagement.access.usersAndRoles,
             },
           ],
         },
@@ -213,6 +210,12 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
               link: 'management:settings',
             },
           ],
+        },
+        {
+          // We include this link here to ensure that sidenav panel opens when user lands to legacy management landing page
+          // https://github.com/elastic/kibana/issues/240275
+          link: 'management',
+          sideNavStatus: 'hidden',
         },
       ],
     },
