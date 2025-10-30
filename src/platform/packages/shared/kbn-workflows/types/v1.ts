@@ -197,18 +197,13 @@ export const EsWorkflowSchema = z.object({
   createdBy: z.string(),
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
-  definition: WorkflowSchema.optional(),
+  definition: WorkflowSchema,
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
 });
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
-
-export type EsWorkflowCreate = Omit<
-  EsWorkflow,
-  'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
->;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),

@@ -28,7 +28,6 @@ import type {
   ConnectorTypeInfo,
   CreateWorkflowCommand,
   EsWorkflow,
-  EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   ExecutionStatus,
@@ -45,7 +44,6 @@ import type {
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
-
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
@@ -65,15 +63,15 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
-import { InvalidYamlSchemaError } from '../../common/lib/errors';
 
+import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
-import { getWorkflowZodSchema } from '../../common/schema';
+import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
-import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
+import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -178,29 +176,26 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    let workflowToCreate: EsWorkflowCreate = {
-      name: 'Untitled workflow',
-      description: undefined,
-      enabled: false,
-      tags: [],
-      definition: undefined,
-      valid: false,
-    };
     const parsedYaml = parseWorkflowYamlToJSON(
       workflow.yaml,
-      await this.getWorkflowZodSchema({ loose: false }, spaceId, request)
+      await this.getWorkflowZodSchema({ loose: true }, spaceId, request)
     );
-    if (parsedYaml.success) {
-      // The type of parsedYaml.data is validated by getWorkflowZodSchemaLoose(), so this assertion is partially safe.
-      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
-
-      // Validate step name uniqueness
-      const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
-      if (!stepValidation.isValid) {
-        workflowToCreate.valid = false;
-        workflowToCreate.definition = undefined;
-      }
+    if (!parsedYaml.success) {
+      throw new Error(`Invalid workflow yaml: ${parsedYaml.error.message}`);
     }
+
+    // Validate step name uniqueness
+    const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+    if (!stepValidation.isValid) {
+      const errorMessages = stepValidation.errors.map((error) => error.message);
+      throw new WorkflowValidationError(
+        'Workflow validation failed: Step names must be unique throughout the workflow.',
+        errorMessages
+      );
+    }
+
+    // The type of parsedYaml.data is validated by getWorkflowZodSchemaLoose(), so this assertion is partially safe.
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
 
@@ -210,11 +205,11 @@ export class WorkflowsService {
       enabled: workflowToCreate.enabled,
       tags: workflowToCreate.tags || [],
       yaml: workflow.yaml,
-      definition: workflowToCreate.definition ?? null,
+      definition: workflowToCreate.definition,
       createdBy: authenticatedUser,
       lastUpdatedBy: authenticatedUser,
       spaceId,
-      valid: workflowToCreate.valid,
+      valid: true,
       deleted_at: null,
       created_at: now.toISOString(),
       updated_at: now.toISOString(),
@@ -228,7 +223,7 @@ export class WorkflowsService {
     });
 
     // Schedule the workflow if it has triggers
-    if (this.taskScheduler && workflowToCreate.definition?.triggers) {
+    if (this.taskScheduler && workflowToCreate.definition.triggers) {
       for (const trigger of workflowToCreate.definition.triggers) {
         if (trigger.type === 'scheduled') {
           await this.taskScheduler.scheduleWorkflowTask(id, spaceId, trigger, request);
@@ -1132,12 +1127,15 @@ export class WorkflowsService {
 
   public async getWorkflowZodSchema(
     options: {
-      loose?: false;
+      loose: boolean;
     },
     spaceId: string,
     request: KibanaRequest
   ): Promise<z.ZodType> {
     const { connectorsByType } = await this.getAvailableConnectors(spaceId, request);
+    if (options.loose) {
+      return getWorkflowZodSchemaLoose(connectorsByType);
+    }
     return getWorkflowZodSchema(connectorsByType);
   }
 }

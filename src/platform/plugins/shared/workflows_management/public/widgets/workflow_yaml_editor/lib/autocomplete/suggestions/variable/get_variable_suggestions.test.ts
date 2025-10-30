@@ -59,6 +59,7 @@ describe('getVariableSuggestions', () => {
     dynamicConnectorTypes: null,
     isInLiquidBlock: false,
     isInScheduledTriggerWithBlock: false,
+    isInTriggersContext: false,
     shouldUseCurlyBraces: true,
     shouldBeQuoted: false,
     ...overrides,
