@@ -191,7 +191,7 @@ export class WorkflowsService {
       await this.getWorkflowZodSchema({ loose: false }, spaceId, request)
     );
     if (parsedYaml.success) {
-      // The type of parsedYaml.data is validated by getWorkflowZodSchemaLoose(), so this assertion is partially safe.
+      // The type of parsedYaml.data is validated by getWorkflowZodSchema (strict mode), so this assertion is safe.
       workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
 
       // Validate step name uniqueness
