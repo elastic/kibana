@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/workplace-ai-connectors-plugin",
   "owner": "@elastic/workchat-eng",
-  "group": "workplace_ai",
+  "group": "workplaceai",
   "visibility": "private",
   "plugin": {
     "id": "workplaceAIConnectors",
