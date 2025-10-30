@@ -48,10 +48,6 @@ export const useInstall = ({
         }),
         ['data-test-subj']: 'sampleDataSetInstallToast',
       });
-
-      // Small delay before refresh to ensure server status check has updated data
-      // Server-side index refresh happens, but status API check may need a moment
-      await new Promise((resolve) => setTimeout(resolve, 10));
       onInstall(id);
     } catch (e) {
       setIsInstalling(false);

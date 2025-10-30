@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import moment from 'moment';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/220053
-  describe.skip('sample data', function describeIndexTests() {
+  describe('sample data', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {

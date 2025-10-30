@@ -28,12 +28,12 @@ export const useList = (): [SampleDataSet[], typeof refresh, boolean] => {
       setIsLoading(true);
       const sets = await fetchSampleDataSets();
       setIsLoading(false);
-
-      setSampleDataSets(
-        sets.sort((a, b) => {
+      const sorted = sets
+        .sort((a, b) => {
           return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
         })
-      );
+        .map((item) => ({ ...item }));
+      setSampleDataSets(sorted);
     } catch (fetchError) {
       notifyError({
         title: i18n.translate('homePackages.sampleDataSet.unableToLoadListErrorMessage', {
