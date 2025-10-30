@@ -26,7 +26,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import { BasicPrettyPrinter, Parser, type FieldType } from '@kbn/esql-ast';
+import { type FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import {
@@ -48,10 +48,6 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import {
-  hasLimitBeforeAggregate,
-  missingSortBeforeLimit,
-} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
