@@ -28,6 +28,7 @@ export function getSourceField(
       case 'append':
       case 'set':
         return processor.to;
+      case 'convert':
       case 'rename':
       case 'grok':
       case 'dissect':

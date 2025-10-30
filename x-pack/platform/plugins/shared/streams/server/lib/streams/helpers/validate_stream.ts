@@ -11,6 +11,7 @@ import { isEqual } from 'lodash';
 import type {
   AppendProcessor,
   Condition,
+  ConvertProcessor,
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
@@ -99,6 +100,12 @@ const actionStepValidators: {
   [K in ProcessorType]: (step: Extract<StreamlangProcessorDefinition, { action: K }>) => void;
 } = {
   append: (step: AppendProcessor) => checkFieldName(step.to),
+  convert: (step: ConvertProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
   date: (step: DateProcessor) => {
     checkFieldName(step.from);
     if ('to' in step && step.to) {
@@ -128,7 +135,7 @@ function validateSteps(steps: StreamlangStep[]) {
       validateCondition(step.where as Condition);
       validateSteps(step.where.steps);
     } else if (isActionBlock(step)) {
-      if (step.where) {
+      if ('where' in step && step.where) {
         validateCondition(step.where);
       }
       const validateStep = actionStepValidators[step.action] as (
