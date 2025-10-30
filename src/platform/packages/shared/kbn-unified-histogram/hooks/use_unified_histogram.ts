@@ -12,12 +12,9 @@ import type {
   LensEmbeddableInput,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import { useEffect, useMemo, useState } from 'react';
-import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
+import { useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { cloneDeep } from 'lodash';
-import useObservable from 'react-use/lib/useObservable';
 import useLatest from 'react-use/lib/useLatest';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
@@ -110,10 +107,10 @@ export type UseUnifiedHistogramResult =
       layoutProps: UnifiedHistogramPartialLayoutProps;
     };
 
-const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = of({
+const EMPTY_SUGGESTION_CONTEXT: UnifiedHistogramSuggestionContext = {
   suggestion: undefined,
   type: UnifiedHistogramSuggestionType.unsupported,
-});
+};
 
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [lensVisService, setLensVisService] = useState<LensVisService>();
@@ -127,18 +124,15 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
   });
 
   const { services, isChartLoading } = props;
-
-  const lensVisServiceCurrentSuggestionContext = useObservable(
-    lensVisService?.currentSuggestionContext$ ?? EMPTY_SUGGESTION_CONTEXT
-  );
   const latestGetModifiedVisAttributes = useLatest(props.getModifiedVisAttributes);
 
-  useEffect(() => {
+  // useMemo allows to recalculate lensVisServiceState right after the fetchParams got updated in a sync way
+  const lensVisServiceState = useMemo(() => {
     if (isChartLoading || !lensVisService || !fetchParams?.dataView) {
       return;
     }
 
-    lensVisService.update({
+    return lensVisService.update({
       externalVisContext: fetchParams.externalVisContext,
       queryParams: {
         dataView: fetchParams.dataView,
@@ -176,6 +170,9 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     stateProps.onSuggestionContextChange,
     stateProps.onVisContextChanged,
   ]);
+
+  const lensVisServiceCurrentSuggestionContext =
+    lensVisServiceState?.currentSuggestionContext ?? EMPTY_SUGGESTION_CONTEXT;
 
   const chart =
     !lensVisServiceCurrentSuggestionContext?.type ||

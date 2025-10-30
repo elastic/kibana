@@ -187,7 +187,7 @@ export function UnifiedHistogramChart({
   const lensPropsContext = useLensProps({
     request,
     fetchParams,
-    visContext,
+    lensVisService,
     onLoad,
   });
 

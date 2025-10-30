@@ -12,12 +12,9 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type {
-  UnifiedHistogramFetchParams,
-  UnifiedHistogramRequestContext,
-  UnifiedHistogramVisContext,
-} from '../../../types';
+import type { UnifiedHistogramFetchParams, UnifiedHistogramRequestContext } from '../../../types';
 import { useStableCallback } from '../../../hooks/use_stable_callback';
+import type { LensVisService } from '../../../services/lens_vis_service';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -35,17 +32,16 @@ export type LensProps = Pick<
 export const useLensProps = ({
   request,
   fetchParams,
-  visContext,
+  lensVisService,
   onLoad,
 }: {
   request: UnifiedHistogramRequestContext | undefined;
   fetchParams: UnifiedHistogramFetchParams;
-  visContext: UnifiedHistogramVisContext | undefined;
+  lensVisService: LensVisService;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
-  const hasVisContext = Boolean(visContext);
-
   const buildLensProps = useCallback(() => {
+    const visContext = lensVisService.getStateValue().visContext;
     console.log('useLensProps - buildLensProps called', visContext);
     if (!visContext) {
       return;
@@ -63,7 +59,7 @@ export const useLensProps = ({
         onLoad,
       }),
     };
-  }, [visContext, request?.searchSessionId, fetchParams, onLoad]);
+  }, [lensVisService, request?.searchSessionId, fetchParams, onLoad]);
 
   // Initialize with undefined to avoid rendering Lens until a fetch has been triggered
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
@@ -71,7 +67,7 @@ export const useLensProps = ({
 
   useEffect(() => {
     updateLensPropsContext();
-  }, [hasVisContext, fetchParams.triggeredAt, updateLensPropsContext]);
+  }, [fetchParams.triggeredAt, updateLensPropsContext]);
 
   return lensPropsContext;
 };

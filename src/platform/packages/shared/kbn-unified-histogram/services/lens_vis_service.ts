@@ -81,6 +81,7 @@ interface LensVisServiceParams {
 }
 
 export class LensVisService {
+  private state: LensVisServiceState;
   private state$: BehaviorSubject<LensVisServiceState>;
   private services: Services;
   private lensSuggestionsApi: LensSuggestionsApi;
@@ -107,14 +108,16 @@ export class LensVisService {
     this.services = services;
     this.lensSuggestionsApi = lensSuggestionsApi;
 
-    this.state$ = new BehaviorSubject<LensVisServiceState>({
+    const initialState = {
       status: LensVisServiceStatus.initial,
       currentSuggestionContext: {
         suggestion: undefined,
         type: UnifiedHistogramSuggestionType.unsupported,
       },
       visContext: undefined,
-    });
+    };
+    this.state$ = new BehaviorSubject<LensVisServiceState>(initialState); // TODO: can we remove the state$ altogether?
+    this.state = initialState;
 
     const stateSelector = stateSelectorFactory(this.state$);
     this.status$ = stateSelector((state) => state.status);
@@ -125,6 +128,10 @@ export class LensVisService {
     this.visContext$ = stateSelector((state) => state.visContext, isEqual);
     this.prevUpdateContext = undefined;
   }
+
+  getStateValue = () => {
+    return this.state; // more preferable here than this.state$.getValue() to enable faster access to the latest value in sync flows
+  };
 
   update = ({
     externalVisContext,
@@ -151,7 +158,7 @@ export class LensVisService {
     getModifiedVisAttributes?: (
       attributes: TypedLensByValueInput['attributes']
     ) => TypedLensByValueInput['attributes'];
-  }) => {
+  }): LensVisServiceState => {
     const suggestionState = this.getCurrentSuggestionState({
       externalVisContext,
       queryParams,
@@ -175,11 +182,14 @@ export class LensVisService {
       lensAttributesState.externalVisContextStatus
     );
 
-    this.state$.next({
+    const nextState = {
       status: LensVisServiceStatus.completed,
       currentSuggestionContext: suggestionState.currentSuggestionContext,
       visContext: lensAttributesState.visContext,
-    });
+    };
+
+    this.state$.next(nextState); // TODO: can we remove the state$ altogether?
+    this.state = nextState;
 
     this.prevUpdateContext = {
       queryParams,
@@ -189,6 +199,8 @@ export class LensVisService {
       onSuggestionContextChange,
       onVisContextChanged,
     };
+
+    return nextState;
   };
 
   onSuggestionEdited = ({

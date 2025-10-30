@@ -19,6 +19,7 @@ import { getBreakdownField } from '../utils/local_storage_utils';
 import { processFetchParams } from '../utils/process_fetch_params';
 
 export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
+  // TODO: should I remove fetch$ and keep only fetchParams?
   const [fetch$] = useState(() => new ReplaySubject<UnifiedHistogramFetchParams | undefined>(1));
   const fetchParams = useObservable(fetch$);
 
@@ -72,7 +73,7 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     fetch$,
     fetchParams,
     hasValidFetchParams: Boolean(
-      fetchParams && (fetchParams.searchSessionId || stateProps.isPlainRecord)
+      fetchParams && (fetchParams.searchSessionId || fetchParams.isESQLQuery)
     ),
   };
 };
