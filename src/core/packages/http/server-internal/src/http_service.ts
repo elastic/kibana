@@ -107,7 +107,7 @@ export class HttpService
 
   public async preboot(deps: PrebootDeps): Promise<InternalHttpServicePreboot> {
     this.log.debug('setting up preboot server');
-    this.log.info(`Doc links: ${deps.docLinks.links.server.troubleshootServerNotReady}`);
+    
     const config = await firstValueFrom(this.config$);
 
     const prebootSetup = await this.prebootServer.setup({
