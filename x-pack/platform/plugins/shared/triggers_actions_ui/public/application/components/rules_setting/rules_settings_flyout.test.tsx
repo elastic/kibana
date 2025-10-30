@@ -509,4 +509,17 @@ describe('rules_settings_flyout', () => {
 
     expect(result.queryByTestId('alert-delete-open-modal-button')).toBe(null);
   });
+
+  test('save button is disabled on initial load and enabled when user changes a setting', async () => {
+    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    await waitForFlyoutLoad();
+
+    const saveButton = result.getByTestId('rulesSettingsFlyoutSaveButton');
+    expect(saveButton).toBeDisabled();
+
+    const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
+    fireEvent.change(lookBackWindowInput, { target: { value: 20 } });
+
+    expect(saveButton).not.toBeDisabled();
+  });
 });
