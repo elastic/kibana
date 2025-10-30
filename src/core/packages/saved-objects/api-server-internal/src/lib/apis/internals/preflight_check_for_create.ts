@@ -76,7 +76,6 @@ export interface PreflightCheckForCreateResult {
     metadata?: {
       spacesWithConflictingAliases?: string[];
       isNotOverwritable?: boolean;
-      // requiresManageAccessControl?: boolean;
     };
   };
 }

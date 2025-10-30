@@ -43,20 +43,17 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
   readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #log: Logger;
   readonly #exportableTypes: string[];
-  // readonly #accessControlExportTransform?: SavedObjectsExportTransform;
 
   constructor({
     savedObjectsClient,
     typeRegistry,
     exportSizeLimit,
     logger,
-  }: // accessControlExportTransform,
-  {
+  }: {
     savedObjectsClient: SavedObjectsClientContract;
     typeRegistry: ISavedObjectTypeRegistry;
     exportSizeLimit: number;
     logger: Logger;
-    // accessControlExportTransform?: SavedObjectsExportTransform;
   }) {
     this.#log = logger;
     this.#savedObjectsClient = savedObjectsClient;
@@ -65,7 +62,6 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
     this.#exportableTypes = this.#typeRegistry
       .getImportableAndExportableTypes()
       .map((type) => type.name);
-    // this.#accessControlExportTransform = accessControlExportTransform;
   }
 
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
@@ -121,7 +117,6 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
       typeRegistry: this.#typeRegistry,
       savedObjectsClient: this.#savedObjectsClient,
       logger: this.#log,
-      // accessControlExportTransform: this.#accessControlExportTransform,
     });
 
     // sort with the provided sort function then with the default export sorting

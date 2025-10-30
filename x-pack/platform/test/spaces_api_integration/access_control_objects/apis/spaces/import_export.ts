@@ -475,7 +475,7 @@ export default function ({ getService }: FtrProviderContext) {
               meta: {},
               error: {
                 message:
-                  'Overwriting objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+                  'Overwriting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
                 statusCode: 403,
                 error: 'Forbidden',
                 type: 'unknown',
@@ -1125,7 +1125,7 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {},
             error: {
               message:
-                'Overwriting objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+                'Overwriting objects in "write_restricted" mode that are owned by another user requires the "manage_access_control" privilege.',
               statusCode: 403,
               error: 'Forbidden',
               type: 'unknown',

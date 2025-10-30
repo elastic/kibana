@@ -1058,7 +1058,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(403);
           expect(res.body).to.have.property('message');
           expect(res.body.message).to.contain(
-            `Unable to bulk_delete ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:`
+            `Unable to bulk_update ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:`
           );
           expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`);
           expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
