@@ -255,6 +255,9 @@ export class DashboardPageObject extends FtrService {
   public async duplicateDashboard(dashboardNameOverride?: string) {
     this.log.debug('Clicking duplicate');
 
+    if (!(await this.testSubjects.exists('dashboardInteractiveSaveMenuItem'))) {
+      await this.openSaveSplitMenu();
+    }
     await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
 
     if (dashboardNameOverride) {
@@ -608,6 +611,9 @@ export class DashboardPageObject extends FtrService {
     });
 
     if (!isSaveModalOpen) {
+      if (!(await this.testSubjects.exists('dashboardInteractiveSaveMenuItem'))) {
+        await this.openSaveSplitMenu();
+      }
       await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
     }
 
