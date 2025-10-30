@@ -46,7 +46,6 @@ toc:
           - file: connectors-kibana/server-log-action-type.md
       - file: connectors-kibana/alerting-cases-connectors.md
         children:
-          - file: connectors-kibana/xsoar-action-type.md
           - file: connectors-kibana/crowdstrike-action-type.md
           - file: connectors-kibana/d3security-action-type.md
           - file: connectors-kibana/email-action-type.md
@@ -69,6 +68,7 @@ toc:
           - file: connectors-kibana/webhook-action-type.md
           - file: connectors-kibana/cases-webhook-action-type.md
           - file: connectors-kibana/xmatters-action-type.md
+          - file: connectors-kibana/xsoar-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
   - file: kibana-plugins.md
   - file: commands.md
