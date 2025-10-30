@@ -129,7 +129,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
   // useMemo allows to recalculate lensVisServiceState right after the fetchParams got updated in a sync way
   const lensVisServiceState = useMemo(() => {
     if (isChartLoading || !lensVisService || !fetchParams?.dataView) {
-      return;
+      return lensVisService?.getStateValue();
     }
 
     return lensVisService.update({

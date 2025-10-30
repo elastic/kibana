@@ -126,6 +126,10 @@ export function UnifiedHistogramChart({
     controlsState,
     isESQLQuery: isPlainRecord,
   } = fetchParams;
+  const hasLensSuggestions = Boolean(
+    isPlainRecord &&
+      lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
+  );
 
   useTotalHits({
     services,
@@ -281,10 +285,6 @@ export function UnifiedHistogramChart({
   }
 
   const LensSaveModalComponent = services.lens.SaveModalComponent;
-  const hasLensSuggestions = Boolean(
-    isPlainRecord &&
-      lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
-  );
 
   const canCustomizeVisualization =
     isPlainRecord &&

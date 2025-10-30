@@ -23,7 +23,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
 import useLatest from 'react-use/lib/useLatest';
-import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Filter } from '@kbn/es-query';
@@ -69,7 +68,6 @@ export const useDiscoverHistogram = (
   } = stateContainer.dataState;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
-  const documentsValue = useObservable(documents$);
 
   /**
    * API initialization
@@ -243,16 +241,15 @@ export const useDiscoverHistogram = (
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const { table, esqlQueryColumns } = useMemo(() => {
-    return getUnifiedHistogramTableForEsql({
-      documentsValue,
-      isEsqlMode,
-    });
-  }, [documentsValue, isEsqlMode]);
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
       const visContext = latestFetchDetails?.visContext ?? savedSearchState?.visContext;
+      const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
+        documentsValue: documents$.getValue(),
+        isEsqlMode,
+      });
+
       unifiedHistogramApi?.fetch({
         abortController: latestFetchDetails?.abortController ?? getAbortController(),
         searchSessionId,
