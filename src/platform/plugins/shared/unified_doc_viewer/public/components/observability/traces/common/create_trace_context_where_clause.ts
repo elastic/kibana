@@ -58,7 +58,14 @@ export const createTraceContextWhereClauseForErrors = ({
 }) => {
   let queryString = createBaseTraceContextFilters({ traceId, spanId, transactionId });
 
-  queryString += ` AND  KQL("""${PROCESSOR_EVENT}: "error" OR ${ERROR_LOG_LEVEL}: "error" OR ${OTEL_EVENT_NAME}: "exception" OR ${OTEL_EVENT_NAME}: "error" """)`;
+  const conditions = [
+    `${PROCESSOR_EVENT}: "error"`,
+    `${ERROR_LOG_LEVEL}: "error"`,
+    `${OTEL_EVENT_NAME}: "exception"`,
+    `${OTEL_EVENT_NAME}: "error" `,
+  ];
+
+  queryString += ` AND  KQL("""${conditions.join(' OR ')}""")`;
 
   const params = [{ traceId }, { transactionId }, { spanId }];
 
