@@ -15,7 +15,7 @@ import type { DashboardAttributes as DashboardAttributesV1 } from '../../schema/
 import type { GridData } from '../../schema/v2';
 
 interface KibanaAttributes {
-  kibanaSavedObjectMeta: {
+  kibanaSavedObjectMeta?: {
     searchSourceJSON?: string;
   };
 }

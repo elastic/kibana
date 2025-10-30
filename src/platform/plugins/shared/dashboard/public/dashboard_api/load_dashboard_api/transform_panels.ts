@@ -18,7 +18,7 @@ export async function transformPanels(panels: DashboardState['panels'], referenc
     return !references || !panelId ? undefined : getReferencesForPanelId(panelId, references);
   }
 
-  return await asyncMap(panels, async (panel) => {
+  return await asyncMap(panels ?? [], async (panel) => {
     if (isDashboardSection(panel)) {
       const panelsInSection = await asyncMap(panel.panels, async (panelInSection) => {
         return await transformPanel(panelInSection, filterReferences(panelInSection.uid));

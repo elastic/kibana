@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
@@ -99,13 +98,11 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  it('should handle missing optional state keys', () => {
+  it('should not provide default values for optional properties', () => {
     const dashboardState: DashboardState = {
       title: 'title',
       description: 'my description',
       timeRestore: false,
-      panels: [],
-      options: DEFAULT_DASHBOARD_OPTIONS,
     };
 
     const output = transformDashboardIn({ dashboardState });
@@ -113,11 +110,6 @@ describe('transformDashboardIn', () => {
       Object {
         "attributes": Object {
           "description": "my description",
-          "kibanaSavedObjectMeta": Object {
-            "searchSourceJSON": "{}",
-          },
-          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":true,\\"syncCursor\\":true,\\"syncTooltips\\":true}",
-          "panelsJSON": "[]",
           "timeRestore": false,
           "title": "title",
         },

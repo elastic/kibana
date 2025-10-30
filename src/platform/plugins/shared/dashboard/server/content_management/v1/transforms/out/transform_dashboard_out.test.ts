@@ -41,7 +41,18 @@ describe('transformDashboardOut', () => {
     },
   ];
 
-  test('should not supply defaults for missing properties', () => {
+  test('should not supply defaults for optional top level properties', () => {
+    const input: DashboardSavedObjectAttributes = {
+      title: 'my title',
+      description: '',
+    };
+    expect(transformDashboardOut(input)).toEqual<DashboardState>({
+      timeRestore: false,
+      title: 'my title',
+    });
+  });
+
+  test('should not supply defaults for optional nested properties', () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
