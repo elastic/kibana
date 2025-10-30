@@ -50,7 +50,7 @@ export function StreamsSettingsFlyout({
   const {
     dependencies: {
       start: {
-        streams: { wiredStatus$, enableWiredMode, disableWiredMode },
+        streams: { getWiredStatus, enableWiredMode, disableWiredMode },
       },
     },
     core,
@@ -71,13 +71,24 @@ export function StreamsSettingsFlyout({
   const [isDisabling, setIsDisabling] = React.useState(false);
 
   React.useEffect(() => {
-    const sub = wiredStatus$.subscribe((status) => {
-      setWiredChecked(status.enabled === true);
-      setCanManageWiredElasticsearch(Boolean(status.can_manage));
-      setLoading(false);
-    });
-    return () => sub.unsubscribe();
-  }, [wiredStatus$]);
+    const fetchWiredStatus = async () => {
+      try {
+        const status = await getWiredStatus();
+        setWiredChecked(status.enabled === true);
+        setCanManageWiredElasticsearch(Boolean(status.can_manage));
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.streams.streamsListView.fetchWiredStatusErrorToastTitle', {
+            defaultMessage: 'Error fetching wired streams status',
+          }),
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWiredStatus();
+  }, [getWiredStatus, core.notifications.toasts]);
 
   const handleSwitchChange = async () => {
     if (wiredChecked) {
@@ -87,6 +98,10 @@ export function StreamsSettingsFlyout({
         setLoading(true);
         await enableWiredMode(signal);
         telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: true });
+        // Refetch status to ensure UI is in sync
+        const status = await getWiredStatus();
+        setWiredChecked(status.enabled === true);
+        setCanManageWiredElasticsearch(Boolean(status.can_manage));
         refreshStreams();
       } catch (error) {
         core.notifications.toasts.addError(error, {
@@ -108,6 +123,10 @@ export function StreamsSettingsFlyout({
     try {
       await disableWiredMode(signal);
       telemetryClient.trackWiredStreamsStatusChanged({ is_enabled: false });
+      // Refetch status to ensure UI is in sync
+      const status = await getWiredStatus();
+      setWiredChecked(status.enabled === true);
+      setCanManageWiredElasticsearch(Boolean(status.can_manage));
       refreshStreams();
       setShowDisableModal(false);
       setDisableConfirmChecked(false);
