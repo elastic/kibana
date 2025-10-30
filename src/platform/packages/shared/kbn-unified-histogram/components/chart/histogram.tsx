@@ -11,7 +11,6 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type {
   UnifiedHistogramBucketInterval,
@@ -29,7 +28,6 @@ export interface HistogramProps {
   chart: UnifiedHistogramChartContext;
   bucketInterval: UnifiedHistogramBucketInterval | undefined;
   isPlainRecord: boolean;
-  timeRange: TimeRange;
   requestData: string;
   lensProps: LensProps;
   visContext: UnifiedHistogramVisContext;
@@ -46,7 +44,6 @@ export function Histogram({
   chart: { timeInterval },
   bucketInterval,
   isPlainRecord,
-  timeRange,
   requestData,
   lensProps,
   visContext,
@@ -60,7 +57,7 @@ export function Histogram({
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
-    timeRange,
+    timeRange: lensProps.timeRange!,
     timeInterval,
     isPlainRecord,
     timeField: dataView.timeFieldName,

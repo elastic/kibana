@@ -55,7 +55,6 @@ export interface UnifiedHistogramChartProps {
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
   services: UnifiedHistogramServices;
-  isPlainRecord: boolean;
   lensVisService: LensVisService;
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
@@ -89,7 +88,6 @@ export function UnifiedHistogramChart({
   chart,
   breakdown,
   lensVisService,
-  isPlainRecord,
   renderCustomChartToggleActions,
   fetchParams,
   lensAdapters,
@@ -118,8 +116,16 @@ export function UnifiedHistogramChart({
   const chartVisible =
     isChartAvailable && !!chart && !chart.hidden && !!visContext && !!visContext?.attributes;
 
-  const { dataView, query, timeRange, relativeTimeRange, abortController, columns, controlsState } =
-    fetchParams;
+  const {
+    dataView,
+    query,
+    timeRange,
+    relativeTimeRange,
+    abortController,
+    columns,
+    controlsState,
+    isESQLQuery: isPlainRecord,
+  } = fetchParams;
 
   useTotalHits({
     services,
@@ -128,7 +134,6 @@ export function UnifiedHistogramChart({
     chartVisible,
     fetchParams,
     onTotalHitsChange,
-    isPlainRecord,
   });
 
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
@@ -365,7 +370,6 @@ export function UnifiedHistogramChart({
                   dataView={dataView}
                   chart={chart}
                   bucketInterval={bucketInterval}
-                  timeRange={timeRange}
                   visContext={visContext}
                   isPlainRecord={isPlainRecord}
                   abortController={abortController}

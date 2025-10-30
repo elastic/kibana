@@ -71,14 +71,11 @@ export const useStateProps = ({
     fetchParams && 'breakdownField' in fetchParams
       ? fetchParams.breakdownField
       : initialBreakdownField;
-  const { dataView, query, columns, searchSessionId, requestAdapter } = fetchParams || {};
+  const { dataView, query, columns, searchSessionId, requestAdapter, isESQLQuery } =
+    fetchParams || {};
   /**
    * Contexts
    */
-
-  const isPlainRecord = useMemo(() => {
-    return Boolean(query && isOfAggregateQueryType(query));
-  }, [query]);
 
   const isTimeBased = useMemo(() => {
     return dataView && dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
@@ -96,7 +93,7 @@ export const useStateProps = ({
   }, [totalHitsResult, totalHitsStatus]);
 
   const chart = useMemo(() => {
-    if (!isTimeBased && !isPlainRecord) {
+    if (!isTimeBased && !isESQLQuery) {
       return undefined;
     }
 
@@ -104,7 +101,7 @@ export const useStateProps = ({
       hidden: chartHidden,
       timeInterval,
     };
-  }, [chartHidden, isPlainRecord, isTimeBased, timeInterval]);
+  }, [chartHidden, isESQLQuery, isTimeBased, timeInterval]);
 
   const breakdown = useMemo(() => {
     if (!isTimeBased) {
@@ -116,7 +113,7 @@ export const useStateProps = ({
       return undefined;
     }
 
-    if (isPlainRecord) {
+    if (isESQLQuery) {
       const breakdownColumn = columns?.find((column) => column.name === breakdownField);
       const field = breakdownColumn
         ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
@@ -129,7 +126,7 @@ export const useStateProps = ({
     return {
       field: breakdownField ? dataView?.getFieldByName(breakdownField) : undefined,
     };
-  }, [isTimeBased, query, isPlainRecord, breakdownField, dataView, columns]);
+  }, [isTimeBased, query, isESQLQuery, breakdownField, dataView, columns]);
 
   const request = useMemo(() => {
     return {
@@ -198,7 +195,7 @@ export const useStateProps = ({
   );
 
   const onVisContextChanged: UseUnifiedHistogramProps['onVisContextChanged'] = useMemo(() => {
-    if (!originalOnVisContextChanged || !isPlainRecord) {
+    if (!originalOnVisContextChanged || !isESQLQuery) {
       return undefined;
     }
 
@@ -207,7 +204,7 @@ export const useStateProps = ({
 
       originalOnVisContextChanged(minifiedVisContext, externalVisContextStatus);
     };
-  }, [isPlainRecord, originalOnVisContextChanged]);
+  }, [isESQLQuery, originalOnVisContextChanged]);
 
   /**
    * Effects
@@ -233,7 +230,6 @@ export const useStateProps = ({
     chart,
     breakdown,
     request,
-    isPlainRecord,
     lensAdapters,
     dataLoading$: lensDataLoading$,
     onTopPanelHeightChange,

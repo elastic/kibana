@@ -118,7 +118,7 @@ const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = 
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [lensVisService, setLensVisService] = useState<LensVisService>();
 
-  const { stateProps, fetchParams, fetch$, hasValidFetchParams, api } = useServicesBootstrap(props);
+  const { stateProps, fetchParams, hasValidFetchParams, api } = useServicesBootstrap(props);
 
   // Load async services and initialize API
   useMount(async () => {
@@ -145,7 +145,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
         query: fetchParams.query,
         filters: fetchParams.filters,
         timeRange: fetchParams.timeRange,
-        isPlainRecord: stateProps.isPlainRecord, // TODO: move to fetchParams?
+        isPlainRecord: fetchParams.isESQLQuery,
         columns: fetchParams.columns,
         columnsMap: fetchParams.columnsMap,
       },
@@ -167,12 +167,12 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     fetchParams?.filters,
     fetchParams?.query,
     fetchParams?.columnsMap,
+    fetchParams?.isESQLQuery,
     isChartLoading,
     latestGetModifiedVisAttributes,
     lensVisService,
     stateProps.breakdown?.field,
     stateProps.chart?.timeInterval,
-    stateProps.isPlainRecord,
     stateProps.onSuggestionContextChange,
     stateProps.onVisContextChanged,
   ]);
@@ -186,7 +186,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
   const isChartAvailable = checkChartAvailability({
     chart,
     dataView: fetchParams?.dataView,
-    isPlainRecord: stateProps.isPlainRecord,
+    isPlainRecord: fetchParams?.isESQLQuery,
   });
 
   const chartProps = useMemo<UnifiedHistogramChartProps | undefined>(() => {
@@ -195,13 +195,12 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
           ...props,
           ...stateProps,
           fetchParams,
-          fetch$,
           chart,
           isChartAvailable,
           lensVisService,
         }
       : undefined;
-  }, [fetchParams, lensVisService, props, stateProps, fetch$, chart, isChartAvailable]);
+  }, [fetchParams, lensVisService, props, stateProps, chart, isChartAvailable]);
 
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({

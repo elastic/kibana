@@ -261,12 +261,15 @@ export interface UnifiedHistogramFetchParamsExternal {
 }
 
 export type UnifiedHistogramFetchParams = UnifiedHistogramFetchParamsExternal & {
-  triggeredAt: number;
   query: Query | AggregateQuery;
   filters: Filter[];
   timeRange: TimeRange;
   relativeTimeRange: TimeRange;
   esqlVariables: ESQLControlVariable[];
+
+  // additional
+  triggeredAt: number;
+  isESQLQuery: boolean;
   columnsMap: Record<string, DatatableColumn> | undefined;
 };
 

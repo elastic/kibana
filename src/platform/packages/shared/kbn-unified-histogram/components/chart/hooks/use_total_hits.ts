@@ -31,7 +31,6 @@ export const useTotalHits = ({
   chartVisible,
   fetchParams,
   onTotalHitsChange,
-  isPlainRecord,
 }: {
   services: UnifiedHistogramServices;
   request: UnifiedHistogramRequestContext | undefined;
@@ -39,8 +38,8 @@ export const useTotalHits = ({
   chartVisible: boolean;
   fetchParams: UnifiedHistogramFetchParams;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
-  isPlainRecord?: boolean;
 }) => {
+  const isPlainRecord = fetchParams.isESQLQuery;
   const parentAbortController = fetchParams.abortController;
   const abortController = useRef<AbortController>();
 
