@@ -63,6 +63,7 @@ export function getLogDocumentOverview(
 
   // apm  log fields
   const errorLogLevel = formatField(fieldConstants.ERROR_LOG_LEVEL_FIELD);
+  const errorExceptionMessage = formatField(fieldConstants.ERROR_EXCEPTION_MESSAGE);
   const processorEvent = formatField(fieldConstants.PROCESSOR_EVENT_FIELD);
 
   // otel log fields
@@ -96,5 +97,11 @@ export function getLogDocumentOverview(
     [fieldConstants.DATASTREAM_NAMESPACE_FIELD]: namespace,
     [fieldConstants.DATASTREAM_DATASET_FIELD]: dataset,
     [fieldConstants.AGENT_NAME_FIELD]: agentName,
+    [fieldConstants.EXCEPTION_MESSAGE_FIELD]: exceptionMessage,
+    [fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE]: otelExpectionMessage,
+    [fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_STACKTRACE]: otelExpectionStackTrace,
+    [fieldConstants.PROCESSOR_EVENT_FIELD]: processorEvent,
+    [fieldConstants.OTEL_EVENT_NAME_FIELD]: eventName,
+    [fieldConstants.ERROR_EXCEPTION_MESSAGE]: errorExceptionMessage,
   };
 }
