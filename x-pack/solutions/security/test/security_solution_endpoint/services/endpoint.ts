@@ -175,6 +175,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
             'metrics-endpoint.policy-default',
             'logs-endpoint.events.process-default',
             'logs-endpoint.alerts-default',
+            'logs-endpoint.events.device-default',
             alertsPerHost,
             enableFleetIntegration,
             undefined,
