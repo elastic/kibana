@@ -161,7 +161,7 @@ export const WorkflowDetailHeader = React.memo(
             <EuiPageHeaderSection css={styles.headerSection}>
               <EuiButtonEmpty
                 iconType="sortLeft"
-                size="s"
+                size="xs"
                 flush="left"
                 onClick={() => {
                   application.navigateToApp(PLUGIN_ID);
