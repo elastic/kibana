@@ -187,10 +187,12 @@ export function transformInitialState(state: LensSerializedAPIConfig): LensSeria
     return state as LensSerializedState;
   }
 
-  // TODO: check this type casting
-  const serializedState = builder.fromAPIFormat(state.attributes);
+  const attributes = builder.fromAPIFormat(state.attributes);
 
-  return serializedState;
+  return {
+    ...state,
+    attributes,
+  };
 }
 
 export function transformOutputState(state: LensSerializedState): LensByValueSerializedAPIConfig {
