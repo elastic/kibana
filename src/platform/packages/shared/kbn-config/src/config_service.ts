@@ -213,13 +213,13 @@ export class ConfigService {
 
     let validatedConfig = hasSchema
       ? await firstValueFrom(
-        this.getValidatedConfigAtPath$(
-          path,
-          // At this point we don't care about how valid the config is: we just want to read `enabled`
-          { stripUnknownKeys: true }
-        ) as Observable<{ enabled?: boolean }>,
-        { defaultValue: undefined }
-      )
+          this.getValidatedConfigAtPath$(
+            path,
+            // At this point we don't care about how valid the config is: we just want to read `enabled`
+            { stripUnknownKeys: true }
+          ) as Observable<{ enabled?: boolean }>,
+          { defaultValue: undefined }
+        )
       : undefined;
 
     // Special use case: when the provided config includes `enabled` and the validated config doesn't,
