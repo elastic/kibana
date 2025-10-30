@@ -62,11 +62,12 @@ export const QueryBar = ({
     async (e: React.MouseEvent) => {
       indexEditorTelemetryService.trackQueryThisIndexClicked(searchQuery);
 
-      // If no onOpenIndexInDiscover function is provided, we open discover in a new browser tab.
+      // If onOpenIndexInDiscover is provided, we let that handler to manage the navigation to Discover
+      // If not the button href will be executed
       if (onOpenIndexInDiscover && indexName && esqlDiscoverQuery) {
         e.preventDefault();
-        indexUpdateService.destroy();
-        await onOpenIndexInDiscover(indexName, esqlDiscoverQuery);
+        const onExitCallback = () => onOpenIndexInDiscover(indexName, esqlDiscoverQuery);
+        indexUpdateService.exit(onExitCallback);
       }
     },
     [
