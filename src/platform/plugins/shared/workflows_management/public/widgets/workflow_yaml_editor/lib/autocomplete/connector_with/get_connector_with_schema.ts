@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { getCachedAllConnectors } from '../../connectors_cache';
 
@@ -17,161 +17,182 @@ import { getCachedAllConnectors } from '../../connectors_cache';
 // Cache for connector schemas to avoid repeated processing
 const connectorSchemaCache = new Map<string, Record<string, z.ZodType> | null>();
 
-// eslint-disable-next-line complexity
+function getCachedSchema(connectorType: string): Record<string, z.ZodType> | null | undefined {
+  return connectorSchemaCache.get(connectorType);
+}
+
+function setCachedSchema(connectorType: string, schema: Record<string, z.ZodType> | null): void {
+  connectorSchemaCache.set(connectorType, schema);
+}
+
+function findConnector(
+  connectorType: string,
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+): ConnectorContractUnion | undefined {
+  const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
+  return allConnectors.find((c) => c.type === connectorType);
+}
+
+function extractActualSchema(paramsSchema: unknown): z.ZodType | null {
+  let actualSchema = paramsSchema;
+  if (typeof paramsSchema === 'function') {
+    try {
+      actualSchema = (paramsSchema as Function)();
+    } catch {
+      return null;
+    }
+  }
+  return actualSchema as z.ZodType;
+}
+
+/**
+ * Extract properties from any schema type recursively
+ */
+function extractPropertiesFromSchema(schema: z.ZodType): Record<string, z.ZodType> {
+  if (schema instanceof z.ZodObject) {
+    return schema.shape;
+  } else if (schema instanceof z.ZodIntersection) {
+    // For intersections, merge properties from both sides
+    const leftProps = extractPropertiesFromSchema(schema._def.left);
+    const rightProps = extractPropertiesFromSchema(schema._def.right);
+    return { ...leftProps, ...rightProps };
+  }
+  return {};
+}
+
+/**
+ * Find common properties across all union options
+ */
+function getCommonUnionProperties(options: z.ZodType[]): Record<string, z.ZodType> {
+  if (options.length === 0) {
+    return {};
+  }
+
+  const commonProperties: Record<string, z.ZodType> = {};
+  const firstOptionProps = extractPropertiesFromSchema(options[0]);
+
+  // Check each property in the first option
+  for (const [key, schema] of Object.entries(firstOptionProps)) {
+    // Check if this property exists in ALL other options
+    const existsInAll = options.every((option) => {
+      const optionProps = extractPropertiesFromSchema(option);
+      return optionProps[key];
+    });
+
+    if (existsInAll) {
+      commonProperties[key] = schema;
+    }
+  }
+
+  return commonProperties;
+}
+
+/**
+ * Process simple ZodObject schema
+ */
+function processObjectSchema(schema: z.ZodObject<z.ZodRawShape>): Record<string, z.ZodType> {
+  return schema.shape;
+}
+
+/**
+ * Process ZodUnion schema
+ */
+function processUnionSchema(
+  schema: z.ZodUnion<[z.ZodTypeAny, ...z.ZodTypeAny[]]>
+): Record<string, z.ZodType> | null {
+  const unionOptions = schema._def.options;
+  const commonProperties = getCommonUnionProperties(unionOptions);
+  return Object.keys(commonProperties).length > 0 ? commonProperties : null;
+}
+
+/**
+ * Process ZodIntersection schema
+ */
+function processIntersectionSchema(
+  schema: z.ZodIntersection<z.ZodTypeAny, z.ZodTypeAny>
+): Record<string, z.ZodType> | null {
+  const allProperties = extractPropertiesFromSchema(schema);
+  return Object.keys(allProperties).length > 0 ? allProperties : null;
+}
+
+/**
+ * Process ZodDiscriminatedUnion schema
+ */
+function processDiscriminatedUnionSchema(
+  schema: z.ZodDiscriminatedUnion<string, z.ZodDiscriminatedUnionOption<string>[]>
+): Record<string, z.ZodType> | null {
+  const unionOptions = Array.from(schema._def.options.values()) as z.ZodType[];
+  const commonProperties = getCommonUnionProperties(unionOptions);
+  return Object.keys(commonProperties).length > 0 ? commonProperties : null;
+}
+
+/**
+ * Extract schema properties based on schema type
+ */
+function extractSchemaProperties(schema: z.ZodType): Record<string, z.ZodType> | null {
+  if (schema instanceof z.ZodObject) {
+    return processObjectSchema(schema);
+  }
+
+  if (schema instanceof z.ZodUnion) {
+    return processUnionSchema(schema);
+  }
+
+  if (schema instanceof z.ZodIntersection) {
+    return processIntersectionSchema(schema);
+  }
+
+  if (schema instanceof z.ZodDiscriminatedUnion) {
+    return processDiscriminatedUnionSchema(schema);
+  }
+
+  return null;
+}
+
 export function getConnectorParamsSchema(
   connectorType: string,
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): Record<string, z.ZodType> | null {
   // Check cache first
-  if (connectorSchemaCache.has(connectorType)) {
-    return connectorSchemaCache.get(connectorType) ?? null;
+  const cached = getCachedSchema(connectorType);
+  if (cached !== undefined) {
+    return cached;
   }
 
   try {
-    const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
-    const connector = allConnectors.find((c) => c.type === connectorType);
-
+    const connector = findConnector(connectorType, dynamicConnectorTypes);
     if (!connector || !connector.paramsSchema) {
-      // No paramsSchema found for connector
-      connectorSchemaCache.set(connectorType, null);
+      setCachedSchema(connectorType, null);
       return null;
     }
 
-    // Handle function-generated schemas (like the complex union schemas)
-    let actualSchema = connector.paramsSchema;
-    if (typeof connector.paramsSchema === 'function') {
-      try {
-        actualSchema = (connector.paramsSchema as Function)();
-      } catch (error) {
-        // If function execution fails, cache null and return
-        connectorSchemaCache.set(connectorType, null);
-        return null;
-      }
+    const actualSchema = extractActualSchema(connector.paramsSchema);
+    if (!actualSchema) {
+      setCachedSchema(connectorType, null);
+      return null;
     }
 
-    // Extract the shape from the Zod schema
-    if (actualSchema instanceof z.ZodObject) {
-      // Found paramsSchema for connector (simple object)
-      const result = actualSchema.shape;
-      connectorSchemaCache.set(connectorType, result);
-      return result;
-    }
-
-    // Handle ZodUnion schemas (from our generic intersection fix)
-    if (actualSchema instanceof z.ZodUnion) {
-      // For union schemas, extract common properties from all options
-      const unionOptions = actualSchema._def.options;
-      const commonProperties: Record<string, z.ZodType> = {};
-
-      // Helper function to extract properties from any schema type
-      const extractPropertiesFromSchema = (schema: z.ZodType): Record<string, z.ZodType> => {
-        if (schema instanceof z.ZodObject) {
-          return schema.shape;
-        } else if (schema instanceof z.ZodIntersection) {
-          // For intersections, merge properties from both sides
-          const leftProps = extractPropertiesFromSchema(schema._def.left);
-          const rightProps = extractPropertiesFromSchema(schema._def.right);
-          return { ...leftProps, ...rightProps };
-        }
-        return {};
-      };
-
-      // Get properties that exist in ALL union options
-      if (unionOptions.length > 0) {
-        const firstOptionProps = extractPropertiesFromSchema(unionOptions[0]);
-
-        // Check each property in the first option
-        for (const [key, schema] of Object.entries(firstOptionProps)) {
-          // Check if this property exists in ALL other options
-          const existsInAll = unionOptions.every((option: z.ZodType) => {
-            const optionProps = extractPropertiesFromSchema(option);
-            return optionProps[key];
-          });
-
-          if (existsInAll) {
-            commonProperties[key] = schema;
-          }
-        }
-      }
-
-      if (Object.keys(commonProperties).length > 0) {
-        // Found common properties in union schema
-        connectorSchemaCache.set(connectorType, commonProperties);
-        return commonProperties;
-      }
-    }
-
-    // Handle ZodIntersection schemas (from complex union handling)
-    if (actualSchema instanceof z.ZodIntersection) {
-      // Helper function to extract properties from any schema type (reuse from above)
-      const extractPropertiesFromSchema = (schema: z.ZodType): Record<string, z.ZodType> => {
-        if (schema instanceof z.ZodObject) {
-          return schema.shape;
-        } else if (schema instanceof z.ZodIntersection) {
-          // For intersections, merge properties from both sides
-          const leftProps = extractPropertiesFromSchema(schema._def.left);
-          const rightProps = extractPropertiesFromSchema(schema._def.right);
-          return { ...leftProps, ...rightProps };
-        }
-        return {};
-      };
-
-      // For intersection schemas, extract properties from both sides
-      const allProperties = extractPropertiesFromSchema(actualSchema);
-
-      if (Object.keys(allProperties).length > 0) {
-        connectorSchemaCache.set(connectorType, allProperties);
-        return allProperties;
-      }
-    }
-
-    // Handle discriminated unions
-    if (actualSchema instanceof z.ZodDiscriminatedUnion) {
-      // For discriminated unions, extract common properties from all options
-      const unionOptions = Array.from(actualSchema._def.options.values());
-      const commonProperties: Record<string, z.ZodType> = {};
-
-      // Helper function to extract properties from any schema type (reuse from above)
-      const extractPropertiesFromSchema = (schema: z.ZodType): Record<string, z.ZodType> => {
-        if (schema instanceof z.ZodObject) {
-          return schema.shape;
-        } else if (schema instanceof z.ZodIntersection) {
-          // For intersections, merge properties from both sides
-          const leftProps = extractPropertiesFromSchema(schema._def.left);
-          const rightProps = extractPropertiesFromSchema(schema._def.right);
-          return { ...leftProps, ...rightProps };
-        }
-        return {};
-      };
-
-      if (unionOptions.length > 0) {
-        const firstOptionProps = extractPropertiesFromSchema(unionOptions[0] as z.ZodType);
-
-        // Check each property in the first option
-        for (const [key, schema] of Object.entries(firstOptionProps)) {
-          // Check if this property exists in ALL other options
-          const existsInAll = unionOptions.every((option) => {
-            const optionProps = extractPropertiesFromSchema(option as z.ZodType);
-            return optionProps[key];
-          });
-
-          if (existsInAll) {
-            commonProperties[key] = schema;
-          }
-        }
-      }
-
-      if (Object.keys(commonProperties).length > 0) {
-        connectorSchemaCache.set(connectorType, commonProperties);
-        return commonProperties;
-      }
-    }
-
-    connectorSchemaCache.set(connectorType, null);
-    return null;
+    const result = extractSchemaProperties(actualSchema);
+    setCachedSchema(connectorType, result);
+    return result;
   } catch (error) {
     // Error getting connector params schema
-    connectorSchemaCache.set(connectorType, null);
+    setCachedSchema(connectorType, null);
     return null;
   }
 }
+
+// Export for testing
+export {
+  getCachedSchema,
+  setCachedSchema,
+  findConnector,
+  extractActualSchema,
+  extractPropertiesFromSchema,
+  getCommonUnionProperties,
+  processObjectSchema,
+  processUnionSchema,
+  processIntersectionSchema,
+  processDiscriminatedUnionSchema,
+  extractSchemaProperties,
+};
