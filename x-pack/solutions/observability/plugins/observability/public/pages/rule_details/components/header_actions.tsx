@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
@@ -227,7 +228,7 @@ export function HeaderActions({
         </EuiFlexItem>
         {navigateToLinkedApp ? (
           <EuiFlexItem grow={false} data-test-subj="ruleSidebarViewInAppAction">
-            <EuiButton
+            <EuiButtonEmpty
               color={'primary'}
               title={buttonText}
               className="ruleViewLinkedObjectButton"
@@ -239,7 +240,7 @@ export function HeaderActions({
               }}
             >
               {buttonText}
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={1}>
