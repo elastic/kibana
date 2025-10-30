@@ -59,7 +59,7 @@ import type {
 import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
 import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager';
 import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
-import type { ProfilesManager } from './context_awareness';
+import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
 
@@ -82,6 +82,7 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
+  private profileProviderSharedServices?: Promise<ProfileProviderSharedServices>;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     const experimental = this.initializerContext.config.get().experimental;
@@ -327,26 +328,30 @@ export class DiscoverPlugin
   }) {
     const [
       { rootProfileService, dataSourceProfileService, documentProfileService, profilesManager },
-      { registerProfileProviders },
+      { createProfileProviderSharedServices, registerProfileProviders },
     ] = await Promise.all([
       this.createProfileServices(),
       import('./context_awareness/profile_providers'),
     ]);
 
-    const services = await this.getDiscoverServices({
-      core,
-      plugins,
-      profilesManager,
-      ebtManager,
-      scopedHistory,
-      setHeaderActionMenu,
-    });
+    const [sharedServices, services] = await Promise.all([
+      (this.profileProviderSharedServices ??= createProfileProviderSharedServices(plugins)),
+      this.getDiscoverServices({
+        core,
+        plugins,
+        profilesManager,
+        ebtManager,
+        scopedHistory,
+        setHeaderActionMenu,
+      }),
+    ]);
 
-    await registerProfileProviders({
+    registerProfileProviders({
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
       enabledExperimentalProfileIds: this.experimentalFeatures.enabledProfiles ?? [],
+      sharedServices,
       services,
     });
 

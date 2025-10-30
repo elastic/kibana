@@ -13,7 +13,7 @@ import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider, isLogsDataSourceContext } from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
@@ -21,7 +21,7 @@ import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import { RESOLUTION_MATCH } from './__mocks__';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('logsDataSourceProfileProvider', () => {
   const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(mockServices);
