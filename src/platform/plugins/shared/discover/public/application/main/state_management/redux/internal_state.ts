@@ -286,10 +286,10 @@ export const internalStateSlice = createSlice({
 
     setCascadeUiState: (
       state,
-      action: TabAction<{ cascadeUiState: TabState['uiState']['cascade'] }>
+      action: TabAction<{ cascadeUiState: TabState['uiState']['cascadedDocuments'] }>
     ) =>
       withTab(state, action, (tab) => {
-        tab.uiState.cascade = action.payload.cascadeUiState;
+        tab.uiState.cascadedDocuments = action.payload.cascadeUiState;
       }),
   },
   extraReducers: (builder) => {

@@ -10,7 +10,7 @@
 import { css } from '@emotion/react';
 import type { EuiThemeShape } from '@elastic/eui';
 
-export const esqlCascadeStyles = ({ euiTheme }: { euiTheme: EuiThemeShape }) => ({
+export const cascadedDocumentsStyles = ({ euiTheme }: { euiTheme: EuiThemeShape }) => ({
   wrapper: css({
     display: 'flex',
     flexDirection: 'column',

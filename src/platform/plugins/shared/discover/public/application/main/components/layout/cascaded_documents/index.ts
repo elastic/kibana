@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CascadedDocumentsLayout, useGroupBySelectorRenderer } from './esql_data_cascade';
-export type { ESQLDataCascadeProps } from './esql_data_cascade';
+export { CascadedDocumentsLayout, useGroupBySelectorRenderer } from './cascaded_document_layout';
+export type { ESQLDataCascadeProps } from './cascaded_document_layout';

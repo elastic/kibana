@@ -96,14 +96,12 @@ export function fetchAll(
     const internalStateStore = internalState.getState();
     const currentTabState = internalStateStore.tabs.byId[internalStateStore.tabs.unsafeCurrentId];
 
-    if (
-      isEsqlQuery &&
-      currentTabState.uiState.layout?.cascadeEnabled !== false &&
-      currentTabState.uiState.cascade?.selectedCascadeGroups?.length
-    ) {
+    // if the query is an ESQL query and there are cascade groupings selected,
+    // we mutate the query to only include the selected groupings
+    if (isEsqlQuery && currentTabState.uiState.cascadedDocuments?.selectedCascadeGroups?.length) {
       fetchQuery = mutateQueryStatsGrouping(
         query,
-        currentTabState.uiState.cascade.selectedCascadeGroups ?? []
+        currentTabState.uiState.cascadedDocuments.selectedCascadeGroups
       );
     }
 
