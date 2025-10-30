@@ -2109,7 +2109,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # Exclude OAS error baseline file from @elastic/kibana-core ownership
-!src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
+!/src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
 # Exclude usage collection schema from @elastic/kibana-core ownership
 !/src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
 
