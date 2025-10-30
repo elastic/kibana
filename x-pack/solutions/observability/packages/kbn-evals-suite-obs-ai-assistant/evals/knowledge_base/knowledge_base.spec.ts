@@ -170,7 +170,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
   });
 
   evaluate.describe('kb source isolation (Lens)', () => {
-    evaluate.beforeEach(async ({ knowledgeBaseClient, documentationClient }) => {
+    evaluate.beforeAll(async ({ knowledgeBaseClient, documentationClient }) => {
       await knowledgeBaseClient.importEntries({
         entries: [
           {
@@ -192,13 +192,11 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       await documentationClient.ensureInstalled();
     });
 
-    evaluate.afterEach(
-      async ({ knowledgeBaseClient, conversationsClient, documentationClient }) => {
-        await knowledgeBaseClient.clear();
-        await conversationsClient.clear();
-        await documentationClient.clear();
-      }
-    );
+    evaluate.afterAll(async ({ knowledgeBaseClient, conversationsClient, documentationClient }) => {
+      await knowledgeBaseClient.clear();
+      await conversationsClient.clear();
+      await documentationClient.clear();
+    });
 
     evaluate(
       'returns information ONLY from the internal knowledge base for internal Lens usage questions',
