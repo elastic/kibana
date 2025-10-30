@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
 import { getSchema } from './schema';
 import type { AttackDiscoveryScheduleSchema } from './types';
 
@@ -29,7 +30,6 @@ import {
   useFormData,
 } from '../../../../../shared_imports';
 import { getMessageVariables } from './message_variables';
-import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
 
 const CommonUseField = getUseField({ component: Field });
 

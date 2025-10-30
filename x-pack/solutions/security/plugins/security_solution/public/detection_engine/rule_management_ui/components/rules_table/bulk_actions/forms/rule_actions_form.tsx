@@ -14,6 +14,7 @@ import type {
   ActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
 import { RuleActionsField } from '../../../../../../common/components/rule_actions_field';
 import { transformAlertToNormalizedRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { FormSchema } from '../../../../../../shared_imports';
@@ -36,7 +37,6 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 import { getAllActionMessageParams } from '../../../../../common/helpers';
 
 import { debouncedValidateRuleActionsField } from '../../../../../../common/containers/rule_actions/validate_rule_actions_field';
-import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
 
 const CommonUseField = getUseField({ component: Field });
 
