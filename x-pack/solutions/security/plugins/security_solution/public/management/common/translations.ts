@@ -322,7 +322,7 @@ export const CONSOLE_COMMANDS = {
     ),
     resultRemainingFreeDiskSpaceLabel: i18n.translate(
       'xpack.securitySolution.translations.memoryDump.resultRemainingFreeDiskSpaceLabel',
-      { defaultMessage: 'Remaining disk space' }
+      { defaultMessage: 'Disk free space' }
     ),
   },
 };
