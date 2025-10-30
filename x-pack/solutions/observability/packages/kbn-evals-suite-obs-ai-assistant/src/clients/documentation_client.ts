@@ -68,7 +68,7 @@ export class DocumentationClient {
     return installStatus;
   }
 
-  async clear() {
+  async uninstall() {
     this.log.info('Uninstalling Elastic documentation');
     const uninstallResponse = await this.fetch<UninstallResponse>(
       ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,

@@ -195,7 +195,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
     evaluate.afterAll(async ({ knowledgeBaseClient, conversationsClient, documentationClient }) => {
       await knowledgeBaseClient.clear();
       await conversationsClient.clear();
-      await documentationClient.clear();
+      await documentationClient.uninstall();
     });
 
     evaluate(
