@@ -50,6 +50,9 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
   const isInitialValueSet = useRef<boolean>(false);
   const editorDispatch = useEditorActionContext();
 
+  const httpsProtocol = 'https:';
+  const elasticHostname = 'www.elastic.co';
+
   useEffect(() => {
     const ALLOWED_PATHS = ['/guide/', '/docs/'];
 
@@ -65,11 +68,16 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         const parsedURL = new URL(url);
         // Validate protocol, hostname, and allowed path to prevent request forgery
         if (
-          parsedURL.protocol === 'https:' &&
-          parsedURL.hostname === 'www.elastic.co' &&
+          parsedURL.protocol === httpsProtocol &&
+          parsedURL.hostname === elasticHostname &&
           ALLOWED_PATHS.some((path) => parsedURL.pathname.startsWith(path))
         ) {
-          const resp = await fetch(parsedURL);
+          // Construct a safe URL from validated components to prevent request forgery
+          const safeURL = new URL(parsedURL.href);
+          safeURL.protocol = httpsProtocol;
+          safeURL.hostname = elasticHostname;
+
+          const resp = await fetch(safeURL);
           const data = await resp.text();
           editorDispatch({ type: 'setRequestToRestore', payload: { request: data } });
         } else {
