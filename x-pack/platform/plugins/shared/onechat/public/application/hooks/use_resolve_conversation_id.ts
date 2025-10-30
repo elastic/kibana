@@ -5,26 +5,17 @@
  * 2.0.
  */
 
-import { useLastConversationId } from './use_last_conversation_id';
-
 interface UseResolveConversationIdParams {
   newConversation?: boolean;
   conversationId?: string;
-  sessionTag?: string;
-  agentId?: string;
+  persistedConversationId?: string;
 }
 
 export const useResolveConversationId = ({
   newConversation,
   conversationId,
-  sessionTag,
-  agentId,
+  persistedConversationId,
 }: UseResolveConversationIdParams) => {
-  const lastConversationId = useLastConversationId({
-    sessionTag,
-    agentId,
-  });
-
   if (newConversation === true) {
     return undefined;
   }
@@ -33,5 +24,5 @@ export const useResolveConversationId = ({
     return conversationId;
   }
 
-  return lastConversationId;
+  return persistedConversationId;
 };

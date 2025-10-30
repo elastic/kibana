@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -13,11 +13,9 @@ import type { EmbeddableConversationInternalProps } from '../../../embeddable/ty
 import { ConversationContext } from './conversation_context';
 import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
-import { queryKeys } from '../../query_keys';
-import { newConversationId } from '../../utils/new_conversation';
 import { useConversationActions } from './use_conversation_actions';
 import { useResolveConversationId } from '../../hooks/use_resolve_conversation_id';
-import { useSaveLastConversationId } from '../../hooks/use_save_last_conversation_id';
+import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
@@ -40,68 +38,70 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     [coreStart, services.startDependencies]
   );
 
-  const resolvedConversationId = useResolveConversationId({
-    newConversation: contextProps.newConversation,
-    conversationId: contextProps.conversationId,
+  const { persistedConversationId, updatePersistedConversationId } = usePersistedConversationId({
     sessionTag: contextProps.sessionTag,
     agentId: contextProps.agentId,
   });
 
+  const resolvedConversationId = useResolveConversationId({
+    newConversation: contextProps.newConversation,
+    conversationId: contextProps.conversationId,
+    persistedConversationId,
+  });
+
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+
+  const hasInitializedRef = useRef(false);
+
+  const setConversationIdAndPersist = useCallback(
+    (id?: string) => {
+      setConversationId(id);
+      updatePersistedConversationId(id);
+    },
+    [updatePersistedConversationId]
+  );
 
   const validateAndSetConversationId = useCallback(
     async (id: string) => {
       try {
         const conversation = await services.conversationsService.get({ conversationId: id });
-        setConversationId(conversation ? id : undefined);
+        setConversationIdAndPersist(conversation.id ?? undefined);
       } catch {
-        setConversationId(undefined);
+        setConversationIdAndPersist(undefined);
       }
     },
-    [services.conversationsService]
+    [services.conversationsService, setConversationIdAndPersist]
   );
 
+  /**
+   * One-time initialization per provider instance:
+   * - If no resolved id, clears persisted state.
+   * - Otherwise validates the resolved id and persists the outcome.
+   * Guarded by hasInitializedRef to avoid re-running on subsequent renders.
+   */
   useEffect(() => {
+    if (hasInitializedRef.current) return;
+
     if (!resolvedConversationId) {
-      setConversationId(undefined);
-      return;
+      setConversationIdAndPersist(undefined);
+    } else {
+      validateAndSetConversationId(resolvedConversationId);
     }
-    validateAndSetConversationId(resolvedConversationId);
-  }, [resolvedConversationId, validateAndSetConversationId]);
-
-  useSaveLastConversationId({
-    conversationId,
-    sessionTag: contextProps.sessionTag,
-    agentId: contextProps.agentId,
-  });
-
-  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
+    hasInitializedRef.current = true;
+  }, [resolvedConversationId, setConversationIdAndPersist, validateAndSetConversationId]);
 
   const onConversationCreated = useCallback(
     ({ conversationId: id }: { conversationId: string }) => {
-      // Update conversationId to show the newly created conversation in the UI
-      setConversationId(id);
+      setConversationIdAndPersist(id);
     },
-    []
-  );
-
-  const onDeleteConversation = useCallback(
-    ({ isCurrentConversation }: { isCurrentConversation: boolean }) => {
-      if (isCurrentConversation) {
-        // For embeddable context, we can't navigate, just reset the conversation ID
-        setConversationId(undefined);
-      }
-    },
-    []
+    [setConversationIdAndPersist]
   );
 
   const conversationActions = useConversationActions({
     conversationId,
-    queryKey,
     queryClient,
     conversationsService: services.conversationsService,
     onConversationCreated,
-    onDeleteConversation,
   });
 
   const conversationContextValue = useMemo(
@@ -112,9 +112,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       sessionTag: contextProps.sessionTag,
       agentId: contextProps.agentId,
       initialMessage: contextProps.initialMessage,
-      setConversationId: (id: string) => {
-        setConversationId(id);
-      },
+      setConversationId: setConversationIdAndPersist,
       conversationActions,
     }),
     [
@@ -123,6 +121,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       contextProps.agentId,
       contextProps.initialMessage,
       conversationActions,
+      setConversationIdAndPersist,
     ]
   );
 
