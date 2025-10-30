@@ -40,7 +40,7 @@ import type {
 import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionType } from '../../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { TimeIntervalSelector } from './time_interval_selector';
-// import { useTotalHits } from './hooks/use_total_hits';
+import { useTotalHits } from './hooks/use_total_hits';
 import { useChartStyles } from './hooks/use_chart_styles';
 import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
@@ -124,15 +124,15 @@ export function UnifiedHistogramChart({
   const { dataView, query, timeRange, relativeTimeRange, abortController, columns, controlsState } =
     fetchParams;
 
-  // TODO: keep only fetch$
-  // useTotalHits({
-  //   services,
-  //   hits,
-  //   chartVisible,
-  //   fetch$,
-  //   onTotalHitsChange,
-  //   isPlainRecord,
-  // });
+  useTotalHits({
+    services,
+    request,
+    hits,
+    chartVisible,
+    fetchParams,
+    onTotalHitsChange,
+    isPlainRecord,
+  });
 
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const onLoad = useStableCallback(
