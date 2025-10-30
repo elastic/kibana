@@ -65,7 +65,10 @@ export class ScoutMcpServer {
               type: 'object',
               properties: {
                 url: { type: 'string', description: 'Full URL to navigate to' },
-                app: { type: 'string', description: 'Kibana app name (e.g., "discover", "dashboard")' },
+                app: {
+                  type: 'string',
+                  description: 'Kibana app name (e.g., "discover", "dashboard")',
+                },
                 path: { type: 'string', description: 'Optional path within the app' },
               },
             },
@@ -182,7 +185,15 @@ export class ScoutMcpServer {
               properties: {
                 pageObject: {
                   type: 'string',
-                  enum: ['discover', 'dashboard', 'filterBar', 'datePicker', 'maps', 'collapsibleNav', 'toasts'],
+                  enum: [
+                    'discover',
+                    'dashboard',
+                    'filterBar',
+                    'datePicker',
+                    'maps',
+                    'collapsibleNav',
+                    'toasts',
+                  ],
                   description: 'Page object name',
                 },
                 method: { type: 'string', description: 'Method to call' },
@@ -331,9 +342,10 @@ export class ScoutMcpServer {
             content: [
               {
                 type: 'text',
-                text: typeof result.data === 'string'
-                  ? result.data
-                  : JSON.stringify(result.data || result.message, null, 2),
+                text:
+                  typeof result.data === 'string'
+                    ? result.data
+                    : JSON.stringify(result.data || result.message, null, 2),
               },
             ],
           };

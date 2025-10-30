@@ -25,7 +25,7 @@ import { success, error } from '../utils';
 export async function scoutApiService(params: ApiServiceParams): Promise<ToolResult> {
   return error(
     'API services not yet implemented in MCP server. ' +
-    'API services require Scout fixture initialization which needs a full test context.'
+      'API services require Scout fixture initialization which needs a full test context.'
   );
 }
 

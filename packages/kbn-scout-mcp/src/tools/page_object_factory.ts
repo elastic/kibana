@@ -19,10 +19,7 @@ import { subj } from '@kbn/test-subj-selector';
  *
  * For MCP server usage, we create simplified wrappers around Playwright Page.
  */
-export async function createPageObjectInstance(
-  pageObjectName: string,
-  page: Page
-): Promise<any> {
+export async function createPageObjectInstance(pageObjectName: string, page: Page): Promise<any> {
   // Wrap the page with Scout-like helpers
   const scoutPage = wrapPageWithScoutHelpers(page);
 
@@ -71,9 +68,12 @@ function wrapPageWithScoutHelpers(page: Page) {
       return page.goto(url);
     },
     waitForLoadingIndicatorHidden: () => {
-      return page.locator(subj('globalLoadingIndicator')).waitFor({ state: 'hidden' }).catch(() => {
-        // Loading indicator might not exist, that's ok
-      });
+      return page
+        .locator(subj('globalLoadingIndicator'))
+        .waitFor({ state: 'hidden' })
+        .catch(() => {
+          // Loading indicator might not exist, that's ok
+        });
     },
   };
 }
@@ -188,9 +188,15 @@ function createFilterBarPageObject(page: any) {
     async addFilter(options: { field: string; operator: string; value: string }) {
       await page.testSubj.click('addFilter');
       await page.testSubj.waitForSelector('addFilterPopover');
-      await page.testSubj.typeWithDelay('filterFieldSuggestionList > comboBoxSearchInput', options.field);
+      await page.testSubj.typeWithDelay(
+        'filterFieldSuggestionList > comboBoxSearchInput',
+        options.field
+      );
       await page.click(`.euiFilterSelectItem[title="${options.field}"]`);
-      await page.testSubj.typeWithDelay('filterOperatorList > comboBoxSearchInput', options.operator);
+      await page.testSubj.typeWithDelay(
+        'filterOperatorList > comboBoxSearchInput',
+        options.operator
+      );
       await page.click(`.euiFilterSelectItem[title="${options.operator}"]`);
       const filterParamsInput = page.locator('[data-test-subj="filterParams"] input');
       await filterParamsInput.focus();
@@ -289,7 +295,10 @@ function createToastsPageObject(page: any) {
       }
     },
     async waitForToastCount(count: number) {
-      await page.locator('[data-test-subj="toastMessage"]').nth(count - 1).waitFor();
+      await page
+        .locator('[data-test-subj="toastMessage"]')
+        .nth(count - 1)
+        .waitFor();
     },
     async expectSuccess(message?: string) {
       const toast = page.locator('[data-test-subj="toastMessage"]').first();

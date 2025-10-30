@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { subj } from '@kbn/test-subj-selector';
 import type { ScoutSession } from '../session';
 import type {
   NavigateParams,
@@ -17,8 +18,7 @@ import type {
   WaitForParams,
   ToolResult,
 } from '../types';
-import { success, error, executeSafely, formatScreenshotFilename } from '../utils';
-import { subj } from '@kbn/test-subj-selector';
+import { error, executeSafely, formatScreenshotFilename } from '../utils';
 
 /**
  * Navigate to a URL or Kibana app
@@ -54,10 +54,7 @@ export async function scoutNavigate(
 /**
  * Click an element by test subject or selector
  */
-export async function scoutClick(
-  session: ScoutSession,
-  params: ClickParams
-): Promise<ToolResult> {
+export async function scoutClick(session: ScoutSession, params: ClickParams): Promise<ToolResult> {
   if (!session.isInitialized()) {
     return error('Session not initialized');
   }
@@ -85,10 +82,7 @@ export async function scoutClick(
 /**
  * Type text into an element
  */
-export async function scoutType(
-  session: ScoutSession,
-  params: TypeParams
-): Promise<ToolResult> {
+export async function scoutType(session: ScoutSession, params: TypeParams): Promise<ToolResult> {
   if (!session.isInitialized()) {
     return error('Session not initialized');
   }

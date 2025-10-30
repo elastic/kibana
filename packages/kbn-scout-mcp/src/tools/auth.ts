@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PROJECT_DEFAULT_ROLES } from '@kbn/scout/src/common';
+import type { KibanaRole } from '@kbn/scout';
 import type { ScoutSession } from '../session';
 import type { LoginParams, ToolResult } from '../types';
 import { success, error, executeSafely } from '../utils';
-import { PROJECT_DEFAULT_ROLES } from '@kbn/scout/src/common';
-import type { KibanaRole } from '@kbn/scout';
 
 /**
  * Login with a role using Scout's SAML authentication
@@ -21,10 +21,7 @@ import type { KibanaRole } from '@kbn/scout';
  * 2. Sets the cookie in the browser context
  * 3. The cookie authenticates subsequent requests
  */
-export async function scoutLogin(
-  session: ScoutSession,
-  params: LoginParams
-): Promise<ToolResult> {
+export async function scoutLogin(session: ScoutSession, params: LoginParams): Promise<ToolResult> {
   if (!session.isInitialized()) {
     return error('Session not initialized');
   }
@@ -54,7 +51,9 @@ export async function scoutLogin(
 
     // Get SAML session cookie for the role
     const samlSessionManager = await session.getSamlSessionManager();
-    const cookieValue = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleToUse);
+    const cookieValue = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+      roleToUse
+    );
 
     // Get Kibana URL helper to get the domain
     const kbnUrl = await session.getKbnUrl();

@@ -19,7 +19,7 @@ import { success, error } from '../utils';
 export async function scoutEsQuery(params: EsQueryParams): Promise<ToolResult> {
   return error(
     'Elasticsearch queries not yet implemented in MCP server. ' +
-    'ES queries require Scout fixture initialization with authenticated ES client.'
+      'ES queries require Scout fixture initialization with authenticated ES client.'
   );
 }
 
@@ -32,7 +32,7 @@ export async function scoutEsQuery(params: EsQueryParams): Promise<ToolResult> {
 export async function scoutKibanaApi(params: KibanaApiParams): Promise<ToolResult> {
   return error(
     'Kibana API calls not yet implemented in MCP server. ' +
-    'Kibana API requires Scout fixture initialization with authenticated Kibana client.'
+      'Kibana API requires Scout fixture initialization with authenticated Kibana client.'
   );
 }
 
@@ -45,7 +45,7 @@ export async function scoutKibanaApi(params: KibanaApiParams): Promise<ToolResul
 export async function scoutEsArchiver(params: EsArchiverParams): Promise<ToolResult> {
   return error(
     'ES Archiver not yet implemented in MCP server. ' +
-    'ES Archiver requires Scout fixture initialization.'
+      'ES Archiver requires Scout fixture initialization.'
   );
 }
 
@@ -55,7 +55,7 @@ export async function scoutEsArchiver(params: EsArchiverParams): Promise<ToolRes
 export async function scoutGetConfig(configKey?: string): Promise<ToolResult> {
   return error(
     'Config access not yet implemented in MCP server. ' +
-    'Config requires Scout fixture initialization.'
+      'Config requires Scout fixture initialization.'
   );
 }
 

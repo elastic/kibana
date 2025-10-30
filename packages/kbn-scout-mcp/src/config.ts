@@ -8,10 +8,10 @@
  */
 
 import path from 'path';
-import type { ScoutMcpConfig } from './types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ScoutTestConfig } from '@kbn/scout';
 import { createScoutConfig } from '@kbn/scout/src/common/services';
+import type { ScoutMcpConfig } from './types';
 
 /**
  * Load Scout MCP configuration from environment variables and options
@@ -23,20 +23,14 @@ export function loadScoutMcpConfig(options: Partial<ScoutMcpConfig> = {}): Scout
     process.env.TEST_KIBANA_URL ||
     'http://localhost:5601';
 
-  const mode =
-    options.mode ||
-    (process.env.SCOUT_MODE as 'stateful' | 'serverless') ||
-    'stateful';
+  const mode = options.mode || (process.env.SCOUT_MODE as 'stateful' | 'serverless') || 'stateful';
 
   const projectType =
     options.projectType ||
     (process.env.SCOUT_PROJECT_TYPE as 'es' | 'oblt' | 'security') ||
     undefined;
 
-  const configPath =
-    options.configPath ||
-    process.env.SCOUT_CONFIG_PATH ||
-    undefined;
+  const configPath = options.configPath || process.env.SCOUT_CONFIG_PATH || undefined;
 
   // Try to load Scout config if configPath is provided, otherwise we'll create minimal config on demand
   let scoutConfig: ScoutTestConfig | undefined = options.scoutConfig;
@@ -128,7 +122,8 @@ export function createScoutTestConfig(config: ScoutMcpConfig, log: ToolingLog): 
 
   // Determine Elasticsearch URL (usually Kibana URL without port or with different port)
   // For local development, ES is typically on port 9200
-  const esUrl = process.env.ELASTICSEARCH_URL ||
+  const esUrl =
+    process.env.ELASTICSEARCH_URL ||
     (config.targetUrl.includes('localhost')
       ? config.targetUrl.replace('5601', '9200').replace('/app', '')
       : config.targetUrl.replace(/:\d+/, ':9200').replace('/app', ''));

@@ -93,7 +93,14 @@ export interface LoginParams {
 }
 
 export interface PageObjectParams {
-  pageObject: 'discover' | 'dashboard' | 'filterBar' | 'datePicker' | 'maps' | 'collapsibleNav' | 'toasts';
+  pageObject:
+    | 'discover'
+    | 'dashboard'
+    | 'filterBar'
+    | 'datePicker'
+    | 'maps'
+    | 'collapsibleNav'
+    | 'toasts';
   method: string;
   args?: any[];
 }

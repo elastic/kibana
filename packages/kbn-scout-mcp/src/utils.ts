@@ -50,10 +50,7 @@ export async function executeSafely<T>(
 /**
  * Validate required parameters
  */
-export function validateParams(
-  params: Record<string, any>,
-  required: string[]
-): string | null {
+export function validateParams(params: Record<string, any>, required: string[]): string | null {
   for (const key of required) {
     if (params[key] === undefined || params[key] === null) {
       return `Missing required parameter: ${key}`;

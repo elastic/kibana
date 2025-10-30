@@ -27,7 +27,9 @@ export async function scoutEuiComponent(
   }
 
   return executeSafely(async () => {
-    const selector = params.testSubj ? { dataTestSubj: params.testSubj } : { locator: params.selector! };
+    const selector = params.testSubj
+      ? { dataTestSubj: params.testSubj }
+      : { locator: params.selector! };
 
     // Get or create the EUI component wrapper
     const component = await session.createEuiComponent(params.component, selector);

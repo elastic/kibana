@@ -9,15 +9,25 @@
 
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { ScoutMcpConfig } from './types';
 import type { ScoutTestConfig, KibanaRole, ElasticsearchRoleDescriptor } from '@kbn/scout';
 import type { SamlSessionManager } from '@kbn/test';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
-import { EuiComboBoxWrapper, EuiCheckBoxWrapper, EuiDataGridWrapper, EuiSelectableWrapper } from '@kbn/scout';
-import { createSamlSessionManager, getEsClient, getKbnClient, createKbnUrl } from '@kbn/scout/src/common/services';
-import { createScoutTestConfig } from './config';
+import {
+  EuiComboBoxWrapper,
+  EuiCheckBoxWrapper,
+  EuiDataGridWrapper,
+  EuiSelectableWrapper,
+} from '@kbn/scout';
+import {
+  createSamlSessionManager,
+  getEsClient,
+  getKbnClient,
+  createKbnUrl,
+} from '@kbn/scout/src/common/services';
 import { createCustomRole, createElasticsearchCustomRole } from '@kbn/scout/src/common/services';
+import { createScoutTestConfig } from './config';
+import type { ScoutMcpConfig } from './types';
 
 /**
  * Manages the Scout session including browser context, page objects, and fixtures
@@ -38,10 +48,7 @@ export class ScoutSession {
   private customRoleName: string = 'custom_role_mcp';
   private customRoleHash: string = '';
 
-  constructor(
-    private readonly config: ScoutMcpConfig,
-    private readonly log: ToolingLog
-  ) {}
+  constructor(private readonly config: ScoutMcpConfig, private readonly log: ToolingLog) {}
 
   /**
    * Initialize Scout configuration and clients
@@ -143,17 +150,9 @@ export class ScoutSession {
     };
 
     if (isElasticsearchRole(role)) {
-      await createElasticsearchCustomRole(
-        await this.getEsClient(),
-        this.customRoleName,
-        role
-      );
+      await createElasticsearchCustomRole(await this.getEsClient(), this.customRoleName, role);
     } else {
-      await createCustomRole(
-        await this.getKbnClient(),
-        this.customRoleName,
-        role
-      );
+      await createCustomRole(await this.getKbnClient(), this.customRoleName, role);
     }
 
     this.customRoleHash = newRoleHash;
@@ -289,7 +288,10 @@ export class ScoutSession {
   /**
    * Create an EUI component wrapper
    */
-  async createEuiComponent(component: string, selector: string | { dataTestSubj?: string; locator?: string }): Promise<any> {
+  async createEuiComponent(
+    component: string,
+    selector: string | { dataTestSubj?: string; locator?: string }
+  ): Promise<any> {
     const page = await this.getPage();
 
     switch (component) {
