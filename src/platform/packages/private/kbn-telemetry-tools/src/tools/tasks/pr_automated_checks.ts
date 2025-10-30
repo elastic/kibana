@@ -19,6 +19,12 @@ import type { TaskContext } from './task_context';
 import { fetchTelemetrySchemaAtRevision, isTelemetrySchemaModified } from './git';
 
 export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext): ListrTask[] {
+  const isPullRequestPipeline =
+    Boolean(process.env.GITHUB_PR_BASE_OWNER) &&
+    Boolean(process.env.GITHUB_PR_BASE_REPO) &&
+    Boolean(process.env.GITHUB_PR_NUMBER);
+  const isOnMergePipeline = !isPullRequestPipeline;
+
   return [
     ...roots.flatMap((root): ListrTask[] => {
       const path = relative(REPO_ROOT, root.config.output);
@@ -28,6 +34,7 @@ export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext)
             root.configChanged = await isTelemetrySchemaModified({ path });
           },
           title: `Checking if ${path} telemetry schema has changed`,
+          enabled: (_) => isPullRequestPipeline,
         },
         {
           task: async () => {
@@ -40,7 +47,7 @@ export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext)
             });
           },
           title: `Downloading /${baselineSha}/${path} from Github`,
-          enabled: (_) => Boolean(root.configChanged),
+          enabled: (_) => Boolean(isOnMergePipeline || root.configChanged),
         },
         {
           task: async () => {
@@ -52,7 +59,7 @@ export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext)
             }
           },
           title: `PR checks in modified attributes in ${path}`,
-          enabled: (_) => Boolean(root.configChanged),
+          enabled: (_) => Boolean(isOnMergePipeline || root.configChanged),
         },
       ];
     }),

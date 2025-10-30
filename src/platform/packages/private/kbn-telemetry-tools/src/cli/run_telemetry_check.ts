@@ -122,13 +122,8 @@ export function runTelemetryCheck() {
             title: 'Automated PR review checks',
             task: (context, task) =>
               task.newListr(prAutomatedChecks(context), { exitOnError: true }),
-            enabled: (_) =>
-              // only run if on a PR branch
-              Boolean(baselineSha) &&
-              Boolean(process.env.GITHUB_AUTH_TOKEN) &&
-              Boolean(process.env.GITHUB_PR_BASE_OWNER) &&
-              Boolean(process.env.GITHUB_PR_BASE_REPO) &&
-              Boolean(process.env.GITHUB_PR_NUMBER),
+            // only run if on a PR branch
+            enabled: (_) => Boolean(baselineSha),
           },
         ],
         {
