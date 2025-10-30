@@ -67,7 +67,7 @@ describe('ProjectPicker', () => {
 
   const mockCPSService = {
     cpsManager: mockCPSManager as CPSManager,
-  } ;
+  };
 
   const renderProjectPicker = async (
     props: {

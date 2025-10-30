@@ -178,10 +178,10 @@ describe('ProjectPickerComponent', () => {
 
       await userEvent.click(button);
 
-        const buttonGroup = screen.getByRole('group', {
-          name: 'Cross-project search project picker',
-        });
-        expect(buttonGroup).toBeInTheDocument();
+      const buttonGroup = screen.getByRole('group', {
+        name: 'Cross-project search project picker',
+      });
+      expect(buttonGroup).toBeInTheDocument();
     });
 
     it('should support keyboard navigation', async () => {
