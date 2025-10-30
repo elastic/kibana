@@ -84,17 +84,21 @@ describe('get_connector_with_schema', () => {
           createMockConnector('slack', z.object({})),
           createMockConnector('email', z.object({})),
         ];
+        const dynamicConnectorTypes = {
+          slack: {} as ConnectorTypeInfo,
+          email: {} as ConnectorTypeInfo,
+        };
 
         jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-        const result = findConnector('email');
+        const result = findConnector('email', dynamicConnectorTypes);
         expect(result?.type).toEqual('email');
       });
 
       it('should return undefined for non-existent connector', () => {
         jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue([]);
 
-        const result = findConnector('non-existent');
+        const result = findConnector('non-existent', {});
         expect(result).toBeUndefined();
       });
 
@@ -365,18 +369,19 @@ describe('get_connector_with_schema', () => {
           })
         ),
       ];
+      const dynamicConnectorTypes = { 'test-connector': {} as ConnectorTypeInfo };
 
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
       // First call should fetch and cache
-      const result1 = getConnectorParamsSchema('test-connector');
+      const result1 = getConnectorParamsSchema('test-connector', dynamicConnectorTypes);
       expect(result1).toEqual({
         field1: expect.any(z.ZodString),
         field2: expect.any(z.ZodNumber),
       });
 
       // Second call should use cache (getCachedAllConnectors should only be called once)
-      const result2 = getConnectorParamsSchema('test-connector');
+      const result2 = getConnectorParamsSchema('test-connector', dynamicConnectorTypes);
       expect(result2).toEqual(result1);
       expect(connectorsCache.getCachedAllConnectors).toHaveBeenCalledTimes(1);
     });
@@ -388,11 +393,15 @@ describe('get_connector_with_schema', () => {
         createMockConnector('slack', z.object({})),
         createMockConnector('email', z.object({})),
       ];
+      const dynamicConnectorTypes = {
+        slack: {} as ConnectorTypeInfo,
+        email: {} as ConnectorTypeInfo,
+      };
 
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      getConnectorParamsSchema('slack');
-      expect(connectorsCache.getCachedAllConnectors).toHaveBeenCalledWith(undefined);
+      getConnectorParamsSchema('slack', dynamicConnectorTypes);
+      expect(connectorsCache.getCachedAllConnectors).toHaveBeenCalledWith(dynamicConnectorTypes);
     });
 
     it('should pass dynamic connector types to getCachedAllConnectors', () => {
@@ -410,10 +419,11 @@ describe('get_connector_with_schema', () => {
       const mockConnectors: ConnectorContractUnion[] = [
         createMockConnector('function-schema', (() => schema) as unknown as z.ZodType),
       ];
+      const dynamicConnectorTypes = { 'function-schema': {} as ConnectorTypeInfo };
 
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('function-schema');
+      const result = getConnectorParamsSchema('function-schema', dynamicConnectorTypes);
       expect(result).toEqual({
         test: expect.any(z.ZodString),
       });
@@ -425,10 +435,11 @@ describe('get_connector_with_schema', () => {
           throw new Error('Schema generation failed');
         }) as unknown as z.ZodType),
       ];
+      const dynamicConnectorTypes = { 'error-schema': {} as ConnectorTypeInfo };
 
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('error-schema');
+      const result = getConnectorParamsSchema('error-schema', dynamicConnectorTypes);
       expect(result).toBeNull();
     });
 
@@ -437,10 +448,11 @@ describe('get_connector_with_schema', () => {
       const mockConnectors: ConnectorContractUnion[] = [
         createMockConnector('direct-schema', schema),
       ];
+      const dynamicConnectorTypes = { 'direct-schema': {} as ConnectorTypeInfo };
 
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('direct-schema');
+      const result = getConnectorParamsSchema('direct-schema', dynamicConnectorTypes);
       expect(result).toEqual({
         direct: expect.any(z.ZodBoolean),
       });
@@ -457,10 +469,11 @@ describe('get_connector_with_schema', () => {
       const mockConnectors: ConnectorContractUnion[] = [
         createMockConnector('object-schema', schema),
       ];
+      const dynamicConnectorTypes = { 'object-schema': {} as ConnectorTypeInfo };
 
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('object-schema');
+      const result = getConnectorParamsSchema('object-schema', dynamicConnectorTypes);
       expect(result).toEqual({
         name: expect.any(z.ZodString),
         age: expect.any(z.ZodNumber),
@@ -476,10 +489,11 @@ describe('get_connector_with_schema', () => {
       const mockConnectors: ConnectorContractUnion[] = [
         createMockConnector('intersection-schema', schema),
       ];
+      const dynamicConnectorTypes = { 'intersection-schema': {} as ConnectorTypeInfo };
 
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('intersection-schema');
+      const result = getConnectorParamsSchema('intersection-schema', dynamicConnectorTypes);
       expect(result).toEqual({
         field1: expect.any(z.ZodString),
         field2: expect.any(z.ZodNumber),
@@ -495,10 +509,11 @@ describe('get_connector_with_schema', () => {
       const mockConnectors: ConnectorContractUnion[] = [
         createMockConnector('nested-intersection', schema),
       ];
+      const dynamicConnectorTypes = { 'nested-intersection': {} as ConnectorTypeInfo };
 
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('nested-intersection');
+      const result = getConnectorParamsSchema('nested-intersection', dynamicConnectorTypes);
       expect(result).toEqual({
         a: expect.any(z.ZodString),
         b: expect.any(z.ZodNumber),
@@ -517,10 +532,10 @@ describe('get_connector_with_schema', () => {
       const mockConnectors: ConnectorContractUnion[] = [
         createMockConnector('union-schema', schema),
       ];
-
+      const dynamicConnectorTypes = { 'union-schema': {} as ConnectorTypeInfo };
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('union-schema');
+      const result = getConnectorParamsSchema('union-schema', dynamicConnectorTypes);
       expect(result).toEqual({
         common: expect.any(z.ZodString),
       });
@@ -532,10 +547,10 @@ describe('get_connector_with_schema', () => {
       const mockConnectors: ConnectorContractUnion[] = [
         createMockConnector('union-no-common', schema),
       ];
-
+      const dynamicConnectorTypes = { 'union-no-common': {} as ConnectorTypeInfo };
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('union-no-common');
+      const result = getConnectorParamsSchema('union-no-common', dynamicConnectorTypes);
       expect(result).toBeNull();
     });
 
@@ -546,10 +561,11 @@ describe('get_connector_with_schema', () => {
       (schema as any)._def.options = [];
 
       const mockConnectors: ConnectorContractUnion[] = [createMockConnector('empty-union', schema)];
+      const dynamicConnectorTypes = { 'empty-union': {} as ConnectorTypeInfo };
 
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('empty-union');
+      const result = getConnectorParamsSchema('empty-union', dynamicConnectorTypes);
       expect(result).toBeNull();
     });
   });
@@ -564,10 +580,10 @@ describe('get_connector_with_schema', () => {
       const mockConnectors: ConnectorContractUnion[] = [
         createMockConnector('discriminated-union', schema),
       ];
-
+      const dynamicConnectorTypes = { 'discriminated-union': {} as ConnectorTypeInfo };
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('discriminated-union');
+      const result = getConnectorParamsSchema('discriminated-union', dynamicConnectorTypes);
       expect(result).toEqual({
         type: expect.any(z.ZodLiteral),
         common: expect.any(z.ZodString),
@@ -577,9 +593,10 @@ describe('get_connector_with_schema', () => {
 
   describe('edge cases and error handling', () => {
     it('should return null for non-existent connector', () => {
+      const dynamicConnectorTypes = {};
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue([]);
 
-      const result = getConnectorParamsSchema('non-existent');
+      const result = getConnectorParamsSchema('non-existent', dynamicConnectorTypes);
       expect(result).toBeNull();
     });
 
@@ -590,13 +607,14 @@ describe('get_connector_with_schema', () => {
           outputSchema: z.object({}),
           actionTypeId: 'no-params',
           instances: [],
-          // No paramsSchema property
-        } as DynamicConnectorContract,
+          paramsSchema: undefined,
+        } as unknown as DynamicConnectorContract,
       ];
+      const dynamicConnectorTypes = { 'no-params': {} as ConnectorTypeInfo };
 
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('no-params');
+      const result = getConnectorParamsSchema('no-params', dynamicConnectorTypes);
       expect(result).toBeNull();
     });
 
@@ -605,7 +623,8 @@ describe('get_connector_with_schema', () => {
         throw new Error('Cache error');
       });
 
-      const result = getConnectorParamsSchema('error-case');
+      const dynamicConnectorTypes = {};
+      const result = getConnectorParamsSchema('error-case', dynamicConnectorTypes);
       expect(result).toBeNull();
     });
 
@@ -615,10 +634,10 @@ describe('get_connector_with_schema', () => {
       const mockConnectors: ConnectorContractUnion[] = [
         createMockConnector('unsupported-schema', schema),
       ];
-
+      const dynamicConnectorTypes = { 'unsupported-schema': {} as ConnectorTypeInfo };
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('unsupported-schema');
+      const result = getConnectorParamsSchema('unsupported-schema', dynamicConnectorTypes);
       expect(result).toBeNull();
     });
   });
@@ -633,10 +652,10 @@ describe('get_connector_with_schema', () => {
       const mockConnectors: ConnectorContractUnion[] = [
         createMockConnector('union-intersections', schema),
       ];
-
+      const dynamicConnectorTypes = { 'union-intersections': {} as ConnectorTypeInfo };
       jest.mocked(connectorsCache.getCachedAllConnectors).mockReturnValue(mockConnectors);
 
-      const result = getConnectorParamsSchema('union-intersections');
+      const result = getConnectorParamsSchema('union-intersections', dynamicConnectorTypes);
       expect(result).toEqual({
         base: expect.any(z.ZodString),
       });

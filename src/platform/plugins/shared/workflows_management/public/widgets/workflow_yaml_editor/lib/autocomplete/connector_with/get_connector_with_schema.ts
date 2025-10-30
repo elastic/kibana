@@ -27,7 +27,7 @@ function setCachedSchema(connectorType: string, schema: Record<string, z.ZodType
 
 function findConnector(
   connectorType: string,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion | undefined {
   const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
   return allConnectors.find((c) => c.type === connectorType);
@@ -149,37 +149,42 @@ function extractSchemaProperties(schema: z.ZodType): Record<string, z.ZodType> |
   return null;
 }
 
-export function getConnectorParamsSchema(
+export function _getConnectorParamsSchema(
   connectorType: string,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
 ): Record<string, z.ZodType> | null {
-  // Check cache first
-  const cached = getCachedSchema(connectorType);
-  if (cached !== undefined) {
-    return cached;
-  }
-
   try {
     const connector = findConnector(connectorType, dynamicConnectorTypes);
     if (!connector || !connector.paramsSchema) {
-      setCachedSchema(connectorType, null);
       return null;
     }
 
     const actualSchema = extractActualSchema(connector.paramsSchema);
     if (!actualSchema) {
-      setCachedSchema(connectorType, null);
       return null;
     }
 
-    const result = extractSchemaProperties(actualSchema);
-    setCachedSchema(connectorType, result);
-    return result;
+    return extractSchemaProperties(actualSchema);
   } catch (error) {
-    // Error getting connector params schema
-    setCachedSchema(connectorType, null);
     return null;
   }
+}
+
+export function getConnectorParamsSchema(
+  connectorType: string,
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
+): Record<string, z.ZodType> | null {
+  const cached = getCachedSchema(connectorType);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const result = _getConnectorParamsSchema(connectorType, dynamicConnectorTypes);
+  if (result !== null) {
+    setCachedSchema(connectorType, result);
+  }
+
+  return result;
 }
 
 // Export for testing
