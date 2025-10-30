@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AnalyticsServiceStart } from '@kbn/core/server';
-import type {
-  QuerySource,
-  TelemetryQuerySubmittedProps,
-} from '@kbn/esql-types/src/esql_telemetry_types';
+import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
+import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import {
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_QUERY_HISTORY_CLICKED,
@@ -22,6 +20,11 @@ import {
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../custom_commands/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../custom_commands/use_lookup_index_editor';
+import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
+import {
+  hasLimitBeforeAggregate,
+  missingSortBeforeLimit,
+} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 
 export class ESQLEditorTelemetryService {
   constructor(private readonly _analytics: AnalyticsServiceStart) {}
@@ -104,19 +107,29 @@ export class ESQLEditorTelemetryService {
     }
   }
 
-  public trackQuerySubmitted(props: TelemetryQuerySubmittedProps) {
+  public trackQuerySubmitted({ source, query }: TelemetryQuerySubmittedProps) {
+    const { root } = Parser.parse(query);
+    const prettyQuery = BasicPrettyPrinter.print(root);
+    const hasLimitBeforeStats =
+      source === QuerySource.HELP || source === QuerySource.AUTOCOMPLETE
+        ? false
+        : hasLimitBeforeAggregate(query);
+    const hasMissingSortBeforeLimit =
+      source === QuerySource.HELP || source === QuerySource.AUTOCOMPLETE
+        ? false
+        : missingSortBeforeLimit(query);
     this._reportEvent(ESQL_QUERY_SUBMITTED, {
-      query_source: props.query_source,
-      query_length: props.query_length,
-      query_lines: props.query_lines,
-      anti_limit_before_aggregate: props.anti_limit_before_aggregate,
-      anti_missing_sort_before_limit: props.anti_missing_sort_before_limit,
+      query_source: source,
+      query_length: prettyQuery.length.toString(),
+      query_lines: query.split('\n').length.toString(),
+      anti_limit_before_aggregate: hasLimitBeforeStats,
+      anti_missing_sort_before_limit: hasMissingSortBeforeLimit,
     });
   }
 
   public trackRecommendedQueryClicked(source: QuerySource.HELP | QuerySource.AUTOCOMPLETE) {
     this._reportEvent(ESQL_RECOMMENDED_QUERY_CLICKED, {
-      ui_surface: source,
+      trigger_source: source,
     });
   }
 }

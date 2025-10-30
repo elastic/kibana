@@ -114,7 +114,7 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
   analytics.registerEventType({
     eventType: ESQL_RECOMMENDED_QUERY_CLICKED,
     schema: {
-      ui_surface: {
+      trigger_source: {
         type: 'keyword',
         _meta: {
           description:
