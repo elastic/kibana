@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MemoryDumpActionResult } from '../command_render_components/memory_dump_action';
 import { wrapWithNotice } from './get_not_supported_arg_about_info';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -602,9 +603,7 @@ export const getEndpointConsoleCommands = ({
         aboutInfo: CONSOLE_COMMANDS.memoryDump.about,
         isSupported: doesEndpointSupportCommand('memory-dump'),
       }),
-      RenderComponent: () => {
-        return '';
-      }, // FIXME:PT implement
+      RenderComponent: MemoryDumpActionResult,
       meta: commandMeta,
       exampleUsage: 'memory-dump --type="process" --pid=123 --comment="dump process 123"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
