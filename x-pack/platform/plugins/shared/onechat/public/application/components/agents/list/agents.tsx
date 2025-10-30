@@ -17,26 +17,30 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { DeleteAgentProvider } from '../../../context/delete_agent_context';
 import { TechPreviewTitle } from '../../common/tech_preview';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 export const OnechatAgents = () => {
   const { euiTheme } = useEuiTheme();
+  const { manageAgents } = useUiPrivileges();
   const headerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
     border: none;
   `;
   const { createOnechatUrl } = useNavigation();
   const headerButtons = [
-    <EuiButton
-      iconType="plus"
-      color="primary"
-      fill
-      iconSide="left"
-      href={createOnechatUrl(appPaths.agents.new)}
-    >
-      {i18n.translate('xpack.onechat.agents.newAgentButton', {
-        defaultMessage: 'New agent',
-      })}
-    </EuiButton>,
+    manageAgents && (
+      <EuiButton
+        iconType="plus"
+        color="primary"
+        fill
+        iconSide="left"
+        href={createOnechatUrl(appPaths.agents.new)}
+      >
+        {i18n.translate('xpack.onechat.agents.newAgentButton', {
+          defaultMessage: 'New agent',
+        })}
+      </EuiButton>
+    ),
   ];
   return (
     <DeleteAgentProvider>
