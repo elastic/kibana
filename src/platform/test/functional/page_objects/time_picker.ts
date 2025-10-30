@@ -108,14 +108,8 @@ export class TimePickerPageObject extends FtrService {
     await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
     await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
     const panel = await this.testSubjects.find('superDatePickerQuickMenu');
-    const allOptions = await panel.findAllByCssSelector('button');
-    for (const optionElement of allOptions) {
-      const optionText = await optionElement.getVisibleText();
-      if (optionText.includes(option)) {
-        await optionElement.click();
-        break;
-      }
-    }
+    const buttonByOptionText = await panel.findByXpath(`.//button[text()='${option}']`);
+    await buttonByOptionText?.click();
   }
 
   public async inputValue(dataTestSubj: string, value: string) {
