@@ -1210,11 +1210,6 @@ x-pack/solutions/workplace_ai/test @elastic/workchat-eng
 /x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-ux-infra_services-team
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
 
-# Observability Entities Team (@elastic/obs-entities)
-/x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
-/x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
-/x-pack/platform/test/api_integration/apis/entity_manager @elastic/obs-entities
-
 # Metrics Experience
 /src/platform/plugins/shared/metrics_experience @elastic/obs-ux-infra_services-team
 /src/platform/test/api_integration/apis/metrics_experience @elastic/obs-ux-infra_services-team
@@ -2496,9 +2491,9 @@ x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elas
 x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/contextual-security-apps
 
 ## Security Solution sub teams - Security Entity Store
-x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1 @elastic/core-analysis
-x-pack/platform/plugins/shared/entity_manager/server/lib/entities @elastic/core-analysis
-x-pack/platform/plugins/shared/entity_manager/server/lib/auth @elastic/core-analysis
+x-pack/platform/packages/shared/kbn-entities-schema @elastic/core-analysis
+x-pack/platform/plugins/shared/entity_manager @elastic/core-analysis
+x-pack/platform/test/api_integration/apis/entity_manager @elastic/core-analysis
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/core-analysis
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store @elastic/core-analysis
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/ @elastic/core-analysis

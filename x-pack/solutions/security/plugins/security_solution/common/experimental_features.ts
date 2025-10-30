@@ -46,11 +46,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
-   * Disables new notes
-   */
-  securitySolutionNotesDisabled: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
