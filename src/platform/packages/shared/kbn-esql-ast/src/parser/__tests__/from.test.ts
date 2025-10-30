@@ -9,6 +9,7 @@
 
 import { parse } from '..';
 import type { ESQLSource } from '../../types';
+import { isSubQuerySource } from '../../ast/is';
 
 describe('FROM', () => {
   describe('correctly formatted', () => {
@@ -454,23 +455,43 @@ describe('FROM', () => {
     describe('error cases', () => {
       it('errors on unclosed subquery', () => {
         const text = 'FROM (FROM index | WHERE a > 10';
-        const { errors } = parse(text);
+        const { ast, errors } = parse(text);
 
-        expect(errors.length > 0).toBe(true);
+        expect(errors.length).toBeGreaterThan(0);
+
+        const subquerySource = ast[0].args[0] as ESQLSource;
+
+        expect(isSubQuerySource(subquerySource)).toBe(true);
+        expect(subquerySource.incomplete).toBe(true);
+        expect(subquerySource.subquery?.incomplete).toBe(true);
+        expect(subquerySource.subquery?.commands).toHaveLength(2);
       });
 
       it('errors on empty subquery', () => {
         const text = 'FROM index, ()';
-        const { errors } = parse(text);
+        const { ast, errors } = parse(text);
 
-        expect(errors.length > 0).toBe(true);
+        expect(errors.length).toBeGreaterThan(0);
+
+        const emptySubquery = ast[0].args[1] as ESQLSource;
+
+        expect(isSubQuerySource(emptySubquery)).toBe(true);
+        expect(emptySubquery.incomplete).toBe(true);
+        expect(emptySubquery.subquery?.commands).toHaveLength(0);
       });
 
       it('errors on subquery without FROM', () => {
         const text = 'FROM (WHERE a > 10)';
-        const { errors } = parse(text);
+        const { ast, errors } = parse(text);
 
-        expect(errors.length > 0).toBe(true);
+        expect(errors.length).toBeGreaterThan(0);
+
+        const subquerySource = ast[0].args[0] as ESQLSource;
+
+        expect(isSubQuerySource(subquerySource)).toBe(true);
+        expect(subquerySource.incomplete).toBe(true);
+        expect(subquerySource.subquery?.incomplete).toBe(true);
+        expect(subquerySource.subquery?.commands[0].name).toBe('where');
       });
     });
   });

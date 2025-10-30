@@ -588,26 +588,9 @@ export class CstToAstConverter {
       }
     }
 
-    const query: ast.ESQLAstQueryExpression = {
-      type: 'query',
-      name: '',
-      text: ctx.getText(),
-      location: getPosition(ctx.start, ctx.stop),
-      incomplete: Boolean(ctx.exception),
-      commands,
-    };
+    const query = Builder.expression.query(commands, this.getParserFields(ctx));
 
-    const querySource: ast.ESQLSource = {
-      type: 'source',
-      sourceType: 'subquery',
-      name: '',
-      text: ctx.getText(),
-      location: getPosition(ctx.start, ctx.stop),
-      incomplete: query.incomplete,
-      subquery: query,
-    };
-
-    return querySource;
+    return Builder.expression.subquery(query, { incomplete: query.incomplete });
   }
 
   // ---------------------------------------------------------------------- ROW
