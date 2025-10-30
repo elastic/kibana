@@ -25,6 +25,7 @@ import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
+import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { isOperation } from '../../../types_guards';
 import { LayerHeader } from './layer_header';
 import type { LayerPanelProps } from './types';
@@ -39,6 +40,7 @@ import {
   selectDatasourceStates,
 } from '../../../state_management';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
+import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
@@ -339,6 +341,12 @@ export function LayerPanel(props: LayerPanelProps) {
           }
         `}
         data-test-subj={`lns-layerPanel-${layerIndex}`}
+        id={LENS_LAYER_TABS_CONTENT_ID}
+        role="tabpanel"
+        aria-labelledby={getTabIdAttribute({
+          id: layerId,
+          label: 'tab item',
+        })}
       >
         <div>
           <header

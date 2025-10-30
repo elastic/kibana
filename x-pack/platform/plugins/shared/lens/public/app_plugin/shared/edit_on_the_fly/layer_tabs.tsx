@@ -47,6 +47,8 @@ import { useFocusUpdate } from '../../../editor_frame_service/editor_frame/confi
 
 import type { LayerTabsProps } from './types';
 
+export const LENS_LAYER_TABS_CONTENT_ID = 'lnsLayerTabsContent';
+
 export const LayerTabsWrapper = memo(function LayerTabsWrapper(props: LayerTabsProps) {
   const { visualizationMap } = useEditorFrameService();
   const visualization = useLensSelector(selectVisualization);
@@ -398,6 +400,7 @@ export function LayerTabs({
           createItem={getNewTabDefaultProps}
           onEBTEvent={() => {}}
           customNewTabButton={addLayerButton || undefined}
+          tabContentIdOverride={LENS_LAYER_TABS_CONTENT_ID}
           disableInlineLabelEditing
           disablePreview
           disableDragAndDrop
