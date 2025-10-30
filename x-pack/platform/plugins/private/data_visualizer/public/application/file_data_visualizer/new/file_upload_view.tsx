@@ -117,7 +117,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
             {uploadStatus.overallImportStatus !== STATUS.ABORTED ? (
               <EuiButton onClick={() => abortImport()}>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.importAnotherButton"
+                  id="xpack.dataVisualizer.file.uploadView.cancelButton"
                   defaultMessage="Cancel"
                 />
               </EuiButton>

@@ -171,34 +171,31 @@ export const FileStatus: FC<Props> = ({
                       </>
                     ) : null}
 
-                    <>
-                      {/* TODO, remove button should be stop if analysis is in progress */}
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          position="top"
-                          content={
-                            <FormattedMessage
-                              id="xpack.dataVisualizer.file.fileStatus.deleteFile"
-                              defaultMessage="Remove file"
-                            />
-                          }
-                        >
-                          <EuiButtonIcon
-                            onClick={() => deleteFile(index)}
-                            iconType="trash"
-                            size="xs"
-                            color="danger"
-                            data-test-subj={`mlFileUploadDeleteFileButton-${index}`}
-                            aria-label={i18n.translate(
-                              'xpack.dataVisualizer.file.fileStatus.deleteFile',
-                              {
-                                defaultMessage: 'Remove file',
-                              }
-                            )}
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        position="top"
+                        content={
+                          <FormattedMessage
+                            id="xpack.dataVisualizer.file.fileStatus.deleteFile"
+                            defaultMessage="Remove file"
                           />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    </>
+                        }
+                      >
+                        <EuiButtonIcon
+                          onClick={() => deleteFile(index)}
+                          iconType="trash"
+                          size="xs"
+                          color="danger"
+                          data-test-subj={`mlFileUploadDeleteFileButton-${index}`}
+                          aria-label={i18n.translate(
+                            'xpack.dataVisualizer.file.fileStatus.deleteFile',
+                            {
+                              defaultMessage: 'Remove file',
+                            }
+                          )}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </>
               }
