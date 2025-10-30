@@ -145,7 +145,7 @@ const RulesPageComponent: React.FC = () => {
               {isDoesNotMatchForIndicatorMatchRuleEnabled && <RuleFeatureTour />}
             </EuiFlexGroup>
           </HeaderPage>
-          <RuleUpdateCallouts shouldShowUpdateRulesCallout={true} />
+          <RuleUpdateCallouts shouldShowUpdateRulesCallout={canEditRules} />
           <EuiSpacer size="s" />
           <MaintenanceWindowCallout
             kibanaServices={kibanaServices}
