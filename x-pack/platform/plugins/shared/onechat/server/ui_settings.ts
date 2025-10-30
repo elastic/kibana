@@ -31,10 +31,10 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
     },
     [AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID]: {
       description: i18n.translate('xpack.onechat.uiSettings.createVisualizations.description', {
-        defaultMessage: 'Enables the dashDashboard Agent and related tools for Agent Builder.',
+        defaultMessage: 'Enables the Dashboard Agent and related tools for Elastic Agent Builder.',
       }),
       name: i18n.translate('xpack.onechat.uiSettings.createVisualizations.name', {
-        defaultMessage: 'Agent Builder: Dashboard Agent and tools',
+        defaultMessage: 'Elastic Agent Builder: Dashboard Agent and tools',
       }),
       schema: schema.boolean(),
       value: false,
@@ -53,7 +53,8 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       value: false,
       technicalPreview: true,
       requiresPageReload: true,
-      readonly: false,
+      readonly: true,
+      readonlyMode: 'ui',
     },
   });
 };

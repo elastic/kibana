@@ -42,6 +42,7 @@ import type {
 } from './types';
 import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
+import type { OpenConversationFlyoutOptions } from './flyout/types';
 
 export class OnechatPlugin
   implements
@@ -141,6 +142,23 @@ export class OnechatPlugin
       false
     );
 
+    const onechatService: OnechatPluginStart = {
+      tools: createPublicToolContract({ toolsService }),
+      setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
+        this.conversationFlyoutActiveConfig = config;
+      },
+      clearConversationFlyoutActiveConfig: () => {
+        this.conversationFlyoutActiveConfig = {};
+      },
+      openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
+        const config = options ?? this.conversationFlyoutActiveConfig;
+        return openConversationFlyout(config, {
+          coreStart: core,
+          services: internalServices,
+        });
+      },
+    };
+
     if (isAgentBuilderNavEnabled) {
       core.chrome.navControls.registerRight({
         mount: (element) => {
@@ -148,14 +166,7 @@ export class OnechatPlugin
             <OnechatNavControlInitiator
               coreStart={core}
               pluginsStart={startDependencies}
-              onechatService={{
-                tools: createPublicToolContract({ toolsService }),
-                openConversationFlyout: (options) =>
-                  openConversationFlyout(options, {
-                    coreStart: core,
-                    services: internalServices,
-                  }),
-              }}
+              onechatService={onechatService}
             />,
             element,
             () => {}
@@ -170,21 +181,6 @@ export class OnechatPlugin
       });
     }
 
-    return {
-      tools: createPublicToolContract({ toolsService }),
-      setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
-        this.conversationFlyoutActiveConfig = config;
-      },
-      clearConversationFlyoutActiveConfig: () => {
-        this.conversationFlyoutActiveConfig = {};
-      },
-      openConversationFlyout: (options) => {
-        const config = options ?? this.conversationFlyoutActiveConfig;
-        return openConversationFlyout(config, {
-          coreStart: core,
-          services: internalServices,
-        });
-      },
-    };
+    return onechatService;
   }
 }

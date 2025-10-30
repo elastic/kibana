@@ -9,7 +9,6 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { OnechatNavControl } from './onechat_nav_control';
 import type { OnechatStartDependencies } from '../../types';
 import type { OnechatPluginStart } from '../../types';
@@ -35,11 +34,9 @@ export const OnechatNavControlWithProvider = ({
             onechat: onechatService,
           }}
         >
-          <RedirectAppLinks coreStart={coreStart}>
-            <coreStart.i18n.Context>
-              <OnechatNavControl />
-            </coreStart.i18n.Context>
-          </RedirectAppLinks>
+          <coreStart.i18n.Context>
+            <OnechatNavControl />
+          </coreStart.i18n.Context>
         </KibanaContextProvider>
       </KibanaThemeProvider>
     </EuiErrorBoundary>

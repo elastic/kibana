@@ -51,7 +51,7 @@ export function OnechatNavControl() {
         aria-label={buttonLabel}
         data-test-subj="OnechatNavControlButton"
         onClick={() => {
-          onechat.openConversationFlyout({});
+          onechat.openConversationFlyout();
         }}
         color="primary"
         size="s"
