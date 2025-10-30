@@ -8,6 +8,7 @@
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { getRiskScoreConfigurationWithDefaults, type RiskScoreConfiguration } from '../common';
 
 const FETCH_RISK_ENGINE_SETTINGS = ['GET', 'FETCH_RISK_ENGINE_SETTINGS'];
 
@@ -28,21 +29,11 @@ export const useRiskEngineSettingsQuery = () => {
     data: savedRiskEngineSettings,
     isLoading: isLoadingRiskEngineSettings,
     isError,
-  } = useQuery(
+  } = useQuery<RiskScoreConfiguration | undefined>(
     FETCH_RISK_ENGINE_SETTINGS,
     async () => {
       const riskEngineSettings = await fetchRiskEngineSettings();
-
-      // Transform filters from backend format to internal format for storage
-      const backendFilters = (riskEngineSettings as Record<string, unknown>)?.filters;
-      const transformedSettings = riskEngineSettings
-        ? {
-            ...riskEngineSettings,
-            filters: Array.isArray(backendFilters) ? backendFilters : [],
-          }
-        : undefined;
-
-      return transformedSettings;
+      return getRiskScoreConfigurationWithDefaults(riskEngineSettings);
     },
     { retry: false, refetchOnWindowFocus: false }
   );

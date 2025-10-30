@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { ConfigureRiskEngineSavedObjectRequestBody } from '../../../../common/api/entity_analytics';
+import type { ReadRiskEngineSettingsResponse } from '../../../../common/api/entity_analytics';
 
 export const DEFAULT_ENTITY_TYPES = ['host', 'user', 'service'] as const;
 
-export type AlertFilter = NonNullable<ConfigureRiskEngineSavedObjectRequestBody['filters']>[number];
+type BaseRiskEngineSettings = ReadRiskEngineSettingsResponse;
+
+export type AlertFilter = NonNullable<BaseRiskEngineSettings['filters']>[number];
 
 export interface UIAlertFilter {
   id: string;
@@ -17,7 +19,7 @@ export interface UIAlertFilter {
   entityTypes: AlertFilter['entity_types'];
 }
 
-export interface RiskScoreConfiguration {
+export interface RiskScoreConfiguration extends BaseRiskEngineSettings {
   includeClosedAlerts: boolean;
   range: {
     start: string;
@@ -26,3 +28,19 @@ export interface RiskScoreConfiguration {
   enableResetToZero: boolean;
   filters: AlertFilter[];
 }
+
+export const getRiskScoreConfigurationWithDefaults = (
+  riskEngineSettings?: Partial<RiskScoreConfiguration>
+): RiskScoreConfiguration => ({
+  ...riskEngineSettings,
+  includeClosedAlerts: riskEngineSettings?.includeClosedAlerts ?? false,
+  range: {
+    start: riskEngineSettings?.range?.start ?? 'now-30d',
+    end: riskEngineSettings?.range?.end ?? 'now',
+  },
+  enableResetToZero:
+    riskEngineSettings?.enableResetToZero === undefined
+      ? true
+      : riskEngineSettings.enableResetToZero,
+  filters: Array.isArray(riskEngineSettings?.filters) ? riskEngineSettings.filters : [],
+});

@@ -10,7 +10,7 @@ import type { RiskScoresPreviewRequest } from '../../../../common/api/entity_ana
 import { useEntityAnalyticsRoutes } from '../api';
 
 export type UseRiskScorePreviewParams = Omit<RiskScoresPreviewRequest, 'data_view_id'> & {
-  data_view_id?: string;
+  data_view_id?: RiskScoresPreviewRequest['data_view_id'];
 };
 
 export const useRiskScorePreview = ({
@@ -19,17 +19,30 @@ export const useRiskScorePreview = ({
   filter,
   exclude_alert_statuses: excludeAlertStatuses,
   filters,
-}: UseRiskScorePreviewParams & { filters?: Array<{ entity_types: string[]; filter: string }> }) => {
+  ...otherParams
+}: UseRiskScorePreviewParams) => {
   const { fetchRiskScorePreview } = useEntityAnalyticsRoutes();
+  const serializedOtherParams = otherParams ? JSON.stringify(otherParams) : null;
 
   return useQuery(
-    ['POST', 'FETCH_PREVIEW_RISK_SCORE', range, filter, excludeAlertStatuses, filters],
+    [
+      'POST',
+      'FETCH_PREVIEW_RISK_SCORE',
+      range,
+      filter,
+      excludeAlertStatuses,
+      filters,
+      serializedOtherParams,
+    ],
     async ({ signal }) => {
       if (!dataViewId) {
         return;
       }
 
-      const params: RiskScoresPreviewRequest = { data_view_id: dataViewId };
+      const params: RiskScoresPreviewRequest = {
+        data_view_id: dataViewId,
+        ...otherParams,
+      };
       if (range) {
         const startTime = dateMath.parse(range.start)?.utc().toISOString();
         const endTime = dateMath
@@ -56,8 +69,7 @@ export const useRiskScorePreview = ({
       }
 
       if (filters && filters.length > 0) {
-        // Type cast needed until backend PR merges with filters support
-        (params as RiskScoresPreviewRequest & { filters?: typeof filters }).filters = filters;
+        params.filters = filters;
       }
 
       const response = await fetchRiskScorePreview({ signal, params });

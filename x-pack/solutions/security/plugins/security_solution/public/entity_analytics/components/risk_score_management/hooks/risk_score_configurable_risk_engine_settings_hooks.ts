@@ -8,7 +8,6 @@
 import { useRiskEngineSettingsQuery } from './use_risk_engine_settings_query';
 import { useRiskEngineSettingsMutations } from './use_risk_engine_settings_mutations';
 import { useRiskEngineSettingsState } from './use_risk_engine_settings_state';
-import type { RiskScoreConfiguration } from '../common';
 
 export const useConfigurableRiskEngineSettings = () => {
   const { savedRiskEngineSettings, isLoadingRiskEngineSettings, isError } =
@@ -25,14 +24,10 @@ export const useConfigurableRiskEngineSettings = () => {
     getUIAlertFilters,
     waitingForSaveRefetch,
     preSaveFilterCount,
-  } = useRiskEngineSettingsState(
-    savedRiskEngineSettings as RiskScoreConfiguration | undefined,
-    isLoadingRiskEngineSettings,
-    isError
-  );
+  } = useRiskEngineSettingsState(savedRiskEngineSettings, isLoadingRiskEngineSettings, isError);
 
   const { saveSelectedSettingsMutation } = useRiskEngineSettingsMutations(
-    savedRiskEngineSettings as RiskScoreConfiguration | undefined,
+    savedRiskEngineSettings,
     waitingForSaveRefetch,
     preSaveFilterCount
   );

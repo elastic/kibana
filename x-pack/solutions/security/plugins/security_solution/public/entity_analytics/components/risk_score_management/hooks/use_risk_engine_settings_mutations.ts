@@ -23,13 +23,21 @@ export const useRiskEngineSettingsMutations = (
 
   const saveSelectedSettingsMutation = useMutation(
     async (selectedRiskEngineSettings: RiskScoreConfiguration) => {
-      await mutateRiskEngineSettingsAsync(selectedRiskEngineSettings, {
-        onSuccess: () => {
-          addSuccess(i18n.RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS, {
-            toastLifeTimeMs: 5000,
-          });
+      await mutateRiskEngineSettingsAsync(
+        {
+          includeClosedAlerts: selectedRiskEngineSettings.includeClosedAlerts ?? false,
+          range: selectedRiskEngineSettings.range,
+          enableResetToZero: selectedRiskEngineSettings.enableResetToZero ?? true,
+          filters: selectedRiskEngineSettings.filters,
         },
-      });
+        {
+          onSuccess: () => {
+            addSuccess(i18n.RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS, {
+              toastLifeTimeMs: 5000,
+            });
+          },
+        }
+      );
 
       // Track pre-save state to detect when refetch completes
       if (preSaveFilterCount) {

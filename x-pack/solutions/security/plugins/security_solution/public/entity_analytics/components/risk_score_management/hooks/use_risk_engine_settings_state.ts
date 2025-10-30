@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DEFAULT_ENTITY_TYPES,
+  getRiskScoreConfigurationWithDefaults,
   type AlertFilter,
   type RiskScoreConfiguration,
   type UIAlertFilter,
@@ -51,21 +52,6 @@ const settingsAreEqual = (
   );
 };
 
-const riskEngineSettingsWithDefaults = (
-  riskEngineSettings?: Partial<RiskScoreConfiguration>
-): RiskScoreConfiguration => ({
-  includeClosedAlerts: riskEngineSettings?.includeClosedAlerts ?? false,
-  range: {
-    start: riskEngineSettings?.range?.start ?? 'now-30d',
-    end: riskEngineSettings?.range?.end ?? 'now',
-  },
-  enableResetToZero:
-    riskEngineSettings?.enableResetToZero === undefined
-      ? true
-      : riskEngineSettings.enableResetToZero,
-  filters: riskEngineSettings?.filters ?? [],
-});
-
 export const useRiskEngineSettingsState = (
   savedRiskEngineSettings?: RiskScoreConfiguration,
   isLoadingRiskEngineSettings?: boolean,
@@ -82,14 +68,14 @@ export const useRiskEngineSettingsState = (
   // Initialize selected settings when saved settings are loaded
   useEffect(() => {
     if (savedRiskEngineSettings && !selectedRiskEngineSettings) {
-      setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults(savedRiskEngineSettings));
+      setSelectedRiskEngineSettings(getRiskScoreConfigurationWithDefaults(savedRiskEngineSettings));
     }
   }, [savedRiskEngineSettings, selectedRiskEngineSettings]);
 
   // Handle error case by setting default values
   useEffect(() => {
     if (isError) {
-      setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults());
+      setSelectedRiskEngineSettings(getRiskScoreConfigurationWithDefaults());
     }
   }, [isError]);
 
@@ -103,7 +89,7 @@ export const useRiskEngineSettingsState = (
       savedRiskEngineSettings &&
       currentFilterCount !== preSaveFilterCount.current
     ) {
-      const savedWithDefaults = riskEngineSettingsWithDefaults(savedRiskEngineSettings);
+      const savedWithDefaults = getRiskScoreConfigurationWithDefaults(savedRiskEngineSettings);
       setSelectedRiskEngineSettings(savedWithDefaults);
       waitingForSaveRefetch.current = false;
       preSaveFilterCount.current = 0;
@@ -111,7 +97,7 @@ export const useRiskEngineSettingsState = (
   }, [savedRiskEngineSettings, isLoadingRiskEngineSettings, selectedRiskEngineSettings]);
 
   const resetSelectedSettings = useCallback(() => {
-    setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults(savedRiskEngineSettings));
+    setSelectedRiskEngineSettings(getRiskScoreConfigurationWithDefaults(savedRiskEngineSettings));
   }, [savedRiskEngineSettings]);
 
   const setSelectedDateSetting = useCallback(({ start, end }: { start: string; end: string }) => {
@@ -139,7 +125,7 @@ export const useRiskEngineSettingsState = (
     const transformedFilters = transformFiltersForBackend(filters);
     setSelectedRiskEngineSettings((prevState) => {
       if (!prevState) {
-        return riskEngineSettingsWithDefaults({ filters: transformedFilters });
+        return getRiskScoreConfigurationWithDefaults({ filters: transformedFilters });
       }
       return { ...prevState, filters: transformedFilters };
     });
@@ -158,7 +144,7 @@ export const useRiskEngineSettingsState = (
 
   const selectedSettingsMatchSavedSettings = settingsAreEqual(
     selectedRiskEngineSettings,
-    riskEngineSettingsWithDefaults(savedRiskEngineSettings)
+    getRiskScoreConfigurationWithDefaults(savedRiskEngineSettings)
   );
 
   return {
