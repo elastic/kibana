@@ -4010,6 +4010,10 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/functional_with_es_ssl/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client/server/plugin.ts"
               },
               {
