@@ -48,7 +48,6 @@ export const ConfigSchema = z.union([
       contextWindowLength: z.coerce.number().optional(),
       temperature: z.coerce.number().optional(),
       enableNativeFunctionCalling: z.boolean().optional(),
-      temperature: z.coerce.number().optional(),
     })
     .strict(),
 ]);
