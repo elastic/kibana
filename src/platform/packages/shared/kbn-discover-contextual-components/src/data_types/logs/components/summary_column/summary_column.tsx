@@ -17,7 +17,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   type ShouldShowFieldInTableHandler,
   TRACE_FIELDS,
-  getMessageFieldValueWithOtelFallback,
+  getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
 import { getAvailableTraceFields } from '@kbn/discover-utils/src';
 import { Resource } from './resource';
@@ -154,7 +154,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const shouldRenderResource = resourceFields.length > 0;
 
   // Use OTel fallback version that returns the actual field name used
-  const { field, value, formattedValue } = getMessageFieldValueWithOtelFallback(row.flattened, {
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(row.flattened, {
     includeFormattedValue: true,
   });
   const messageCodeBlockProps = formattedValue

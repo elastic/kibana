@@ -10,6 +10,7 @@ import type {
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
+  EuiDataGridToolbarProps,
 } from '@elastic/eui';
 import {
   EuiAvatar,
@@ -19,7 +20,10 @@ import {
   EuiToolTip,
   useEuiTheme,
   EuiButtonGroup,
+  EuiFlexItem,
+  euiScreenReaderOnly,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
@@ -347,52 +351,89 @@ export function PreviewTable({
     EuiDataGridRowHeightsOptions | undefined
   >(rowHeightsOptions);
 
+  const renderCustomToolbar: EuiDataGridToolbarProps['renderCustomToolbar'] = useCallback(
+    (props: Parameters<NonNullable<EuiDataGridToolbarProps['renderCustomToolbar']>>[0]) => {
+      const {
+        hasRoomForGridControls,
+        columnControl,
+        columnSortingControl,
+        displayControl,
+        fullScreenControl,
+        keyboardShortcutsControl,
+      } = props;
+
+      const mobileStyles =
+        !hasRoomForGridControls &&
+        css`
+          .euiDataGridToolbarControl__text {
+            ${euiScreenReaderOnly()}
+          }
+        `;
+
+      const viewModeOptions = [
+        {
+          id: 'columns' as const,
+          label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.columns', {
+            defaultMessage: 'Columns',
+          }),
+        },
+        {
+          id: 'summary' as const,
+          label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
+            defaultMessage: 'Summary',
+          }),
+        },
+      ];
+
+      return (
+        <EuiFlexGroup
+          responsive={false}
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          css={mobileStyles}
+          className="euiDataGrid__controls"
+        >
+          <EuiFlexItem grow={false}>
+            {viewModeToggle && (
+              <EuiButtonGroup
+                legend={i18n.translate(
+                  'xpack.streams.processorOutcomePreview.viewModeToggle.legend',
+                  {
+                    defaultMessage: 'Preview view mode',
+                  }
+                )}
+                options={viewModeOptions}
+                idSelected={viewModeToggle.currentMode}
+                onChange={(id) => viewModeToggle.setViewMode(id as PreviewTableMode)}
+                buttonSize="compressed"
+                isDisabled={viewModeToggle.isDisabled}
+              />
+            )}
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>{columnControl}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{columnSortingControl}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{keyboardShortcutsControl}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{displayControl}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{fullScreenControl}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
+    [viewModeToggle]
+  );
+
   const toolbarVisibilityConfig = useMemo(() => {
     if (!toolbarVisibility) {
       return false;
     }
 
-    if (!viewModeToggle) {
-      return true;
-    }
-
-    const viewModeOptions = [
-      {
-        id: 'columns' as const,
-        label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.columns', {
-          defaultMessage: 'Columns',
-        }),
-      },
-      {
-        id: 'summary' as const,
-        label: i18n.translate('xpack.streams.processorOutcomePreview.viewMode.summary', {
-          defaultMessage: 'Summary',
-        }),
-      },
-    ];
-
-    return {
-      additionalControls: {
-        left: {
-          append: (
-            <EuiButtonGroup
-              legend={i18n.translate(
-                'xpack.streams.processorOutcomePreview.viewModeToggle.legend',
-                {
-                  defaultMessage: 'Preview view mode',
-                }
-              )}
-              options={viewModeOptions}
-              idSelected={viewModeToggle.currentMode}
-              onChange={(id) => viewModeToggle.setViewMode(id as PreviewTableMode)}
-              buttonSize="compressed"
-              isDisabled={viewModeToggle.isDisabled}
-            />
-          ),
-        },
-      },
-    };
-  }, [toolbarVisibility, viewModeToggle]);
+    return true;
+  }, [toolbarVisibility]);
 
   return (
     <EuiDataGrid
@@ -412,6 +453,7 @@ export function PreviewTable({
       inMemory={sortingConfig ? { level: 'sorting' } : undefined}
       height={height}
       toolbarVisibility={toolbarVisibilityConfig}
+      renderCustomToolbar={viewModeToggle ? renderCustomToolbar : undefined}
       rowCount={documents.length}
       rowHeightsOptions={{
         ...currentRowHeights,

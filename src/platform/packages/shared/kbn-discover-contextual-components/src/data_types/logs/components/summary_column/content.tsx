@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { ShouldShowFieldInTableHandler, DataTableRecord } from '@kbn/discover-utils';
 import {
-  getMessageFieldValueWithOtelFallback,
+  getMessageFieldWithFallbacks,
   getLogLevelCoalescedValue,
   getLogLevelColor,
   LOG_LEVEL_REGEX,
@@ -97,13 +97,13 @@ export const Content = ({
   shouldShowFieldHandler,
 }: ContentProps) => {
   // Use OTel fallback version that returns the actual field name used
-  const { field, value } = getMessageFieldValueWithOtelFallback(row.flattened);
+  const { field, value } = getMessageFieldWithFallbacks(row.flattened);
 
   const { euiTheme } = useEuiTheme();
   const isDarkTheme = useKibanaIsDarkMode();
 
   const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(value as string, row, euiTheme, isDarkTheme) : value),
+    () => (value ? getHighlightedMessage(value, row, euiTheme, isDarkTheme) : value),
     [value, row, euiTheme, isDarkTheme]
   );
 

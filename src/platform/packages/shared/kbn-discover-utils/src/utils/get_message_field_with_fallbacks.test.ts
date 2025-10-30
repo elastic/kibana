@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  getMessageFieldWithFallbacks,
-  getMessageFieldValueWithOtelFallback,
-} from './get_message_field_with_fallbacks';
+import { getMessageFieldWithFallbacks } from './get_message_field_with_fallbacks';
 
 describe('getMessageFieldWithFallbacks', () => {
   it('should return message field object when it exists', () => {
     const doc = {
       message: 'log message',
-    } as any;
+    };
 
     const result = getMessageFieldWithFallbacks(doc);
     expect(result).toEqual({
@@ -29,7 +26,7 @@ describe('getMessageFieldWithFallbacks', () => {
   it('should return error.message when message does not exist', () => {
     const doc = {
       'error.message': 'error occurred',
-    } as any;
+    };
 
     const result = getMessageFieldWithFallbacks(doc);
     expect(result).toEqual({
@@ -42,7 +39,7 @@ describe('getMessageFieldWithFallbacks', () => {
   it('should return event.original when neither message nor error.message exist', () => {
     const doc = {
       'event.original': 'original event',
-    } as any;
+    };
 
     const result = getMessageFieldWithFallbacks(doc);
     expect(result).toEqual({
@@ -55,7 +52,7 @@ describe('getMessageFieldWithFallbacks', () => {
   it('should return undefined field when no message fields exist', () => {
     const doc = {
       'other.field': 'value',
-    } as any;
+    };
 
     const result = getMessageFieldWithFallbacks(doc);
     expect(result).toEqual({
@@ -63,91 +60,68 @@ describe('getMessageFieldWithFallbacks', () => {
     });
   });
 
-  it('should handle array values without extracting first element', () => {
+  it('should handle array values by converting to string', () => {
     const doc = {
       message: ['message1', 'message2'],
-    } as any;
+    };
 
     const result = getMessageFieldWithFallbacks(doc);
     expect(result).toEqual({
       field: 'message',
-      value: ['message1', 'message2'],
+      value: 'message1,message2',
       formattedValue: undefined,
     });
   });
-});
 
-describe('getMessageFieldValueWithOtelFallback', () => {
-  it('should return message field with ECS field name', () => {
+  it('should use OTel fallback body.text when message is not present', () => {
     const doc = {
-      message: 'log message',
+      'body.text': 'OTel log message',
     };
 
-    const result = getMessageFieldValueWithOtelFallback(doc);
+    const result = getMessageFieldWithFallbacks(doc);
+    expect(result).toEqual({
+      field: 'body.text',
+      value: 'OTel log message',
+      formattedValue: undefined,
+    });
+  });
+
+  it('should prefer ECS message over OTel body.text', () => {
+    const doc = {
+      message: 'ECS message',
+      'body.text': 'OTel message',
+    };
+
+    const result = getMessageFieldWithFallbacks(doc);
     expect(result).toEqual({
       field: 'message',
-      value: 'log message',
+      value: 'ECS message',
       formattedValue: undefined,
     });
   });
 
-  it("should try OTel fallbacks when ECS fields don't exist", () => {
+  it('should handle includeFormattedValue option for valid JSON', () => {
     const doc = {
-      'other.field': 'value',
+      message: '{"key":"value"}',
     };
 
-    const result = getMessageFieldValueWithOtelFallback(doc);
-    expect(result).toEqual({
-      field: undefined,
-    });
-  });
-
-  it('should fallback to error.message with field name', () => {
-    const doc = {
-      'error.message': 'error occurred',
-    };
-
-    const result = getMessageFieldValueWithOtelFallback(doc);
-    expect(result).toEqual({
-      field: 'error.message',
-      value: 'error occurred',
-      formattedValue: undefined,
-    });
-  });
-
-  it('should fallback to event.original with field name', () => {
-    const doc = {
-      'event.original': 'original event',
-    };
-
-    const result = getMessageFieldValueWithOtelFallback(doc);
-    expect(result).toEqual({
-      field: 'event.original',
-      value: 'original event',
-      formattedValue: undefined,
-    });
-  });
-
-  it('should return undefined for field when no message fields exist', () => {
-    const doc = {
-      'other.field': 'value',
-    };
-
-    const result = getMessageFieldValueWithOtelFallback(doc);
-    expect(result).toEqual({
-      field: undefined,
-    });
-  });
-
-  it('should handle array values without extracting first element', () => {
-    const doc = {
-      message: ['message1', 'message2'],
-    };
-
-    const result = getMessageFieldValueWithOtelFallback(doc);
+    const result = getMessageFieldWithFallbacks(doc, { includeFormattedValue: true });
     expect(result).toEqual({
       field: 'message',
-      value: ['message1', 'message2'],
+      value: '{"key":"value"}',
+      formattedValue: '{\n  "key": "value"\n}',
+    });
+  });
+
+  it('should not format non-JSON values', () => {
+    const doc = {
+      message: 'plain text message',
+    };
+
+    const result = getMessageFieldWithFallbacks(doc, { includeFormattedValue: true });
+    expect(result).toEqual({
+      field: 'message',
+      value: 'plain text message',
       formattedValue: undefined,
     });
   });

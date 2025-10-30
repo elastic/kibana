@@ -44,7 +44,6 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
-  getMessageFieldValueWithOtelFallback,
   getAvailableResourceFieldsWithActualNames,
   getShouldShowFieldHandler,
   isNestedFieldParent,

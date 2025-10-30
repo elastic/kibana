@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButtonGroup,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -124,24 +123,6 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
 
   const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
 
-  const viewModeOptions = useMemo(
-    () => [
-      {
-        id: 'columns' as const,
-        label: i18n.translate('xpack.streams.streamDetail.preview.columnsView', {
-          defaultMessage: 'Columns',
-        }),
-      },
-      {
-        id: 'summary' as const,
-        label: i18n.translate('xpack.streams.streamDetail.preview.summaryView', {
-          defaultMessage: 'Summary',
-        }),
-      },
-    ],
-    []
-  );
-
   const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
   const documents = useStreamSamplesSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
@@ -236,6 +217,11 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
             cellActions={cellActions}
             mode={viewMode}
             streamName={streamName}
+            viewModeToggle={{
+              currentMode: viewMode,
+              setViewMode,
+              isDisabled: false,
+            }}
           />
         </RowSelectionContext.Provider>
         <PreviewFlyout
@@ -255,28 +241,11 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
-            <EuiFlexItem>
-              <DocumentMatchFilterControls
-                onFilterChange={setDocumentMatchFilter}
-                matchedDocumentPercentage={approximateMatchingPercentage}
-                isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
-              />
-            </EuiFlexItem>
-            {hasDocuments && isProcessedCondition && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  legend={i18n.translate('xpack.streams.streamDetail.preview.viewModeLegend', {
-                    defaultMessage: 'Select view mode',
-                  })}
-                  options={viewModeOptions}
-                  idSelected={viewMode}
-                  onChange={(id) => setViewMode(id as PreviewTableMode)}
-                  buttonSize="compressed"
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <DocumentMatchFilterControls
+            onFilterChange={setDocumentMatchFilter}
+            matchedDocumentPercentage={approximateMatchingPercentage}
+            isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
+          />
         </EuiFlexItem>
         {content}
       </EuiFlexGroup>
