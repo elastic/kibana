@@ -38,8 +38,8 @@ export const updateDashboardMeta = async ({
   await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
     contentTypeId: DASHBOARD_CONTENT_ID,
     id,
-    data: { title, description, tags },
-    options: { references: [] },
+    data: { ...dashboard.attributes, title, description, tags },
+    options: { references: dashboard.references },
   });
 
   getDashboardContentManagementCache().deleteDashboard(id);
