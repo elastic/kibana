@@ -22,7 +22,7 @@ import {
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { Query } from '@kbn/es-query';
+import type { ProjectRouting, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
@@ -340,6 +340,9 @@ export function InternalDashboardTopNav({
     []
   );
 
+  // TODO: moving this up because it's controlled from the dashboard
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(undefined);
+
   return (
     <div css={styles.container}>
       <EuiScreenReaderOnly>
@@ -350,6 +353,8 @@ export function InternalDashboardTopNav({
       </EuiScreenReaderOnly>
       <navigationService.ui.TopNavMenu
         {...visibilityProps}
+        projectRouting={projectRouting}
+        onProjectRoutingChange={setProjectRouting}
         query={query as Query | undefined}
         badges={badges}
         screenTitle={title}
