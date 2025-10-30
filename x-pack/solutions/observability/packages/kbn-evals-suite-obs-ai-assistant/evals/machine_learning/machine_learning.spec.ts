@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { MlGetJobsResponse, MlPutJobRequest } from '@elastic/elasticsearch/lib/api/types';
-import moment from 'moment';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { MlGetJobsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   cleanupMachineLearningJobs,
-  setupMLJobAndDatafeed,
+  createApmJobWithNormalData,
+  createAnomalyDetectionJobWithNoData,
 } from '../../src/data_generators/machine_learning_jobs';
-import { loadSampleData } from '../../src/data_generators/load_sample_data';
+import { createSampleDataMLJobs } from '../../src/data_generators/load_sample_data';
 import { evaluate } from '../../src/evaluate';
 
 /**
@@ -34,141 +33,27 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
     await cleanupMachineLearningJobs({ esClient, log });
     await esClient.indices.delete({ index: TEST_INDEX, ignore_unavailable: true });
     await apmSynthtraceEsClient.clean();
-    const logsSampleDataIndex = await loadSampleData({
+    await createSampleDataMLJobs({
       log,
       kbnClient,
       sampleDataId: 'logs',
     });
-    // Get time range for the sample data
-    const timeFieldRangeResponse = await kbnClient.request<{
-      success: boolean;
-      start: number;
-      end: number;
-    }>({
-      method: 'POST',
-      path: '/internal/ml/fields_service/time_field_range',
-      body: {
-        index: logsSampleDataIndex,
-        timeFieldName: 'timestamp',
-        query: {
-          bool: {
-            must: [
-              {
-                match_all: {},
-              },
-            ],
-            must_not: [
-              {
-                term: {
-                  _tier: {
-                    value: 'data_frozen',
-                  },
-                },
-              },
-            ],
-          },
-        },
-        runtimeMappings: {
-          hour_of_day: {
-            type: 'long',
-            script: {
-              source: "emit(doc['timestamp'].value.getHour());",
-            },
-          },
-        },
-      },
-      headers: { 'elastic-api-version': '1' },
-    });
 
-    log.debug('Creating ML jobs from logs sample data');
-    await kbnClient.request({
-      method: 'POST',
-      path: '/internal/ml/modules/setup/sample_data_weblogs',
-      body: {
-        prefix: 'test_',
-        indexPatternName: logsSampleDataIndex,
-        useDedicatedIndex: false,
-        startDatafeed: true,
-        start: timeFieldRangeResponse.data.start,
-        end: timeFieldRangeResponse.data.end,
-      },
-      headers: { 'elastic-api-version': '1' },
-    });
-    log.debug('Generating APM data');
-
-    const range = timerange(moment().subtract(1, 'days'), moment());
-
-    const myServiceInstance = apm
-      .service({ name: SERVICE_TEST_NAME, environment: 'production', agentName: 'nodejs' })
-      .instance('my-instance');
-
-    // Normal transactions: same duration 5 ms
-    const normalDocs = range
-      .interval('1m')
-      .rate(1)
-      .generator((timestamp) =>
-        myServiceInstance
-          .transaction('GET /api')
-          .duration(5) // duration in ms
-          .timestamp(timestamp)
-      );
-    await apmSynthtraceEsClient.index(normalDocs);
-    const ML_JOB_CONFIG_1: MlPutJobRequest = {
-      job_id: TEST_JOB_ID,
-      description: 'Detect anomalies in APM transaction duration',
-      analysis_config: {
-        bucket_span: '5m',
-        detectors: [{ function: 'mean', field_name: 'transaction.duration.us' }],
-      },
-      data_description: { time_field: '@timestamp' },
-      datafeed_config: {
-        datafeed_id: TEST_DATAFEED_ID,
-        indices: ['traces-apm*'],
-        query: { match: { 'service.name': SERVICE_TEST_NAME } },
-      },
-    };
-
-    await setupMLJobAndDatafeed(esClient, ML_JOB_CONFIG_1, TEST_JOB_ID, TEST_DATAFEED_ID, 'now-1h');
-
-    await esClient.indices.create({
-      index: TEST_INDEX,
-      mappings: {
-        properties: {
-          '@timestamp': { type: 'date' },
-          response_time: { type: 'float' },
-          service: { type: 'keyword' },
-        },
-      },
-    });
-
-    const ML_JOB_CONFIG_2 = {
-      job_id: TEST_JOB_ID_2,
-      description: 'Detect anomalies in average response_time',
-      analysis_config: {
-        bucket_span: '5m',
-        detectors: [
-          {
-            function: 'mean',
-            field_name: 'response_time',
-          },
-        ],
-      },
-      data_description: {
-        time_field: '@timestamp',
-      },
-      datafeed_config: {
-        datafeed_id: TEST_DATAFEED_ID_2,
-        indices: [TEST_INDEX],
-        query: { match_all: {} },
-      },
-    };
-
-    await setupMLJobAndDatafeed(
+    await createApmJobWithNormalData(
       esClient,
-      ML_JOB_CONFIG_2,
+      apmSynthtraceEsClient,
+      SERVICE_TEST_NAME,
+      TEST_JOB_ID,
+      TEST_DATAFEED_ID,
+      log
+    );
+
+    await createAnomalyDetectionJobWithNoData(
+      esClient,
+      TEST_INDEX,
       TEST_JOB_ID_2,
       TEST_DATAFEED_ID_2,
-      'now-1h'
+      log
     );
 
     await esClient.ml.closeJob({ job_id: TEST_JOB_ID_2, force: true });
