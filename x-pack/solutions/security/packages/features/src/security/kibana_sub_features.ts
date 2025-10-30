@@ -24,11 +24,6 @@ const TRANSLATIONS = Object.freeze({
 });
 
 export const endpointListSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.endpointList.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Endpoint List access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointList',
     { defaultMessage: 'Endpoint List' }
@@ -72,11 +67,6 @@ export const endpointListSubFeature = (): SubFeatureConfig => ({
 });
 
 export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedApplications.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Trusted Applications access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.trustedApplications',
     { defaultMessage: 'Trusted Applications' }
@@ -126,13 +116,6 @@ export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
 });
 
 export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices.privilegesTooltip',
-    {
-      defaultMessage: 'All Spaces is required for Trusted Devices access.',
-    }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices',
     {
@@ -183,11 +166,6 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
 });
 
 export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Host Isolation Exceptions access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions',
     { defaultMessage: 'Host Isolation Exceptions' }
@@ -236,11 +214,6 @@ export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
   ],
 });
 export const blocklistSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.blockList.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Blocklist access.' }
-  ),
   name: i18n.translate('securitySolutionPackages.features.featureRegistry.subFeatures.blockList', {
     defaultMessage: 'Blocklist',
   }),
@@ -288,11 +261,6 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
   ],
 });
 export const eventFiltersSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.eventFilters.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Event Filters access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.eventFilters',
     { defaultMessage: 'Event Filters' }
@@ -341,11 +309,6 @@ export const eventFiltersSubFeature = (): SubFeatureConfig => ({
   ],
 });
 export const policyManagementSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.policyManagement.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Policy Management access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.policyManagement',
     { defaultMessage: 'Elastic Defend Policy Management' }
@@ -389,11 +352,6 @@ export const policyManagementSubFeature = (): SubFeatureConfig => ({
 });
 
 export const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.responseActionsHistory.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Response Actions History access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.responseActionsHistory',
     { defaultMessage: 'Response Actions History' }
@@ -433,11 +391,6 @@ export const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
   ],
 });
 export const hostIsolationSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolation.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Host Isolation access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolation',
     { defaultMessage: 'Host Isolation' }
@@ -467,11 +420,6 @@ export const hostIsolationSubFeature = (): SubFeatureConfig => ({
 });
 
 export const processOperationsSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.processOperations.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Process Operations access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.processOperations',
     { defaultMessage: 'Process Operations' }
@@ -500,11 +448,6 @@ export const processOperationsSubFeature = (): SubFeatureConfig => ({
   ],
 });
 export const fileOperationsSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.fileOperations.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for File Operations access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.fileOperations',
     { defaultMessage: 'File Operations' }
@@ -536,11 +479,6 @@ export const fileOperationsSubFeature = (): SubFeatureConfig => ({
 // execute operations are not available in 8.7,
 // but will be available in 8.8
 export const executeActionSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Execute Operations access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.executeOperations',
     { defaultMessage: 'Execute Operations' }
@@ -571,11 +509,6 @@ export const executeActionSubFeature = (): SubFeatureConfig => ({
 
 // 8.15 feature
 export const scanActionSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.scanOperations.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Scan Operations access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.scanOperations',
     { defaultMessage: 'Scan Operations' }
@@ -605,11 +538,6 @@ export const scanActionSubFeature = (): SubFeatureConfig => ({
 });
 
 export const workflowInsightsSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Automatic Troubleshooting access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights',
     { defaultMessage: 'Automatic Troubleshooting' }
@@ -651,11 +579,6 @@ export const workflowInsightsSubFeature = (): SubFeatureConfig => ({
 });
 
 export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Endpoint Exceptions access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions',
     { defaultMessage: 'Endpoint Exceptions' }
@@ -725,8 +648,6 @@ export const globalArtifactManagementSubFeature = (
   );
 
   return {
-    requireAllSpaces: false,
-    privilegesTooltip: undefined,
     name: GLOBAL_ARTIFACT_MANAGEMENT,
     description: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.description',

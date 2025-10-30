@@ -64,18 +64,7 @@ export const getSecurityV5SubFeaturesMap = ({
     [SecuritySubFeatureId.scanAction, scanActionSubFeature()],
   ];
 
-  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
-    securitySubFeaturesList.map(([id, originalSubFeature]) => {
-      let subFeature = originalSubFeature;
-
-      // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
-      if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-        subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
-      }
-
-      return [id, subFeature];
-    })
-  );
+  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(securitySubFeaturesList);
 
   // Remove disabled experimental features
   if (!experimentalFeatures.defendInsightsPolicyResponseFailure) {

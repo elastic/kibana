@@ -95,9 +95,6 @@ export const getSecurityV4SubFeaturesMap = ({
         subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
       }
 
-      // Space awareness is now always enabled - set requireAllSpaces to false and remove privilegesTooltip
-      subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
-
       return [id, subFeature];
     })
   );
