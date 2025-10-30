@@ -85,8 +85,7 @@ const deriveValue = (type: SettingType, value: unknown): Value => {
     case 'boolean':
       return Boolean(value);
     case 'array':
-      // @ts-expect-error upgrade typescript v5.9.3
-      return Array.isArray(value) ? value : [value];
+      return (Array.isArray(value) ? value : [value]) as Value;
     default:
       return value as string;
   }
