@@ -54,7 +54,7 @@ export async function getUnifiedTraceErrors({
   return {
     apmErrors,
     unprocessedOtelErrors,
-    totalErrors: apmErrors.length > 0 ? apmErrors.length : unprocessedOtelErrors.length,
+    totalErrors: apmErrors.length + unprocessedOtelErrors.length,
   };
 }
 
