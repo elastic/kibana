@@ -23,7 +23,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import { Subject } from 'rxjs';
+import { Subject, shareReplay } from 'rxjs';
 import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
@@ -75,10 +75,17 @@ export const MetricsExperienceGrid = ({
     [originalInput$]
   );
 
-  const discoverFetch$ = useFetch({
+  const baseFetch$ = useFetch({
     input$,
     beforeFetch: updateTimeRange,
   });
+
+  const discoverFetch$ = useMemo(
+    // Buffer and replay emissions to child components that subscribe in later useEffects
+    // without this, child components would miss emissions that occurred before they subscribed
+    () => baseFetch$.pipe(shareReplay({ bufferSize: 1, refCount: false })),
+    [baseFetch$]
+  );
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
   const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
