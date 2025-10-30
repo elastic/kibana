@@ -88,17 +88,19 @@ describe('Workflows API', () => {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
         inputs: {
-          alerts: [],
-          rule: {
-            id: 'rule-1',
-            name: 'Test Rule',
-            tags: ['test'],
-            consumer: 'test-consumer',
-            producer: 'test-producer',
-            ruleTypeId: 'test-rule-type',
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: 'https://example.com/rule',
+            spaceId: 'default',
           },
-          ruleUrl: 'https://example.com/rule',
-          spaceId: 'default',
         },
       };
 
@@ -124,17 +126,19 @@ describe('Workflows API', () => {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
         inputs: {
-          alerts: null as any,
-          rule: {
-            id: 'rule-1',
-            name: 'Test Rule',
-            tags: ['test'],
-            consumer: 'test-consumer',
-            producer: 'test-producer',
-            ruleTypeId: 'test-rule-type',
+          event: {
+            alerts: null as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: 'https://example.com/rule',
+            spaceId: 'default',
           },
-          ruleUrl: 'https://example.com/rule',
-          spaceId: 'default',
         },
       };
 
@@ -159,6 +163,20 @@ describe('Workflows API', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: undefined as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await api.run({
