@@ -12,7 +12,7 @@ interface ThreatHuntingHypothesesDependencies {
   namespace: string;
 }
 
-export class ThreatHuntingHypothesesClient {
+export class ThreatHuntingHypothesesDescriptorClient {
   constructor(private readonly deps: ThreatHuntingHypothesesDependencies) {}
   getSavedObjectId() {
     return `threat-hunting-hypotheses-${this.deps.namespace}`;
