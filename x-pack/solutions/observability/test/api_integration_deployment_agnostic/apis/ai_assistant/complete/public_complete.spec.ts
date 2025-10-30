@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type {
   FunctionDefinition,
   ConversationCreateRequest,
@@ -70,9 +70,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       });
 
-      const shouldStream = isStream ?? true;
-
-      return shouldStream ? String(body) : (body as ConversationCreateRequest);
+      const isStreamResponse = isStream ?? true;
+      // @ts-expect-error
+      return isStreamResponse ? String(body) : (body as ConversationCreateRequest);
     }
 
     before(async () => {
@@ -200,7 +200,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('when isStream:false and persist:false', () => {
+    // Skipped because `isStream` has been temporarily removed from the public API
+    describe.skip('when isStream:false and persist:false', () => {
       let conversationResponseBody: ConversationCreateRequest;
 
       before(async () => {
@@ -220,7 +221,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('when isStream:false for existing conversation', () => {
+    // Skipped because `isStream` has been temporarily removed from the public API
+    describe.skip('when isStream:false for existing conversation', () => {
       const followUpQuestion = 'Can you give me more details?';
       const followUpAnswer = 'Yes John. Here are some more details: yadadada.';
       let createdConversationResponse: ConversationCreateRequest;

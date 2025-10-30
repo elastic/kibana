@@ -215,15 +215,17 @@ export class ObservabilityAIAssistantClient {
     disableFunctions?: boolean;
   }): {
     response$: Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>;
-    conversationPromise: Promise<ConversationCreateRequest | undefined>;
+    getConversation: () => Promise<ConversationCreateRequest>;
   } => {
     return withActiveInferenceSpan('RunTools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
       const conversationId = persist ? predefinedConversationId ?? v4() : '';
-      let resolveConversation: (value: ConversationCreateRequest | undefined) => void;
-      const conversationPromise = new Promise<ConversationCreateRequest | undefined>((resolve) => {
-        resolveConversation = resolve;
-      });
+      let resolveConversationRequest: (value: ConversationCreateRequest | undefined) => void;
+      const conversationRequestPromise = new Promise<ConversationCreateRequest | undefined>(
+        (resolve) => {
+          resolveConversationRequest = resolve;
+        }
+      );
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
         const { namespace } = this.dependencies;
@@ -397,7 +399,7 @@ export class ObservabilityAIAssistantClient {
                     };
 
                     if (!persist || isFunctionRequest) {
-                      resolveConversation(conversationCreateRequest);
+                      resolveConversationRequest(conversationCreateRequest);
                       return of();
                     }
 
@@ -425,7 +427,7 @@ export class ObservabilityAIAssistantClient {
                         )
                       ).pipe(
                         map((conversationUpdated): ConversationUpdateEvent => {
-                          resolveConversation(conversationUpdated);
+                          resolveConversationRequest(conversationUpdated);
                           return {
                             conversation: conversationUpdated.conversation,
                             type: StreamingChatResponseEventType.ConversationUpdate,
@@ -436,7 +438,7 @@ export class ObservabilityAIAssistantClient {
 
                     return from(this.create(conversationCreateRequest)).pipe(
                       map((conversationCreated): ConversationCreateEvent => {
-                        resolveConversation(conversationCreated);
+                        resolveConversationRequest(conversationCreated);
                         return {
                           conversation: conversationCreated.conversation,
                           type: StreamingChatResponseEventType.ConversationCreate,
@@ -478,7 +480,23 @@ export class ObservabilityAIAssistantClient {
         shareReplay()
       );
 
-      return { response$, conversationPromise };
+      return {
+        response$,
+        getConversation: async () => {
+          const subscription = response$.subscribe();
+
+          try {
+            const response = await conversationRequestPromise;
+            if (!response) {
+              throw new Error('Failed to generate conversation response');
+            }
+
+            return response;
+          } finally {
+            subscription.unsubscribe();
+          }
+        },
+      };
     });
   };
 

@@ -12,6 +12,7 @@ import { from, map } from 'rxjs';
 import { v4 } from 'uuid';
 import type { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { last } from 'lodash';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { flushBuffer } from '../../service/util/flush_buffer';
@@ -254,7 +255,7 @@ async function chatComplete(
   }
 ): Promise<{
   response$: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent>;
-  conversationPromise: Promise<ConversationCreateRequest | undefined>;
+  getConversation: () => Promise<ConversationCreateRequest>;
 }> {
   const { params, service } = resources;
 
@@ -296,7 +297,7 @@ async function chatComplete(
         : userInstructionOrString
   );
 
-  const { response$, conversationPromise } = client.complete({
+  const { response$, getConversation } = client.complete({
     messages,
     connectorId,
     conversationId,
@@ -310,7 +311,7 @@ async function chatComplete(
   });
 
   const responseWithFlushBuffer$ = response$.pipe(flushBuffer(isCloudEnabled));
-  return { response$: responseWithFlushBuffer$, conversationPromise };
+  return { response$: responseWithFlushBuffer$, getConversation };
 }
 
 const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
@@ -323,14 +324,20 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
   params: chatCompleteInternalRt,
   handler: async (resources) => {
     const { params } = resources;
-    const { response$: chatResponse$, conversationPromise } = await chatComplete(resources);
-    const { isStream = true } = params.body;
+    const { response$, getConversation } = await chatComplete(resources);
+    const { isStream = true, connectorId } = params.body;
 
-    if (!isStream) {
-      return waitForBufferedResponse(chatResponse$, conversationPromise);
+    if (isStream === false) {
+      const response = await getConversation();
+
+      return {
+        conversationId: response.conversation.id,
+        data: last(response.messages),
+        connectorId,
+      };
     }
 
-    return observableIntoStream(chatResponse$);
+    return observableIntoStream(response$);
   },
 });
 
@@ -347,9 +354,9 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   },
   handler: async (resources) => {
     const { params, logger } = resources;
-    const { actions, isStream = true, ...bodyParams } = params.body;
+    const { actions, ...bodyParams } = params.body;
 
-    const { response$: chatResponse$, conversationPromise } = await chatComplete({
+    const { response$ } = await chatComplete({
       ...resources,
       params: {
         body: {
@@ -364,31 +371,9 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       },
     });
 
-    if (!isStream) {
-      return waitForBufferedResponse(chatResponse$, conversationPromise);
-    }
-
-    return observableIntoOpenAIStream(chatResponse$, logger);
+    return observableIntoOpenAIStream(response$, logger);
   },
 });
-
-async function waitForBufferedResponse(
-  chatResponse$: Observable<StreamingChatResponseEventWithoutError>,
-  conversationPromise: Promise<ConversationCreateRequest | undefined>
-) {
-  const subscription = chatResponse$.subscribe();
-
-  try {
-    const conversationPayload = await conversationPromise;
-    if (!conversationPayload) {
-      throw new Error('Failed to generate conversation response');
-    }
-
-    return conversationPayload;
-  } finally {
-    subscription.unsubscribe();
-  }
-}
 
 export const chatRoutes = {
   ...chatRoute,
