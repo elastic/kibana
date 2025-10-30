@@ -338,6 +338,71 @@ node scripts/scout.js start-server [--stateful|--serverless=[es|oblt|security]]
 
 This command is useful for manual testing or running tests via an IDE.
 
+#### Generating Tests with Codegen
+
+Scout provides a `codegen` command that uses Playwright's test recorder to generate Scout-compatible tests. This is a great way to quickly create test scaffolding by recording your interactions with Kibana.
+
+**Basic Usage:**
+
+```bash
+node scripts/scout.js codegen --stateful --plugin x-pack/platform/plugins/shared/maps --output my_test
+```
+
+**Available Options:**
+
+- **`--stateful`** or **`--serverless=[es|oblt|security]`**: Specifies the deployment type (required)
+- **`--plugin`**: Path to your plugin relative to repo root (required)
+- **`--output`**: Name of the test file without extension (default: `recorded_test`)
+- **`--role`**: Role to authenticate as during recording (default: `admin`)
+- **`--parallel`**: Generate test using `spaceTest` for parallel execution (default: `false`)
+- **`--url`**: Starting URL path to navigate to (e.g., `/app/maps`) - saves manual navigation (optional)
+
+**How It Works:**
+
+1. Starts Kibana and Elasticsearch servers
+2. Opens Playwright's test generator with your browser
+3. Records your interactions as you perform test actions
+4. Transforms the recorded code to Scout format with:
+   - Correct Scout package imports (`@kbn/scout`, `@kbn/scout-oblt`, or `@kbn/scout-security`)
+   - Scout fixtures (`page`, `pageObjects`, `browserAuth`)
+   - Conversion of data-test-subj attributes where detected
+   - Detection and replacement of common page object patterns
+   - Authentication handling via `browserAuth` fixture
+   - Appropriate deployment tags (`@ess`, `@svlOblt`, etc.)
+5. Saves the test file to your plugin's test directory
+6. Creates Playwright config if it doesn't exist
+
+**Example Usage:**
+
+```bash
+# Generate test for Maps plugin (stateful) - browser starts at Maps app
+node scripts/scout.js codegen --stateful --plugin x-pack/platform/plugins/shared/maps --url /app/maps --output full_screen_mode
+
+# Generate test for APM plugin (serverless observability) - browser starts at APM app
+node scripts/scout.js codegen --serverless=oblt --plugin x-pack/solutions/observability/plugins/apm --url /app/apm --output service_inventory
+
+# Generate parallel test with custom role
+node scripts/scout.js codegen --stateful --plugin x-pack/plugins/my_plugin --parallel --role editor --output my_test
+
+# Start at base URL (no --url flag) - you'll need to manually navigate to your plugin
+node scripts/scout.js codegen --stateful --plugin x-pack/platform/plugins/shared/discover --output discover_test
+```
+
+**Important Notes:**
+
+- The generated test is a **starting point** and should be reviewed and refined
+- Verify all assertions are correct and add more specific ones
+- Replace generic selectors with page objects where possible
+- Consider adding more meaningful waits instead of `waitForTimeout`
+- Test the generated code to ensure it works as expected
+
+**Limitations:**
+
+- Authentication steps are detected and removed, but complex auth flows may need manual adjustment
+- Some selectors may not be automatically converted to `data-test-subj` attributes
+- Page object detection is based on common patterns and may not catch all cases
+- Generated code may need refactoring for better maintainability
+
 #### Running Servers and Tests Locally
 
 To start the servers locally and run tests in one step, use:
