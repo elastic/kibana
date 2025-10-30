@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import type { FramePublicAPI, Visualization } from '@kbn/lens-common';
+import { memo, useCallback } from 'react';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import {
   useLensDispatch,
   updateVisualizationState,
