@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { evaluate } from '../../src/evaluate';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type {
   InstallationStatusResponse,
   PerformInstallResponse,
   UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';
+import { evaluate } from '../../src/evaluate';
 import { testDocs } from '../../src/sample_data/knowledge_base';
 
 /**
@@ -198,6 +198,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
           },
         ],
       });
+
       const { data: status } = await kbnClient.request<InstallationStatusResponse>({
         method: 'GET',
         path: `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(
@@ -255,7 +256,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
           dataset: {
             name: 'kb: source isolation',
             description:
-              'Queries about internal Lens governance should retrieve only internal entries, excluding product docs.',
+              'Queries about internal Lens governance should retrieve only internal entries, excluding product docs (and vice versa).',
             examples: [
               {
                 input: {
@@ -267,7 +268,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
                     'Retrieves the internal policy entry (id "lens_internal_policy").',
                     'Mentions naming format <team>::<service>::<purpose>, required tags (owner, env, data_domain, pii_level, retention_days).',
                     'Mentions allowed data views ("acme-*", "metrics-acme-*", "logs-acme-*"), default time 24h, and refresh ≥ 30s.',
-                    'Does not use function retrieve_elastic_doc before answering the question about internal Lens policies.',
+                    `Does not use function ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME}  before answering the question about internal Lens policies.`,
                     'Does not hallucinate details that are not present in the internal policy.',
                   ],
                 },
