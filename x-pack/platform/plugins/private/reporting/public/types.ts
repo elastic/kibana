@@ -23,6 +23,7 @@ export type StartServices = [
     | 'application'
     | 'notifications'
     | 'uiSettings'
+    | 'userProfile'
   >,
   ReportingPublicPluginStartDependencies,
   unknown
@@ -54,6 +55,10 @@ export interface JobSummarySet {
 export type ReportTypeId = 'pngV2' | 'printablePdfV2' | 'csv_searchsource' | 'csv_v2';
 
 export interface ScheduledReport {
+  /**
+   * The id of the report
+   */
+  id: string;
   /**
    * The title of the report, used for the filename and in the UI
    */

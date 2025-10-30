@@ -24,9 +24,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import type { ReportingAPIClient } from '@kbn/reporting-public';
 import { useKibana } from '@kbn/reporting-public';
-import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { REPORTING_MANAGEMENT_SCHEDULES } from '@kbn/reporting-common';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -36,9 +34,6 @@ import {
   useForm,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/convert_to_rrule';
-import type { Rrule } from '@kbn/task-manager-plugin/server/task';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { RecurringScheduleFormFields } from '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { Frequency } from '@kbn/rrule';
@@ -50,16 +45,13 @@ import {
 } from '@kbn/response-ops-recurring-schedule-form/converters/moment';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { ResponsiveFormGroup } from './responsive_form_group';
-import { getReportParams } from '../report_params';
 import { getScheduledReportFormSchema } from '../schemas/scheduled_report_form_schema';
 import { useDefaultTimezone } from '../hooks/use_default_timezone';
-import { useScheduleReport } from '../hooks/use_schedule_report';
 import { useGetReportingHealthQuery } from '../hooks/use_get_reporting_health_query';
 import type { ReportTypeData, ScheduledReport } from '../../types';
 import * as i18n from '../translations';
 import { SCHEDULED_REPORT_FORM_ID } from '../constants';
 import { getStartDateValidator } from '../validators/start_date_validator';
-import { useUpdateScheduleReport } from '../hooks/use_update_schedule_report';
 
 const { emptyField } = fieldValidators;
 
@@ -84,34 +76,30 @@ export type FormData = Pick<
   | 'optimizedForPrinting'
 >;
 
-export interface ScheduledReportFlyoutContentProps {
-  // create
-  apiClient: ReportingAPIClient;
-  objectType?: string;
-  sharingData?: ReportingSharingData;
-  // necessary
+export interface ScheduledReportFormProps {
   scheduledReport: Partial<ScheduledReport>;
   availableReportTypes?: ReportTypeData[];
   onClose: () => void;
+  onSubmitForm?: (params: FormData) => Promise<void>;
+  isSubmitLoading?: boolean;
+  defaultEmail?: string;
+  editMode?: boolean;
+  readOnly?: boolean;
 }
 
-export const ScheduledReportFlyoutContent = ({
-  apiClient,
-  objectType,
-  sharingData,
+export const ScheduledReportForm = ({
+  onSubmitForm,
+  isSubmitLoading,
   scheduledReport,
   availableReportTypes,
   onClose,
-}: ScheduledReportFlyoutContentProps) => {
-  const editMode = Boolean(scheduledReport.id) || false;
-  if (!editMode && (!objectType || !sharingData)) {
-    throw new Error('Cannot schedule an export without an objectType or sharingData');
-  }
+  editMode,
+  readOnly,
+}: ScheduledReportFormProps) => {
   const {
     application: { capabilities },
     http,
     actions: { validateEmailAddresses },
-    notifications: { toasts },
     userProfile: userProfileService,
   } = useKibana().services;
   const { data: userProfile, isLoading: isUserProfileLoading } = useGetUserProfileQuery({
@@ -136,12 +124,6 @@ export const ScheduledReportFlyoutContent = ({
     ),
     [http.basePath]
   );
-  const { mutateAsync: scheduleReport, isLoading: isScheduleExportLoading } = useScheduleReport({
-    http,
-  });
-  const { mutateAsync: updateScheduleReport } = useUpdateScheduleReport({
-    http,
-  });
   const { defaultTimezone } = useDefaultTimezone();
   const schema = useMemo(
     () =>
@@ -155,69 +137,7 @@ export const ScheduledReportFlyoutContent = ({
     defaultValue: scheduledReport,
     options: { stripEmptyFields: true },
     schema,
-    onSubmit: async (formData) => {
-      try {
-        const {
-          title,
-          reportTypeId,
-          startDate,
-          timezone,
-          recurringSchedule,
-          optimizedForPrinting,
-          sendByEmail,
-          emailRecipients,
-        } = formData;
-        const rrule = convertToRRule({
-          startDate,
-          timezone,
-          recurringSchedule,
-          includeTime: true,
-        });
-        if (!editMode) {
-          await scheduleReport({
-            reportTypeId,
-            jobParams: getReportParams({
-              apiClient,
-              // The assertion at the top of the component ensures these are defined when scheduling
-              sharingData: sharingData!,
-              objectType: objectType!,
-              title,
-              reportTypeId,
-              ...(reportTypeId === 'printablePdfV2' ? { optimizedForPrinting } : {}),
-            }),
-            schedule: { rrule: rrule as Rrule },
-            notification: sendByEmail ? { email: { to: emailRecipients } } : undefined,
-          });
-          toasts.addSuccess({
-            title: i18n.SCHEDULED_REPORT_FORM_SUCCESS_TOAST_TITLE,
-            text: mountReactNode(
-              <>
-                {i18n.SCHEDULED_REPORT_FORM_SUCCESS_TOAST_MESSAGE} {reportingPageLink}.
-              </>
-            ),
-          });
-        } else {
-          await updateScheduleReport({
-            reportId: scheduledReport.id!,
-            title,
-            schedule: { rrule: rrule as Rrule },
-          });
-          toasts.addSuccess({
-            title: i18n.SCHEDULED_REPORT_UPDATE_SUCCESS_TOAST_TITLE,
-            text: mountReactNode(<>{i18n.SCHEDULED_REPORT_UPDATE_SUCCESS_TOAST_MESSAGE}</>),
-          });
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-        toasts.addError(error, {
-          title: i18n.SCHEDULED_REPORT_FORM_FAILURE_TOAST_TITLE,
-          toastMessage: i18n.SCHEDULED_REPORT_FORM_FAILURE_TOAST_MESSAGE,
-        });
-        // Forward error to signal whether to close the flyout or not
-        throw error;
-      }
-    },
+    onSubmit: onSubmitForm,
   });
   const [{ reportTypeId, startDate, timezone, sendByEmail }] = useFormData<FormData>({
     form,
@@ -227,10 +147,10 @@ export const ScheduledReportFlyoutContent = ({
   const defaultStartDateValue = useMemo(() => now.toISOString(), [now]);
 
   useEffect(() => {
-    if (!editMode && !hasManageReportingPrivilege && userProfile?.user.email) {
-      form.setFieldValue('emailRecipients', [userProfile.user.email]);
+    if (!editMode && !readOnly && !hasManageReportingPrivilege && userProfile?.user.email) {
+      form.setFieldValue('emailRecipients', [userProfile?.user.email]);
     }
-  }, [form, hasManageReportingPrivilege, editMode, userProfile?.user.email]);
+  }, [form, editMode, readOnly, hasManageReportingPrivilege, userProfile?.user.email]);
 
   const isEmailActive = sendByEmail || false;
 
@@ -299,6 +219,7 @@ export const ScheduledReportFlyoutContent = ({
                     compressed: true,
                     fullWidth: true,
                     append: i18n.SCHEDULED_REPORT_FORM_FILE_NAME_SUFFIX,
+                    readOnly,
                   },
                 }}
               />
@@ -313,7 +234,7 @@ export const ScheduledReportFlyoutContent = ({
                     options:
                       availableReportTypes?.map((f) => ({ inputDisplay: f.label, value: f.id })) ??
                       [],
-                    readOnly: editMode,
+                    readOnly: editMode || readOnly,
                   },
                 }}
               />
@@ -328,7 +249,7 @@ export const ScheduledReportFlyoutContent = ({
                     helpText: i18n.SCHEDULED_REPORT_FORM_OPTIMIZED_FOR_PRINTING_DESCRIPTION,
                     euiFieldProps: {
                       compressed: true,
-                      disabled: editMode,
+                      readOnly: editMode || readOnly,
                     },
                   }}
                 />
@@ -350,7 +271,7 @@ export const ScheduledReportFlyoutContent = ({
                       validator: emptyField(i18n.SCHEDULED_REPORT_FORM_START_DATE_REQUIRED_MESSAGE),
                     },
                     {
-                      validator: getStartDateValidator(now, timezone ?? defaultTimezone, editMode),
+                      validator: getStartDateValidator(now, timezone ?? defaultTimezone),
                     },
                   ],
                 }}
@@ -363,6 +284,7 @@ export const ScheduledReportFlyoutContent = ({
                     fullWidth: true,
                     showTimeSelect: true,
                     minDate: now,
+                    readOnly,
                   },
                 }}
               />
@@ -386,6 +308,7 @@ export const ScheduledReportFlyoutContent = ({
                     compressed: true,
                     fullWidth: true,
                     options: TIMEZONE_OPTIONS,
+                    readOnly,
                     prepend: (
                       <EuiFormLabel htmlFor="timezone">
                         {i18n.SCHEDULED_REPORT_FORM_TIMEZONE_LABEL}
@@ -403,6 +326,7 @@ export const ScheduledReportFlyoutContent = ({
                 minFrequency={Frequency.MONTHLY}
                 showTimeInSummary
                 compressed
+                readOnly
               />
             </ResponsiveFormGroup>
             <ResponsiveFormGroup
@@ -425,6 +349,7 @@ export const ScheduledReportFlyoutContent = ({
                   euiFieldProps: {
                     compressed: true,
                     disabled:
+                      readOnly ||
                       editMode ||
                       !reportingHealth.areNotificationsEnabled ||
                       (!hasManageReportingPrivilege && !userProfile?.user.email),
@@ -451,6 +376,7 @@ export const ScheduledReportFlyoutContent = ({
                             fullWidth: true,
                             isDisabled: editMode || !hasManageReportingPrivilege,
                             'data-test-subj': 'emailRecipientsCombobox',
+                            readOnly,
                           },
                         }}
                       />
@@ -503,7 +429,7 @@ export const ScheduledReportFlyoutContent = ({
               data-test-subj="scheduleExportSubmitButton"
               isDisabled={isReportingHealthLoading || isUserProfileLoading}
               onClick={onSubmit}
-              isLoading={isScheduleExportLoading}
+              isLoading={isSubmitLoading}
               fill
             >
               {i18n.SCHEDULED_REPORT_FLYOUT_SUBMIT_BUTTON_LABEL}

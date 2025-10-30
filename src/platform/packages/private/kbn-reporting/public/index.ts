@@ -37,6 +37,7 @@ export interface KibanaContext {
   actions: ActionsPublicPluginSetup;
   notifications: NotificationsStart;
   license$: LicensingPluginStart['license$'];
+  userProfile: CoreStart['userProfile'];
 }
 
 export const useKibana = () => _useKibana<KibanaContext>();
