@@ -12,7 +12,7 @@ import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 
-import { prAutomatedChecks } from '../tools/tasks/pr_automated_checks';
+import { validateSchemaChanges } from '../tools/tasks/validate_schema_changes';
 import type { TaskContext } from '../tools/tasks';
 import {
   createTaskContext,
@@ -119,9 +119,9 @@ export function runTelemetryCheck() {
             task: (context, task) => task.newListr(writeToFileTask(context), { exitOnError: true }),
           },
           {
-            title: 'Automated PR review checks',
+            title: 'Validating changes in telemetry schemas',
             task: (context, task) =>
-              task.newListr(prAutomatedChecks(context), { exitOnError: true }),
+              task.newListr(validateSchemaChanges(context), { exitOnError: true }),
             // only run if on a PR branch
             enabled: (_) => Boolean(baselineSha),
           },

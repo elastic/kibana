@@ -18,7 +18,7 @@ import type {
 import type { TaskContext } from './task_context';
 import { fetchTelemetrySchemaAtRevision, isTelemetrySchemaModified } from './git';
 
-export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext): ListrTask[] {
+export function validateSchemaChanges({ baselineSha, roots, reporter }: TaskContext): ListrTask[] {
   const isPullRequestPipeline =
     Boolean(process.env.GITHUB_PR_BASE_OWNER) &&
     Boolean(process.env.GITHUB_PR_BASE_REPO) &&
