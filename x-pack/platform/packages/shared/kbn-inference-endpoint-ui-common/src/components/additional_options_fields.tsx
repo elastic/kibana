@@ -177,10 +177,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
 
   const temperatureSettings = useMemo(
     () =>
-      taskTypeOptions?.some((option) => option.id === CHAT_COMPLETION_TASK_TYPE) ||
-      (isEdit &&
-        (selectedTaskType === CHAT_COMPLETION_TASK_TYPE ||
-          selectedTaskType === DEFAULT_TASK_TYPE)) ? (
+      selectedTaskType === CHAT_COMPLETION_TASK_TYPE || selectedTaskType === DEFAULT_TASK_TYPE ? (
         <>
           <EuiTitle size="xxs" data-test-subj="temperature-details-label">
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
