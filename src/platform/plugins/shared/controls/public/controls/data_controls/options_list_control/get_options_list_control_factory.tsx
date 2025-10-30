@@ -234,6 +234,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
               selectedOptions,
               existsSelected,
               exclude,
+              sectionId,
             });
             dataControlManager.internalApi.setOutputFilter(newFilter);
           }

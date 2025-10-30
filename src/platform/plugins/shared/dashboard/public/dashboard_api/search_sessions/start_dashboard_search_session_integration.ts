@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, skip } from 'rxjs';
+import { skip, type BehaviorSubject } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
@@ -24,7 +24,8 @@ export function startDashboardSearchSessionIntegration(
   dashboardApi: DashboardApi,
   dashboardInternalApi: DashboardInternalApi,
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
-  setSearchSessionId: (searchSessionId: string) => void
+  setSearchSessionId: (searchSessionId: string) => void,
+  searchSessionGenerationInProgress$: BehaviorSubject<boolean>
 ) {
   if (!searchSessionSettings) return;
 
