@@ -22,7 +22,11 @@ import {
 import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
 import { testWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/test_workflow_thunk';
 
-export const WorkflowDetailTestModal = () => {
+interface WorkflowDetailTestModalProps {
+  workflowId?: string;
+}
+
+export const WorkflowDetailTestModal = ({ workflowId }: WorkflowDetailTestModalProps) => {
   const dispatch = useDispatch();
   const { notifications } = useKibana().services;
   const { canExecuteWorkflow } = useCapabilities();
@@ -35,12 +39,12 @@ export const WorkflowDetailTestModal = () => {
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>) => {
-      const result = await testWorkflow({ inputs });
+      const result = await testWorkflow({ workflowId, inputs });
       if (result) {
         setSelectedExecution(result.workflowExecutionId);
       }
     },
-    [testWorkflow, setSelectedExecution]
+    [workflowId, testWorkflow, setSelectedExecution]
   );
 
   const closeModal = useCallback(() => {

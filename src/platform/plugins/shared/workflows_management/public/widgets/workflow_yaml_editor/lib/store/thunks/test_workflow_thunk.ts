@@ -14,6 +14,7 @@ import { selectYamlString } from '../selectors';
 import type { RootState } from '../types';
 
 export interface TestWorkflowParams {
+  workflowId?: string;
   inputs: Record<string, unknown>;
 }
 
@@ -27,7 +28,7 @@ export const testWorkflowThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/testWorkflowThunk',
-  async ({ inputs }, { getState, rejectWithValue, extra: { services } }) => {
+  async ({ workflowId, inputs }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     try {
       const yamlString = selectYamlString(getState());
@@ -35,9 +36,18 @@ export const testWorkflowThunk = createAsyncThunk<
         return rejectWithValue('No YAML content to test');
       }
 
+      const requestBody: Record<string, unknown> = {
+        workflowYaml: yamlString,
+        inputs,
+      };
+
+      if (workflowId) {
+        requestBody.workflowId = workflowId;
+      }
+
       // Make the API call to test the workflow
       const response = await http.post<TestWorkflowResponse>(`/api/workflows/test`, {
-        body: JSON.stringify({ workflowYaml: yamlString, inputs }),
+        body: JSON.stringify(requestBody),
       });
 
       // Show success notification
