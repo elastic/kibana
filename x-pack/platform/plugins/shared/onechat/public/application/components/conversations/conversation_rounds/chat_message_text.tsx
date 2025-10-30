@@ -150,7 +150,7 @@ export function ChatMessageText({
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationTagParser,
-        browserToolTagParser(),
+        browserToolTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
