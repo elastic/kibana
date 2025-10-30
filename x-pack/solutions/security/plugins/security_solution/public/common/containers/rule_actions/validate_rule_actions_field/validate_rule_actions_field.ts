@@ -45,8 +45,12 @@ export const validateRuleActionsField =
 
     const errors = [];
     for (const actionItem of value) {
-      const connector = connectors?.find((connector) => connector.id === actionItem.id);
-      const errorsArray = await validateSingleAction(actionItem, actionTypeRegistry, connector);
+      const currentConnector = connectors?.find((connector) => connector.id === actionItem.id);
+      const errorsArray = await validateSingleAction(
+        actionItem,
+        actionTypeRegistry,
+        currentConnector
+      );
 
       if (errorsArray.length) {
         const actionTypeName = getActionTypeName(actionItem.actionTypeId);
