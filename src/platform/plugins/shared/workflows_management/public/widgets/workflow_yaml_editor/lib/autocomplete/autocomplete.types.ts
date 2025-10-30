@@ -29,6 +29,7 @@ export interface AutocompleteContext {
   lineUpToCursor: string;
   lineParseResult: LineParseResult | null;
   contextSchema: z.ZodType;
+  contextScopedToPath: string | null;
   focusedStepInfo: StepInfo | null;
   yamlDocument: Document;
   scalarType: Scalar.Type | null;

@@ -235,7 +235,7 @@ function generateUnionErrorMessage(
 
       const schemaAtPath = getSchemaAtPath(schema, pathString);
 
-      if (schemaAtPath) {
+      if (schemaAtPath.schema) {
         // Check if it's a union schema (might be wrapped in optional, nullable, etc.)
         let unionSchema = schemaAtPath;
 

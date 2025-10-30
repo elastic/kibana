@@ -8,8 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
-import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import type { MinimalWorkflowDetailState } from './autocomplete.types';
 import type { BuildAutocompleteContextParams } from './build_autocomplete_context';
@@ -22,17 +21,6 @@ import { findStepByLine } from '../store/utils/step_finder';
 export function getFakeAutocompleteContextParams(
   yamlContent: string
 ): BuildAutocompleteContextParams {
-  const mockConnectors: ConnectorContractUnion[] = [
-    {
-      type: 'console',
-      paramsSchema: z.object({
-        message: z.string(),
-      }),
-      outputSchema: z.object({
-        message: z.string(),
-      }),
-    },
-  ];
   const connectorTypes: Record<string, ConnectorTypeInfo> = {
     console: {
       actionTypeId: 'console',
@@ -51,8 +39,7 @@ export function getFakeAutocompleteContextParams(
   const mockModel = createFakeMonacoModel(cleanedYaml, cursorOffset);
   const position = mockModel.getPositionAt(cursorOffset);
   const triggerCharacter = cleanedYaml.slice(cursorOffset - 1, cursorOffset);
-  const looseSchema = generateYamlSchemaFromConnectors(mockConnectors, true);
-  const computedData = performComputation(cleanedYaml, looseSchema);
+  const computedData = performComputation(cleanedYaml);
   const mockEditorState: MinimalWorkflowDetailState = {
     yamlString: cleanedYaml,
     focusedStepId: computedData?.workflowLookup

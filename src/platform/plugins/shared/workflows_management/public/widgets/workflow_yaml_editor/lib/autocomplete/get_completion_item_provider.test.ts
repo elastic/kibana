@@ -274,6 +274,66 @@ steps:
       expect(suggestions.map((s) => s.label)).toEqual(expect.arrayContaining(['apiUrl']));
     });
 
+    it('should autocomplete incomplete key in complete mustache expression', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+  apiKey: "secret-key"
+  timeout: 10
+  retryCount: 10
+steps:
+  - name: step0
+    type: console
+    with:
+      message: "{{ consts.a|<- }}"
+`.trim();
+
+      const suggestions = await getSuggestions(yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey']);
+    });
+
+    it('should not give suggestions when path does not exist in schema and path ends with dot', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+  apiKey: "secret-key"
+  timeout: 10
+  retryCount: 10
+steps:
+  - name: step0
+    type: console
+    with:  
+      message: "{{ consts.docs.|<- }}"
+`.trim();
+
+      const suggestions = await getSuggestions(yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual([]);
+    });
+
+    it('should not give suggestions when path does not exist in schema', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+  apiKey: "secret-key"
+  timeout: 10
+  retryCount: 10
+steps:
+  - name: step0
+    type: console
+    with: 
+      message: "{{ consts.docs.a|<- }}"
+`.trim();
+
+      const suggestions = await getSuggestions(yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual([]);
+    });
+
     it('should provide completions with brackets for keys in kebab-case and use single quotes when inside double quoted string', async () => {
       const yamlContent = `
 version: "1"

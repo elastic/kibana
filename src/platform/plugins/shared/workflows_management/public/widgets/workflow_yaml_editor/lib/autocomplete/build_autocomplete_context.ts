@@ -90,6 +90,7 @@ export function buildAutocompleteContext({
   const shouldBeQuoted = scalarType === null || scalarType === 'PLAIN';
 
   let contextSchema: z.ZodType = DynamicStepContextSchema;
+  let contextScopedToPath: string | null = null;
   const lineUpToCursor = line.substring(0, position.column - 1);
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
@@ -98,9 +99,14 @@ export function buildAutocompleteContext({
   }
 
   if (parseResult?.fullKey) {
-    const schemaAtPath = getSchemaAtPath(contextSchema, parseResult.fullKey, { partial: true });
+    const { schema: schemaAtPath, scopedToPath } = getSchemaAtPath(
+      contextSchema,
+      parseResult.fullKey,
+      { partial: true }
+    );
     if (schemaAtPath) {
       contextSchema = schemaAtPath;
+      contextScopedToPath = scopedToPath;
     }
   }
 
@@ -123,6 +129,7 @@ export function buildAutocompleteContext({
 
     // context
     contextSchema,
+    contextScopedToPath,
     yamlDocument,
     scalarType,
 

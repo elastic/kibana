@@ -26,6 +26,7 @@ import { getVariableSuggestions } from './variable/get_variable_suggestions';
 export function getSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
 ): monaco.languages.CompletionItem[] {
+  // console.log('getSuggestions', autocompleteContext);
   const { lineParseResult } = autocompleteContext;
 
   // Check if we're in a scheduled trigger's with block for RRule suggestions
@@ -41,6 +42,7 @@ export function getSuggestions(
   // Handle completions inside {{ }} or after @ triggers
   if (
     lineParseResult?.matchType === 'variable-unfinished' ||
+    lineParseResult?.matchType === 'variable-complete' ||
     lineParseResult?.matchType === 'at' ||
     lineParseResult?.matchType === 'foreach-variable'
   ) {

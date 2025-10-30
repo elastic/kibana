@@ -19,6 +19,7 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
     triggerCharacter,
     range,
     contextSchema,
+    contextScopedToPath,
     scalarType,
     shouldBeQuoted,
     shouldUseCurlyBraces,
@@ -30,34 +31,69 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
   }
 
   const suggestions: monaco.languages.CompletionItem[] = [];
+  const currentSchema: z.ZodType | null = contextSchema;
 
-  // We're inside a variable expression, provide context-based completions
-  if (contextSchema instanceof z.ZodObject) {
-    const contextKeys = Object.keys(contextSchema.shape);
+  // The contextSchema passed in is already scoped to the appropriate level
+  // based on the cursor position in the YAML. We don't need to navigate
+  // through the path segments because buildAutocompleteContext has already
+  // done that for us.
 
-    // Filter based on what the user has typed so far
-    const filteredKeys =
-      lineParseResult.lastPathSegment !== null && lineParseResult.fullKey.length > 0
-        ? contextKeys.filter((key) => key.startsWith(lineParseResult.lastPathSegment ?? ''))
-        : contextKeys;
+  // Check if we're trying to access a non-existent path
+  if (lineParseResult.fullKey && contextScopedToPath !== null) {
+    const fullKeySegments = lineParseResult.fullKey.split('.');
+    const scopedPathSegments = contextScopedToPath.split('.');
 
-    for (const key of filteredKeys) {
-      const keySchema = contextSchema.shape[key];
-      const propertyTypeName = getDetailedTypeDescription(keySchema, { singleLine: true });
+    // If scopedToPath is empty string, it means we're at the root
+    const scopedSegmentCount = contextScopedToPath === '' ? 0 : scopedPathSegments.length;
 
-      suggestions.push(
-        wrapAsMonacoSuggestion(
-          key,
-          triggerCharacter,
-          range,
-          scalarType,
-          shouldBeQuoted,
-          propertyTypeName,
-          keySchema?.description,
-          shouldUseCurlyBraces
-        )
-      );
+    // Check if we're accessing a path that doesn't exist
+    // This happens when the fullKey has more segments than the scoped path,
+    // and we're not just typing the next valid segment
+    const segmentDiff = fullKeySegments.length - scopedSegmentCount;
+
+    // If the difference is > 1, we're definitely in a non-existent path
+    // e.g., consts.docs.a where docs doesn't exist (diff would be 2)
+    // If the difference is 1 and we're not currently typing (lastPathSegment is null),
+    // it means we just typed a dot after a non-existent path
+    // e.g., consts.docs. where docs doesn't exist
+    if (segmentDiff > 1 || (segmentDiff === 1 && lineParseResult.lastPathSegment === null)) {
+      return [];
     }
+  }
+
+  if (
+    !(currentSchema instanceof z.ZodObject) ||
+    !currentSchema.shape ||
+    Object.keys(currentSchema.shape).length === 0
+  ) {
+    return [];
+  }
+
+  // Get all keys from the current schema
+  const keys = Object.keys(currentSchema.shape);
+
+  // Filter keys based on lastPathSegment if it exists
+  const filteredKeys =
+    lineParseResult.lastPathSegment !== null
+      ? keys.filter((key) => key.startsWith(lineParseResult.lastPathSegment ?? ''))
+      : keys;
+
+  for (const key of filteredKeys) {
+    const keySchema = currentSchema.shape[key];
+    const propertyTypeName = getDetailedTypeDescription(keySchema, { singleLine: true });
+
+    suggestions.push(
+      wrapAsMonacoSuggestion(
+        key,
+        triggerCharacter,
+        range,
+        scalarType,
+        shouldBeQuoted,
+        propertyTypeName,
+        keySchema?.description,
+        shouldUseCurlyBraces
+      )
+    );
   }
 
   return suggestions;

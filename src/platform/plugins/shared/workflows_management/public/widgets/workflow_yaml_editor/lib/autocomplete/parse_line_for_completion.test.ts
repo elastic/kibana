@@ -73,6 +73,12 @@ describe('parseLineForCompletion', () => {
       expect(result?.fullKey).toBe('consts.apiUrl');
     });
 
+    it('should parse incomplete key in complete mustache expression', () => {
+      const result = parseLineForCompletion('message: "{{ consts.a }}"');
+      expect(result?.matchType).toBe('variable-complete');
+      expect(result?.fullKey).toBe('consts.a');
+    });
+
     it('should parse last complete mustache when multiple present', () => {
       const result = parseLineForCompletion('url: {{ consts.baseUrl }}/users/{{ steps.getUser');
       expect(result?.matchType).toBe('variable-unfinished');

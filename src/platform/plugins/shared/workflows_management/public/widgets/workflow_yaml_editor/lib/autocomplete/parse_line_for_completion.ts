@@ -228,6 +228,7 @@ export function isVariableLineParseResult(
 ): lineParseResult is VariableLineParseResult {
   return (
     lineParseResult.matchType === 'variable-unfinished' ||
+    lineParseResult.matchType === 'variable-complete' ||
     lineParseResult.matchType === 'at' ||
     lineParseResult.matchType === 'foreach-variable'
   );

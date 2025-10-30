@@ -26,6 +26,7 @@ export function getCompletionItemProvider(
     provideCompletionItems: (model, position, completionContext) => {
       const editorState = getState();
       if (!editorState) {
+        // console.log('no editor state');
         return {
           suggestions: [],
           incomplete: false,
@@ -38,6 +39,7 @@ export function getCompletionItemProvider(
         completionContext,
       });
       if (!autocompleteContext) {
+        // console.log('no autocomplete context');
         return {
           suggestions: [],
           incomplete: false,
