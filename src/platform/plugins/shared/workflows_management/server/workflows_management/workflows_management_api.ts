@@ -134,7 +134,7 @@ export class WorkflowsManagementApi {
   ): Promise<WorkflowDetailDto> {
     // Parse and update the YAML to change the name
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
-      { loose: true },
+      { loose: false },
       spaceId,
       request
     );
@@ -207,7 +207,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<string> {
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
-      { loose: true },
+      { loose: false },
       spaceId,
       request
     );
@@ -261,7 +261,7 @@ export class WorkflowsManagementApi {
   ): Promise<string> {
     const parsedYaml = parseWorkflowYamlToJSON(
       workflowYaml,
-      await this.workflowsService.getWorkflowZodSchema({ loose: true }, spaceId, request)
+      await this.workflowsService.getWorkflowZodSchema({ loose: false }, spaceId, request)
     );
 
     if (parsedYaml.error) {
@@ -388,7 +388,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<JsonSchema7Type> {
-    const zodSchema = await this.workflowsService.getWorkflowZodSchema({ loose }, spaceId, request);
+    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
+      { loose: false },
+      spaceId,
+      request
+    );
     return getJsonSchemaFromYamlSchema(zodSchema);
   }
 }

@@ -19,9 +19,10 @@ import { performComputation } from '../store/utils/computation';
 import { findStepByLine } from '../store/utils/step_finder';
 
 export function getFakeAutocompleteContextParams(
-  yamlContent: string
+  yamlContent: string,
+  customConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): BuildAutocompleteContextParams {
-  const connectorTypes: Record<string, ConnectorTypeInfo> = {
+  const defaultConnectorTypes: Record<string, ConnectorTypeInfo> = {
     console: {
       actionTypeId: 'console',
       displayName: 'Console',
@@ -33,6 +34,8 @@ export function getFakeAutocompleteContextParams(
       enabledInLicense: true,
     },
   };
+
+  const connectorTypes = customConnectorTypes || defaultConnectorTypes;
 
   const cursorOffset = yamlContent.indexOf('|<-');
   const cleanedYaml = yamlContent.replace('|<-', '');
