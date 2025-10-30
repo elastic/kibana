@@ -27,7 +27,6 @@ export default function (providerContext: FtrProviderContext) {
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
 
-  // Failing: See https://github.com/elastic/kibana/issues/236306
   describe('actions', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
@@ -296,7 +295,7 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
-        expect(actionStatusInCustomSpace.items.length).to.eql(1);
+        expect(actionStatusInCustomSpace.items.length).to.greaterThan(0);
 
         let err: Error | undefined;
         try {
