@@ -691,7 +691,7 @@ steps:
     with:
       message: |-
         {%- liquid
-\t\t\t|<-`;
+			|<-`;
 
       const result = await getSuggestions(yamlContent);
 
@@ -713,7 +713,7 @@ steps:
     with:
       message: |-
         {%- liquid
-\t  |<-`;
+	  |<-`;
 
       const result = await getSuggestions(yamlContent);
 
@@ -768,6 +768,83 @@ steps:
       const labels = result.map((s) => s.label) || [];
       expect(labels).not.toContain('assign');
       expect(labels).not.toContain('echo');
+    });
+  });
+
+  describe('Integration tests for with block suggestions', () => {
+    // Note: These tests are simplified for now since we don't have dynamic connector types
+    // available in the test environment. In a real environment, these would show
+    // connector-specific parameter suggestions.
+
+    it('should handle with blocks gracefully without dynamic connectors', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+steps:
+  - name: send-email
+    type: email
+    connector_id: email-1
+    with:
+      |<-
+`.trim();
+
+      const suggestions = await getSuggestions(yamlContent);
+
+      // Without dynamic connector types, we expect no suggestions
+      // This is expected behavior in test environment
+      expect(suggestions).toEqual([]);
+    });
+
+    it('should provide value suggestions when typing after colon', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+steps:
+  - name: set-var
+    type: set_variable
+    with:
+      enabled: |<-
+`.trim();
+
+      const suggestions = await getSuggestions(yamlContent);
+
+      // Should provide boolean value suggestions
+      expect(suggestions.map((s) => s.label)).toEqual(expect.arrayContaining(['true', 'false']));
+    });
+
+    it('should not provide suggestions when connector type is not found', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+steps:
+  - name: unknown-step
+    type: unknown_connector
+    with:
+      |<-
+`.trim();
+
+      const suggestions = await getSuggestions(yamlContent);
+
+      // Should not provide any suggestions for unknown connector type
+      expect(suggestions).toHaveLength(0);
+    });
+
+    it('should not provide suggestions when value is being typed after colon with content', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+steps:
+  - name: send-email
+    type: email
+    connector_id: email-1
+    with:
+      subject: Test |<-
+`.trim();
+
+      const suggestions = await getSuggestions(yamlContent);
+
+      // Should not provide parameter suggestions when typing a value
+      expect(suggestions).toEqual([]);
     });
   });
 });
