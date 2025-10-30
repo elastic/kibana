@@ -32,6 +32,13 @@ export const ORG_ID_LABEL = i18n.translate(
   }
 );
 
+export const HEADERS_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.addHeadersTextFieldLabel',
+  {
+    defaultMessage: 'Add headers',
+  }
+);
+
 export const PROJECT_ID_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.projectIdTextFieldLabel',
   {

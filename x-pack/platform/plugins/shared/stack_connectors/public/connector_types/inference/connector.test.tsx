@@ -6,13 +6,28 @@
  */
 
 import React from 'react';
-
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
+
+const history = createMemoryHistory({
+  initialEntries: ['/'],
+});
+
+const renderConnector = (connector: ConnectorFormSchema, onSubmit?: any) =>
+  render(
+    <Router history={history}>
+      <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    </Router>
+  );
 
 const providersSchemas = [
   {
@@ -785,11 +800,7 @@ const googleaistudioConnector = {
 
 describe('ConnectorFields renders', () => {
   test('openai provider fields are rendered', () => {
-    const { getAllByTestId } = render(
-      <ConnectorFormTestProvider connector={openAiConnector}>
-        <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
-      </ConnectorFormTestProvider>
-    );
+    const { getAllByTestId } = renderConnector(openAiConnector);
     expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
     expect(getAllByTestId('provider-select')[0]).toHaveValue('OpenAI');
 
@@ -800,11 +811,7 @@ describe('ConnectorFields renders', () => {
   });
 
   test('googleaistudio provider fields are rendered', () => {
-    const { getAllByTestId } = render(
-      <ConnectorFormTestProvider connector={googleaistudioConnector}>
-        <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
-      </ConnectorFormTestProvider>
-    );
+    const { getAllByTestId } = renderConnector(googleaistudioConnector);
     expect(getAllByTestId('api_key-password')[0]).toBeInTheDocument();
     expect(getAllByTestId('api_key-password')[0]).toHaveValue('');
     expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
@@ -824,11 +831,7 @@ describe('ConnectorFields renders', () => {
     });
 
     it('connector validation succeeds when connector config is valid', async () => {
-      render(
-        <ConnectorFormTestProvider connector={openAiConnector} onSubmit={onSubmit}>
-          <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
-        </ConnectorFormTestProvider>
-      );
+      renderConnector(openAiConnector, onSubmit);
 
       await userEvent.type(
         screen.getByTestId('api_key-password'),
@@ -867,12 +870,7 @@ describe('ConnectorFields renders', () => {
           },
         },
       };
-
-      render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
-          <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
-        </ConnectorFormTestProvider>
-      );
+      renderConnector(connector, onSubmit);
       await userEvent.type(
         screen.getByTestId('api_key-password'),
         '{selectall}{backspace}goodpassword'
@@ -893,11 +891,7 @@ describe('ConnectorFields renders', () => {
         },
       };
 
-      render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
-          <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
-        </ConnectorFormTestProvider>
-      );
+      renderConnector(connector, onSubmit);
 
       await userEvent.type(screen.getByTestId('api_key-password'), `{selectall}{backspace}`);
 

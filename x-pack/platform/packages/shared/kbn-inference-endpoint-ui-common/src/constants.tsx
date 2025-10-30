@@ -34,6 +34,12 @@ export enum ServiceProviderKeys {
   contextualai = 'contextualai',
 }
 
+export const ServiceProviderKeyMap: Record<string, string> = {
+  '.bedrock': ServiceProviderKeys.amazonbedrock,
+  '.gemini': ServiceProviderKeys.googlevertexai,
+  '.gen-ai': ServiceProviderKeys.openai,
+};
+
 export const GEMINI_REGION_DOC_LINK = (
   <EuiLink
     data-test-subj="gemini-vertexai-api-doc"

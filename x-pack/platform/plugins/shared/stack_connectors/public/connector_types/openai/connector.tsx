@@ -309,6 +309,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                 ))}
                 <EuiSpacer size="m" />
                 <EuiButtonEmpty
+                  aria-label={i18n.HEADERS_LABEL}
                   iconType="plusInCircle"
                   onClick={addItem}
                   data-test-subj="openAIAddHeaderButton"
