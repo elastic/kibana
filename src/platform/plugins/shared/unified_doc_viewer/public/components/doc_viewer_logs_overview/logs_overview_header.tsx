@@ -50,7 +50,8 @@ export function LogsOverviewHeader({
   onRemoveColumn,
   renderFlyoutStreamProcessingLink,
 }: LogsOverviewHeaderProps) {
-  const hasLogLevel = Boolean(formattedDoc[fieldConstants.LOG_LEVEL_FIELD]);
+  const { field: logLevelField, value: logLevelValue } = getLogLevelFieldWithFallback(formattedDoc);
+  const hasLogLevel = Boolean(logLevelValue);
   const hasTimestamp = Boolean(formattedDoc[fieldConstants.TIMESTAMP_FIELD]);
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
     includeFormattedValue: true,
@@ -72,12 +73,9 @@ export function LogsOverviewHeader({
       {hasMessageField &&
         renderFlyoutStreamProcessingLink &&
         renderFlyoutStreamProcessingLink({ doc: hit })}
-      {formattedDoc[fieldConstants.LOG_LEVEL_FIELD] && (
-        <HoverActionPopover
-          value={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]}
-          field={fieldConstants.LOG_LEVEL_FIELD}
-        >
-          <LogLevel level={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]} />
+      {hasLogLevel && (
+        <HoverActionPopover value={logLevelValue} field={logLevelField}>
+          <LogLevel level={logLevelValue} />
         </HoverActionPopover>
       )}
       {hasTimestamp && <Timestamp timestamp={formattedDoc[fieldConstants.TIMESTAMP_FIELD]} />}

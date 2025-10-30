@@ -61,8 +61,21 @@ export function getLogDocumentOverview(
   const dataset = formatField(fieldConstants.DATASTREAM_DATASET_FIELD);
   const agentName = formatField(fieldConstants.AGENT_NAME_FIELD);
 
+  // apm  log fields
+  const errorLogLevel = formatField(fieldConstants.ERROR_LOG_LEVEL_FIELD);
+  const processorEvent = formatField(fieldConstants.PROCESSOR_EVENT_FIELD);
+
+  // otel log fields
+  const eventName = formatField(fieldConstants.OTEL_EVENT_NAME_FIELD);
+
+  // exception message
+  const exceptionMessage = formatField(fieldConstants.EXCEPTION_MESSAGE_FIELD);
+  const otelExpectionMessage = formatField(fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE);
+  const otelExpectionStackTrace = formatField(fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_STACKTRACE);
+
   return {
     [fieldConstants.LOG_LEVEL_FIELD]: level,
+    [fieldConstants.ERROR_LOG_LEVEL_FIELD]: errorLogLevel,
     [fieldConstants.TIMESTAMP_FIELD]: timestamp,
     [fieldConstants.MESSAGE_FIELD]: message,
     [fieldConstants.ERROR_MESSAGE_FIELD]: errorMessage,
