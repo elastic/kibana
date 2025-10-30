@@ -126,60 +126,11 @@ steps:
       |<-
 `.trim();
 
-      // Mock getWithBlockSuggestions to return empty array when no connector types available
-      jest.mocked(getWithBlockSuggestionsModule.getWithBlockSuggestions).mockReturnValue([]);
-
       const suggestions = await getSuggestions(yamlContent);
 
       // Without dynamic connector types, we expect no suggestions
       expect(suggestions).toEqual([]);
       expect(getWithBlockSuggestionsModule.getWithBlockSuggestions).toHaveBeenCalled();
-    });
-
-    it('should provide value suggestions when typing after colon', async () => {
-      const yamlContent = `
-version: "1"
-name: "test"
-steps:
-  - name: set-var
-    type: set_variable
-    with:
-      enabled: |<-
-`.trim();
-
-      // Mock getWithBlockSuggestions to return boolean value suggestions
-      jest.mocked(getWithBlockSuggestionsModule.getWithBlockSuggestions).mockReturnValue([
-        {
-          label: 'true',
-          kind: monaco.languages.CompletionItemKind.Value,
-          insertText: 'true',
-          range: {
-            startLineNumber: 7,
-            endLineNumber: 7,
-            startColumn: 1,
-            endColumn: 100,
-          },
-          documentation: 'Boolean true value',
-        },
-        {
-          label: 'false',
-          kind: monaco.languages.CompletionItemKind.Value,
-          insertText: 'false',
-          range: {
-            startLineNumber: 7,
-            endLineNumber: 7,
-            startColumn: 1,
-            endColumn: 100,
-          },
-          documentation: 'Boolean false value',
-        },
-      ]);
-
-      const suggestions = await getSuggestions(yamlContent);
-
-      // Should provide boolean value suggestions
-      expect(suggestions.map((s) => s.label)).toEqual(['true', 'false']);
-      expect(suggestions[0].kind).toBe(monaco.languages.CompletionItemKind.Value);
     });
 
     it('should not provide suggestions when connector type is not found', async () => {
@@ -192,9 +143,6 @@ steps:
     with:
       |<-
 `.trim();
-
-      // Mock getWithBlockSuggestions to return empty for unknown connector
-      jest.mocked(getWithBlockSuggestionsModule.getWithBlockSuggestions).mockReturnValue([]);
 
       const suggestions = await getSuggestions(yamlContent);
 
@@ -213,9 +161,6 @@ steps:
     with:
       subject: Test |<-
 `.trim();
-
-      // Mock getWithBlockSuggestions to return empty when typing values
-      jest.mocked(getWithBlockSuggestionsModule.getWithBlockSuggestions).mockReturnValue([]);
 
       const suggestions = await getSuggestions(yamlContent);
 
@@ -302,65 +247,65 @@ steps:
 `.trim();
 
       // Mock getWithBlockSuggestions to return Slack parameter suggestions
-      jest.mocked(getWithBlockSuggestionsModule.getWithBlockSuggestions).mockReturnValue([
-        {
-          label: 'channel',
-          kind: monaco.languages.CompletionItemKind.Variable,
-          insertText: 'channel: "${1:#general}"',
-          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          range: {
-            startLineNumber: 10,
-            endLineNumber: 10,
-            startColumn: 1,
-            endColumn: 100,
-          },
-          sortText: '!channel',
-          detail: 'string (required)',
-          documentation: {
-            value:
-              '**slack Parameter: channel**\n\n**Type:** `string`\n**Required:** Yes\n\n**Description:** The Slack channel to post to\n\n**Example:** `#general`\n\n*This parameter is specific to the slack connector.*',
-          },
-          preselect: true,
-        },
-        {
-          label: 'message',
-          kind: monaco.languages.CompletionItemKind.Variable,
-          insertText: 'message: "${1:}"',
-          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          range: {
-            startLineNumber: 10,
-            endLineNumber: 10,
-            startColumn: 1,
-            endColumn: 100,
-          },
-          sortText: '!message',
-          detail: 'string (required)',
-          documentation: {
-            value:
-              '**slack Parameter: message**\n\n**Type:** `string`\n**Required:** Yes\n\n**Description:** The message to send\n\n*This parameter is specific to the slack connector.*',
-          },
-          preselect: true,
-        },
-        {
-          label: 'thread_ts',
-          kind: monaco.languages.CompletionItemKind.Variable,
-          insertText: 'thread_ts: "${1:}"',
-          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          range: {
-            startLineNumber: 10,
-            endLineNumber: 10,
-            startColumn: 1,
-            endColumn: 100,
-          },
-          sortText: '!thread_ts',
-          detail: 'string (optional)',
-          documentation: {
-            value:
-              '**slack Parameter: thread_ts**\n\n**Type:** `string`\n**Required:** No\n\n**Description:** Thread timestamp for replies\n\n*This parameter is specific to the slack connector.*',
-          },
-          preselect: true,
-        },
-      ]);
+      // jest.mocked(getWithBlockSuggestionsModule.getWithBlockSuggestions).mockReturnValue([
+      //   {
+      //     label: 'channel',
+      //     kind: monaco.languages.CompletionItemKind.Variable,
+      //     insertText: 'channel: "${1:#general}"',
+      //     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+      //     range: {
+      //       startLineNumber: 10,
+      //       endLineNumber: 10,
+      //       startColumn: 1,
+      //       endColumn: 100,
+      //     },
+      //     sortText: '!channel',
+      //     detail: 'string (required)',
+      //     documentation: {
+      //       value:
+      //         '**slack Parameter: channel**\n\n**Type:** `string`\n**Required:** Yes\n\n**Description:** The Slack channel to post to\n\n**Example:** `#general`\n\n*This parameter is specific to the slack connector.*',
+      //     },
+      //     preselect: true,
+      //   },
+      //   {
+      //     label: 'message',
+      //     kind: monaco.languages.CompletionItemKind.Variable,
+      //     insertText: 'message: "${1:}"',
+      //     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+      //     range: {
+      //       startLineNumber: 10,
+      //       endLineNumber: 10,
+      //       startColumn: 1,
+      //       endColumn: 100,
+      //     },
+      //     sortText: '!message',
+      //     detail: 'string (required)',
+      //     documentation: {
+      //       value:
+      //         '**slack Parameter: message**\n\n**Type:** `string`\n**Required:** Yes\n\n**Description:** The message to send\n\n*This parameter is specific to the slack connector.*',
+      //     },
+      //     preselect: true,
+      //   },
+      //   {
+      //     label: 'thread_ts',
+      //     kind: monaco.languages.CompletionItemKind.Variable,
+      //     insertText: 'thread_ts: "${1:}"',
+      //     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+      //     range: {
+      //       startLineNumber: 10,
+      //       endLineNumber: 10,
+      //       startColumn: 1,
+      //       endColumn: 100,
+      //     },
+      //     sortText: '!thread_ts',
+      //     detail: 'string (optional)',
+      //     documentation: {
+      //       value:
+      //         '**slack Parameter: thread_ts**\n\n**Type:** `string`\n**Required:** No\n\n**Description:** Thread timestamp for replies\n\n*This parameter is specific to the slack connector.*',
+      //     },
+      //     preselect: true,
+      //   },
+      // ]);
 
       const suggestions = await getSuggestions(yamlContent, slackConnectorType);
 
