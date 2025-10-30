@@ -81143,6 +81143,9 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
         - type: object
           properties:
+            '@timestamp':
+              format: date-time
+              type: string
             event:
               type: object
               properties:
