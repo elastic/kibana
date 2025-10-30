@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
 
-  describe.only('discover ES|QL embeddable', () => {
+  describe('discover ES|QL embeddable', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
