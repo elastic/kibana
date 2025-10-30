@@ -32,6 +32,8 @@ import { registerSearchEmbeddable } from './react_embeddables/search/register_se
 import { setKibanaServices } from './kibana_services';
 import { setupBookEmbeddable } from './react_embeddables/saved_book/setup_book_embeddable';
 import { registerSearchPanelAction } from './react_embeddables/search/register_search_panel_action';
+import { registerDirectFilterEmbeddable } from './react_embeddables/direct_filter/register_direct_filter_embeddable';
+import { ADD_DIRECT_FILTER_ID } from './react_embeddables/direct_filter/constants';
 
 export interface SetupDeps {
   contentManagement: ContentManagementPublicSetup;
@@ -60,6 +62,9 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     setupApp(core, developerExamples);
 
     const startServicesPromise = core.getStartServices();
+    const startDepsPromise = new Promise<StartDeps>((resolve) =>
+      startServicesPromise.then(([_, startDeps]) => resolve(startDeps))
+    );
 
     embeddable.registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
@@ -79,10 +84,8 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     setupBookEmbeddable(core, embeddable, contentManagement);
 
-    registerSearchEmbeddable(
-      embeddable,
-      new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
-    );
+    registerDirectFilterEmbeddable(embeddable, startDepsPromise);
+    registerSearchEmbeddable(embeddable, startDepsPromise);
   }
 
   public start(core: CoreStart, deps: StartDeps) {
@@ -97,6 +100,14 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     registerFieldListPanelPlacementSetting(deps.dashboard);
     registerSearchPanelAction(deps.uiActions);
+
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DIRECT_FILTER_ID, async () => {
+      const { createDirectFilterAction } = await import(
+        './react_embeddables/direct_filter/create_direct_filter_action'
+      );
+      return createDirectFilterAction;
+    });
+
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
       const { createDataTableAction } = await import(
         './react_embeddables/data_table/create_data_table_action'

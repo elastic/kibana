@@ -10,8 +10,10 @@
 import {
   registerReactEmbeddableFactory,
   getReactEmbeddableFactory,
+  getComposableFetchContextFactory,
+  registerComposableFetchContextFactory,
 } from './react_embeddable_registry';
-import type { EmbeddableFactory } from './types';
+import type { ComposableFetchContextFactory, EmbeddableFactory } from './types';
 
 describe('embeddable registry', () => {
   const getTestEmbeddableFactory = () =>
@@ -19,6 +21,12 @@ describe('embeddable registry', () => {
       type: 'test',
       buildEmbeddable: jest.fn(),
     } as EmbeddableFactory);
+
+  const getTestComposableContextFactory = () =>
+    Promise.resolve({
+      type: 'test',
+      buildFetchContext: jest.fn(),
+    } as ComposableFetchContextFactory);
 
   it('throws an error if requested embeddable factory type is not registered', () => {
     expect(() => getReactEmbeddableFactory('notRegistered')).rejects.toThrow(
@@ -30,5 +38,17 @@ describe('embeddable registry', () => {
     const returnedFactory = getTestEmbeddableFactory();
     registerReactEmbeddableFactory('test', getTestEmbeddableFactory);
     expect(getReactEmbeddableFactory('test')).toEqual(returnedFactory);
+  });
+
+  it('throws an error if requested composable context factory type is not registered', () => {
+    expect(() => getComposableFetchContextFactory('notRegistered')).rejects.toThrow(
+      'No composable fetch context factory found for type: notRegistered'
+    );
+  });
+
+  it('can register and get a composabble context factory', () => {
+    const returnedFactory = getTestComposableContextFactory();
+    registerComposableFetchContextFactory('test', getTestComposableContextFactory);
+    expect(getComposableFetchContextFactory('test')).toEqual(returnedFactory);
   });
 });

@@ -124,8 +124,8 @@ export const initializeComposableFetchContextManager = (
       map((fetchContextMap) =>
         Object.values(fetchContextMap).reduce(
           (acc, fetchContext) => {
-            acc.filters!.concat(fetchContext.filters ?? []);
-            acc.esqlVariables!.concat(fetchContext.esqlVariables ?? []);
+            acc.filters = acc.filters!.concat(fetchContext.filters ?? []);
+            acc.esqlVariables = acc.esqlVariables!.concat(fetchContext.esqlVariables ?? []);
 
             // There should only ever be one time slice. In the event there are more, the last takes precedence.
             if (fetchContext.timeSlice) acc.timeSlice = fetchContext.timeSlice;

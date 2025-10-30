@@ -91,11 +91,17 @@ export interface EmbeddableFactory<
 
 export interface ComposableFetchContextFactory<SerializedState extends object = object> {
   /**
+   * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type
+   * to find this factory.
+   */
+  type: string;
+  /**
    * An optional async function that takes the current serialized state and an optional API and returns a
    * fetchContext. This allows parent APIs to compose fetch context from their children before any fetches
    * are begun, and regardless of API creation.
    */
   buildFetchContext: (
-    serializedState: SerializedPanelState<SerializedState>
+    serializedState: SerializedPanelState<SerializedState>,
+    parentApi?: unknown
   ) => Promise<ComposableFetchContext>;
 }
