@@ -24,7 +24,6 @@ import {
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
-import { getSerializedState } from './get_serialized_state';
 import { initializeLayoutManager } from './layout_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
@@ -131,8 +130,7 @@ export function getDashboardApi({
 
     return {
       dashboardState,
-      controlGroupReferences,
-      panelReferences: panelReferences ?? [],
+      references: [...(controlGroupReferences ?? []), ...(panelReferences ?? [])],
     };
   }
 
@@ -168,14 +166,28 @@ export function getDashboardApi({
       unifiedSearchManager.internalApi.controlGroupReload$,
       unifiedSearchManager.internalApi.panelsReload$
     ).pipe(debounceTime(0)),
-    getSerializedState: () => getSerializedState(getState()),
+    getSerializedState: () => {
+      const { dashboardState, references } = getState();
+      return {
+        attributes: dashboardState,
+        references,
+      };
+    },
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
+
+      const { description, tags, timeRestore, title } = settingsManager.api.getSettings();
       const saveResult = await openSaveModal({
+        description,
         isManaged,
         lastSavedId: savedObjectId$.value,
+        serializeState: getState,
+        setTimeRestore: (newTimeRestore: boolean) =>
+          settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
+        tags,
+        timeRestore,
+        title,
         viewMode: viewModeManager.api.viewMode$.value,
-        ...getState(),
       });
 
       if (!saveResult || saveResult.error) {
@@ -191,7 +203,6 @@ export function getDashboardApi({
           hidePanelTitles: settings.hidePanelTitles ?? false,
           description: saveResult.savedState.description,
           tags: saveResult.savedState.tags,
-          timeRestore: saveResult.savedState.timeRestore,
           title: saveResult.savedState.title,
         });
         savedObjectId$.next(saveResult.id);
@@ -201,11 +212,10 @@ export function getDashboardApi({
     },
     runQuickSave: async () => {
       if (isManaged) return;
-      const { controlGroupReferences, dashboardState, panelReferences } = getState();
+      const { dashboardState, references } = getState();
       const saveResult = await getDashboardContentManagementService().saveDashboardState({
-        controlGroupReferences,
         dashboardState,
-        panelReferences,
+        references,
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
       });
