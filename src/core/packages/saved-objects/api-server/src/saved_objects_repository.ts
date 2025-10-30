@@ -8,6 +8,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsRawDocSource } from '..';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -54,6 +55,8 @@ import type {
   SavedObjectsChangeAccessModeOptions,
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
 } from './apis';
 
 /**
@@ -181,6 +184,17 @@ export interface ISavedObjectsRepository {
     options: SavedObjectsFindOptions,
     internalOptions?: SavedObjectsFindInternalOptions
   ): Promise<SavedObjectsFindResponse<T, A>>;
+
+  /**
+   * Performs a raw search against the saved objects indices, returning the raw Elasticsearch response
+   * @param options {@link SavedObjectsSearchOptions} - options for the search operation
+   * @returns the {@link SavedObjectsSearchResponse}
+   *
+   * @deprecated This method is experimental, please do not adopt it for production use cases yet!
+   */
+  search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
+    options: SavedObjectsSearchOptions
+  ): Promise<SavedObjectsSearchResponse<T, A>>;
 
   /**
    * Returns an array of objects by id

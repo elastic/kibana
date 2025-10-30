@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin_mock';
-import { WorkflowRunFixture } from '../workflow_run_fixture';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import { ExecutionStatus } from '@kbn/workflows';
+import { FakeConnectors } from '../mocks/actions_plugin.mock';
+import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow with wait step', () => {
   let duration: string;
@@ -97,10 +97,10 @@ steps:
         workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime());
 
-      expect(allStepExecutions.length).toBe(3);
-      expect(allStepExecutions[0].stepId).toBe('firstConnectorStep');
-      expect(allStepExecutions[1].stepId).toBe('waitStep');
-      expect(allStepExecutions[2].stepId).toBe('lastConnectorStep');
+      expect(allStepExecutions.length).toBe(4);
+      expect(allStepExecutions[1].stepId).toBe('firstConnectorStep');
+      expect(allStepExecutions[2].stepId).toBe('waitStep');
+      expect(allStepExecutions[3].stepId).toBe('lastConnectorStep');
     });
 
     it('should have correct workflow duration', async () => {

@@ -9,11 +9,11 @@
 
 import { registerPostRunWorkflowRoute } from './post_run_workflow';
 import {
-  mockLogger,
-  createMockRouterInstance,
-  createSpacesMock,
-  createMockWorkflowsApi,
   createMockResponse,
+  createMockRouterInstance,
+  createMockWorkflowsApi,
+  createSpacesMock,
+  mockLogger,
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
@@ -27,42 +27,6 @@ describe('POST /api/workflows/{id}/run', () => {
     workflowsApi = createMockWorkflowsApi();
     mockSpaces = createSpacesMock();
     jest.clearAllMocks();
-  });
-
-  describe('route definition', () => {
-    it('should define the run workflow route with correct configuration', () => {
-      registerPostRunWorkflowRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const postRunCall = (mockRouter.post as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/{id}/run'
-      );
-
-      expect(postRunCall).toBeDefined();
-      expect(postRunCall[0]).toMatchObject({
-        path: '/api/workflows/{id}/run',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['all', 'workflow_execute', 'workflow_execution_create'],
-              },
-            ],
-          },
-        },
-      });
-      expect(postRunCall[0].validate).toBeDefined();
-      expect(postRunCall[0].validate.params).toBeDefined();
-      expect(postRunCall[0].validate.body).toBeDefined();
-      expect(postRunCall[1]).toEqual(expect.any(Function));
-    });
   });
 
   describe('handler logic', () => {

@@ -14,7 +14,7 @@ import { isCommand } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import { getPosition } from './tokens';
 import { nonNullable } from './helpers';
-import { firstItem, lastItem, resolveItem } from '../visitor/utils';
+import { firstItem, lastItem, resolveItem, singleItems } from '../visitor/utils';
 import { type AstNodeParserFields, Builder } from '../builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
 import type { Parser } from './parser';
@@ -497,7 +497,7 @@ export class CstToAstConverter {
       args,
       incomplete:
         incomplete ??
-        Boolean(
+        (Boolean(
           ctx.exception ||
             ctx.children?.some((c) => {
               // TODO: 1. Remove this expect error comment
@@ -505,7 +505,8 @@ export class CstToAstConverter {
               // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
               return Boolean(c.isErrorNode);
             })
-        ),
+        ) ||
+          [...singleItems(args)].some((arg) => arg.incomplete)),
     };
   }
 
@@ -533,11 +534,16 @@ export class CstToAstConverter {
     ctx: antlr.ParserRuleContext & Pick<cst.FromCommandContext, 'indexPatternAndMetadataFields'>
   ): ast.ESQLCommand<Name> {
     const command = this.createCommand(commandName, ctx);
-    const indexPatternCtx = ctx.indexPatternAndMetadataFields();
-    const metadataCtx = indexPatternCtx.metadata();
-    const sources = indexPatternCtx
-      .getTypedRuleContexts(cst.IndexPatternContext as any)
-      .map((sourceCtx) => this.toSource(sourceCtx));
+    const indexPatternAndMetadataCtx = ctx.indexPatternAndMetadataFields();
+    const metadataCtx = indexPatternAndMetadataCtx.metadata();
+    const indexPatternOrSubqueryCtxs = indexPatternAndMetadataCtx.indexPatternOrSubquery_list();
+    const sources = indexPatternOrSubqueryCtxs
+      .map((indexPatternOrSubqueryCtx) => {
+        // ToDo: handle subqueries when implemented
+        const indexPatternCtx = indexPatternOrSubqueryCtx.indexPattern();
+        return indexPatternCtx ? this.toSource(indexPatternCtx) : null;
+      })
+      .filter((source): source is ast.ESQLSource => source !== null);
 
     command.args.push(...sources);
 
@@ -1141,6 +1147,10 @@ export class CstToAstConverter {
 
       if (expression) {
         joinPredicates.push(expression);
+
+        if (resolveItem(expression).incomplete) {
+          onOption.incomplete = true;
+        }
       }
     }
 
@@ -1148,6 +1158,10 @@ export class CstToAstConverter {
 
     if (onOption.args.length) {
       command.args.push(onOption);
+
+      if (onOption.incomplete) {
+        command.incomplete = true;
+      }
     }
 
     return command;

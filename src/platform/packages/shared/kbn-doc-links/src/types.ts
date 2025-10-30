@@ -88,6 +88,10 @@ export interface DocLinks {
     readonly customerEngineerRequestForm: string;
     readonly elasticCommunity: string;
   };
+  readonly searchGettingStarted: {
+    readonly visitSearchLabs: string;
+    readonly notebooksExamples: string;
+  };
   readonly metricbeat: {
     readonly base: string;
     readonly configure: string;
@@ -364,6 +368,7 @@ export interface DocLinks {
     readonly queryDsl: string;
     readonly queryESQL: string;
     readonly queryESQLExamples: string;
+    readonly queryESQLMultiValueControls: string;
   };
   readonly date: {
     readonly dateMath: string;

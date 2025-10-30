@@ -7,42 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { EsWorkflowExecution } from '@kbn/workflows';
-
-import type { Client } from '@elastic/elasticsearch';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
+
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
 import { UrlValidator } from '../lib/url_validator';
+import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
+import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
-import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
-import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
-import type { ContextDependencies } from '../workflow_context_manager/types';
+
+const defaultWorkflowSettings: WorkflowSettings = {
+  timeout: '6h',
+};
 
 export async function setupDependencies(
   workflowRunId: string,
   spaceId: string,
   actionsPlugin: ActionsPluginStartContract,
   taskManagerPlugin: TaskManagerStartContract,
-  esClient: Client,
+  esClient: ElasticsearchClient,
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   workflowExecutionRepository: WorkflowExecutionRepository,
   stepExecutionRepository: StepExecutionRepository,
   logsRepository: LogsRepository,
+  coreStart: CoreStart, // CoreStart for creating esClientAsUser
   dependencies: ContextDependencies,
-  fakeRequest?: any, // KibanaRequest from task manager
-  coreStart?: any // CoreStart for creating esClientAsUser
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fakeRequest?: any // KibanaRequest from task manager
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -54,7 +58,8 @@ export async function setupDependencies(
   }
 
   let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
-    workflowExecution.workflowDefinition
+    workflowExecution.workflowDefinition,
+    defaultWorkflowSettings
   );
 
   // If the execution is for a specific step, narrow the graph to that step
@@ -62,8 +67,17 @@ export async function setupDependencies(
     workflowExecutionGraph = workflowExecutionGraph.getStepGraph(workflowExecution.stepId);
   }
 
-  const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
-  const connectorExecutor = new ConnectorExecutor(unsecuredActionsClient);
+  // Use scoped actions client when fakeRequest is available to preserve user context
+  // Otherwise fallback to unsecured actions client
+  // TODO(tb): Consider completely disabling connectors when no fakeRequest is available
+  let connectorExecutor: ConnectorExecutor;
+  if (fakeRequest) {
+    const scopedActionsClient = await actionsPlugin.getActionsClientWithRequest(fakeRequest);
+    connectorExecutor = new ConnectorExecutor(scopedActionsClient, true);
+  } else {
+    const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
+    connectorExecutor = new ConnectorExecutor(unsecuredActionsClient, false);
+  }
 
   const workflowLogger = new WorkflowEventLogger(
     logsRepository,
@@ -94,7 +108,7 @@ export async function setupDependencies(
   });
 
   // Use user-scoped ES client if fakeRequest is available, otherwise fallback to regular client
-  let clientToUse = esClient; // fallback
+  let clientToUse: ElasticsearchClient = esClient; // fallback
   if (fakeRequest && coreStart) {
     clientToUse = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
   }
@@ -109,7 +123,7 @@ export async function setupDependencies(
     workflowExecutionGraph,
     workflowExecutionState,
     workflowLogger,
-    esClient,
+    esClient: clientToUse,
     fakeRequest,
     coreStart,
     dependencies,
