@@ -239,23 +239,34 @@ describe('createPrivilegedUsersCrudService', () => {
         size: 1,
       });
 
-      expect(mockEsClient.asCurrentUser.update).toHaveBeenCalledWith({
-        index: TEST_INDEX,
-        id: existingUserId,
-        refresh: 'wait_for',
-        doc: {
+      const updateCall = mockEsClient.asCurrentUser.update.mock.calls[0][0];
+      expect(updateCall).toEqual(
+        expect.objectContaining({
+          index: TEST_INDEX,
+          id: existingUserId,
+          refresh: 'wait_for',
+        })
+      );
+
+      expect(updateCall.doc).toEqual(
+        expect.objectContaining({
           ...mockUserInput,
-          user: {
+          '@timestamp': expect.any(String),
+          event: expect.objectContaining({
+            ingested: expect.any(String),
+            '@timestamp': expect.any(String),
+          }),
+          user: expect.objectContaining({
             ...mockUserInput.user,
             is_privileged: true,
             entity: { attributes: { Privileged: true } },
-          },
+          }),
           labels: { sources: ['csv', 'api'] },
           entity_analytics_monitoring: {
             labels: [],
           },
-        },
-      });
+        })
+      );
 
       // Should not call count since we're updating, not creating
       expect(mockEsClient.asCurrentUser.count).not.toHaveBeenCalled();

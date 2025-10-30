@@ -73,6 +73,7 @@ export const createPrivilegedUsersCrudService = ({
     // 2. If user doesn't exist: Create a new user
 
     deps.logger.info(`Maximum supported number of privileged users allowed: ${maxUsersAllowed}`);
+    const timestamp = new Date().toISOString();
     // Check if user already exists by username
     const username = user.user?.name;
     if (username) {
@@ -107,6 +108,12 @@ export const createPrivilegedUsersCrudService = ({
             refresh: 'wait_for',
             doc: {
               ...user,
+              '@timestamp': timestamp,
+              event: {
+                ...(existingUserDoc?.event ?? {}),
+                ingested: timestamp,
+                '@timestamp': timestamp,
+              },
               user: {
                 ...user.user,
                 is_privileged: true,
@@ -152,7 +159,11 @@ export const createPrivilegedUsersCrudService = ({
 
     // Create new user
     const doc = merge(user, {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': timestamp,
+      event: {
+        ingested: timestamp,
+        '@timestamp': timestamp,
+      },
       user: {
         is_privileged: true,
         entity: { attributes: { Privileged: true } },
