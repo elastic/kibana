@@ -236,8 +236,6 @@ export class ConfigService {
           { defaultValue: undefined }
         );
       } catch (error) {
-        const namespace = pathToString(path);
-        // If validation fails, it's likely because the `enabled` field is not allowed in the schema
         if (error instanceof ValidationError) {
           throw new ValidationError(
             new SchemaTypeError(
