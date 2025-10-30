@@ -7,15 +7,15 @@
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
-import type { TypeOf } from '@kbn/config-schema';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '@kbn/ml-common-constants/explorer';
-import type { AnomalySwimlaneEmbeddableUserInput } from '@kbn/ml-common-types/anomaly_swim_lane';
-import type { AnomalySwimLaneComponentApi, AnomalySwimLaneEmbeddableState } from './types';
-import type { anomalySwimLaneControlsStateSchema } from '../../../server/embeddable/schemas';
-
-type AnomalySwimLaneControlsState = TypeOf<typeof anomalySwimLaneControlsStateSchema>;
+import type {
+  AnomalySwimLaneControlsState,
+  AnomalySwimLaneEmbeddableState,
+  AnomalySwimlaneEmbeddableUserInput,
+} from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
+import type { SwimlaneType } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+import type { AnomalySwimLaneComponentApi } from './types';
 
 export const swimLaneComparators: StateComparators<AnomalySwimLaneControlsState> = {
   jobIds: 'deepEquality',

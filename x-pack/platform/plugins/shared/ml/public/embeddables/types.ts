@@ -55,16 +55,6 @@ import type {
   SingleMetricViewerEmbeddableUserInput,
 } from './single_metric_viewer/types';
 
-export type {
-  AnomalySwimLaneEmbeddableState,
-  AnomalySwimLaneEmbeddableApi,
-} from './anomaly_swimlane/types';
-
-export type {
-  SingleMetricViewerEmbeddableUserInput,
-  SingleMetricViewerEmbeddableState,
-} from './single_metric_viewer/types';
-
 /**
  * Common API for all ML embeddables
  */

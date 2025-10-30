@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
+import type { SwimlaneType } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

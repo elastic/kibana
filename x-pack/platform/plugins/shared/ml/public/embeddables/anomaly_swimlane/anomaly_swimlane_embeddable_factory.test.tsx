@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
+import { of } from 'rxjs';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { render, waitFor, screen } from '@testing-library/react';
-import React from 'react';
-import { of } from 'rxjs';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
+
 import { getAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
-import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+import type { AnomalySwimLaneEmbeddableApi } from './types';
 
 // Mock dependencies
 const pluginStartDeps = {

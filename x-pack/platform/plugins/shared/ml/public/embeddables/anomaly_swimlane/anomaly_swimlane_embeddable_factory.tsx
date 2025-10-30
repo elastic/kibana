@@ -53,6 +53,7 @@ import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-p
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { HttpService } from '@kbn/ml-services/http_service';
 import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
 
 import type { AnomalySwimlaneEmbeddableServices } from '../types';
 import type { MlDependencies } from '../../application/app';
@@ -68,7 +69,7 @@ import { buildDataViewPublishingApi } from '../common/build_data_view_publishing
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeSwimLaneControls, swimLaneComparators } from './initialize_swim_lane_controls';
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
-import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+import type { AnomalySwimLaneEmbeddableApi } from './types';
 import { AnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
 
 /**

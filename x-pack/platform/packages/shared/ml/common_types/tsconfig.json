@@ -35,6 +35,7 @@
     "@kbn/rule-data-utils",
     "@kbn/config-schema",
     "@kbn/core-http-browser",
-    "@kbn/es-query",
+    "@kbn/config-schema",
+    "@kbn/ml-common-api-schemas",
   ]
 }
