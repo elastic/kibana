@@ -22972,6 +22972,7 @@
         "operationId": "get-fleet-cloud-connectors",
         "parameters": [
           {
+            "description": "The page number for pagination.",
             "in": "query",
             "name": "page",
             "required": false,
@@ -22980,6 +22981,7 @@
             }
           },
           {
+            "description": "The number of items per page.",
             "in": "query",
             "name": "perPage",
             "required": false,
@@ -22988,6 +22990,7 @@
             }
           },
           {
+            "description": "Filter by cloud provider: aws or azure.",
             "in": "query",
             "name": "cloudProvider",
             "required": false,
@@ -23120,6 +23123,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "cloudProvider": {
+                    "description": "The cloud provider type: aws, azure, or gcp.",
                     "enum": [
                       "aws",
                       "azure",
@@ -23128,6 +23132,7 @@
                     "type": "string"
                   },
                   "name": {
+                    "description": "The name of the cloud connector.",
                     "maxLength": 255,
                     "minLength": 1,
                     "type": "string"
@@ -23437,6 +23442,7 @@
             }
           },
           {
+            "description": "The unique identifier of the cloud connector to delete.",
             "in": "path",
             "name": "cloudConnectorId",
             "required": true,
@@ -23445,6 +23451,7 @@
             }
           },
           {
+            "description": "If true, forces deletion even if the cloud connector is in use.",
             "in": "query",
             "name": "force",
             "required": false,
@@ -23516,6 +23523,7 @@
         "operationId": "get-fleet-cloud-connectors-cloudconnectorid",
         "parameters": [
           {
+            "description": "The unique identifier of the cloud connector.",
             "in": "path",
             "name": "cloudConnectorId",
             "required": true,
@@ -23634,6 +23642,7 @@
             }
           },
           {
+            "description": "The unique identifier of the cloud connector to update.",
             "in": "path",
             "name": "cloudConnectorId",
             "required": true,
@@ -23649,6 +23658,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "name": {
+                    "description": "The name of the cloud connector.",
                     "maxLength": 255,
                     "minLength": 1,
                     "type": "string"
