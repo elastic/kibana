@@ -590,12 +590,16 @@ export class StatusRuleExecutor {
     const errorStartedAt = start ?? startedAt.toISOString() ?? monitorSummary.timestamp;
 
     let relativeViewInAppUrl = '';
-    if (monitorSummary.stateId && locationId) {
-      relativeViewInAppUrl = getRelativeViewInAppUrl({
-        configId,
-        locationId,
-        stateId: monitorSummary.stateId,
-      });
+    if (monitorSummary.stateId) {
+      // For ungrouped monitors with downConfigs, use the first location ID
+      const effectiveLocationId = locationId || locationIds[0];
+      if (effectiveLocationId) {
+        relativeViewInAppUrl = getRelativeViewInAppUrl({
+          configId,
+          locationId: effectiveLocationId,
+          stateId: monitorSummary.stateId,
+        });
+      }
     }
 
     const grouping: Record<string, unknown> = {
@@ -637,7 +641,11 @@ export class StatusRuleExecutor {
 
     // Fetch step information for browser monitors synchronously before creating alert
     let stepInfo = '';
-    if (monitorSummary.monitorType === 'browser') {
+    // Get monitor type directly from saved object attributes
+    const monitor = this.monitors.find((m) => m.id === configId);
+    const monitorType = monitor?.attributes.type;
+
+    if (monitorType === 'browser') {
       let allConfigs: Array<AlertStatusMetaData | AlertPendingStatusMetaData> = [];
       if ('statusConfig' in params) {
         allConfigs = [params.statusConfig];
