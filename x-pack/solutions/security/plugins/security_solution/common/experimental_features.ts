@@ -86,11 +86,6 @@ export const allowedExperimentalValues = Object.freeze({
   microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
-   * Enables the new modal for the value list items
-   */
-  valueListItemsModalEnabled: true,
-
-  /**
    * Enables the storing of gaps in the event log
    */
   storeGapsInEventLogEnabled: true,
