@@ -128,8 +128,25 @@ export const InputCapture = memo<InputCaptureProps>(
       return '';
     }, []);
 
+    const isEventFromInputCapture = useCallback((ev: Pick<React.UIEvent, 'target'>) => {
+      if (focusEleRef.current) {
+        const { target: evTarget } = ev;
+
+        return (
+          evTarget === focusEleRef.current ||
+          (evTarget instanceof Node && focusEleRef.current.contains(evTarget))
+        );
+      }
+
+      return false;
+    }, []);
+
     const handleOnKeyDown = useCallback<KeyboardEventHandler>(
       (ev) => {
+        if (!isEventFromInputCapture(ev)) {
+          return;
+        }
+
         // handles the ctrl + a select and allows for clipboard events to be captured via onPaste event handler
         if (ev.metaKey || ev.ctrlKey) {
           if (ev.key === 'a') {
@@ -177,11 +194,15 @@ export const InputCapture = memo<InputCaptureProps>(
           deSelectTextOnPage();
         }
       },
-      [getTextSelection, onCapture]
+      [getTextSelection, isEventFromInputCapture, onCapture]
     );
 
     const handleOnPaste = useCallback<ClipboardEventHandler>(
       (ev) => {
+        if (!isEventFromInputCapture(ev)) {
+          return;
+        }
+
         ev.preventDefault();
         ev.stopPropagation();
 
@@ -212,14 +233,21 @@ export const InputCapture = memo<InputCaptureProps>(
           deSelectTextOnPage();
         }
       },
-      [getTextSelection, onCapture]
+      [getTextSelection, isEventFromInputCapture, onCapture]
     );
 
-    const handleOnFocus = useCallback(() => {
-      if (onChangeFocus) {
-        onChangeFocus(true);
-      }
-    }, [onChangeFocus]);
+    const handleOnFocus = useCallback<React.FocusEventHandler<HTMLDivElement>>(
+      (ev) => {
+        if (!isEventFromInputCapture(ev)) {
+          return;
+        }
+
+        if (onChangeFocus) {
+          onChangeFocus(true);
+        }
+      },
+      [isEventFromInputCapture, onChangeFocus]
+    );
 
     const handleOnBlur = useCallback(() => {
       if (onChangeFocus) {
