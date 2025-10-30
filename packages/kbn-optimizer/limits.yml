@@ -117,7 +117,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 75115
-  onechat: 20161
+  onechat: 22883
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11484
@@ -164,7 +164,7 @@ pageLoadAssetSize:
   snapshotRestore: 22068
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 74000
+  stackConnectors: 75538
   streams: 9000
   streamsApp: 17000
   synthetics: 31571
