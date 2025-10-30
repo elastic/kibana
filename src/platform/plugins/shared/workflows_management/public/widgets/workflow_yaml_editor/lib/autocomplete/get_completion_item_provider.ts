@@ -8,9 +8,9 @@
  */
 
 import type { monaco } from '@kbn/monaco';
-import type { MinimalWorkflowDetailState } from './autocomplete.types';
-import { buildAutocompleteContext } from './build_autocomplete_context';
-import { getSuggestions } from './get_suggestions';
+import type { MinimalWorkflowDetailState } from './context/autocomplete.types';
+import { buildAutocompleteContext } from './context/build_autocomplete_context';
+import { getSuggestions } from './suggestions/get_suggestions';
 
 export function getCompletionItemProvider(
   getState: () => MinimalWorkflowDetailState | undefined

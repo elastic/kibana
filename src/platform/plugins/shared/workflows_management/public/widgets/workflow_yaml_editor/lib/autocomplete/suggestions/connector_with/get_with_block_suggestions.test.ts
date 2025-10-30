@@ -14,14 +14,14 @@ import { z } from '@kbn/zod';
 import { getConnectorParamsSchema } from './get_connector_with_schema';
 import * as getExistingParametersModule from './get_existing_parameters_in_with_block';
 import { getWithBlockSuggestions } from './get_with_block_suggestions';
-import { createFakeMonacoModel } from '../../../../../../common/mocks/monaco_model';
-import * as generateConnectorSnippetModule from '../../snippets/generate_connector_snippet';
-import type { ExtendedAutocompleteContext } from '../autocomplete.types';
+import { createFakeMonacoModel } from '../../../../../../../common/mocks/monaco_model';
+import * as generateConnectorSnippetModule from '../../../snippets/generate_connector_snippet';
+import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 
 // Mock dependencies
 jest.mock('./get_connector_with_schema');
 jest.mock('./get_existing_parameters_in_with_block');
-jest.mock('../../snippets/generate_connector_snippet');
+jest.mock('../../../snippets/generate_connector_snippet');
 
 // Helper to create autocomplete context
 function createAutocompleteContext(

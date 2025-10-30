@@ -8,7 +8,6 @@
  */
 
 import type { monaco } from '@kbn/monaco';
-import type { ExtendedAutocompleteContext } from './autocomplete.types';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
 import { getWithBlockSuggestions } from './connector_with/get_with_block_suggestions';
@@ -20,8 +19,8 @@ import {
 import { getRRuleSchedulingSuggestions } from './rrule/get_rrule_scheduling_suggestions';
 import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
-import { isInTriggersContext } from './triggers_utils';
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
+import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
 
 export function getSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
@@ -30,11 +29,22 @@ export function getSuggestions(
   const { lineParseResult } = autocompleteContext;
 
   // Check if we're in a scheduled trigger's with block for RRule suggestions
+  // e.g.
+  // triggers:
+  // - type: scheduled
+  //   with:
+  //     |<-
   if (autocompleteContext.isInScheduledTriggerWithBlock) {
     // We're in a scheduled trigger's with block - provide RRule suggestions
     return getRRuleSchedulingSuggestions(autocompleteContext.range);
   }
 
+  // Connector ID completion
+  // e.g.
+  // steps:
+  // - name: notify-slack
+  //   type: slack
+  //   connector-id: |<-
   if (lineParseResult?.matchType === 'connector-id') {
     return getConnectorIdSuggestions(autocompleteContext);
   }
@@ -50,6 +60,9 @@ export function getSuggestions(
   }
 
   // Liquid filter completion
+  // e.g.
+  // steps:
+  //     message: "{{ user.name | |<-
   if (
     lineParseResult?.matchType === 'liquid-filter' ||
     lineParseResult?.matchType === 'liquid-block-filter'
@@ -70,11 +83,11 @@ export function getSuggestions(
     return createLiquidBlockKeywordCompletions(autocompleteContext.range, lineParseResult?.fullKey);
   }
 
-  // Direct type completion - context-aware
-  // Check if we're trying to complete a type field, regardless of schema validation
-  // TODO: remove this, schema should be that forgiving so we don't need another handler
-
-  if (lineParseResult?.matchType === 'type' && isInTriggersContext(autocompleteContext.path)) {
+  // Trigger type completion
+  // e.g.
+  // triggers:
+  // - type: |<-
+  if (lineParseResult?.matchType === 'type' && autocompleteContext.isInTriggersContext) {
     // For snippets, we need to replace from the start of the type value to the end of the line
     const adjustedRange = {
       ...autocompleteContext.range,
@@ -84,6 +97,11 @@ export function getSuggestions(
     return getTriggerTypeSuggestions(lineParseResult.fullKey, adjustedRange);
   }
 
+  // Connector type completion
+  // e.g.
+  // steps:
+  // - name: search-errors
+  //   type: |<-
   if (lineParseResult?.matchType === 'type' && autocompleteContext.dynamicConnectorTypes) {
     const adjustedRange = {
       ...autocompleteContext.range,
@@ -97,6 +115,15 @@ export function getSuggestions(
     );
   }
 
+  // Timezone completion
+  // e.g.
+  // triggers:
+  // - type: scheduled
+  //   with:
+  //     rrule:
+  //       freq: DAILY
+  //       interval: 1
+  //       tzid: |<-
   if (lineParseResult?.matchType === 'timezone') {
     const adjustedRange = {
       ...autocompleteContext.range,
@@ -108,5 +135,17 @@ export function getSuggestions(
 
   const { model, position } = autocompleteContext;
 
+  // Connector with block completion
+  // e.g.
+  // steps:
+  // - name: search-alerts
+  //   type: elasticsearch.search
+  //   with:
+  //     index: "alerts-*"
+  //     query:
+  //       range:
+  //         "@timestamp":
+  //           gte: "now-1h"
+  //     |<-
   return getWithBlockSuggestions({ ...autocompleteContext, model, position });
 }

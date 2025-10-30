@@ -11,11 +11,11 @@ import { monaco } from '@kbn/monaco';
 import { getRRuleSchedulingSuggestions } from './get_rrule_scheduling_suggestions';
 
 // Mock the dependencies
-jest.mock('../../snippets/generate_trigger_snippet', () => ({
+jest.mock('../../../snippets/generate_trigger_snippet', () => ({
   generateRRuleTriggerSnippet: jest.fn(),
 }));
 
-import { generateRRuleTriggerSnippet } from '../../snippets/generate_trigger_snippet';
+import { generateRRuleTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 
 describe('getRRuleSchedulingSuggestions', () => {
   const mockRange: monaco.IRange = {

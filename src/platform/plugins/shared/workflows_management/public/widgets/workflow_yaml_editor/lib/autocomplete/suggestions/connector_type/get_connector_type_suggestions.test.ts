@@ -12,21 +12,21 @@ import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { getConnectorTypeSuggestions } from './get_connector_type_suggestions';
 
 // Mock the dependencies
-jest.mock('../../connectors_cache', () => ({
+jest.mock('../../../connectors_cache', () => ({
   getCachedAllConnectors: jest.fn(),
 }));
 
-jest.mock('../../snippets/generate_builtin_step_snippet', () => ({
+jest.mock('../../../snippets/generate_builtin_step_snippet', () => ({
   generateBuiltInStepSnippet: jest.fn(),
 }));
 
-jest.mock('../../snippets/generate_connector_snippet', () => ({
+jest.mock('../../../snippets/generate_connector_snippet', () => ({
   generateConnectorSnippet: jest.fn(),
 }));
 
-import { getCachedAllConnectors } from '../../connectors_cache';
-import { generateBuiltInStepSnippet } from '../../snippets/generate_builtin_step_snippet';
-import { generateConnectorSnippet } from '../../snippets/generate_connector_snippet';
+import { getCachedAllConnectors } from '../../../connectors_cache';
+import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
+import { generateConnectorSnippet } from '../../../snippets/generate_connector_snippet';
 
 describe('getConnectorTypeSuggestions', () => {
   const mockRange: monaco.IRange = {

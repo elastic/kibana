@@ -8,7 +8,7 @@
  */
 
 import { getConnectorIdSuggestionsItems } from './get_connector_id_suggestions_items';
-import type { AutocompleteContext } from '../autocomplete.types';
+import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 export function getConnectorIdSuggestions({
   line,

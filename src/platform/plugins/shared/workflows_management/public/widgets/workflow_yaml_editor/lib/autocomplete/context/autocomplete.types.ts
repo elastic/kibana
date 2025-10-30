@@ -12,15 +12,15 @@ import type { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
 import type { LineParseResult } from './parse_line_for_completion';
-import type { WorkflowDetailState } from '../store';
-import type { StepInfo } from '../store/utils/build_workflow_lookup';
+import type { WorkflowDetailState } from '../../store';
+import type { StepInfo } from '../../store/utils/build_workflow_lookup';
 
 export type MinimalWorkflowDetailState = Pick<
   WorkflowDetailState,
   'yamlString' | 'computed' | 'focusedStepId' | 'connectors'
 >;
 
-// TODO: see if we can reduce the number of properties in this interface
+// TODO: see if we can reduce the number of properties in this interface and group them into smaller interfaces
 export interface AutocompleteContext {
   triggerCharacter: string | null;
   triggerKind: monaco.languages.CompletionTriggerKind | null;
@@ -37,6 +37,7 @@ export interface AutocompleteContext {
   absoluteOffset: number;
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
   isInLiquidBlock: boolean;
+  isInTriggersContext: boolean;
   isInScheduledTriggerWithBlock: boolean;
   shouldUseCurlyBraces: boolean;
   shouldBeQuoted: boolean;

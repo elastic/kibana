@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { generateRRuleTriggerSnippet } from '../../snippets/generate_trigger_snippet';
+import { generateRRuleTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 
 /**
  * Get RRule scheduling pattern suggestions

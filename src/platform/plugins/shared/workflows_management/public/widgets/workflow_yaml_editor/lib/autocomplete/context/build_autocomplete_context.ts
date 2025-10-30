@@ -13,13 +13,13 @@ import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
 import type { AutocompleteContext, MinimalWorkflowDetailState } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
-import { isInsideLiquidBlock } from './liquid/liquid_utils';
+import { isInsideLiquidBlock } from './liquid_utils';
 import { parseLineForCompletion } from './parse_line_for_completion';
-import { isInScheduledTriggerWithBlock } from './triggers_utils';
-import { getCurrentPath } from '../../../../../common/lib/yaml';
-import { getSchemaAtPath } from '../../../../../common/lib/zod';
-import { getContextSchemaForPath } from '../../../../features/workflow_context/lib/get_context_for_path';
-import type { StepInfo } from '../store';
+import { isInScheduledTriggerWithBlock, isInTriggersContext } from './triggers_utils';
+import { getCurrentPath } from '../../../../../../common/lib/yaml';
+import { getSchemaAtPath } from '../../../../../../common/lib/zod';
+import { getContextSchemaForPath } from '../../../../../features/workflow_context/lib/get_context_for_path';
+import type { StepInfo } from '../../store';
 
 export interface BuildAutocompleteContextParams {
   editorState: MinimalWorkflowDetailState | undefined;
@@ -144,6 +144,7 @@ export function buildAutocompleteContext({
     // kind of ast info
     isInLiquidBlock,
     isInScheduledTriggerWithBlock: _isInScheduledTriggerWithBlock,
+    isInTriggersContext: isInTriggersContext(path),
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,

@@ -10,9 +10,9 @@
 import type { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
 import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
-import { getDetailedTypeDescription } from '../../../../../../common/lib/zod';
-import type { AutocompleteContext } from '../autocomplete.types';
-import { isVariableLineParseResult } from '../parse_line_for_completion';
+import { getDetailedTypeDescription } from '../../../../../../../common/lib/zod';
+import type { AutocompleteContext } from '../../context/autocomplete.types';
+import { isVariableLineParseResult } from '../../context/parse_line_for_completion';
 
 export function getVariableSuggestions(autocompleteContext: AutocompleteContext) {
   const {

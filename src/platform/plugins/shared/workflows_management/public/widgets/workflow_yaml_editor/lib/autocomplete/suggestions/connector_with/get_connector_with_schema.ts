@@ -9,7 +9,7 @@
 
 import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
 import { z } from '@kbn/zod';
-import { getCachedAllConnectors } from '../../connectors_cache';
+import { getCachedAllConnectors } from '../../../connectors_cache';
 
 /**
  * Get the specific connector's parameter schema for autocomplete

@@ -9,8 +9,8 @@
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { getConnectorIdSuggestions } from './get_connector_id_suggestions';
-import type { AutocompleteContext } from '../autocomplete.types';
-import { parseLineForCompletion } from '../parse_line_for_completion';
+import type { AutocompleteContext } from '../../context/autocomplete.types';
+import { parseLineForCompletion } from '../../context/parse_line_for_completion';
 
 describe('getConnectorIdSuggestions', () => {
   const fakeConnectorTypes: Record<string, ConnectorTypeInfo> = {

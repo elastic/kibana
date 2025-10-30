@@ -8,7 +8,7 @@
  */
 
 import type { monaco } from '@kbn/monaco';
-import { getIndentLevel } from '../../get_indent_level';
+import { getIndentLevel } from '../../../get_indent_level';
 
 /**
  * Get existing parameters in the current with block to avoid suggesting duplicates

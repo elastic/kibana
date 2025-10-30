@@ -14,11 +14,11 @@ import {
 } from './get_trigger_type_suggestions';
 
 // Mock the generate_trigger_snippet module
-jest.mock('../../snippets/generate_trigger_snippet', () => ({
+jest.mock('../../../snippets/generate_trigger_snippet', () => ({
   generateTriggerSnippet: jest.fn(),
 }));
 
-import { generateTriggerSnippet } from '../../snippets/generate_trigger_snippet';
+import { generateTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 
 describe('get_trigger_type_suggestions', () => {
   const mockRange: monaco.IRange = {

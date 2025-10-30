@@ -11,11 +11,11 @@ import { Document, Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
 import { getVariableSuggestions } from './get_variable_suggestions';
-import type { AutocompleteContext } from '../autocomplete.types';
+import type { AutocompleteContext } from '../../context/autocomplete.types';
 import type {
   ForeachVariableLineParseResult,
   VariableLineParseResult,
-} from '../parse_line_for_completion';
+} from '../../context/parse_line_for_completion';
 
 describe('getVariableSuggestions', () => {
   const createMockRange = (): monaco.IRange => ({

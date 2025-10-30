@@ -12,7 +12,7 @@ import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { getZodTypeName } from '../../../../../common/lib/zod';
 import { isMac } from '../../../../shared/utils/is_mac';
-import { getConnectorInstancesForType } from '../autocomplete/connector_id/get_connector_id_suggestions_items';
+import { getConnectorInstancesForType } from '../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import { getCachedAllConnectors } from '../connectors_cache';
 import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
 

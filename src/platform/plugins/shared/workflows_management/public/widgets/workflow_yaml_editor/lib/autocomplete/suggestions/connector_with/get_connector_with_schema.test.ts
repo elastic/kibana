@@ -25,10 +25,10 @@ import {
   processObjectSchema,
   processUnionSchema,
 } from './get_connector_with_schema';
-import * as connectorsCache from '../../connectors_cache';
+import * as connectorsCache from '../../../connectors_cache';
 
 // Mock the connectors cache module
-jest.mock('../../connectors_cache');
+jest.mock('../../../connectors_cache');
 
 // Helper to create mock connectors
 function createMockConnector(type: string, paramsSchema: z.ZodType): DynamicConnectorContract {

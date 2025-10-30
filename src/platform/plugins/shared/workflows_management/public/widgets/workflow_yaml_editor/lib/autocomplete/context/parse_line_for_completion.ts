@@ -13,8 +13,8 @@ import {
   LIQUID_FILTER_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
   VARIABLE_REGEX_GLOBAL,
-} from '../../../../../common/lib/regex';
-import { parsePath } from '../../../../../common/lib/zod';
+} from '../../../../../../common/lib/regex';
+import { parsePath } from '../../../../../../common/lib/zod';
 
 interface BaseLineParseResult {
   fullKey: string;

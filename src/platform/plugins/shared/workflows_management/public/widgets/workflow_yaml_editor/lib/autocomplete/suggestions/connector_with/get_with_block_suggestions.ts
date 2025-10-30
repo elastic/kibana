@@ -11,8 +11,8 @@ import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
 import { getConnectorParamsSchema } from './get_connector_with_schema';
 import { getExistingParametersInWithBlock } from './get_existing_parameters_in_with_block';
-import { getEnhancedTypeInfo } from '../../snippets/generate_connector_snippet';
-import type { ExtendedAutocompleteContext } from '../autocomplete.types';
+import { getEnhancedTypeInfo } from '../../../snippets/generate_connector_snippet';
+import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 
 // eslint-disable-next-line complexity
 export function getWithBlockSuggestions(autocompleteContext: ExtendedAutocompleteContext) {

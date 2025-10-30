@@ -13,10 +13,10 @@ import { z } from '@kbn/zod';
 import type { MinimalWorkflowDetailState } from './autocomplete.types';
 import type { BuildAutocompleteContextParams } from './build_autocomplete_context';
 import { buildAutocompleteContext } from './build_autocomplete_context';
-import { expectZodSchemaEqual } from '../../../../../common/lib/zod';
-import { createFakeMonacoModel } from '../../../../../common/mocks/monaco_model';
-import { performComputation } from '../store/utils/computation';
-import { findStepByLine } from '../store/utils/step_finder';
+import { expectZodSchemaEqual } from '../../../../../../common/lib/zod';
+import { createFakeMonacoModel } from '../../../../../../common/mocks/monaco_model';
+import { performComputation } from '../../store/utils/computation';
+import { findStepByLine } from '../../store/utils/step_finder';
 
 export function getFakeAutocompleteContextParams(
   yamlContent: string,
