@@ -170,35 +170,6 @@ export const REMOVE_HEADER_BUTTON = i18n.translate(
   }
 );
 
-// Test connection
-export const TEST_CONNECTION_BUTTON = i18n.translate(
-  'xpack.stackConnectors.components.mcp.testConnectionButton',
-  {
-    defaultMessage: 'Test Connection',
-  }
-);
-
-export const TEST_CONNECTION_SUCCESS = i18n.translate(
-  'xpack.stackConnectors.components.mcp.testConnectionSuccess',
-  {
-    defaultMessage: 'Connection successful',
-  }
-);
-
-export const TEST_CONNECTION_FAILURE = i18n.translate(
-  'xpack.stackConnectors.components.mcp.testConnectionFailure',
-  {
-    defaultMessage: 'Connection failed',
-  }
-);
-
-export const TEST_CONNECTION_LOADING = i18n.translate(
-  'xpack.stackConnectors.components.mcp.testConnectionLoading',
-  {
-    defaultMessage: 'Testing connection...',
-  }
-);
-
 // OneChat integration
 export const ONECHAT_COMPATIBLE_BADGE = i18n.translate(
   'xpack.stackConnectors.components.mcp.oneChatCompatibleBadge',

@@ -11,7 +11,6 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiSelect,
-  EuiButton,
   EuiSpacer,
   EuiCallOut,
   EuiBadge,
@@ -25,7 +24,6 @@ import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
 import type { MCPConnectorAuthType } from '@kbn/mcp-connector-common';
-import { i18n } from '@kbn/i18n';
 import {
   AUTH_PRESET_LABEL,
   PRESET_NONE_LABEL,
@@ -40,10 +38,6 @@ import {
   BEARER_TOKEN_LABEL,
   USERNAME_LABEL,
   PASSWORD_LABEL,
-  TEST_CONNECTION_BUTTON,
-  TEST_CONNECTION_SUCCESS,
-  TEST_CONNECTION_FAILURE,
-  TEST_CONNECTION_LOADING,
   ONECHAT_COMPATIBLE_BADGE,
   ONECHAT_INFO_TITLE,
   ONECHAT_INFO_TEXT,
@@ -84,12 +78,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
     return (config?.service?.authType as AuthPreset) || 'none';
   });
 
-  const [testResult, setTestResult] = useState<{
-    status: 'success' | 'error' | 'loading' | null;
-    message?: string;
-    toolCount?: number;
-  }>({ status: null });
-
   useEffect(() => {
     const loadedAuthType = config?.service?.authType as AuthPreset;
     if (loadedAuthType && !hasInitializedRef.current) {
@@ -106,27 +94,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
     },
     [formContext]
   );
-
-  const handleTestConnection = useCallback(async () => {
-    setTestResult({ status: 'loading' });
-
-    try {
-      // TODO: Call executeAction with listTools sub-action
-      // For now, mock success
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setTestResult({
-        status: 'success',
-        message: TEST_CONNECTION_SUCCESS,
-        toolCount: 5, // Mock value
-      });
-    } catch (error) {
-      setTestResult({
-        status: 'error',
-        message: error instanceof Error ? error.message : TEST_CONNECTION_FAILURE,
-      });
-    }
-  }, []);
 
   const secretsSchema: SecretsFieldSchema[] = useMemo(() => {
     switch (authPreset) {
@@ -257,54 +224,6 @@ export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isE
 
       {/* Custom headers builder */}
       {authPreset === 'customHeaders' && <CustomHeadersFields readOnly={readOnly} />}
-
-      <EuiFlexGroup gutterSize="s" direction="column">
-        <EuiFlexItem>
-          <EuiButton
-            onClick={handleTestConnection}
-            isLoading={testResult.status === 'loading'}
-            disabled={readOnly || !config?.service?.http?.url}
-            iconType="beaker"
-          >
-            {testResult.status === 'loading' ? TEST_CONNECTION_LOADING : TEST_CONNECTION_BUTTON}
-          </EuiButton>
-        </EuiFlexItem>
-
-        {testResult.status === 'success' && (
-          <EuiFlexItem>
-            <EuiCallOut
-              announceOnMount
-              title={testResult.message}
-              color="success"
-              iconType="check"
-              size="s"
-            >
-              {testResult.toolCount && (
-                <p>
-                  {i18n.translate('xpack.stackConnectors.components.mcp.toolsFoundMessage', {
-                    defaultMessage: '{count, plural, one {# tool} other {# tools}} available',
-                    values: { count: testResult.toolCount },
-                  })}
-                </p>
-              )}
-            </EuiCallOut>
-          </EuiFlexItem>
-        )}
-
-        {testResult.status === 'error' && (
-          <EuiFlexItem>
-            <EuiCallOut
-              announceOnMount
-              title={TEST_CONNECTION_FAILURE}
-              color="danger"
-              iconType="alert"
-              size="s"
-            >
-              {testResult.message && <p>{testResult.message}</p>}
-            </EuiCallOut>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
     </>
   );
 }
