@@ -67,7 +67,7 @@ export class OnechatPlugin
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     deps: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const isOnechatUiEnabled = core.settings.client.get<boolean>(
+    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
       AGENT_BUILDER_ENABLED_SETTING_ID,
       true
     );
@@ -79,7 +79,7 @@ export class OnechatPlugin
 
     this.setupServices = { navigationService };
 
-    if (isOnechatUiEnabled) {
+    if (isAgentBuilderEnabled) {
       registerApp({
         core,
         getServices: () => {
@@ -137,6 +137,10 @@ export class OnechatPlugin
 
     this.internalServices = internalServices;
 
+    const isAgentBuilderEnabled = core.settings.client.get<boolean>(
+      AGENT_BUILDER_ENABLED_SETTING_ID,
+      true
+    );
     const isAgentBuilderNavEnabled = core.settings.client.get<boolean>(
       AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
       false
@@ -159,7 +163,7 @@ export class OnechatPlugin
       },
     };
 
-    if (isAgentBuilderNavEnabled) {
+    if (isAgentBuilderEnabled && isAgentBuilderNavEnabled) {
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(
