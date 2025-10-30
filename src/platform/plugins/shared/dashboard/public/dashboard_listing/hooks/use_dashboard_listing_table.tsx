@@ -127,7 +127,7 @@ export const useDashboardListingTable = ({
   }, [dashboardBackupService, goToDashboard, useSessionStorageIntegration]);
 
   const updateItemMeta = useCallback(
-    async ({ id, ...newState }: UpdateDashboardMetaProps) => {
+    async ({ id, ...newState }: Parameters<Required<OpenContentEditorParams>['onSave']>[0]) => {
       const dashboard = await findService.findById(id);
       if (dashboard.status === 'error') {
         return;
