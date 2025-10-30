@@ -10,7 +10,6 @@
 import type { monaco } from '@kbn/monaco';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
-import { getWithBlockSuggestions } from './connector_with/get_with_block_suggestions';
 import {
   createLiquidBlockKeywordCompletions,
   createLiquidFilterCompletions,
@@ -133,8 +132,7 @@ export function getSuggestions(
     return getTimezoneSuggestions(adjustedRange, lineParseResult.fullKey);
   }
 
-  const { model, position } = autocompleteContext;
-
+  // TODO: Implement connector with block completion
   // Connector with block completion
   // e.g.
   // steps:
@@ -147,5 +145,5 @@ export function getSuggestions(
   //         "@timestamp":
   //           gte: "now-1h"
   //     |<-
-  return getWithBlockSuggestions({ ...autocompleteContext, model, position });
+  return [];
 }
