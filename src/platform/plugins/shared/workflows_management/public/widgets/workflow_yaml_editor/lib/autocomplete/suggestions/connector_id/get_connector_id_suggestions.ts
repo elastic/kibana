@@ -17,8 +17,7 @@ export function getConnectorIdSuggestions({
   focusedStepInfo,
   dynamicConnectorTypes,
 }: AutocompleteContext) {
-  // eslint-disable-next-line prefer-const
-  let stepConnectorType = focusedStepInfo?.stepType ?? null;
+  const stepConnectorType = focusedStepInfo?.stepType ?? null;
 
   if (
     !stepConnectorType ||
