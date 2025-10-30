@@ -7,7 +7,8 @@
 
 import React, { useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+
+import { EuiSpacer } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
@@ -60,7 +61,6 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
-  const { euiTheme } = useEuiTheme();
   const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -167,23 +167,16 @@ export function EditorFrame(props: EditorFrameProps) {
                 >
                   <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
                     <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />
+                    <EuiSpacer size="m" />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <div
-                  css={css`
-                    pointer-events: auto;
-                    background-color: ${euiTheme.colors.emptyShade};
-                    border-bottom: ${euiTheme.border.thin};
-                  `}
-                >
-                  <LayerTabsWrapper
-                    coreStart={props.core}
-                    framePublicAPI={framePublicAPI}
-                    setIsInlineFlyoutVisible={() => {}}
-                    dataViews={props.plugins.dataViews}
-                    uiActions={props.plugins.uiActions}
-                  />
-                </div>
+                <LayerTabsWrapper
+                  coreStart={props.core}
+                  framePublicAPI={framePublicAPI}
+                  setIsInlineFlyoutVisible={() => {}}
+                  dataViews={props.plugins.dataViews}
+                  uiActions={props.plugins.uiActions}
+                />
                 <ConfigPanelWrapper
                   core={props.core}
                   framePublicAPI={framePublicAPI}
@@ -238,5 +231,6 @@ const componentStyles = {
   visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base}`,
+      backgroundColor: euiTheme.colors.emptyShade,
     }),
 };

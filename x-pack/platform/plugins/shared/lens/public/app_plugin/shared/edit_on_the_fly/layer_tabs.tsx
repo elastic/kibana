@@ -6,6 +6,9 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { css } from '@emotion/react';
+
+import { useEuiTheme } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getLensLayerTypeTabDisplayName } from '@kbn/lens-common';
@@ -68,6 +71,7 @@ export function LayerTabs({
 }: LayerTabsProps & {
   activeVisualization: Visualization;
 }) {
+  const { euiTheme } = useEuiTheme();
   const { datasourceMap } = useEditorFrameService();
   const { isSaveable, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
@@ -359,41 +363,49 @@ export function LayerTabs({
     visualization.state,
   ]);
 
-  return !!addLayerButton ? (
-    <>
-      <UnifiedTabs
-        items={managedItems}
-        selectedItemId={selectedLayerId ?? undefined}
-        recentlyClosedItems={[]}
-        onClearRecentlyClosed={() => {}}
-        maxItemsCount={25}
-        services={{
-          core: { chrome: coreStart.chrome },
-        }}
-        onChanged={(updatedState) => {
-          // Create a set of the updated item ids for easy lookup
-          const updatedItemIds = new Set(updatedState.items.map((item) => item.id));
+  return (
+    <div
+      css={css`
+        pointer-events: auto;
+        background-color: ${euiTheme.colors.emptyShade};
+        border-bottom: ${euiTheme.border.thin};
+      `}
+    >
+      {!!addLayerButton ? (
+        <UnifiedTabs
+          items={managedItems}
+          selectedItemId={selectedLayerId ?? undefined}
+          recentlyClosedItems={[]}
+          onClearRecentlyClosed={() => {}}
+          maxItemsCount={25}
+          services={{
+            core: { chrome: coreStart.chrome },
+          }}
+          onChanged={(updatedState) => {
+            // Create a set of the updated item ids for easy lookup
+            const updatedItemIds = new Set(updatedState.items.map((item) => item.id));
 
-          // Handle removed layers
-          managedItems
-            .filter((item) => !updatedItemIds.has(item.id))
-            .forEach((item) => {
-              onRemoveLayer(item.id);
-            });
+            // Handle removed layers
+            managedItems
+              .filter((item) => !updatedItemIds.has(item.id))
+              .forEach((item) => {
+                onRemoveLayer(item.id);
+              });
 
-          // Update selected layer
-          dispatchLens(setSelectedLayerId({ layerId: updatedState.selectedItem?.id ?? null }));
-        }}
-        createItem={getNewTabDefaultProps}
-        onEBTEvent={() => {}}
-        customNewTabButton={addLayerButton || undefined}
-        disableInlineLabelEditing
-        disablePreview
-        disableDragAndDrop
-        disableTabsBarMenu
-        disableCloseButton
-      />
+            // Update selected layer
+            dispatchLens(setSelectedLayerId({ layerId: updatedState.selectedItem?.id ?? null }));
+          }}
+          createItem={getNewTabDefaultProps}
+          onEBTEvent={() => {}}
+          customNewTabButton={addLayerButton || undefined}
+          disableInlineLabelEditing
+          disablePreview
+          disableDragAndDrop
+          disableTabsBarMenu
+          disableCloseButton
+        />
+      ) : null}
       <div ref={layerActionsFlyoutRef} />
-    </>
-  ) : null;
+    </div>
+  );
 }
