@@ -8,6 +8,7 @@
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { fromKueryExpression } from '@kbn/es-query';
+import type { SortOrder } from '../../../common/ui/types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -120,7 +121,7 @@ export const getCasesTelemetryData = async ({
         extractObservablesOff: findValueInBuckets(aggregationsBuckets.extractObservables, 0),
         observables: getObservablesTotalsByType(casesRes.aggregations?.observables),
         totalWithMaxObservables: getTotalWithMaxObservables(
-          casesRes.aggregations?.totalWithMaxObservables
+          casesRes.aggregations?.totalWithMaxObservables?.buckets ?? []
         ),
         totalUsers: casesRes.aggregations?.users?.value ?? 0,
         totalParticipants: commentsRes.aggregations?.participants?.value ?? 0,
@@ -284,16 +285,10 @@ const getObservablesAggregations = () => ({
     },
   },
   totalWithMaxObservables: {
-    nested: {
-      path: `${CASE_SAVED_OBJECT}.attributes.observables`,
-    },
-    aggs: {
-      observables: {
-        top_hits: {
-          size: 10000,
-          _source: [`${CASE_SAVED_OBJECT}.attributes.observables.id`],
-        },
-      },
+    terms: {
+      field: `${CASE_SAVED_OBJECT}.attributes.total_observables`,
+      size: 100,
+      order: { _key: 'desc' as SortOrder },
     },
   },
 });

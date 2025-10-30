@@ -149,7 +149,10 @@ export const casesSchema: CasesTelemetrySchema = {
         _meta: { description: 'Automatically extract observables setting disabled' },
       },
       observables: observablesSchema,
-      totalWithMaxObservables: long,
+      totalWithMaxObservables: {
+        type: 'long',
+        _meta: { description: 'Number of cases with maximum observables' },
+      },
       totalUsers: long,
       totalParticipants: long,
       totalTags: long,

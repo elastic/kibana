@@ -87,12 +87,13 @@ describe('utils', () => {
         },
       },
       totalWithMaxObservables: {
-        doc_count: 60,
-        observables: {
-          hits: {
-            hits: Array(60).map(() => ({ _id: '1' })),
+        doc_count: 3,
+        buckets: [
+          {
+            key: 3,
+            doc_count: 3,
           },
-        },
+        ],
       },
     };
 
@@ -1881,29 +1882,21 @@ describe('utils', () => {
   });
 
   describe('getTotalWithMaxObservables', () => {
-    it('returns the correct total when no case has max observables', () => {
-      expect(
-        getTotalWithMaxObservables({
-          doc_count: 1,
-          observables: { hits: { hits: [{ _id: '1' }] } },
-        })
-      ).toEqual(0);
+    it('returns the correct total when response is undefined', () => {
+      expect(getTotalWithMaxObservables(undefined)).toEqual(0);
+    });
+
+    it('returns the correct total when no case has observables', () => {
+      expect(getTotalWithMaxObservables([])).toEqual(0);
     });
 
     it('returns the correct total when there are cases with max observables', () => {
       expect(
-        getTotalWithMaxObservables({
-          doc_count: 160,
-          observables: {
-            hits: {
-              hits: [
-                ...Array.from({ length: 60 }, () => ({ _id: '1' })),
-                ...Array.from({ length: 100 }, () => ({ _id: '2' })),
-              ],
-            },
-          },
-        })
-      ).toEqual(2);
+        getTotalWithMaxObservables([
+          { key: 50, doc_count: 20 },
+          { key: 49, doc_count: 15 },
+        ])
+      ).toEqual(20);
     });
   });
 });

@@ -96,12 +96,16 @@ describe('getCasesTelemetryData', () => {
           },
         },
         totalWithMaxObservables: {
-          doc_count: 60,
-          observables: {
-            hits: {
-              hits: Array.from({ length: 60 }, () => ({ _id: '1' })),
+          buckets: [
+            {
+              key: 50,
+              doc_count: 1,
             },
-          },
+            {
+              key: 3,
+              doc_count: 1,
+            },
+          ],
         },
       };
 
@@ -648,18 +652,12 @@ describe('getCasesTelemetryData', () => {
                   },
                 },
                 "totalWithMaxObservables": Object {
-                  "aggs": Object {
-                    "observables": Object {
-                      "top_hits": Object {
-                        "_source": Array [
-                          "cases.attributes.observables.id",
-                        ],
-                        "size": 10000,
-                      },
+                  "terms": Object {
+                    "field": "cases.attributes.total_observables",
+                    "order": Object {
+                      "_key": "desc",
                     },
-                  },
-                  "nested": Object {
-                    "path": "cases.attributes.observables",
+                    "size": 100,
                   },
                 },
               },
@@ -770,18 +768,12 @@ describe('getCasesTelemetryData', () => {
                   },
                 },
                 "totalWithMaxObservables": Object {
-                  "aggs": Object {
-                    "observables": Object {
-                      "top_hits": Object {
-                        "_source": Array [
-                          "cases.attributes.observables.id",
-                        ],
-                        "size": 10000,
-                      },
+                  "terms": Object {
+                    "field": "cases.attributes.total_observables",
+                    "order": Object {
+                      "_key": "desc",
                     },
-                  },
-                  "nested": Object {
-                    "path": "cases.attributes.observables",
+                    "size": 100,
                   },
                 },
               },
@@ -886,18 +878,12 @@ describe('getCasesTelemetryData', () => {
                   },
                 },
                 "totalWithMaxObservables": Object {
-                  "aggs": Object {
-                    "observables": Object {
-                      "top_hits": Object {
-                        "_source": Array [
-                          "cases.attributes.observables.id",
-                        ],
-                        "size": 10000,
-                      },
+                  "terms": Object {
+                    "field": "cases.attributes.total_observables",
+                    "order": Object {
+                      "_key": "desc",
                     },
-                  },
-                  "nested": Object {
-                    "path": "cases.attributes.observables",
+                    "size": 100,
                   },
                 },
               },
@@ -928,18 +914,12 @@ describe('getCasesTelemetryData', () => {
               },
             },
             "totalWithMaxObservables": Object {
-              "aggs": Object {
-                "observables": Object {
-                  "top_hits": Object {
-                    "_source": Array [
-                      "cases.attributes.observables.id",
-                    ],
-                    "size": 10000,
-                  },
+              "terms": Object {
+                "field": "cases.attributes.total_observables",
+                "order": Object {
+                  "_key": "desc",
                 },
-              },
-              "nested": Object {
-                "path": "cases.attributes.observables",
+                "size": 100,
               },
             },
             "totalsByOwner": Object {

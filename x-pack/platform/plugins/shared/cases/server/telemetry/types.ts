@@ -83,12 +83,10 @@ export interface ObservablesAggregationResult {
 }
 
 export interface TotalWithMaxObservablesAggregationResult {
-  doc_count: number;
-  observables: {
-    hits: {
-      hits: Array<{ _id: string }>;
-    };
-  };
+  buckets: Array<{
+    key: number;
+    doc_count: number;
+  }>;
 }
 
 export interface FileAttachmentAggsResult {

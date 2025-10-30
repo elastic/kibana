@@ -237,17 +237,17 @@ export const getObservablesTotalsByType = (
 };
 
 export const getTotalWithMaxObservables = (
-  totalWithMaxObservables?: TotalWithMaxObservablesAggregationResult
-) => {
-  if (!totalWithMaxObservables || !totalWithMaxObservables.observables?.hits?.hits) {
+  totalWithMaxObservablesAgg?: TotalWithMaxObservablesAggregationResult['buckets']
+): number => {
+  if (!totalWithMaxObservablesAgg || totalWithMaxObservablesAgg.length === 0) {
     return 0;
   }
-  const flattenedHits = totalWithMaxObservables.observables.hits.hits.map((hit) => hit._id);
-  const aggregatedHits = flattenedHits.reduce<Record<string, number>>((acc, hit) => {
-    acc[hit] = (acc[hit] || 0) + 1;
-    return acc;
-  }, {});
-  return Object.values(aggregatedHits).filter((value) => value >= MAX_OBSERVABLES_PER_CASE).length;
+
+  // Sum doc_count for all buckets where key (total_observables value) >= 50
+  return totalWithMaxObservablesAgg.reduce((sum, bucket) => {
+    const key = typeof bucket.key === 'number' ? bucket.key : Number(bucket.key);
+    return key >= MAX_OBSERVABLES_PER_CASE ? sum + (bucket.doc_count ?? 0) : sum;
+  }, 0);
 };
 
 interface CountsAndMaxAlertsAggRes {
@@ -439,7 +439,7 @@ export const getSolutionValues = ({
     }),
     observables: getObservablesTotalsByType(caseAggregations?.[owner]?.observables),
     totalWithMaxObservables: getTotalWithMaxObservables(
-      caseAggregations?.[owner]?.totalWithMaxObservables
+      caseAggregations?.[owner]?.totalWithMaxObservables?.buckets ?? []
     ),
     totalWithAlerts: totalWithAlerts[owner],
     assignees: {
