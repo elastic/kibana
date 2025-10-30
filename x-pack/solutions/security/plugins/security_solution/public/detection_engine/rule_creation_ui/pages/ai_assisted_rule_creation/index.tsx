@@ -6,7 +6,7 @@
  */
 
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiResizableContainer, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 
@@ -24,6 +24,8 @@ import { useAiRuleCreation } from './hooks/use_ai_rule_creation';
 import { CreateRulePage } from '../rule_creation';
 import { useKibana } from '../../../../common/lib/kibana';
 import { PromptComponent } from './prompt';
+import { LinkIcon } from '../../../../common/components/link_icon';
+import { useHeaderLinkBackStyles } from '../../../../common/components/header_page';
 
 const AiAssistedCreateRulePageComponent: React.FC = () => {
   const [
@@ -41,9 +43,11 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const isLoading = userInfoLoading || listsConfigLoading;
   const collapseFn = useRef<() => void | undefined>();
   const { settings } = useKibana().services;
+  const styles = useHeaderLinkBackStyles();
 
   const [promptValue, setPromptValue] = useState('');
   const [submittedPromptValue, setSubmittedPromptValue] = useState('');
+  const [showForm, setShowForm] = useState(false);
   const { aiConnectors, isLoading: isAiConnectorsLoading } = useAIConnectors();
 
   const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>();
@@ -59,6 +63,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     rule,
     isLoading: isAiRuleCreationInProgress,
   } = useAiRuleCreation();
+
   const isValid = promptValue.length > 0 && selectedConnectorId != null;
   const handlePromptSubmit = useCallback(() => {
     if (isValid) {
@@ -66,9 +71,13 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
       executeAiAssistedRuleCreation({
         message: promptValue,
         connectorId: selectedConnectorId,
-      }).catch((err) => {
-        addError(err, { title: 'Failure to suggest rule with AI assistant' });
-      });
+      })
+        .then(() => {
+          setShowForm(true);
+        })
+        .catch((err) => {
+          addError(err, { title: 'Failure to suggest rule with AI assistant' });
+        });
     }
   }, [executeAiAssistedRuleCreation, promptValue, selectedConnectorId, isValid, addError]);
 
@@ -77,8 +86,31 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     setPromptValue('');
   }, [handlePromptSubmit, setPromptValue]);
 
-  return rule ? (
-    <CreateRulePage rule={rule} aiAssistedUserQuery={submittedPromptValue} />
+  const backComponent = useMemo(
+    () => (
+      <div css={styles.linkBack}>
+        <LinkIcon
+          dataTestSubj="link-back-to-ai-prompt"
+          onClick={(ev: Event) => {
+            ev.preventDefault();
+            setShowForm(false);
+            setPromptValue(submittedPromptValue);
+          }}
+          iconType="arrowLeft"
+        >
+          {'Back to AI prompt'}
+        </LinkIcon>
+      </div>
+    ),
+    [styles.linkBack, submittedPromptValue]
+  );
+
+  return showForm ? (
+    <CreateRulePage
+      rule={rule}
+      backComponent={backComponent}
+      aiAssistedUserQuery={submittedPromptValue}
+    />
   ) : (
     <>
       <SecuritySolutionPageWrapper>

@@ -25,8 +25,14 @@ const CustomHeaderPage: React.FC<
   togglePanel,
   isRulePreviewVisible,
   setIsRulePreviewVisible,
+  backComponent,
 }) => (
-  <HeaderPage backOptions={backOptions} isLoading={isLoading} title={title}>
+  <HeaderPage
+    backOptions={backOptions}
+    backComponent={backComponent}
+    isLoading={isLoading}
+    title={title}
+  >
     <EuiButton
       data-test-subj="preview-container"
       isSelected={isRulePreviewVisible}

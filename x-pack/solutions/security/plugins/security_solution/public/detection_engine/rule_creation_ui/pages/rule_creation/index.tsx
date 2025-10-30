@@ -115,10 +115,11 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const CreateRulePageComponent: React.FC<{ rule?: RuleResponse; aiAssistedUserQuery?: string }> = ({
-  rule,
-  aiAssistedUserQuery,
-}) => {
+const CreateRulePageComponent: React.FC<{
+  rule?: RuleResponse;
+  aiAssistedUserQuery?: string;
+  backComponent?: React.ReactNode;
+}> = ({ rule, aiAssistedUserQuery, backComponent }) => {
   const [
     {
       loading: userInfoLoading,
@@ -853,7 +854,8 @@ const CreateRulePageComponent: React.FC<{ rule?: RuleResponse; aiAssistedUserQue
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
                       <CustomHeaderPageMemo
-                        backOptions={aiAssistedUserQuery ? undefined : backOptions}
+                        backOptions={backComponent ? undefined : backOptions}
+                        backComponent={backComponent}
                         isLoading={isCreateRuleLoading || loading}
                         title={i18n.PAGE_TITLE}
                         isRulePreviewVisible={isRulePreviewVisible}
