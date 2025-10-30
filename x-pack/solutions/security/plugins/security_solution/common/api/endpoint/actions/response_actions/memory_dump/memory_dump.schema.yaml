@@ -18,6 +18,17 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/MemoryDumpRouteRequestBody'
+            examples:
+              ProcessMemoryDump:
+                summary: Generate a memory dump from the host machine
+                value:
+                  endpoint_ids:
+                    - 'ed518850-681a-4d60-bb98-e22640cae2a8'
+                  agent_type: 'endpoint'
+                  parameters:
+                    type: 'process'
+                    entity_id: 'abc123'
+                  comment: 'Generating memory dump for investigation'
       responses:
         '200':
           description: Action request was successfully created
