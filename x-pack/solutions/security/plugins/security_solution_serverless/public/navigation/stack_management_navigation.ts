@@ -86,7 +86,6 @@ export const createStackManagementNavigationTree = (
             },
             {
               cloudLink: 'userAndRoles',
-              title: i18nStrings.stackManagement.access.usersAndRoles,
             },
           ],
         },

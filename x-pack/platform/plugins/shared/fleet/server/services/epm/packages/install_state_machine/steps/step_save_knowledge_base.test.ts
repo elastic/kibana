@@ -23,6 +23,9 @@ jest.mock('../../../../app_context', () => ({
       info: jest.fn(),
       debug: jest.fn(),
     }),
+    getExperimentalFeatures: jest.fn().mockReturnValue({
+      installIntegrationsKnowledge: true,
+    }),
   },
 }));
 
@@ -536,7 +539,7 @@ describe('stepSaveKnowledgeBase', () => {
     });
   });
 
-  describe('License Validation', () => {
+  describe('Gating Validation', () => {
     it('should skip knowledge base processing when Enterprise license is not available', async () => {
       // Mock license service to return false for Enterprise license
       const { licenseService } = jest.requireMock('../../../../license');
@@ -583,6 +586,75 @@ describe('stepSaveKnowledgeBase', () => {
       await stepSaveKnowledgeBase(context);
 
       // Verify that saveKnowledgeBaseContentToIndex WAS called with Enterprise license
+      expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+        esClient,
+        pkgName: 'test-package',
+        pkgVersion: '1.0.0',
+        knowledgeBaseContent: [
+          {
+            fileName: 'guide.md',
+            content: '# User Guide\n\nThis is a comprehensive guide.',
+          },
+        ],
+      });
+
+      // Verify that updateEsAssetReferences WAS called
+      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(updateEsAssetReferences).toHaveBeenCalled();
+    });
+
+    it('should skip knowledge base processing when installIntegrationsKnowledge feature flag is disabled', async () => {
+      // Mock app context service to return experimental features with flag disabled
+      const { appContextService } = jest.requireMock('../../../../app_context');
+      appContextService.getExperimentalFeatures.mockReturnValue({
+        installIntegrationsKnowledge: false,
+      });
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      // Verify that saveKnowledgeBaseContentToIndex was NOT called due to feature flag being disabled
+      expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
+
+      // Verify that updateEsAssetReferences was NOT called
+      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      expect(updateEsAssetReferences).not.toHaveBeenCalled();
+
+      // Reset the mock back to enabled for other tests
+      appContextService.getExperimentalFeatures.mockReturnValue({
+        installIntegrationsKnowledge: true,
+      });
+    });
+
+    it('should process knowledge base when installIntegrationsKnowledge feature flag is enabled', async () => {
+      // Ensure app context service returns experimental features with flag enabled
+      const { appContextService } = jest.requireMock('../../../../app_context');
+      appContextService.getExperimentalFeatures.mockReturnValue({
+        installIntegrationsKnowledge: true,
+      });
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      // Verify that saveKnowledgeBaseContentToIndex WAS called with feature flag enabled
       expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
         esClient,
         pkgName: 'test-package',
