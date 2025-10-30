@@ -992,25 +992,26 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async setDonutHoleSize(value: string) {
       await retry.waitFor('visual options toolbar is open', async () => {
         await this.openStyleSettingsFlyout();
-
         return await testSubjects.exists('lnsEmptySizeRatioOption');
       });
       await comboBox.set('lnsEmptySizeRatioOption', value);
+
+      await this.closeFlyoutWithBackButton();
     },
 
     async setGaugeShape(value: string) {
       await retry.waitFor('visual options toolbar is open', async () => {
         await this.openStyleSettingsFlyout();
-
         return await testSubjects.exists('lnsToolbarGaugeAngleType');
       });
       await comboBox.set('lnsToolbarGaugeAngleType > comboBoxInput', value);
+
+      await this.closeFlyoutWithBackButton();
     },
 
     async getSelectedBarOrientationSetting() {
       await retry.waitFor('visual options are displayed', async () => {
         await this.openStyleSettingsFlyout();
-
         return await testSubjects.exists('lns_barOrientation');
       });
       const orientationButtons = await find.allByCssSelector(
