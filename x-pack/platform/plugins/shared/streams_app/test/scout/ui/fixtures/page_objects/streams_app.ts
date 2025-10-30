@@ -495,7 +495,7 @@ export class StreamsApp {
     await expect(this.getModal()).toBeHidden();
   }
 
-  async selectProcessorType(value: ProcessorType) {
+  async selectProcessorType(value: string) {
     await this.processorTypeComboBox.selectSingleOption(value);
   }
 
