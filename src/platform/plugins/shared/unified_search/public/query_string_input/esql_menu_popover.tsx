@@ -251,14 +251,9 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
             onClick: () => {
               telemetryService.trackRecommendedQueryClicked(QuerySource.HELP);
               onESQLQuerySubmit?.(query.queryString);
-              const { root } = Parser.parse(query.queryString);
-              const prettyQuery = BasicPrettyPrinter.print(root);
               telemetryService.trackQuerySubmitted({
-                query_source: QuerySource.HELP,
-                query_length: prettyQuery.length.toString(),
-                query_lines: query.queryString.split('\n').length.toString(),
-                anti_limit_before_aggregate: false,
-                anti_missing_sort_before_limit: false,
+                source: QuerySource.HELP,
+                query: query.queryString,
               });
               setIsESQLMenuPopoverOpen(false);
             },

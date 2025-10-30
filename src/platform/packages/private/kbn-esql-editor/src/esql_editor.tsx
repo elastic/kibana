@@ -201,7 +201,7 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const onQuerySubmit = useCallback(
-    (source: TelemetryQuerySubmittedProps['query_source']) => {
+    (source: TelemetryQuerySubmittedProps['source']) => {
       if (isQueryLoading && isLoading && allowQueryCancellation) {
         abortController?.abort();
         setIsQueryLoading(false);
@@ -217,14 +217,9 @@ const ESQLEditorInternal = function ESQLEditor({
 
         // TODO: add rest of options
         if (currentValue) {
-          const { root } = Parser.parse(currentValue);
-          const prettyQuery = BasicPrettyPrinter.print(root);
           telemetryService.trackQuerySubmitted({
-            query_source: source,
-            query_length: prettyQuery.length.toString(),
-            query_lines: editor1.current?.getModel()?.getLineCount().toString() ?? '0',
-            anti_limit_before_aggregate: hasLimitBeforeAggregate(currentValue),
-            anti_missing_sort_before_limit: missingSortBeforeLimit(currentValue),
+            source: source,
+            query: currentValue,
           });
         }
         onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
