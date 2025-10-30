@@ -436,24 +436,33 @@ describe('FROM', () => {
       expect(ast[2].name).toBe('limit');
     });
 
-    it('can parse nested subquery', () => {
-      const text = 'FROM (FROM (FROM index))';
-      const { ast, errors } = parse(text);
+    it('correctly captures location for deeply nested subqueries (3 levels)', () => {
+      const text = 'FROM (FROM (FROM (FROM index | WHERE a > 0) | WHERE b < 10) | LIMIT 5)';
+      const { ast } = parse(text);
 
-      expect(errors.length).toBe(0);
-      const outerParens = ast[0].args[0] as ESQLParens;
+      // Level 1 - outermost
+      const level1Parens = ast[0].args[0] as ESQLParens;
+      expect(text.slice(level1Parens.location.min, level1Parens.location.max + 1)).toBe(
+        '(FROM (FROM (FROM index | WHERE a > 0) | WHERE b < 10) | LIMIT 5)'
+      );
 
-      expect(isParens(outerParens)).toBe(true);
-      expect(isSubQuery(outerParens)).toBe(true);
+      // Level 2 - middle
+      const level1Query = level1Parens.child as ESQLAstQueryExpression;
+      const level2Parens = level1Query.commands[0].args[0] as ESQLParens;
+      expect(text.slice(level2Parens.location.min, level2Parens.location.max + 1)).toBe(
+        '(FROM (FROM index | WHERE a > 0) | WHERE b < 10)'
+      );
 
-      const outerQuery = outerParens.child as ESQLAstQueryExpression;
-      const innerParens = outerQuery.commands[0].args[0] as ESQLParens;
-
-      expect(isSubQuery(innerParens)).toBe(true);
+      // Level 3 - innermost
+      const level2Query = level2Parens.child as ESQLAstQueryExpression;
+      const level3Parens = level2Query.commands[0].args[0] as ESQLParens;
+      expect(text.slice(level3Parens.location.min, level3Parens.location.max + 1)).toBe(
+        '(FROM index | WHERE a > 0)'
+      );
     });
 
     describe('error cases', () => {
-      it('errors on unclosed subquery', () => {
+      it('errors on unclosed subquery and captures location up to end of content', () => {
         const text = 'FROM (FROM index | WHERE a > 10';
         const { ast, errors } = parse(text);
 
@@ -469,6 +478,11 @@ describe('FROM', () => {
 
         expect(query.incomplete).toBe(true);
         expect(query.commands).toHaveLength(2);
+
+        // Verify location captures everything including missing closing paren
+        expect(text.slice(parens.location.min, parens.location.max + 1)).toBe(
+          '(FROM index | WHERE a > 10'
+        );
       });
 
       it('errors on empty subquery', () => {

@@ -189,18 +189,12 @@ export namespace Builder {
 
     export const parens = (
       child: ESQLAstExpression,
-      locations?: {
-        openParen?: ESQLLocation;
-        closeParen?: ESQLLocation;
-      },
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLParens => {
       return {
         type: 'parens',
         name: '',
         child,
-        openParenLocation: locations?.openParen ?? { min: 0, max: 0 },
-        closeParenLocation: locations?.closeParen,
         ...Builder.parserFields(fromParser),
       };
     };

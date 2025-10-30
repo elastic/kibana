@@ -594,23 +594,20 @@ export class CstToAstConverter {
     // ANTLR inserts tokens with text like "<missing ')'>" when they're missing
     const closeParenText = closeParen?.getText() ?? '';
     const hasCloseParen = closeParen && !/<missing /.test(closeParenText);
-
-    // We need BOTH checks because ANTLR's error recovery can insert missing tokens
-    const parensHasError = Boolean(ctx.exception) || !hasCloseParen;
+    const incomplete = Boolean(ctx.exception) || !hasCloseParen;
 
     const query = Builder.expression.query(commands, {
       ...this.getParserFields(ctx),
-      incomplete: parensHasError,
+      incomplete,
     });
 
-    return Builder.expression.parens(
-      query,
-      {
-        openParen: openParen ? getPosition(openParen.symbol) : undefined,
-        closeParen: hasCloseParen ? getPosition(closeParen.symbol) : undefined,
-      },
-      { incomplete: parensHasError || query.incomplete }
-    );
+    return Builder.expression.parens(query, {
+      incomplete: incomplete || query.incomplete,
+      location: getPosition(
+        openParen?.symbol ?? ctx.start,
+        hasCloseParen ? closeParen.symbol : ctx.stop
+      ),
+    });
   }
 
   // ---------------------------------------------------------------------- ROW
