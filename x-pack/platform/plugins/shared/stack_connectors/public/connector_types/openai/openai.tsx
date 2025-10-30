@@ -11,6 +11,7 @@ import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/pu
 import { SUB_ACTION } from '../../../common/openai/constants';
 import { OPENAI_CONNECTOR_ID, OPENAI_TITLE } from '../../../common/openai/constants';
 import type { ActionParams, OpenAIConnector } from './types';
+import { formSerializer, formDeserializer } from './form_serialization';
 
 interface ValidationErrors {
   subAction: string[];
@@ -58,5 +59,9 @@ export function getConnectorType(): OpenAIConnector {
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
     actionReadOnlyExtraComponent: lazy(() => import('./dashboard_link')),
+    connectorForm: {
+      serializer: formSerializer,
+      deserializer: formDeserializer,
+    },
   };
 }

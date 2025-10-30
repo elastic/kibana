@@ -43,8 +43,7 @@ type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string,
    *   - `message`: callout message custom content
    */
 
-  // TODO Remove ReactNode type https://github.com/elastic/kibana/issues/238877
-  draftModeCallOut?: boolean | DraftModeCalloutProps | ReactNode;
+  draftModeCallOut?: boolean | DraftModeCalloutProps;
   helpText?: ReactNode;
   CTAButtonConfig?: {
     id: string;
@@ -397,7 +396,7 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   allowShortUrl: boolean;
   onClose?: () => void;
   publicAPIEnabled?: boolean;
-  onSave?: () => Promise<void | object>;
+  onSave?: () => Promise<void>;
 }
 
 export interface ClientConfigType {
