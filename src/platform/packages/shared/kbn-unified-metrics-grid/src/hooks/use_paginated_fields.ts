@@ -10,6 +10,7 @@
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useStableCallback } from '@kbn/unified-histogram';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ValueFilter } from '../types';
 
 export const usePaginatedFields = ({
   fields,
@@ -17,15 +18,25 @@ export const usePaginatedFields = ({
   pageSize,
   currentPage,
   searchTerm,
+  valueFilters,
 }: {
   fields: MetricField[];
   searchTerm: string;
   dimensions: string[];
+  valueFilters: Array<ValueFilter>;
   pageSize: number;
   currentPage: number;
 }) => {
   const dimensionsSet = useMemo(() => new Set(dimensions), [dimensions]);
   const searchTermLower = useMemo(() => searchTerm.toLowerCase(), [searchTerm]);
+  const scopesSet = useMemo(() => {
+    if (valueFilters.length === 0) return null;
+    const scopes = new Set<string>();
+    valueFilters.forEach((v) => {
+      v.scopes?.forEach((ds) => scopes.add(ds));
+    });
+    return scopes;
+  }, [valueFilters]);
 
   const buildPaginatedFields = useCallback(() => {
     const filteredFields = fields.filter((field) => {
@@ -33,6 +44,10 @@ export const usePaginatedFields = ({
         field.noData ||
         (searchTermLower && !field.name.toLowerCase().includes(searchTermLower))
       ) {
+        return false;
+      }
+
+      if (scopesSet && (!field.scope || !scopesSet.has(field.scope))) {
         return false;
       }
 
@@ -55,7 +70,7 @@ export const usePaginatedFields = ({
       filteredFieldsCount: filteredFields.length,
       totalPages,
     };
-  }, [fields, dimensionsSet, searchTermLower, pageSize, currentPage]);
+  }, [fields, dimensionsSet, searchTermLower, scopesSet, pageSize, currentPage]);
 
   const [paginatedFieldsContext, setPaginatedFieldsContext] =
     useState<ReturnType<typeof buildPaginatedFields>>();

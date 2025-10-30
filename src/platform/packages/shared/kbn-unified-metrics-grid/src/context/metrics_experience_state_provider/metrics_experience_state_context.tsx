@@ -11,11 +11,12 @@ import React, { useCallback } from 'react';
 import { createContext } from 'react';
 import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
+import type { ValueFilter } from '../../types';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   onPageChange: (value: number) => void;
   onDimensionsChange: (value: string[]) => void;
-  onValuesChange: (value: string[]) => void;
+  onValuesChange: (value: Array<ValueFilter>) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
 }
@@ -36,14 +37,16 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
       const filteredValues =
         nextDimensions.length === 0
           ? []
-          : valueFilters.filter((v) => nextDimensions.includes(v.split(FIELD_VALUE_SEPARATOR)[0]));
+          : valueFilters.filter((v) =>
+              nextDimensions.includes(v.key.split(FIELD_VALUE_SEPARATOR)[0])
+            );
       setValueFilters(filteredValues);
     },
     [valueFilters, setValueFilters, setDimensions]
   );
 
   const onValuesChange = useCallback(
-    (values: string[]) => setValueFilters(values),
+    (values: Array<{ key: string; datasets?: string[] }>) => setValueFilters(values),
     [setValueFilters]
   );
 

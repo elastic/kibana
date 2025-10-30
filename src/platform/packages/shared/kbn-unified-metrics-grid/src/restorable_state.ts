@@ -8,6 +8,7 @@
  */
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
+import type { ValueFilter } from './types';
 
 export interface MetricsExperienceRestorableState {
   // Pagination page index
@@ -23,7 +24,7 @@ export interface MetricsExperienceRestorableState {
   dimensions: string[];
 
   // Metric value filters
-  valueFilters: string[];
+  valueFilters: Array<ValueFilter>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

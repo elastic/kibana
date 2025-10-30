@@ -110,6 +110,7 @@ export const MetricsExperienceGrid = ({
   } = usePaginatedFields({
     fields,
     dimensions,
+    valueFilters,
     pageSize: PAGE_SIZE,
     currentPage,
     searchTerm,
