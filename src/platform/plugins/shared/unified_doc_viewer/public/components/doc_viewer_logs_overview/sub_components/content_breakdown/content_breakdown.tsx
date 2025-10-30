@@ -14,7 +14,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   getMessageFieldWithFallbacks,

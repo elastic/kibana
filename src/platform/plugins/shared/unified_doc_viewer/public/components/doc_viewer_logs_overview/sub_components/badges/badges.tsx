@@ -20,9 +20,7 @@ import { HoverActionPopover } from '../hover_popover_action';
 import { LogLevel } from './log_level';
 import { EventType } from './event_type';
 import { Timestamp } from './timestamp';
-// ---
 
-// Define all the props the component needs
 interface BadgesProps {
   hasMessageField: boolean;
   hit: DataTableRecord;
@@ -37,7 +35,8 @@ export const Badges = ({ formattedDoc, hit, renderFlyoutStreamProcessingLink }: 
 
   const hasLogLevel = Boolean(logLevelValue);
   const isErrorEventType =
-    Boolean(eventTypeValue) && (eventTypeValue === 'error' || eventTypeValue === 'exception');
+    Boolean(eventTypeValue) &&
+    (eventTypeValue?.includes('error') || eventTypeValue?.includes('exception'));
 
   const timestampField = formattedDoc[fieldConstants.TIMESTAMP_FIELD];
   const hasTimestamp = Boolean(timestampField);
