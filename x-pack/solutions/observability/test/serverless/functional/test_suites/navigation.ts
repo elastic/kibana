@@ -14,6 +14,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const common = getPageObject('common');
+  const solutionNavigation = getPageObject('solutionNavigation');
 
   describe('navigation', function () {
     before(async () => {
@@ -158,6 +160,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.tour.expectHidden();
       await browser.refresh();
       await svlCommonNavigation.sidenav.tour.expectHidden();
+    });
+
+    it('opens panel on legacy management landing page', async () => {
+      await common.navigateToApp('management');
+      await testSubjects.exists('cards-navigation-page');
+      await solutionNavigation.sidenav.expectPanelExists('admin_and_settings');
     });
   });
 }

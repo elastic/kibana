@@ -436,8 +436,9 @@ describe('autocomplete', () => {
         'boolean',
         {
           operators: true,
+          skipAssign: true,
         },
-        undefined,
+        ['keyword'],
         ['and', 'or', 'not']
       )
     );
@@ -851,7 +852,7 @@ describe('autocomplete', () => {
       ),
     ]);
 
-    // WHERE argument comparison
+    // WHERE argument comparison (keyword fields get only string operators)
     testSuggestions(
       'FROM a | WHERE keywordField /',
       getFunctionSignaturesByReturnType(
@@ -859,6 +860,7 @@ describe('autocomplete', () => {
         'boolean',
         {
           operators: true,
+          skipAssign: true,
         },
         ['keyword']
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
