@@ -107,7 +107,7 @@ export class HttpService
 
   public async preboot(deps: PrebootDeps): Promise<InternalHttpServicePreboot> {
     this.log.debug('setting up preboot server');
-    
+
     const config = await firstValueFrom(this.config$);
 
     const prebootSetup = await this.prebootServer.setup({
@@ -117,7 +117,9 @@ export class HttpService
       path: '/{p*}',
       method: '*',
       handler: (req, responseToolkit) => {
-        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url.href}. For troubleshooting guidance, see ${deps.docLinks.links.server.troubleshootServerNotReady}`);
+        this.log.debug(
+          `Kibana server is not ready yet ${req.method}:${req.url.href}. For troubleshooting guidance, see ${deps.docLinks.links.server.troubleshootServerNotReady}`
+        );
 
         // If server is not ready yet, because plugins or core can perform
         // long running tasks (build assets, saved objects migrations etc.)
