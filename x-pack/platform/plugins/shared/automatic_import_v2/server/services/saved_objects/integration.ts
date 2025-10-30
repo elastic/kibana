@@ -20,7 +20,6 @@ export const integrationSavedObjectType: SavedObjectsType = {
       data_stream_count: { type: 'integer' },
       created_by: { type: 'keyword' },
       status: { type: 'keyword' },
-      title: { type: 'keyword' },
       metadata: {
         properties: {
           // version , description , created_at etc.,
