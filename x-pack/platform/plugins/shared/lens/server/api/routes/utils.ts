@@ -15,6 +15,7 @@ import type {
   LensResponseItem,
   LensUpdateRequestBody,
 } from './types';
+
 /**
  * Converts Lens request data to Lens Config
  */
@@ -39,14 +40,18 @@ export function getLensRequestConfig(
     throw new Error('Failure to transform API Format');
   }
 
-  const attributes = request;
+  const { visualizationType, ...attributes } = request;
+
+  if (!visualizationType) {
+    throw new Error('Missing visualizationType');
+  }
 
   return {
     ...attributes,
     // TODO: fix these type issues
+    visualizationType,
     title: attributes.title ?? '',
     description: attributes.description ?? undefined,
-    visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   } satisfies LensUpdateIn['data'] & LensUpdateIn['options'];
 }
 

@@ -281,7 +281,6 @@ export type {
   LensEmbeddableOutput,
   ESQLVariablesCompatibleDashboardApi,
   LensByValueBase,
-  LensSerializedSharedState,
 } from './embeddable/types';
 export type {
   LensAppLocatorParams,

@@ -33,11 +33,6 @@ export interface LensItemResponse<M extends Record<string, string | boolean> = {
   meta: LensItemMeta & M;
 }
 
-export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
-  item: LensItem;
-  meta: LensItemMeta & M;
-}
-
 /**
  * This type is to allow `visualizationType` to be `null` in the public context.
  *
