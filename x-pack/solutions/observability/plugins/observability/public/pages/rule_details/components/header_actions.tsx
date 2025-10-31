@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
+import { sloDetailsLocatorID } from '../../..';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { useKibana } from '../../../utils/kibana_react';
 import { useEnableRule } from '../../../hooks/use_enable_rule';
@@ -43,6 +44,11 @@ export function HeaderActions({
   onEditRule,
 }: HeaderActionsProps) {
   const { services } = useKibana();
+  const {
+    share: {
+      url: { locators },
+    },
+  } = services;
   const {
     triggersActionsUi: {
       getRuleSnoozeModal: RuleSnoozeModal,
@@ -122,7 +128,9 @@ export function HeaderActions({
     ruleId,
   });
 
-  const { navigateToLinkedApp, buttonText } = useAppLink({ rule });
+  const locator = locators.get(sloDetailsLocatorID);
+
+  const { linkUrl, buttonText } = useAppLink({ rule, locator });
 
   if (!isRuleEditable || !rule) {
     return null;
@@ -226,18 +234,15 @@ export function HeaderActions({
             />
           </EuiPopover>
         </EuiFlexItem>
-        {navigateToLinkedApp ? (
+        {linkUrl ? (
           <EuiFlexItem grow={false} data-test-subj="ruleSidebarViewInAppAction">
             <EuiButtonEmpty
               color={'primary'}
-              title={buttonText}
+              href={linkUrl}
               className="ruleViewLinkedObjectButton"
               data-test-subj="ruleViewLinkedObjectButton"
               iconType={'eye'}
               aria-label={buttonText}
-              onClick={() => {
-                navigateToLinkedApp();
-              }}
             >
               {buttonText}
             </EuiButtonEmpty>
