@@ -21,7 +21,7 @@ import {
 } from 'yaml';
 import { InvalidYamlSyntaxError } from '../errors';
 
-type DangerouslyParseWorkflowYamlToJSONResult =
+type ParseYamlToJSONWithoutValidationResult =
   | {
       success: false;
       error: Error;
@@ -37,9 +37,9 @@ type DangerouslyParseWorkflowYamlToJSONResult =
  * @param yamlString - The YAML string to parse.
  * @returns The JSON object and the YAML document.
  */
-export function dangerouslyParseWorkflowYamlToJSON(
+export function parseYamlToJSONWithoutValidation(
   yamlString: string
-): DangerouslyParseWorkflowYamlToJSONResult {
+): ParseYamlToJSONWithoutValidationResult {
   try {
     let error: Error | undefined;
     const doc = parseDocument(yamlString);

@@ -9,7 +9,7 @@
 
 import { WorkflowSchemaForAutocomplete } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
-import { dangerouslyParseWorkflowYamlToJSON } from './dangerously_parse_workflow_yaml_to_json';
+import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { InvalidYamlSchemaError } from '../errors';
 import { formatZodError } from '../zod/format_zod_error';
 
@@ -21,21 +21,21 @@ export function parseWorkflowYamlForAutocomplete(
       z.output<typeof WorkflowSchemaForAutocomplete>
     >
   | { success: false; error: Error } {
-  const dangerouslyParseResult = dangerouslyParseWorkflowYamlToJSON(yamlString);
-  if (!dangerouslyParseResult.success) {
+  const parseResult = parseYamlToJSONWithoutValidation(yamlString);
+  if (!parseResult.success) {
     return {
       success: false,
-      error: dangerouslyParseResult.error,
+      error: parseResult.error,
     };
   }
-  const json = dangerouslyParseResult.json;
+  const json = parseResult.json;
   const result = WorkflowSchemaForAutocomplete.safeParse(json);
   if (!result.success) {
     // Use custom error formatter for better user experience
     const { message, formattedError } = formatZodError(
       result.error,
       WorkflowSchemaForAutocomplete,
-      dangerouslyParseResult.document
+      parseResult.document
     );
     return {
       success: false,

@@ -9,4 +9,4 @@
 
 export * from './yaml_utils';
 export { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';
-export { dangerouslyParseWorkflowYamlToJSON } from './dangerously_parse_workflow_yaml_to_json';
+export { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';

@@ -8,7 +8,7 @@
  */
 
 import type { z } from '@kbn/zod';
-import { dangerouslyParseWorkflowYamlToJSON } from './dangerously_parse_workflow_yaml_to_json';
+import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { InvalidYamlSchemaError } from '../errors';
 import { formatZodError } from '../zod/format_zod_error';
 
@@ -16,22 +16,17 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   yamlString: string,
   schema: T
 ): z.SafeParseReturnType<z.input<T>, z.output<T>> | { success: false; error: Error } {
-  const dangerouslyParseResult = dangerouslyParseWorkflowYamlToJSON(yamlString);
-  if (!dangerouslyParseResult.success) {
+  const parseResult = parseYamlToJSONWithoutValidation(yamlString);
+  if (!parseResult.success) {
     return {
       success: false,
-      error: dangerouslyParseResult.error,
+      error: parseResult.error,
     };
   }
-  const json = dangerouslyParseResult.json;
-  const result = schema.safeParse(json);
+  const result = schema.safeParse(parseResult.json);
   if (!result.success) {
     // Use custom error formatter for better user experience
-    const { message, formattedError } = formatZodError(
-      result.error,
-      schema,
-      dangerouslyParseResult.document
-    );
+    const { message, formattedError } = formatZodError(result.error, schema, parseResult.document);
     return {
       success: false,
       error: new InvalidYamlSchemaError(message, formattedError),
