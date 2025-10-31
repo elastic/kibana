@@ -16,8 +16,6 @@ import type {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { apiHasSerializableState } from '@kbn/presentation-publishing';
-import { omit } from 'lodash';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, debounceTime, map, skipWhile, switchMap, tap } from 'rxjs';
 import type { DashboardBackupState } from '../services/dashboard_backup_service';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
@@ -80,7 +78,7 @@ export function initializeUnsavedChangesManager({
     })
   );
 
-  const dashboardStateChanges$: Observable<Partial<DashboardState>> = combineLatest([
+  const dashboardStateChanges$ = combineLatest([
     settingsManager.internalApi.startComparing$(lastSavedState$),
     unifiedSearchManager.internalApi.startComparing$(lastSavedState$),
     layoutManager.internalApi.startComparing$(lastSavedState$),
@@ -114,13 +112,13 @@ export function initializeUnsavedChangesManager({
         }
 
         if (storeUnsavedChanges) {
-          const dashboardBackupState: DashboardBackupState = omit(dashboardChanges ?? {}, [
-            'timeRange',
-            'refreshInterval',
-          ]);
+          const { timeRestore, ...restOfDashboardChanges } = dashboardChanges;
+          const dashboardBackupState: DashboardBackupState = {
+            // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
+            viewMode,
+            ...restOfDashboardChanges,
+          };
 
-          // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
-          dashboardBackupState.viewMode = viewMode;
           // Backup latest state from children that have unsaved changes
           if (hasChildrenUnsavedChanges || hasControlGroupChanges || hasLayoutChanges) {
             const { panels, references } = layoutManager.internalApi.serializeLayout();

@@ -8,14 +8,9 @@
  */
 
 export const DEFAULT_THEME_NAME = 'borealis';
-export const SUPPORTED_THEME_NAMES = ['amsterdam', 'borealis'] as const;
+export const SUPPORTED_THEME_NAMES = ['borealis'] as const;
 
 export type ThemeName = (typeof SUPPORTED_THEME_NAMES)[number];
-
-/**
- * Theme tags of the Amsterdam theme
- */
-export const ThemeAmsterdamTags = ['v8light', 'v8dark'] as const;
 
 /**
  * Theme tags of the experimental Borealis theme
@@ -26,7 +21,7 @@ export const ThemeBorealisTags = ['borealislight', 'borealisdark'] as const;
  * An array of all theme tags supported by Kibana. Note that this list doesn't
  * reflect what theme tags are available in a Kibana build.
  */
-export const SUPPORTED_THEME_TAGS = [...ThemeAmsterdamTags, ...ThemeBorealisTags] as const;
+export const SUPPORTED_THEME_TAGS = [...ThemeBorealisTags] as const;
 
 export type ThemeTag = (typeof SUPPORTED_THEME_TAGS)[number];
 export type ThemeTags = readonly ThemeTag[];
