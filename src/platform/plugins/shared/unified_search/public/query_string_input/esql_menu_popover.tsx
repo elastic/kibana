@@ -24,12 +24,10 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
-import {
-  getRecommendedQueriesTemplatesFromExtensions,
-  getRecommendedQueriesTemplates,
-} from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
+import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
+import { prettifyQueryTemplate } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries/utils';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface ESQLMenuPopoverProps {
@@ -127,19 +125,27 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 
   const esqlContextMenuPanels = useMemo(() => {
     const recommendedQueries = [];
-    // If there are specific recommended queries for the current solution, process them.
-    if (solutionsRecommendedQueries.length) {
-      // Extract the core query templates by removing the 'FROM' clause.
-      const recommendedQueriesTemplatesFromExtensions =
-        getRecommendedQueriesTemplatesFromExtensions(solutionsRecommendedQueries);
-
+    if (solutionsRecommendedQueries.length && typeof adHocDataview !== 'string') {
       // Construct the full recommended queries by prepending the base 'FROM' command
       // and add them to the main list of recommended queries.
+
       recommendedQueries.push(
-        ...recommendedQueriesTemplatesFromExtensions.map((template) => ({
-          label: template.label,
-          queryString: `${queryForRecommendedQueries}${template.text}`,
-        }))
+        ...solutionsRecommendedQueries.map((recommendedQuery) => {
+          const template = prettifyQueryTemplate(recommendedQuery.query);
+
+          // Check if query starts with FROM or TS
+          const startsWithTs = recommendedQuery.query.startsWith('TS');
+
+          // Use the information to conditionally format the query
+          const queryString = startsWithTs
+            ? `TS ${adHocDataview?.name} ${template}`
+            : `${queryForRecommendedQueries} ${template}`;
+
+          return {
+            label: recommendedQuery.name,
+            queryString,
+          };
+        })
       );
     }
 
@@ -247,6 +253,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     ];
     return panels as EuiContextMenuPanelDescriptor[];
   }, [
+    adHocDataview,
     docLinks.links.query.queryESQL,
     onESQLQuerySubmit,
     queryForRecommendedQueries,
