@@ -15,7 +15,6 @@ import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
-import { resolveConversationId } from '../../utils/resolve_conversation_id';
 
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
@@ -41,12 +40,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   const { persistedConversationId, updatePersistedConversationId } = usePersistedConversationId({
     sessionTag: contextProps.sessionTag,
     agentId: contextProps.agentId,
-  });
-
-  const resolvedConversationId = resolveConversationId({
-    isNewConversation: contextProps.newConversation,
-    conversationId: contextProps.conversationId,
-    persistedConversationId,
   });
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
@@ -76,19 +69,27 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   );
 
   // One-time initialization per provider instance:
-  // If no resolved id, clears persisted state.
-  // Otherwise validates the resolved id and persists the outcome.
-  // Guarded by hasInitializedRef to avoid re-running on subsequent renders.
+  // - If newConversation flag is set, clears the conversation ID to start fresh.
+  // - Otherwise, if there's a persisted conversation ID, validates and restores it.
+  // - Otherwise, clears the conversation ID.
+  // Guarded by hasInitializedConversationIdRef to prevent re-running on subsequent renders.
   useEffect(() => {
     if (hasInitializedConversationIdRef.current) return;
 
-    if (resolvedConversationId) {
-      validateAndSetConversationId(resolvedConversationId);
+    if (contextProps.newConversation) {
+      setConversationIdAndPersist(undefined);
+    } else if (persistedConversationId) {
+      validateAndSetConversationId(persistedConversationId);
     } else {
       setConversationIdAndPersist(undefined);
     }
     hasInitializedConversationIdRef.current = true;
-  }, [resolvedConversationId, setConversationIdAndPersist, validateAndSetConversationId]);
+  }, [
+    contextProps.newConversation,
+    persistedConversationId,
+    setConversationIdAndPersist,
+    validateAndSetConversationId,
+  ]);
 
   const onConversationCreated = useCallback(
     ({ conversationId: id }: { conversationId: string }) => {
