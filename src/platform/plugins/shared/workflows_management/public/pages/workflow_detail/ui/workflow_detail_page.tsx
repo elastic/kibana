@@ -112,7 +112,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
             ) : null
           }
         />
-        <WorkflowDetailTestModal workflowId={id} />
+        <WorkflowDetailTestModal />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
