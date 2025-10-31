@@ -1,0 +1,83 @@
+{
+  "id": "serverlessWorkplaceAI",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverlessWorkplaceAI",
+      "id": "def-public.WorkplaceAIServerlessPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "WorkplaceAIServerlessPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/workplaceai/plugins/serverless_workplace_ai/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverlessWorkplaceAI",
+      "id": "def-public.WorkplaceAIServerlessPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "WorkplaceAIServerlessPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/workplaceai/plugins/serverless_workplace_ai/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverlessWorkplaceAI",
+      "id": "def-server.ServerlessWorkplaceAIPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessWorkplaceAIPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/workplaceai/plugins/serverless_workplace_ai/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverlessWorkplaceAI",
+      "id": "def-server.ServerlessWorkplaceAIPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessWorkplaceAIPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/workplaceai/plugins/serverless_workplace_ai/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

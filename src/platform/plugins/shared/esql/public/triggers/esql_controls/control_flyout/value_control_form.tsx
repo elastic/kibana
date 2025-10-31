@@ -18,9 +18,13 @@ import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
-import { getESQLResults, appendStatsByToQuery } from '@kbn/esql-utils';
+import {
+  getESQLResults,
+  appendStatsByToQuery,
+  getIndexPatternFromESQLQuery,
+} from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
-import { ControlLabel } from './shared_form_components';
+import { ControlLabel, ControlSelectionType } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 interface ValueControlFormProps {
@@ -92,9 +96,11 @@ export function ValueControlForm({
     valuesRetrieval ? [valuesRetrieval] : []
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
-  // TODO Remove these from control state
-  const [minimumWidth] = useState(initialState?.width ?? 'medium');
-  const [grow] = useState(initialState?.grow ?? false);
+
+  const shouldDefaultToMultiSelect = variableType === ESQLVariableType.MULTI_VALUES;
+  const [singleSelect, setSingleSelect] = useState<boolean>(
+    initialState?.singleSelect ?? !shouldDefaultToMultiSelect
+  );
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setSelectedValues(selectedOptions);
@@ -129,6 +135,10 @@ export function ValueControlForm({
 
   const onLabelChange = useCallback((e: { target: { value: React.SetStateAction<string> } }) => {
     setLabel(e.target.value);
+  }, []);
+
+  const onSelectionTypeChange = useCallback((isSingleSelect: boolean) => {
+    setSingleSelect(isSingleSelect);
   }, []);
 
   const onValuesQuerySubmit = useCallback(
@@ -173,14 +183,18 @@ export function ValueControlForm({
   );
 
   useEffect(() => {
-    if (
-      !selectedValues?.length &&
-      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
-      valuesRetrieval
-    ) {
-      onValuesQuerySubmit(queryString);
+    if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
+      if (initialState?.esqlQuery) {
+        onValuesQuerySubmit(initialState.esqlQuery);
+      } else if (valuesRetrieval) {
+        const queryForValues = `FROM ${getIndexPatternFromESQLQuery(
+          queryString
+        )} | STATS BY ${valuesRetrieval}`;
+        onValuesQuerySubmit(queryForValues);
+      }
     }
   }, [
+    initialState?.esqlQuery,
     controlFlyoutType,
     onValuesQuerySubmit,
     queryString,
@@ -196,23 +210,21 @@ export function ValueControlForm({
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
-      width: minimumWidth,
+      singleSelect,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
-      variableType,
+      variableType: singleSelect ? variableType : ESQLVariableType.MULTI_VALUES,
       esqlQuery: valuesQuery || queryString,
       controlType: controlFlyoutType,
-      grow,
     };
     if (!isEqual(state, initialState)) {
       setControlState(state);
     }
   }, [
+    singleSelect,
     controlFlyoutType,
-    grow,
     initialState,
     label,
-    minimumWidth,
     queryString,
     selectedValues,
     setControlState,
@@ -339,6 +351,11 @@ export function ValueControlForm({
         </EuiFormRow>
       )}
       <ControlLabel label={label} onLabelChange={onLabelChange} />
+
+      <ControlSelectionType
+        singleSelect={singleSelect}
+        onSelectionTypeChange={onSelectionTypeChange}
+      />
     </>
   );
 }

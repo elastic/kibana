@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import {
@@ -15,11 +15,17 @@ import {
   EuiWrappingPopover,
   type EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { openLazyFlyout } from '@kbn/presentation-util';
+import { coreServices } from '../../../services/kibana_services';
+import {
+  executeCreateTimeSliderControlPanelAction,
+  isTimeSliderControlCreationCompatible,
+} from '../../../dashboard_actions/execute_create_time_slider_control_panel_action';
+import { executeCreateControlPanelAction } from '../../../dashboard_actions/execute_create_control_panel_action';
+import { executeCreateESQLControlPanelAction } from '../../../dashboard_actions/execute_create_esql_control_panel_action';
 import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { addFromLibrary } from '../../../dashboard_renderer/add_panel_from_library';
@@ -28,8 +34,27 @@ import { getCreateVisualizationButtonTitle } from '../../_dashboard_app_strings'
 interface AddMenuProps {
   dashboardApi: DashboardApi;
   anchorElement: HTMLElement;
-  coreServices: CoreStart;
 }
+
+const getControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.controlsMenuButtonLabel', {
+    defaultMessage: 'Controls',
+  });
+
+const getAddControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addControlButtonLabel', {
+    defaultMessage: 'Control',
+  });
+
+const getAddESQLControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addESQLControlButtonLabel', {
+    defaultMessage: 'Variable control',
+  });
+
+const getAddTimeSliderControlButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addTimeSliderControlButtonLabel', {
+    defaultMessage: 'Time slider control',
+  });
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -43,13 +68,12 @@ function cleanup() {
   isOpen = false;
 }
 
-export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) => {
-  /** TODO: Set this as part of the timeslider conversion */
-  const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
+export const AddMenu = ({ dashboardApi, anchorElement }: AddMenuProps) => {
+  const [canCreateTimeSlider, setCanCreateTimeSlider] = useState(false);
 
-  const onSave = () => {
-    dashboardApi.scrollToTop();
-  };
+  useEffect(() => {
+    isTimeSliderControlCreationCompatible(dashboardApi).then(setCanCreateTimeSlider);
+  }, [dashboardApi]);
 
   const closePopover = useCallback(() => {
     cleanup();
@@ -76,7 +100,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
         triggerId: 'dashboardAddTopNavButton',
       },
     });
-  }, [coreServices, dashboardApi]);
+  }, [dashboardApi]);
 
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -102,6 +126,14 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
             openAddPanelFlyout();
             closePopover();
           },
+        },
+        {
+          name: i18n.translate('dashboard.solutionToolbar.controlsMenuButtonLabel', {
+            defaultMessage: 'Controls',
+          }),
+          icon: 'controlsHorizontal',
+          'data-test-subj': 'dashboard-controls-menu-button',
+          panel: 1,
         },
         {
           name: i18n.translate('dashboard.solutionToolbar.addSectionButtonLabel', {
@@ -130,6 +162,41 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
         },
       ],
     },
+    {
+      id: 1,
+      title: getControlButtonTitle(),
+      initialFocusedItemIndex: 0,
+      items: [
+        {
+          name: getAddControlButtonTitle(),
+          icon: 'empty',
+          'data-test-subj': 'controls-create-button',
+          onClick: async () => {
+            await executeCreateControlPanelAction(dashboardApi);
+            closePopover();
+          },
+        },
+        {
+          name: getAddESQLControlButtonTitle(),
+          icon: 'empty',
+          'data-test-subj': 'esql-control-create-button',
+          onClick: async () => {
+            await executeCreateESQLControlPanelAction(dashboardApi);
+            closePopover();
+          },
+        },
+        {
+          name: getAddTimeSliderControlButtonTitle(),
+          icon: 'empty',
+          'data-test-subj': 'controls-create-timeslider-button',
+          disabled: !canCreateTimeSlider,
+          onClick: async () => {
+            await executeCreateTimeSliderControlPanelAction(dashboardApi);
+            closePopover();
+          },
+        },
+      ],
+    },
   ];
 
   return (
@@ -145,7 +212,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
   );
 };
 
-export function showAddMenu({ dashboardApi, anchorElement, coreServices }: AddMenuProps) {
+export function showAddMenu({ dashboardApi, anchorElement }: AddMenuProps) {
   if (isOpen) {
     cleanup();
     return;
@@ -155,11 +222,7 @@ export function showAddMenu({ dashboardApi, anchorElement, coreServices }: AddMe
   document.body.appendChild(container);
   ReactDOM.render(
     <KibanaContextProvider services={coreServices}>
-      <AddMenu
-        dashboardApi={dashboardApi}
-        anchorElement={anchorElement}
-        coreServices={coreServices}
-      />
+      <AddMenu dashboardApi={dashboardApi} anchorElement={anchorElement} />
     </KibanaContextProvider>,
     container
   );

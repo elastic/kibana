@@ -15,6 +15,9 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import { licenseService } from '..';
+import { LICENSE_FOR_AGENT_MIGRATION } from '../../../common/constants';
+
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { getAgents, getAgentsByKuery, openPointInTime } from './crud';
@@ -34,6 +37,13 @@ export async function migrateSingleAgent(
     settings?: Record<string, any>;
   }
 ) {
+  // Check the user has the correct license
+  if (!licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)) {
+    throw new FleetUnauthorizedError(
+      `Agent migration requires an ${LICENSE_FOR_AGENT_MIGRATION} license. Please upgrade your license.`
+    );
+  }
+
   //  If the agent belongs to a policy that is protected or has fleet-server as a component meaning its a fleet server agent, throw an error
   if (agentPolicy?.is_protected) {
     throw new FleetUnauthorizedError(`Agent is protected and cannot be migrated`);
@@ -77,6 +87,13 @@ export async function bulkMigrateAgents(
     settings?: Record<string, any>;
   }
 ): Promise<{ actionId: string }> {
+  // Check the user has the correct license
+  if (!licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)) {
+    throw new FleetUnauthorizedError(
+      `Agent migration requires an ${LICENSE_FOR_AGENT_MIGRATION} license. Please upgrade your license.`
+    );
+  }
+
   const currentSpaceId = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {

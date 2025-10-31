@@ -9,9 +9,10 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, debounceTime, map } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { getReferencesForPanelId } from '../../common';
+
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import type { DashboardState } from '../../common/types';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
@@ -19,8 +20,6 @@ import type { LoadDashboardReturn } from '../services/dashboard_content_manageme
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
-import { initializeFiltersManager } from './filters_manager';
-import { getSerializedState } from './get_serialized_state';
 import { initializeLayoutManager } from './layout_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
@@ -35,16 +34,18 @@ import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
 import { initializeTimesliceManager } from './timeslice_manager';
+import { initializeFiltersManager } from './filters_manager';
+// import { mergeControlGroupStates } from './merge_control_group_states';
 
 export function getDashboardApi({
   creationOptions,
-  incomingEmbeddable,
+  incomingEmbeddables,
   initialState,
   savedObjectResult,
   savedObjectId,
 }: {
   creationOptions?: DashboardCreationOptions;
-  incomingEmbeddable?: EmbeddablePackageState | undefined;
+  incomingEmbeddables?: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
@@ -54,7 +55,7 @@ export function getDashboardApi({
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
 
-  const viewModeManager = initializeViewModeManager(incomingEmbeddable, savedObjectResult);
+  const viewModeManager = initializeViewModeManager(incomingEmbeddables, savedObjectResult);
   const trackPanel = initializeTrackPanel(async (id: string) => {
     await layoutManager.api.getChildApi(id);
   }, dashboardContainerRef$);
@@ -64,13 +65,24 @@ export function getDashboardApi({
     return getReferencesForPanelId(id, references$.value ?? []);
   };
 
+  // TODO: Handle incoming sticky embeddables
+  // const incomingControlGroup = incomingEmbeddables?.find(
+  //   (embeddable) => embeddable.type === CONTROLS_GROUP_TYPE
+  // );
+  const restEmbeddables = incomingEmbeddables;
+
   const layoutManager = initializeLayoutManager(
-    incomingEmbeddable,
+    restEmbeddables,
     initialState.panels,
     initialState.controlGroupInput,
     trackPanel,
     getReferences
   );
+  // const mergedControlGroupState = mergeControlGroupStates(
+  //   initialState.controlGroupInput,
+  //   incomingControlGroup
+  // );
+
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
   const settingsManager = initializeSettingsManager(initialState);
@@ -110,15 +122,16 @@ export function getDashboardApi({
     } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
-      ...settingsManager.api.getSettings(),
+      ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
       panels,
       controlGroupInput,
     };
 
+    // ...(controlGroupReferences ?? []),
     return {
       dashboardState,
-      panelReferences: panelReferences ?? [],
+      references: [...(panelReferences ?? [])],
     };
   }
 
@@ -145,7 +158,10 @@ export function getDashboardApi({
       arePanelsRelated$.next((a: string, b: string) => getRelatedPanels(a).includes(b))
     );
 
+  const isFetchPaused$ = new BehaviorSubject<boolean>(false); // TODO: Make this work and probably move it to another file
+
   const dashboardApi = {
+    isFetchPaused$,
     ...viewModeManager.api,
     ...dataLoadingManager.api,
     ...dataViewsManager.api,
@@ -173,15 +189,28 @@ export function getDashboardApi({
     },
     isEmbeddedExternally: Boolean(creationOptions?.isEmbeddedExternally),
     isManaged,
-    reload$: unifiedSearchManager.internalApi.panelsReload$.pipe(debounceTime(0)),
-    getSerializedState: () => getSerializedState(getState()),
+    getSerializedState: () => {
+      const { dashboardState, references } = getState();
+      return {
+        attributes: dashboardState,
+        references,
+      };
+    },
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
+
+      const { description, tags, timeRestore, title } = settingsManager.api.getSettings();
       const saveResult = await openSaveModal({
+        description,
         isManaged,
         lastSavedId: savedObjectId$.value,
+        serializeState: getState,
+        setTimeRestore: (newTimeRestore: boolean) =>
+          settingsManager.api.setSettings({ timeRestore: newTimeRestore }),
+        tags,
+        timeRestore,
+        title,
         viewMode: viewModeManager.api.viewMode$.value,
-        ...getState(),
       });
 
       if (!saveResult || saveResult.error) {
@@ -197,7 +226,6 @@ export function getDashboardApi({
           hidePanelTitles: settings.hidePanelTitles ?? false,
           description: saveResult.savedState.description,
           tags: saveResult.savedState.tags,
-          timeRestore: saveResult.savedState.timeRestore,
           title: saveResult.savedState.title,
         });
         savedObjectId$.next(saveResult.id);
@@ -207,10 +235,10 @@ export function getDashboardApi({
     },
     runQuickSave: async () => {
       if (isManaged) return;
-      const { dashboardState, panelReferences } = getState();
+      const { dashboardState, references } = getState();
       const saveResult = await getDashboardContentManagementService().saveDashboardState({
         dashboardState,
-        panelReferences,
+        references,
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
       });
@@ -243,7 +271,7 @@ export function getDashboardApi({
 
   const searchSessionManager = initializeSearchSessionManager(
     creationOptions?.searchSessionSettings,
-    incomingEmbeddable,
+    incomingEmbeddables,
     dashboardApi,
     internalApi
   );

@@ -16,9 +16,8 @@ import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../../dashboard_saved_object';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardState } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
 describe('transformDashboardOut', () => {
   const controlGroupInputControlsSo = {
@@ -39,7 +38,7 @@ describe('transformDashboardOut', () => {
     },
   ];
 
-  test('should set default values if not provided', () => {
+  test('should not supply defaults for missing properties', () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
@@ -52,7 +51,7 @@ describe('transformDashboardOut', () => {
       title: 'my title',
       description: 'my description',
     };
-    expect(transformDashboardOut(input)).toEqual<DashboardAttributes>({
+    expect(transformDashboardOut(input)).toEqual<DashboardState>({
       controlGroupInput: {
         labelPosition: '', // TODO: Remove
         ignoreParentSettings: {}, // TODO: Remove
@@ -70,7 +69,6 @@ describe('transformDashboardOut', () => {
       },
       description: 'my description',
       options: {
-        ...DEFAULT_DASHBOARD_OPTIONS,
         hidePanelTitles: false,
       },
       panels: [
@@ -86,7 +84,6 @@ describe('transformDashboardOut', () => {
           version: '2',
         },
       ],
-      timeRestore: false,
       title: 'my title',
     });
   });
@@ -140,7 +137,7 @@ describe('transformDashboardOut', () => {
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toEqual<DashboardAttributes>({
+    expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
       controlGroupInput: {
         labelPosition: 'twoLine',
         ignoreParentSettings: {
@@ -199,7 +196,6 @@ describe('transformDashboardOut', () => {
         from: 'now-15m',
         to: 'now',
       },
-      timeRestore: true,
       title: 'title',
     });
   });

@@ -98,7 +98,9 @@
     "@kbn/licensing-types",
     "@kbn/control-group-renderer",
     "@kbn/es-query-server",
-    "@kbn/data-service-server"
+    "@kbn/data-service-server",
+    "@kbn/visualizations-common",
+    "@kbn/lens-common"
   ],
   "exclude": ["target/**/*"]
 }

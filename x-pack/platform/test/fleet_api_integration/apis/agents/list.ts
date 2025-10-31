@@ -19,8 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const mockAgentlessApiService = setupMockServer();
   let elasticAgentpkgVersion: string;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170690
-  describe.skip('fleet_list_agent', () => {
+  describe('fleet_list_agent', () => {
     let mockApiServer: http.Server;
 
     before(async () => {
@@ -99,6 +98,13 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.total).to.eql(1);
       const agent = apiResponse.items[0];
       expect(agent.access_api_key_id).to.eql('api-key-2');
+    });
+
+    it('should return a 400 when given an invalid "sortField" value', async () => {
+      await supertest
+        .get(`/api/fleet/agents?sortField=invalid_field`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(400);
     });
 
     it('should return a 200 when given sort options', async () => {
@@ -316,18 +322,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should not return agentless agents when showAgentless=false', async () => {
-      // Set up default Fleet Server host, needed during agentless agent creation
-      await supertest
-        .post(`/api/fleet/fleet_server_hosts`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          id: 'fleet-default-fleet-server-host',
-          name: 'Default',
-          is_default: true,
-          host_urls: ['https://test.com:8080', 'https://test.com:8081'],
-        })
-        .expect(200);
-
       // Create an agentless agent policy
       const { body: policyRes } = await supertest
         .post('/api/fleet/agent_policies')

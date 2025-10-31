@@ -15,6 +15,7 @@ import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import { map } from 'rxjs';
 import { ACTION_CREATE_TIME_SLIDER } from './constants';
+
 import { apiPublishesControlsLayout } from './types';
 
 const compatibilityCheck = (api: unknown | null) =>

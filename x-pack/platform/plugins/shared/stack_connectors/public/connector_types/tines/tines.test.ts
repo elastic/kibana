@@ -19,8 +19,6 @@ const webhook = {
   id: 1234,
   name: 'some webhook action',
   storyId: 5435,
-  path: 'somePath',
-  secret: 'someSecret',
 };
 const actionParams: TinesExecuteActionParams = {
   subAction: SUB_ACTION.RUN,
@@ -71,28 +69,6 @@ describe('tines action params validation', () => {
     expect(validation.errors).toEqual({
       ...defaultValidationErrors,
       webhook: ['Webhook is required.'],
-    });
-  });
-
-  it('should fail when webhook path is missing', async () => {
-    const validation = await actionTypeModel.validateParams({
-      ...actionParams,
-      subActionParams: { webhook: { ...webhook, path: '' } },
-    });
-    expect(validation.errors).toEqual({
-      ...defaultValidationErrors,
-      webhook: ['Webhook action path is missing.'],
-    });
-  });
-
-  it('should fail when webhook secret is missing', async () => {
-    const validation = await actionTypeModel.validateParams({
-      ...actionParams,
-      subActionParams: { webhook: { ...webhook, secret: '' } },
-    });
-    expect(validation.errors).toEqual({
-      ...defaultValidationErrors,
-      webhook: ['Webhook action secret is missing.'],
     });
   });
 

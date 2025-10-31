@@ -35,6 +35,8 @@
     "@kbn/response-ops-rules-apis",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
-    "@kbn/control-group-renderer"
+    "@kbn/control-group-renderer",
+    "@kbn/react-query",
+    "@kbn/es-ui-shared-plugin"
   ]
 }

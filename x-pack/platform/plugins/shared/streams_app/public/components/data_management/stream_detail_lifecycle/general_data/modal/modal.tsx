@@ -7,8 +7,19 @@
 
 import React, { useState, useMemo } from 'react';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import type { IngestStreamLifecycle, IngestStreamLifecycleDSL } from '@kbn/streams-schema';
-import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
+import type {
+  IngestStreamLifecycle,
+  IngestStreamLifecycleAll,
+  IngestStreamLifecycleDSL,
+} from '@kbn/streams-schema';
+import {
+  effectiveToIngestLifecycle,
+  isDisabledLifecycle,
+  isDslLifecycle,
+  isErrorLifecycle,
+  isIlmLifecycle,
+  isInheritLifecycle,
+} from '@kbn/streams-schema';
 import { Streams, isRoot } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -60,8 +71,8 @@ export function EditLifecycleModal({
 
   const [isInheritToggleOn, setIsInheritToggleOn] = useState<boolean>(isCurrentLifecycleInherit);
   const [selectedAction, setSelectedAction] = useState<LifecycleEditAction>(initialSelectedAction);
-  const [lifecycle, setLifecycle] = useState<IngestStreamLifecycle>(
-    definition.effective_lifecycle as IngestStreamLifecycle
+  const [lifecycle, setLifecycle] = useState<IngestStreamLifecycleAll>(
+    effectiveToIngestLifecycle(definition.effective_lifecycle)
   );
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState<boolean>(
@@ -77,12 +88,14 @@ export function EditLifecycleModal({
         label: i18n.translate('xpack.streams.streamDetailLifecycle.indefinite', {
           defaultMessage: 'Indefinite',
         }),
+        'data-test-subj': 'indefiniteRetentionButton',
       },
       {
         id: 'custom',
         label: i18n.translate('xpack.streams.streamDetailLifecycle.customPeriod', {
           defaultMessage: 'Custom period',
         }),
+        'data-test-subj': 'customRetentionButton',
       },
     ];
 
@@ -92,6 +105,7 @@ export function EditLifecycleModal({
         label: i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicy', {
           defaultMessage: 'ILM policy',
         }),
+        'data-test-subj': 'ilmRetentionButton',
       });
     }
 
@@ -105,7 +119,7 @@ export function EditLifecycleModal({
   return (
     <EuiModal onClose={closeModal} aria-labelledby={modalTitleId} css={{ width: '600px' }}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
+        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="editLifecycleModalTitle">
           {i18n.translate('xpack.streams.streamDetailLifecycle.editRetention', {
             defaultMessage: 'Edit data retention',
           })}
@@ -117,7 +131,7 @@ export function EditLifecycleModal({
           {(!isWired || !isRoot(definition.stream.name)) && (
             <EuiFlexItem>
               <EuiText>
-                <h5>
+                <h5 data-test-subj="inheritRetentionHeading">
                   {isWired
                     ? i18n.translate(
                         'xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel',
@@ -154,7 +168,7 @@ export function EditLifecycleModal({
                 onChange={(event) => {
                   if (event.target.checked) {
                     if (isCurrentLifecycleInherit) {
-                      setLifecycle(definition.effective_lifecycle as IngestStreamLifecycle);
+                      setLifecycle(effectiveToIngestLifecycle(definition.effective_lifecycle));
                       setSelectedAction(initialSelectedAction);
                     }
                     setIsInheritToggleOn(true);
@@ -171,7 +185,7 @@ export function EditLifecycleModal({
 
           <EuiFlexItem>
             <EuiText>
-              <h5>
+              <h5 data-test-subj="customRetentionHeading">
                 {i18n.translate('xpack.streams.streamDetailLifecycle.dataRetention', {
                   defaultMessage: 'Custom retention',
                 })}
@@ -201,6 +215,7 @@ export function EditLifecycleModal({
               buttonSize="m"
               isDisabled={isInheritToggleOn}
               isFullWidth
+              data-test-subj="dataRetentionButtonGroup"
             />
             <EuiSpacer size="s" />
 
@@ -256,7 +271,18 @@ export function EditLifecycleModal({
               fill
               disabled={isSaveButtonDisabled}
               isLoading={updateInProgress}
-              onClick={() => updateLifecycle(isInheritToggleOn ? { inherit: {} } : lifecycle)}
+              onClick={() => {
+                if (isInheritToggleOn) {
+                  updateLifecycle({ inherit: {} });
+                  return;
+                }
+
+                if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
+                  return;
+                }
+
+                updateLifecycle(lifecycle);
+              }}
             >
               {i18n.translate('xpack.streams.streamDetailLifecycle.saveButton', {
                 defaultMessage: 'Save',

@@ -17,6 +17,7 @@ import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
+  type PublishingSubject,
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
@@ -125,7 +126,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       });
 
       const componentStaticState = {
-        singleSelect: true,
+        singleSelect: initialState.singleSelect ?? true,
         exclude: false,
         existsSelected: false,
         requestSize: 0,
@@ -146,13 +147,27 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         ...selections.internalApi,
         uuid,
         makeSelection(key?: string) {
-          if (key) selections.internalApi.setSelectedOptions([key]);
+          const singleSelect = selections.api.singleSelect$.value ?? true;
+          if (singleSelect && key) {
+            selections.internalApi.setSelectedOptions([key]);
+          } else if (key) {
+            // Get current selection state, not initial state
+            const current = componentApi.selectedOptions$.value || [];
+            const isSelected = current.includes(key);
+            const newSelection = isSelected ? current.filter((k) => k !== key) : [...current, key];
+            selections.internalApi.setSelectedOptions(newSelection);
+          }
         },
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
         ...componentStaticStateManager.api,
+        singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
         deselectOption: () => {},
-        selectAll: () => {},
-        deselectAll: () => {},
+        selectAll: (keys: string[]) => {
+          selections.internalApi.setSelectedOptions(keys);
+        },
+        deselectAll: () => {
+          selections.internalApi.setSelectedOptions([]);
+        },
         loadMoreSubject: new BehaviorSubject<void>(undefined),
         fieldFormatter: new BehaviorSubject((v: string) => v),
         allowExpensiveQueries$: new BehaviorSubject<boolean>(true),

@@ -43,12 +43,12 @@ const optionListControlStyles = {
     }),
   validOption: ({ euiTheme }: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.text,
+      color: euiTheme.colors.textParagraph,
       fontWeight: euiTheme.font.weight.regular,
     }),
   invalidOption: ({ euiTheme }: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.warningText,
+      color: euiTheme.colors.textWarning,
       fontWeight: euiTheme.font.weight.medium,
     }),
   optionsListExistsFilter: ({ euiTheme }: UseEuiTheme) => css`
@@ -59,10 +59,10 @@ const optionListControlStyles = {
   filterButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
-      color: `${euiTheme.colors.subduedText} !important`,
+      color: `${euiTheme.colors.textSubdued} !important`,
       padding: `0 ${euiTheme.size.s}`,
       '&:hover::before': {
-        background: `${euiTheme.colors.backgroundBaseSubdued} !important`,
+        background: `${euiTheme.colors.backgroundBasePlain} !important`,
       },
       blockSize: '100% !important',
     }),
@@ -73,11 +73,13 @@ const optionListControlStyles = {
   inputButtonOverride: css({
     width: '100%',
     height: '100%',
+    maxInlineSize: '100%',
   }),
   /* additional custom overrides due to unexpected component usage;
     open issue: https://github.com/elastic/eui-private/issues/270 */
   filterGroup: css`
     height: 100%;
+    width: 100%;
 
     /* prevents duplicate border due to nested filterGroup */
     &::after {
@@ -151,9 +153,7 @@ export const OptionsListControl = () => {
                 <>
                   {selectedOptions?.length
                     ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
-                        const text = `${fieldFormatter(value)}${
-                          i + 1 === length ? '' : delimiter
-                        } `;
+                        const text = `${fieldFormatter(value)}${i + 1 === length ? '' : delimiter}`;
                         const isInvalid = invalidSelections?.has(value);
                         return (
                           <span
@@ -209,56 +209,54 @@ export const OptionsListControl = () => {
   ]);
 
   const button = (
+    <EuiFilterButton
+      badgeColor="success"
+      isLoading={loading}
+      iconType={'arrowDown'}
+      data-test-subj={`optionsList-control-${componentApi.uuid}`}
+      css={styles.filterButton}
+      onClick={() => setPopoverOpen(!isPopoverOpen)}
+      isSelected={isPopoverOpen}
+      numActiveFilters={selectedOptionsCount}
+      hasActiveFilters={Boolean(selectedOptionsCount)}
+      textProps={{ css: styles.filterButtonText }}
+      aria-label={panelTitle ?? defaultPanelTitle}
+      aria-expanded={isPopoverOpen}
+      aria-controls={popoverId}
+      role="combobox"
+    >
+      {hasSelections || existsSelected
+        ? selectionDisplayNode
+        : displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}
+    </EuiFilterButton>
+  );
+
+  return (
     <EuiFilterGroup
       fullWidth
       compressed={isCompressed(componentApi)}
       css={optionListControlStyles.filterGroup}
     >
-      <EuiFilterButton
-        badgeColor="success"
-        isLoading={loading}
-        iconType={'arrowDown'}
-        data-test-subj={`optionsList-control-${componentApi.uuid}`}
-        css={styles.filterButton}
-        onClick={() => setPopoverOpen(!isPopoverOpen)}
-        isSelected={isPopoverOpen}
-        numActiveFilters={selectedOptionsCount}
-        hasActiveFilters={Boolean(selectedOptionsCount)}
-        textProps={{ css: styles.filterButtonText }}
-        aria-label={panelTitle ?? defaultPanelTitle}
-        aria-expanded={isPopoverOpen}
-        aria-controls={popoverId}
-        role="combobox"
+      <EuiInputPopover
+        id={popoverId}
+        ownFocus
+        input={button}
+        repositionOnScroll
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
+        panelMinWidth={MIN_POPOVER_WIDTH}
+        className="optionsList__inputButtonOverride"
+        css={styles.inputButtonOverride}
+        initialFocus={'[data-test-subj=optionsList-control-search-input]'}
+        closePopover={() => setPopoverOpen(false)}
+        panelClassName="optionsList__popoverOverride"
+        panelProps={{
+          title: panelTitle ?? defaultPanelTitle,
+          'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
+        }}
       >
-        {hasSelections || existsSelected
-          ? selectionDisplayNode
-          : displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}
-      </EuiFilterButton>
+        <OptionsListPopover />
+      </EuiInputPopover>
     </EuiFilterGroup>
-  );
-
-  return (
-    <EuiInputPopover
-      fullWidth
-      id={popoverId}
-      ownFocus
-      input={button}
-      hasArrow={false}
-      repositionOnScroll
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-      panelMinWidth={MIN_POPOVER_WIDTH}
-      className="optionsList__inputButtonOverride"
-      css={styles.inputButtonOverride}
-      initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-      closePopover={() => setPopoverOpen(false)}
-      panelClassName="optionsList__popoverOverride"
-      panelProps={{
-        title: panelTitle ?? defaultPanelTitle,
-        'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
-      }}
-    >
-      <OptionsListPopover />
-    </EuiInputPopover>
   );
 };

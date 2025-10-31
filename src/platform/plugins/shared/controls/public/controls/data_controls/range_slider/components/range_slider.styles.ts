@@ -22,41 +22,39 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
     // EuiFormControlLayout, so unfortunately there is some double nesting going on here
     // that we need to account for via height inheritence & unsetting EuiDualRange's
     // form control layout colors/borders
+
     rangeSliderControl: css`
       &,
       .euiPopover,
       .euiFormControlLayoutDelimited {
-        height: 100%;
+        background-color: ${euiTheme.colors.backgroundBasePlain};
         width: 100%;
+        height: 100%;
       }
 
-      /**
-       * Workarounds for removing the border from EuiDualRange
-       * Border is rendered with a combination of outline, border on ::after, and box-shadows
-       */
+      // remove the border coming from EUI
+      .euiFormControlLayoutDelimited::after {
+        border: none !important;
+      }
+
       .euiFormControlLayout {
-        background: transparent;
         border: none;
         border-radius: 0;
-        box-shadow: none;
 
-        &::after {
-          display: none;
-        }
-
+        // Removes the border that appears on hover
         &:hover {
           z-index: 0 !important;
-          outline: none !important;
+
+          .euiFormControlLayout__childrenWrapper {
+            outline: none !important;
+          }
         }
       }
 
       .euiFormControlLayout__childrenWrapper {
-        /* Additional border removal workarounds */
+        border: none;
         box-shadow: none;
-
-        &:hover {
-          outline: none !important;
-        }
+        background: ${euiTheme.colors.backgroundBasePlain};
 
         /** Don't deform the control when rendering the loading spinner. 
         * Instead, render the spinner on top of the control with a light background,

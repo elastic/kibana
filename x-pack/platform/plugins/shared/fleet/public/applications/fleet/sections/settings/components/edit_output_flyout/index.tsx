@@ -63,20 +63,20 @@ import { OutputFormLogstashSection } from './output_form_logstash';
 import { OutputFormElasticsearchSection } from './output_form_elasticsearch';
 
 export interface EditOutputFlyoutProps {
-  defaultOuput?: Output;
+  defaultOutput?: Output;
   output?: Output;
   onClose: () => void;
   proxies: FleetProxy[];
 }
 
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
-  defaultOuput,
+  defaultOutput,
   onClose,
   output,
   proxies,
 }) => {
   useBreadcrumbs('settings');
-  const form = useOutputForm(onClose, output, defaultOuput);
+  const form = useOutputForm(onClose, output, defaultOutput);
   const inputs = form.inputs;
   const { docLinks, cloud } = useStartServices();
   const fleetStatus = useFleetStatus();
@@ -470,7 +470,25 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               helpText={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.writeToStreamsHelpText"
-                  defaultMessage="When enabled, adds logs and logs.* to the output streams configuration in the agent policy."
+                  defaultMessage="When enabled, agents will be granted additional permissions to write data to {streamsLink}. To learn more, refer to the {learnMore} documentation."
+                  values={{
+                    streamsLink: (
+                      <EuiLink href={docLinks.links.observability.logsStreams} target="_blank">
+                        <FormattedMessage
+                          id="xpack.fleet.settings.editOutputFlyout.streamsLink"
+                          defaultMessage="Streams"
+                        />
+                      </EuiLink>
+                    ),
+                    learnMore: (
+                      <EuiLink href={docLinks.links.observability.wiredStreams} target="_blank">
+                        <FormattedMessage
+                          id="xpack.fleet.settings.editOutputFlyout.learnMore"
+                          defaultMessage="wired streams"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
                 />
               }
             >
@@ -478,7 +496,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 label={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.writeToStreamsLabel"
-                    defaultMessage="Write to logs streams"
+                    defaultMessage="Allow agents to write to Streams"
                   />
                 }
                 checked={inputs.writeToStreams.value}

@@ -13,7 +13,8 @@ export enum RuleUpgradeEventTypes {
 }
 interface ReportRuleUpgradeFlyoutButtonClickParams {
   type: 'update' | 'dismiss';
-  hasMissingBaseVersion: boolean;
+  hasBaseVersion: boolean;
+  eventVersion: number;
 }
 
 interface ReportRuleUpgradeSingleButtonClickParams {
@@ -21,7 +22,8 @@ interface ReportRuleUpgradeSingleButtonClickParams {
 }
 
 interface ReportRuleUpgradeFlyoutOpenParams {
-  hasMissingBaseVersion: boolean;
+  hasBaseVersion: boolean;
+  eventVersion: number;
 }
 
 export interface RuleUpgradeTelemetryEventsMap {

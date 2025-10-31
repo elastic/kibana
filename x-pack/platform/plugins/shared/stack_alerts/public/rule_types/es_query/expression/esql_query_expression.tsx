@@ -19,12 +19,9 @@ import {
 } from '@elastic/eui';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
-import { type DataPublicPluginStart, getEsQueryConfig } from '@kbn/data-plugin/public';
-import { getTime } from '@kbn/data-plugin/common';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
-import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
+import { type AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   firstFieldOption,
@@ -43,19 +40,32 @@ import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
 import { transformToEsqlTable, getEsqlQueryHits, ALERT_ID_SUGGESTED_MAX } from '../../../../common';
 
-const getTimeFilter = (
-  queryService: DataPublicPluginStart['query'],
-  uiSettings: IUiSettingsClient,
-  timeFieldName?: string
-) => {
-  const esQueryConfigs = getEsQueryConfig(uiSettings);
-  const timeFilter =
-    queryService.timefilter.timefilter.getTime() &&
-    getTime(undefined, queryService.timefilter.timefilter.getTime(), {
-      fieldName: timeFieldName,
-    });
-
-  return buildEsQuery(undefined, [], timeFilter ? [timeFilter] : [], esQueryConfigs);
+export const getTimeFilter = (timeField: string, window: string) => {
+  const timeWindow = parseDuration(window);
+  const now = Date.now();
+  const dateEnd = new Date(now).toISOString();
+  const dateStart = new Date(now - timeWindow).toISOString();
+  return {
+    timeRange: {
+      from: dateStart,
+      to: dateEnd,
+    },
+    timeFilter: {
+      bool: {
+        filter: [
+          {
+            range: {
+              [timeField]: {
+                lte: dateEnd,
+                gt: dateStart,
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ],
+      },
+    },
+  };
 };
 
 const ALL_DOCUMENTS = 'all';
@@ -102,7 +112,7 @@ const keepRecommendedWarning = i18n.translate(
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
-  const { http, isServerless, dataViews, uiSettings } = useTriggerUiActionServices();
+  const { http, isServerless, dataViews } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
 
@@ -202,17 +212,12 @@ export const EsqlQueryExpression: React.FC<
       return emptyResult;
     }
     setIsLoading(true);
-    const timeWindow = parseDuration(window);
-    const now = Date.now();
-    const timeFilter = getTimeFilter(data.query, uiSettings, timeField);
+    const { timeFilter, timeRange } = getTimeFilter(timeField, window);
     const table = await getESQLResults({
       esqlQuery: esqlQuery.esql,
       search: data.search.search,
       dropNullColumns: true,
-      timeRange: {
-        from: new Date(now - timeWindow).toISOString(),
-        to: new Date(now).toISOString(),
-      },
+      timeRange,
       filter: timeFilter,
     });
     if (table.response) {
@@ -249,8 +254,6 @@ export const EsqlQueryExpression: React.FC<
     timeWindowUnit,
     currentRuleParams,
     esqlQuery,
-    data.query,
-    uiSettings,
     data.search.search,
     timeField,
     isServerless,

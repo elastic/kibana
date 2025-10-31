@@ -3,8 +3,16 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
-  "exclude": ["target/**/*", ".storybook/**/*.js"],
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
@@ -59,6 +67,7 @@
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
+    "@kbn/license-management-plugin",
     "@kbn/scout",
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",
@@ -76,5 +85,12 @@
     "@kbn/spaces-plugin",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/ai-assistant-connector-selector-action",
+    "@kbn/elastic-assistant",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-query",
+    "@kbn/maps-plugin",
+    "@kbn/shared-ux-utility"
   ]
 }

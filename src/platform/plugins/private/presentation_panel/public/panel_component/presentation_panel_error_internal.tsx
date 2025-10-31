@@ -51,6 +51,14 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
     () => (isEditable ? () => executeEditPanelAction(api) : undefined),
     [api, isEditable]
   );
+
+  useEffect(() => {
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }, [error]);
+
   const [label, setLabel] = useState('');
   const [panelSize, setPanelSize] = useState<{ width: number; height: number } | undefined>(
     undefined

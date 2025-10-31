@@ -69,7 +69,7 @@ import {
 } from './types';
 
 export function initializeLayoutManager(
-  incomingEmbeddable: EmbeddablePackageState | undefined,
+  incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   initialControls: DashboardState['controlGroupInput'] | undefined,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
@@ -196,38 +196,40 @@ export function initializeLayoutManager(
   };
 
   // --------------------------------------------------------------------------------------
-  // Place the incoming embeddable if there is one
+  // Place the incoming embeddables if there is at least one
   // --------------------------------------------------------------------------------------
-  if (incomingEmbeddable) {
-    const { serializedState, size, type } = incomingEmbeddable;
-    const uuid = incomingEmbeddable.embeddableId ?? v4();
-    const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
-    const sameType = existingPanel?.type === type;
+  if (incomingEmbeddables?.length) {
+    for (const incomingEmbeddable of incomingEmbeddables) {
+      const { serializedState, size, type } = incomingEmbeddable;
+      const uuid = incomingEmbeddable.embeddableId ?? v4();
+      const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
+      const sameType = existingPanel?.type === type;
 
-    const grid = existingPanel
-      ? existingPanel.grid
-      : runPanelPlacementStrategy(PanelPlacementStrategy.findTopLeftMostOpenSpace, {
-          width: size?.width ?? DEFAULT_PANEL_WIDTH,
-          height: size?.height ?? DEFAULT_PANEL_HEIGHT,
-          currentPanels: layout$.value.panels,
-        }).newPanelPlacement;
-    currentChildState[uuid] = {
-      rawState: {
-        ...(sameType && currentChildState[uuid] ? currentChildState[uuid].rawState : {}),
-        ...serializedState.rawState,
-      },
-      references: serializedState?.references,
-    };
+      const grid = existingPanel
+        ? existingPanel.grid
+        : runPanelPlacementStrategy(PanelPlacementStrategy.findTopLeftMostOpenSpace, {
+            width: size?.width ?? DEFAULT_PANEL_WIDTH,
+            height: size?.height ?? DEFAULT_PANEL_HEIGHT,
+            currentPanels: layout$.value.panels,
+          }).newPanelPlacement;
+      currentChildState[uuid] = {
+        rawState: {
+          ...(sameType && currentChildState[uuid] ? currentChildState[uuid].rawState : {}),
+          ...serializedState.rawState,
+        },
+        references: serializedState?.references,
+      };
 
-    layout$.next({
-      ...layout$.value,
-      panels: {
-        ...layout$.value.panels,
-        [uuid]: { grid, type },
-      },
-    });
-    trackPanel.setScrollToPanelId(uuid);
-    trackPanel.setHighlightPanelId(uuid);
+      layout$.next({
+        ...layout$.value,
+        panels: {
+          ...layout$.value.panels,
+          [uuid]: { grid, type },
+        },
+      });
+      trackPanel.setScrollToPanelId(uuid);
+      trackPanel.setHighlightPanelId(uuid);
+    }
   }
 
   function getDashboardPanelFromId(panelId: string) {
@@ -300,7 +302,14 @@ export function initializeLayoutManager(
       layout$.next({ ...layout$.value, panels });
     } else if (controls[uuid]) {
       delete controls[uuid];
-      layout$.next({ ...layout$.value, controls });
+      // Recompute the order of the remaining controls
+      const nextControls: typeof controls = Object.entries(controls)
+        .sort(([, a], [, b]) => a.order - b.order)
+        .reduce(
+          (result, [key, value], i) => ({ ...result, [key as string]: { ...value, order: i } }),
+          {}
+        );
+      layout$.next({ ...layout$.value, controls: nextControls });
     }
 
     const children = { ...children$.value };
@@ -315,15 +324,22 @@ export function initializeLayoutManager(
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
     const existingGridData = layout$.value.panels[idToRemove]?.grid;
-    if (!existingGridData) throw new PanelNotFoundError();
+    const existingControlData = layout$.value.controls[idToRemove];
+    if (!existingGridData && !existingControlData) throw new PanelNotFoundError();
 
     removePanel(idToRemove);
-    const newPanel = await addNewPanel<DefaultEmbeddableApi>(
-      panelPackage,
-      { displaySuccessMessage: false },
-      existingGridData
-    );
-    return newPanel.uuid;
+    if (existingGridData) {
+      const newPanel = await addNewPanel<DefaultEmbeddableApi>(
+        panelPackage,
+        { displaySuccessMessage: false },
+        existingGridData
+      );
+      return newPanel.uuid;
+    } else {
+      const prevLayoutState = pick(existingControlData, 'grow', 'width', 'order');
+      const newPanel = await addPinnedPanel(panelPackage, prevLayoutState);
+      return newPanel.uuid;
+    }
   };
 
   const duplicatePanel = async (uuidToDuplicate: string) => {
@@ -378,7 +394,7 @@ export function initializeLayoutManager(
 
     newControls[uuid] = {
       type: controlToPin.type as StickyControlLayoutState['type'],
-      order: Object.keys(newControls).length,
+      order: controlToPin.order ?? Object.keys(newControls).length,
       width: controlToPin.width ?? DEFAULT_CONTROL_WIDTH,
       grow: controlToPin.grow ?? DEFAULT_CONTROL_GROW,
     };
@@ -387,6 +403,24 @@ export function initializeLayoutManager(
 
     // update the layout with the control panel removed and added as a pinned control
     layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
+  };
+
+  const addPinnedPanel = async (
+    panelPackage: PanelPackage,
+    prevLayoutState?: Partial<StickyControlLayoutState>
+  ) => {
+    const newPanelUuid = createPanel(panelPackage);
+    const { serializedState } = panelPackage;
+    const layoutState = {
+      ...(serializedState ? pick(serializedState.rawState, 'grow', 'width') : {}),
+      ...prevLayoutState,
+    };
+    const panelToPin = {
+      type: panelPackage.panelType,
+      ...layoutState,
+    };
+    pinPanel(newPanelUuid, panelToPin);
+    return (await getChildApi(newPanelUuid)) ?? { uuid: newPanelUuid };
   };
 
   const getChildApi = async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
@@ -531,19 +565,7 @@ export function initializeLayoutManager(
 
         pinPanel(uuid, controlToPin);
       },
-      addPinnedPanel: async (panelPackage: PanelPackage) => {
-        const newPanelUuid = createPanel(panelPackage);
-        const { serializedState } = panelPackage;
-        const displaySettings = serializedState
-          ? pick(serializedState.rawState, 'grow', 'width')
-          : {};
-        const panelToPin = {
-          type: panelPackage.panelType,
-          ...displaySettings,
-        };
-        pinPanel(newPanelUuid, panelToPin);
-        return await getChildApi(newPanelUuid);
-      },
+      addPinnedPanel,
 
       /** Sections */
       addNewSection: () => {

@@ -214,9 +214,7 @@
         "type": "Function",
         "tags": [],
         "label": "withActiveInferenceSpan",
-        "description": [
-          "\nCreates an active \"inference\"-scoped span, that is, every span created in this\ncontext will be exported via the inference exporters. This allows us to export\na subset of spans to external systems like Phoenix."
-        ],
+        "description": [],
         "signature": [
           "WithActiveSpan"
         ],
@@ -431,6 +429,41 @@
               " | undefined) => T"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.withInferenceContext",
+        "type": "Function",
+        "tags": [],
+        "label": "withInferenceContext",
+        "description": [
+          "\nCreates an active \"inference\"-scoped context. Every span created in this\ncontext will be exported via the inference exporters. This allows us to export\na subset of spans to external systems like Phoenix."
+        ],
+        "signature": [
+          "<T>(fn: () => T) => T"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withInferenceContext.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "() => T"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

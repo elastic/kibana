@@ -29,7 +29,7 @@ const createNavigationItems = (
   tree: NavigationTreeDefinitionUI = navigationTree,
   activeNodes: ChromeProjectNavigationNode[][] = []
 ) => {
-  return toNavigationItems(tree, [], activeNodes, mockPanelStateManager);
+  return toNavigationItems(tree, activeNodes, mockPanelStateManager);
 };
 
 beforeEach(() => {
@@ -96,7 +96,8 @@ describe('toNavigationItems', () => {
       • No icon found for node \\"securityGroup:assets\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • No icon found for node \\"securityGroup:machineLearning\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
       • No icon found for node \\"stack_management\\". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon \\"broom\\".
-      • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\"."
+      • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\".
+      • ID \\"endpoints\\" is used 2 times in navigation items. Each navigation item must have a unique ID."
     `);
   });
 });
@@ -279,5 +280,48 @@ describe('empty panel opener', () => {
     } = createNavigationItems(tree);
 
     expect(primaryItems.find((item) => item.id === 'securityGroup:rules')).toBeUndefined();
+  });
+});
+
+describe('hidden panel link', () => {
+  // https://github.com/elastic/kibana/issues/240275
+  it('should remove panel links marked as hidden, but should keep opener active', () => {
+    const tree = structuredClone(navigationTree);
+    // @ts-expect-error to avoid excess type checking for test
+    const stackManagementNode = tree.footer[0].children[2].children[0];
+    stackManagementNode.children.push({
+      link: 'management',
+      sideNavStatus: 'hidden',
+    });
+
+    // Add management link under stack management section
+    const {
+      navItems: { footerItems },
+      activeItemId,
+    } = createNavigationItems(tree, [
+      [
+        // @ts-expect-error to avoid excess type checking for test
+        tree.footer[0],
+        // @ts-expect-error to avoid excess type checking for test
+        tree.footer[0].children[2],
+        stackManagementNode,
+        stackManagementNode.children[stackManagementNode.children.length - 1],
+      ],
+    ]);
+
+    // No management link under Stack Management
+    expect(footerItems[2]!.sections!.map((s) => s.label)).toMatchInlineSnapshot(`
+      Array [
+        "Ingest",
+        "Data",
+        "Alerts and Insights",
+        "Security",
+        "Kibana",
+        "Stack",
+      ]
+    `);
+
+    // But management panel is considered active
+    expect(activeItemId).toBe('stack_management');
   });
 });

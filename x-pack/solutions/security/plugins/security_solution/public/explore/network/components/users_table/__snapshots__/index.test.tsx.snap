@@ -2,11 +2,11 @@
 
 exports[`Users Table Component Rendering it renders the default Users table 1`] = `
 .c3 {
-  color: #98a2b3;
+  color: #7186A8;
 }
 
 .c1 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -50,7 +50,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
 
   .c5 .euiPagination::before {
     bottom: 0;
-    color: #515761;
+    color: #1D2A3E;
     content: '\\2026';
     font-size: 14px;
     padding: 5px 8px;
@@ -515,6 +515,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
       class="euiFlexItem c5 emotion-euiFlexItem-growZero"
     >
       <nav
+        aria-label="Table pagination"
         class="euiPagination emotion-euiPagination"
         data-test-subj="numberedPagination"
       >

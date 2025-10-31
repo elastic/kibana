@@ -16,12 +16,12 @@ import type { Logger } from '@kbn/logging';
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import type { DashboardItem } from '../content_management/v1';
-import { dashboardAPIGetResultSchema } from '../content_management/v1';
+import { getDashboardAPIGetResultSchema } from '../content_management/v1';
 import {
-  dashboardDataSchema,
-  dashboardAPICreateResultSchema,
-  dashboardListResultAPISchema,
-  dashboardUpdateResultSchema,
+  getDashboardDataSchema,
+  getDashboardAPICreateResultSchema,
+  getDashboardListResultAPISchema,
+  getDashboardUpdateResultSchema,
 } from '../content_management/v1/schema';
 
 interface RegisterAPIRoutesArgs {
@@ -97,7 +97,7 @@ export function registerAPIRoutes({
   createRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
-      validate: {
+      validate: () => ({
         request: {
           params: schema.object({
             id: schema.maybe(
@@ -106,14 +106,14 @@ export function registerAPIRoutes({
               })
             ),
           }),
-          body: dashboardDataSchema,
+          body: getDashboardDataSchema(),
         },
         response: {
           200: {
-            body: () => dashboardAPICreateResultSchema,
+            body: getDashboardAPICreateResultSchema,
           },
         },
-      },
+      }),
     },
     async (ctx, req, res) => {
       const { id } = req.params;
@@ -162,21 +162,21 @@ export function registerAPIRoutes({
   updateRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
-      validate: {
+      validate: () => ({
         request: {
           params: schema.object({
             id: schema.string({
               meta: { description: 'A unique identifier for the dashboard.' },
             }),
           }),
-          body: dashboardDataSchema,
+          body: getDashboardDataSchema(),
         },
         response: {
           200: {
-            body: () => dashboardUpdateResultSchema,
+            body: getDashboardUpdateResultSchema,
           },
         },
-      },
+      }),
     },
     async (ctx, req, res) => {
       const { references, ...attributes } = req.body;
@@ -238,7 +238,7 @@ export function registerAPIRoutes({
         },
         response: {
           200: {
-            body: () => dashboardListResultAPISchema,
+            body: getDashboardListResultAPISchema,
           },
         },
       },
@@ -257,7 +257,7 @@ export function registerAPIRoutes({
             limit,
           },
           {
-            fields: ['title', 'description', 'timeRestore'],
+            fields: ['title', 'description', 'timeRange'],
           }
         ));
       } catch (e) {
@@ -299,7 +299,7 @@ export function registerAPIRoutes({
         },
         response: {
           200: {
-            body: () => dashboardAPIGetResultSchema,
+            body: getDashboardAPIGetResultSchema,
           },
         },
       },

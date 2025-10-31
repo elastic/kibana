@@ -111,6 +111,10 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
 
   const showApiKeyInfoForSelfManagedConnector = !connector.is_native;
   const showApiKeyBanner = showApiKeyInfoForSelfManagedConnector && apiKey?.encoded;
+  const refreshApiKeyAriaLabel = i18n.translate(
+    'xpack.enterpriseSearch.connectorDeployment.refreshAPIKey',
+    { defaultMessage: 'Refresh API key' }
+  );
 
   return (
     <>
@@ -269,10 +273,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                                   isLoading={isGenerateLoading}
                                   onClick={refreshButtonClick}
                                   disabled={!connector.index_name}
-                                  aria-label={i18n.translate(
-                                    'xpack.enterpriseSearch.connectorDeployment.refreshAPIKey',
-                                    { defaultMessage: 'Refresh an Elasticsearch API key' }
-                                  )}
+                                  aria-label={refreshApiKeyAriaLabel}
                                 />
                               </EuiFlexItem>
                             )}
@@ -303,10 +304,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                           isLoading={isGenerateLoading}
                           onClick={refreshButtonClick}
                           disabled={!connector.index_name}
-                          aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.connectorDeployment.generateAPIKey',
-                            { defaultMessage: 'Generate an Elasticsearch API key' }
-                          )}
+                          aria-label={refreshApiKeyAriaLabel}
                         />
                       </EuiFlexItem>
                     )

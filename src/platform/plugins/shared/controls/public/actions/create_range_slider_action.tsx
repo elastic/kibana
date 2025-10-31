@@ -38,8 +38,8 @@ export const createRangeSliderControlAction =
         const field = dataView.getFieldByName(fieldName);
         return Boolean(field && isFieldCompatible(field));
       },
-      execute: async ({ embeddable, state, controlId }) => {
-        createDataControlOfType(RANGE_SLIDER_CONTROL, { embeddable, state, controlId });
+      execute: async ({ embeddable, state, controlId, isPinned }) => {
+        createDataControlOfType(RANGE_SLIDER_CONTROL, { embeddable, state, controlId, isPinned });
       },
       extension: {
         CustomOptionsComponent: RangeSliderEditorOptions,

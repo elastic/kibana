@@ -984,6 +984,55 @@ paths:
       tags:
         - Security Entity Analytics API
   /api/entity_store/entities/{entityType}:
+    delete:
+      description: >
+        Delete a single entity in Entity Store.
+
+        The entity will be immediately deleted from the latest index.  It will
+        remain available in historical snapshots if it has been snapshotted. 
+        The delete operation does not prevent the entity from being recreated if
+        it is observed again in the future. 
+      operationId: DeleteSingleEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  description: >-
+                    Identifier of the entity to be deleted, commonly entity.id
+                    value.
+                  type: string
+              required:
+                - id
+        description: Schema for the deleting entity
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+          description: Successful response. Entity deleted.
+        '404':
+          description: Entity Not Found. No entity with this ID and Type exists.
+        '503':
+          description: >-
+            Operation on an uninitialized Engine or in a cluster without CRUD
+            API Enabled
+      summary: Delete an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
     put:
       description: >
         Update or create an entity in Entity Store.
@@ -1040,6 +1089,44 @@ paths:
             Operation on an uninitialized Engine or in a cluster without CRUD
             API Enabled
       summary: Upsert an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/entities/bulk:
+    put:
+      description: >
+        Update or create many entities in Entity Store.
+
+        If the specified entity already exists, it is updated with the provided
+        values.  If the entity does not exist, a new one is created.
+
+        The creation is asynchronous. The time for a document to be present in
+        the  final index depends on the entity store transform and usually takes
+        more than 1 minute.
+      operationId: UpsertEntitiesBulk
+      parameters:
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntitiesContainer'
+        description: Schema for the updating many entities
+        required: true
+      responses:
+        '200':
+          description: Entities updated or created
+        '403':
+          description: Operation on a restricted field
+        '503':
+          description: >-
+            Operation on an uninitialized Engine or in a cluster without CRUD
+            API Enabled
+      summary: Upsert many entities in Entity Store
       tags:
         - Security Entity Analytics API
   /api/entity_store/entities/list:
@@ -1206,6 +1293,25 @@ paths:
                 exclude_alert_tags:
                   items:
                     type: string
+                  type: array
+                filters:
+                  items:
+                    type: object
+                    properties:
+                      entity_types:
+                        items:
+                          enum:
+                            - host
+                            - user
+                            - service
+                          type: string
+                        type: array
+                      filter:
+                        description: KQL filter string
+                        type: string
+                    required:
+                      - entity_types
+                      - filter
                   type: array
                 range:
                   type: object
@@ -1622,6 +1728,15 @@ components:
         - updating
         - error
       type: string
+    EntitiesContainer:
+      type: object
+      properties:
+        entities:
+          items:
+            $ref: '#/components/schemas/EntityContainer'
+          type: array
+      required:
+        - entities
     Entity:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
@@ -1662,6 +1777,16 @@ components:
       required:
         - has_all_required
         - privileges
+    EntityContainer:
+      type: object
+      properties:
+        record:
+          $ref: '#/components/schemas/Entity'
+        type:
+          $ref: '#/components/schemas/EntityType'
+      required:
+        - type
+        - record
     EntityField:
       additionalProperties: false
       type: object

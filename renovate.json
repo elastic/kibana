@@ -19,9 +19,7 @@
     "main",
     "9.2",
     "9.1",
-    "9.0",
     "8.19",
-    "8.18",
     "7.17"
   ],
   "prConcurrentLimit": 0,
@@ -1482,7 +1480,8 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
-        "@seriousme/openapi-schema-validator"
+        "ajv-draft-04",
+        "ajv-formats"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -1916,6 +1915,25 @@
       ],
       "labels": [
         "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "liquidjs",
+      "matchDepNames": [
+        "liquidjs"
+      ],
+      "reviewers": [
+        "team:workflows-eng"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:One Workflow",
         "backport:all-open",
         "release_note:skip"
       ],
@@ -2388,7 +2406,7 @@
       "enabled": true
     },
     {
-      "groupName": "workchat gen-ai dependencies",
+      "groupName": "workplace_ai gen-ai dependencies",
       "matchDepNames": [
         "@a2a-js/sdk",
         "@modelcontextprotocol/sdk",
@@ -3398,24 +3416,6 @@
         "release_note:skip",
         "blocked",
         "effort:low"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "p-timeout",
-      "matchDepNames": [
-        "p-timeout"
-      ],
-      "reviewers": [
-        "team:obs-ai-assistant"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "backport:all-open",
-        "release_note:skip"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -4740,7 +4740,7 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:current-major"
+        "backport:previous-minor"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true

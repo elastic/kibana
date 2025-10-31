@@ -19,6 +19,7 @@ import type { CustomOptionsComponentProps } from '../controls/data_controls/type
 export type CreateControlTypeContext<State extends DataControlState> = EmbeddableApiContext & {
   state: Partial<State>;
   controlId?: string;
+  isPinned?: boolean;
 };
 
 export type CreateControlTypeAction<State extends DataControlState = DataControlState> = Action<

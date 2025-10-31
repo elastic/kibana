@@ -9,11 +9,13 @@ import pMap from 'p-map';
 import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
+import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import type {
   ConcreteTaskInstance,
   IntervalSchedule,
+  RruleSchedule,
   ScheduleOptions,
   TaskInstanceWithDeprecatedFields,
   TaskInstanceWithId,
@@ -23,8 +25,10 @@ import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
+import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 
 const VERSION_CONFLICT_STATUS = 409;
+const NOT_FOUND_STATUS = 404;
 const BULK_ACTION_SIZE = 100;
 export interface TaskSchedulingOpts {
   logger: Logger;
@@ -207,32 +211,32 @@ export class TaskScheduling {
    * `schedule` and `runAt` will be recalculated after task run finishes
    *
    * @param {string[]} taskIds  - list of task ids
-   * @param {IntervalSchedule} schedule  - new schedule
+   * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
    * @returns {Promise<BulkUpdateTaskResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
-    schedule: IntervalSchedule
+    schedule: IntervalSchedule | RruleSchedule
   ): Promise<BulkUpdateTaskResult> {
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
-      filter: (task) =>
-        task.status === TaskStatus.Idle && task.schedule?.interval !== schedule.interval,
+      filter: (task) => task.status === TaskStatus.Idle && !isEqual(task.schedule, schedule),
       map: (task) => {
-        const oldIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
-
-        // computing new runAt using formula:
-        // newRunAt = oldRunAt - oldInterval + newInterval
-        const newRunAtInMs = Math.max(
-          Date.now(),
-          task.runAt.getTime() - oldIntervalInMs + parseIntervalAsMillisecond(schedule.interval)
-        );
+        const newRunAtInMs = calculateNextRunAtFromSchedule({
+          schedule,
+          startDate: task.scheduledAt,
+        });
 
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
       },
       validate: false,
+      /**
+       * Because the schedule can be converted from Interval to Rrule and vice versa we want to a void a situation
+       * where both are defined by passing mergeAttributes: false here.
+       */
+      mergeAttributes: false,
     });
   }
 
@@ -284,12 +288,27 @@ export class TaskScheduling {
    */
   public async ensureScheduled(
     taskInstance: TaskInstanceWithId,
-    options?: Record<string, unknown>
+    options?: ScheduleOptions
   ): Promise<TaskInstanceWithId> {
     try {
       return await this.schedule(taskInstance, options);
     } catch (err) {
       if (err.statusCode === VERSION_CONFLICT_STATUS) {
+        // check if task specifies a schedule interval
+        // if so,try to update the just the schedule
+        // only works for interval schedule
+        if (taskInstance.schedule && taskInstance.schedule.interval) {
+          const result = await this.bulkUpdateSchedules([taskInstance.id], taskInstance.schedule);
+          if (
+            result.errors.length &&
+            result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS &&
+            result.errors[0].error.statusCode !== NOT_FOUND_STATUS
+          ) {
+            throw new Error(
+              `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
+            );
+          }
+        }
         return taskInstance;
       }
       throw err;
