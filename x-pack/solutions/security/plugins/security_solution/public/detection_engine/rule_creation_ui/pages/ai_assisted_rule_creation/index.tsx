@@ -42,6 +42,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   // const { navigateToApp } = useKibana().services.application;
   const isLoading = userInfoLoading || listsConfigLoading;
   const collapseFn = useRef<() => void | undefined>();
+  const lastSubmittedPrompt = useRef<string>('');
   const { settings } = useKibana().services;
   const styles = useHeaderLinkBackStyles();
 
@@ -66,6 +67,11 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
 
   const isValid = promptValue.length > 0 && selectedConnectorId != null;
   const handlePromptSubmit = useCallback(() => {
+    // Prevent submitting the same prompt again
+    if (lastSubmittedPrompt.current === promptValue) {
+      setShowForm(true);
+      return;
+    }
     if (isValid) {
       setSubmittedPromptValue(promptValue);
       executeAiAssistedRuleCreation({
@@ -95,6 +101,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
             ev.preventDefault();
             setShowForm(false);
             setPromptValue(submittedPromptValue);
+            lastSubmittedPrompt.current = submittedPromptValue;
           }}
           iconType="arrowLeft"
         >
