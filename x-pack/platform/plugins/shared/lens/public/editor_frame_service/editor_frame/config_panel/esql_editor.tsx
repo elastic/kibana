@@ -15,7 +15,11 @@ import { isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import {
+  apiPublishesESQLVariable,
+  apiPublishesESQLVariables,
+  type ESQLControlVariable,
+} from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -111,10 +115,12 @@ export function ESQLEditor({
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
   const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi)
+    apiPublishesESQLVariables(parentApi)
       ? parentApi?.esqlVariables$
       : new BehaviorSubject(undefined)
   );
+
+  console.log({ esqlVariables });
 
   const dispatch = useLensDispatch();
 
