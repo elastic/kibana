@@ -183,6 +183,7 @@ export const getStructuredToolForIndexEntry = ({
       // Generate filters for inputSchema fields
       const filter =
         indexEntry.inputSchema?.reduce(
+          // @ts-expect-error upgrade typescript v5.9.3
           (prev, i) => [...prev, { term: { [`${i.fieldName}`]: input?.[i.fieldName] } }],
           [] as Array<{ term: { [key: string]: string } }>
         ) ?? [];

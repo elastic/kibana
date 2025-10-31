@@ -47,13 +47,10 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
         );
 
         const knowledgeBaseEntry: KnowledgeBaseEntryCreateProps = {
-          // @ts-expect-error upgrade typescript v5.9.3
           name: input.name,
           kbResource: 'user',
           source: 'conversation',
-          // @ts-expect-error upgrade typescript v5.9.3
           required: input.required,
-          // @ts-expect-error upgrade typescript v5.9.3
           text: input.query,
           type: DocumentEntryType.value,
         };

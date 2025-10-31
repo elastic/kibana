@@ -341,7 +341,6 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       ];
     } else {
       if ('name' in schema) {
-        // @ts-expect-error upgrade typescript v5.9.3
         functionName = schema.name;
       }
       tools = [

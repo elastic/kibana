@@ -84,7 +84,6 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
         );
 
         const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
-          // @ts-expect-error upgrade typescript v5.9.3
           query: input.query,
           kbResource: 'user',
           required: false,

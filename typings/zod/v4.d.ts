@@ -8,5 +8,5 @@
  */
 
 declare module 'zod' {
-  export * from 'zod/dist/commonjs/v4';
+  export * from 'zod/v4';
 }

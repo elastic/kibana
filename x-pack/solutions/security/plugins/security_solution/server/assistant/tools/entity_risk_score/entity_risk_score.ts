@@ -81,7 +81,6 @@ export const ENTITY_RISK_SCORE_TOOL: AssistantTool = {
           esClient,
         });
 
-        // @ts-expect-error upgrade typescript v5.9.3
         const entityField = EntityTypeToIdentifierField[input.identifier_type];
 
         if (isDenied({ anonymizationFields, field: entityField })) {
@@ -96,11 +95,9 @@ export const ENTITY_RISK_SCORE_TOOL: AssistantTool = {
           onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
         };
 
-        // @ts-expect-error upgrade typescript v5.9.3
         const deAnonymizedIdentifier = localReplacements[input.identifier] ?? input.identifier;
 
         const riskScore = await getRiskScore({
-          // @ts-expect-error upgrade typescript v5.9.3
           entityType: input.identifier_type as EntityType,
           entityIdentifier: deAnonymizedIdentifier,
           pagination: { querySize: 1, cursorStart: 0 },
@@ -134,7 +131,6 @@ export const ENTITY_RISK_SCORE_TOOL: AssistantTool = {
           }))
         );
 
-        // @ts-expect-error upgrade typescript v5.9.3
         const data = { ...latestRiskScore, inputs: enhancedInputs, id_value: input.identifier }; // Replace id_value for the anonymized identifier to avoid leaking user data
 
         return JSON.stringify({

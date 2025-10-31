@@ -78,14 +78,14 @@ module.exports = (request, options) => {
   }
 
   if (request === 'zod' || request === 'zod/v3') {
-    return resolve.sync('zod/dist/commonjs/v3/index.js', {
+    return resolve.sync('zod/v3/index.cjs', {
       basedir: options.basedir,
       extensions: options.extensions,
     });
   }
 
   if (request.startsWith('zod/v4/')) {
-    return resolve.sync(`zod/dist/commonjs/v4/index.js`, {
+    return resolve.sync(`zod/v4/index.cjs`, {
       basedir: options.basedir,
       extensions: options.extensions,
     });

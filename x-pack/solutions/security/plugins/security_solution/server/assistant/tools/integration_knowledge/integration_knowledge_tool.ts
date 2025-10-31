@@ -73,7 +73,6 @@ export const INTEGRATION_KNOWLEDGE_TOOL: AssistantTool = {
             query: {
               semantic: {
                 field: 'content',
-                // @ts-expect-error upgrade typescript v5.9.3
                 query: input.question,
               },
             },
