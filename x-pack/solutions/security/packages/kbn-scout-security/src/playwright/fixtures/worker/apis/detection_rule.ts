@@ -18,6 +18,8 @@ const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_ac
 export interface DetectionRuleApiService {
   createCustomQueryRule: (body: CustomQueryRule) => Promise<{ id: string; rule_id: string }>;
   deleteAll: () => Promise<void>;
+  deleteAllAlerts: () => Promise<void>;
+  cleanupTestData: (indexPattern: string) => Promise<void>;
   waitForRuleExecution: (ruleId: string, afterDate?: Date) => Promise<void>;
   indexTestDocument: (index: string, document: Record<string, unknown>) => Promise<void>;
 }
@@ -132,6 +134,67 @@ export const getDetectionRuleApiService = ({
             throw error;
           }
           log.debug(`[DETECTION RULE API] No rules to delete (404)`);
+        }
+      });
+    },
+
+    deleteAllAlerts: async () => {
+      await measurePerformanceAsync(log, 'security.detectionRule.deleteAllAlerts', async () => {
+        try {
+          const namespace = scoutSpace?.id || 'default';
+          const alertsIndexPattern = `.alerts-security.alerts-${namespace}`;
+
+          log.debug(`[DETECTION RULE API] Deleting all alerts from ${alertsIndexPattern}`);
+
+          // Delete all alerts using ES deleteByQuery
+          await esClient.deleteByQuery({
+            index: alertsIndexPattern,
+            ignore_unavailable: true,
+            query: {
+              match_all: {},
+            },
+            refresh: true,
+            conflicts: 'proceed',
+          });
+
+          log.debug(`[DETECTION RULE API] All alerts deleted and index refreshed`);
+        } catch (error: unknown) {
+          // Ignore index_not_found errors - it means no alerts exist yet
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((error as any)?.meta?.body?.error?.type !== 'index_not_found_exception') {
+            log.error(`[DETECTION RULE API] Failed to delete alerts: ${error}`);
+            throw error;
+          }
+          log.debug(`[DETECTION RULE API] No alerts index found (expected for first test run)`);
+        }
+      });
+    },
+
+    cleanupTestData: async (indexPattern: string) => {
+      await measurePerformanceAsync(log, 'security.detectionRule.cleanupTestData', async () => {
+        try {
+          log.debug(`[DETECTION RULE API] Cleaning up test data from ${indexPattern}`);
+
+          // Delete all test documents using ES deleteByQuery
+          await esClient.deleteByQuery({
+            index: indexPattern,
+            ignore_unavailable: true,
+            query: {
+              match_all: {},
+            },
+            refresh: true,
+            conflicts: 'proceed',
+          });
+
+          log.debug(`[DETECTION RULE API] Test data cleaned up from ${indexPattern}`);
+        } catch (error: unknown) {
+          // Ignore index_not_found errors - it means the index doesn't exist yet
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((error as any)?.meta?.body?.error?.type !== 'index_not_found_exception') {
+            log.error(`[DETECTION RULE API] Failed to cleanup test data: ${error}`);
+            throw error;
+          }
+          log.debug(`[DETECTION RULE API] No test data index found (${indexPattern})`);
         }
       });
     },

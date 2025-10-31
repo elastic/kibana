@@ -12,6 +12,7 @@ import { retryApiCall, pollUntilDocumentIndexed, pollUntilAvailable } from './ut
 
 // API endpoint constants
 const CONNECTORS_API = '/api/actions/connector';
+const CONNECTORS_LIST_API = '/api/actions/connectors';
 
 // Connector payload types
 export interface ConnectorConfig {
@@ -320,12 +321,12 @@ export const getConnectorsApiService = ({
       await measurePerformanceAsync(log, 'security.connectors.deleteAll', async () => {
         try {
           log.debug(`[CONNECTORS API] Fetching all connectors to delete`);
-          log.debug(`[CONNECTORS API] Request path: ${basePath}${CONNECTORS_API}/_getAll`);
+          log.debug(`[CONNECTORS API] Request path: ${basePath}${CONNECTORS_LIST_API}`);
 
           // Step 1: Get all connectors
           const response = await kbnClient.request<Connector[]>({
             method: 'GET',
-            path: `${basePath}${CONNECTORS_API}/_getAll`,
+            path: `${basePath}${CONNECTORS_LIST_API}`,
           });
 
           const connectors = response.data || [];
@@ -354,7 +355,7 @@ export const getConnectorsApiService = ({
             async () => {
               const checkResponse = await kbnClient.request<Connector[]>({
                 method: 'GET',
-                path: `${basePath}${CONNECTORS_API}/_getAll`,
+                path: `${basePath}${CONNECTORS_LIST_API}`,
               });
 
               const remainingConnectors = checkResponse.data || [];

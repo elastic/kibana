@@ -15,15 +15,8 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
   spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
     ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
 
-    // Create the rule with a more recent 'from' time to catch new data
-    const ruleWithRecentFromTime = {
-      ...CUSTOM_QUERY_RULE,
-      name: ruleName,
-      from: 'now-1m', // Look for data from the last minute
-    };
-    await apiServices.detectionRule.createCustomQueryRule(ruleWithRecentFromTime);
-
-    // Generate test data that will trigger the rule
+    // Generate test data FIRST before creating the rule
+    // This allows the rule to immediately match the already-indexed document
     await apiServices.detectionRule.indexTestDocument('logs-test', {
       'event.category': 'security',
       'event.type': 'alert',
@@ -32,9 +25,13 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
       'user.name': 'test-user',
     });
 
-    // Wait for the rule to execute (detection rules typically run every 1-5 minutes)
-    // In test environments, this might be faster
-    await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds
+    // Create the rule with a more recent 'from' time to catch new data
+    const ruleWithRecentFromTime = {
+      ...CUSTOM_QUERY_RULE,
+      name: ruleName,
+      from: 'now-1m', // Look for data from the last minute
+    };
+    await apiServices.detectionRule.createCustomQueryRule(ruleWithRecentFromTime);
 
     await browserAuth.loginAsPlatformEngineer();
   });
@@ -49,7 +46,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
     const urlBeforeAlertDetails = page.url();
     expect(urlBeforeAlertDetails).not.toContain(RIGHT);
 
-    await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+    await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
     await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
     const urlAfterAlertDetails = page.url();
@@ -59,7 +56,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
     await expect(headerTitle).toHaveText(ruleName);
 
     await page.reload();
-    await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+    await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper(ruleName);
 
     const urlAfterReload = page.url();
     expect(urlAfterReload).toContain(RIGHT);

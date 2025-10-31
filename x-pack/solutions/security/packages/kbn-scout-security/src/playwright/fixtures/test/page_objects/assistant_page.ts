@@ -393,6 +393,18 @@ export class AssistantPage {
     await conversationButton.click();
 
     await expect(this.conversationTitleHeading).toHaveText(conversationTitle);
+
+    // Wait for the conversation state to fully load, including the connector configuration
+    // The connector selector should not show the placeholder text once fully loaded
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(TIMEOUTS.UI_ELEMENT_STANDARD);
+
+    // Verify the connector selector has loaded (should not still be loading)
+    await this.connectorSelector.waitFor({
+      state: 'visible',
+      timeout: TIMEOUTS.UI_ELEMENT_STANDARD,
+    });
+
     await this.flyoutNavToggle.click();
   }
 
@@ -413,8 +425,16 @@ export class AssistantPage {
   async resetConversation() {
     await this.conversationSettingsMenu.click();
     await this.clearChatButton.click();
+
+    // Wait for the modal to be visible
+    const resetModal = this.page.testSubj.locator('reset-conversation-modal');
+    await resetModal.waitFor({ state: 'visible', timeout: TIMEOUTS.UI_ELEMENT_STANDARD });
+    // Click the confirm button
     await this.confirmClearChatButton.click();
-    await this.emptyConversation.waitFor({ state: 'visible' });
+    await this.emptyConversation.waitFor({
+      state: 'visible',
+      timeout: TIMEOUTS.UI_ELEMENT_EXTRA_LONG,
+    });
   }
 
   /**
@@ -425,10 +445,11 @@ export class AssistantPage {
     await this.createNewChat();
     await this.typeAndSendMessage(initialMessage);
     // Wait for response (error is expected in test environment)
+    // Use longer timeout as responses can be slower after resets or in serverless environments
     // eslint-disable-next-line playwright/no-nth-methods
     await this.conversationErrorMessages.first().waitFor({
       state: 'visible',
-      timeout: TIMEOUTS.AI_ASSISTANT_RESPONSE,
+      timeout: TIMEOUTS.AI_ASSISTANT_RESPONSE * 3, // 90 seconds - triple the standard timeout
     });
     await this.updateConversationTitle(title);
   }
@@ -484,11 +505,29 @@ export class AssistantPage {
     await this.connectorSelector.click();
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await this.page.waitForTimeout(TIMEOUTS.UI_ELEMENT_STANDARD);
+
     // Use .first() to handle multiple connectors with same name (from test pollution)
     // eslint-disable-next-line playwright/no-nth-methods
     await this.connectorOption(connectorName).first().click();
+
     // Use containText instead of exact match to handle UI variations
     await expect(this.connectorSelector).toContainText(connectorName);
+
+    // Wait for the connector configuration to be saved to the conversation
+    // This ensures the apiConfig is persisted before moving to the next operation
+    try {
+      await this.page.waitForResponse(
+        (response) =>
+          response.url().includes('/internal/elastic_assistant/current_user/conversations') &&
+          response.request().method() === 'PUT' &&
+          response.status() === 200,
+        { timeout: TIMEOUTS.UI_ELEMENT_EXTRA_LONG }
+      );
+    } catch (e) {
+      // If the wait times out, continue anyway
+      // This could happen if the conversation is new and hasn't been created yet
+    }
+
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await this.page.waitForTimeout(TIMEOUTS.UI_ELEMENT_STANDARD);
   }
@@ -549,7 +588,21 @@ export class AssistantPage {
       }
     }
 
-    await this.modalSaveButton.click();
+    // Wait for any toasts to disappear before clicking save (they can block the button)
+    const toastHeader = this.page.testSubj.locator('euiToastHeader');
+    try {
+      await toastHeader.waitFor({ state: 'hidden', timeout: 5000 });
+    } catch {
+      // Toasts may not exist, continue anyway
+    }
+
+    // Wait for save button to be stable and clickable
+    await expect(this.modalSaveButton).toBeVisible({ timeout: TIMEOUTS.UI_ELEMENT_STANDARD });
+    await expect(this.modalSaveButton).toBeEnabled({ timeout: TIMEOUTS.UI_ELEMENT_STANDARD });
+
+    // Use force click if toast is still blocking (it's just a visual overlay)
+    // eslint-disable-next-line playwright/no-force-option
+    await this.modalSaveButton.click({ force: true });
   }
 
   // ========================================
@@ -575,7 +628,21 @@ export class AssistantPage {
       }
     }
 
-    await this.modalSaveButton.click();
+    // Wait for any toasts to disappear before clicking save (they can block the button)
+    const toastHeader = this.page.testSubj.locator('euiToastHeader');
+    try {
+      await toastHeader.waitFor({ state: 'hidden', timeout: 5000 });
+    } catch {
+      // Toasts may not exist, continue anyway
+    }
+
+    // Wait for save button to be stable and clickable
+    await expect(this.modalSaveButton).toBeVisible({ timeout: TIMEOUTS.UI_ELEMENT_STANDARD });
+    await expect(this.modalSaveButton).toBeEnabled({ timeout: TIMEOUTS.UI_ELEMENT_STANDARD });
+
+    // Use force click if toast is still blocking (it's just a visual overlay)
+    // eslint-disable-next-line playwright/no-force-option
+    await this.modalSaveButton.click({ force: true });
   }
 
   /**
@@ -780,8 +847,9 @@ export class AssistantPage {
    * Asserts that an error response is visible
    */
   async expectErrorResponse() {
+    // Use longer timeout as responses can be slower after resets or in serverless environments
     await expect(this.conversationErrorMessages).toBeVisible({
-      timeout: TIMEOUTS.AI_ASSISTANT_RESPONSE,
+      timeout: TIMEOUTS.AI_ASSISTANT_RESPONSE * 2, // 60 seconds - double the standard timeout
     });
   }
 

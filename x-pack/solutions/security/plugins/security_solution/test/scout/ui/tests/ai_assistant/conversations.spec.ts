@@ -19,12 +19,16 @@ spaceTest.describe(
       await apiServices.connectors.deleteAll();
       await apiServices.assistant.deleteAllConversations();
       await apiServices.detectionRule.deleteAll();
+      await apiServices.detectionRule.deleteAllAlerts();
+      await apiServices.detectionRule.cleanupTestData('logs-*');
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
       await apiServices.connectors.deleteAll();
       await apiServices.assistant.deleteAllConversations();
       await apiServices.detectionRule.deleteAll();
+      await apiServices.detectionRule.deleteAllAlerts();
+      await apiServices.detectionRule.cleanupTestData('logs-*');
     });
 
     spaceTest(
@@ -71,6 +75,8 @@ spaceTest.describe(
       await apiServices.connectors.deleteAll();
       await apiServices.assistant.deleteAllConversations();
       await apiServices.detectionRule.deleteAll();
+      await apiServices.detectionRule.deleteAllAlerts();
+      await apiServices.detectionRule.cleanupTestData('logs-*');
     });
 
     spaceTest('When invoked on AI Assistant click', async ({ page, pageObjects }) => {
@@ -188,6 +194,8 @@ spaceTest.describe.serial(
       await apiServices.connectors.deleteAll();
       await apiServices.assistant.deleteAllConversations();
       await apiServices.detectionRule.deleteAll();
+      await apiServices.detectionRule.deleteAllAlerts();
+      await apiServices.detectionRule.cleanupTestData('logs-*');
 
       // Create connectors
       const azureConnector = await apiServices.connectors.createAzureOpenAI();
@@ -215,6 +223,8 @@ spaceTest.describe.serial(
       await apiServices.connectors.deleteAll();
       await apiServices.assistant.deleteAllConversations();
       await apiServices.detectionRule.deleteAll();
+      await apiServices.detectionRule.deleteAllAlerts();
+      await apiServices.detectionRule.cleanupTestData('logs-*');
     });
 
     spaceTest(
@@ -292,11 +302,19 @@ spaceTest.describe.serial(
 
         // Switch back to first conversation - should retain state
         await pageObjects.assistantPage.selectConversation(mockConvo1Title);
+        // Wait for conversation to fully load before checking state
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
+          // Ignore timeout - network might not be idle, continue anyway
+        });
         await pageObjects.assistantPage.expectConnectorSelected(azureConnectorName);
         await pageObjects.assistantPage.expectMessageSent('hello');
 
         // Switch back to second conversation - should retain state
         await pageObjects.assistantPage.selectConversation(mockConvo2Title);
+        // Wait for conversation to fully load before checking state
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
+          // Ignore timeout - network might not be idle, continue anyway
+        });
         await pageObjects.assistantPage.expectConnectorSelected(bedrockConnectorName);
         await pageObjects.assistantPage.expectMessageSent('goodbye');
       }
