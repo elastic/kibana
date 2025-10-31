@@ -13,8 +13,8 @@ import userEvent from '@testing-library/user-event';
 import type { MetricsGridProps } from './metrics_grid';
 import { MetricsGrid } from './metrics_grid';
 import { Chart } from './chart';
-import { Subject } from 'rxjs';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
+import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
@@ -23,16 +23,15 @@ jest.mock('./chart', () => ({
 }));
 
 describe('MetricsGrid', () => {
-  const requestParams: MetricsGridProps['requestParams'] = {
+  const fetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
     filters: [],
-    getTimeRange: () => ({ from: 'now-1h', to: 'now' }),
     query: {
       esql: 'FROM metrics-*',
     },
     esqlVariables: [],
     relativeTimeRange: { from: 'now-1h', to: 'now' },
-    updateTimeRange: () => {},
-  };
+  });
+  const discoverFetch$ = getFetch$Mock(fetchParams);
 
   const services = {
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
@@ -59,9 +58,9 @@ describe('MetricsGrid', () => {
         columns={3}
         dimensions={[]}
         pivotOn="metric"
-        discoverFetch$={new Subject()}
+        discoverFetch$={discoverFetch$}
         fields={fields}
-        requestParams={requestParams}
+        fetchParams={fetchParams}
         services={services}
         filters={[]}
       />
@@ -77,9 +76,9 @@ describe('MetricsGrid', () => {
         columns={3}
         dimensions={['host.name']}
         pivotOn="metric"
-        discoverFetch$={new Subject()}
+        discoverFetch$={discoverFetch$}
         fields={fields}
-        requestParams={requestParams}
+        fetchParams={fetchParams}
         services={services}
         filters={[]}
       />
@@ -92,9 +91,9 @@ describe('MetricsGrid', () => {
         columns={4}
         dimensions={['host.name']}
         pivotOn="metric"
-        discoverFetch$={new Subject()}
+        discoverFetch$={discoverFetch$}
         fields={fields}
-        requestParams={requestParams}
+        fetchParams={fetchParams}
         services={services}
         filters={[]}
       />
@@ -114,9 +113,9 @@ describe('MetricsGrid', () => {
           columns={2}
           dimensions={[]}
           pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
-          requestParams={requestParams}
+          fetchParams={fetchParams}
           services={services}
           filters={[]}
         />
@@ -139,9 +138,9 @@ describe('MetricsGrid', () => {
           columns={2}
           dimensions={[]}
           pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
-          requestParams={requestParams}
+          fetchParams={fetchParams}
           services={services}
           filters={[]}
         />
@@ -169,9 +168,9 @@ describe('MetricsGrid', () => {
           columns={2}
           dimensions={[]}
           pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
-          requestParams={requestParams}
+          fetchParams={fetchParams}
           services={services}
           filters={[]}
         />
@@ -202,9 +201,9 @@ describe('MetricsGrid', () => {
           columns={2}
           dimensions={[]}
           pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={fields}
-          requestParams={requestParams}
+          fetchParams={fetchParams}
           services={services}
           filters={[]}
         />
@@ -242,9 +241,9 @@ describe('MetricsGrid', () => {
           columns={2}
           dimensions={[]}
           pivotOn="metric"
-          discoverFetch$={new Subject()}
+          discoverFetch$={discoverFetch$}
           fields={multipleFields}
-          requestParams={requestParams}
+          fetchParams={fetchParams}
           services={services}
           filters={[]}
         />
@@ -289,9 +288,9 @@ describe('MetricsGrid', () => {
             columns={2}
             dimensions={[]}
             pivotOn="metric"
-            discoverFetch$={new Subject()}
+            discoverFetch$={discoverFetch$}
             fields={fields}
-            requestParams={requestParams}
+            fetchParams={fetchParams}
             services={services}
             filters={[]}
           />
@@ -310,9 +309,9 @@ describe('MetricsGrid', () => {
             columns={2}
             dimensions={[]}
             pivotOn="metric"
-            discoverFetch$={new Subject()}
+            discoverFetch$={discoverFetch$}
             fields={fields}
-            requestParams={requestParams}
+            fetchParams={fetchParams}
             services={services}
             filters={[]}
           />
@@ -335,9 +334,9 @@ describe('MetricsGrid', () => {
             columns={2}
             dimensions={[]}
             pivotOn="metric"
-            discoverFetch$={new Subject()}
+            discoverFetch$={discoverFetch$}
             fields={fields}
-            requestParams={requestParams}
+            fetchParams={fetchParams}
             services={services}
             filters={[]}
           />
@@ -359,9 +358,9 @@ describe('MetricsGrid', () => {
             columns={2}
             dimensions={[]}
             pivotOn="metric"
-            discoverFetch$={new Subject()}
+            discoverFetch$={discoverFetch$}
             fields={fields}
-            requestParams={requestParams}
+            fetchParams={fetchParams}
             services={services}
             filters={[]}
           />

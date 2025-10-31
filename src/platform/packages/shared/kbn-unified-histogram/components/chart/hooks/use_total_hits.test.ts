@@ -15,13 +15,13 @@ import { useTotalHits } from './use_total_hits';
 import { useEffect as mockUseEffect } from 'react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { of, ReplaySubject, throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { waitFor, renderHook } from '@testing-library/react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SearchSourceSearchOptions } from '@kbn/data-plugin/common';
 import { DataViewType } from '@kbn/data-plugin/common';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { getFetchParamsMock } from '../../../__mocks__/fetch_params';
+import { getFetchParamsMock, getFetch$Mock } from '../../../__mocks__/fetch_params';
 
 jest.mock('react-use/lib/useDebounce', () => {
   return jest.fn((...args) => {
@@ -30,7 +30,7 @@ jest.mock('react-use/lib/useDebounce', () => {
 });
 
 describe('useTotalHits', () => {
-  let fetch$: UnifiedHistogramFetch$ = new ReplaySubject(1);
+  let fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
   const getDeps = (fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock()) => ({
     services: {
       data: dataPluginMock.createStartContract(),
@@ -59,7 +59,7 @@ describe('useTotalHits', () => {
   });
 
   beforeEach(() => {
-    fetch$ = new ReplaySubject(1);
+    fetch$ = getFetch$Mock();
   });
 
   it('should fetch total hits on first execution', async () => {

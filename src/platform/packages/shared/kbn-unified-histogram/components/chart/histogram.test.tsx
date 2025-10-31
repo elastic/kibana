@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { HistogramProps } from './histogram';
 import { Histogram } from './histogram';
 import React from 'react';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import { getLensVisMock } from '../../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
@@ -20,7 +20,7 @@ import type { UnifiedHistogramFetch$ } from '../../types';
 import { act } from 'react-dom/test-utils';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import { getLensProps, useLensProps } from './hooks/use_lens_props';
-import { getFetchParamsMock } from '../../__mocks__/fetch_params';
+import { getFetch$Mock, getFetchParamsMock } from '../../__mocks__/fetch_params';
 
 const getMockLensAttributes = async () => {
   const query = {
@@ -49,7 +49,7 @@ async function mountComponent(isPlainRecord = false, hasLensSuggestions = false)
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
-  const fetch$: UnifiedHistogramFetch$ = new ReplaySubject(1);
+  const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
   const fetchParams = getFetchParamsMock({
     searchSessionId: '123',
     dataView: dataViewWithTimefieldMock,

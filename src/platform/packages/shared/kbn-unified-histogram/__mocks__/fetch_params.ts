@@ -11,6 +11,7 @@ import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 import type { UnifiedHistogramFetchParams, UnifiedHistogramFetchParamsExternal } from '../types';
 import { processFetchParams } from '../utils/process_fetch_params';
 import { unifiedHistogramServicesMock } from './services';
+import { ReplaySubject } from 'rxjs';
 
 export const getFetchParamsMock = (
   partialParams?: Partial<UnifiedHistogramFetchParamsExternal>
@@ -32,4 +33,12 @@ export const getFetchParamsMock = (
       services: unifiedHistogramServicesMock,
     }),
   };
+};
+
+export const getFetch$Mock = (fetchParams?: UnifiedHistogramFetchParams) => {
+  const fetch$ = new ReplaySubject<UnifiedHistogramFetchParams | undefined>(1);
+  if (fetchParams) {
+    fetch$.next(fetchParams);
+  }
+  return fetch$;
 };

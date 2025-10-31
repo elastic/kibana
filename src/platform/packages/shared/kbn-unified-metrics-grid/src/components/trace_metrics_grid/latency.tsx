@@ -16,11 +16,9 @@ import { getLatencyChart } from './trace_charts_definition';
 export const LatencyChart = () => {
   const {
     filters,
-    requestParams,
     services,
-    abortController,
+    fetchParams,
     discoverFetch$,
-    searchSessionId,
     dataSource,
     indexes,
     onBrushEnd,
@@ -51,10 +49,8 @@ export const LatencyChart = () => {
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
-      requestParams={requestParams}
+      fetchParams={fetchParams}
       services={services}
-      abortController={abortController}
-      searchSessionId={searchSessionId}
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
       title={title}

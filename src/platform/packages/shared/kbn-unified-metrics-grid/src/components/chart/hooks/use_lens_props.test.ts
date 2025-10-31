@@ -8,14 +8,13 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
 import { useLensProps } from './use_lens_props';
 import { useChartLayers } from './use_chart_layers';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
-import type { UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import type { TimeRange } from '@kbn/data-plugin/common';
 
 jest.mock('./use_chart_layers');
@@ -36,7 +35,8 @@ describe('useLensProps', () => {
       yAxis: [{ value: 'foo' }],
     },
   ];
-  const discoverFetch$ = new BehaviorSubject<UnifiedHistogramInputMessage>({ type: 'fetch' });
+  const fetchParams = getFetchParamsMock();
+  const discoverFetch$ = getFetch$Mock(fetchParams);
   const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
 
   const createMockChartRef = () => {
@@ -94,7 +94,7 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
+        fetchParams,
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
@@ -121,7 +121,7 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
+        fetchParams,
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
@@ -158,20 +158,26 @@ describe('useLensProps', () => {
 
   it('updates lensProps when discoverFetch$ emits', async () => {
     const chartRef = createMockChartRef();
+    const fetch$ = getFetch$Mock();
+    const testFetchParams = {
+      ...fetchParams,
+      timeRange: getTimeRange(),
+    };
     const { result } = renderHook(() =>
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
-        discoverFetch$,
+        fetchParams: testFetchParams,
+        discoverFetch$: fetch$,
         chartRef,
         chartLayers: mockChartLayers,
       })
     );
+    expect(result.current).toBeUndefined();
 
     act(() => {
-      discoverFetch$.next({ type: 'fetch' });
+      discoverFetch$.next(testFetchParams);
     });
 
     await waitFor(() => {
@@ -180,7 +186,7 @@ describe('useLensProps', () => {
         executionContext: { description: 'metrics experience chart data' },
         id: 'metricsExperienceLensComponent',
         noPadding: true,
-        searchSessionId: undefined,
+        searchSessionId: fetchParams.searchSessionId,
         timeRange: getTimeRange(),
         viewMode: 'view',
       });
@@ -193,7 +199,7 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
+        fetchParams,
         discoverFetch$,
         chartRef: { current: null },
         chartLayers: mockChartLayers,

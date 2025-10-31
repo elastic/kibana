@@ -9,9 +9,9 @@
 
 import React from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { FetchStatus } from '../../../types';
+import { type DiscoverLatestFetchDetails, FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { useDiscoverHistogram, type UseUnifiedHistogramOptions } from './use_discover_histogram';
@@ -389,22 +389,27 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should set isChartLoading to true for fetch start', async () => {
-      const fetch$ = new Subject<void>();
       const stateContainer = getStateContainer();
       stateContainer.appState.update({ query: { esql: 'from *' } });
-      stateContainer.dataState.fetchChart$ = fetch$;
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       act(() => {
-        fetch$.next();
+        stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.LOADING });
       });
       expect(hook.result.current.isChartLoading).toBe(true);
+      act(() => {
+        stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.COMPLETE });
+      });
+      expect(hook.result.current.isChartLoading).toBe(false);
     });
 
     it('should use timerange + timeRangeRelative + query given by the internalState', async () => {
-      const fetch$ = new Subject<void>();
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
       const stateContainer = getStateContainer();
       const timeRangeAbs = { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
       const timeRangeRel = { from: 'now-15m', to: 'now' };
+      const query = { esql: 'from *' };
+      stateContainer.appState.update({ query });
+      stateContainer.dataState.fetchChart$ = fetch$;
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
           dataRequestParams: {
@@ -416,29 +421,48 @@ describe('useDiscoverHistogram', () => {
         })
       );
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const api = createMockUnifiedHistogramApi();
+      jest.spyOn(api.state$, 'subscribe');
       act(() => {
-        fetch$.next();
+        hook.result.current.setUnifiedHistogramApi(api);
       });
-      expect(hook.result.current.timeRange).toBe(timeRangeAbs);
-      expect(hook.result.current.relativeTimeRange).toBe(timeRangeRel);
+      act(() => {
+        fetch$.next({});
+      });
+      expect(api.fetch).toHaveBeenCalledTimes(1);
+      expect(api.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          timeRange: timeRangeAbs,
+          relativeTimeRange: timeRangeRel,
+          query,
+          filters: [],
+          searchSessionId: '123',
+        })
+      );
     });
   });
 
   describe('fetching', () => {
     it('should call fetch when savedSearchFetch$ is triggered', async () => {
-      const savedSearchFetch$ = new Subject<void>();
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
       const stateContainer = getStateContainer();
-      stateContainer.dataState.fetchChart$ = savedSearchFetch$;
+      stateContainer.dataState.fetchChart$ = fetch$;
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const api = createMockUnifiedHistogramApi();
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
       expect(api.fetch).not.toHaveBeenCalled();
+      const abortController = new AbortController();
       act(() => {
-        savedSearchFetch$.next();
+        fetch$.next({ abortController });
       });
       expect(api.fetch).toHaveBeenCalledTimes(1);
+      expect(api.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          abortController,
+        })
+      );
     });
   });
 

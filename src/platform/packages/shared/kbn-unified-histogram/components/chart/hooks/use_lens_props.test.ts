@@ -8,17 +8,16 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { ReplaySubject } from 'rxjs';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { UnifiedHistogramFetchParams, UnifiedHistogramFetch$ } from '../../../types';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { getLensVisMock } from '../../../__mocks__/lens_vis';
-import { getFetchParamsMock } from '../../../__mocks__/fetch_params';
+import { getFetchParamsMock, getFetch$Mock } from '../../../__mocks__/fetch_params';
 import { useLensProps } from './use_lens_props';
 
 describe('useLensProps', () => {
   it('should return lens props', async () => {
-    const fetch$: UnifiedHistogramFetch$ = new ReplaySubject(1);
+    const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
     const onLoad = jest.fn();
     const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock();
     const lensVisMock = await getLensVisMock({
@@ -47,7 +46,7 @@ describe('useLensProps', () => {
   });
 
   it('should return lens props for text based languages', async () => {
-    const fetch$: UnifiedHistogramFetch$ = new ReplaySubject(1);
+    const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
     const onLoad = jest.fn();
     const query = { esql: 'FROM logs* | WHERE ??field >= ?otherVar' };
     const esqlVariables: ESQLControlVariable[] = [
@@ -84,7 +83,7 @@ describe('useLensProps', () => {
   });
 
   it('should only return lens props after fetch$ is triggered', async () => {
-    const fetch$: UnifiedHistogramFetch$ = new ReplaySubject(1);
+    const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
     const onLoad = jest.fn();
     const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock();
     const lensVisMock = await getLensVisMock({

@@ -20,13 +20,13 @@ import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import { getLensVisMock } from '../../__mocks__/lens_vis';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { of, ReplaySubject } from 'rxjs';
+import { of } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { checkChartAvailability } from './utils/check_chart_availability';
 import { allSuggestionsMock } from '../../__mocks__/suggestions';
-import { getFetchParamsMock } from '../../__mocks__/fetch_params';
+import { getFetchParamsMock, getFetch$Mock } from '../../__mocks__/fetch_params';
 
 let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
 
@@ -131,7 +131,7 @@ async function mountComponent({
     withDefaultActions: undefined,
     isChartAvailable: checkChartAvailability({ chart, dataView, isPlainRecord }),
     renderCustomChartToggleActions: customToggle ? () => customToggle : undefined,
-    fetch$: new ReplaySubject(1),
+    fetch$: getFetch$Mock(),
     fetchParams,
     request: undefined,
     dataLoading$: undefined,

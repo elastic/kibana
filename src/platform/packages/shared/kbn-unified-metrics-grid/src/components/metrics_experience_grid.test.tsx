@@ -13,13 +13,9 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from '../hooks';
 import { FIELD_VALUE_SEPARATOR } from '../common/constants';
-import type {
-  ChartSectionProps,
-  UnifiedHistogramInputMessage,
-  UnifiedHistogramServices,
-} from '@kbn/unified-histogram/types';
+import type { ChartSectionProps, UnifiedHistogramServices } from '@kbn/unified-histogram/types';
+import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Subject } from 'rxjs';
 import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
@@ -50,8 +46,6 @@ const usePaginatedFieldsMock = hooks.usePaginatedFields as jest.MockedFunction<
   typeof hooks.usePaginatedFields
 >;
 
-const input$ = new Subject<UnifiedHistogramInputMessage>();
-
 const dimensions: Dimension[] = [
   { name: 'foo', type: ES_FIELD_TYPES.KEYWORD },
   { name: 'qux', type: ES_FIELD_TYPES.KEYWORD },
@@ -74,23 +68,24 @@ const allFields: MetricField[] = [
 ];
 
 describe('MetricsExperienceGrid', () => {
+  const fetchParams = getFetchParamsMock({
+    dataView: { getIndexPattern: () => 'metrics-*' } as any,
+    filters: [],
+    query: { esql: 'FROM metrics-*' },
+    esqlVariables: [],
+    relativeTimeRange: { from: 'now-15m', to: 'now' },
+  });
+  const fetch$ = getFetch$Mock(fetchParams);
+
   const defaultProps: ChartSectionProps = {
-    dataView: { getIndexPattern: () => 'metrics-*' } as ChartSectionProps['dataView'],
     renderToggleActions: () => <div data-test-subj="toggleActions" />,
     chartToolbarCss: { name: '', styles: '' },
     histogramCss: { name: '', styles: '' },
-    requestParams: {
-      getTimeRange: () => ({ from: 'now-15m', to: 'now' }),
-      filters: [],
-      query: { esql: 'FROM metrics-*' },
-      esqlVariables: [],
-      relativeTimeRange: { from: 'now-15m', to: 'now' },
-      updateTimeRange: () => {},
-    },
+    fetchParams,
     services: {
       fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
     } as unknown as UnifiedHistogramServices,
-    input$,
+    fetch$,
     isComponentVisible: true,
   };
 
