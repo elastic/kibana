@@ -15,7 +15,7 @@ const placeholder = i18n.translate('xpack.datasetQuality.filterBar.placeholder',
 });
 
 const ariaLabel = i18n.translate('xpack.datasetQuality.filterBar.ariaLabel', {
-  defaultMessage: 'Search and filter data sets',
+  defaultMessage: 'Type a data set name',
 });
 
 export interface FilterBarComponentProps {
