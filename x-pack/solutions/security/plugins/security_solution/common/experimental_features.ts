@@ -12,10 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  // FIXME:PT delete?
-  excludePoliciesInFilterEnabled: false,
-
-  kubernetesEnabled: false,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -43,47 +39,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the `upload` endpoint response action (v8.9)
-   */
-  responseActionUploadEnabled: true,
-
-  /**
-   * Enables Automated Endpoint Process actions
-   */
-  automatedProcessActionsEnabled: true,
-
-  /**
-   * Enables the ability to send Response actions to SentinelOne and persist the results
-   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
-   * response actions in Response Console.
-   *
-   * Release: v8.13.0
-   */
-  responseActionsSentinelOneV1Enabled: true,
-
-  /**
-   * Enables use of SentinelOne response actions that complete asynchronously
-   *
-   * Release: v8.14.0
-   */
-  responseActionsSentinelOneV2Enabled: true,
-
-  /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: true,
-
-  /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: true,
-
-  /** Enable the `processes` response actions for SentinelOne */
-  responseActionsSentinelOneProcessesEnabled: true,
-
-  /**
-   * Enables the ability to send Response actions to Crowdstrike and persist the results
-   * in ES.
-   */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-
-  /**
    * `runscript` response actions for SentinelOne hosts.
    *
    * Release: 9.2.0 (earlier for serverless)
@@ -91,49 +46,19 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneRunScriptEnabled: true,
 
   /**
-   * Space awareness for Elastic Defend management.
-   * Feature depends on Fleet's corresponding features also being enabled:
-   * - `subfeaturePrivileges`
-   * - `useSpaceAwareness`
-   * and Fleet must set it runtime mode to spaces by calling the following API:
-   * - `POST /internal/fleet/enable_space_awareness`
-   */
-  endpointManagementSpaceAwarenessEnabled: true,
-
-  /**
-   * Disables new notes
-   */
-  securitySolutionNotesDisabled: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
 
   /**
-   * Enables the Managed User section inside the new user details flyout.
-   */
-  newUserDetailsFlyoutManagedUser: false,
-
-  /**
-   * Enable risk engine client and initialisation of datastream, component templates and mappings
-   */
-  riskScoringPersistence: true,
-
-  /**
-   * Enables experimental Entity Analytics HTTP endpoints
-   */
-  riskScoringRoutesEnabled: true,
-
-  /**
    * Disables ESQL-based risk scoring
    */
-  disableESQLRiskScoring: true,
+  disableESQLRiskScoring: false,
 
   /**
    * Enable resetting risk scores to zero for outdated entities
    */
-  enableRiskScoreResetToZero: false,
+  enableRiskScoreResetToZero: true,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
@@ -141,59 +66,19 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoreAssistantToolDisabled: false,
 
   /**
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   */
+  entityDetailsHighlightsEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
 
   /**
-   * Enables Protection Updates tab in the Endpoint Policy Details page
-   */
-  protectionUpdatesEnabled: true,
-
-  /**
-   * Disables the timeline save tour.
-   * This flag is used to disable the tour in cypress tests.
-   */
-  disableTimelineSaveTour: false,
-
-  /**
-   * Enables the risk engine privileges route
-   * and associated callout in the UI
-   */
-  riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables SentinelOne manual host isolation response actions directly through the connector
-   * sub-actions framework.
-   * v8.12.0
-   */
-  sentinelOneManualHostActionsEnabled: true,
-
-  /**
-   * Enables Response actions telemetry collection
-   * Should be enabled in 8.17.0
-   */
-  responseActionsTelemetryEnabled: true,
-
-  /**
    * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
    */
   microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-
-  /**
-   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
-   */
-  malwareOnWriteScanOptionAvailable: true,
-
-  /**
-   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
-   */
-  unifiedManifestEnabled: true,
-
-  /**
-   * Enables the new modal for the value list items
-   */
-  valueListItemsModalEnabled: true,
 
   /**
    * Enables the storing of gaps in the event log
@@ -206,9 +91,9 @@ export const allowedExperimentalValues = Object.freeze({
   bulkFillRuleGapsEnabled: true,
 
   /**
-   * Adds a new option to filter descendants of a process for Management / Event Filters
+   * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  filterProcessDescendantsForEventFiltersEnabled: true,
+  filterProcessDescendantsForTrustedAppsEnabled: false,
 
   /**
    * Enables the rule's bulk action to manage alert suppression
@@ -221,22 +106,10 @@ export const allowedExperimentalValues = Object.freeze({
   doesNotMatchForIndicatorMatchRuleEnabled: true,
 
   /**
-   * Enables the new data ingestion hub
-   */
-  dataIngestionHubEnabled: false,
-
-  /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
    * can be disabled if necessary in a given environment.
    */
   entityStoreDisabled: false,
-
-  /**
-   * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
-   */
-  serviceEntityStoreEnabled: true,
-  /**
-
 
   /**
    * Disables the siem migrations feature
@@ -254,31 +127,10 @@ export const allowedExperimentalValues = Object.freeze({
   endpointExceptionsMovedUnderManagement: false,
 
   /**
-   * Disables flyout history and new preview navigation
-   */
-  newExpandableFlyoutNavigationDisabled: false,
-
-  /**
-   * Enables the ability to edit highlighted fields in the alertflyout
-   */
-  editHighlightedFields: true,
-
-  /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /**
-   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
-   * Release: 8.18/9.0
-   */
-  responseActionsMSDefenderEndpointEnabled: true,
-
-  /**
-   * Enables banner for informing users about changes in data collection.
-   */
-  eventCollectionDataReductionBannerEnabled: true,
 
   /** Enables new Data View Picker */
   newDataViewPickerEnabled: true,
@@ -298,12 +150,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Trusted Devices artifact management for device control protections.
    * Allows users to manage trusted USB and external devices
    */
-  trustedDevices: false,
+  trustedDevices: true,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
    */
-  automaticDashboardsMigration: false,
+  automaticDashboardsMigration: true,
 
   /**
    * Enables the SIEM Readiness Dashboard feature
@@ -314,6 +166,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.2.0
    */
   microsoftDefenderEndpointCancelEnabled: true,
+  /**
+   * Protects all the work related to the attacks and alerts alignment effort
+   */
+  attacksAlertsAlignment: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

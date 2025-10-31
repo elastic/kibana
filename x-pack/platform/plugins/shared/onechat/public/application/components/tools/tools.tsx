@@ -19,15 +19,19 @@ import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { OnechatToolsTable } from './table/tools_table';
 import { McpConnectionButton } from './mcp_server/mcp_connection_button';
+import { TechPreviewTitle } from '../common/tech_preview';
+import { useUiPrivileges } from '../../hooks/use_ui_privileges';
 export const OnechatTools = () => {
   const { euiTheme } = useEuiTheme();
   const { createTool } = useToolsActions();
   const { createOnechatUrl } = useNavigation();
 
+  const { manageTools } = useUiPrivileges();
+
   return (
-    <KibanaPageTemplate>
+    <KibanaPageTemplate data-test-subj="agentBuilderToolsPage">
       <KibanaPageTemplate.Header
-        pageTitle={labels.tools.title}
+        pageTitle={<TechPreviewTitle title={labels.tools.title} />}
         description={
           <FormattedMessage
             id="xpack.onechat.tools.toolsDescription"
@@ -61,14 +65,16 @@ export const OnechatTools = () => {
           border-block-end: none;
         `}
         rightSideItems={[
-          <EuiButton
-            key="new-esql-tool-button"
-            fill
-            iconType="plus"
-            onClick={() => createTool(ToolType.esql)}
-          >
-            <EuiText size="s">{labels.tools.newToolButton}</EuiText>
-          </EuiButton>,
+          manageTools && (
+            <EuiButton
+              key="new-esql-tool-button"
+              fill
+              iconType="plus"
+              onClick={() => createTool(ToolType.esql)}
+            >
+              <EuiText size="s">{labels.tools.newToolButton}</EuiText>
+            </EuiButton>
+          ),
           <McpConnectionButton key="mcp-server-connection-button" />,
         ]}
       />

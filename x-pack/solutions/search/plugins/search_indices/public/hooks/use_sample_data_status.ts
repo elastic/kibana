@@ -6,7 +6,7 @@
  */
 
 import type { StatusResponse } from '@kbn/sample-data-ingest/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { QueryKeys } from '../constants';

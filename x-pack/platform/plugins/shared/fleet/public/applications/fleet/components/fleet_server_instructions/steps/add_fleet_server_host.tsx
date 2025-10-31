@@ -274,6 +274,7 @@ export const AddFleetServerHostStepContent = ({
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             iconType="check"
             color="success"
             title={

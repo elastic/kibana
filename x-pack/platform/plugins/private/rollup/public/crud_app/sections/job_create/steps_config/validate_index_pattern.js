@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 export function validateIndexPattern(indexPattern, rollupIndex) {
   if (!indexPattern || !indexPattern.trim()) {
     return [
@@ -28,7 +28,7 @@ export function validateIndexPattern(indexPattern, rollupIndex) {
     ];
   }
 
-  const illegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
+  const illegalCharacters = ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
     if (indexPattern.includes(char)) {
       chars.push(char);
     }

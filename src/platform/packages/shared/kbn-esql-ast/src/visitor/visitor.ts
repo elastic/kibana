@@ -10,7 +10,11 @@
 import type { SharedData } from './global_visitor_context';
 import { GlobalVisitorContext } from './global_visitor_context';
 import { QueryVisitorContext } from './contexts';
-import type { VisitorContext } from './contexts';
+import type {
+  CommandVisitorContext,
+  HeaderCommandVisitorContext,
+  VisitorContext,
+} from './contexts';
 import type {
   AstNodeToVisitorName,
   EnsureFunction,
@@ -46,6 +50,22 @@ export class Visitor<
     ast: ESQLAstQueryExpression,
     pos: number
   ): ESQLProperNode | null => {
+    const visitCommand = (
+      ctx: CommandVisitorContext | HeaderCommandVisitorContext
+    ): ESQLProperNode | null => {
+      for (const child of ctx.arguments()) {
+        const { location: childLocation } = child;
+        if (!childLocation) continue;
+        const isInsideChild = childLocation.min <= pos && childLocation.max >= pos;
+        if (isInsideChild) return ctx.visitExpression(child, undefined);
+        const isBeforeChild = childLocation.min > pos;
+        if (isBeforeChild) {
+          return ctx.visitExpression(child, undefined) || child;
+        }
+      }
+      return null;
+    };
+
     return new Visitor()
       .on('visitExpression', (ctx): ESQLProperNode | null => {
         const node = ctx.node;
@@ -74,20 +94,18 @@ export class Visitor<
         }
         return null;
       })
-      .on('visitCommand', (ctx): ESQLProperNode | null => {
-        for (const child of ctx.arguments()) {
-          const { location: childLocation } = child;
-          if (!childLocation) continue;
-          const isInsideChild = childLocation.min <= pos && childLocation.max >= pos;
-          if (isInsideChild) return ctx.visitExpression(child);
-          const isBeforeChild = childLocation.min > pos;
-          if (isBeforeChild) {
-            return ctx.visitExpression(child) || child;
-          }
-        }
-        return null;
-      })
+      .on('visitCommand', visitCommand)
+      .on('visitHeaderCommand', visitCommand)
       .on('visitQuery', (ctx): ESQLProperNode | null => {
+        for (const node of ctx.headerCommands()) {
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitHeaderCommand(node, undefined);
+          const isBefore = location.min > pos;
+          if (isBefore) return node;
+        }
+
         for (const node of ctx.commands()) {
           const { location } = node;
           if (!location) continue;
@@ -96,6 +114,7 @@ export class Visitor<
           const isBefore = location.min > pos;
           if (isBefore) return node;
         }
+
         return null;
       })
       .visitQuery(ast);
@@ -114,6 +133,28 @@ export class Visitor<
     ast: ESQLAstQueryExpression,
     pos: number
   ): ESQLProperNode | null => {
+    const visitCommand = (
+      ctx: CommandVisitorContext | HeaderCommandVisitorContext
+    ): ESQLProperNode | null => {
+      const nodes = [...ctx.arguments()];
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const node = nodes[i];
+        if (!node) continue;
+        const { location } = node;
+        if (!location) continue;
+        const isInside = location.min <= pos && location.max >= pos;
+        if (isInside) return ctx.visitExpression(node, undefined);
+        const isAfter = location.max < pos;
+        if (isAfter) {
+          if (ctx.node.location && ctx.node.location.max >= location.max) {
+            return ctx.visitExpression(node, undefined) || node;
+          }
+          return node;
+        }
+      }
+      return null;
+    };
+
     return new Visitor()
       .on('visitExpression', (ctx): ESQLProperNode | null => {
         const nodeLocation = ctx.node.location;
@@ -143,37 +184,29 @@ export class Visitor<
 
         return null;
       })
-      .on('visitCommand', (ctx): ESQLProperNode | null => {
-        const nodes = [...ctx.arguments()];
+      .on('visitCommand', visitCommand)
+      .on('visitHeaderCommand', visitCommand)
+      .on('visitQuery', (ctx): ESQLProperNode | null => {
+        const nodes = [...ctx.headerCommands(), ...ctx.commands()];
         for (let i = nodes.length - 1; i >= 0; i--) {
           const node = nodes[i];
           if (!node) continue;
           const { location } = node;
           if (!location) continue;
           const isInside = location.min <= pos && location.max >= pos;
-          if (isInside) return ctx.visitExpression(node);
+          if (isInside) {
+            if (node.type === 'command') return ctx.visitCommand(node);
+            else if (node.type === 'header-command') {
+              return ctx.visitHeaderCommand(node, undefined);
+            } else return node;
+          }
           const isAfter = location.max < pos;
           if (isAfter) {
-            if (ctx.node.location && ctx.node.location.max >= location.max) {
-              return ctx.visitExpression(node) || node;
-            }
+            if (node.type === 'command') return ctx.visitCommand(node) || node;
             return node;
           }
         }
-        return null;
-      })
-      .on('visitQuery', (ctx): ESQLProperNode | null => {
-        const nodes = [...ctx.commands()];
-        for (let i = nodes.length - 1; i >= 0; i--) {
-          const node = nodes[i];
-          if (!node) continue;
-          const { location } = node;
-          if (!location) continue;
-          const isInside = location.min <= pos && location.max >= pos;
-          if (isInside) return ctx.visitCommand(node);
-          const isAfter = location.max < pos;
-          if (isAfter) return ctx.visitCommand(node) || node;
-        }
+
         return null;
       })
       .visitQuery(ast);
@@ -225,6 +258,12 @@ export class Visitor<
             NonNullable<Methods['visitQuery']>
           >;
         }
+        case 'header-command': {
+          this.ctx.assertMethodExists('visitHeaderCommand');
+          return this.ctx.methods.visitHeaderCommand!(ctx as any, input) as ReturnType<
+            NonNullable<Methods['visitHeaderCommand']>
+          >;
+        }
         case 'command': {
           this.ctx.assertMethodExists('visitCommand');
           return this.ctx.methods.visitCommand!(ctx as any, input) as ReturnType<
@@ -268,6 +307,21 @@ export class Visitor<
   ) {
     this.ctx.assertMethodExists('visitCommand');
     return this.ctx.visitCommand(null, node, input);
+  }
+
+  /**
+   * Traverse starting from known header command node with default context.
+   *
+   * @param node Header command node to traverse.
+   * @param input Input to pass to the first visitor.
+   * @returns The output of the visitor.
+   */
+  public visitHeaderCommand(
+    node: import('../types').ESQLAstHeaderCommand,
+    input: UndefinedToVoid<Parameters<NonNullable<Methods['visitHeaderCommand']>>[1]>
+  ) {
+    this.ctx.assertMethodExists('visitHeaderCommand');
+    return this.ctx.visitHeaderCommand(null, node, input);
   }
 
   /**

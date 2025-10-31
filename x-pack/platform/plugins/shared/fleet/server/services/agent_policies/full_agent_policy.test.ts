@@ -133,7 +133,7 @@ jest.mock('../download_source', () => {
   return {
     downloadSourceService: {
       getDefaultDownloadSourceId: async () => 'default-download-source-id',
-      get: async (soClient: any, id: string): Promise<DownloadSource> => {
+      get: async (id: string): Promise<DownloadSource> => {
         if (id === 'test-ds-1') {
           return {
             id: 'test-ds-1',
@@ -761,6 +761,7 @@ describe('getFullAgentPolicy', () => {
       },
     });
   });
+
   it('should return agent binary with secrets if there are any present', async () => {
     mockAgentPolicy({
       namespace: 'default',
@@ -1808,6 +1809,37 @@ describe('generateFleetConfig', () => {
       },
     }
   `);
+  });
+
+  it('should generate ssl config when a default ES output has ssl options', () => {
+    const res = generateFleetConfig(
+      {
+        host_urls: ['https://test.fr'],
+        ssl: {
+          agent_certificate_authorities: ['/tmp/ssl/ca.crt'],
+          agent_certificate: 'my-cert',
+        },
+        secrets: {
+          ssl: {
+            agent_key: 'my-key',
+          },
+        },
+      } as any,
+      []
+    );
+
+    expect(res).toEqual({
+      hosts: ['https://test.fr'],
+      ssl: {
+        certificate: 'my-cert',
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+      },
+      secrets: {
+        ssl: {
+          key: 'my-key',
+        },
+      },
+    });
   });
 });
 

@@ -9,7 +9,8 @@
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
-import type { SerializedVis, VisParams } from '../types';
+import type { VisParams } from '@kbn/visualizations-common';
+import type { SerializedVis } from '../types';
 
 export type VisualizeEmbeddableBaseState = SerializedTitles &
   SerializedTimeRange &

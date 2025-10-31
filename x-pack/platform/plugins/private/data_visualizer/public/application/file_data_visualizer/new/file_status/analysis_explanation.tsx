@@ -27,8 +27,9 @@ import { AnalysisSummary } from './analysis_summary';
 
 interface Props {
   fileStatus: FileAnalysis;
+  index: number;
 }
-export const AnalysisExplanation: FC<Props> = ({ fileStatus }) => {
+export const AnalysisExplanation: FC<Props> = ({ fileStatus, index }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
   const results = fileStatus.results;
@@ -44,13 +45,18 @@ export const AnalysisExplanation: FC<Props> = ({ fileStatus }) => {
         iconType="inspect"
         size="xs"
         color="text"
+        data-test-subj={`mlFileUploadAnalysisExplanationButton-${index}`}
         aria-label={i18n.translate('xpack.dataVisualizer.file.analysisSummary.inspectButtonLabel', {
           defaultMessage: 'Analysis explanation',
         })}
       />
 
       {isModalVisible && results?.explanation ? (
-        <EuiModal aria-labelledby={modalTitleId} onClose={() => setIsModalVisible(false)}>
+        <EuiModal
+          aria-labelledby={modalTitleId}
+          onClose={() => setIsModalVisible(false)}
+          data-test-subj="mlFileUploadAnalysisExplanationModal"
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle id={modalTitleId}>
               <EuiIcon type="inspect" size={'l'} />{' '}
@@ -75,7 +81,7 @@ export const AnalysisExplanation: FC<Props> = ({ fileStatus }) => {
 
             <AnalysisSummary results={results} />
 
-            <EuiText size={'s'}>
+            <EuiText size={'s'} data-test-subj="mlFileUploadAnalysisExplanationText">
               <EuiSpacer size="l" />
               <EuiSubSteps>
                 <ul style={{ wordBreak: 'break-word' }}>

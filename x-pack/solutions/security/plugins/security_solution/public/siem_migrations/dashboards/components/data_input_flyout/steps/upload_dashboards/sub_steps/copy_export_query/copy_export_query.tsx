@@ -19,7 +19,7 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiText size="s">
+        <EuiText size="s" data-test-subj="migrationCopyExportQueryDescription">
           <FormattedMessage
             id="xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.dashboardUpload.copyExportQuery.description"
             defaultMessage="Log in to your Splunk admin account, go to the {section} app and run the following query. Export your results as {format}."
@@ -30,11 +30,11 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
           />
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem data-test-subj="migrationCopyExportQuery">
         <CopyQuery query={DASHBOARDS_SPLUNK_QUERY} onCopied={onCopied} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText color="subdued" size="xs">
+        <EuiText color="subdued" size="xs" data-test-subj="migrationCopyExportDisclaimer">
           <FormattedMessage
             id="xpack.securitySolution.siemMigrations.dashboardsFileUpload.disclaimer"
             defaultMessage="Note: To avoid exceeding your LLM API rate limit when translating a large number of queries, consider exporting dashboards in batches, for example by adding {operator} to the query above"

@@ -8,5 +8,21 @@
  */
 
 export interface ESQLTelemetryCallbacks {
-  onDecorationHoverShown: (hoverMessage: string) => void;
+  onDecorationHoverShown?: (hoverMessage: string) => void;
+  onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
+}
+
+export enum QuerySource {
+  HISTORY = 'history',
+  STARRED = 'starred',
+  MANUAL = 'manual',
+  HELP = 'help',
+}
+
+export interface TelemetryQuerySubmittedProps {
+  query_source: QuerySource;
+  query_length: string;
+  query_lines: string;
+  anti_limit_before_aggregate: boolean;
+  anti_missing_sort_before_limit: boolean;
 }

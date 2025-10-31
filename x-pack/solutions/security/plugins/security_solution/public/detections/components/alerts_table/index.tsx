@@ -144,7 +144,7 @@ const casesConfiguration = {
   featureId: CASES_FEATURE_ID,
   owner: [APP_ID],
   syncAlerts: true,
-  extractObservables: false,
+  extractObservables: true,
 };
 const emptyInputFilters: Filter[] = [];
 
@@ -351,11 +351,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     ACTION_BUTTON_COUNT--;
   }
 
-  // remove space if add notes icon shouldn't be displayed
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-  if (!canReadNotes || securitySolutionNotesDisabled) {
+  if (!canReadNotes) {
     ACTION_BUTTON_COUNT--;
   }
 

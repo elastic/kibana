@@ -63,14 +63,14 @@ You start with a broad hypothesis based on a common field like `resource.attribu
     "index": "logs-generic-v1",
     "partitions": [
       {
-        "name": "apache-logs",
+        "name": "apache",
         "condition": {
           "field": "resource.attributes.service.name",
           "eq": "apache"
         }
       },
       {
-        "name": "system-logs",
+        "name": "system",
         "condition": {
           "field": "resource.attributes.service.name",
           "eq": "system"
@@ -83,14 +83,14 @@ You start with a broad hypothesis based on a common field like `resource.attribu
 
 #### **Reasoning and Refinement**
 
-The tool returns results. The `apache-logs` partition has 3 distinct clusters, and the "unmatched" bucket is large. This means your initial partition is too coarse.
+The tool returns results. The `apache` partition has 3 distinct clusters, and the "unmatched" bucket is large. This means your initial partition is too coarse.
 
 ```text
 {"tool":"reason","arguments":{}}
 # Orchestrator returns stepsLeft
 <<<BEGIN_INTERNAL>>>
 [stepsLeft = 8]
-REFLECT> The initial call showed that the `apache-logs` partition is not pure; its three clusters suggest it contains multiple distinct web applications. The large 'unmatched' bucket, which seems to contain redis logs, also needs to be addressed.
+REFLECT> The initial call showed that the `apache` partition is not pure; its three clusters suggest it contains multiple distinct web applications. The large 'unmatched' bucket, which seems to contain redis logs, also needs to be addressed.
 GATHER> I will split the 'apache' partition into three more specific ones by looking for additional fields like `virtualhost` or `log_source_id`. I will also add a new partition for Redis based on the `process.name` field I observed in the unmatched logs.
 continue = yes
 <<<END_INTERNAL>>>
@@ -141,7 +141,7 @@ You now submit a more detailed and complete set of partitions.
         }
       },
       {
-        "name": "system-logs",
+        "name": "system",
         "condition": {
           "field": "resource.attributes.service.name",
           "eq": "system"
@@ -166,7 +166,7 @@ You now submit a more detailed and complete set of partitions.
 ### **Error => Repair Examples**
 
 *   **Error: Partition is too broad.**
-    *   **Bad Partition:** `{"name": "database-logs", "condition": {"field": "log.type", "eq": "database"}}`
+    *   **Bad Partition:** `{"name": "database", "condition": {"field": "log.type", "eq": "database"}}`
     *   **Symptom:** The `partition_logs` tool returns 5 clusters for this partition.
     *   **Reasoning:** "database" is a category, not a system. The clusters likely correspond to `mysql`, `redis`, `postgres`, etc.
     *   **Repair:** Replace the single partition with multiple, specific partitions: one for `mysql` (e.g., matching `process.name: 'mysqld'`), one for `redis` (`process.name: 'redis-server'`), etc.

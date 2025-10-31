@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ccrStore } from './store';
+export { ccrStore, createCrossClusterReplicationStore } from './store';

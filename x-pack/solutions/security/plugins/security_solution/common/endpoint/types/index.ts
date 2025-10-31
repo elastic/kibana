@@ -816,6 +816,18 @@ export type SafeEndpointEvent = Partial<{
   }>;
   file: Partial<{ path: ECSField<string> }>;
   registry: Partial<{ path: ECSField<string>; key: ECSField<string> }>;
+  device: Partial<{
+    serial_number: ECSField<string>;
+    vendor: Partial<{
+      name: ECSField<string>;
+      id: ECSField<string>;
+    }>;
+    product: Partial<{
+      name: ECSField<string>;
+      id: ECSField<string>;
+    }>;
+    type: ECSField<string>;
+  }>;
 }>;
 
 export interface SafeLegacyEndpointEvent {
@@ -1347,13 +1359,21 @@ export interface HostPolicyResponse {
           };
         };
         artifacts: {
+          /**
+           * The Global artifacts applied to the host. Object could be empty if download of
+           * artifacts failed on the host.
+           */
           global: {
-            version: string;
-            identifiers: HostPolicyResponseAppliedArtifact[];
+            version?: string;
+            identifiers?: HostPolicyResponseAppliedArtifact[];
           };
+          /**
+           * The user defined artifacts (Kibana) applied to the host. Object could be empty if download of
+           * artifacts failed on the host.
+           */
           user: {
-            version: string;
-            identifiers: HostPolicyResponseAppliedArtifact[];
+            version?: string;
+            identifiers?: HostPolicyResponseAppliedArtifact[];
           };
         };
       };

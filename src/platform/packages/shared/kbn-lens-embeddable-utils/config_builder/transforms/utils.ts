@@ -13,15 +13,13 @@ import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type {
   TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPersistedState,
-} from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { Filter, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
@@ -474,15 +472,23 @@ export const queryToLensState = (query: LensApiFilterType): Query => {
 
 export const filtersAndQueryToApiFormat = (state: LensAttributes) => {
   return {
-    filters: filtersToApiFormat(state.state.filters),
-    query: queryToApiFormat(state.state.query as Query),
+    ...(state.state.filters?.length ? { filters: filtersToApiFormat(state.state.filters) } : {}),
+    ...(state.state.query && !isOfAggregateQueryType(state.state.query)
+      ? { query: queryToApiFormat(state.state.query) }
+      : {}),
   };
 };
 
 export const filtersAndQueryToLensState = (state: LensApiState) => {
+  const query =
+    state.dataset.type === 'esql'
+      ? { esql: state.dataset.query }
+      : 'query' in state && state.query
+      ? queryToLensState(state.query satisfies LensApiFilterType)
+      : undefined;
   return {
     ...(state.filters ? { filters: filtersToLensState(state.filters) } : {}),
-    ...(state.query ? { query: queryToLensState(state.query as LensApiFilterType) } : {}),
+    ...(query ? { query } : {}),
   };
 };
 
@@ -505,3 +511,7 @@ export type DeepPartial<T> = T extends (...args: never[]) => unknown
       [P in keyof T]?: DeepPartial<T[P]>;
     }
   : T;
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}

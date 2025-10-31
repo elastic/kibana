@@ -37,6 +37,27 @@ export class UnifiedTabsPageObject extends FtrService {
     }
   }
 
+  public async hasUnsavedIndicator(index?: number) {
+    if (index === undefined) return false;
+
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+
+    const tabElement = tabElements[index];
+    const tab = (await tabElement?.getAttribute('data-test-subj')) || '';
+    const tabId = tab.replace(/^unifiedTabs_tab_/, '');
+    const tabChangesIndicator = `unifiedTabs__tabChangesIndicator-${tabId}`;
+
+    return await this.testSubjects.exists(tabChangesIndicator);
+  }
+
+  public async getSelectedTabLabel() {
+    const selectedTab = await this.getSelectedTab();
+    return selectedTab?.label;
+  }
+
   public async getTabWidths() {
     const tabElements = await this.getTabElements();
     return await Promise.all(
@@ -145,7 +166,11 @@ export class UnifiedTabsPageObject extends FtrService {
     const labelElement = await this.find.byCssSelector(
       '[data-test-subj^="unifiedTabs_editTabLabelInput_"]'
     );
-    await labelElement.clearValue();
+    await labelElement.clearValueWithKeyboard();
+    await this.retry.waitFor('the tab label input to be empty', async () => {
+      const value = await labelElement.getAttribute('value');
+      return value === '';
+    });
     await labelElement.type(newLabel, { charByChar: true });
     await this.browser.pressKeys(this.browser.keys.ENTER);
     await this.retry.waitFor('the tab label to change', async () => {

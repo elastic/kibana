@@ -254,7 +254,7 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : undefined;
   if (LIMIT_SOLUTIONS) {
-    const validSolutions = ['chat', 'observability', 'search', 'security'];
+    const validSolutions = ['observability', 'search', 'security', 'workplaceai'];
     const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
     if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
   }
@@ -338,7 +338,7 @@ export async function pickTestGroupRunOrder() {
     : [];
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
+    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.*js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: DISABLED_JEST_CONFIGS,
@@ -507,7 +507,7 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 85,
+              diskSizeGb: 100,
             },
             env: {
               SCOUT_TARGET_TYPE: 'local',
@@ -565,7 +565,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
+                  timeout_in_minutes: 120,
                   agents: expandAgentQueue(queue),
                   env: {
                     SCOUT_TARGET_TYPE: 'local',
@@ -644,8 +644,8 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
             },
             retry: {
               automatic: [
-                { exit_status: '-1', limit: 1 },
-                { exit_status: '*', limit: 0 },
+                { exit_status: '10', limit: 1 },
+                { exit_status: '*', limit: 3 },
               ],
             },
           })

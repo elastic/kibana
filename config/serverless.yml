@@ -131,6 +131,7 @@ xpack.ilm.enabled: false
 xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
+xpack.reindex_service.rollupsEnabled: false
 
 # Management team UI configurations
 # Disable index actions from the Index Management UI
@@ -297,7 +298,6 @@ xpack.genAiSettings:
   showSpacesIntegration: false
   showAiAssistantsVisibilitySetting: false
 
-## Feature flags overrides
-feature_flags.overrides:
-  # Serverless uses old side nav for now, while classic already rolling out new side nav
-  core.chrome.projectSideNav: 'v1'
+# Cross Project Search
+cps.enabled: true
+cps.cpsEnabled: false

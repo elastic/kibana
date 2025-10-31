@@ -13,3 +13,8 @@ export type DataStreamFieldCapsMap = Map<
   string,
   Record<string, Record<string, FieldCapsFieldCapability>>
 >;
+
+export interface EpochTimeRange {
+  from: number;
+  to: number;
+}

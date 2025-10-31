@@ -12,6 +12,7 @@ import type {
   ESQLAstChangePointCommand,
   ESQLAstCommand,
   ESQLAstCompletionCommand,
+  ESQLAstHeaderCommand,
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
   ESQLAstRerankCommand,
@@ -214,6 +215,19 @@ export class GlobalVisitorContext<
       }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
+  }
+
+  public visitHeaderCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstHeaderCommand,
+    input: types.VisitorInput<Methods, 'visitHeaderCommand'>
+  ): types.VisitorOutput<Methods, 'visitHeaderCommand'> {
+    this.assertMethodExists('visitHeaderCommand');
+
+    const context = new contexts.HeaderCommandVisitorContext(this, node, parent);
+    const output = this.methods.visitHeaderCommand!(context, input);
+
+    return output;
   }
 
   public visitFromCommand(

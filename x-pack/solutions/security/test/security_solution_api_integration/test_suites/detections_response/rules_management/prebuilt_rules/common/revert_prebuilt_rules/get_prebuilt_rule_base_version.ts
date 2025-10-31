@@ -72,6 +72,8 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_source: {
             is_customized: true,
             type: 'external',
+            customized_fields: [{ field_name: 'description' }],
+            has_base_version: true,
           },
           updated_at: modifiedCurrentVersion.updated_at,
         });

@@ -11,7 +11,7 @@ import { routes } from './routes';
 export const CASES_FEATURES = {
   observables: {
     enabled: true,
-    autoExtract: false,
+    autoExtract: true,
   },
 } as const;
 

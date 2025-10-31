@@ -101,6 +101,9 @@ export interface FleetServerHostCreateBody {
       key?: {
         id?: string;
       };
+      agent_key?: {
+        id?: string;
+      };
     };
   };
   ssl?: {
@@ -111,6 +114,9 @@ export interface FleetServerHostCreateBody {
     es_certificate_authorities?: string[];
     es_key?: string;
     key?: string;
+    agent_certificate?: string;
+    agent_certificate_authorities?: string[];
+    agent_key?: string;
   };
 }
 

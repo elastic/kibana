@@ -21,6 +21,9 @@
     "@kbn/core-application-browser-mocks",
     "@kbn/core",
     "@kbn/discover-utils",
-    "@kbn/cloud-security-posture"
+    "@kbn/cloud-security-posture",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/expandable-flyout",
+    "@kbn/react-query"
   ]
 }

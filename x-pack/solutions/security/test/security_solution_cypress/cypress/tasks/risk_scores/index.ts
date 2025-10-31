@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  ENABLE_RISK_SCORE_BUTTON,
-  HOSTS_TABLE_ALERT_CELL,
-  USERS_TABLE_ALERT_CELL,
-} from '../../screens/entity_analytics';
-
-export const clickEnableRiskScore = () => cy.get(ENABLE_RISK_SCORE_BUTTON).click();
+import { HOSTS_TABLE_ALERT_CELL, USERS_TABLE_ALERT_CELL } from '../../screens/entity_analytics';
 
 export const clickOnFirstUsersAlerts = () => {
   cy.get(USERS_TABLE_ALERT_CELL).first().click();
