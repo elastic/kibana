@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useConversationRounds } from '../../../hooks/use_conversation';
-import { ConversationContent } from '../conversation_grid';
+import { ConversationRoundsLayout } from '../layouts/conversation_rounds_layout';
 import { RoundError } from './round_error';
 import { RoundIcon } from './round_icon';
 import { RoundLayout } from './round_layout';
@@ -29,7 +29,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
   const conversationRounds = useConversationRounds();
 
   return (
-    <ConversationContent>
+    <ConversationRoundsLayout>
       <EuiFlexGroup
         id={conversationRoundsId}
         direction="column"
@@ -69,6 +69,6 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
           );
         })}
       </EuiFlexGroup>
-    </ConversationContent>
+    </ConversationRoundsLayout>
   );
 };

@@ -17,7 +17,7 @@ import { useShouldStickToBottom } from '../../context/conversation/use_should_st
 import { useSendMessage } from '../../context/send_message/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
-import { ConversationContent } from './conversation_grid';
+import { ConversationInputLayout } from './layouts/conversation_input_layout';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 
 const fullHeightStyles = css`
@@ -105,9 +105,9 @@ export const Conversation: React.FC<{}> = () => {
             </EuiResizablePanel>
             <EuiResizableButton />
             <EuiResizablePanel initialSize={20} minSize="20%">
-              <ConversationContent css={contentStyles}>
+              <ConversationInputLayout className={contentStyles}>
                 <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
-              </ConversationContent>
+              </ConversationInputLayout>
             </EuiResizablePanel>
           </>
         );

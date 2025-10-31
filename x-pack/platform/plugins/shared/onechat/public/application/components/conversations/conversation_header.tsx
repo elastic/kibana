@@ -8,14 +8,9 @@
 import React from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationActions } from './conversation_actions';
-import {
-  ConversationCenter,
-  ConversationGrid,
-  ConversationLeft,
-  ConversationRight,
-} from './conversation_grid';
 import { ConversationSidebarToggle } from './conversation_sidebar/conversation_sidebar_toggle';
 import { ConversationTitle } from './conversation_title';
+import { ConversationHeaderLayout } from './layouts/conversation_header_layout';
 
 interface ConversationHeaderProps {
   sidebar?: {
@@ -28,22 +23,14 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({ sidebar 
   const hasActiveConversation = useHasActiveConversation();
 
   return (
-    <ConversationGrid>
-      {sidebar && (
-        <ConversationLeft>
+    <ConversationHeaderLayout
+      left={
+        sidebar ? (
           <ConversationSidebarToggle isSidebarOpen={sidebar.isOpen} onToggle={sidebar.onToggle} />
-        </ConversationLeft>
-      )}
-      {hasActiveConversation && (
-        <>
-          <ConversationCenter>
-            <ConversationTitle />
-          </ConversationCenter>
-          <ConversationRight>
-            <ConversationActions />
-          </ConversationRight>
-        </>
-      )}
-    </ConversationGrid>
+        ) : undefined
+      }
+      center={hasActiveConversation ? <ConversationTitle /> : undefined}
+      right={hasActiveConversation ? <ConversationActions /> : undefined}
+    />
   );
 };
