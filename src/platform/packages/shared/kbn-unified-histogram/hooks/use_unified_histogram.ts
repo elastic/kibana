@@ -177,16 +177,8 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     setLensVisService(new LensVisService({ services, lensSuggestionsApi: apiHelper.suggestions }));
   });
 
-  const {
-    services,
-    dataView,
-    columns,
-    isChartLoading,
-    timeRange,
-    table,
-    externalVisContext,
-    esqlVariables,
-  } = props;
+  const { services, dataView, columns, isChartLoading, timeRange, table, externalVisContext } =
+    props;
 
   const columnsMap = useMemo(() => {
     return columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
@@ -259,7 +251,6 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       ? {
           ...props,
           ...stateProps,
-          esqlVariables,
           input$,
           chart,
           isChartAvailable,
@@ -267,16 +258,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
           lensVisService,
         }
       : undefined;
-  }, [
-    chart,
-    input$,
-    isChartAvailable,
-    lensVisService,
-    props,
-    requestParams,
-    stateProps,
-    esqlVariables,
-  ]);
+  }, [chart, input$, isChartAvailable, lensVisService, props, requestParams, stateProps]);
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
       chart,
