@@ -11,14 +11,14 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { type HasSerializableState, type SerializedPanelState } from '@kbn/presentation-publishing';
+import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
 import type {
   GetStateType,
-  LensByRefSerializedState,
-  LensByValueSerializedState,
   LensRuntimeState,
-  LensSerializedState,
   IntegrationCallbacks,
+  LensByRefSerializedAPIConfig,
+  LensByValueSerializedAPIConfig,
+  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
 import { isTextBasedLanguage, transformOutputState } from '../helper';
 
@@ -39,7 +39,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState<LensSerializedState>;
+    HasSerializableState<LensSerializedAPIConfig>;
 } {
   return {
     api: {
@@ -47,25 +47,24 @@ export function initializeIntegrations(getLatestState: GetStateType): {
        * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
-      serializeState: (): SerializedPanelState<LensSerializedState> => {
+      serializeState: (): SerializedPanelState<LensSerializedAPIConfig> => {
         const currentState = cleanupSerializedState(getLatestState());
 
         const { savedObjectId, attributes, ...state } = currentState;
-
         if (savedObjectId) {
           return {
             rawState: {
               ...state,
               savedObjectId,
             },
-          } satisfies SerializedPanelState<LensByRefSerializedState>;
+          } satisfies SerializedPanelState<LensByRefSerializedAPIConfig>;
         }
 
         const transformedState = transformOutputState(currentState);
 
         return {
           rawState: transformedState,
-        } satisfies SerializedPanelState<LensByValueSerializedState>;
+        } satisfies SerializedPanelState<LensByValueSerializedAPIConfig>;
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

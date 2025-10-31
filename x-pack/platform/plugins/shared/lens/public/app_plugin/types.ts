@@ -19,6 +19,7 @@ import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type {
   LensAppLocatorParams,
   LensSerializedState,
+  LensSerializedAPIConfig,
   UserMessagesGetter,
   LensStartServices as StartServices,
   EditorFrameInstance,
@@ -30,7 +31,7 @@ import type {
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
 
 export interface RedirectToOriginProps {
-  state?: LensSerializedState;
+  state?: LensSerializedAPIConfig;
   isCopied?: boolean;
 }
 

@@ -22,7 +22,7 @@ import { getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder }
 ) => {
   const getRoute = router.get({
     path: `${LENS_VIS_API_PATH}/{id}`,
@@ -88,7 +88,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
         }
 
         const resultMeta: CMItemResultMeta = result.meta;
-        const responseItem = getLensResponseItem(result.item, resultMeta);
+        const responseItem = getLensResponseItem(builder, result.item, resultMeta);
 
         return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
           body: responseItem,

@@ -134,6 +134,7 @@ import {
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/constants';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
+import { setLensFeatureFlags } from './get_feature_flags';
 import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggestion } from '.';
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
 import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
@@ -386,12 +387,20 @@ export class LensPlugin {
         return createLensEmbeddableFactory(deps);
       });
 
-      embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
-        const { getLensTransforms } = await import('../common/transforms');
-        return getLensTransforms({
-          transformEnhancementsIn: embeddable.transformEnhancementsIn,
-          transformEnhancementsOut: embeddable.transformEnhancementsOut,
-        }).transformOut;
+      core.getStartServices().then(async ([{ featureFlags }]) => {
+        const flags = await setLensFeatureFlags(featureFlags);
+
+        embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
+          const { getLensTransforms } = await import('../common/transforms');
+          const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
+          const builder = new LensConfigBuilder(undefined, flags.apiFormat);
+
+          return getLensTransforms({
+            builder,
+            transformEnhancementsIn: embeddable.transformEnhancementsIn,
+            transformEnhancementsOut: embeddable.transformEnhancementsOut,
+          }).transformOut;
+        });
       });
 
       // Let Dashboard know about the Lens panel type

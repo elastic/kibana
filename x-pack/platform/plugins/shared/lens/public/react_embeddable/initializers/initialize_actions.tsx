@@ -27,9 +27,9 @@ import type {
   GetStateType,
   LensInternalApi,
   LensRuntimeState,
-  LensSerializedState,
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
+  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
 import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
 
@@ -247,7 +247,7 @@ export function initializeActionApi(
   getComparators: () => StateComparators<DynamicActionsSerializedState>;
   getLatestState: () => DynamicActionsSerializedState;
   cleanup: () => void;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 } {
   const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
@@ -272,7 +272,7 @@ export function initializeActionApi(
     cleanup: () => {
       maybeStopDynamicActions?.stopDynamicActions();
     },
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       dynamicActionsManager?.reinitializeState(lastSaved ?? {});
     },
   };

@@ -26,7 +26,7 @@ import type {
   IntegrationCallbacks,
   LensInternalApi,
   LensApi,
-  LensSerializedState,
+  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
 import { isTextBasedLanguage, transformOutputState } from '../helper';
 
@@ -59,12 +59,12 @@ export const dashboardServicesComparators: StateComparators<SerializedProps> = {
 export interface DashboardServicesConfig {
   api: PublishesWritableTitle &
     PublishesWritableDescription &
-    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
+    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
     Pick<LensApi, 'parentApi'> &
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
   anyStateChange$: Observable<void>;
   getLatestState: () => SerializedProps;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 }
 
 /**
@@ -172,7 +172,7 @@ export function initializeDashboardServices(
         disableTriggers: internalApi.disableTriggers$.getValue(),
       };
     },
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       titleManager.reinitializeState(lastSaved);
       internalApi.updateDisabledTriggers(lastSaved?.disableTriggers);
       internalApi.updateOverrides(lastSaved?.overrides);

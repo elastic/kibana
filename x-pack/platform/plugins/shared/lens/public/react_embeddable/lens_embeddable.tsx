@@ -10,9 +10,8 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
-import type { LensApi, LensRuntimeState, LensSerializedState } from '@kbn/lens-common';
+import type { LensApi, LensRuntimeState, LensSerializedAPIConfig } from '@kbn/lens-common';
 import { DOC_TYPE } from '../../common/constants';
-import type { LensEmbeddableStartServices } from './types';
 
 import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
@@ -32,19 +31,20 @@ import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
+import type { LensEmbeddableStartServices } from './types';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
-): EmbeddableFactory<LensSerializedState, LensApi> => {
+): EmbeddableFactory<LensSerializedAPIConfig, LensApi> => {
   return {
     type: DOC_TYPE,
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
+     * @param uuid      a unique identifier for the embeddable panel
      * @param state     the Lens "runtime" state, which means that 'attributes' is always present.
      *                  The difference for a by-value and a by-ref can be determined by the presence of 'savedObjectId' in the state
      * @param buildApi  a utility function to build the Lens API together to instrument the embeddable container on how to detect
      *                  significative changes in the state (i.e. worth a save or not)
-     * @param uuid      a unique identifier for the embeddable panel
      * @param parentApi a set of props passed down from the embeddable container. Note: no assumptions can be made about its content
      *                  so the usage of type-guards is recommended before extracting data from it.
      *                  Due to the new embeddable being rendered by a <ReactEmbeddableRenderer /> wrapper, this is the only way
@@ -53,7 +53,7 @@ export const createLensEmbeddableFactory = (
      *                  from the Lens component container to the Lens embeddable.
      * @returns an object with the Lens API and the React component to render in the Embeddable
      */
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({ finalizeApi, parentApi, uuid, initialState }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
 
       const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
@@ -137,7 +137,7 @@ export const createLensEmbeddableFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<LensSerializedState>({
+      const unsavedChangesApi = initializeUnsavedChanges<LensSerializedAPIConfig>({
         uuid,
         parentApi,
         serializeState: integrationsConfig.api.serializeState,

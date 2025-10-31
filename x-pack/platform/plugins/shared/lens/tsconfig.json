@@ -123,6 +123,7 @@
     "@kbn/core-http-server",
     "@kbn/presentation-util",
     "@kbn/content-management-table-list-view-common",
+    "@kbn/lens-embeddable-utils",
     "@kbn/controls-plugin",
     "@kbn/controls-schemas",
     "@kbn/controls-constants",

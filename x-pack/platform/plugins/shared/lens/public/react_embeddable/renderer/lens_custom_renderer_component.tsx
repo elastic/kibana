@@ -15,6 +15,7 @@ import type {
   LensParentApi,
   LensRendererProps,
   LensSerializedState,
+  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { createEmptyLensState, transformOutputState } from '../helper';
@@ -143,7 +144,7 @@ export function LensRenderer({
   }, [showInspector, withDefaultActions, extraActions, lensApi]);
 
   return (
-    <EmbeddableRenderer<LensSerializedState, LensApi>
+    <EmbeddableRenderer<LensSerializedAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
       getParentApi={() =>

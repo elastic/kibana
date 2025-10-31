@@ -16,8 +16,8 @@ import { isEqual } from 'lodash';
 import type {
   LensInternalApi,
   LensRuntimeState,
-  LensSerializedState,
   LensUnifiedSearchContext,
+  LensSerializedAPIConfig,
 } from '@kbn/lens-common';
 import type { LensEmbeddableStartServices } from '../types';
 
@@ -35,7 +35,7 @@ export interface SearchContextConfig {
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   getLatestState: () => LensUnifiedSearchContext;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 }
 
 export function initializeSearchContext(
@@ -99,7 +99,7 @@ export function initializeSearchContext(
       lastReloadRequestTime: lastReloadRequestTime$.getValue(),
       ...timeRangeManager.getLatestState(),
     }),
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       timeRangeManager.reinitializeState(lastSaved);
     },
   };
