@@ -25,6 +25,7 @@ import { getBeforeSetup, setGlobalDate } from './lib';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import type { AlertsService } from '../../alerts_service';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -37,9 +38,17 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const alertsService = {
+  isInitialized: jest.fn(),
+  createAlertsClient: jest.fn(),
   muteAlertInstance: jest.fn(),
   unmuteAlertInstance: jest.fn(),
-};
+  muteAllAlerts: jest.fn(),
+  unmuteAllAlerts: jest.fn(),
+  getContextInitializationPromise: jest.fn(),
+  register: jest.fn(),
+  setAlertsToUntracked: jest.fn(),
+  clearAlertFlappingHistory: jest.fn(),
+} as unknown as jest.Mocked<AlertsService>;
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
@@ -63,7 +72,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
-  alertsService: alertsService as any,
+  alertsService,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),

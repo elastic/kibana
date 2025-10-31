@@ -13,12 +13,12 @@ import { alertingAuthorizationMock } from '../../../../authorization/alerting_au
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
-  loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+} from '@kbn/core-saved-objects-api-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { fromKueryExpression } from '@kbn/es-query';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';

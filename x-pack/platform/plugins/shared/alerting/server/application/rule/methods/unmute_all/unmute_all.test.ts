@@ -102,14 +102,17 @@ describe('unmuteAll', () => {
 
   it('should continue when alertsService fails', async () => {
     const loggerMock = loggingSystemMock.create().get();
+    const unmuteAllAlertsErrorMock = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('ES connection failed'));
     const contextWithLogger = {
       ...context,
       logger: loggerMock,
       getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
       alertsService: {
-        unmuteAllAlerts: jest.fn().mockRejectedValueOnce(new Error('ES connection failed')),
+        unmuteAllAlerts: unmuteAllAlertsErrorMock,
       },
-    };
+    } as unknown as RulesClientContext;
     const validParams = {
       id: 'rule-123',
     };

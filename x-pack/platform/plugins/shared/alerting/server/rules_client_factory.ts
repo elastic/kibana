@@ -12,7 +12,6 @@ import type {
   PluginInitializerContext,
   ISavedObjectsRepository,
   CoreStart,
-  ElasticsearchClient,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
