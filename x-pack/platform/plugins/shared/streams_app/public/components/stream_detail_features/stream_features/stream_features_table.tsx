@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { type Streams, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { ConditionPanel } from '../../shared';
+import { ConditionPanel } from '../../data_management/shared';
 import { FeatureEventsSparkline } from './feature_events_sparkline';
 import { FeatureDetailExpanded } from './feature_detail_expanded';
 import { TableTitle } from './table_title';
