@@ -920,7 +920,7 @@ describe('#create', () => {
           })
         ).rejects.toThrowError(
           createBadRequestErrorPayload(
-            `Unable to create \"write_restricted\" \"accessControlType\" saved object. User profile ID not found.`
+            `Unable to create \"accessControlType\" with \"accessMode\". User profile ID not found.`
           )
         );
         expect(client.create).not.toHaveBeenCalled();
