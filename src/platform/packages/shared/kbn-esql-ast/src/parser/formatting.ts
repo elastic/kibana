@@ -11,6 +11,7 @@ import type { Token } from 'antlr4';
 import { type CommonTokenStream } from 'antlr4';
 import { Builder } from '../builder';
 import { Visitor } from '../visitor';
+import { walk } from '../walker';
 import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
@@ -183,6 +184,32 @@ const attachCommentDecoration = (
     return;
   }
 
+  const commentLocation = comment.node.location;
+
+  // Check if comment belongs to a subquery (parens expression)
+  // Walk through the AST to find parens nodes that contain this comment
+  let commentAttachedToSubquery = false;
+  walk(ast, {
+    visitParens(node) {
+      if (
+        node.child?.type === 'query' &&
+        node.location &&
+        commentLocation.min >= node.location.min &&
+        commentLocation.max <= node.location.max
+      ) {
+        // This comment is inside a subquery, attach it to the child query instead
+        const childQuery = node.child as ESQLAstQueryExpression;
+        attachCommentDecoration(childQuery, tokens, comment);
+        commentAttachedToSubquery = true;
+      }
+    },
+  });
+
+  // If comment was attached to a subquery, we're done
+  if (commentAttachedToSubquery) {
+    return;
+  }
+
   if (commentConsumesWholeLine) {
     const node = Visitor.findNodeAtOrAfter(ast, comment.node.location.max);
 
@@ -271,6 +298,7 @@ export const attachDecorations = (
     for (const decoration of line) {
       switch (decoration.type) {
         case 'comment': {
+          // attachCommentDecoration now handles subqueries internally
           attachCommentDecoration(ast, tokens, decoration);
           break;
         }
