@@ -170,7 +170,7 @@ export const getCloudFormationDefaultValue = (
   return cloudFormationTemplate;
 };
 
-const getDefaultAwsCredentialConfig = ({
+export const getDefaultAwsCredentialConfig = ({
   isAgentless,
   showCloudConnectors,
   packageInfo,
