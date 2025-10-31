@@ -27,7 +27,7 @@ export function parseExecutionStatuses(
 }
 
 /**
- * Helper function to parse execution statuses from query parameters
+ * Helper function to parse execution types from query parameters
  * Handles both single string and array of strings
  */
 export function parseExecutionTypes(
