@@ -91,6 +91,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
         <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
           {type === 'download_source' ? (
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.fleet.editOutputFlyout.downloadSource.sslWarningCallout',
                 {
@@ -103,6 +104,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
             />
           ) : (
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.fleet.editOutputFlyout.sslWarningCallout', {
                 defaultMessage:
                   'Invalid settings can break the connection between Elastic Agent and the configured output. If this happens, you will need to provide valid credentials.',
