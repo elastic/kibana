@@ -86,21 +86,21 @@ type Story = StoryObj<typeof WorkflowYAMLEditor>;
 export const Default: Story = {
   args: {
     workflowYaml,
-    readOnly: false,
+    isExecutionYaml: false,
   },
 };
 
 export const ReadOnly: Story = {
   args: {
     workflowYaml,
-    readOnly: true,
+    isExecutionYaml: true,
   },
 };
 
 export const WithStepExecutions: Story = {
   args: {
     workflowYaml,
-    readOnly: false,
+    isExecutionYaml: false,
     stepExecutions: [
       {
         stepId: 'analysis',
