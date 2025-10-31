@@ -52,3 +52,15 @@ export const selectHasSimulatedRecords = createSelector(
     return Boolean(documents && documents.length > 0);
   }
 );
+
+export const selectFieldsInSamples = createSelector(
+  [(context: SimulationContext) => context.samples],
+  (samples) => {
+    const fieldSet = new Set<string>();
+    samples.forEach((sample) => {
+      const flattened = flattenObjectNestedLast(sample.document);
+      Object.keys(flattened).forEach((key) => fieldSet.add(key));
+    });
+    return Array.from(fieldSet).sort();
+  }
+);

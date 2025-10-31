@@ -29,9 +29,11 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const [popoverIsOpen, { off: closePopover, toggle }] = useBoolean(false);
 
   const panels = useMemo(() => {
-    const { onFieldUpdate, stream, withFieldSimulation } = schemaEditorContext;
+    const { onFieldUpdate, stream, withFieldSimulation, editableFields } = schemaEditorContext;
 
     let actions = [];
+
+    const isFieldEditable = !editableFields || editableFields.includes(field.name);
 
     const openFlyout = (props: { isEditingByDefault: boolean } = { isEditingByDefault: false }) => {
       const overlay = core.overlays.openFlyout(
@@ -63,35 +65,43 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       case 'mapped':
         actions = [
           viewFieldAction,
-          {
-            name: i18n.translate('xpack.streams.actions.editFieldLabel', {
-              defaultMessage: 'Edit field',
-            }),
-            onClick: () => openFlyout({ isEditingByDefault: true }),
-          },
-          {
-            name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
-              defaultMessage: 'Unmap field',
-            }),
-            onClick: () => {
-              onFieldUpdate({
-                name: field.name,
-                parent: field.parent,
-                status: 'unmapped',
-              } as SchemaField);
-            },
-          },
+          ...(isFieldEditable
+            ? [
+                {
+                  name: i18n.translate('xpack.streams.actions.editFieldLabel', {
+                    defaultMessage: 'Edit field',
+                  }),
+                  onClick: () => openFlyout({ isEditingByDefault: true }),
+                },
+                {
+                  name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
+                    defaultMessage: 'Unmap field',
+                  }),
+                  onClick: () => {
+                    onFieldUpdate({
+                      name: field.name,
+                      parent: field.parent,
+                      status: 'unmapped',
+                    } as SchemaField);
+                  },
+                },
+              ]
+            : []),
         ];
         break;
       case 'unmapped':
         actions = [
           viewFieldAction,
-          {
-            name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
-              defaultMessage: 'Map field',
-            }),
-            onClick: () => openFlyout({ isEditingByDefault: true }),
-          },
+          ...(isFieldEditable
+            ? [
+                {
+                  name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
+                    defaultMessage: 'Map field',
+                  }),
+                  onClick: () => openFlyout({ isEditingByDefault: true }),
+                },
+              ]
+            : []),
         ];
         break;
       case 'inherited':

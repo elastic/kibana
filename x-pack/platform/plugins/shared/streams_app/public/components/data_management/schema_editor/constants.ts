@@ -125,6 +125,11 @@ export const TABLE_COLUMNS = {
       defaultMessage: 'Source',
     }),
   },
+  result: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableresultHeader', {
+      defaultMessage: 'Result',
+    }),
+  },
 } as const;
 
 export type TableColumnName = keyof typeof TABLE_COLUMNS;
