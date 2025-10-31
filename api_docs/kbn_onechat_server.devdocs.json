@@ -352,7 +352,7 @@
             "tags": [],
             "label": "runner",
             "description": [
-              "\nOnechat runner scoped to the current execution.\nCan be used to run other workchat primitive as part of the tool execution."
+              "\nOnechat runner scoped to the current execution."
             ],
             "signature": [
               {
@@ -904,7 +904,7 @@
             "tags": [],
             "label": "getDefaultModel",
             "description": [
-              "\nReturns the default model to be used for LLM tasks.\n\nWill use Elasticsearch LLMs by default if present, otherwise will pick\nthe first GenAI compatible connector."
+              "\nReturns the model used for LLM tasks in the current round."
             ],
             "signature": [
               "() => Promise<",
@@ -1810,7 +1810,7 @@
             "tags": [],
             "label": "runner",
             "description": [
-              "\nOnechat runner scoped to the current execution.\nCan be used to run other workchat primitive as part of the tool execution."
+              "\nOnechat runner scoped to the current execution."
             ],
             "signature": [
               {

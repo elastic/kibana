@@ -16,7 +16,7 @@ export const CURL_INFO: CodeLanguage = {
     defaultMessage: 'cURL',
   }),
   icon: 'curl.svg',
-  codeBlockLanguage: 'shell',
+  codeBlockLanguage: 'bash',
 };
 
 const formatSampleDocs = (sampleDocuments: object[], indexName: string) => {

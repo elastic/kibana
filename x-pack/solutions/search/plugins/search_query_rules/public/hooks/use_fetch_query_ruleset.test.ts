@@ -10,7 +10,7 @@ import { MOCK_QUERY_RULESET_RESPONSE_FIXTURE } from '../../common/__fixtures__/q
 
 const mockHttpGet = jest.fn();
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn().mockImplementation(async ({ queryKey, queryFn, opts }) => {
     try {
       const res = await queryFn();

@@ -113,13 +113,17 @@ export const FlyoutWrapper = ({
                 </EuiText>
               </EuiFlexItem>
             )}
-            {toolbar && <EuiFlexItem grow={false}>{toolbar}</EuiFlexItem>}
+            {toolbar && (
+              <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+                {toolbar}
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutHeader>
       )}
       {isInlineFlyoutVisible && isReadOnly ? (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={i18n.translate('xpack.lens.config.readOnly', {
             defaultMessage: 'Read-only: Changes will be reverted on close',
           })}

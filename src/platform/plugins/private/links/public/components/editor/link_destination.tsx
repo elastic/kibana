@@ -63,11 +63,7 @@ export const LinkDestination = ({
           parentDashboardId={parentDashboardId}
           initialSelection={dashboardLinkDestination}
           onDestinationPicked={(dashboard) =>
-            setDestination(
-              dashboard?.id,
-              dashboard?.attributes.title,
-              dashboard?.attributes.description
-            )
+            setDestination(dashboard?.id, dashboard?.title, dashboard?.description)
           }
         />
       ) : (
