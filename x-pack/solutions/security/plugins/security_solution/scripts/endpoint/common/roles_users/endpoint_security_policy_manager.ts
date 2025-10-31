@@ -17,7 +17,7 @@ export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => 
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV4: [
+          siemV5: [
             'all',
 
             'policy_management_all',
@@ -32,6 +32,7 @@ export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => 
 
             'workflow_insights_all',
           ],
+          securitySolutionRulesV1: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },
