@@ -163,9 +163,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetCategoriesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetCategoriesResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -190,9 +192,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetPackagesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetPackagesResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -217,9 +221,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetInstalledPackagesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetInstalledPackagesResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -244,9 +250,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetLimitedPackagesResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -271,9 +279,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetStatsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetStatsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -298,9 +308,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetInputsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetInputsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -325,9 +337,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetFileRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetFileResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -355,9 +369,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetInfoRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetInfoResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -394,9 +410,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetKnowledgeBaseRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetKnowledgeBaseResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -421,9 +439,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: UpdatePackageRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => UpdatePackageResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -449,11 +469,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           response: {
             200: {
               body: () => InstallPackageResponseSchema,
-              description: 'OK',
+              description: 'OK: A successful request.',
             },
             400: {
               body: genericErrorResponse,
-              description: 'Bad Request',
+              description: 'A bad request.',
             },
           },
         },
@@ -478,11 +498,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           response: {
             200: {
               body: () => InstallKibanaAssetsResponseSchema,
-              description: 'OK',
+              description: 'OK: A successful request.',
             },
             400: {
               body: genericErrorResponse,
-              description: 'Bad Request',
+              description: 'A bad request.',
             },
           },
         },
@@ -506,11 +526,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           response: {
             200: {
               body: () => InstallKibanaAssetsResponseSchema,
-              description: 'OK',
+              description: 'OK: A successful request.',
             },
             400: {
               body: genericErrorResponse,
-              description: 'Bad Request',
+              description: 'A bad request.',
             },
           },
         },
@@ -535,11 +555,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           response: {
             200: {
               body: () => InstallKibanaAssetsResponseSchema,
-              description: 'OK',
+              description: 'OK: A successful request.',
             },
             400: {
               body: genericErrorResponse,
-              description: 'Bad Request',
+              description: 'A bad request.',
             },
           },
         },
@@ -565,11 +585,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => BulkUpgradePackagesResponseSchema,
-                description: 'OK',
+                description: 'OK: A successful request.',
               },
               400: {
                 body: genericErrorResponse,
-                description: 'Bad Request',
+                description: 'A bad request.',
               },
             },
           },
@@ -594,11 +614,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => BulkUpgradePackagesResponseSchema,
-                description: 'OK',
+                description: 'OK: A successful request.',
               },
               400: {
                 body: genericErrorResponse,
-                description: 'Bad Request',
+                description: 'A bad request.',
               },
             },
           },
@@ -624,11 +644,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
               response: {
                 200: {
                   body: () => BulkRollbackPackagesResponseSchema,
-                  description: 'OK',
+                  description: 'OK: A successful request.',
                 },
                 400: {
                   body: genericErrorResponse,
-                  description: 'Bad Request',
+                  description: 'A bad request.',
                 },
               },
             },
@@ -653,11 +673,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
               response: {
                 200: {
                   body: () => GetOneBulkOperationPackagesResponseSchema,
-                  description: 'OK',
+                  description: 'OK: A successful request.',
                 },
                 400: {
                   body: genericErrorResponse,
-                  description: 'Bad Request',
+                  description: 'A bad request.',
                 },
               },
             },
@@ -683,11 +703,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => GetOneBulkOperationPackagesResponseSchema,
-                description: 'OK',
+                description: 'OK: A successful request.',
               },
               400: {
                 body: genericErrorResponse,
-                description: 'Bad Request',
+                description: 'A bad request.',
               },
             },
           },
@@ -712,11 +732,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => GetOneBulkOperationPackagesResponseSchema,
-                description: 'OK',
+                description: 'OK: A successful request.',
               },
               400: {
                 body: genericErrorResponse,
-                description: 'Bad Request',
+                description: 'A bad request.',
               },
             },
           },
@@ -742,11 +762,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           response: {
             200: {
               body: () => BulkInstallPackagesFromRegistryResponseSchema,
-              description: 'OK',
+              description: 'OK: A successful request.',
             },
             400: {
               body: genericErrorResponse,
-              description: 'Bad Request',
+              description: 'A bad request.',
             },
           },
         },
@@ -776,9 +796,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: InstallPackageByUploadRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => InstallPackageResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -803,9 +825,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: CreateCustomIntegrationRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => InstallPackageResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -837,9 +861,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: DeletePackageRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeletePackageResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -865,9 +891,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetVerificationKeyIdResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -892,9 +920,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetDataStreamsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetDataStreamsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -919,9 +949,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: GetBulkAssetsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetBulkAssetsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -960,9 +992,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: ReauthorizeTransformRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ReauthorizeTransformResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -993,8 +1027,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         validate: {
           request: CustomIntegrationRequestSchema,
           response: {
-            200: {},
+            200: {
+              description: 'OK: A successful request.',
+            },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -1019,9 +1056,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: DeletePackageDatastreamAssetsRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeletePackageDatastreamAssetsResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -1051,9 +1090,11 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             request: RollbackPackageRequestSchema,
             response: {
               200: {
+                description: 'OK: A successful request.',
                 body: () => RollbackPackageResponseSchema,
               },
               400: {
+                description: 'A bad request.',
                 body: genericErrorResponse,
               },
             },

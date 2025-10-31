@@ -67,5 +67,5 @@ export const useChartLayers = ({
           : undefined,
       },
     ];
-  }, [dimensions, metric, color]);
+  }, [color, dimensions, metric.instrument, metric.name, metric.unit]);
 };
