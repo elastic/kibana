@@ -87,6 +87,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
         <>
           <EuiSpacer size="l" />
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.contentConnectors.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
               { defaultMessage: 'Configuration warning' }
