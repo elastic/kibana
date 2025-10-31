@@ -546,7 +546,12 @@ export class GlobalVisitorContext<
       }
       case 'parens': {
         if (!this.methods.visitParensExpression) break;
-        return this.visitParensExpression(parent, expressionNode, input as any);
+        const result = this.visitParensExpression(parent, expressionNode, input as any);
+
+        if (result) {
+          return result;
+        }
+        break;
       }
     }
     return this.visitExpressionGeneric(parent, expressionNode, input as any);
