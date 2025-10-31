@@ -4574,9 +4574,6 @@ Object {
         "subActionParams": Object {
           "additionalProperties": false,
           "properties": Object {
-            "alerts": Object {
-              "type": "array",
-            },
             "inputs": Object {},
             "spaceId": Object {
               "type": "string",
@@ -4587,7 +4584,6 @@ Object {
           },
           "required": Array [
             "workflowId",
-            "alerts",
             "spaceId",
           ],
           "type": "object",
