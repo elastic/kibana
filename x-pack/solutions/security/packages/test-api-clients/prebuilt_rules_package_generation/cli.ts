@@ -20,7 +20,7 @@ export function runCli() {
   yargs(process.argv.slice(2))
     .command(
       '*',
-      'Generate Prebuilt Rules mock FLeet package',
+      'Generate Prebuilt Rules mock Fleet package',
       (y) =>
         y
           .option('packageName', {
