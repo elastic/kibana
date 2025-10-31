@@ -157,7 +157,7 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
       {error && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut title="Error" color="danger">
+          <EuiCallOut announceOnMount title="Error" color="danger">
             {error?.message ?? (
               <FormattedMessage
                 id="xpack.fleet.debug.healthCheckPanel.fetchError"
