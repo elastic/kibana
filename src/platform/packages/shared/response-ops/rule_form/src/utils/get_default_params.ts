@@ -17,7 +17,7 @@ export const getDefaultParams = ({
   group: string;
   actionTypeModel: ActionTypeModel;
   ruleType: RuleTypeWithDescription;
-}) => {
+}): ActionTypeModel['defaultActionParams'] => {
   if (group === ruleType.recoveryActionGroup.id) {
     return actionTypeModel.defaultRecoveredActionParams;
   } else {

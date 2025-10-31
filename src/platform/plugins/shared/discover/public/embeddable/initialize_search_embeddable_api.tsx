@@ -31,13 +31,12 @@ import {
   type Query,
 } from '@kbn/es-query';
 import type { DiscoverServices } from '../build_services';
-import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
+import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import type {
   PublishesWritableSavedSearch,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
-  SearchEmbeddableSerializedState,
   SearchEmbeddableStateManager,
 } from './types';
 import { getEsqlDataView } from '../application/main/state_management/utils/get_esql_data_view';
@@ -94,7 +93,7 @@ export const initializeSearchEmbeddableApi = async (
   anyStateChange$: Observable<void>;
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
-  reinitializeState: (lastSaved?: SearchEmbeddableSerializedState) => void;
+  reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => void;
 }> => {
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView } = await initializeSearchSource(
