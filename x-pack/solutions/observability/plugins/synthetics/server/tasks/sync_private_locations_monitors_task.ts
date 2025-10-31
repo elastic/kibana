@@ -132,6 +132,8 @@ export class SyncPrivateLocationMonitorsTask {
             soClient,
             encryptedSavedObjects,
           });
+        } else {
+          this.debugLog(`No private locations found, skipping sync`);
         }
         this.debugLog(`Sync of private location monitors succeeded`);
       } else {
@@ -244,9 +246,7 @@ export class SyncPrivateLocationMonitorsTask {
             privateConfigs,
             allPrivateLocations,
             spaceId,
-            maintenanceWindows,
-            false,
-            false
+            maintenanceWindows
           );
         } else {
           this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
