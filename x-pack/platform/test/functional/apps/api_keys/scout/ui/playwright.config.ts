@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('feature controls', function () {
-    loadTestFile(require.resolve('./api_keys_security'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
+
