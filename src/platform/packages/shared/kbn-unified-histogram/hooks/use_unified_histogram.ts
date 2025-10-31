@@ -96,7 +96,7 @@ export type UnifiedHistogramPartialLayoutProps = Omit<
 export type UseUnifiedHistogramResult =
   | {
       isInitialized: false;
-      api?: UnifiedHistogramApi;
+      api: UnifiedHistogramApi;
       chartProps?: undefined;
       layoutProps?: undefined;
     }

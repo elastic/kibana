@@ -20,12 +20,13 @@ import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import { getLensVisMock } from '../../__mocks__/lens_vis';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { Subject, of } from 'rxjs';
+import { of, ReplaySubject } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { checkChartAvailability } from './utils/check_chart_availability';
 import { allSuggestionsMock } from '../../__mocks__/suggestions';
+import { getFetchParamsMock } from '../../__mocks__/fetch_params';
 
 let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
 
@@ -84,7 +85,8 @@ async function mountComponent({
         },
       };
 
-  const requestParams = {
+  const fetchParams = getFetchParamsMock({
+    dataView,
     query: isPlainRecord
       ? isTransformationalESQL
         ? { esql: 'from logs | limit 10 | stats var0 = avg(bytes) by extension' }
@@ -96,14 +98,12 @@ async function mountComponent({
     filters: [],
     esqlVariables: [],
     relativeTimeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
-    getTimeRange: () => ({ from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' }),
-    updateTimeRange: () => {},
-  };
+  });
 
   const lensVisService = (
     await getLensVisMock({
-      query: requestParams.query,
-      filters: requestParams.filters,
+      query: fetchParams.query,
+      filters: fetchParams.filters,
       isPlainRecord: Boolean(isPlainRecord),
       timeInterval: 'auto',
       dataView,
@@ -116,8 +116,6 @@ async function mountComponent({
 
   const props: UnifiedHistogramChartProps = {
     lensVisService,
-    dataView,
-    requestParams,
     services,
     hits: noHits
       ? undefined
@@ -128,13 +126,16 @@ async function mountComponent({
     chart,
     breakdown: noBreakdown ? undefined : { field: undefined },
     isChartLoading: Boolean(isChartLoading),
-    isPlainRecord,
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
     withDefaultActions: undefined,
     isChartAvailable: checkChartAvailability({ chart, dataView, isPlainRecord }),
     renderCustomChartToggleActions: customToggle ? () => customToggle : undefined,
-    input$: new Subject(),
+    fetch$: new ReplaySubject(1),
+    fetchParams,
+    request: undefined,
+    dataLoading$: undefined,
+    lensAdapters: undefined,
   };
 
   let instance: ReactWrapper = {} as ReactWrapper;
@@ -142,7 +143,7 @@ async function mountComponent({
     instance = mountWithIntl(<UnifiedHistogramChart {...props} />);
     // wait for initial async loading to complete
     await new Promise((r) => setTimeout(r, 0));
-    props.input$?.next({ type: 'fetch' });
+    props.fetch$?.next(fetchParams);
     instance.update();
   });
   return instance;
