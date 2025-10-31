@@ -102,7 +102,10 @@ export const dashboardClient = {
   },
   update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
     // TODO replace with call to dashboard REST update endpoint
-    const updateResponse = await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
+    const updateResponse = await contentManagementService.client.update<
+      DashboardUpdateIn,
+      DashboardUpdateOut
+    >({
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
       data: dashboardState,
