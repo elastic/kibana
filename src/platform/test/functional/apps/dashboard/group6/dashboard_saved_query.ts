@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/189023
-    describe.skip('saved query management component functionality', function () {
+    describe('saved query management component functionality', function () {
       before(async () => {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
