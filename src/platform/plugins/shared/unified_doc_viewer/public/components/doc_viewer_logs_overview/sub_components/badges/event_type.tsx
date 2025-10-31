@@ -10,7 +10,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
 import { euiPaletteRed } from '@elastic/eui';
 
 const dataTestSubj = 'unifiedDocViewLogsOverviewEventType';
@@ -20,14 +20,18 @@ const badgeCss = (euiTheme: EuiThemeComputed) => css`
 `;
 
 interface EventTypeProps {
-  eventTypeValue: string;
+  eventTypeValue: React.ReactNode;
 }
 export function EventType({ eventTypeValue }: EventTypeProps) {
   const euiPaletteRed9 = euiPaletteRed(14);
   const { euiTheme } = useEuiTheme();
   return (
     <EuiBadge color={euiPaletteRed9[9]} data-test-subj={dataTestSubj} css={badgeCss(euiTheme)}>
-      {eventTypeValue}
+      <EuiText
+        size="s"
+        // Value returned from formatFieldValue is always sanitized
+        dangerouslySetInnerHTML={{ __html: eventTypeValue ?? '' }}
+      />
     </EuiBadge>
   );
 }
