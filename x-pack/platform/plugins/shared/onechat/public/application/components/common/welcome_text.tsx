@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, EuiTitle } from '
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { css } from '@emotion/react';
 import { docLinks } from '../../../../common/doc_links';
 import { TechPreviewBadge } from './tech_preview';
 
@@ -57,7 +58,13 @@ export const WelcomeText: React.FC<{}> = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
-          <h2>{labels.title}</h2>
+          <h2
+            css={css`
+              text-align: center;
+            `}
+          >
+            {labels.title}
+          </h2>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
