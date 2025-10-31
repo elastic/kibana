@@ -55,9 +55,10 @@ export async function autocomplete(
   }
   // FROM something /
   else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
-    suggestions.push(metadataSuggestion);
+    suggestions.push({ ...pipeCompleteItem, sortText: '0' });
     suggestions.push(commaCompleteItem);
-    suggestions.push(pipeCompleteItem);
+    suggestions.push(metadataSuggestion);
+
     suggestions.push(
       ...(await getRecommendedQueriesSuggestions(
         context?.editorExtensions ?? { recommendedFields: [], recommendedQueries: [] },

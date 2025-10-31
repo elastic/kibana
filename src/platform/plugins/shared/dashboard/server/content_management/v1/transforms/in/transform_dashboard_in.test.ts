@@ -58,7 +58,6 @@ describe('transformDashboardIn', () => {
         },
       ],
       tags: [],
-      timeRestore: true,
       title: 'title',
       refreshInterval: { pause: true, value: 1000 },
       timeRange: {
@@ -103,7 +102,6 @@ describe('transformDashboardIn', () => {
     const dashboardState: DashboardState = {
       title: 'title',
       description: 'my description',
-      timeRestore: false,
       panels: [],
       options: DEFAULT_DASHBOARD_OPTIONS,
     };
