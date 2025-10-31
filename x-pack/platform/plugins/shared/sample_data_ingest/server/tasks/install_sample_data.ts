@@ -6,9 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
+import {
+  createTaskRunError,
+  TaskErrorSource,
+  type TaskManagerSetupContract,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { DatasetSampleType } from '../../common';
@@ -20,6 +22,11 @@ export const INSTALL_SAMPLE_DATA_TASK_TYPE = 'SampleDataIngest:InstallSampleData
 export const getInstallTaskId = (sampleType: DatasetSampleType): string => {
   return `SampleDataIngest:Install:${sampleType}`;
 };
+
+export interface InstallSampleDataTaskState {
+  status?: 'pending' | 'completed' | 'error';
+  errorMessage?: string;
+}
 
 export const registerInstallSampleDataTaskDefinition = ({
   getServices,
@@ -60,11 +67,22 @@ export const registerInstallSampleDataTaskDefinition = ({
               });
 
               return {
-                state: { completed: true },
-                runAt: undefined,
+                state: { status: 'completed' },
+                shouldDeleteTask: true,
               };
             } catch (error) {
-              throw error;
+              const normalizedError =
+                error instanceof Error ? error : new Error(String(error ?? 'Unknown error'));
+
+              const taskError = createTaskRunError(normalizedError, TaskErrorSource.FRAMEWORK);
+
+              return {
+                state: {
+                  status: 'error',
+                  errorMessage: normalizedError.message,
+                },
+                error: taskError,
+              };
             }
           },
         };
@@ -86,11 +104,13 @@ export const scheduleInstallSampleDataTask = async ({
   const taskId = getInstallTaskId(sampleType);
 
   try {
+    const initialState: InstallSampleDataTaskState = { status: 'pending' };
+
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: INSTALL_SAMPLE_DATA_TASK_TYPE,
       params: { sampleType },
-      state: {},
+      state: initialState,
       scope: ['sampleData'],
     });
 

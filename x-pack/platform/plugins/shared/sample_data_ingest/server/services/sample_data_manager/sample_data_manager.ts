@@ -11,15 +11,16 @@ import type {
   ISavedObjectsImporter,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { DatasetSampleType } from '../../../common';
-import { type StatusResponse, getSampleDataIndexName } from '../../../common';
+import { getSampleDataIndexName, type StatusResponse } from '../../../common';
 import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';
 import { SavedObjectsManager } from '../saved_objects_manager';
-import { getInstallTaskId } from '../../tasks/install_sample_data';
+import { getInstallTaskId, type InstallSampleDataTaskState } from '../../tasks/install_sample_data';
 import type { ZipArchive } from '../types';
+
 interface SampleDataManagerOpts {
   artifactsFolder: string;
   logger: Logger;
@@ -164,17 +165,61 @@ export class SampleDataManager {
   }): Promise<StatusResponse> {
     try {
       if (this.taskManager) {
-        try {
-          const task = await this.taskManager.get(getInstallTaskId(sampleType));
+        const taskId = getInstallTaskId(sampleType);
 
-          if (task?.status === 'running') {
+        try {
+          const task = await this.taskManager.get(taskId);
+          const taskState = (task.state ?? {}) as InstallSampleDataTaskState;
+          const runAtTime = task.runAt ? new Date(task.runAt).getTime() : undefined;
+          const retryAtTime = task.retryAt ? new Date(task.retryAt).getTime() : undefined;
+
+          if (
+            task.status === TaskStatus.Failed ||
+            task.status === TaskStatus.DeadLetter ||
+            taskState.status === 'error'
+          ) {
+            const taskErrorMessage =
+              taskState.errorMessage ||
+              (task as { taskRunError?: { message?: string } }).taskRunError?.message ||
+              (task as { error?: { message?: string } }).error?.message;
+
             return {
-              status: 'installing',
-              taskId: getInstallTaskId(sampleType),
+              status: 'error',
+              taskId,
+              error: taskErrorMessage,
             };
           }
-        } catch {
-          this.log.debug(`Task ${getInstallTaskId(sampleType)} not found or error getting it`);
+
+          const isInFlight =
+            task.status === TaskStatus.Claiming || task.status === TaskStatus.Running;
+
+          const hasPendingRun =
+            task.status === TaskStatus.Idle &&
+            (runAtTime !== undefined || retryAtTime !== undefined);
+
+          if (
+            (isInFlight || hasPendingRun || taskState.status === 'pending') &&
+            taskState.status !== 'completed'
+          ) {
+            return {
+              status: 'installing',
+              taskId,
+            };
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+
+          const statusCode =
+            (error as { statusCode?: number }).statusCode ??
+            (error as { output?: { statusCode?: number } }).output?.statusCode;
+
+          if (statusCode && statusCode !== 404) {
+            this.log.error(
+              `Failed to check sample data task status for [${sampleType}]: ${errorMessage}`
+            );
+          }
+
+          this.log.debug(`Task ${taskId} not found or error getting it: ${errorMessage}`);
         }
       }
 

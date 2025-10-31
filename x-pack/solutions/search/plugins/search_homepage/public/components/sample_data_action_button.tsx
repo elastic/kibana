@@ -25,9 +25,15 @@ import { useUsageTracker } from '../hooks/use_usage_tracker';
 
 export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSampleDataClick }) => {
   const usageTracker = useUsageTracker();
-  const { ingestSampleData, isLoading } = useIngestSampleData();
+  const { ingestSampleData } = useIngestSampleData();
   const { share, uiSettings } = useKibana().services;
-  const { isInstalled, indexName, dashboardId, isLoading: isStatusLoading } = useSampleDataStatus();
+  const {
+    isInstalled,
+    indexName,
+    dashboardId,
+    isLoading: isStatusLoading,
+    isInstalling,
+  } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
   const isAgentBuilderAvailable = uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false);
 
@@ -163,7 +169,7 @@ export const SampleDataActionButton = ({ clickEvent = AnalyticsEvents.installSam
       iconType="download"
       size="s"
       data-test-subj="installSampleBtn"
-      isLoading={isLoading}
+      isLoading={isInstalling}
       onClick={onInstallButtonClick}
     >
       <FormattedMessage

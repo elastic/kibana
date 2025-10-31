@@ -12,7 +12,8 @@ import {
   STATUS_API_PATH,
   DatasetSampleType,
   type StatusResponse,
-  type InstallResponse,
+  type InstallingResponse,
+  type InstalledResponse,
 } from '../../common';
 import type { InternalServices } from '../types';
 import { scheduleInstallSampleDataTask } from '../tasks';
@@ -53,13 +54,25 @@ export const registerInstallationRoutes = ({
           soClient,
         });
 
-        if (currentStatus.status === 'installed' || currentStatus.status === 'installing') {
-          return res.ok<InstallResponse>({
+        if (currentStatus.status === 'installing') {
+          return res.ok<InstallingResponse>({
+            body: {
+              status: currentStatus.status,
+              taskId: currentStatus.taskId || '',
+            },
+          });
+        }
+
+        if (
+          currentStatus.status === 'installed' &&
+          currentStatus.indexName &&
+          currentStatus.dashboardId
+        ) {
+          return res.ok<InstalledResponse>({
             body: {
               status: currentStatus.status,
               indexName: currentStatus.indexName,
               dashboardId: currentStatus.dashboardId,
-              taskId: currentStatus.taskId || '',
             },
           });
         }
@@ -70,7 +83,7 @@ export const registerInstallationRoutes = ({
           sampleType,
         });
 
-        return res.ok<InstallResponse>({
+        return res.ok<InstallingResponse>({
           body: {
             status: 'installing',
             taskId,
@@ -124,6 +137,7 @@ export const registerInstallationRoutes = ({
             indexName: statusData.indexName,
             dashboardId: statusData.dashboardId,
             taskId: statusData.taskId,
+            error: statusData.error,
           },
         });
       } catch (e) {
