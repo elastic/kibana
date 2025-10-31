@@ -40,7 +40,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       expect(ingestedDocs[0]).toStrictEqual(
         expect.objectContaining({ attributes: { status: 'active', is_active: 'yes' } })
@@ -81,7 +81,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       expect(ingestedDocs[0]).toStrictEqual(
         expect.objectContaining({ attributes: { status: 'active', not_deleted: 'kept' } })
@@ -143,7 +143,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       expect(ingestedDocs[0]).toStrictEqual(
         expect.objectContaining({ attributes: { score: 90, category: 'high' } })
@@ -182,7 +182,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       expect(ingestedDocs[0].attributes).toStrictEqual(
         expect.objectContaining({ user: { email: 'test@example.com' }, has_email: 'yes' })
@@ -226,7 +226,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       expect(ingestedDocs[0]).toStrictEqual(
         expect.objectContaining({ attributes: { temperature: 15 } })
@@ -271,7 +271,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       // First two documents should match (exact and partial match)
       expect(ingestedDocs[0].attributes).toStrictEqual(
@@ -326,7 +326,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       // First two documents should match (start with "Error:")
       expect(ingestedDocs[0].attributes).toStrictEqual(
@@ -381,7 +381,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       // First two documents should match (end with ".log")
       expect(ingestedDocs[0].attributes).toStrictEqual(
@@ -465,7 +465,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       // Only first document should match all three conditions
       expect(ingestedDocs[0].attributes).toStrictEqual(
@@ -515,7 +515,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       // First and third documents should match (not DEBUG)
       expect(ingestedDocs[0].attributes).toStrictEqual(
@@ -582,7 +582,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       // First three documents should match (at least one condition true)
       expect(ingestedDocs[0].attributes).toStrictEqual(
@@ -640,7 +640,7 @@ apiTest.describe(
       ];
       await testBed.ingest(indexName, docs, processors);
 
-      const ingestedDocs = await testBed.getDocs(indexName);
+      const ingestedDocs = await testBed.getDocsOrdered(indexName);
 
       // First two documents should match
       expect(ingestedDocs[0].attributes).toStrictEqual(
