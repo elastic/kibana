@@ -11,14 +11,10 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
-import type { Observable } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type {
-  UnifiedHistogramInputMessage,
-  UnifiedHistogramRequestContext,
-  UnifiedHistogramVisContext,
-} from '../../../types';
+import type { UnifiedHistogramFetchParams, UnifiedHistogramRequestContext } from '../../../types';
 import { useStableCallback } from '../../../hooks/use_stable_callback';
+import type { LensVisService } from '../../../services/lens_vis_service';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -35,20 +31,18 @@ export type LensProps = Pick<
 
 export const useLensProps = ({
   request,
-  getTimeRange,
-  fetch$,
-  visContext,
-  esqlVariables,
+  fetchParams,
+  lensVisService,
   onLoad,
 }: {
-  request?: UnifiedHistogramRequestContext;
-  getTimeRange: () => TimeRange;
-  fetch$: Observable<UnifiedHistogramInputMessage>;
-  visContext?: UnifiedHistogramVisContext;
-  esqlVariables?: ESQLControlVariable[];
+  request: UnifiedHistogramRequestContext | undefined;
+  fetchParams: UnifiedHistogramFetchParams;
+  lensVisService: LensVisService;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
   const buildLensProps = useCallback(() => {
+    const visContext = lensVisService.getStateValue().visContext;
+    // console.log('useLensProps - buildLensProps called', visContext);
     if (!visContext) {
       return;
     }
@@ -59,42 +53,41 @@ export const useLensProps = ({
       requestData: JSON.stringify(requestData),
       lensProps: getLensProps({
         searchSessionId: request?.searchSessionId,
-        getTimeRange,
+        timeRange: fetchParams.timeRange,
+        esqlVariables: fetchParams.esqlVariables,
         attributes,
-        esqlVariables,
         onLoad,
       }),
     };
-  }, [visContext, request?.searchSessionId, getTimeRange, esqlVariables, onLoad]);
+  }, [lensVisService, request?.searchSessionId, fetchParams, onLoad]);
 
   // Initialize with undefined to avoid rendering Lens until a fetch has been triggered
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   useEffect(() => {
-    const subscription = fetch$.subscribe(updateLensPropsContext);
-    return () => subscription.unsubscribe();
-  }, [fetch$, updateLensPropsContext]);
+    updateLensPropsContext();
+  }, [fetchParams.triggeredAt, updateLensPropsContext]);
 
   return lensPropsContext;
 };
 
 export const getLensProps = ({
   searchSessionId,
-  getTimeRange,
+  timeRange,
   attributes,
   esqlVariables,
   onLoad,
 }: {
-  searchSessionId?: string;
-  getTimeRange: () => TimeRange;
+  searchSessionId: string | undefined;
+  timeRange: TimeRange;
   attributes: TypedLensByValueInput['attributes'];
-  esqlVariables?: ESQLControlVariable[];
+  esqlVariables: ESQLControlVariable[] | undefined;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }): LensProps => ({
   id: 'unifiedHistogramLensComponent',
   viewMode: 'view',
-  timeRange: getTimeRange(),
+  timeRange,
   attributes,
   esqlVariables,
   noPadding: true,

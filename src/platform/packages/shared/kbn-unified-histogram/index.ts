@@ -12,6 +12,7 @@ export type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
   UnifiedHistogramVisContext,
+  UnifiedHistogramFetchParamsExternal,
   ChartSectionConfiguration,
 } from './types';
 export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';

@@ -9,16 +9,19 @@
 
 import { useMemo, useState } from 'react';
 import { pick } from 'lodash';
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
-import type { UnifiedHistogramInputMessage } from '../types';
-import { useRequestParams } from './use_request_params';
+import type { UnifiedHistogramFetchParams } from '../types';
 import { getBreakdownField } from '../utils/local_storage_utils';
+import { processFetchParams } from '../utils/process_fetch_params';
 
 export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
-  const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
+  // TODO: should I remove fetch$ and keep only fetchParams?
+  const [fetch$] = useState(() => new ReplaySubject<UnifiedHistogramFetchParams | undefined>(1));
+  const fetchParams = useObservable(fetch$);
 
   const [stateService] = useState(() => {
     const { services, initialState, localStorageKeyPrefix } = props;
@@ -30,8 +33,9 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
   });
 
   const [api] = useState<UnifiedHistogramApi>(() => ({
-    fetch: () => {
-      input$.next({ type: 'fetch' });
+    fetch: (params) => {
+      // console.log('UnifiedHistogramApi.fetch called with params:', params);
+      fetch$.next(processFetchParams({ params, services }));
     },
     ...pick(
       stateService,
@@ -43,18 +47,7 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     ),
   }));
 
-  const {
-    services,
-    dataView,
-    query,
-    columns,
-    searchSessionId,
-    requestAdapter,
-    localStorageKeyPrefix,
-    filters,
-    timeRange,
-    esqlVariables,
-  } = props;
+  const { services, localStorageKeyPrefix } = props;
 
   const initialBreakdownField = useMemo(
     () =>
@@ -68,28 +61,19 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
     services,
     localStorageKeyPrefix,
     stateService,
-    dataView,
-    query,
-    searchSessionId,
-    requestAdapter,
-    columns,
-    breakdownField: 'breakdownField' in props ? props.breakdownField : initialBreakdownField,
+    fetchParams,
+    initialBreakdownField,
     onBreakdownFieldChange: props.onBreakdownFieldChange,
     onVisContextChanged: props.onVisContextChanged,
   });
 
-  const requestParams = useRequestParams({
-    services,
-    query,
-    filters,
-    esqlVariables,
-    timeRange,
-  });
-
   return {
     api,
-    input$,
     stateProps,
-    requestParams,
+    fetch$,
+    fetchParams,
+    hasValidFetchParams: Boolean(
+      fetchParams && (fetchParams.searchSessionId || fetchParams.isESQLQuery)
+    ),
   };
 };

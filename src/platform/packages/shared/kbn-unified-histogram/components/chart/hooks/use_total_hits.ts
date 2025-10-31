@@ -14,11 +14,10 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { MutableRefObject } from 'react';
 import { useEffect, useRef, useCallback } from 'react';
-import type { Observable } from 'rxjs';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import type {
+  UnifiedHistogramFetchParams,
   UnifiedHistogramHitsContext,
-  UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../../../types';
@@ -27,52 +26,42 @@ import { useStableCallback } from '../../../hooks/use_stable_callback';
 
 export const useTotalHits = ({
   services,
-  dataView,
   request,
   hits,
   chartVisible,
-  filters,
-  query,
-  getTimeRange,
-  fetch$,
+  fetchParams,
   onTotalHitsChange,
-  isPlainRecord,
-  abortController: parentAbortController,
 }: {
   services: UnifiedHistogramServices;
-  dataView: DataView;
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   chartVisible: boolean;
-  filters: Filter[];
-  query: Query | AggregateQuery;
-  getTimeRange: () => TimeRange;
-  fetch$: Observable<UnifiedHistogramInputMessage>;
+  fetchParams: UnifiedHistogramFetchParams;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
-  isPlainRecord?: boolean;
-  abortController: AbortController | undefined;
 }) => {
+  const isPlainRecord = fetchParams.isESQLQuery;
+  const parentAbortController = fetchParams.abortController;
   const abortController = useRef<AbortController>();
-  const fetch = useStableCallback(() => {
+
+  const fetch = useStableCallback((params: UnifiedHistogramFetchParams) => {
     fetchTotalHits({
       services,
       abortController,
-      dataView,
+      dataView: params.dataView,
       request,
       hits,
       chartVisible,
-      filters,
-      query,
-      timeRange: getTimeRange(),
+      filters: params.filters,
+      query: params.query,
+      timeRange: params.timeRange,
       onTotalHitsChange,
       isPlainRecord,
     });
   });
 
   useEffect(() => {
-    const subscription = fetch$.subscribe(fetch);
-    return () => subscription.unsubscribe();
-  }, [fetch, fetch$]);
+    fetch(fetchParams);
+  }, [fetch, fetchParams.triggeredAt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onAbort = useCallback(() => {
     abortController.current?.abort();

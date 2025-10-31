@@ -7,18 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
-import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { useCallback, useEffect, useMemo } from 'react';
 import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramFetchParams,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
@@ -44,24 +41,16 @@ export const useStateProps = ({
   services,
   localStorageKeyPrefix,
   stateService,
-  dataView,
-  query,
-  searchSessionId,
-  requestAdapter,
-  columns,
-  breakdownField,
+  fetchParams,
+  initialBreakdownField,
   onBreakdownFieldChange: originalOnBreakdownFieldChange,
   onVisContextChanged: originalOnVisContextChanged,
 }: {
   services: UnifiedHistogramServices;
   localStorageKeyPrefix: string | undefined;
   stateService: UnifiedHistogramStateService | undefined;
-  dataView: DataView;
-  query: Query | AggregateQuery | undefined;
-  searchSessionId: string | undefined;
-  requestAdapter: RequestAdapter | undefined;
-  columns: DatatableColumn[] | undefined;
-  breakdownField: string | undefined;
+  fetchParams: UnifiedHistogramFetchParams | undefined;
+  initialBreakdownField: string | undefined;
   onBreakdownFieldChange: ((breakdownField: string | undefined) => void) | undefined;
   onVisContextChanged:
     | ((
@@ -78,13 +67,15 @@ export const useStateProps = ({
   const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
   const lensDataLoading$ = useStateSelector(stateService?.state$, lensDataLoadingSelector$);
 
+  const breakdownField =
+    fetchParams && 'breakdownField' in fetchParams
+      ? fetchParams.breakdownField
+      : initialBreakdownField;
+  const { dataView, query, columns, searchSessionId, requestAdapter, isESQLQuery } =
+    fetchParams || {};
   /**
    * Contexts
    */
-
-  const isPlainRecord = useMemo(() => {
-    return query && isOfAggregateQueryType(query);
-  }, [query]);
 
   const isTimeBased = useMemo(() => {
     return dataView && dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
@@ -102,7 +93,7 @@ export const useStateProps = ({
   }, [totalHitsResult, totalHitsStatus]);
 
   const chart = useMemo(() => {
-    if (!isTimeBased && !isPlainRecord) {
+    if (!isTimeBased && !isESQLQuery) {
       return undefined;
     }
 
@@ -110,7 +101,7 @@ export const useStateProps = ({
       hidden: chartHidden,
       timeInterval,
     };
-  }, [chartHidden, isPlainRecord, isTimeBased, timeInterval]);
+  }, [chartHidden, isESQLQuery, isTimeBased, timeInterval]);
 
   const breakdown = useMemo(() => {
     if (!isTimeBased) {
@@ -122,7 +113,7 @@ export const useStateProps = ({
       return undefined;
     }
 
-    if (isPlainRecord) {
+    if (isESQLQuery) {
       const breakdownColumn = columns?.find((column) => column.name === breakdownField);
       const field = breakdownColumn
         ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
@@ -135,7 +126,7 @@ export const useStateProps = ({
     return {
       field: breakdownField ? dataView?.getFieldByName(breakdownField) : undefined,
     };
-  }, [isTimeBased, query, isPlainRecord, breakdownField, dataView, columns]);
+  }, [isTimeBased, query, isESQLQuery, breakdownField, dataView, columns]);
 
   const request = useMemo(() => {
     return {
@@ -204,7 +195,7 @@ export const useStateProps = ({
   );
 
   const onVisContextChanged: UseUnifiedHistogramProps['onVisContextChanged'] = useMemo(() => {
-    if (!originalOnVisContextChanged || !isPlainRecord) {
+    if (!originalOnVisContextChanged || !isESQLQuery) {
       return undefined;
     }
 
@@ -213,7 +204,7 @@ export const useStateProps = ({
 
       originalOnVisContextChanged(minifiedVisContext, externalVisContextStatus);
     };
-  }, [isPlainRecord, originalOnVisContextChanged]);
+  }, [isESQLQuery, originalOnVisContextChanged]);
 
   /**
    * Effects
@@ -239,7 +230,6 @@ export const useStateProps = ({
     chart,
     breakdown,
     request,
-    isPlainRecord,
     lensAdapters,
     dataLoading$: lensDataLoading$,
     onTopPanelHeightChange,

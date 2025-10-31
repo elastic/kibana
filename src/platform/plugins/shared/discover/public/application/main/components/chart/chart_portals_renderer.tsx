@@ -175,23 +175,25 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
 const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
   const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(stateContainer);
 
-  const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
+  const { setUnifiedHistogramApi } = unifiedHistogramProps;
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
 
   useEffect(() => {
-    if (unifiedHistogram.isInitialized) {
+    if (unifiedHistogram.api) {
       setUnifiedHistogramApi(unifiedHistogram.api);
     }
-  }, [setUnifiedHistogramApi, unifiedHistogram.api, unifiedHistogram.isInitialized]);
+  }, [setUnifiedHistogramApi, unifiedHistogram.api]);
 
-  const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+  const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps: unifiedHistogram.layoutProps,
     stateContainer,
     panelsToggle,
   });
 
-  if (!unifiedHistogram.isInitialized || (!restProps.searchSessionId && !isEsqlMode)) {
+  // TODO: debug how many rerenders happen here
+
+  if (!unifiedHistogram.isInitialized) {
     return null;
   }
 
@@ -219,7 +221,7 @@ const CustomChartSectionWrapper = ({
     chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix;
 
   const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
-  const { api, stateProps, requestParams, input$ } = useServicesBootstrap({
+  const { api, stateProps, fetch$, fetchParams, hasValidFetchParams } = useServicesBootstrap({
     ...restProps,
     initialState: unifiedHistogramProps.initialState,
     localStorageKeyPrefix,
@@ -256,7 +258,7 @@ const CustomChartSectionWrapper = ({
     ]
   );
 
-  const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+  const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps,
     stateContainer,
@@ -268,21 +270,20 @@ const CustomChartSectionWrapper = ({
     !!layoutProps.chart && !layoutProps.chart.hidden
   );
 
-  const hasValidSession = !!unifiedHistogramProps.searchSessionId || isEsqlMode;
-  const isComponentVisible =
-    !!chartSectionConfig.Component && !!layoutProps.chart && !layoutProps.chart.hidden;
-
-  if (!hasValidSession) {
+  if (!api || !hasValidFetchParams) {
     return null;
   }
+
+  const isComponentVisible =
+    !!chartSectionConfig.Component && !!layoutProps.chart && !layoutProps.chart.hidden;
 
   return (
     <chartSectionConfig.Component
       histogramCss={histogramCss}
       chartToolbarCss={chartToolbarCss}
       renderToggleActions={renderCustomChartToggleActions}
-      input$={input$}
-      requestParams={requestParams}
+      input$={fetch$} // TODO: continue the refactoring
+      requestParams={fetchParams}
       isComponentVisible={isComponentVisible}
       {...unifiedHistogramProps}
       initialState={metricsGridState}
