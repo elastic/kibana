@@ -492,7 +492,7 @@ describe('AgentActivityFlyout', () => {
     const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
-      'Reassigning 1 agent to Policy1'
+      'Reassigning 1 agent to Policy 1'
     );
     expect(
       result.container
