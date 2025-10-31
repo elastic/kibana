@@ -270,9 +270,7 @@ describe('Scout MCP Configuration', () => {
         ignoreHTTPSErrors: false,
       };
 
-      expect(() => createScoutTestConfig(mcpConfig, log)).toThrow(
-        'Credentials must be provided'
-      );
+      expect(() => createScoutTestConfig(mcpConfig, log)).toThrow('Credentials must be provided');
     });
 
     it('should accept credentials from URL for remote deployments', () => {

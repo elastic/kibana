@@ -291,9 +291,7 @@ describe('Auth Tools', () => {
 
   describe('error handling', () => {
     it('should handle missing SAML manager gracefully', async () => {
-      mockSession.getSamlSessionManager.mockRejectedValue(
-        new Error('SAML manager not available')
-      );
+      mockSession.getSamlSessionManager.mockRejectedValue(new Error('SAML manager not available'));
 
       const result = await scoutLogin(mockSession, { role: 'admin' });
 

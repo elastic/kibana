@@ -55,9 +55,7 @@ describe('Security Validators', () => {
 
     it('should reject URLs exceeding maximum length', () => {
       const longUrl = 'http://localhost:5601/' + 'a'.repeat(2048);
-      expect(() => validateAndSanitizeUrl(longUrl, baseUrl)).toThrow(
-        'URL exceeds maximum length'
-      );
+      expect(() => validateAndSanitizeUrl(longUrl, baseUrl)).toThrow('URL exceeds maximum length');
     });
 
     it('should handle relative URLs correctly', () => {
@@ -160,7 +158,9 @@ describe('Security Validators', () => {
 
     it('should allow custom maximum length', () => {
       expect(() => validateTextInput('Hello', 10)).not.toThrow();
-      expect(() => validateTextInput('Hello World', 10)).toThrow('Text input exceeds maximum length');
+      expect(() => validateTextInput('Hello World', 10)).toThrow(
+        'Text input exceeds maximum length'
+      );
     });
 
     it('should handle empty strings', () => {
