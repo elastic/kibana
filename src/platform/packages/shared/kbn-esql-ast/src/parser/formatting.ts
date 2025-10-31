@@ -184,32 +184,6 @@ const attachCommentDecoration = (
     return;
   }
 
-  const commentLocation = comment.node.location;
-
-  // Check if comment belongs to a subquery (parens expression)
-  // Walk through the AST to find parens nodes that contain this comment
-  let commentAttachedToSubquery = false;
-  walk(ast, {
-    visitParens(node) {
-      if (
-        node.child?.type === 'query' &&
-        node.location &&
-        commentLocation.min >= node.location.min &&
-        commentLocation.max <= node.location.max
-      ) {
-        // This comment is inside a subquery, attach it to the child query instead
-        const childQuery = node.child as ESQLAstQueryExpression;
-        attachCommentDecoration(childQuery, tokens, comment);
-        commentAttachedToSubquery = true;
-      }
-    },
-  });
-
-  // If comment was attached to a subquery, we're done
-  if (commentAttachedToSubquery) {
-    return;
-  }
-
   if (commentConsumesWholeLine) {
     const node = Visitor.findNodeAtOrAfter(ast, comment.node.location.max);
 
@@ -294,12 +268,50 @@ export const attachDecorations = (
   tokens: Token[],
   lines: ParsedFormattingDecorationLines
 ) => {
+  const subqueryBounds: Array<{
+    query: ESQLAstQueryExpression;
+    min: number;
+    max: number;
+    size: number;
+  }> = [];
+
+  walk(ast, {
+    visitParens(node) {
+      if (node.child?.type === 'query' && node.location) {
+        subqueryBounds.push({
+          query: node.child as ESQLAstQueryExpression,
+          min: node.location.min,
+          max: node.location.max,
+          size: node.location.max - node.location.min,
+        });
+      }
+    },
+  });
+
+  // Sort by size (ascending) so smaller (innermost) subqueries come first
+  subqueryBounds.sort((a, b) => a.size - b.size);
+
+  // Process each decoration
   for (const line of lines) {
     for (const decoration of line) {
       switch (decoration.type) {
         case 'comment': {
-          // attachCommentDecoration now handles subqueries internally
-          attachCommentDecoration(ast, tokens, decoration);
+          if (!decoration.node.location) {
+            continue;
+          }
+
+          const commentLoc = decoration.node.location;
+
+          // Find the innermost subquery that contains this comment
+          let targetQuery = ast;
+          for (const subquery of subqueryBounds) {
+            if (commentLoc.min >= subquery.min && commentLoc.max <= subquery.max) {
+              targetQuery = subquery.query;
+              break; // Since sorted by size, first match is the innermost
+            }
+          }
+
+          attachCommentDecoration(targetQuery, tokens, decoration);
           break;
         }
       }
