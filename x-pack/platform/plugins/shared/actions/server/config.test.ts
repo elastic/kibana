@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_EMAIL_BODY_LENGTH } from '../common';
 import type { ActionsConfig } from './config';
 import { configSchema, getValidatedConfig } from './config';
 import type { Logger } from '@kbn/core/server';
