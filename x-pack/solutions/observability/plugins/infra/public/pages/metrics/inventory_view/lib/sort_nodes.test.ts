@@ -8,10 +8,10 @@
 import { sortNodes } from './sort_nodes';
 import type { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 
-const nodes: SnapshotNode[] = [
+const hostNodes: SnapshotNode[] = [
   {
-    name: 'host-01',
-    path: [{ value: 'host-01', label: 'host-01' }],
+    name: 'host-1',
+    path: [{ value: 'host-1', label: 'host-1' }],
     metrics: [
       {
         name: 'cpu',
@@ -22,38 +22,95 @@ const nodes: SnapshotNode[] = [
     ],
   },
   {
-    name: 'host-02',
-    path: [{ value: 'host-02', label: 'host-02' }],
+    name: 'host-2',
+    path: [{ value: 'host-2', label: 'host-2' }],
     metrics: [
       {
         name: 'cpu',
-        value: 0.2,
-        max: 0.7,
-        avg: 0.4,
+        value: 0.7,
+        max: 1.5,
+        avg: 0.8,
+      },
+    ],
+  },
+  {
+    name: 'host-3',
+    path: [{ value: 'host-3', label: 'host-3' }],
+    metrics: [
+      {
+        name: 'cpu',
+        value: 0.9,
+        max: 1.5,
+        avg: 1.0,
+      },
+    ],
+  },
+  {
+    name: 'host-4',
+    path: [{ value: 'host-4', label: 'host-4' }],
+    metrics: [
+      {
+        name: 'cpu',
+        value: 0.3,
+        max: 1.5,
+        avg: 0.5,
+      },
+    ],
+  },
+  {
+    name: 'host-5',
+    path: [{ value: 'host-5', label: 'host-5' }],
+    metrics: [
+      {
+        name: 'cpu',
+        value: 0.1,
+        max: 1.5,
+        avg: 0.3,
       },
     ],
   },
 ];
 
 describe('sortNodes', () => {
-  describe('asc', () => {
-    it('should sort by name', () => {
-      const sortedNodes = sortNodes({ by: 'name', direction: 'asc' }, nodes);
-      expect(sortedNodes).toEqual(nodes);
-    });
-    it('should sort by merics', () => {
-      const sortedNodes = sortNodes({ by: 'value', direction: 'asc' }, nodes);
-      expect(sortedNodes).toEqual(nodes.reverse());
+  describe('sort by value descending', () => {
+    it('should sort nodes by value in descending order', () => {
+      const sortedNodes = sortNodes({ by: 'value', direction: 'desc' }, hostNodes);
+      const nodeNames = sortedNodes.map((node) => node.name);
+
+      expect(nodeNames).toEqual(['host-3', 'host-2', 'host-1', 'host-4', 'host-5']);
+
+      const nodeValues = sortedNodes.map((node) => node.metrics[0].value);
+
+      expect(nodeValues).toEqual([0.9, 0.7, 0.5, 0.3, 0.1]);
     });
   });
-  describe('desc', () => {
-    it('should sort by name', () => {
-      const sortedNodes = sortNodes({ by: 'name', direction: 'desc' }, nodes);
-      expect(sortedNodes).toEqual(nodes.reverse());
+
+  describe('sort by value ascending', () => {
+    it('should sort nodes by value in ascending order', () => {
+      const sortedNodes = sortNodes({ by: 'value', direction: 'asc' }, hostNodes);
+      const nodeNames = sortedNodes.map((node) => node.name);
+
+      expect(nodeNames).toEqual(['host-5', 'host-4', 'host-1', 'host-2', 'host-3']);
+
+      const nodeValues = sortedNodes.map((node) => node.metrics[0].value);
+
+      expect(nodeValues).toEqual([0.1, 0.3, 0.5, 0.7, 0.9]);
     });
-    it('should sort by merics', () => {
-      const sortedNodes = sortNodes({ by: 'value', direction: 'desc' }, nodes);
-      expect(sortedNodes).toEqual(nodes);
+  });
+
+  describe('sort by name', () => {
+    it('should sort by name ascending', () => {
+      const sortedNodes = sortNodes({ by: 'name', direction: 'asc' }, hostNodes);
+      const nodeNames = sortedNodes.map((node) => node.name);
+
+      expect(nodeNames).toEqual(['host-1', 'host-2', 'host-3', 'host-4', 'host-5']);
+    });
+
+    it('should sort by name descending', () => {
+      const sortedNodes = sortNodes({ by: 'name', direction: 'desc' }, hostNodes);
+      const nodeNames = sortedNodes.map((node) => node.name);
+
+      expect(nodeNames).toEqual(['host-5', 'host-4', 'host-3', 'host-2', 'host-1']);
     });
   });
 });
