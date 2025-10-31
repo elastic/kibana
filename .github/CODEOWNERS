@@ -1217,6 +1217,8 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 
 # Data Discovery
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/page_objects/unified_field_list.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/page_objects/unified_tabs.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/es_archiver/makelogs @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/es_archiver/large_fields @elastic/kibana-data-discovery # Assigned per only use: test/functional/apps/management/data_views/_test_huge_fields.ts
 /x-pack/platform/test/functional/fixtures/kbn_archives/kibana_scripted_fields_on_logstash.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/functional/apps/discover/async_scripted_fields.ts#L35
@@ -1900,14 +1902,11 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/services/embedding.ts @elastic/appex-qa
 /src/platform/test/functional/services/data_grid.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/services/combo_box.ts @elastic/appex-qa
-/src/platform/test/functional/page_objects/unified_field_list.ts @elastic/kibana-data-discovery
-/src/platform/test/functional/page_objects/unified_tabs.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/page_objects/time_picker.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/index.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/header_page.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/error_page.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/common_page.ts @elastic/appex-qa
-/src/platform/test/functional/page_objects/space_settings.ts @elastic/appex-qa
 /src/platform/test/functional/jest.config.js @elastic/appex-qa
 /src/platform/test/functional/ftr_provider_context.ts @elastic/appex-qa
 /src/platform/test/functional/fixtures/es_archiver/README.md @elastic/appex-qa
@@ -1948,7 +1947,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/packages/shared/kbn-test/src/functional_test_runner @elastic/appex-qa
 /packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 /x-pack/platform/test/serverless/api_integration/test_suites/elasticsearch_api @elastic/appex-qa
-/x-pack/solutions/security/test/serverless/functional/test_suites/ftr/ @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/test_suites/home_page/  @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
@@ -1963,18 +1961,13 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/api_integration_basic/config.basic_license.ts @elastic/appex-qa
 /x-pack/platform/test/api_integration_basic/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/security/test/README.md @elastic/appex-qa
-/x-pack/solutions/security/test/kibana.jsonc @elastic/appex-qa
-/x-pack/solutions/security/test/tsconfig.json @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/config.ts @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/services/index.ts @elastic/appex-qa
 /x-pack/solutions/security/test/alerting_api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/shared @elastic/appex-qa
-/x-pack/platform/test/functional/services/ml/api.ts @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/platform/test/.gitignore @elastic/appex-qa
 /x-pack/solutions/**/test/.gitignore @elastic/appex-qa
-/x-pack/platform/test/functional/services/pipeline_list.ts @elastic/appex-qa
-/x-pack/platform/test/functional/services/pipeline_editor.ts @elastic/appex-qa
 /x-pack/platform/test/accessibility/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/accessibility/page_objects.ts @elastic/appex-qa
 /x-pack/platform/test/accessibility/services.ts @elastic/appex-qa
@@ -1982,9 +1975,9 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/serverless/api_integration/services/ @elastic/appex-qa
 /x-pack/platform/test/serverless/api_integration/configs/ @elastic/appex-qa
-/x-pack/platform/test/serverless/functional/configs/ @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/platform/test/serverless/functional/page_objects/ @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/platform/test/serverless/functional/services/ @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/platform/test/serverless/functional/configs/ @elastic/appex-qa
+/x-pack/platform/test/serverless/functional/page_objects/ @elastic/appex-qa
+/x-pack/platform/test/serverless/functional/services/ @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/config* @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/ftr_provider_context.d.ts @elastic/appex-qa
 
@@ -2143,6 +2136,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/api_integration/apis/cloud @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/198444
 /src/platform/test/plugin_functional/snapshots/baseline/hardening @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/190716
 /src/platform/test/functional/page_objects/login_page.ts @elastic/kibana-security
+/src/platform/test/functional/page_objects/space_settings.ts @elastic/kibana-security
 /x-pack/solutions/observability/test/serverless/functional/test_suites/role_management @elastic/kibana-security
 /x-pack/platform/test/functional/config_security_basic.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/user_profile_page.ts @elastic/kibana-security
@@ -2385,6 +2379,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
 # Security Solution
+/x-pack/solutions/security/test/kibana.jsonc @elastic/security-solution
+/x-pack/solutions/security/test/tsconfig.json @elastic/security-solution
 /x-pack/solutions/security/test/fixtures/kbn_archives/timelines/7.15.0_space @elastic/security-solution # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation/timeline/tests/timeline_migrations.ts#L58
 /x-pack/solutions/security/test/fixtures/es_archives/packetbeat @elastic/security-solution
 /x-pack/solutions/security/test/fixtures/es_archives/security_solution @elastic/security-solution
