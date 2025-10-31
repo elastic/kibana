@@ -10,6 +10,7 @@
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { useStableCallback } from '@kbn/unified-histogram';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ValueFilter } from '../types';
 
 export const usePaginatedFields = ({
   fields,
@@ -17,22 +18,38 @@ export const usePaginatedFields = ({
   pageSize,
   currentPage,
   searchTerm,
+  valueFilters,
+  noDataMetrics,
 }: {
   fields: MetricField[];
   searchTerm: string;
   dimensions: string[];
+  valueFilters: Array<ValueFilter>;
   pageSize: number;
   currentPage: number;
+  noDataMetrics: string[];
 }) => {
+  const fieldsWithData = useMemo(() => {
+    return fields.filter((field) => !field.noData && !noDataMetrics.includes(field.name));
+  }, [fields, noDataMetrics]);
   const dimensionsSet = useMemo(() => new Set(dimensions), [dimensions]);
   const searchTermLower = useMemo(() => searchTerm.toLowerCase(), [searchTerm]);
+  const scopesSet = useMemo(() => {
+    if (valueFilters.length === 0) return null;
+    const scopes = new Set<string>();
+    valueFilters.forEach((v) => {
+      v.scopes?.forEach((ds) => scopes.add(ds));
+    });
+    return scopes;
+  }, [valueFilters]);
 
   const buildPaginatedFields = useCallback(() => {
-    const filteredFields = fields.filter((field) => {
-      if (
-        field.noData ||
-        (searchTermLower && !field.name.toLowerCase().includes(searchTermLower))
-      ) {
+    const filteredFields = fieldsWithData.filter((field) => {
+      if (searchTermLower && !field.name.toLowerCase().includes(searchTermLower)) {
+        return false;
+      }
+
+      if (scopesSet && (!field.scope || !scopesSet.has(field.scope))) {
         return false;
       }
 
@@ -55,7 +72,7 @@ export const usePaginatedFields = ({
       filteredFieldsCount: filteredFields.length,
       totalPages,
     };
-  }, [fields, dimensionsSet, searchTermLower, pageSize, currentPage]);
+  }, [fieldsWithData, dimensionsSet, searchTermLower, scopesSet, pageSize, currentPage]);
 
   const [paginatedFieldsContext, setPaginatedFieldsContext] =
     useState<ReturnType<typeof buildPaginatedFields>>();

@@ -53,6 +53,7 @@ export const Chart = ({
   syncCursor,
   syncTooltips,
   yBounds,
+  onLoad,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -101,6 +102,7 @@ export const Chart = ({
             onCopyToDashboard={toggleSaveModalVisible}
             syncCursor={syncCursor}
             syncTooltips={syncTooltips}
+            onLoad={onLoad}
           />
           {isSaveModalVisible && (
             <SaveModalComponent
