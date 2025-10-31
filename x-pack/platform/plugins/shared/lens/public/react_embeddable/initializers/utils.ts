@@ -23,6 +23,6 @@ export function getEmbeddableVariables(
       return esqlVariables;
     }
     // filter out the variables that are not used in the query
-    return esqlVariables.filter((variable) => currentVariables.includes(variable.key));
+    return esqlVariables?.filter((variable) => currentVariables.includes(variable.key));
   }
 }

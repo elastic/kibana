@@ -8,10 +8,8 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useFetch } from '@kbn/unified-histogram';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import React, { useMemo } from 'react';
-import { Subject } from 'rxjs';
 import { TraceMetricsProvider } from '../../context/trace_metrics_context';
 import { useEsqlQueryInfo } from '../../hooks';
 import { ErrorRateChart } from './error_rate';
@@ -24,22 +22,19 @@ export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 export type DataSource = 'apm' | 'otel';
 
 function TraceMetricsGrid({
-  requestParams,
+  fetchParams,
+  fetch$: discoverFetch$,
   services,
-  input$: originalInput$,
-  searchSessionId,
   onBrushEnd,
   onFilter,
-  abortController,
-  query,
   dataSource,
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
-  dataView,
 }: ChartSectionProps & {
   dataSource: DataSource;
 }) {
+  const { query, dataView } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
   });
@@ -62,18 +57,6 @@ function TraceMetricsGrid({
     [renderToggleActions]
   );
 
-  const { updateTimeRange } = requestParams;
-
-  const input$ = useMemo(
-    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
-    [originalInput$]
-  );
-
-  const discoverFetch$ = useFetch({
-    input$,
-    beforeFetch: updateTimeRange,
-  });
-
   const indexPattern = dataView?.getIndexPattern();
 
   if (!indexPattern) {
@@ -92,12 +75,10 @@ function TraceMetricsGrid({
           dataSource,
           indexes: indexPattern,
           filters,
-          requestParams,
           services,
-          searchSessionId,
-          abortController,
           onBrushEnd,
           onFilter,
+          fetchParams,
           discoverFetch$,
         }}
       >

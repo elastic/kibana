@@ -270,7 +270,7 @@ const CustomChartSectionWrapper = ({
     !!layoutProps.chart && !layoutProps.chart.hidden
   );
 
-  if (!api || !hasValidFetchParams) {
+  if (!api || !fetchParams || !hasValidFetchParams) {
     return null;
   }
 
@@ -282,8 +282,8 @@ const CustomChartSectionWrapper = ({
       histogramCss={histogramCss}
       chartToolbarCss={chartToolbarCss}
       renderToggleActions={renderCustomChartToggleActions}
-      input$={fetch$} // TODO: continue the refactoring
-      requestParams={fetchParams}
+      fetch$={fetch$}
+      fetchParams={fetchParams}
       isComponentVisible={isComponentVisible}
       {...unifiedHistogramProps}
       initialState={metricsGridState}

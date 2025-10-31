@@ -8,8 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import { useFetch } from '@kbn/unified-histogram';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { i18n } from '@kbn/i18n';
 import { keys } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -23,7 +22,6 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import { Subject } from 'rxjs';
 import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
@@ -39,20 +37,16 @@ import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from './toolbar/right_side_actions/search_button';
 
 export const MetricsExperienceGrid = ({
-  dataView,
   renderToggleActions,
   chartToolbarCss,
   histogramCss,
   onBrushEnd,
   onFilter,
-  searchSessionId,
-  requestParams,
   services,
-  input$: originalInput$,
+  fetch$: discoverFetch$,
+  fetchParams,
   isChartLoading: isDiscoverLoading,
   isComponentVisible,
-  abortController,
-  timeRange,
 }: ChartSectionProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -68,17 +62,7 @@ export const MetricsExperienceGrid = ({
     onToggleFullscreen,
   } = useMetricsExperienceState();
 
-  const { updateTimeRange } = requestParams;
-
-  const input$ = useMemo(
-    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
-    [originalInput$]
-  );
-
-  const discoverFetch$ = useFetch({
-    input$,
-    beforeFetch: updateTimeRange,
-  });
+  const { dataView, timeRange } = fetchParams;
 
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
   const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
@@ -90,7 +74,7 @@ export const MetricsExperienceGrid = ({
     fields,
     indexPattern,
     renderToggleActions,
-    requestParams,
+    fetchParams,
   });
 
   const onKeyDown = useCallback(
@@ -213,12 +197,10 @@ export const MetricsExperienceGrid = ({
             filters={filters}
             services={services}
             fields={currentPageFields}
-            searchSessionId={searchSessionId}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
             discoverFetch$={discoverFetch$}
-            requestParams={requestParams}
-            abortController={abortController}
+            fetchParams={fetchParams}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

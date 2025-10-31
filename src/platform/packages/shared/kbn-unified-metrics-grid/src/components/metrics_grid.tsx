@@ -12,8 +12,7 @@ import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import type { Observable } from 'rxjs';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { css } from '@emotion/react';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
@@ -26,13 +25,13 @@ import { useChartLayers } from './chart/hooks/use_chart_layers';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
-  'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
+  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams'
 > & {
   filters?: Array<{ field: string; value: string }>;
   dimensions: string[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
-  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
+  discoverFetch$: ChartSectionProps['fetch$'];
 } & (
     | {
         pivotOn: 'metric';
@@ -46,15 +45,13 @@ export type MetricsGridProps = Pick<
 
 export const MetricsGrid = ({
   fields,
-  searchSessionId,
   onBrushEnd,
   onFilter,
   dimensions,
   pivotOn,
   services,
   columns,
-  abortController,
-  requestParams,
+  fetchParams,
   discoverFetch$,
   searchTerm,
   filters = [],
@@ -180,13 +177,11 @@ export const MetricsGrid = ({
                   dimensions={dimensions}
                   filters={filters}
                   discoverFetch$={discoverFetch$}
+                  fetchParams={fetchParams}
                   handleViewDetails={handleViewDetails}
-                  searchSessionId={searchSessionId}
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
-                  abortController={abortController}
-                  requestParams={requestParams}
                   size={chartSize}
                   setChartRef={setChartRef}
                   handleFocusCell={handleFocusCell}
@@ -217,12 +212,10 @@ function ChartItem({
   focusedCell,
   dimensions,
   filters,
-  searchSessionId,
   services,
   onBrushEnd,
   onFilter,
-  abortController,
-  requestParams,
+  fetchParams,
   discoverFetch$,
   handleViewDetails,
   size,
@@ -236,17 +229,14 @@ function ChartItem({
   focusedCell: { rowIndex: number; colIndex: number };
   dimensions: string[];
   filters: Array<{ field: string; value: string }>;
-  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
+  discoverFetch$: ChartSectionProps['fetch$'];
   size: ChartSize;
   searchTerm?: string;
   getRowColFromIndex: (index: number) => { rowIndex: number; colIndex: number };
   handleViewDetails: (esqlQuery: string, metric: MetricField, chartId: string) => void;
   setChartRef: (chartId: string, element: HTMLDivElement | null) => void;
   handleFocusCell: (rowIndex: number, colIndex: number) => void;
-} & Pick<
-  ChartSectionProps,
-  'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
->) {
+} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams'>) {
   const { euiTheme } = useEuiTheme();
   const colorPalette = useMemo(
     () => Object.values(euiTheme.colors.vis).slice(0, 10),
@@ -281,10 +271,8 @@ function ChartItem({
         esqlQuery={esqlQuery}
         size={size}
         discoverFetch$={discoverFetch$}
-        requestParams={requestParams}
+        fetchParams={fetchParams}
         services={services}
-        abortController={abortController}
-        searchSessionId={searchSessionId}
         onBrushEnd={onBrushEnd}
         onFilter={onFilter}
         onViewDetails={() => handleViewDetails(esqlQuery, metric, chartId)}
