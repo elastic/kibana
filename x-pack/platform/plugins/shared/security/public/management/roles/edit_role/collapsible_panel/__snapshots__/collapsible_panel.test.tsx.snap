@@ -689,12 +689,6 @@ exports[`it renders without blowing up 1`] = `
                 "headerDarkBackground": "#0B1628",
                 "headerDarkSearchBorderColor": "#485975",
                 "headerDarkSectionItemBackgroundFocus": "#0A2342",
-                "keyPadMenuItemBackgroundDisabledSelect": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseDisabled",
-                  ],
-                },
                 "listGroupItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1125,12 +1119,6 @@ exports[`it renders without blowing up 1`] = `
                 "headerDarkBackground": "#0B1628",
                 "headerDarkSearchBorderColor": "#485975",
                 "headerDarkSectionItemBackgroundFocus": "#0A2342",
-                "keyPadMenuItemBackgroundDisabledSelect": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseDisabled",
-                  ],
-                },
                 "listGroupItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1493,9 +1481,7 @@ exports[`it renders without blowing up 1`] = `
                   "backgroundText": Computed {
                     "computer": [Function],
                     "dependencies": Array [
-                      "flags.buttonVariant",
                       "colors.backgroundBasePlain",
-                      "colors.backgroundLightText",
                     ],
                   },
                   "backgroundTextActive": "rgba(255,255,255, 0.16)",
@@ -1786,9 +1772,7 @@ exports[`it renders without blowing up 1`] = `
                   "backgroundText": Computed {
                     "computer": [Function],
                     "dependencies": Array [
-                      "flags.buttonVariant",
                       "colors.backgroundBasePlain",
-                      "colors.backgroundLightText",
                     ],
                   },
                   "backgroundTextActive": "rgba(23,80,186, 0.12)",
@@ -2190,10 +2174,6 @@ exports[`it renders without blowing up 1`] = `
               },
             },
             "flags": Object {
-              "buttonVariant": "refresh",
-              "formVariant": "refresh",
-              "hasGlobalFocusColor": true,
-              "hasVisColorAdjustment": false,
               "shadowVariant": "refresh",
             },
             "focus": Object {

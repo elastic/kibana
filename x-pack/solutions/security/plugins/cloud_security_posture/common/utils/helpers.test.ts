@@ -337,5 +337,131 @@ describe('test helper methods', () => {
         'gcp.credentials.json': { value: 'unused' },
       });
     });
+
+    it('cleans all aws credential fields from disabled inputs to prevent storing unnecessary secrets', () => {
+      const mockPackagePolicy = createPackagePolicyMock();
+      mockPackagePolicy.inputs = [
+        {
+          type: 'cloudbeat/cis_aws',
+          enabled: true,
+          streams: [
+            {
+              id: 'findings',
+              enabled: true,
+              data_stream: {
+                dataset: 'cloud_security_posture.findings',
+                type: 'logs',
+              },
+              vars: {
+                'aws.credentials.type': { value: 'direct_access_keys' },
+                access_key_id: { value: 'used_key', type: 'text' },
+                secret_access_key: { value: 'used_secret', type: 'text' },
+                role_arn: { value: 'unused' },
+              },
+            },
+          ],
+        },
+        {
+          type: 'cloudbeat/cis_eks',
+          enabled: false,
+          streams: [
+            {
+              id: 'findings',
+              enabled: false,
+              data_stream: {
+                dataset: 'cloud_security_posture.findings',
+                type: 'logs',
+              },
+              vars: {
+                'aws.credentials.type': { value: 'assume_role' },
+                access_key_id: { value: 'should_be_removed', type: 'text' },
+                secret_access_key: { value: 'should_be_removed', type: 'text' },
+                role_arn: { value: 'should_be_removed' },
+                session_token: { value: 'should_be_removed', type: 'text' },
+              },
+            },
+          ],
+        },
+      ];
+
+      const cleanedPackage = cleanupCredentials(mockPackagePolicy);
+
+      // Enabled input should keep credentials based on credential type
+      expect(cleanedPackage.inputs[0].streams[0].vars).toEqual({
+        'aws.credentials.type': { value: 'direct_access_keys' },
+        access_key_id: { value: 'used_key', type: 'text' },
+        secret_access_key: { value: 'used_secret', type: 'text' },
+        role_arn: { value: undefined },
+      });
+
+      // Disabled input should have all credential fields removed
+      expect(cleanedPackage.inputs[1].streams[0].vars).toEqual({
+        'aws.credentials.type': { value: 'assume_role' },
+        access_key_id: { value: undefined, type: 'text' },
+        secret_access_key: { value: undefined, type: 'text' },
+        role_arn: { value: undefined },
+        session_token: { value: undefined, type: 'text' },
+      });
+    });
+
+    it('cleans all gcp credential fields from disabled inputs', () => {
+      const mockPackagePolicy = createPackagePolicyMock();
+      mockPackagePolicy.inputs = [
+        {
+          type: 'cloudbeat/cis_gcp',
+          enabled: true,
+          streams: [
+            {
+              id: 'findings',
+              enabled: true,
+              data_stream: {
+                dataset: 'cloud_security_posture.findings',
+                type: 'logs',
+              },
+              vars: {
+                'gcp.credentials.type': { value: 'credentials-file' },
+                'gcp.credentials.file': { value: 'used' },
+                'gcp.credentials.json': { value: 'unused' },
+              },
+            },
+          ],
+        },
+        {
+          type: 'cloudbeat/cis_gcp',
+          enabled: false,
+          streams: [
+            {
+              id: 'findings',
+              enabled: false,
+              data_stream: {
+                dataset: 'cloud_security_posture.findings',
+                type: 'logs',
+              },
+              vars: {
+                'gcp.credentials.type': { value: 'credentials-json' },
+                'gcp.credentials.file': { value: 'should_be_removed' },
+                'gcp.credentials.json': { value: 'should_be_removed' },
+              },
+            },
+          ],
+        },
+      ];
+
+      const cleanedPackage = cleanupCredentials(mockPackagePolicy);
+
+      // Enabled input should keep credentials based on credential type
+      expect(cleanedPackage.inputs[0].streams[0].vars).toEqual({
+        'gcp.credentials.type': { value: 'credentials-file' },
+        'gcp.credentials.file': { value: 'used' },
+        'gcp.credentials.json': { value: undefined },
+      });
+
+      // Disabled input should have all credential fields removed
+      expect(cleanedPackage.inputs[1].streams[0].vars).toEqual({
+        'gcp.credentials.type': { value: 'credentials-json' },
+        'gcp.credentials.file': { value: undefined },
+        'gcp.credentials.json': { value: undefined },
+      });
+    });
   });
 });
