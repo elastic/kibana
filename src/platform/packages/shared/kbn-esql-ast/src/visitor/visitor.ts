@@ -94,6 +94,43 @@ export class Visitor<
         }
         return null;
       })
+      .on('visitParensExpression', (ctx): ESQLProperNode | null => {
+        const parens = ctx.node;
+        const parensLocation = parens.location;
+
+        if (!parensLocation) {
+          return null;
+        }
+
+        const isPosInsideParens = parensLocation.min <= pos && parensLocation.max >= pos;
+        if (!isPosInsideParens) {
+          return null;
+        }
+
+        const childQuery = ctx.child();
+        if (!childQuery || !childQuery.location) {
+          return null;
+        }
+
+        const childLocation = childQuery.location;
+        const isPosInsideChild = childLocation.min <= pos && childLocation.max >= pos;
+
+        if (isPosInsideChild) {
+          if (childQuery.type === 'query') {
+            return Visitor.findNodeAtOrAfter(childQuery, pos);
+          }
+
+          return ctx.visitExpression(childQuery, undefined);
+        }
+
+        const isPosBeforeChild = childLocation.min > pos;
+
+        if (isPosBeforeChild) {
+          return childQuery;
+        }
+
+        return parens;
+      })
       .on('visitCommand', visitCommand)
       .on('visitHeaderCommand', visitCommand)
       .on('visitQuery', (ctx): ESQLProperNode | null => {
@@ -183,6 +220,58 @@ export class Visitor<
         }
 
         return null;
+      })
+      .on('visitParensExpression', (ctx): ESQLProperNode | null => {
+        const parens = ctx.node;
+        const parensLocation = parens.location;
+
+        if (!parensLocation) {
+          return null;
+        }
+
+        const isPosInsideParens = parensLocation.min <= pos && parensLocation.max >= pos;
+        if (!isPosInsideParens) {
+          return null;
+        }
+
+        const childQuery = ctx.child();
+        if (!childQuery || !childQuery.location) {
+          return null;
+        }
+
+        const childLocation = childQuery.location;
+        const isPosInsideChild = childLocation.min <= pos && childLocation.max >= pos;
+
+        if (isPosInsideChild) {
+          if (childQuery.type === 'query') {
+            return Visitor.findNodeAtOrBefore(childQuery, pos);
+          }
+
+          return ctx.visitExpression(childQuery, undefined);
+        }
+
+        const isPosAfterChild = childLocation.max < pos;
+        if (isPosAfterChild) {
+          if (childQuery.type === 'query') {
+            const lastNodeInChild = Visitor.findNodeAtOrBefore(childQuery, childLocation.max);
+
+            if (lastNodeInChild) {
+              return lastNodeInChild;
+            }
+          } else {
+            // For expression children, visit to find the deepest node
+            const lastNodeInChild = ctx.visitExpression(childQuery, undefined);
+
+            if (lastNodeInChild) {
+              return lastNodeInChild;
+            }
+          }
+
+          // Fallback: return the child itself if we couldn't find a deeper node
+          return childQuery;
+        }
+
+        return parens;
       })
       .on('visitCommand', visitCommand)
       .on('visitHeaderCommand', visitCommand)

@@ -11,7 +11,6 @@ import type { Token } from 'antlr4';
 import { type CommonTokenStream } from 'antlr4';
 import { Builder } from '../builder';
 import { Visitor } from '../visitor';
-import { walk } from '../walker';
 import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
@@ -268,50 +267,11 @@ export const attachDecorations = (
   tokens: Token[],
   lines: ParsedFormattingDecorationLines
 ) => {
-  const subqueryBounds: Array<{
-    query: ESQLAstQueryExpression;
-    min: number;
-    max: number;
-    size: number;
-  }> = [];
-
-  walk(ast, {
-    visitParens(node) {
-      if (node.child?.type === 'query' && node.location) {
-        subqueryBounds.push({
-          query: node.child as ESQLAstQueryExpression,
-          min: node.location.min,
-          max: node.location.max,
-          size: node.location.max - node.location.min,
-        });
-      }
-    },
-  });
-
-  // Sort by size (ascending) so smaller (innermost) subqueries come first
-  subqueryBounds.sort((a, b) => a.size - b.size);
-
-  // Process each decoration
   for (const line of lines) {
     for (const decoration of line) {
       switch (decoration.type) {
         case 'comment': {
-          if (!decoration.node.location) {
-            continue;
-          }
-
-          const commentLoc = decoration.node.location;
-
-          // Find the innermost subquery that contains this comment
-          let targetQuery = ast;
-          for (const subquery of subqueryBounds) {
-            if (commentLoc.min >= subquery.min && commentLoc.max <= subquery.max) {
-              targetQuery = subquery.query;
-              break; // Since sorted by size, first match is the innermost
-            }
-          }
-
-          attachCommentDecoration(targetQuery, tokens, decoration);
+          attachCommentDecoration(ast, tokens, decoration);
           break;
         }
       }
