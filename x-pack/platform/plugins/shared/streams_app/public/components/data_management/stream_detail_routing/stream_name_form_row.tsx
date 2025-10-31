@@ -14,6 +14,8 @@ interface StreamNameFormRowProps {
   onChange?: (value: string) => void;
   disabled?: boolean;
   autoFocus?: boolean;
+  error?: string;
+  isInvalid?: boolean;
 }
 
 const MAX_NAME_LENGTH = 200;
@@ -23,6 +25,8 @@ export function StreamNameFormRow({
   onChange = () => {},
   disabled = false,
   autoFocus = false,
+  error,
+  isInvalid = false,
 }: StreamNameFormRowProps) {
   const helpText =
     value.length >= MAX_NAME_LENGTH && !disabled
@@ -41,6 +45,8 @@ export function StreamNameFormRow({
         defaultMessage: 'Stream name',
       })}
       helpText={helpText}
+      error={error}
+      isInvalid={isInvalid}
     >
       <EuiFieldText
         data-test-subj="streamsAppRoutingStreamEntryNameField"
@@ -51,6 +57,7 @@ export function StreamNameFormRow({
         autoFocus={autoFocus}
         onChange={(e) => onChange(e.target.value)}
         maxLength={200}
+        isInvalid={isInvalid}
       />
     </EuiFormRow>
   );

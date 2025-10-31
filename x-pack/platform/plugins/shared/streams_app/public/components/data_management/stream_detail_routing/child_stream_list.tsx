@@ -68,6 +68,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     previewSuggestion,
     acceptSuggestion,
     rejectSuggestion,
+    updateSuggestion,
   } = useReviewSuggestionsForm();
 
   const { currentRuleId, definition, routing } = routingSnapshot.context;
@@ -233,6 +234,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                   rejectSuggestion={rejectSuggestion}
                   resetForm={resetForm}
                   suggestions={suggestions}
+                  updateSuggestion={updateSuggestion}
                 />
               )
             ) : null}

@@ -20,6 +20,7 @@ import type {
 import {
   useStreamSamplesSelector,
   useStreamsRoutingSelector,
+  useStreamRoutingEvents,
 } from '../state_management/stream_routing_state_machine';
 import { CreateStreamConfirmationModal } from './create_stream_confirmation_modal';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
@@ -32,6 +33,7 @@ export interface ReviewSuggestionsFormProps
     | 'previewSuggestion'
     | 'acceptSuggestion'
     | 'rejectSuggestion'
+    | 'updateSuggestion'
   > {
   suggestions: PartitionSuggestion[];
   onRegenerate: (connectorId: string) => void;
@@ -48,11 +50,20 @@ export function ReviewSuggestionsForm({
   previewSuggestion,
   acceptSuggestion,
   rejectSuggestion,
+  updateSuggestion,
   onRegenerate,
 }: ReviewSuggestionsFormProps) {
   const ruleUnderReview = useStreamsRoutingSelector((snapshot) =>
     snapshot.matches({ ready: 'reviewSuggestedRule' }) ? snapshot.context.suggestedRuleId : null
   );
+  const editingSuggestion = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: 'editingSuggestedRule' }) ? snapshot.context.editedSuggestion : null
+  );
+
+  // For the confirmation modal, use edited suggestion if available, otherwise find by name
+  const partitionForModal =
+    editingSuggestion || suggestions.find(({ name }) => name === ruleUnderReview)!;
+
   const selectedPreviewName = useStreamSamplesSelector(
     ({ context }) =>
       context.selectedPreview &&
@@ -60,17 +71,34 @@ export function ReviewSuggestionsForm({
       context.selectedPreview.name
   );
 
+  const { editSuggestion } = useStreamRoutingEvents();
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+
+  const handleSave = () => {
+    const currentEditingIndex = routingSnapshot.context.editingSuggestionIndex;
+    const currentEditedSuggestion = routingSnapshot.context.editedSuggestion;
+
+    if (currentEditingIndex !== null && currentEditedSuggestion) {
+      updateSuggestion(currentEditingIndex, currentEditedSuggestion);
+    }
+  };
+
   return (
     <>
-      {ruleUnderReview && (
+      {ruleUnderReview && partitionForModal && (
         <CreateStreamConfirmationModal
-          partition={suggestions.find(({ name }) => name === ruleUnderReview)!}
-          onSuccess={() =>
-            acceptSuggestion(suggestions.findIndex(({ name }) => name === ruleUnderReview)!)
-          }
+          partition={partitionForModal}
+          onSuccess={() => {
+            acceptSuggestion(
+              editingSuggestion
+                ? routingSnapshot.context.editingSuggestionIndex!
+                : suggestions.findIndex(({ name }) => name === ruleUnderReview)!
+            );
+          }}
         />
       )}
       <EuiCallOut
+        iconType="sparkles"
         title={i18n.translate(
           'xpack.streams.reviewSuggestionsForm.euiCallOut.reviewPartitioningSuggestionsLabel',
           { defaultMessage: 'Review partitioning suggestions' }
@@ -95,8 +123,11 @@ export function ReviewSuggestionsForm({
             <SuggestedStreamPanel
               definition={definition}
               partition={partition}
+              index={index}
               onPreview={(toggle) => previewSuggestion(index, toggle)}
               onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
+              onEdit={editSuggestion}
+              onSave={handleSave}
             />
             <EuiSpacer size="s" />
           </NestedView>
