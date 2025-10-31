@@ -14,6 +14,9 @@ const findSloDefinitionsParamsSchema = t.partial({
     includeOutdatedOnly: toBooleanRt,
     tags: t.string,
     page: t.string,
+    enabledFilter: t.string,
+    sortField: t.union([t.literal('version'), t.literal('enabled')]),
+    sortOrder: t.union([t.literal('asc'), t.literal('desc')]),
     perPage: t.string,
   }),
 });
