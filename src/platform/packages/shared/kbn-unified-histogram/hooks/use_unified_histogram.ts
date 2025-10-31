@@ -115,7 +115,7 @@ const EMPTY_SUGGESTION_CONTEXT: UnifiedHistogramSuggestionContext = {
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [lensVisService, setLensVisService] = useState<LensVisService>();
 
-  const { stateProps, fetchParams, hasValidFetchParams, api } = useServicesBootstrap(props);
+  const { stateProps, fetch$, fetchParams, hasValidFetchParams, api } = useServicesBootstrap(props);
 
   // Load async services and initialize API
   useMount(async () => {
@@ -191,13 +191,14 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       ? {
           ...props,
           ...stateProps,
+          fetch$,
           fetchParams,
           chart,
           isChartAvailable,
           lensVisService,
         }
       : undefined;
-  }, [fetchParams, lensVisService, props, stateProps, chart, isChartAvailable]);
+  }, [fetch$, fetchParams, lensVisService, props, stateProps, chart, isChartAvailable]);
 
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({

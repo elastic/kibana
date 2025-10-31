@@ -30,6 +30,7 @@ import type {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
   UnifiedHistogramHitsContext,
   UnifiedHistogramRequestContext,
@@ -63,6 +64,7 @@ export interface UnifiedHistogramChartProps {
   renderCustomChartToggleActions?: () => ReactElement | undefined;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
+  fetch$: UnifiedHistogramFetch$;
   fetchParams: UnifiedHistogramFetchParams;
   lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined;
   dataLoading$: LensEmbeddableOutput['dataLoading$'] | undefined;
@@ -89,6 +91,7 @@ export function UnifiedHistogramChart({
   breakdown,
   lensVisService,
   renderCustomChartToggleActions,
+  fetch$,
   fetchParams,
   lensAdapters,
   dataLoading$,
@@ -136,7 +139,7 @@ export function UnifiedHistogramChart({
     request,
     hits,
     chartVisible,
-    fetchParams,
+    fetchParams, // TODO: use fetch$
     onTotalHitsChange,
   });
 
@@ -189,7 +192,7 @@ export function UnifiedHistogramChart({
   );
 
   const lensPropsContext = useLensProps({
-    request,
+    fetch$,
     fetchParams,
     lensVisService,
     onLoad,

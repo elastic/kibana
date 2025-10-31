@@ -116,7 +116,7 @@ export class LensVisService {
       },
       visContext: undefined,
     };
-    this.state$ = new BehaviorSubject<LensVisServiceState>(initialState); // TODO: can we remove the state$ altogether?
+    this.state$ = new BehaviorSubject<LensVisServiceState>(initialState);
     this.state = initialState;
 
     const stateSelector = stateSelectorFactory(this.state$);
@@ -188,7 +188,7 @@ export class LensVisService {
       visContext: lensAttributesState.visContext,
     };
 
-    this.state$.next(nextState); // TODO: can we remove the state$ altogether?
+    this.state$.next(nextState);
     this.state = nextState;
 
     this.prevUpdateContext = {

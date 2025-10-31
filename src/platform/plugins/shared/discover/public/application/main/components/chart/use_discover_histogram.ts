@@ -293,6 +293,7 @@ export const useDiscoverHistogram = (
         table: isEsqlMode ? table : undefined,
         externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       };
+      console.debug('Use Unified Histogram - triggering fetch', nextFetchParams);
       usedFetchParamsRef.current = nextFetchParams;
       unifiedHistogramApi?.fetch(nextFetchParams);
     }

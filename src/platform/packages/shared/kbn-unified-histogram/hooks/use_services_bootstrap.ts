@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { pick } from 'lodash';
 import { ReplaySubject } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
@@ -19,9 +18,17 @@ import { getBreakdownField } from '../utils/local_storage_utils';
 import { processFetchParams } from '../utils/process_fetch_params';
 
 export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
-  // TODO: should I remove fetch$ and keep only fetchParams?
   const [fetch$] = useState(() => new ReplaySubject<UnifiedHistogramFetchParams | undefined>(1));
-  const fetchParams = useObservable(fetch$);
+  const [fetchParams, setFetchParams] = useState<UnifiedHistogramFetchParams | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    if (fetchParams) {
+      // update the observable after fetchParams state is set
+      fetch$.next(fetchParams);
+    }
+  }, [fetchParams, fetch$]);
 
   const [stateService] = useState(() => {
     const { services, initialState, localStorageKeyPrefix } = props;
@@ -35,7 +42,7 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
   const [api] = useState<UnifiedHistogramApi>(() => ({
     fetch: (params) => {
       // console.log('UnifiedHistogramApi.fetch called with params:', params);
-      fetch$.next(processFetchParams({ params, services }));
+      setFetchParams(processFetchParams({ params, services }));
     },
     ...pick(
       stateService,

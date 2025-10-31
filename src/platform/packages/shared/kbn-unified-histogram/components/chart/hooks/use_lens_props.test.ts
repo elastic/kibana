@@ -8,128 +8,100 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { Subject } from 'rxjs';
-import type { UnifiedHistogramInputMessage } from '../../../types';
+import { ReplaySubject } from 'rxjs';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import type { UnifiedHistogramFetchParams, UnifiedHistogramFetch$ } from '../../../types';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { getLensVisMock } from '../../../__mocks__/lens_vis';
-import { getLensProps, useLensProps } from './use_lens_props';
+import { getFetchParamsMock } from '../../../__mocks__/fetch_params';
+import { useLensProps } from './use_lens_props';
 
 describe('useLensProps', () => {
   it('should return lens props', async () => {
-    const getTimeRange = jest.fn();
-    const fetch$ = new Subject<UnifiedHistogramInputMessage>();
+    const fetch$: UnifiedHistogramFetch$ = new ReplaySubject(1);
     const onLoad = jest.fn();
-    const query = {
-      language: 'kuery',
-      query: '',
-    };
-    const attributesContext = (
-      await getLensVisMock({
-        filters: [],
-        query,
-        columns: [],
-        isPlainRecord: false,
-        dataView: dataViewWithTimefieldMock,
-        timeInterval: 'auto',
-        breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-      })
-    ).visContext;
+    const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock();
+    const lensVisMock = await getLensVisMock({
+      filters: fetchParams.filters,
+      query: fetchParams.query,
+      columns: [],
+      isPlainRecord: fetchParams.isESQLQuery,
+      dataView: fetchParams.dataView,
+      timeInterval: 'auto',
+      breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+    });
+    fetchParams.externalVisContext = lensVisMock.visContext;
+
     const lensProps = renderHook(() => {
       return useLensProps({
-        request: {
-          searchSessionId: 'id',
-          adapter: undefined,
-        },
-        getTimeRange,
         fetch$,
-        visContext: attributesContext!,
+        fetchParams,
+        lensVisService: lensVisMock.lensService,
         onLoad,
       });
     });
     act(() => {
-      fetch$.next({ type: 'fetch' });
+      fetch$.next(fetchParams);
     });
-    expect(lensProps.result.current?.lensProps).toEqual(
-      getLensProps({
-        searchSessionId: 'id',
-        getTimeRange,
-        attributes: attributesContext!.attributes,
-        onLoad,
-      })
-    );
+    expect(lensProps.result.current?.lensProps).toMatchSnapshot();
   });
 
   it('should return lens props for text based languages', async () => {
-    const getTimeRange = jest.fn();
-    const fetch$ = new Subject<UnifiedHistogramInputMessage>();
+    const fetch$: UnifiedHistogramFetch$ = new ReplaySubject(1);
     const onLoad = jest.fn();
-    const query = {
-      language: 'kuery',
-      query: '',
-    };
-    const attributesContext = (
-      await getLensVisMock({
-        filters: [],
-        query,
-        columns: [],
-        isPlainRecord: false,
-        dataView: dataViewWithTimefieldMock,
-        timeInterval: 'auto',
-        breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-      })
-    ).visContext;
+    const query = { esql: 'FROM logs* | WHERE ??field >= ?otherVar' };
+    const esqlVariables: ESQLControlVariable[] = [
+      { key: 'field', value: 'variableColumn', type: ESQLVariableType.FIELDS },
+      { key: 'otherVar', value: 'someOtherValue', type: ESQLVariableType.VALUES },
+    ];
+    const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock({
+      query,
+      esqlVariables,
+    });
+    const lensVisMock = await getLensVisMock({
+      filters: fetchParams.filters,
+      query: fetchParams.query,
+      columns: [],
+      isPlainRecord: fetchParams.isESQLQuery,
+      dataView: fetchParams.dataView,
+      timeInterval: 'auto',
+      breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+    });
+    fetchParams.externalVisContext = lensVisMock.visContext;
+
     const lensProps = renderHook(() => {
       return useLensProps({
-        request: {
-          searchSessionId: 'id',
-          adapter: undefined,
-        },
-        getTimeRange,
         fetch$,
-        visContext: attributesContext!,
+        fetchParams,
+        lensVisService: lensVisMock.lensService,
         onLoad,
       });
     });
     act(() => {
-      fetch$.next({ type: 'fetch' });
+      fetch$.next(fetchParams);
     });
-    expect(lensProps.result.current?.lensProps).toEqual(
-      getLensProps({
-        searchSessionId: 'id',
-        getTimeRange,
-        attributes: attributesContext!.attributes,
-        onLoad,
-      })
-    );
+    expect(lensProps.result.current?.lensProps).toMatchSnapshot();
   });
 
   it('should only return lens props after fetch$ is triggered', async () => {
-    const getTimeRange = jest.fn();
-    const fetch$ = new Subject<UnifiedHistogramInputMessage>();
+    const fetch$: UnifiedHistogramFetch$ = new ReplaySubject(1);
     const onLoad = jest.fn();
-    const query = {
-      language: 'kuery',
-      query: '',
-    };
-    const attributesContext = (
-      await getLensVisMock({
-        filters: [],
-        query,
-        columns: [],
-        isPlainRecord: false,
-        dataView: dataViewWithTimefieldMock,
-        timeInterval: 'auto',
-        breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-      })
-    ).visContext;
+    const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock();
+    const lensVisMock = await getLensVisMock({
+      filters: fetchParams.filters,
+      query: fetchParams.query,
+      columns: [],
+      isPlainRecord: fetchParams.isESQLQuery,
+      dataView: fetchParams.dataView,
+      timeInterval: 'auto',
+      breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+    });
+    fetchParams.externalVisContext = lensVisMock.visContext;
+
     const lensProps = {
-      request: {
-        searchSessionId: '123',
-        adapter: undefined,
-      },
-      getTimeRange,
       fetch$,
-      visContext: attributesContext!,
+      fetchParams,
+      lensVisService: lensVisMock.lensService,
       onLoad,
     };
     const hook = renderHook(
@@ -139,10 +111,12 @@ describe('useLensProps', () => {
       { initialProps: lensProps }
     );
     expect(hook.result.current).toEqual(undefined);
-    hook.rerender({ ...lensProps, request: { searchSessionId: '456', adapter: undefined } });
+
+    const updatedFetchParams = { ...fetchParams, searchSessionId: '456' };
+    hook.rerender({ ...lensProps, fetchParams: updatedFetchParams });
     expect(hook.result.current).toEqual(undefined);
     act(() => {
-      fetch$.next({ type: 'fetch' });
+      fetch$.next(updatedFetchParams);
     });
     expect(hook.result.current).not.toEqual(undefined);
   });

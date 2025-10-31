@@ -26,7 +26,7 @@ import type {
   DatatableColumn,
   DefaultInspectorAdapters,
 } from '@kbn/expressions-plugin/common';
-import type { ReplaySubject, Subject } from 'rxjs';
+import type { ReplaySubject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -96,7 +96,6 @@ export interface UnifiedHistogramChartLoadEvent {
 /**
  * Context object for requests made by Unified Histogram components
  */
-// TODO: remove
 export interface UnifiedHistogramRequestContext {
   /**
    * Current search session ID
@@ -148,23 +147,6 @@ export interface UnifiedHistogramBreakdownContext {
   field?: DataViewField;
 }
 
-/**
- * Message to fetch the chart and total hits
- */
-export interface UnifiedHistogramFetchMessage {
-  type: 'fetch';
-}
-
-/**
- * Unified histogram input message
- */
-export type UnifiedHistogramInputMessage = UnifiedHistogramFetchMessage; // TODO: remove
-
-/**
- * Unified histogram input observable
- */
-export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>; // TODO: remove
-
 export enum UnifiedHistogramExternalVisContextStatus {
   unknown = 'unknown',
   applied = 'applied',
@@ -209,7 +191,7 @@ export interface UnifiedHistogramFetchParamsExternal {
   /**
    * The current search session ID
    */
-  searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
+  searchSessionId: UnifiedHistogramRequestContext['searchSessionId'];
   /**
    * The abort controller to use for requests
    */

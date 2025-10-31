@@ -12,7 +12,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { UnifiedHistogramFetchParams, UnifiedHistogramRequestContext } from '../../../types';
+import type { UnifiedHistogramFetch$, UnifiedHistogramFetchParams } from '../../../types';
 import { useStableCallback } from '../../../hooks/use_stable_callback';
 import type { LensVisService } from '../../../services/lens_vis_service';
 
@@ -30,12 +30,12 @@ export type LensProps = Pick<
 >;
 
 export const useLensProps = ({
-  request,
+  fetch$,
   fetchParams,
   lensVisService,
   onLoad,
 }: {
-  request: UnifiedHistogramRequestContext | undefined;
+  fetch$: UnifiedHistogramFetch$;
   fetchParams: UnifiedHistogramFetchParams;
   lensVisService: LensVisService;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
@@ -52,22 +52,29 @@ export const useLensProps = ({
     return {
       requestData: JSON.stringify(requestData),
       lensProps: getLensProps({
-        searchSessionId: request?.searchSessionId,
+        searchSessionId: fetchParams.searchSessionId,
         timeRange: fetchParams.timeRange,
         esqlVariables: fetchParams.esqlVariables,
         attributes,
         onLoad,
       }),
     };
-  }, [lensVisService, request?.searchSessionId, fetchParams, onLoad]);
+  }, [
+    lensVisService,
+    fetchParams.searchSessionId,
+    fetchParams.timeRange,
+    fetchParams.esqlVariables,
+    onLoad,
+  ]);
 
   // Initialize with undefined to avoid rendering Lens until a fetch has been triggered
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   useEffect(() => {
-    updateLensPropsContext();
-  }, [fetchParams.triggeredAt, updateLensPropsContext]);
+    const subscription = fetch$.subscribe(updateLensPropsContext);
+    return () => subscription.unsubscribe();
+  }, [fetch$, updateLensPropsContext]);
 
   return lensPropsContext;
 };
