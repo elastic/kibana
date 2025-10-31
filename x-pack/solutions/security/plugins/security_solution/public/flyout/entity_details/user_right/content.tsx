@@ -7,6 +7,7 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import type { UserItem } from '../../../../common/search_strategy';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -47,9 +48,15 @@ export const UserPanelContent = ({
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
 
+  const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
+    'entityDetailsHighlightsEnabled'
+  );
+
   return (
     <FlyoutBody>
-      <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
+      {isEntityDetailsHighlightsAIEnabled && (
+        <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
+      )}
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
