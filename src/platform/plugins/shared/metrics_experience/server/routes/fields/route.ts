@@ -12,6 +12,7 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import { isoToEpoch } from '@kbn/zod-helpers';
 import { parse as dateMathParse } from '@kbn/datemath';
 import { getMetricFields } from './get_metric_fields';
+import { filterFieldsByDataAvailability } from './filter_fields';
 import { createRoute } from '../create_route';
 import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
@@ -62,6 +63,47 @@ export const getFieldsRoute = createRoute({
   },
 });
 
+export const filterFieldsRoute = createRoute({
+  endpoint: 'POST /internal/metrics_experience/fields/filter',
+  security: { authz: { requiredPrivileges: ['read'] } },
+  params: z.object({
+    body: z.object({
+      fields: z.array(z.object({ name: z.string(), index: z.string() })),
+      kuery: z.string(),
+      to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
+      from: z
+        .string()
+        .datetime()
+        .default(dateMathParse('now-15m', { roundUp: true })!.toISOString())
+        .transform(isoToEpoch),
+    }),
+  }),
+  handler: async ({ context, params, logger }) => {
+    const { elasticsearch, featureFlags } = await context.core;
+    await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
+
+    const esClient = elasticsearch.client.asCurrentUser;
+    const { from, to, kuery, fields } = params.body;
+
+    const filteredFields = await filterFieldsByDataAvailability({
+      esClient: createTracedEsClient({
+        logger,
+        client: esClient,
+        plugin: 'metrics_experience',
+      }),
+      fields,
+      timerange: { from, to },
+      kuery,
+      logger,
+    });
+
+    return {
+      fields: filteredFields,
+    };
+  },
+});
+
 export const fieldsRoutes = {
   ...getFieldsRoute,
+  ...filterFieldsRoute,
 };

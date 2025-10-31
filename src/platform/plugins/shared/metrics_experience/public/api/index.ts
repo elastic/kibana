@@ -66,6 +66,16 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
         },
         signal,
       }),
+    filterFields: (
+      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/fields/filter'>['params']['body'],
+      signal?: AbortSignal | null
+    ) =>
+      request('POST /internal/metrics_experience/fields/filter', {
+        params: {
+          body: params,
+        },
+        signal,
+      }),
     getIndexPatternMetadata(
       {
         indexPattern,

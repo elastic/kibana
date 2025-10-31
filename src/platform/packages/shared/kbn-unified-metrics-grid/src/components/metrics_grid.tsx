@@ -34,7 +34,6 @@ export type MetricsGridProps = Pick<
   columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
   fields: MetricField[];
-  onCellLoad: (fieldName: string, hasData: boolean) => void;
 };
 
 const getItemKey = (metric: MetricField, index: number) => {
@@ -52,7 +51,6 @@ export const MetricsGrid = ({
   requestParams,
   discoverFetch$,
   searchTerm,
-  onCellLoad,
   filters = [],
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
@@ -117,13 +115,6 @@ export const MetricsGrid = ({
     return { current: null };
   }, [expandedMetric]);
 
-  const handleOnCellLoad = useCallback(
-    (metricName: string, hasData: boolean) => {
-      onCellLoad(metricName, hasData);
-    },
-    [onCellLoad]
-  );
-
   if (fields.length === 0) {
     return <EmptyState />;
   }
@@ -162,7 +153,7 @@ export const MetricsGrid = ({
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
 
             return (
-              <EuiFlexItem key={id}>
+              <EuiFlexItem key={index}>
                 <ChartItem
                   id={id}
                   index={index}
@@ -184,7 +175,6 @@ export const MetricsGrid = ({
                   onFocusCell={handleFocusCell}
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
-                  onCellLoad={handleOnCellLoad}
                 />
               </EuiFlexItem>
             );
@@ -221,7 +211,6 @@ interface ChartItemProps
   searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metric: MetricField) => void;
-  onCellLoad: (metricName: string, hasData: boolean) => void;
 }
 
 const ChartItem = React.memo(
@@ -247,7 +236,6 @@ const ChartItem = React.memo(
         searchTerm,
         onFocusCell,
         onViewDetails,
-        onCellLoad,
       }: ChartItemProps,
       ref
     ) => {
@@ -275,13 +263,6 @@ const ChartItem = React.memo(
         [index, esqlQuery, metric, onViewDetails]
       );
 
-      const handleOnLoad = useCallback(
-        (title: string, hasData: boolean) => {
-          onCellLoad(title, hasData);
-        },
-        [onCellLoad]
-      );
-
       return (
         <A11yGridCell
           id={id}
@@ -306,7 +287,6 @@ const ChartItem = React.memo(
             title={metric.name}
             chartLayers={chartLayers}
             titleHighlight={searchTerm}
-            onLoad={handleOnLoad}
           />
         </A11yGridCell>
       );

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
@@ -21,7 +21,6 @@ export type LensWrapperProps = {
   onCopyToDashboard?: () => void;
   syncTooltips?: boolean;
   syncCursor?: boolean;
-  onLoad?: (title: string, hasData: boolean) => void;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
@@ -37,7 +36,6 @@ export function LensWrapper({
   onCopyToDashboard,
   syncTooltips,
   syncCursor,
-  onLoad: onChartDataChange,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -80,24 +78,6 @@ export function LensWrapper({
     viewDetails: onViewDetails ? { onClick: onViewDetails } : undefined,
   });
 
-  const handleLoad = useCallback(
-    (isLoading: boolean, adapters?: any) => {
-      // Only process when data has finished loading
-      if (!isLoading && adapters) {
-        // Check if chart has data by examining the tables adapter
-        const tables = adapters?.tables?.tables;
-        const chartHasData = Boolean(
-          tables &&
-            Object.keys(tables).length > 0 &&
-            Object.values(tables).some((table: any) => table?.rows?.length > 0)
-        );
-
-        onChartDataChange?.(lensProps.attributes.title, chartHasData);
-      }
-    },
-    [onChartDataChange, lensProps.attributes.title]
-  );
-
   return (
     <div css={chartCss}>
       <ChartTitle highlight={titleHighlight} title={lensProps.attributes.title} />
@@ -112,7 +92,6 @@ export function LensWrapper({
         onFilter={onFilter}
         syncTooltips={syncTooltips}
         syncCursor={syncCursor}
-        onLoad={handleLoad}
       />
     </div>
   );
