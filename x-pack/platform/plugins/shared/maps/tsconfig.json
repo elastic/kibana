@@ -96,6 +96,7 @@
     "@kbn/scout",
     "@kbn/react-kibana-mount",
     "@kbn/css-utils",
+    "@kbn/presentation-util",
     "@kbn/licensing-types",
     "@kbn/es-query-server",
     "@kbn/data-service-server",
