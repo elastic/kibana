@@ -35,7 +35,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
 }
 
 .c2 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -79,7 +79,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
 
   .c5 .euiPagination::before {
     bottom: 0;
-    color: #515761;
+    color: #1D2A3E;
     content: '\\2026';
     font-size: 14px;
     padding: 5px 8px;
