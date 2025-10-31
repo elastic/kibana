@@ -1253,7 +1253,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const agentPolicies: AgentPolicy[] = [];
 
     for (const policyId of packagePolicyUpdate.policy_ids) {
-      const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+      const agentPolicy = await agentPolicyService.get(soClient, policyId, false);
       if (!agentPolicy) {
         throw new AgentPolicyNotFoundError('Agent policy not found');
       }
