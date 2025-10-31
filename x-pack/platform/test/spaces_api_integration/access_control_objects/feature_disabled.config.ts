@@ -23,7 +23,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   return {
-    testFiles: [resolve(__dirname, './apis/spaces/feature_disabled.ts')],
+    testFiles: [
+      resolve(__dirname, './apis/spaces/feature_disabled.ts'),
+      resolve(__dirname, './apis/spaces/feature_disabled_with_objects.ts'),
+    ],
     services: {
       ...kibanaAPITestsConfig.get('services'),
       ...xPackAPITestsConfig.get('services'),
