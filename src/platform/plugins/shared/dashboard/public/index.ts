@@ -17,6 +17,7 @@ export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';
 export type { DashboardStart } from './plugin';
+export type { DashboardState } from '../common/types';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
@@ -30,6 +31,19 @@ export {
 export { DASHBOARD_APP_ID } from '../common/constants';
 export { cleanEmptyKeys, DashboardAppLocatorDefinition } from '../common/locator/locator';
 export { getDashboardLocatorParamsFromEmbeddable } from '../common/locator/get_dashboard_locator_params';
+
+export type {
+  DashboardAttributes,
+  DashboardGetIn,
+  DashboardSearchIn,
+  DashboardSearchOptions,
+  DashboardSearchAPIResult,
+  DashboardGetOut,
+  DashboardSearchOut,
+  DashboardAPIGetOut,
+} from '../server/content_management';
+
+export { CONTENT_ID as DASHBOARD_CONTENT_ID } from '../common/content_management/constants';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
