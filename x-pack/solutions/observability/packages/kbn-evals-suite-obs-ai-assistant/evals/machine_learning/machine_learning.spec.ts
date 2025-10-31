@@ -20,7 +20,7 @@ import { evaluate } from '../../src/evaluate';
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
 
-evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
+evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
   const TEST_INDEX = 'my-index-000001';
   const TEST_JOB_ID = 'test-job-anomaly-detection';
   const TEST_DATAFEED_ID = `datafeed-${TEST_JOB_ID}`;
@@ -29,6 +29,7 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
   const TEST_DATAFEED_ID_2 = `datafeed-${TEST_JOB_ID_2}`;
   let jobs: MlGetJobsResponse = { count: 0, jobs: [] };
   let jobIds: string[] = [];
+
   evaluate.beforeAll(async ({ apmSynthtraceEsClient, kbnClient, esClient, log }) => {
     await cleanupMachineLearningJobs({ esClient, log });
     await esClient.indices.delete({ index: TEST_INDEX, ignore_unavailable: true });
