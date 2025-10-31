@@ -23,7 +23,6 @@ import {
   getDashboardListResultAPISchema,
   getDashboardUpdateResultSchema,
 } from '../content_management/v1/schema';
-import { rest } from 'lodash';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
