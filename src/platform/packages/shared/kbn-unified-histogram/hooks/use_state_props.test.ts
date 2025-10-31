@@ -25,6 +25,7 @@ import type {
 } from '../services/state_service';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
+import { getFetchParamsMock } from '../__mocks__/fetch_params';
 
 describe('useStateProps', () => {
   const initialState: UnifiedHistogramState = {
@@ -54,17 +55,20 @@ describe('useStateProps', () => {
 
   it('should return the correct props', () => {
     const stateService = getStateService({ initialState });
+    const fetchParams = getFetchParamsMock({
+      dataView: dataViewWithTimefieldMock,
+      query: { language: 'kuery', query: '' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      columns: undefined,
+    });
     const { result } = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
         localStorageKeyPrefix: undefined,
         stateService,
-        dataView: dataViewWithTimefieldMock,
-        query: { language: 'kuery', query: '' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        columns: undefined,
-        breakdownField: undefined,
+        fetchParams,
+        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
         onVisContextChanged: undefined,
       })
@@ -83,7 +87,6 @@ describe('useStateProps', () => {
           "status": "uninitialized",
           "total": undefined,
         },
-        "isPlainRecord": false,
         "lensAdapters": Object {
           "tables": Object {
             "tables": Object {
@@ -146,17 +149,20 @@ describe('useStateProps', () => {
 
   it('should return the correct props when an ES|QL query is used', () => {
     const stateService = getStateService({ initialState });
+    const fetchParams = getFetchParamsMock({
+      dataView: dataViewWithTimefieldMock,
+      query: { esql: 'FROM index' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      columns: undefined,
+    });
     const { result } = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
         localStorageKeyPrefix: undefined,
         stateService,
-        dataView: dataViewWithTimefieldMock,
-        query: { esql: 'FROM index' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        columns: undefined,
-        breakdownField: undefined,
+        fetchParams,
+        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
         onVisContextChanged: undefined,
       })
@@ -175,7 +181,6 @@ describe('useStateProps', () => {
           "status": "uninitialized",
           "total": undefined,
         },
-        "isPlainRecord": true,
         "lensAdapters": Object {
           "tables": Object {
             "tables": Object {
@@ -237,7 +242,6 @@ describe('useStateProps', () => {
 
     expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
     expect(result.current.breakdown).toStrictEqual({ field: undefined });
-    expect(result.current.isPlainRecord).toBe(true);
   });
 
   it('should return the correct props when an ES|QL query is used with transformational commands', () => {
@@ -247,24 +251,26 @@ describe('useStateProps', () => {
         currentSuggestionContext: undefined,
       },
     });
+    const fetchParams = getFetchParamsMock({
+      dataView: dataViewWithTimefieldMock,
+      query: { esql: 'FROM index | keep field1' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      columns: undefined,
+    });
     const { result } = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
         localStorageKeyPrefix: undefined,
         stateService,
-        dataView: dataViewWithTimefieldMock,
-        query: { esql: 'FROM index | keep field1' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        columns: undefined,
-        breakdownField: undefined,
+        fetchParams,
+        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
         onVisContextChanged: undefined,
       })
     );
     expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
     expect(result.current.breakdown).toBe(undefined);
-    expect(result.current.isPlainRecord).toBe(true);
   });
 
   it('should return the correct props when an ES|QL query is used with breakdown field', () => {
@@ -287,17 +293,21 @@ describe('useStateProps', () => {
         currentSuggestionContext: undefined,
       },
     });
+    const fetchParams = getFetchParamsMock({
+      dataView: dataViewWithTimefieldMock,
+      query: { esql: 'FROM index' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      columns: esqlColumns,
+      breakdownField,
+    });
     const { result } = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
         localStorageKeyPrefix: undefined,
         stateService,
-        dataView: dataViewWithTimefieldMock,
-        query: { esql: 'FROM index' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        columns: esqlColumns,
-        breakdownField,
+        fetchParams,
+        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
         onVisContextChanged: undefined,
       })
@@ -330,17 +340,20 @@ describe('useStateProps', () => {
         currentSuggestionContext: undefined,
       },
     });
+    const fetchParams = getFetchParamsMock({
+      dataView: dataViewWithTimefieldMock,
+      query: { esql: 'FROM index' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      columns: esqlColumns,
+    });
     const { result } = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
         localStorageKeyPrefix: undefined,
         stateService,
-        dataView: dataViewWithTimefieldMock,
-        query: { esql: 'FROM index' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        columns: esqlColumns,
-        breakdownField: undefined,
+        fetchParams,
+        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
         onVisContextChanged: undefined,
       })
@@ -353,20 +366,23 @@ describe('useStateProps', () => {
 
   it('should return the correct props when a rollup data view is used', () => {
     const stateService = getStateService({ initialState });
+    const fetchParams = getFetchParamsMock({
+      dataView: {
+        ...dataViewWithTimefieldMock,
+        type: DataViewType.ROLLUP,
+      } as DataView,
+      query: { language: 'kuery', query: '' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      columns: undefined,
+    });
     const { result } = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
         localStorageKeyPrefix: undefined,
         stateService,
-        dataView: {
-          ...dataViewWithTimefieldMock,
-          type: DataViewType.ROLLUP,
-        } as DataView,
-        query: { language: 'kuery', query: '' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        columns: undefined,
-        breakdownField: undefined,
+        fetchParams,
+        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
         onVisContextChanged: undefined,
       })
@@ -380,7 +396,6 @@ describe('useStateProps', () => {
           "status": "uninitialized",
           "total": undefined,
         },
-        "isPlainRecord": false,
         "lensAdapters": Object {
           "tables": Object {
             "tables": Object {
@@ -443,17 +458,20 @@ describe('useStateProps', () => {
 
   it('should return the correct props when a non time based data view is used', () => {
     const stateService = getStateService({ initialState });
+    const fetchParams = getFetchParamsMock({
+      dataView: dataViewMock,
+      query: { language: 'kuery', query: '' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      columns: undefined,
+    });
     const { result } = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
         localStorageKeyPrefix: undefined,
         stateService,
-        dataView: dataViewMock,
-        query: { language: 'kuery', query: '' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        columns: undefined,
-        breakdownField: undefined,
+        fetchParams,
+        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
         onVisContextChanged: undefined,
       })
@@ -467,7 +485,6 @@ describe('useStateProps', () => {
           "status": "uninitialized",
           "total": undefined,
         },
-        "isPlainRecord": false,
         "lensAdapters": Object {
           "tables": Object {
             "tables": Object {
@@ -530,17 +547,20 @@ describe('useStateProps', () => {
 
   it('should execute callbacks correctly', async () => {
     const stateService = getStateService({ initialState });
+    const fetchParams = getFetchParamsMock({
+      dataView: dataViewWithTimefieldMock,
+      query: { language: 'kuery', query: '' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      columns: undefined,
+    });
     const { result } = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
         localStorageKeyPrefix: undefined,
         stateService,
-        dataView: dataViewWithTimefieldMock,
-        query: { language: 'kuery', query: '' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        columns: undefined,
-        breakdownField: undefined,
+        fetchParams,
+        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
         onVisContextChanged: undefined,
       })
@@ -608,17 +628,20 @@ describe('useStateProps', () => {
 
   it('should clear lensRequestAdapter when chart is hidden', () => {
     const stateService = getStateService({ initialState });
+    const fetchParams = getFetchParamsMock({
+      dataView: dataViewWithTimefieldMock,
+      query: { language: 'kuery', query: '' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      columns: undefined,
+    });
     const hook = renderHook(() =>
       useStateProps({
         services: unifiedHistogramServicesMock,
         localStorageKeyPrefix: undefined,
         stateService,
-        dataView: dataViewWithTimefieldMock,
-        query: { language: 'kuery', query: '' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        columns: undefined,
-        breakdownField: undefined,
+        fetchParams,
+        initialBreakdownField: undefined,
         onBreakdownFieldChange: undefined,
         onVisContextChanged: undefined,
       })
@@ -634,16 +657,19 @@ describe('useStateProps', () => {
 
   it('should clear lensRequestAdapter when chart is undefined', () => {
     const stateService = getStateService({ initialState });
-    const initialProps = {
-      services: unifiedHistogramServicesMock,
-      localStorageKeyPrefix: undefined,
-      stateService,
+    const fetchParams = getFetchParamsMock({
       dataView: dataViewWithTimefieldMock,
       query: { language: 'kuery', query: '' },
       requestAdapter: new RequestAdapter(),
       searchSessionId: '123',
       columns: undefined,
-      breakdownField: undefined,
+    });
+    const initialProps = {
+      services: unifiedHistogramServicesMock,
+      localStorageKeyPrefix: undefined,
+      stateService,
+      fetchParams,
+      initialBreakdownField: undefined,
       onBreakdownFieldChange: undefined,
       onVisContextChanged: undefined,
     };
@@ -654,7 +680,10 @@ describe('useStateProps', () => {
     expect(stateService.setLensRequestAdapter).not.toHaveBeenCalled();
     hook.rerender({
       ...initialProps,
-      dataView: dataViewMock,
+      fetchParams: {
+        ...fetchParams,
+        dataView: dataViewMock,
+      },
     });
     expect(stateService.setLensRequestAdapter).toHaveBeenLastCalledWith(undefined);
   });
