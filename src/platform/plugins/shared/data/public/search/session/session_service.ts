@@ -369,7 +369,7 @@ export class SessionService {
     });
 
     return {
-      complete: (response) => {
+      complete: () => {
         const state = this.isCurrentSession(sessionId)
           ? this.state
           : this.sessionSnapshots.get(sessionId!);
@@ -385,13 +385,6 @@ export class SessionService {
         // when search completes and session has just been saved,
         // trigger polling once again to save search into a session and extend its keep_alive
         if (this.isStored(state)) {
-          const searchSessionSavedObject = state.get().searchSessionSavedObject;
-          if (searchSessionSavedObject && response) {
-            this.searchSessionEBTManager?.trackBgsCompleted({
-              response,
-              session: searchSessionSavedObject,
-            });
-          }
           const search = state.selectors.getSearch(searchDescriptor);
           if (search && !search.searchMeta.isStored) {
             search.searchDescriptor.poll().catch((e) => {
@@ -401,7 +394,7 @@ export class SessionService {
           }
         }
       },
-      error: (error) => {
+      error: () => {
         const state = this.isCurrentSession(sessionId)
           ? this.state
           : this.sessionSnapshots.get(sessionId!);
@@ -410,14 +403,6 @@ export class SessionService {
             `SearchSessionService trackSearch error: sessionId not found: "${sessionId}"`
           );
           return;
-        }
-
-        const searchSessionSavedObject = state.get().searchSessionSavedObject;
-        if (searchSessionSavedObject && error) {
-          this.searchSessionEBTManager?.trackBgsError({
-            session: searchSessionSavedObject,
-            error,
-          });
         }
 
         state.transitions.errorSearch(searchDescriptor);
