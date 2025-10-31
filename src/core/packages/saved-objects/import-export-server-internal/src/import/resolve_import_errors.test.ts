@@ -43,9 +43,6 @@ import {
   resolveSavedObjectsImportErrors,
   type ResolveSavedObjectsImportErrorsOptions,
 } from './resolve_import_errors';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-
-const request = httpServerMock.createKibanaRequest();
 
 describe('#importSavedObjectsFromStream', () => {
   beforeEach(() => {
@@ -197,7 +194,6 @@ describe('#importSavedObjectsFromStream', () => {
         filter,
         supportedTypes,
         typeRegistry,
-        request,
       };
       expect(mockCollectSavedObjects).toHaveBeenCalledWith(mockCollectSavedObjectsOptions);
     });

@@ -93,30 +93,6 @@ export const performCheckConflicts = async <T>(
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
 
-  // const accessControlObjectsToAuthorize: AuthorizeObject[] = [];
-  // for (const doc of bulkGetResponse?.body.docs ?? []) {
-  //   if (isMgetDoc(doc) && doc.found) {
-  //     const docSource = doc as SavedObjectsRawDoc;
-  //     if (docSource?._source.accessControl) {
-  //       accessControlObjectsToAuthorize.push({
-  //         type: docSource._source.type,
-  //         id: doc._id.substring(docSource._source.type.length + 1),
-  //         ...(docSource._source.name && { name: docSource._source.name }),
-  //         accessControl: docSource._source.accessControl,
-  //       });
-  //     }
-  //   }
-  // }
-
-  // const { typesRequiringAccessControl, results } =
-  //   securityExtension?.getTypesRequiringAccessControlCheck(accessControlObjectsToAuthorize);
-
-  // const authzObjects = ???
-  // const accessAuthz = securityExtension?.authorizeChangeAccessControl(
-  //   { objects: authzObjects, namespace },
-  //   'changeOwnership'
-  // );
-
   const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
   expectedBulkGetResults.forEach((expectedResult) => {
     // Unsupported type
@@ -128,14 +104,13 @@ export const performCheckConflicts = async <T>(
     const { type, id, esRequestIndex } = expectedResult.value;
     const doc = bulkGetResponse?.body.docs[esRequestIndex];
     if (isMgetDoc(doc) && doc.found) {
-      // Check here for access control did the object require manage access control?
       errors.push({
         id,
         type,
         error: {
           ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
           ...(!rawDocExistsInNamespace(registry, doc! as SavedObjectsRawDoc, namespace) && {
-            metadata: { isNotOverwritable: true }, // is also unoverwritable if owned by another user and current user does not have manage_access_control in this space
+            metadata: { isNotOverwritable: true },
           }),
         },
       });

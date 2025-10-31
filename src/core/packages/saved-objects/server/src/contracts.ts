@@ -31,7 +31,6 @@ import type {
 import type { SavedObjectsExtensions } from './extensions/extensions';
 
 export interface SavedObjectsAccessControlTransforms {
-  // exportTransform: SavedObjectsExportTransform;
   createImportTransforms: AccessControlImportTransformsFactory;
 }
 

@@ -404,7 +404,6 @@ export class SavedObjectsService
           typeRegistry: this.typeRegistry,
           exportSizeLimit: this.config!.maxImportExportSize,
           logger: this.logger.get('exporter'),
-          // accessControlExportTransform: this.accessControlTransforms?.exportTransform,
         }),
       createImporter: (savedObjectsClient, options) =>
         new SavedObjectsImporter({

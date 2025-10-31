@@ -427,7 +427,6 @@ describe('SavedObjectsService', () => {
           const setup = await soService.setup(createSetupDeps());
 
           const accessControlTransforms: SavedObjectsAccessControlTransforms = {
-            // exportTransform: jest.fn(),
             createImportTransforms: jest.fn(),
           };
 
@@ -435,11 +434,11 @@ describe('SavedObjectsService', () => {
 
           const request = httpServerMock.createKibanaRequest();
           const start = await soService.start(createStartDeps());
-          start.createExporter(start.getScopedClient(request));
+          start.createImporter(start.getScopedClient(request));
 
           expect(SavedObjectsImportExportModule.SavedObjectsImporter).toHaveBeenCalledWith(
             expect.objectContaining({
-              accessControlExportTransform: accessControlTransforms.createImportTransforms,
+              createAccessControlImportTransforms: accessControlTransforms.createImportTransforms,
             })
           );
         });

@@ -290,7 +290,7 @@ describe('collectSavedObjects()', () => {
       ];
       const importStateMap = new Map([
         [`a:1`, {}], // a:1 is included because it is present in the collected objects
-        [`b:2`, {}], // b:2 is included because it is presen in the collected objects
+        [`b:2`, {}], // b:2 is included because it is present in the collected objects
         [`c:3`, { isOnlyReference: true }], // c:3 is included because b:2 has a reference to c:3, but this is marked as `isOnlyReference` because c:3 is not present in the collected objects
       ]);
       expect(result).toEqual({ collectedObjects, errors: [], importStateMap });

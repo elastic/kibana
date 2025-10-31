@@ -86,7 +86,6 @@ export async function importSavedObjectsFromStream({
   compatibilityMode,
   managed,
   log,
-  // request,
   createAccessControlImportTransforms,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
   log.debug(
