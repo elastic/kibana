@@ -35,7 +35,7 @@ export interface SearchDashboardsResponse {
 
 export type FindDashboardsByIdResponse = { id: string } & (
   | { status: 'success'; attributes: DashboardState; references: Reference[] }
-  | { status: 'error'; error: Error }
+  | { status: 'error'; notFound: boolean; error: Error }
 );
 
 export interface FindDashboardsService {

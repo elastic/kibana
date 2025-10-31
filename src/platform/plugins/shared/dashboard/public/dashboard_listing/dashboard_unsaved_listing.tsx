@@ -23,7 +23,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { DashboardState } from '../../server';
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
@@ -182,7 +181,7 @@ export const DashboardUnsavedListing = ({
       const newItems = results.reduce((map, result) => {
         if (result.status === 'error') {
           hasError = true;
-          if (result.error instanceof SavedObjectNotFound) {
+          if (result.error && result.notFound) {
             // Save object not found error
             dashboardBackupService.clearState(result.id);
           }

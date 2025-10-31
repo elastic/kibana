@@ -8,6 +8,7 @@
  */
 
 import { asyncMap } from '@kbn/std';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { dashboardClient } from './dashboard_client';
 import type { FindDashboardsByIdResponse } from './types';
 
@@ -22,7 +23,7 @@ export const findService = {
         references: result.data.references ?? [],
       };
     } catch (error) {
-      return { id, status: 'error', error };
+      return { id, status: 'error', notFound: error instanceof SavedObjectNotFound, error };
     }
   },
   findByIds: async (ids: string[]) => {
