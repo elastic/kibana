@@ -451,7 +451,7 @@ export default function ({ getService }: FtrProviderContext) {
             false, // createNewCopies = false
             200
           );
-          const results = importResponse.text.split('\n').map((str) => JSON.parse(str));
+          const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
           expect(Array.isArray(results)).to.be(true);
           expect(results.length).to.be(1);
           const result = results[0];
@@ -568,7 +568,7 @@ export default function ({ getService }: FtrProviderContext) {
             false, // createNewCopies = false
             403 // entire import fails
           );
-          const results = importResponse.text.split('\n').map((str) => JSON.parse(str));
+          const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
           expect(Array.isArray(results)).to.be(true);
           expect(results.length).to.be(1);
           expect(results[0]).to.have.property('statusCode', 403);
@@ -864,7 +864,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const results = response.text.split('\n').map((str) => JSON.parse(str));
+        const results = response.text.split('\n').map((str: string) => JSON.parse(str));
         expect(Array.isArray(results)).to.be(true);
         expect(results.length).to.be(3);
 
@@ -980,7 +980,7 @@ export default function ({ getService }: FtrProviderContext) {
           200
         );
 
-        const results = importResponse.text.split('\n').map((str) => JSON.parse(str));
+        const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
         expect(Array.isArray(results)).to.be(true);
         expect(results.length).to.be(1);
         const result = results[0];
@@ -1101,7 +1101,7 @@ export default function ({ getService }: FtrProviderContext) {
           false, // createNewCopies = false
           200
         );
-        const results = importResponse.text.split('\n').map((str) => JSON.parse(str));
+        const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
         expect(Array.isArray(results)).to.be(true);
         expect(results.length).to.be(1);
         const result = results[0];
@@ -1235,7 +1235,7 @@ export default function ({ getService }: FtrProviderContext) {
           200
         );
 
-        const results = importResponse.text.split('\n').map((str) => JSON.parse(str));
+        const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
         expect(Array.isArray(results)).to.be(true);
         expect(results.length).to.be(1);
         const result = results[0];
@@ -1367,7 +1367,7 @@ export default function ({ getService }: FtrProviderContext) {
           200
         );
 
-        const results = importResponse.text.split('\n').map((str) => JSON.parse(str));
+        const results = importResponse.text.split('\n').map((str: string) => JSON.parse(str));
         expect(Array.isArray(results)).to.be(true);
         expect(results.length).to.be(1);
         const result = results[0];
