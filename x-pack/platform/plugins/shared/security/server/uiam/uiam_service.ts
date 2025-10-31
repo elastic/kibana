@@ -217,7 +217,7 @@ export class UiamService implements UiamServicePublic {
           body: JSON.stringify({
             description: name,
             internal: true,
-            expiration,
+            ...(expiration ? { expiration } : {}),
             role_assignments: {
               limit: {
                 access: ['application'],

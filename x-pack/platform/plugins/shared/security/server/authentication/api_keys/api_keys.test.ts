@@ -673,9 +673,8 @@ describe('API Keys', () => {
         mockLicense.isEnabled.mockReturnValue(true);
         mockUiam.grantApiKey.mockResolvedValue({
           id: 'api-key-id',
-          name: 'test_api_key',
-          api_key: 'encoded-key-value',
-          expiration: 1234567890,
+          key: 'encoded-key-value',
+          description: 'test_api_key',
         });
 
         const result = await apiKeys.grantAsInternalUser(
@@ -693,9 +692,13 @@ describe('API Keys', () => {
           id: 'api-key-id',
           name: 'test_api_key',
           api_key: 'encoded-key-value',
-          expiration: 1234567890,
         });
-        expect(mockUiam.grantApiKey).toHaveBeenCalledWith('Bearer', 'essu_access_token');
+        expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
+          'Bearer',
+          'essu_access_token',
+          'test_api_key',
+          undefined
+        );
         expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
       });
 
@@ -703,8 +706,8 @@ describe('API Keys', () => {
         mockLicense.isEnabled.mockReturnValue(true);
         mockUiam.grantApiKey.mockResolvedValue({
           id: 'api-key-id',
-          name: 'test_api_key',
-          api_key: 'encoded-key-value',
+          key: 'encoded-key-value',
+          description: 'test_api_key',
         });
 
         const prefixedCredential = 'essu_api_key';
@@ -724,7 +727,12 @@ describe('API Keys', () => {
           name: 'test_api_key',
           api_key: 'encoded-key-value',
         });
-        expect(mockUiam.grantApiKey).toHaveBeenCalledWith('ApiKey', prefixedCredential);
+        expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
+          'ApiKey',
+          prefixedCredential,
+          'test_api_key',
+          undefined
+        );
         expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
       });
 
@@ -744,7 +752,7 @@ describe('API Keys', () => {
 
         expect(result).toEqual({
           id: 'same_api_key_id',
-          name: 'same_api_key_name',
+          name: 'test_api_key',
           api_key: 'regular_token',
         });
         expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
@@ -827,7 +835,12 @@ describe('API Keys', () => {
             true
           )
         ).rejects.toThrowError('UIAM service error');
-        expect(mockUiam.grantApiKey).toHaveBeenCalledWith('Bearer', 'essu_access_token');
+        expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
+          'Bearer',
+          'essu_access_token',
+          'test_api_key',
+          undefined
+        );
         expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
       });
     });

@@ -24,9 +24,8 @@ export const uiamServiceMock = {
     invalidateSessionTokens: jest.fn().mockResolvedValue(undefined),
     grantApiKey: jest.fn().mockResolvedValue({
       id: 'mock-api-key-id',
-      name: 'mock-api-key-name',
-      api_key: 'mock-api-key-value',
-      expiration: Date.now() + 86400000,
+      key: 'mock-api-key-value',
+      description: 'mock-api-key-name',
     }),
   }),
 };

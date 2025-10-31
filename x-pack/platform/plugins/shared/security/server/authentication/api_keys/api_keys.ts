@@ -279,7 +279,6 @@ export class APIKeys implements APIKeysType {
       );
     }
 
-    let result: GrantAPIKeyResult;
     const { expiration, metadata, name } = createParams;
 
     if (isForUiam) {
@@ -313,6 +312,7 @@ export class APIKeys implements APIKeysType {
     );
 
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
+    let result: GrantAPIKeyResult;
     try {
       result = await this.clusterClient.asInternalUser.security.grantApiKey(params);
       this.logger.debug('API key was granted successfully');

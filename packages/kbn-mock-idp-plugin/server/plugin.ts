@@ -232,12 +232,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               isForUiam
             );
 
-            if (!result) {
-              return response.badRequest({
-                body: { message: 'API keys are not available or disabled' },
-              });
-            }
-
             return response.ok({
               body: result,
             });
