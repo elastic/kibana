@@ -13,7 +13,6 @@ import type { Filter } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import { useBulkAddEventsToCaseActions } from '../../../cases/components/case_events/use_bulk_event_actions';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -80,8 +79,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   tableId,
 }) => {
   let ACTION_BUTTON_COUNT = MAX_ACTION_BUTTON_COUNT;
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -195,9 +192,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           filterQuery={filterQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
-          sourcererScopeId={
-            newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
-          }
+          sourcererScopeId={SourcererScopeName.explore}
         />
       )}
       <StatefulEventsViewer
@@ -208,9 +203,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={
-          newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
-        }
+        sourcererScope={SourcererScopeName.explore}
         tableId={tableId}
         unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}

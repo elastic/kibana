@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover } from '@elastic/eui';
 import { StyledEuiButtonIcon } from './styles';
 import { useColors } from '../use_colors';
-import { Sourcerer } from '../../../sourcerer/components';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
 const nodeLegendButtonTitle = i18n.translate(
@@ -33,8 +31,6 @@ export const SourcererButton = memo(
     setActivePopover: (value: 'sourcererSelection') => void;
     isOpen: boolean;
   }) => {
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
     const setAsActivePopover = useCallback(() => {
       setActivePopover('sourcererSelection');
     }, [setActivePopover]);
@@ -59,11 +55,7 @@ export const SourcererButton = memo(
         closePopover={closePopover}
         anchorPosition="leftCenter"
       >
-        {newDataViewPickerEnabled ? (
-          <DataViewPicker scope={SourcererScopeName.analyzer} onClosePopover={closePopover} />
-        ) : (
-          <Sourcerer scope={SourcererScopeName.analyzer} />
-        )}
+        <DataViewPicker scope={SourcererScopeName.analyzer} onClosePopover={closePopover} />
       </EuiPopover>
     );
   }

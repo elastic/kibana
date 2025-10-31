@@ -22,15 +22,6 @@ import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { AlertTableCellContextProvider } from './cell_value_context';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    browserFields: {},
-    defaultIndex: 'defaultIndex',
-    loading: false,
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';

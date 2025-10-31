@@ -13,7 +13,6 @@ import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
@@ -28,7 +27,6 @@ import { useTimelineEvents } from '../../../../containers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
@@ -79,33 +77,12 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 
   const { telemetry } = useKibana().services;
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const {
-    dataViewId: oldDataViewId,
-    sourcererDataView: oldSourcererDataViewSpec,
-    selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
-
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-  );
-
-  const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
-    [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
-  );
-
+  const selectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const { dataView } = useDataView(SourcererScopeName.timeline);
+  const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
   const runtimeMappings = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
-        : (oldSourcererDataViewSpec?.runtimeFieldMap as RunTimeMappings),
-    [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+    () => dataView.getRuntimeMappings() as RunTimeMappings,
+    [dataView]
   );
 
   const filterQuery = useMemo(() => {

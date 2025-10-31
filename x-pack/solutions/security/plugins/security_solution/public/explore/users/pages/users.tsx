@@ -15,7 +15,6 @@ import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -41,7 +40,6 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
@@ -104,45 +102,29 @@ const UsersComponent = () => {
     return globalFilters;
   }, [severitySelection, tabName, globalFilters]);
 
-  const {
-    indicesExist: oldIndicesExist,
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
-  } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
-
-  const indicesExist = newDataViewPickerEnabled
-    ? experimentalDataView.hasMatchedIndices()
-    : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const selectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+  const indicesExist = dataView.hasMatchedIndices();
 
   const [globalFiltersQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: oldSourcererDataView,
-        dataView: experimentalDataView,
+        dataView,
         queries: [query],
         filters: globalFilters,
       }),
-    [uiSettings, oldSourcererDataView, experimentalDataView, query, globalFilters]
+    [uiSettings, dataView, query, globalFilters]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: oldSourcererDataView,
-        dataView: experimentalDataView,
+        dataView,
         queries: [query],
         filters: tabsFilters,
       }),
-    [experimentalDataView, oldSourcererDataView, query, tabsFilters, uiSettings]
+    [dataView, query, tabsFilters, uiSettings]
   );
 
   useInvalidFilterQuery({
@@ -181,7 +163,7 @@ const UsersComponent = () => {
   const capabilities = useMlCapabilities();
   const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -191,12 +173,7 @@ const UsersComponent = () => {
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              }
-              id={InputsModelId.global}
-            />
+            <SiemSearchBar id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>

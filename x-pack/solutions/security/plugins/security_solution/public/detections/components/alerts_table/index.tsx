@@ -26,7 +26,6 @@ import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type {
   GetSecurityAlertsTableProp,
   SecurityAlertsTableContext,
@@ -44,8 +43,6 @@ import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -184,21 +181,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(sourcererScope);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(sourcererScope);
-  const experimentalBrowserFields = useBrowserFields(sourcererScope);
-  const runtimeMappings = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataView.getRuntimeMappings()
-        : (oldSourcererDataView.runtimeFieldMap as RunTimeMappings),
-    [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataView]
-  );
-
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const { dataView } = useDataView(sourcererScope);
+  const browserFields = useBrowserFields(sourcererScope);
+  const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
 
   const license = useLicense();
   const isEnterprisePlus = license.isEnterprise();
@@ -227,12 +212,11 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   }, [inputFilters, globalFilters, timeRangeFilter]);
 
   const combinedQuery = useMemo(() => {
-    if (browserFields != null && (oldSourcererDataView || experimentalDataView)) {
+    if (browserFields != null) {
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        dataViewSpec: oldSourcererDataView,
-        dataView: experimentalDataView,
+        dataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
@@ -240,14 +224,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
       });
     }
     return null;
-  }, [
-    browserFields,
-    oldSourcererDataView,
-    uiSettings,
-    experimentalDataView,
-    allFilters,
-    globalQuery,
-  ]);
+  }, [browserFields, uiSettings, dataView, allFilters, globalQuery]);
 
   useInvalidFilterQuery({
     id: tableType,

@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
@@ -34,8 +34,8 @@ import { useKibana } from '../../lib/kibana';
 import {
   FORM_CUSTOM_FREQUENCY_OPTION,
   FORM_ERRORS_TITLE,
-  FORM_ON_ACTIVE_ALERT_OPTION,
   FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+  FORM_ON_ACTIVE_ALERT_OPTION,
   FORM_SUMMARY_BODY_MESSAGE,
 } from './translations';
 
@@ -208,6 +208,7 @@ export const RuleActionsField: React.FC<Props> = ({
         const updatedAlertsFilter = { ...alertsFilter };
 
         if (value) {
+          // @ts-ignore
           updatedAlertsFilter[key] = value;
         } else {
           delete updatedAlertsFilter[key];

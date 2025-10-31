@@ -8,9 +8,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
-
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import {
   RULE_FROM_EQL_URL_PARAM,
@@ -160,21 +157,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const { dataViewId: oldDataViewId, selectedPatterns: oldSelectedPatterns } =
-      useSourcererDataView(SourcererScopeName.timeline);
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
-    const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-
-    const dataViewId = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalDataView.id || '' : oldDataViewId),
-      [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
-    );
-    const selectedPatterns = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-      [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-    );
+    const { dataView } = useDataView(SourcererScopeName.timeline);
+    const selectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+    const dataViewId = useMemo(() => dataView.id || '', [dataView.id]);
 
     const {
       customTemplateTimelineCount,

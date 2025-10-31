@@ -19,9 +19,6 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { NewTimelineButton } from '../actions/new_timeline_button';
 import { OpenTimelineButton } from '../actions/open_timeline_button';
 import { APP_ID } from '../../../../../common';
@@ -74,16 +71,9 @@ interface FlyoutHeaderPanelProps {
 export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
   ({ timelineId, openToggleRef }) => {
     const dispatch = useDispatch();
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-    const { browserFields: sourcererBrowserFields, sourcererDataView: oldSourcererDataViewSpec } =
-      useSourcererDataView(SourcererScopeName.timeline);
-    const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.timeline);
-    const experimentalBrowserFields = useBrowserFields(DataViewManagerScopeName.timeline);
-    const browserFields = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalBrowserFields : sourcererBrowserFields),
-      [experimentalBrowserFields, newDataViewPickerEnabled, sourcererBrowserFields]
-    );
+    const { dataView } = useDataView(DataViewManagerScopeName.timeline);
+    const browserFields = useBrowserFields(DataViewManagerScopeName.timeline);
 
     const { cases, uiSettings } = useKibana().services;
     const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
@@ -102,23 +92,13 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
         combineQueries({
           config: esQueryConfig,
           dataProviders,
-          dataViewSpec: oldSourcererDataViewSpec,
-          dataView: experimentalDataView,
+          dataView,
           browserFields,
           filters: filters ? filters : [],
           kqlQuery: kqlQueryObj,
           kqlMode,
         }),
-      [
-        browserFields,
-        dataProviders,
-        esQueryConfig,
-        experimentalDataView,
-        filters,
-        kqlMode,
-        kqlQueryObj,
-        oldSourcererDataViewSpec,
-      ]
+      [browserFields, dataProviders, esQueryConfig, dataView, filters, kqlMode, kqlQueryObj]
     );
     const isInspectDisabled = !isDataInTimeline || combinedQueries?.filterQuery === undefined;
 

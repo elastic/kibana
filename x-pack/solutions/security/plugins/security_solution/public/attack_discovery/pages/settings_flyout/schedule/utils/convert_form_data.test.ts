@@ -6,7 +6,6 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
 import type { AIConnector } from '@kbn/elastic-assistant';
 
 import { convertFormDataInBaseSchedule } from './convert_form_data';
@@ -48,7 +47,6 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alert-*',
       {} as AIConnector,
-      {} as DataViewSpec,
       {
         get: jest.fn(),
       } as unknown as IUiSettingsClient,

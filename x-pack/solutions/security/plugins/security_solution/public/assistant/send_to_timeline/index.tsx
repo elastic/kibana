@@ -19,7 +19,7 @@ import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { SourcererScopeName } from '../../sourcerer/store/model';
-import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import {
   ACTION_CANNOT_INVESTIGATE_IN_TIMELINE,
   ACTION_INVESTIGATE_IN_TIMELINE,
@@ -35,10 +35,8 @@ import {
 } from '../../timelines/store/actions';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export interface SendToTimelineButtonProps {
@@ -64,14 +62,8 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
   const [isTimelineBottomBarVisible] = useShowTimeline();
   const { discoverStateContainer, defaultDiscoverAppState } = useDiscoverInTimelineContext();
 
-  const { dataViewId: oldTimelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
-
-  const timelineDataViewId = newDataViewPickerEnabled
-    ? experimentalDataView.id ?? null
-    : oldTimelineDataViewId;
+  const timelineDataViewId = experimentalDataView.id ?? null;
 
   const { setDiscoverAppState } = useDiscoverState();
   const {
