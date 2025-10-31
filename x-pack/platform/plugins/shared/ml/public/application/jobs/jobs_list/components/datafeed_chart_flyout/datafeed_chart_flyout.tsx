@@ -536,11 +536,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           style={{
                             line: {
                               strokeWidth: 3,
-                              // Amsterdam: euiTheme.colors.vis.euiColorVis1
-                              // Borealis:  euiTheme.colors.vis.euiColorVis2
-                              stroke: euiTheme.flags.hasVisColorAdjustment
-                                ? euiTheme.colors.vis.euiColorVis1
-                                : euiTheme.colors.vis.euiColorVis2,
+                              stroke: euiTheme.colors.vis.euiColorVis2,
                               opacity: 0.5,
                             },
                           }}

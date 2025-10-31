@@ -43,6 +43,7 @@ export const ConfirmUpdate = React.memo<{
       {endpointCount > 0 && (
         <>
           <EuiCallOut
+            announceOnMount
             data-test-subj="policyDetailsWarningCallout"
             title={i18n.translate(
               'xpack.securitySolution.endpoint.policy.details.updateConfirm.warningTitle',

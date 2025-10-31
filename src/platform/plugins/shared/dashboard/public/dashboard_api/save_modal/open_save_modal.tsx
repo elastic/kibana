@@ -15,11 +15,7 @@ import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import type { DashboardSaveOptions } from './types';
-import {
-  coreServices,
-  dataService,
-  savedObjectsTaggingService,
-} from '../../services/kibana_services';
+import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import type { DashboardState } from '../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
@@ -31,18 +27,24 @@ import { DashboardSaveModal } from './save_modal';
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
 export async function openSaveModal({
-  controlGroupReferences,
-  dashboardState,
+  description,
   isManaged,
   lastSavedId,
-  panelReferences,
+  serializeState,
+  setTimeRestore,
+  tags,
+  timeRestore,
+  title,
   viewMode,
 }: {
-  controlGroupReferences?: Reference[];
-  dashboardState: DashboardState;
+  description?: string;
   isManaged: boolean;
   lastSavedId: string | undefined;
-  panelReferences: Reference[];
+  serializeState: () => { dashboardState: DashboardState; references: Reference[] };
+  setTimeRestore: (timeRestore: boolean) => void;
+  tags?: string[];
+  timeRestore: boolean;
+  title: string;
   viewMode: ViewMode;
 }) {
   try {
@@ -50,9 +52,7 @@ export async function openSaveModal({
       return undefined;
     }
     const dashboardContentManagementService = getDashboardContentManagementService();
-    const saveAsTitle = lastSavedId
-      ? await getSaveAsTitle(dashboardState.title)
-      : dashboardState.title;
+    const saveAsTitle = lastSavedId ? await getSaveAsTitle(title) : title;
     return new Promise<(SaveDashboardReturn & { savedState: DashboardState }) | undefined>(
       (resolve) => {
         const onSaveAttempt = async ({
@@ -76,7 +76,7 @@ export async function openSaveModal({
               !(await dashboardContentManagementService.checkForDuplicateDashboardTitle({
                 title: newTitle,
                 onTitleDuplicate,
-                lastSavedTitle: dashboardState.title,
+                lastSavedTitle: title,
                 copyOnSave: saveOptions.saveAsCopy,
                 isTitleDuplicateConfirmed,
               }))
@@ -84,18 +84,14 @@ export async function openSaveModal({
               return {};
             }
 
+            setTimeRestore(newTimeRestore);
+            const { dashboardState, references } = serializeState();
+
             const dashboardStateToSave: DashboardState = {
               ...dashboardState,
               title: newTitle,
               tags: savedObjectsTaggingService && newTags ? newTags : ([] as string[]),
               description: newDescription,
-              timeRestore: newTimeRestore,
-              timeRange: newTimeRestore
-                ? dataService.query.timefilter.timefilter.getTime()
-                : undefined,
-              refreshInterval: newTimeRestore
-                ? dataService.query.timefilter.timefilter.getRefreshInterval()
-                : undefined,
             };
 
             // TODO If this is a managed dashboard - unlink all by reference embeddables on clone
@@ -104,8 +100,7 @@ export async function openSaveModal({
             const beforeAddTime = window.performance.now();
 
             const saveResult = await dashboardContentManagementService.saveDashboardState({
-              controlGroupReferences,
-              panelReferences,
+              references,
               saveOptions,
               dashboardState: dashboardStateToSave,
               lastSavedId,
@@ -125,7 +120,7 @@ export async function openSaveModal({
             return saveResult;
           } catch (error) {
             coreServices.notifications.toasts.addDanger(
-              generateDashboardNotSavedToast(dashboardState.title, error.message)
+              generateDashboardNotSavedToast(title, error.message)
             );
             return error;
           }
@@ -133,12 +128,12 @@ export async function openSaveModal({
 
         showSaveModal(
           <DashboardSaveModal
-            tags={dashboardState.tags}
+            tags={tags}
             title={saveAsTitle}
             onClose={() => resolve(undefined)}
-            timeRestore={dashboardState.timeRestore}
+            timeRestore={timeRestore}
             showStoreTimeOnSave={!lastSavedId}
-            description={dashboardState.description ?? ''}
+            description={description ?? ''}
             showCopyOnSave={false}
             onSave={onSaveAttempt}
             customModalTitle={getCustomModalTitle(viewMode)}
@@ -148,7 +143,7 @@ export async function openSaveModal({
     );
   } catch (error) {
     coreServices.notifications.toasts.addDanger(
-      generateDashboardNotSavedToast(dashboardState.title, error.message)
+      generateDashboardNotSavedToast(title, error.message)
     );
     return undefined;
   }
