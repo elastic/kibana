@@ -10,7 +10,6 @@ import { render, fireEvent } from '@testing-library/react';
 import { InstallTranslatedButton } from './install_translated';
 import { getDashboardMigrationDashboardMock } from '../../../../../common/siem_migrations/model/__mocks__';
 import type { BulkActionsItem } from './types';
-import { as } from 'fp-ts/lib/Option';
 
 describe('InstallTranslatedButton', () => {
   const mockInstallTranslatedItems = jest.fn();
