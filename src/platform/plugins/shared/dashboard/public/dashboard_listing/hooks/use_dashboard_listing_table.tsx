@@ -131,15 +131,20 @@ export const useDashboardListingTable = ({
   }, [dashboardBackupService, goToDashboard, useSessionStorageIntegration]);
 
   const updateItemMeta = useCallback(
-    async ({ id, ...newState }: Parameters<Required<OpenContentEditorParams>['onSave']>[0]) => {
+    async ({ id, ...updatedState }: Parameters<Required<OpenContentEditorParams>['onSave']>[0]) => {
       const dashboard = await findService.findById(id);
       if (dashboard.status === 'error') {
         return;
       }
-      await dashboardClient.update(id, {
-        ...dashboard.attributes,
-        ...newState,
-      });
+      const { references, ...currentState } = dashboard.attributes;
+      await dashboardClient.update(
+        id,
+        {
+          ...currentState,
+          ...updatedState,
+        },
+        dashboard.references
+      );
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },

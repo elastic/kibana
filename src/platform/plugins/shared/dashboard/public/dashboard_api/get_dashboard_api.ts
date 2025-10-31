@@ -15,7 +15,6 @@ import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import {
   CONTROL_GROUP_EMBEDDABLE_ID,
   initializeControlGroupManager,
@@ -37,6 +36,7 @@ import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mergeControlGroupStates } from './merge_control_group_states';
 import type { DashboardAPIGetOut } from '../../server/content_management';
+import { saveDashboard } from './save_modal/save_dashboard';
 
 export function getDashboardApi({
   creationOptions,
@@ -217,7 +217,7 @@ export function getDashboardApi({
     runQuickSave: async () => {
       if (isManaged) return;
       const { dashboardState, references } = getState();
-      const saveResult = await getDashboardContentManagementService().saveDashboardState({
+      const saveResult = await saveDashboard({
         dashboardState,
         references,
         saveOptions: {},

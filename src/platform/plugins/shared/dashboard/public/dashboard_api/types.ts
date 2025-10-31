@@ -52,7 +52,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardAPIGetOut, DashboardState, GridData } from '../../server/content_management';
-import type { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
+import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
 

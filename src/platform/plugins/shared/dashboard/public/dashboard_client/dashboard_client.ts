@@ -10,9 +10,12 @@
 import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
+import type { Reference } from '@kbn/content-management-utils';
 import { CONTENT_ID, DASHBOARD_API_VERSION } from '../../common/content_management/constants';
 import type {
   DashboardAPIGetOut,
+  DashboardCreateIn,
+  DashboardCreateOut,
   DashboardSearchAPIResult,
   DashboardSearchIn,
   DashboardState,
@@ -32,6 +35,15 @@ const cache = new LRUCache<string, DashboardAPIGetOut>({
 });
 
 export const dashboardClient = {
+  create: async (dashboardState: DashboardState, references: Reference[]) => {
+    return contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
+      contentTypeId: DASHBOARD_CONTENT_ID,
+      data: dashboardState,
+      options: {
+        references,
+      },
+    });
+  },
   delete: async (id: string): Promise<DeleteResult> => {
     cache.delete(id);
     return coreServices.http.delete(`/api/dashboards/dashboard/${id}`, {
@@ -87,13 +99,17 @@ export const dashboardClient = {
       hits,
     };
   },
-  update: async (id: string, dashboardState: DashboardState) => {
+  update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
     // TODO replace with call to dashboard REST update endpoint
     await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
       contentTypeId: DASHBOARD_CONTENT_ID,
       id,
       data: dashboardState,
-      options: { references: dashboardState.references },
+      options: {
+        /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
+        mergeAttributes: false,
+        references,
+      },
     });
     cache.delete(id);
   },
