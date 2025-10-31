@@ -298,7 +298,9 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiSaturation.roleDescription\\": \\"HSV color mode saturation and value 2-axis slider.\\",
     \\"euiHue.ariaValueText\\": \\"Hue\\",
     \\"euiHue.ariaRoleDescription\\": \\"Hue slider\\",
-    \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\"
+    \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\",
+    \\"euiFlyoutMenu.back\\": \\"Back\\",
+    \\"euiFlyoutMenu.history\\": \\"History\\"
   }
 }"
 `;
