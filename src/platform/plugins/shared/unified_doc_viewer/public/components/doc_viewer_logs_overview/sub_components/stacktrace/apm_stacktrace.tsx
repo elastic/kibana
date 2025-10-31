@@ -116,7 +116,7 @@ export function ApmStacktrace({ hit, dataView }: { hit: DataTableRecord; dataVie
                   type="question"
                   className="eui-alignCenter"
                   content={i18n.translate('unifiedDocViewer.apmStacktrace.culprit.tooltip', {
-                    defaultMessage: 'Culprit',
+                    defaultMessage: 'The culprit of an error indicates where it originated.',
                   })}
                 />
               </EuiText>
