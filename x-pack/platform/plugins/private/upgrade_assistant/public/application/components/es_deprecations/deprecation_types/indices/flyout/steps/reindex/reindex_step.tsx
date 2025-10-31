@@ -104,6 +104,7 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
           <Fragment>
             <EuiSpacer />
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.insufficientPrivilegeCallout.calloutTitle"

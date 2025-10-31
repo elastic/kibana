@@ -282,3 +282,46 @@ describe('empty panel opener', () => {
     expect(primaryItems.find((item) => item.id === 'securityGroup:rules')).toBeUndefined();
   });
 });
+
+describe('hidden panel link', () => {
+  // https://github.com/elastic/kibana/issues/240275
+  it('should remove panel links marked as hidden, but should keep opener active', () => {
+    const tree = structuredClone(navigationTree);
+    // @ts-expect-error to avoid excess type checking for test
+    const stackManagementNode = tree.footer[0].children[2].children[0];
+    stackManagementNode.children.push({
+      link: 'management',
+      sideNavStatus: 'hidden',
+    });
+
+    // Add management link under stack management section
+    const {
+      navItems: { footerItems },
+      activeItemId,
+    } = createNavigationItems(tree, [
+      [
+        // @ts-expect-error to avoid excess type checking for test
+        tree.footer[0],
+        // @ts-expect-error to avoid excess type checking for test
+        tree.footer[0].children[2],
+        stackManagementNode,
+        stackManagementNode.children[stackManagementNode.children.length - 1],
+      ],
+    ]);
+
+    // No management link under Stack Management
+    expect(footerItems[2]!.sections!.map((s) => s.label)).toMatchInlineSnapshot(`
+      Array [
+        "Ingest",
+        "Data",
+        "Alerts and Insights",
+        "Security",
+        "Kibana",
+        "Stack",
+      ]
+    `);
+
+    // But management panel is considered active
+    expect(activeItemId).toBe('stack_management');
+  });
+});
