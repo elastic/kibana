@@ -23,7 +23,6 @@ describe('convertSecurityApi', () => {
           invalidate: jest.fn(),
           invalidateAsInternalUser: jest.fn(),
           grantAsInternalUser: jest.fn(),
-          grantViaUiam: jest.fn(),
           create: jest.fn(),
           update: jest.fn(),
         },

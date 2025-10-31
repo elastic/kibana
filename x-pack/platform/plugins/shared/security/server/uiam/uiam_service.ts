@@ -34,6 +34,11 @@ export interface UiamServicePublic {
   getUserProfileGrant(accessToken: string): UserProfileGrant;
 
   /**
+   * Returns the Elasticsearch client authentication header with the shared secret value.
+   */
+  getEsClientAuthenticationHeader(): Record<string, string>;
+
+  /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
    * @param refreshToken UIAM session refresh token.
    */
@@ -50,13 +55,20 @@ export interface UiamServicePublic {
 
   /**
    * Grants an API key using the UIAM service.
-   * @param accessToken UIAM session access token.
-   * @param request API key grant request parameters.
+   * @param authcScheme The authentication scheme (e.g., 'Bearer', 'Basic').
+   * @param credential The authentication credential (e.g., access token, encoded credentials).
    */
   grantApiKey(
-    accessToken: string,
-    request: { name: string; expiration?: string; metadata?: Record<string, unknown> }
+    authcScheme: string,
+    credential: string
   ): Promise<{ id: string; name: string; api_key: string; expiration?: number }>;
+
+  /**
+   * Deletes an API key using the UIAM service.
+   * @param apiKey The API key to use for authentication.
+   * @param keyId The ID of the API key to delete.
+   */
+  deleteApiKey(apiKey: string, keyId: string): Promise<void>;
 }
 
 /**
@@ -106,6 +118,15 @@ export class UiamService implements UiamServicePublic {
       type: 'uiamAccessToken' as const,
       accessToken,
       sharedSecret: this.#config.sharedSecret,
+    };
+  }
+
+  /**
+   * See {@link UiamServicePublic.getEsClientAuthenticationHeader}.
+   */
+  getEsClientAuthenticationHeader(): Record<string, string> {
+    return {
+      [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
     };
   }
 
@@ -170,10 +191,7 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.grantApiKey}.
    */
-  async grantApiKey(
-    accessToken: string,
-    request: { name: string; expiration?: string; metadata?: Record<string, unknown> }
-  ) {
+  async grantApiKey(authcScheme: string, credential: string) {
     try {
       this.#logger.debug('Attempting to grant API key.');
 
@@ -183,10 +201,9 @@ export class UiamService implements UiamServicePublic {
           headers: {
             'Content-Type': 'application/json',
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `${authcScheme} ${credential}`,
           },
           body: JSON.stringify({
-            ...request,
             description: 'test',
             internal: true,
             role_assignments: {
@@ -205,6 +222,35 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to grant API key: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.deleteApiKey}.
+   */
+  async deleteApiKey(apiKey: string, keyId: string) {
+    try {
+      this.#logger.debug(`Attempting to delete API key with ID: ${keyId}`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/authentication/keys/${keyId}`, {
+          method: 'DELETE',
+          headers: {
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: apiKey,
+          },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully deleted API key with ID: ${keyId}`);
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to delete API key with ID ${keyId}: ${getDetailedErrorMessage(err)}`
+      );
 
       throw err;
     }

@@ -13,6 +13,8 @@ import { resolve } from 'path';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
+import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Plugin, PluginInitializer } from '@kbn/core-plugins-server';
 import {
   readRolesFromResource,
@@ -77,109 +79,241 @@ export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 
 export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
   initializerContext
-): Promise<Plugin> => ({
-  setup(core, plugins: PluginSetupDependencies) {
-    const logger = initializerContext.logger.get();
-    const config = initializerContext.config.get<ConfigType>();
-    const router = core.http.createRouter();
+): Promise<Plugin> => {
+  let getAuthenticationService: (() => any) | undefined;
 
-    core.http.resources.register(
-      {
-        path: MOCK_IDP_LOGIN_PATH,
-        validate: false,
-        options: { authRequired: false },
-        security: { authz: { enabled: false, reason: '' } },
-      },
-      async (context, request, response) => {
-        return response.renderAnonymousCoreApp();
-      }
-    );
+  return {
+    setup(core, plugins: PluginSetupDependencies) {
+      const logger = initializerContext.logger.get();
+      const config = initializerContext.config.get<ConfigType>();
+      const router = core.http.createRouter();
 
-    // caching roles on the first call
-    const roles: string[] = [];
-
-    router.get(
-      {
-        path: '/mock_idp/supported_roles',
-        validate: false,
-        options: { authRequired: false },
-        security: { authz: { enabled: false, reason: '' } },
-      },
-      (context, request, response) => {
-        try {
-          if (roles.length === 0) {
-            const projectType = plugins.cloud?.serverless?.projectType;
-            const productTier = plugins.cloud?.serverless?.productTier;
-            roles.push(
-              ...(projectType ? readServerlessRoles(projectType, productTier) : readStatefulRoles())
-            );
-          }
-          return response.ok({
-            body: {
-              roles,
-            },
-          });
-        } catch (err) {
-          return response.customError({ statusCode: 500, body: err.message });
-        }
-      }
-    );
-
-    router.post(
-      {
-        path: '/mock_idp/saml_response',
-        validate: {
-          body: createSAMLResponseSchema,
+      core.http.resources.register(
+        {
+          path: MOCK_IDP_LOGIN_PATH,
+          validate: false,
+          options: { authRequired: false },
+          security: { authz: { enabled: false, reason: '' } },
         },
-        options: { authRequired: false },
-        security: { authz: { enabled: false, reason: '' } },
-      },
-      async (context, request, response) => {
-        const { protocol, hostname, port } = core.http.getServerInfo();
-        const pathname = core.http.basePath.prepend('/api/security/saml/callback');
-
-        const serverlessOptions = plugins.cloud?.serverless
-          ? {
-              serverless: {
-                organizationId: plugins.cloud.organizationId!,
-                projectType: plugins.cloud.serverless.projectType!,
-                uiamEnabled: !!config.uiam?.enabled,
-              },
-            }
-          : {};
-
-        try {
-          return response.ok({
-            body: {
-              SAMLResponse: await createSAMLResponse({
-                kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
-                username: request.body.username,
-                full_name: request.body.full_name ?? undefined,
-                email: request.body.email ?? undefined,
-                roles: request.body.roles,
-                ...serverlessOptions,
-              }),
-            },
-          });
-        } catch (err) {
-          logger.error(`Failed to create SAMLResponse: ${err}`, err);
-          throw err;
+        async (context, request, response) => {
+          return response.renderAnonymousCoreApp();
         }
-      }
-    );
+      );
 
-    core.http.resources.register(
-      {
-        path: MOCK_IDP_LOGOUT_PATH,
-        validate: false,
-        options: { authRequired: false },
-        security: { authz: { enabled: false, reason: '' } },
-      },
-      async (context, request, response) => {
-        return response.redirected({ headers: { location: '/' } });
-      }
-    );
-  },
-  start() {},
-  stop() {},
-});
+      // caching roles on the first call
+      const roles: string[] = [];
+
+      router.get(
+        {
+          path: '/mock_idp/supported_roles',
+          validate: false,
+          options: { authRequired: false },
+          security: { authz: { enabled: false, reason: '' } },
+        },
+        (context, request, response) => {
+          try {
+            if (roles.length === 0) {
+              const projectType = plugins.cloud?.serverless?.projectType;
+              const productTier = plugins.cloud?.serverless?.productTier;
+              roles.push(
+                ...(projectType
+                  ? readServerlessRoles(projectType, productTier)
+                  : readStatefulRoles())
+              );
+            }
+            return response.ok({
+              body: {
+                roles,
+              },
+            });
+          } catch (err) {
+            return response.customError({ statusCode: 500, body: err.message });
+          }
+        }
+      );
+
+      router.post(
+        {
+          path: '/mock_idp/saml_response',
+          validate: {
+            body: createSAMLResponseSchema,
+          },
+          options: { authRequired: false },
+          security: { authz: { enabled: false, reason: '' } },
+        },
+        async (context, request, response) => {
+          const { protocol, hostname, port } = core.http.getServerInfo();
+          const pathname = core.http.basePath.prepend('/api/security/saml/callback');
+
+          const serverlessOptions = plugins.cloud?.serverless
+            ? {
+                serverless: {
+                  organizationId: plugins.cloud.organizationId!,
+                  projectType: plugins.cloud.serverless.projectType!,
+                  uiamEnabled: !!config.uiam?.enabled,
+                },
+              }
+            : {};
+
+          try {
+            return response.ok({
+              body: {
+                SAMLResponse: await createSAMLResponse({
+                  kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
+                  username: request.body.username,
+                  full_name: request.body.full_name ?? undefined,
+                  email: request.body.email ?? undefined,
+                  roles: request.body.roles,
+                  ...serverlessOptions,
+                }),
+              },
+            });
+          } catch (err) {
+            logger.error(`Failed to create SAMLResponse: ${err}`, err);
+            throw err;
+          }
+        }
+      );
+
+      router.post(
+        {
+          path: '/mock_idp/grant_api_key',
+          validate: {
+            body: schema.object({
+              name: schema.string(),
+              authcScheme: schema.maybe(schema.string()),
+              credential: schema.maybe(schema.string()),
+              isForUiam: schema.maybe(schema.boolean()),
+            }),
+          },
+          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+        },
+        async (context, request, response) => {
+          try {
+            if (!getAuthenticationService) {
+              return response.badRequest({
+                body: { message: 'Authentication service not available yet' },
+              });
+            }
+
+            const { name, authcScheme, credential, isForUiam } = request.body;
+            const authcService = getAuthenticationService();
+
+            // Create a new request with authentication header if authcScheme and credential are provided
+            let requestToUse = request;
+            if (authcScheme && credential) {
+              const requestHeaders: Headers = {
+                ...request.headers,
+                authorization: `${authcScheme} ${credential}`,
+              };
+              const fakeRawRequest: FakeRawRequest = {
+                headers: requestHeaders,
+                path: request.url.pathname,
+              };
+              requestToUse = kibanaRequestFactory(fakeRawRequest);
+            }
+
+            const result = await authcService.apiKeys.grantAsInternalUser(
+              requestToUse,
+              { name },
+              isForUiam
+            );
+
+            if (!result) {
+              return response.badRequest({
+                body: { message: 'API keys are not available or disabled' },
+              });
+            }
+
+            return response.ok({
+              body: result,
+            });
+          } catch (err) {
+            logger.error(`Failed to grant API key: ${err}`, err);
+            return response.customError({
+              statusCode: 500,
+              body: { message: err.message },
+            });
+          }
+        }
+      );
+
+      router.post(
+        {
+          path: '/mock_idp/call_scoped_client_with_uiam_api_key',
+          validate: {
+            body: schema.object({
+              apiKey: schema.string(),
+              authcScheme: schema.string(),
+            }),
+          },
+          options: { authRequired: 'optional' },
+          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+        },
+        async (context, request, response) => {
+          try {
+            if (!getAuthenticationService) {
+              return response.badRequest({
+                body: { message: 'Authentication service not available yet' },
+              });
+            }
+
+            const { apiKey, authcScheme } = request.body;
+            const authcService = getAuthenticationService();
+
+            const requestHeaders: Headers = {
+              ...request.headers,
+              authorization: `${authcScheme} ${apiKey}`,
+            };
+            const fakeRawRequest: FakeRawRequest = {
+              headers: requestHeaders,
+              path: request.url.pathname,
+            };
+            const requestToUse = kibanaRequestFactory(fakeRawRequest);
+
+            // Get scoped client with UIAM headers
+            const scopedClient = authcService.apiKeys.getScopedClusterClient(requestToUse);
+
+            if (!scopedClient) {
+              return response.badRequest({
+                body: { message: 'UIAM is not enabled or not available' },
+              });
+            }
+
+            // Call a secure endpoint to verify the API key works
+            const currentUser = await scopedClient.asCurrentUser.security.authenticate();
+
+            return response.ok({
+              body: {
+                ...currentUser,
+                message: 'Successfully authenticated with UIAM API Key to ES',
+              },
+            });
+          } catch (err) {
+            logger.error(`Failed to authenticate to ES with UIAM API Key: ${err}`, err);
+            return response.customError({
+              statusCode: 500,
+              body: { message: err.message },
+            });
+          }
+        }
+      );
+
+      core.http.resources.register(
+        {
+          path: MOCK_IDP_LOGOUT_PATH,
+          validate: false,
+          options: { authRequired: false },
+          security: { authz: { enabled: false, reason: '' } },
+        },
+        async (context, request, response) => {
+          return response.redirected({ headers: { location: '/' } });
+        }
+      );
+    },
+    start(core) {
+      getAuthenticationService = () => core.security.authc;
+    },
+    stop() {},
+  };
+};

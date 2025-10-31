@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+
 import type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantAPIKeyResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
   ValidateAPIKeyParams,
@@ -62,4 +67,22 @@ export interface APIKeysServiceWithContext {
    * @param params The params to invalidate an API keys.
    */
   invalidate(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
+   * Tries to grant an API key for the current user.
+   * @param createParams Create operation parameters.
+   * @param isForUiam Indicates whether the API key is being granted for UIAM purposes.
+   */
+  grantAsInternalUser(
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+    isForUiam?: boolean
+  ): Promise<GrantAPIKeyResult | null>;
+
+  /**
+   * Creates a scoped Elasticsearch client with UIAM authentication headers if
+   * the ApiKey in the request is a UIAM ApiKey, otherwise returns a standard scoped client.
+   * @returns A scoped cluster client with UIAM authentication headers.
+   * @throws Error if UIAM service is not available.
+   */
+  getScopedClusterClient(): IScopedClusterClient;
 }

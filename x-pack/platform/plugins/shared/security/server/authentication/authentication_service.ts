@@ -79,8 +79,8 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     | 'invalidate'
     | 'validate'
     | 'grantAsInternalUser'
-    | 'grantViaUiam'
     | 'invalidateAsInternalUser'
+    | 'getScopedClusterClient'
   >;
   login: (request: KibanaRequest, attempt: ProviderLoginAttempt) => Promise<AuthenticationResult>;
   logout: (request: KibanaRequest) => Promise<DeauthenticationResult>;
@@ -397,10 +397,10 @@ export class AuthenticationService {
         create: apiKeys.create.bind(apiKeys),
         update: apiKeys.update.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
-        grantViaUiam: apiKeys.grantViaUiam.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
         validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
+        getScopedClusterClient: apiKeys.getScopedClusterClient.bind(apiKeys),
       },
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
