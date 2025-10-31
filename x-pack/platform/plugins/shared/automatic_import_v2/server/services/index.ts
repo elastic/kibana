@@ -6,7 +6,9 @@
  */
 
 export { AutomaticImportSamplesIndexService } from './samples_index/index_service';
-
 export { AutomaticImportService } from './automatic_import_service';
+export { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 
 export { automaticImportSamplesIndexName as AutomaticImportSamplesIndexName } from './samples_index/storage';
+
+export type { IntegrationAttributes, DataStreamAttributes } from './saved_objects/schemas/types';
