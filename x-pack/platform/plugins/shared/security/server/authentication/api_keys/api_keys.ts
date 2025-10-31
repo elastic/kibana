@@ -259,21 +259,28 @@ export class APIKeys implements APIKeysType {
    * Tries to grant an API key for the current user.
    * @param request Request instance.
    * @param createParams Create operation parameters.
+   * @param isForUiam Optional boolean to use UIAM service for granting API key.
    */
   async grantAsInternalUser(
     request: KibanaRequest,
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+    isForUiam?: boolean
   ) {
     if (!this.license.isEnabled()) {
       return null;
     }
 
     this.logger.debug('Trying to grant an API key');
+
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     if (authorizationHeader == null) {
       throw new Error(
         `Unable to grant an API Key, request does not contain an authorization header`
       );
+    }
+
+    if (isForUiam) {
+      return this.uiamGrantApiKey(authorizationHeader.scheme, authorizationHeader.credentials);
     }
 
     // Try to extract optional Elasticsearch client credentials (currently only used by JWT).
@@ -297,6 +304,7 @@ export class APIKeys implements APIKeysType {
       authorizationHeader,
       clientAuthorizationHeader
     );
+
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
@@ -310,44 +318,65 @@ export class APIKeys implements APIKeysType {
     return result;
   }
 
-  /**
-   * Grants an API key using the UIAM service.
-   * @param request Request instance containing the access token.
-   * @param createParams Create operation parameters.
-   */
-  async grantViaUiam(
-    request: KibanaRequest,
-    createParams: { name: string; expiration?: string; metadata?: Record<string, unknown> }
-  ) {
-    if (!this.license.isEnabled()) {
-      return null;
-    }
-
+  private async uiamGrantApiKey(authcScheme: string, credential: string) {
     if (!this.uiam) {
       throw new Error('UIAM service is not available');
     }
 
     this.logger.debug('Trying to grant an API key via UIAM');
+    this.logger.debug(`Using authorization scheme: ${authcScheme}`);
+
+    let result: GrantAPIKeyResult;
+
+    if (!credential.startsWith('essu_')) {
+      result = {
+        id: 'same_api_key_id',
+        name: 'same_api_key_name',
+        api_key: credential,
+      };
+    } else {
+      try {
+        result = await this.uiam.grantApiKey(authcScheme, credential);
+        this.logger.debug('API key was granted successfully via UIAM');
+        return result;
+      } catch (e) {
+        this.logger.error(`Failed to grant API key via UIAM: ${e.message}`);
+        throw e;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Creates a scoped Elasticsearch client with UIAM authentication headers.
+   * @param request Request instance.
+   * @returns A scoped cluster client with UIAM authentication headers.
+   */
+  getScopedClusterClient(request: KibanaRequest) {
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     if (authorizationHeader == null) {
       throw new Error(
-        `Unable to grant an API Key via UIAM, request does not contain an authorization header`
+        `Unable to grant an API Key, request does not contain an authorization header`
       );
     }
 
-    if (authorizationHeader.scheme.toLowerCase() !== 'bearer') {
-      throw new Error(
-        `Unable to grant an API Key via UIAM, request authorization scheme must be Bearer`
-      );
-    }
+    if (authorizationHeader.credentials.startsWith('essu_')) {
+      if (!this.uiam) {
+        throw new Error('UIAM service is not available');
+      }
 
-    try {
-      const result = await this.uiam.grantApiKey(authorizationHeader.credentials, createParams);
-      this.logger.debug('API key was granted successfully via UIAM');
-      return result;
-    } catch (e) {
-      this.logger.error(`Failed to grant API key via UIAM: ${e.message}`);
-      throw e;
+      const uiamHeaders = this.uiam.getEsClientAuthenticationHeader();
+
+      return this.clusterClient.asScoped({
+        ...request,
+        headers: {
+          ...request.headers,
+          ...uiamHeaders,
+        },
+      });
+    } else {
+      return this.clusterClient.asScoped(request);
     }
   }
 

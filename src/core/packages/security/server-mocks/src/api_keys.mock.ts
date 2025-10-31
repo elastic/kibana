@@ -18,9 +18,9 @@ export const apiKeysMock = {
       create: jest.fn(),
       update: jest.fn(),
       grantAsInternalUser: jest.fn(),
-      grantViaUiam: jest.fn(),
       validate: jest.fn(),
       invalidate: jest.fn(),
       invalidateAsInternalUser: jest.fn(),
+      getScopedClusterClient: jest.fn(),
     }),
 };

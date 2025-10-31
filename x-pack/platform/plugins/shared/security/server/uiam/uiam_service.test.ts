@@ -193,6 +193,14 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#getEsClientAuthenticationHeader', () => {
+    it('returns the ES client authentication header with shared secret', () => {
+      expect(uiamService.getEsClientAuthenticationHeader()).toEqual({
+        [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+      });
+    });
+  });
+
   describe('#refreshSessionTokens', () => {
     it('properly calls UIAM service to refresh the tokens', async () => {
       fetchSpy.mockResolvedValue({
@@ -291,7 +299,7 @@ describe('UiamService', () => {
   });
 
   describe('#grantApiKey', () => {
-    it('properly calls UIAM service to grant an API key', async () => {
+    it('properly calls UIAM service to grant an API key with Bearer scheme', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
         json: async () => ({
@@ -302,13 +310,7 @@ describe('UiamService', () => {
         }),
       });
 
-      await expect(
-        uiamService.grantApiKey('access-token', {
-          name: 'test-key',
-          expiration: '7d',
-          metadata: { environment: 'test' },
-        })
-      ).resolves.toEqual({
+      await expect(uiamService.grantApiKey('Bearer', 'access-token')).resolves.toEqual({
         id: 'api-key-id',
         name: 'test-key',
         api_key: 'encoded-key-value',
@@ -324,15 +326,20 @@ describe('UiamService', () => {
           Authorization: 'Bearer access-token',
         },
         body: JSON.stringify({
-          name: 'test-key',
-          expiration: '7d',
-          metadata: { environment: 'test' },
+          description: 'test',
+          internal: true,
+          role_assignments: {
+            limit: {
+              access: ['application'],
+              resource: ['project'],
+            },
+          },
         }),
         dispatcher: AGENT_MOCK,
       });
     });
 
-    it('properly calls UIAM service to grant an API key without expiration and metadata', async () => {
+    it('properly calls UIAM service to grant an API key with Basic scheme', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,
         json: async () => ({
@@ -342,7 +349,7 @@ describe('UiamService', () => {
         }),
       });
 
-      await expect(uiamService.grantApiKey('access-token', { name: 'test-key' })).resolves.toEqual({
+      await expect(uiamService.grantApiKey('Basic', 'encoded-credentials')).resolves.toEqual({
         id: 'api-key-id',
         name: 'test-key',
         api_key: 'encoded-key-value',
@@ -354,9 +361,18 @@ describe('UiamService', () => {
         headers: {
           'Content-Type': 'application/json',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
-          Authorization: 'Bearer access-token',
+          Authorization: 'Basic encoded-credentials',
         },
-        body: JSON.stringify({ name: 'test-key' }),
+        body: JSON.stringify({
+          description: 'test',
+          internal: true,
+          role_assignments: {
+            limit: {
+              access: ['application'],
+              resource: ['project'],
+            },
+          },
+        }),
         dispatcher: AGENT_MOCK,
       });
     });
@@ -369,9 +385,9 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Invalid request' } }),
       });
 
-      await expect(
-        uiamService.grantApiKey('access-token', { name: 'test-key' })
-      ).rejects.toThrowError('Invalid request');
+      await expect(uiamService.grantApiKey('Bearer', 'access-token')).rejects.toThrowError(
+        'Invalid request'
+      );
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
@@ -381,9 +397,68 @@ describe('UiamService', () => {
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
-        body: JSON.stringify({ name: 'test-key' }),
+        body: JSON.stringify({
+          description: 'test',
+          internal: true,
+          role_assignments: {
+            limit: {
+              access: ['application'],
+              resource: ['project'],
+            },
+          },
+        }),
         dispatcher: AGENT_MOCK,
       });
+    });
+  });
+
+  describe('#deleteApiKey', () => {
+    it('properly calls UIAM service to delete an API key', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        status: 204,
+      });
+
+      await uiamService.deleteApiKey('api-key-value', 'api-key-id');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/authentication/keys/api-key-id',
+        {
+          method: 'DELETE',
+          headers: {
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'api-key-value',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if deleting API key fails with 404 status code', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'API key not found' } }),
+      });
+
+      await expect(uiamService.deleteApiKey('api-key-value', 'api-key-id')).rejects.toThrowError(
+        'API key not found'
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/authentication/keys/api-key-id',
+        {
+          method: 'DELETE',
+          headers: {
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'api-key-value',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
     });
   });
 });

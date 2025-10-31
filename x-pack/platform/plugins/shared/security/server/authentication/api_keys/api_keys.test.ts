@@ -594,14 +594,221 @@ describe('API Keys', () => {
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled();
       expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
     });
+
+    describe('with isForUiam parameter', () => {
+      let mockUiam: any;
+
+      beforeEach(() => {
+        mockUiam = {
+          grantApiKey: jest.fn(),
+        };
+        apiKeys = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+      });
+
+      it('throws an error when UIAM service is not available', async () => {
+        apiKeys = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+        });
+        mockLicense.isEnabled.mockReturnValue(true);
+
+        await expect(
+          apiKeys.grantAsInternalUser(
+            httpServerMock.createKibanaRequest({
+              headers: { authorization: 'Bearer essu_token' },
+            }),
+            {
+              name: 'test_api_key',
+              role_descriptors: {},
+            },
+            true
+          )
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"UIAM service is not available"`);
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+      });
+
+      it('calls UIAM grantApiKey with Bearer scheme when isForUiam is true', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        mockUiam.grantApiKey.mockResolvedValue({
+          id: 'api-key-id',
+          name: 'test_api_key',
+          api_key: 'encoded-key-value',
+          expiration: 1234567890,
+        });
+
+        const result = await apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: 'Bearer essu_access_token' },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+          },
+          true
+        );
+
+        expect(result).toEqual({
+          id: 'api-key-id',
+          name: 'test_api_key',
+          api_key: 'encoded-key-value',
+          expiration: 1234567890,
+        });
+        expect(mockUiam.grantApiKey).toHaveBeenCalledWith('Bearer', 'essu_access_token');
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+      });
+
+      it('calls UIAM grantApiKey with Basic scheme when isForUiam is true', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        mockUiam.grantApiKey.mockResolvedValue({
+          id: 'api-key-id',
+          name: 'test_api_key',
+          api_key: 'encoded-key-value',
+        });
+
+        const prefixedCredential = 'essu_' + encodeToBase64('user:pass');
+        const result = await apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Basic ${prefixedCredential}` },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+          },
+          true
+        );
+
+        expect(result).toEqual({
+          id: 'api-key-id',
+          name: 'test_api_key',
+          api_key: 'encoded-key-value',
+        });
+        expect(mockUiam.grantApiKey).toHaveBeenCalledWith('Basic', prefixedCredential);
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+      });
+
+      it('returns same API key when credential does not start with essu_', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+
+        const result = await apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: 'Bearer regular_token' },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+          },
+          true
+        );
+
+        expect(result).toEqual({
+          id: 'same_api_key_id',
+          name: 'same_api_key_name',
+          api_key: 'regular_token',
+        });
+        expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+      });
+
+      it('does not call UIAM when isForUiam is false', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'encoded-value',
+        });
+
+        const result = await apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: 'Bearer essu_access_token' },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+          },
+          false
+        );
+
+        expect(result).toEqual({
+          api_key: 'abc123',
+          id: '123',
+          name: 'key-name',
+          encoded: 'encoded-value',
+        });
+        expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalled();
+      });
+
+      it('does not call UIAM when isForUiam is undefined', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'encoded-value',
+        });
+
+        const result = await apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: 'Bearer essu_access_token' },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+          }
+        );
+
+        expect(result).toEqual({
+          api_key: 'abc123',
+          id: '123',
+          name: 'key-name',
+          encoded: 'encoded-value',
+        });
+        expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalled();
+      });
+
+      it('throws error when UIAM grantApiKey fails', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        const error = new Error('UIAM service error');
+        mockUiam.grantApiKey.mockRejectedValue(error);
+
+        await expect(
+          apiKeys.grantAsInternalUser(
+            httpServerMock.createKibanaRequest({
+              headers: { authorization: 'Bearer essu_access_token' },
+            }),
+            {
+              name: 'test_api_key',
+              role_descriptors: roleDescriptors,
+            },
+            true
+          )
+        ).rejects.toThrowError('UIAM service error');
+        expect(mockUiam.grantApiKey).toHaveBeenCalledWith('Bearer', 'essu_access_token');
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+      });
+    });
   });
 
-  describe('grantViaUiam()', () => {
+  describe('getScopedClusterClientWithUiamHeaders()', () => {
     let mockUiam: any;
 
     beforeEach(() => {
       mockUiam = {
-        grantApiKey: jest.fn(),
+        getEsClientAuthenticationHeader: jest.fn().mockReturnValue({
+          'es-client-authentication': 'shared-secret-value',
+        }),
       };
       apiKeys = new APIKeys({
         clusterClient: mockClusterClient,
@@ -613,16 +820,7 @@ describe('API Keys', () => {
       });
     });
 
-    it('returns null when security feature is disabled', async () => {
-      mockLicense.isEnabled.mockReturnValue(false);
-      const result = await apiKeys.grantViaUiam(httpServerMock.createKibanaRequest(), {
-        name: 'test_api_key',
-      });
-      expect(result).toBeNull();
-      expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
-    });
-
-    it('throws an error when UIAM service is not available', async () => {
+    it('throws an error when UIAM service is not available', () => {
       apiKeys = new APIKeys({
         clusterClient: mockClusterClient,
         logger,
@@ -630,125 +828,58 @@ describe('API Keys', () => {
         applicationName: 'kibana-.kibana',
         kibanaFeatures: [],
       });
-      mockLicense.isEnabled.mockReturnValue(true);
 
-      await expect(
-        apiKeys.grantViaUiam(httpServerMock.createKibanaRequest(), {
-          name: 'test_api_key',
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"UIAM service is not available"`);
-      expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+      expect(() =>
+        apiKeys.getScopedClusterClientWithUiamHeaders(httpServerMock.createKibanaRequest())
+      ).toThrowErrorMatchingInlineSnapshot(`"UIAM service is not available"`);
+      expect(mockClusterClient.asScoped).not.toHaveBeenCalled();
     });
 
-    it('throws an error when request does not contain an authorization header', async () => {
-      mockLicense.isEnabled.mockReturnValue(true);
-
-      await expect(
-        apiKeys.grantViaUiam(httpServerMock.createKibanaRequest(), {
-          name: 'test_api_key',
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to grant an API Key via UIAM, request does not contain an authorization header"`
-      );
-      expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
-    });
-
-    it('throws an error when authorization scheme is not Bearer', async () => {
-      mockLicense.isEnabled.mockReturnValue(true);
-
-      await expect(
-        apiKeys.grantViaUiam(
-          httpServerMock.createKibanaRequest({
-            headers: { authorization: `Basic ${encodeToBase64('foo:bar')}` },
-          }),
-          {
-            name: 'test_api_key',
-          }
-        )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to grant an API Key via UIAM, request authorization scheme must be Bearer"`
-      );
-      expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
-    });
-
-    it('calls UIAM grantApiKey with proper parameters', async () => {
-      mockLicense.isEnabled.mockReturnValue(true);
-      mockUiam.grantApiKey.mockResolvedValue({
-        id: 'api-key-id',
-        name: 'test_api_key',
-        api_key: 'encoded-key-value',
-        expiration: 1234567890,
+    it('creates scoped client with UIAM authentication headers', () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer user-token' },
       });
 
-      const result = await apiKeys.grantViaUiam(
-        httpServerMock.createKibanaRequest({
-          headers: { authorization: 'Bearer foo-access-token' },
-        }),
-        {
-          name: 'test_api_key',
-          expiration: '7d',
-          metadata: { environment: 'test' },
-        }
-      );
+      apiKeys.getScopedClusterClientWithUiamHeaders(request);
 
-      expect(result).toEqual({
-        id: 'api-key-id',
-        name: 'test_api_key',
-        api_key: 'encoded-key-value',
-        expiration: 1234567890,
-      });
-      expect(mockUiam.grantApiKey).toHaveBeenCalledWith('foo-access-token', {
-        name: 'test_api_key',
-        expiration: '7d',
-        metadata: { environment: 'test' },
+      expect(mockUiam.getEsClientAuthenticationHeader).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
+        ...request,
+        headers: {
+          ...request.headers,
+          'es-client-authentication': 'shared-secret-value',
+        },
       });
     });
 
-    it('calls UIAM grantApiKey without optional parameters', async () => {
-      mockLicense.isEnabled.mockReturnValue(true);
-      mockUiam.grantApiKey.mockResolvedValue({
-        id: 'api-key-id',
-        name: 'test_api_key',
-        api_key: 'encoded-key-value',
+    it('merges UIAM headers with existing request headers', () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: 'Bearer user-token',
+          'custom-header': 'custom-value',
+        },
       });
 
-      const result = await apiKeys.grantViaUiam(
-        httpServerMock.createKibanaRequest({
-          headers: { authorization: 'Bearer foo-access-token' },
-        }),
-        {
-          name: 'test_api_key',
-        }
-      );
+      apiKeys.getScopedClusterClientWithUiamHeaders(request);
 
-      expect(result).toEqual({
-        id: 'api-key-id',
-        name: 'test_api_key',
-        api_key: 'encoded-key-value',
-      });
-      expect(mockUiam.grantApiKey).toHaveBeenCalledWith('foo-access-token', {
-        name: 'test_api_key',
+      expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
+        ...request,
+        headers: {
+          authorization: 'Bearer user-token',
+          'custom-header': 'custom-value',
+          'es-client-authentication': 'shared-secret-value',
+        },
       });
     });
 
-    it('throws error when UIAM grantApiKey fails', async () => {
-      mockLicense.isEnabled.mockReturnValue(true);
-      const error = new Error('UIAM service error');
-      mockUiam.grantApiKey.mockRejectedValue(error);
+    it('returns the scoped cluster client', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const mockScopedClient = { asCurrentUser: {}, asInternalUser: {} };
+      mockClusterClient.asScoped.mockReturnValue(mockScopedClient as any);
 
-      await expect(
-        apiKeys.grantViaUiam(
-          httpServerMock.createKibanaRequest({
-            headers: { authorization: 'Bearer foo-access-token' },
-          }),
-          {
-            name: 'test_api_key',
-          }
-        )
-      ).rejects.toThrowError('UIAM service error');
-      expect(mockUiam.grantApiKey).toHaveBeenCalledWith('foo-access-token', {
-        name: 'test_api_key',
-      });
+      const result = apiKeys.getScopedClusterClientWithUiamHeaders(request);
+
+      expect(result).toBe(mockScopedClient);
     });
   });
 
