@@ -577,7 +577,9 @@ const componentStyles = {
   }),
   sidebarContainer: css({
     width: '100%',
-    height: '100%',
+    height: 'inherit',
+    display: 'flex',
+    flex: '1 1 auto',
   }),
   mainPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
