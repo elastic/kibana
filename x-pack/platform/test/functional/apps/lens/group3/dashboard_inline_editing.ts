@@ -246,7 +246,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.createLayer('annotations');
 
-      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      expect(
+        (await find.allByCssSelector(`[data-test-subj^="unifiedTabs_selectTabBtn_"]`)).length
+      ).to.eql(2);
       expect(
         await (
           await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -294,7 +296,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and try to edit again the by reference annotation layer event
       await dashboardPanelActions.clickInlineEdit();
 
-      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      await lens.assertLayerCount(2);
       expect(
         await (
           await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')

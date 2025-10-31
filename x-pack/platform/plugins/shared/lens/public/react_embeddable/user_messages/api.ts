@@ -143,6 +143,7 @@ export function buildUserMessagesHelpers(
         visualizationState: {
           state: activeVisualizationState,
           activeId: activeVisualizationId,
+          selectedLayerId: null,
         },
         visualization: activeVisualization,
         activeDatasource,

@@ -52,7 +52,7 @@ export const FlyoutWrapper = ({
     <>
       {isInlineFlyoutVisible && displayFlyoutHeader && (
         <EuiFlyoutHeader
-          hasBorder
+          hasBorder={false}
           css={css`
             pointer-events: auto;
             background-color: ${euiTheme.colors.emptyShade};
@@ -99,7 +99,7 @@ export const FlyoutWrapper = ({
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           {/* Header row 2: Edit in Lens and button groups */}
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             {navigateToLensEditor && !isReadOnly && (
@@ -119,6 +119,7 @@ export const FlyoutWrapper = ({
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
         </EuiFlyoutHeader>
       )}
       {isInlineFlyoutVisible && isReadOnly ? (

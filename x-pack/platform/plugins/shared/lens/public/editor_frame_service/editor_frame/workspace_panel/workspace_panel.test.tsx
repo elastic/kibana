@@ -125,7 +125,12 @@ describe('workspace_panel', () => {
         <WorkspacePanel {...defaultProps} />,
       </EditorFrameServiceProvider>,
       {},
-      { preloadedState: { visualization: { activeId: null, state: {} }, datasourceStates: {} } }
+      {
+        preloadedState: {
+          visualization: { activeId: null, state: {}, selectedLayerId: null },
+          datasourceStates: {},
+        },
+      }
     );
     expect(screen.getByText('Drop some fields here to start')).toBeInTheDocument();
     expect(screen.queryByText('Expression renderer mock')).not.toBeInTheDocument();
@@ -937,6 +942,7 @@ describe('workspace_panel', () => {
           visualization: {
             activeId: 'testVis',
             state: {},
+            selectedLayerId: null,
           },
         })
       );

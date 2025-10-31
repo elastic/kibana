@@ -6,6 +6,9 @@
  */
 
 import React, { useCallback, useRef } from 'react';
+import { css } from '@emotion/react';
+
+import { EuiSpacer } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
@@ -19,7 +22,6 @@ import type {
 } from '@kbn/lens-common';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
@@ -45,6 +47,7 @@ import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { getLongMessage } from '../../user_messages_utils';
 import { useEditorFrameService } from '../editor_frame_service_context';
 import { VisualizationToolbarWrapper } from './visualization_toolbar';
+import { LayerTabsWrapper } from '../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 
 export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -164,8 +167,16 @@ export function EditorFrame(props: EditorFrameProps) {
                 >
                   <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
                     <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} />
+                    <EuiSpacer size="m" />
                   </EuiFlexItem>
                 </EuiFlexGroup>
+                <LayerTabsWrapper
+                  coreStart={props.core}
+                  framePublicAPI={framePublicAPI}
+                  setIsInlineFlyoutVisible={() => {}}
+                  dataViews={props.plugins.dataViews}
+                  uiActions={props.plugins.uiActions}
+                />
                 <ConfigPanelWrapper
                   core={props.core}
                   framePublicAPI={framePublicAPI}
@@ -218,5 +229,8 @@ export function EditorFrame(props: EditorFrameProps) {
 
 const componentStyles = {
   visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
-    css({ margin: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}` }),
+    css({
+      padding: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}`,
+      backgroundColor: euiTheme.colors.emptyShade,
+    }),
 };

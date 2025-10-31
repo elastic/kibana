@@ -590,6 +590,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async performLayerAction(testSubject: string, layerIndex = 0) {
       await retry.try(async () => {
+        // Hover over the tab to make the layer actions button visible
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+        if (tabs[layerIndex]) {
+          await tabs[layerIndex].moveMouseTo();
+        }
         await testSubjects.click(`lnsLayerSplitButton--${layerIndex}`);
         await testSubjects.click(testSubject);
       });
@@ -1133,6 +1138,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async duplicateLayer(index: number = 0) {
       await retry.try(async () => {
+        // Hover over the tab to make the layer actions button visible
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+        if (tabs[index]) {
+          await tabs[index].moveMouseTo();
+        }
         if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
@@ -1395,6 +1405,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openLayerContextMenu(index: number = 0) {
+      // Hover over the tab to make the layer actions button visible
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      if (tabs[index]) {
+        await tabs[index].moveMouseTo();
+      }
       await testSubjects.click(`lnsLayerSplitButton--${index}`);
     },
 
@@ -1646,6 +1661,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /** resets visualization/layer or removes a layer */
     async removeLayer(index: number = 0) {
       await retry.try(async () => {
+        // Hover over the tab to make the layer actions button visible
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+        if (tabs[index]) {
+          await tabs[index].moveMouseTo();
+        }
         if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
@@ -1655,6 +1675,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await testSubjects.click('lnsLayerRemoveConfirmButton');
         }
       });
+    },
+
+    async ensureLayerTabIsActive(index: number = 0) {
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      if (tabs[index]) {
+        await tabs[index].click(); // Click to make it active
+        // Wait for the layer panel to render
+        await retry.waitFor('layer panel to be visible', async () => {
+          return await testSubjects.exists(`lns-layerPanel-${index}`);
+        });
+      }
+    },
+
+    async assertLayerCount(expectedCount: number) {
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      expect(tabs.length).to.eql(expectedCount);
     },
 
     /**

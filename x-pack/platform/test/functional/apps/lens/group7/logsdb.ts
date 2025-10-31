@@ -79,6 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
       });
 
       // skip count for now as it's a special function and will
@@ -224,6 +225,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           runTestsForEachScenario(streamConvertedToLogsDBIndex, 'logsdb', (indexes) => {
             it(`should visualize a date histogram chart`, async () => {
+              await lens.ensureLayerTabIsActive();
+
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -250,6 +253,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it(`should visualize a date histogram chart using a different date field`, async () => {
+              await lens.ensureLayerTabIsActive();
+
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -276,6 +281,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it('should visualize an annotation layer from a logsDB stream', async () => {
+              await lens.ensureLayerTabIsActive();
+
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -290,9 +297,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               });
               await lens.createLayer('annotations');
 
-              expect(
-                (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length
-              ).to.eql(2);
+              await lens.assertLayerCount(2);
               expect(
                 await (
                   await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -313,6 +318,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it('should visualize an annotation layer from a logsDB stream using another time field', async () => {
+              await lens.ensureLayerTabIsActive();
+
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -327,9 +334,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               });
               await lens.createLayer('annotations');
 
-              expect(
-                (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length
-              ).to.eql(2);
+              await lens.assertLayerCount(2);
               expect(
                 await (
                   await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -420,6 +425,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           runTestsForEachScenario(logsdbConvertedToStream, 'logsdb', (indexes) => {
             it(`should visualize a date histogram chart`, async () => {
+              await lens.ensureLayerTabIsActive();
+
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -446,6 +453,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it(`should visualize a date histogram chart using a different date field`, async () => {
+              await lens.ensureLayerTabIsActive();
+
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -472,6 +481,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it('should visualize an annotation layer from a logsDB stream', async () => {
+              await lens.ensureLayerTabIsActive();
+
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -486,9 +497,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               });
               await lens.createLayer('annotations');
 
-              expect(
-                (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length
-              ).to.eql(2);
+              await lens.assertLayerCount(2);
               expect(
                 await (
                   await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -509,6 +518,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             it('should visualize an annotation layer from a logsDB stream using another time field', async () => {
+              await lens.ensureLayerTabIsActive();
+
               await lens.configureDimension({
                 dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
                 operation: 'date_histogram',
@@ -523,9 +534,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               });
               await lens.createLayer('annotations');
 
-              expect(
-                (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length
-              ).to.eql(2);
+              await lens.assertLayerCount(2);
               expect(
                 await (
                   await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
