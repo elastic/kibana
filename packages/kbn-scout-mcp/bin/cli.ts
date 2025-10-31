@@ -59,6 +59,7 @@ function parseArgs(): {
  * Show help message
  */
 function showHelp(): void {
+  // eslint-disable-next-line no-console
   console.log(`
 Scout MCP Server - Model Context Protocol server for Scout test framework
 

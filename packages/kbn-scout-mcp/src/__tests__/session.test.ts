@@ -11,6 +11,7 @@ import { ScoutSession } from '../session';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ScoutMcpConfig } from '../types';
 import type { Browser, BrowserContext, Page } from 'playwright';
+import * as playwright from 'playwright';
 
 // Mock playwright
 jest.mock('playwright', () => ({
@@ -102,8 +103,7 @@ describe('ScoutSession', () => {
       close: jest.fn(),
     } as any;
 
-    const playwright = require('playwright');
-    playwright.chromium.launch.mockResolvedValue(mockBrowser);
+    (playwright.chromium.launch as jest.Mock).mockResolvedValue(mockBrowser);
 
     session = new ScoutSession(config, log);
   });
@@ -137,7 +137,6 @@ describe('ScoutSession', () => {
       await session.initialize();
 
       // Should only launch browser once
-      const playwright = require('playwright');
       expect(playwright.chromium.launch).toHaveBeenCalledTimes(1);
     });
 

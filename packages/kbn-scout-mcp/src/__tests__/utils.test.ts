@@ -45,6 +45,7 @@ describe('Security Validators', () => {
       expect(() => validateAndSanitizeUrl('file:///etc/passwd', baseUrl)).toThrow(
         'Invalid protocol: only http and https allowed'
       );
+      // eslint-disable-next-line no-script-url
       expect(() => validateAndSanitizeUrl('javascript:alert(1)', baseUrl)).toThrow(
         'Invalid protocol: only http and https allowed'
       );

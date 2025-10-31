@@ -8085,10 +8085,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout@link:packages/shared/kbn-scout":
-  version "0.0.0"
-  uid ""
-
 "@kbn/scout@link:src/platform/packages/shared/kbn-scout":
   version "0.0.0"
   uid ""
@@ -8873,10 +8869,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-subj-selector@link:platform/packages/shared/kbn-test-subj-selector":
-  version "0.0.0"
-  uid ""
-
 "@kbn/test-subj-selector@link:src/platform/packages/shared/kbn-test-subj-selector":
   version "0.0.0"
   uid ""
@@ -8909,10 +8901,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test@link:platform/packages/shared/kbn-test":
-  version "0.0.0"
-  uid ""
-
 "@kbn/test@link:src/platform/packages/shared/kbn-test":
   version "0.0.0"
   uid ""
@@ -8942,10 +8930,6 @@
   uid ""
 
 "@kbn/tinymath@link:src/platform/packages/private/kbn-tinymath":
-  version "0.0.0"
-  uid ""
-
-"@kbn/tooling-log@link:platform/packages/shared/kbn-tooling-log":
   version "0.0.0"
   uid ""
 

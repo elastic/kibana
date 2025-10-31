@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node"]
+    "types": ["node", "jest"]
   },
   "include": [
     "**/*.ts"
