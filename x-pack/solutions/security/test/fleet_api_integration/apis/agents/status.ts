@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-
+import { v4 as uuidv4 } from 'uuid';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { DATA_STREAM_INDEX_PATTERN } from '@kbn/fleet-plugin/server/services/data_streams';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -356,16 +356,35 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ force: true })
         .expect(200);
 
-      // clean up test data
-      await es.deleteByQuery({
-        index: DATA_STREAM_INDEX_PATTERN,
-        query: {
-          bool: {
-            filter: {
-              terms: {
-                'agent.id': ['agent1', 'agent2'],
-              },
-            },
+      await es.create({
+        refresh: 'wait_for',
+        index: 'logs-system.system-default',
+        id: uuidv4(),
+        body: {
+          agent: {
+            id: 'agent1',
+          },
+          '@timestamp': new Date().toISOString(),
+          data_stream: {
+            dataset: 'system.system',
+            namespace: 'default',
+            type: 'logs',
+          },
+        },
+      });
+      await es.create({
+        refresh: 'wait_for',
+        index: 'logs-system.system-default',
+        id: uuidv4(),
+        body: {
+          agent: {
+            id: 'agent2',
+          },
+          '@timestamp': new Date().toISOString(),
+          data_stream: {
+            dataset: 'system.system',
+            namespace: 'default',
+            type: 'logs',
           },
         },
       });
@@ -379,12 +398,26 @@ export default function ({ getService }: FtrProviderContext) {
         )
         .expect(200);
       expect(apiResponse1).to.eql({
-        items: [{ agent1: { data: false } }, { agent2: { data: false } }],
+        items: [{ agent1: { data: true } }, { agent2: { data: true } }],
         dataPreview: [],
       });
       expect(apiResponse2).to.eql({
-        items: [{ agent1: { data: false } }, { agent2: { data: false } }],
+        items: [{ agent1: { data: true } }, { agent2: { data: true } }],
         dataPreview: [],
+      });
+
+      // clean up test data
+      await es.deleteByQuery({
+        index: DATA_STREAM_INDEX_PATTERN,
+        query: {
+          bool: {
+            filter: {
+              terms: {
+                'agent.id': ['agent1', 'agent2'],
+              },
+            },
+          },
+        },
       });
     });
   });
