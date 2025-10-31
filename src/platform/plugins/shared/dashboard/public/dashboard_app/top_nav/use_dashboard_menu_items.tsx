@@ -8,7 +8,7 @@
  */
 
 import type { Dispatch, SetStateAction } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';

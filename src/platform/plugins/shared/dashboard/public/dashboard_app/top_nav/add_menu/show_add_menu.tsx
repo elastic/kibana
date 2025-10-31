@@ -16,7 +16,6 @@ import {
   EuiContextMenu,
   EuiWrappingPopover,
   EuiThemeProvider,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
