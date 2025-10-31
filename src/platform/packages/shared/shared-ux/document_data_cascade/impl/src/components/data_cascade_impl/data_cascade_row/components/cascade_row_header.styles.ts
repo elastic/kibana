@@ -25,6 +25,7 @@ export const styles = (euiTheme: UseEuiTheme['euiTheme'], size: CascadeSizing) =
   }),
   rowHeaderSlotContainer: css({
     minWidth: 0,
+    maxWidth: 'fit-content',
     overflowX: 'auto',
     justifyContent: 'center',
   }),

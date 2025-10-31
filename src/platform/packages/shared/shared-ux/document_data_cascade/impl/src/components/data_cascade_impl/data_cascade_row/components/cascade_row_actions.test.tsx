@@ -28,6 +28,11 @@ const headerRowActions = [
     iconType: 'eye',
     onClick: jest.fn(),
   },
+  {
+    label: 'Action 4',
+    iconType: 'inspect',
+    onClick: jest.fn(),
+  },
 ];
 
 const renderComponent = () => {
@@ -45,7 +50,8 @@ describe('CascadeRowActions', () => {
     // Check that the first two actions are visible
     expect(screen.getByText('Action 1')).toBeInTheDocument();
     expect(screen.getByText('Action 2')).toBeInTheDocument();
-    expect(screen.queryByText('Action 3')).not.toBeInTheDocument();
+    expect(screen.getByText('Action 3')).toBeInTheDocument();
+    expect(screen.queryByText('Action 4')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Select more options')).toBeInTheDocument();
   });
 
@@ -56,6 +62,6 @@ describe('CascadeRowActions', () => {
     fireEvent.click(screen.getByLabelText('Select more options'));
 
     // Check that the third action is now visible
-    expect(screen.getByText('Action 3')).toBeInTheDocument();
+    expect(screen.getByText('Action 4')).toBeInTheDocument();
   });
 });

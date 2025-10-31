@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { CascadeRowActionProps } from '../../types';
 import { styles as cascadeRowActionsStyles } from './cascade_row_actions.styles';
 
-const MAX_ACTIONS_VISIBLE = 2;
+const MAX_ACTIONS_VISIBLE = 3;
 
 export const CascadeRowActions = function RowActions({
   headerRowActions,
@@ -52,6 +52,7 @@ export const CascadeRowActions = function RowActions({
     () => (
       <EuiButtonIcon
         {...defaultActionProps}
+        iconSize="s"
         aria-label={i18n.translate(
           'sharedUXPackages.dataCascade.expandRowButtonLabel.more_options',
           {
@@ -75,7 +76,7 @@ export const CascadeRowActions = function RowActions({
               {label}
             </EuiButtonEmpty>
           ) : (
-            <EuiButtonIcon {...defaultActionProps} {...props} />
+            <EuiButtonIcon {...defaultActionProps} {...props} iconSize="s" />
           )}
         </EuiFlexItem>
       )),
