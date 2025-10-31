@@ -274,6 +274,7 @@ export default function ({ getService }: FtrProviderContext) {
       await es.delete({
         id: 'agent-without-metrics',
         index: '.fleet-agents',
+        refresh: true,
       });
     });
 
@@ -290,7 +291,7 @@ export default function ({ getService }: FtrProviderContext) {
         enrolling: 0,
         error: 0,
         inactive: 0,
-        offline: 5,
+        offline: 4,
         online: 0,
         orphaned: 0,
         unenrolled: 0,
