@@ -16,6 +16,7 @@ import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { useExampleContext } from '../example_context';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
