@@ -303,18 +303,24 @@ spaceTest.describe.serial(
         // Switch back to first conversation - should retain state
         await pageObjects.assistantPage.selectConversation(mockConvo1Title);
         // Wait for conversation to fully load before checking state
-        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
-          // Ignore timeout - network might not be idle, continue anyway
-        });
+        // Wait for connector selector to be visible as an indicator that conversation has loaded
+        await pageObjects.assistantPage.connectorSelector
+          .waitFor({ state: 'visible', timeout: TIMEOUTS.UI_ELEMENT_STANDARD })
+          .catch(() => {
+            // Ignore timeout - continue anyway
+          });
         await pageObjects.assistantPage.expectConnectorSelected(azureConnectorName);
         await pageObjects.assistantPage.expectMessageSent('hello');
 
         // Switch back to second conversation - should retain state
         await pageObjects.assistantPage.selectConversation(mockConvo2Title);
         // Wait for conversation to fully load before checking state
-        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
-          // Ignore timeout - network might not be idle, continue anyway
-        });
+        // Wait for connector selector to be visible as an indicator that conversation has loaded
+        await pageObjects.assistantPage.connectorSelector
+          .waitFor({ state: 'visible', timeout: TIMEOUTS.UI_ELEMENT_STANDARD })
+          .catch(() => {
+            // Ignore timeout - continue anyway
+          });
         await pageObjects.assistantPage.expectConnectorSelected(bedrockConnectorName);
         await pageObjects.assistantPage.expectMessageSent('goodbye');
       }
