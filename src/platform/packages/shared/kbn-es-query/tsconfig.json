@@ -17,7 +17,6 @@
     "@kbn/i18n",
     "@kbn/safer-lodash-set",
     "@kbn/esql-types",
-    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",
