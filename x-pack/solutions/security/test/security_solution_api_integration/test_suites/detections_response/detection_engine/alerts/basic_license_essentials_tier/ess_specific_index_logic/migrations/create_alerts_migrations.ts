@@ -17,14 +17,14 @@ import { SIGNALS_TEMPLATE_VERSION } from '@kbn/security-solution-plugin/server/l
 import type { Signal } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 
 import {
+  createAlertsIndex,
+  deleteAllAlerts,
+} from '../../../../../../../config/services/detections_response';
+import {
   deleteMigrations,
   getIndexNameFromLoad,
   waitForIndexToPopulate,
 } from '../../../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-} from '../../../../../../../config/services/detections_response';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 

@@ -356,7 +356,7 @@ export const PrivMonUtils = (
       ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
       ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
       ctx._source.user.entity.attributes.Privileged = params.new_privileged_status;
-      ctx._source.user.roles = params.roles;      
+      ctx._source.user.roles = params.roles;
     `,
         params: { new_privileged_status: isPrivileged, roles: rolesParam },
       },

@@ -13,12 +13,12 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { deleteMigrationsIfExistent, getIndexNameFromLoad } from '../../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   waitFor,
 } from '../../../../../../../config/services/detections_response';
+import { deleteMigrationsIfExistent, getIndexNameFromLoad } from '../../../../../utils';
 import { createUserAndRole } from '../../../../../../../config/services/common';
 
 interface CreateResponse {

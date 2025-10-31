@@ -26,6 +26,11 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_U
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
 import {
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '../../../../../../config/services/detections_response';
+import {
   getPreviewAlerts,
   previewRule,
   getOpenAlerts,
@@ -34,11 +39,6 @@ import {
   setAlertStatus,
   patchRule,
 } from '../../../../utils';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 

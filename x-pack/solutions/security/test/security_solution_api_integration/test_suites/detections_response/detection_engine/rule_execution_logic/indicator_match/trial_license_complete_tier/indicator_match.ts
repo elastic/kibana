@@ -43,6 +43,11 @@ import {
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
+  deleteAllAlerts,
+  deleteAllRules,
+  createRule,
+} from '../../../../../../config/services/detections_response';
+import {
   previewRule,
   getAlerts,
   getPreviewAlerts,
@@ -52,11 +57,6 @@ import {
   stopAllManualRuns,
   waitForBackfillExecuted,
 } from '../../../../utils';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  createRule,
-} from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 

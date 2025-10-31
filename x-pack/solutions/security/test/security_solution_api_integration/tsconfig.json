@@ -9,12 +9,9 @@
     "../../../../../typings/**/*",
     "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": ["target/**/*", "config/services/detections_response/**/*"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/test-suites-xpack-security-endpoint",
-    {
-      "path": "config/services/detections_response/tsconfig.json"
-    },
     "@kbn/dev-utils",
     "@kbn/test",
     "@kbn/expect",
