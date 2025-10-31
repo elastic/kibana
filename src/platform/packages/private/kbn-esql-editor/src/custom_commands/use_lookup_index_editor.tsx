@@ -20,7 +20,9 @@ import { useDebounceFn } from '@kbn/react-hooks';
 import { isEqual } from 'lodash';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
-import type { ESQLEditorDeps, IndexEditorContext } from '../types';
+import { firstValueFrom, of } from 'rxjs';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { ESQLEditorDeps } from '../types';
 import {
   appendIndexToJoinCommandByName,
   appendIndexToJoinCommandByPosition,
@@ -39,6 +41,13 @@ export interface IndexEditorCommandArgs {
   canEditIndex?: boolean;
   triggerSource?: string;
   highestPrivilege?: string; // The highest user privilege for the given index ( create, edit, read )
+}
+
+async function isCurrentAppSupported(
+  currentAppId$: ApplicationStart['currentAppId$'] | undefined
+): Promise<boolean> {
+  const currentApp = await firstValueFrom(currentAppId$ ?? of(undefined));
+  return currentApp === 'discover';
 }
 
 /**
@@ -92,13 +101,17 @@ const DEBOUNCE_OPTIONS_PRIVILEGE_CHECK = { wait: 300, leading: true, trailing: f
 /**
  * Hook to determine if the current user has the necessary privileges to create a lookup index.
  */
-export const useCanCreateLookupIndex = (indexEditorContext?: IndexEditorContext) => {
+export const useCanCreateLookupIndex = () => {
+  const {
+    services: { application },
+  } = useKibana<ESQLEditorDeps>();
   const { getPermissions } = useLookupIndexPrivileges();
 
   const { run } = useDebounceFn(async (indexName?: string) => {
-    if (!indexEditorContext?.enabled) {
+    if ((await isCurrentAppSupported(application?.currentAppId$)) === false) {
       return false;
     }
+
     try {
       const resultIndexName = indexName || '*';
       const permissions = await getPermissions([resultIndexName]);
@@ -128,7 +141,7 @@ export const useLookupIndexCommand = (
   query: AggregateQuery,
   onIndexCreated: (resultQuery: string) => Promise<void>,
   onNewFieldsAddedToIndex?: (indexName: string) => void,
-  indexEditorContext?: IndexEditorContext
+  onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover']
 ) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -168,7 +181,7 @@ export const useLookupIndexCommand = (
   `;
 
   const { run: addLookupIndicesDecorator } = useDebounceFn(async () => {
-    if (!indexEditorContext?.enabled) {
+    if ((await isCurrentAppSupported(application?.currentAppId$)) === false) {
       return false;
     }
 
@@ -284,10 +297,10 @@ export const useLookupIndexCommand = (
             indexHasNewFields
           );
         },
-        onOpenIndexInDiscover: indexEditorContext?.onOpenIndexInDiscover,
+        onOpenIndexInDiscover,
       } as EditLookupIndexContentContext);
     },
-    [onFlyoutClose, indexEditorContext, uiActions]
+    [onFlyoutClose, onOpenIndexInDiscover, uiActions]
   );
 
   const openFlyoutRef = useRef(openFlyout);

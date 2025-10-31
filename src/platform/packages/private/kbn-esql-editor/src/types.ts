@@ -37,8 +37,7 @@ export interface ControlsContext {
 }
 
 export interface IndexEditorContext {
-  enabled: boolean;
-  onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover'];
+  onOpenIndexInDiscover: EditLookupIndexContentContext['onOpenIndexInDiscover'];
 }
 
 export interface DataErrorsControl {
@@ -97,7 +96,7 @@ export interface ESQLEditorProps {
   disableAutoFocus?: boolean;
   /** Enables the creation of controls from the editor **/
   controlsContext?: ControlsContext;
-  /** Enables the creation and edition of lookup join indexes **/
+  /** Context for the lookup join index editor **/
   indexEditorContext?: IndexEditorContext;
   /** The available ESQL variables from the page context this editor was opened in */
   esqlVariables?: ESQLControlVariable[];

@@ -330,7 +330,6 @@ export const DiscoverTopNav = ({
             : undefined
         }
         esqlIndexEditorConfig={{
-          enabled: true,
           onOpenIndexInDiscover: openIndexInNewTab,
         }}
       />

@@ -111,6 +111,7 @@ describe('useCanCreateLookupIndex', () => {
   const mockGetPermissions = jest.fn();
 
   beforeEach(() => {
+    mockServices.application.currentAppId$ = of('discover');
     (useLookupIndexPrivileges as jest.Mock).mockReturnValue({
       getPermissions: mockGetPermissions,
     });
@@ -125,7 +126,7 @@ describe('useCanCreateLookupIndex', () => {
       'test-index': { canCreateIndex: true },
     });
 
-    const { result } = renderHook(() => useCanCreateLookupIndex({ enabled: true }), {
+    const { result } = renderHook(() => useCanCreateLookupIndex(), {
       wrapper: createWrapper,
     });
 
@@ -138,7 +139,7 @@ describe('useCanCreateLookupIndex', () => {
       'test-index': { canCreateIndex: false },
     });
 
-    const { result } = renderHook(() => useCanCreateLookupIndex({ enabled: true }), {
+    const { result } = renderHook(() => useCanCreateLookupIndex(), {
       wrapper: createWrapper,
     });
 
@@ -146,10 +147,10 @@ describe('useCanCreateLookupIndex', () => {
     expect(canCreate).toBe(false);
   });
 
-  it('should return false when flyout is not enabled', async () => {
-    const { result } = renderHook(() => useCanCreateLookupIndex({ enabled: false }), {
-      wrapper: createWrapper,
-    });
+  it('should return false when not in supported app', async () => {
+    mockServices.application.currentAppId$ = of('dashboard');
+
+    const { result } = renderHook(() => useCanCreateLookupIndex(), { wrapper: createWrapper });
 
     const canCreate = await result.current('test-index');
     expect(canCreate).toBe(false);
@@ -165,7 +166,6 @@ describe('useLookupIndexCommand', () => {
   >;
   const mockGetLookupIndices = jest.fn();
   const mockOnIndexCreated = jest.fn();
-  const mockOnNewFieldsAddedToIndex = jest.fn();
   const mockGetPermissions = jest.fn();
   const mockQuery = { esql: 'FROM logs | LOOKUP JOIN test-index ON field' };
 
@@ -186,6 +186,8 @@ describe('useLookupIndexCommand', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
+
+    mockServices.application.currentAppId$ = of('discover');
 
     (useLookupIndexPrivileges as jest.Mock).mockReturnValue({
       getPermissions: mockGetPermissions,
@@ -225,9 +227,7 @@ describe('useLookupIndexCommand', () => {
           mockEditorModel,
           mockGetLookupIndices,
           mockQuery,
-          mockOnIndexCreated,
-          mockOnNewFieldsAddedToIndex,
-          { enabled: true }
+          mockOnIndexCreated
         ),
       { wrapper: createWrapper }
     );
@@ -246,9 +246,7 @@ describe('useLookupIndexCommand', () => {
           mockEditorModel,
           mockGetLookupIndices,
           mockQuery,
-          mockOnIndexCreated,
-          mockOnNewFieldsAddedToIndex,
-          { enabled: true }
+          mockOnIndexCreated
         ),
       { wrapper: createWrapper }
     );
@@ -284,9 +282,7 @@ describe('useLookupIndexCommand', () => {
           mockEditorModel,
           mockGetLookupIndices,
           mockQuery,
-          mockOnIndexCreated,
-          mockOnNewFieldsAddedToIndex,
-          { enabled: true }
+          mockOnIndexCreated
         ),
       { wrapper: createWrapper }
     );
@@ -330,9 +326,7 @@ describe('useLookupIndexCommand', () => {
           mockEditorModel,
           mockGetLookupIndices,
           mockQuery,
-          mockOnIndexCreated,
-          mockOnNewFieldsAddedToIndex,
-          { enabled: true }
+          mockOnIndexCreated
         ),
       { wrapper: createWrapper }
     );
@@ -371,9 +365,7 @@ describe('useLookupIndexCommand', () => {
           mockEditorModel,
           mockGetLookupIndices,
           mockQuery,
-          mockOnIndexCreated,
-          mockOnNewFieldsAddedToIndex,
-          { enabled: true }
+          mockOnIndexCreated
         ),
       { wrapper: createWrapper }
     );
@@ -407,9 +399,7 @@ describe('useLookupIndexCommand', () => {
           mockEditorModel,
           mockGetLookupIndices,
           mockQuery,
-          mockOnIndexCreated,
-          mockOnNewFieldsAddedToIndex,
-          { enabled: true }
+          mockOnIndexCreated
         ),
       { wrapper: createWrapper }
     );
@@ -434,7 +424,7 @@ describe('useLookupIndexCommand', () => {
     expect(mockOnIndexCreated).not.toHaveBeenCalled();
   });
 
-  it('should return early when flyout is disabled', async () => {
+  it('should return early when not in supported app', async () => {
     mockServices.application.currentAppId$ = of('dashboard');
 
     const { result } = renderHook(
@@ -444,9 +434,7 @@ describe('useLookupIndexCommand', () => {
           mockEditorModel,
           mockGetLookupIndices,
           mockQuery,
-          mockOnIndexCreated,
-          mockOnNewFieldsAddedToIndex,
-          { enabled: false }
+          mockOnIndexCreated
         ),
       { wrapper: createWrapper }
     );
@@ -457,6 +445,8 @@ describe('useLookupIndexCommand', () => {
   });
 
   it('should call onNewFieldsAddedToIndex when a new field has been added', async () => {
+    const mockOnNewFieldsAddedToIndex = jest.fn();
+
     renderHook(
       () =>
         useLookupIndexCommand(
@@ -465,8 +455,7 @@ describe('useLookupIndexCommand', () => {
           mockGetLookupIndices,
           mockQuery,
           mockOnIndexCreated,
-          mockOnNewFieldsAddedToIndex,
-          { enabled: true }
+          mockOnNewFieldsAddedToIndex
         ),
       { wrapper: createWrapper }
     );
@@ -495,6 +484,8 @@ describe('useLookupIndexCommand', () => {
   });
 
   it('should not call onNewFieldsAddedToIndex when no new field has been added', async () => {
+    const mockOnNewFieldsAddedToIndex = jest.fn();
+
     renderHook(
       () =>
         useLookupIndexCommand(
@@ -503,8 +494,7 @@ describe('useLookupIndexCommand', () => {
           mockGetLookupIndices,
           mockQuery,
           mockOnIndexCreated,
-          mockOnNewFieldsAddedToIndex,
-          { enabled: true }
+          mockOnNewFieldsAddedToIndex
         ),
       { wrapper: createWrapper }
     );
