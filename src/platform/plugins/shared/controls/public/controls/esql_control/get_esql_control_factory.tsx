@@ -126,6 +126,8 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
         serializeState,
       });
 
+      console.log({ api });
+
       const componentStaticState = {
         singleSelect: initialState.singleSelect ?? true,
         exclude: false,

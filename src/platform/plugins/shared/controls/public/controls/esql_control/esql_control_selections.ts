@@ -106,7 +106,7 @@ export function initializeESQLControlSelections(
   }
 
   // For Values From Query controls, update values on dashboard load/reload
-  const fetchSubscription = fetch$({ parentApi })
+  const fetchSubscription = fetch$({ uuid, parentApi })
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
       switchMap(async ({ timeRange }) => {

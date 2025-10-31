@@ -28,7 +28,7 @@ export const initializeESQLVariablesManager = (
 
   return {
     api: {
-      esqlVariables$,
+      esqlVariables$, // USE FETCH TO PUBLISH
     },
     cleanup: () => {
       childrenESQLVariablesSubscription.unsubscribe();

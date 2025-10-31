@@ -18,9 +18,12 @@ import {
   merge,
   of,
   switchMap,
+  tap,
   withLatestFrom,
   type Observable,
 } from 'rxjs';
+
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 
 import { useStateFromPublishingSubject } from '../../publishing_subject';
 import { apiHasParentApi, type HasParentApi } from '../has_parent_api';
@@ -39,7 +42,6 @@ import {
   type PublishesUnifiedSearch,
 } from './publishes_unified_search';
 import { apiHasUniqueId } from '../has_uuid';
-import { apiPublishesESQLVariables } from '@kbn/esql-types';
 
 function hasLocalTimeRange(api: unknown) {
   return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
@@ -95,7 +97,21 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
   }
 
   if (apiHasParentApi(api) && apiPublishesESQLVariables(api.parentApi)) {
-    observables.esqlVariables = api.parentApi.esqlVariables$;
+    observables.esqlVariables = api.parentApi.esqlVariables$.pipe(
+      map((allVariables) => {
+        const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
+        const section = api.parentApi?.layout$
+          ? api.parentApi?.layout$.getValue().panels[uuid]?.grid?.sectionId
+          : undefined;
+        return allVariables?.filter(
+          (currentVariable) =>
+            (currentVariable.meta?.controlledBy
+              ? currentVariable.meta.controlledBy !== uuid
+              : true) &&
+            (section && currentVariable.meta?.group ? section === currentVariable.meta.group : true)
+        );
+      })
+    );
   }
 
   return combineLatest(observables);
@@ -133,7 +149,7 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       isReloadTimeFetchContextEqual(prevContext, nextContext)
     ),
     switchMap(async (reloadTimeFetchContext) => {
-      console.log({ reloadTimeFetchContext });
+      console.log({ api, reloadTimeFetchContext });
 
       let searchSessionId;
       if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
