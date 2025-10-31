@@ -38,7 +38,6 @@ import {
   checkIntegrationFipsLooseCompatibility,
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
-  isPackagePrerelease,
   isRootPrivilegesRequired,
 } from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
@@ -78,8 +77,6 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 import { packageHasAtLeastOneSecret } from '../utils';
 
 import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
-
-import { PrereleaseCallout } from '../../../../../integrations/sections/epm/screens/detail/overview/prerelease_callout';
 
 import {
   AddIntegrationFlyoutConfigureHeader,
@@ -608,7 +605,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
         <>
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             size="m"
             color="warning"
             iconType="warning"
@@ -671,15 +668,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiSpacer size="m" />
         </>
       )}
-      {isAddIntegrationFlyout &&
-        packageInfo?.version &&
-        isPackagePrerelease(packageInfo.version) && (
-          <>
-            <PrereleaseCallout packageInfo={packageInfo} />
-
-            <EuiSpacer size="m" />
-          </>
-        )}
       <StepsWithLessPadding steps={steps} />
     </>
   );

@@ -10,7 +10,7 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSecretHeaders } from './use_secret_headers';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 

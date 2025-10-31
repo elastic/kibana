@@ -125,5 +125,6 @@
     "@kbn/licensing-types",
     "@kbn/alerting-plugin",
     "@kbn/spaces-utils",
+    "@kbn/react-query",
   ]
 }
