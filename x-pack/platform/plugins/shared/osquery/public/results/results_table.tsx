@@ -403,7 +403,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
       {!allResultsData?.edges.length ? (
         <EuiPanel hasShadow={false} data-test-subj={'osqueryResultsPanel'}>
-          <EuiCallOut title={generateEmptyDataMessage(data.aggregations.totalResponded)} />
+          <EuiCallOut
+            announceOnMount
+            title={generateEmptyDataMessage(aggregations.totalResponded)}
+          />
         </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>

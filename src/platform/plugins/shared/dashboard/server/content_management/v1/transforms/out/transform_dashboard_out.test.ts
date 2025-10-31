@@ -88,7 +88,6 @@ describe('transformDashboardOut', () => {
           version: '2',
         },
       ],
-      timeRestore: false,
       title: 'my title',
     });
   });
@@ -203,7 +202,6 @@ describe('transformDashboardOut', () => {
         from: 'now-15m',
         to: 'now',
       },
-      timeRestore: true,
       title: 'title',
     });
   });
