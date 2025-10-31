@@ -61,11 +61,7 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
     onHighlightsCountFound,
   ]);
 
-  return (
-    <div className="eui-textTruncate" ref={cellValueRef}>
-      {children}
-    </div>
-  );
+  return <div ref={cellValueRef}>{children}</div>;
 };
 
 const searchTermRegExpCache = new Map<string, RegExp>();

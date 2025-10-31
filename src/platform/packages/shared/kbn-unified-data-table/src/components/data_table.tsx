@@ -38,6 +38,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   type UseEuiTheme,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -1474,6 +1475,12 @@ const componentStyles = {
       },
       '.unifiedDataTable__cell--expanded': {
         backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+      },
+      '.euiDataGridRowCell__content--defaultHeight > div': {
+        maxInlineSize: '100%',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
       },
       '.unifiedDataTable__cellValue': {
         fontFamily: euiTheme.font.familyCode,
