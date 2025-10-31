@@ -32,11 +32,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add manual annotation layer with static date and allow edition', async () => {
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
       await lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
 
       await lens.createLayer('annotations');
 
-      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      await lens.assertLayerCount(2);
       expect(
         await (
           await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
@@ -75,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.removeLayer(1);
       await lens.createLayer('annotations');
 
-      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      await lens.assertLayerCount(2);
       expect(
         await (
           await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')

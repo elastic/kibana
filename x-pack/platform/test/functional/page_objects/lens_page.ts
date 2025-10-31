@@ -1691,6 +1691,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async ensureLayerTabIsActive(index: number = 0) {
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      if (tabs[index]) {
+        await tabs[index].click(); // Click to make it active
+        // Wait for the layer panel to render
+        await retry.waitFor('layer panel to be visible', async () => {
+          return await testSubjects.exists(`lns-layerPanel-${index}`);
+        });
+      }
+    },
+
+    async assertLayerCount(expectedCount: number) {
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      expect(tabs.length).to.eql(expectedCount);
+    },
+
     /**
      * Starts dragging @param dragging, drags over @param draggedOver and drops it into @dropTarget
      */
