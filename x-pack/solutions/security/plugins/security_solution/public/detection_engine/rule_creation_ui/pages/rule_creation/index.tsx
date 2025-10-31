@@ -236,15 +236,16 @@ const CreateRulePageComponent: React.FC<{
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
   useEffect(() => {
-    if (prevRuleType !== ruleType) {
+    if (prevRuleType && prevRuleType !== ruleType) {
+      console.log('ruleType changed:', { prevRuleType, ruleType });
       aboutStepForm.updateFieldValues({
         threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
       });
       scheduleStepForm.updateFieldValues(
         isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
       );
-      setPrevRuleType(ruleType);
     }
+    setPrevRuleType(ruleType);
   }, [aboutStepForm, scheduleStepForm, isThreatMatchRuleValue, prevRuleType, ruleType]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
