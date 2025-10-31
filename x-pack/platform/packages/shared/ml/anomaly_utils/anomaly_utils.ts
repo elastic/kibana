@@ -28,20 +28,6 @@ export enum ML_ENTITY_FIELD_TYPE {
 }
 
 /**
- * Custom enum of entity field operations
- */
-export const ML_ENTITY_FIELD_OPERATIONS = {
-  ADD: '+',
-  REMOVE: '-',
-} as const;
-
-/**
- * Union type of entity field operations
- */
-export type MlEntityFieldOperation =
-  (typeof ML_ENTITY_FIELD_OPERATIONS)[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
-
-/**
  * Interface of an entity field
  */
 export type MlEntityField = TypeOf<typeof mlEntityFieldSchema>;

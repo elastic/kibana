@@ -35,11 +35,13 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ML_DETECTOR_RULE_ACTION,
   ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/detector_rule';
+import { getPartitioningFieldNames } from '@kbn/ml-common-utils/job_utils/get_partitioning_field_names';
+import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
 
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
-import { checkPermission } from '../../capabilities/check_capabilities';
 import { ConditionsSection } from './conditions_section';
 import { ScopeSection } from './scope_section';
 import { SelectRuleAction } from './select_rule_action';
@@ -52,8 +54,6 @@ import {
   addItemToFilter,
 } from './utils';
 
-import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
-import { mlJobServiceFactory } from '../../services/job_service';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 
 class RuleEditorFlyoutUI extends Component {

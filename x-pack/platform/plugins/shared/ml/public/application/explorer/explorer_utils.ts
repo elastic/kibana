@@ -17,13 +17,14 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import {
-  getEntityFieldList,
-  type MlEntityField,
-  type MlRecordForInfluencer,
-  ML_JOB_AGGREGATION,
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { getEntityFieldList } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import type {
+  InfluencersFilterQuery,
+  MlAnomaliesTableRecordExtended,
+  MlEntityField,
+  MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
-import type { InfluencersFilterQuery, MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
@@ -31,23 +32,22 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-} from '../../../common/constants/search';
-import type { MlIndexUtils } from '../util/index_service';
-import {
-  isSourceDataChartableForDetector,
-  isModelPlotChartableForDetector,
-  isModelPlotEnabled,
-  isTimeSeriesViewJob,
-} from '../../../common/util/job_utils';
-import type { MlJobService } from '../services/job_service';
+} from '@kbn/ml-common-constants/search';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Annotations, AnnotationsTable } from '@kbn/ml-common-types/annotations';
+import { ML_RESULTS_INDEX_PATTERN } from '@kbn/ml-common-constants/index_patterns';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { MlJobService } from '@kbn/ml-services/job_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import type { MlIndexUtils } from '@kbn/ml-services/index_service';
+import { isSourceDataChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_source_data_chartable_for_detector';
+import { isModelPlotChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_model_plot_chartable_for_detector';
+import { isModelPlotEnabled } from '@kbn/ml-common-utils/job_utils/is_model_plot_enabled';
+import { isTimeSeriesViewJob } from '@kbn/ml-common-utils/job_utils/is_time_series_view_job';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+import type { SwimlaneType } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
+import { MAX_CATEGORY_EXAMPLES, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer';
 
-import type { SwimlaneType } from './explorer_constants';
-import { MAX_CATEGORY_EXAMPLES, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
-import { useMlKibana } from '../contexts/kibana';
-import type { MlApi } from '../services/ml_api_service';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { GroupObj } from '../components/job_selector/job_selector';
 import type { TableSeverityState } from '../components/controls/select_severity';
 

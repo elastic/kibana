@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useHasRequiredIndicesPermissions } from '../hooks';
 
 export const IndexPermissionsCallout: FC<{ indexName: string; docsType: 'start' | 'create' }> = ({

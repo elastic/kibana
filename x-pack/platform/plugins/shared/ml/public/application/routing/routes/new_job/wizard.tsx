@@ -11,25 +11,26 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { checkCreateJobsCapabilitiesResolver } from '@kbn/ml-services/capabilities/check_capabilities';
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
-import { useMlKibana } from '../../../contexts/kibana';
 import { basicResolvers } from '../../resolvers';
 import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
-import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import {
   loadNewJobCapabilities,
   ANOMALY_DETECTOR,
 } from '../../../services/new_job_capabilities/load_new_job_capabilities';
-import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import {
   type NavigateToApp,
   getStackManagementBreadcrumb,
   getMlManagementBreadcrumb,
 } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;

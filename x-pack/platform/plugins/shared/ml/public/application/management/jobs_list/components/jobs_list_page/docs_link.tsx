@@ -10,8 +10,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import { useMlKibana } from '../../../../contexts/kibana';
-import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const DocsLink: FC<{ currentTabId: MlSavedObjectType }> = ({ currentTabId }) => {
   const {

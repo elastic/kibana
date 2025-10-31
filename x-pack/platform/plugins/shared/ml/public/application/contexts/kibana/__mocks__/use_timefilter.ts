@@ -8,7 +8,7 @@
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 
-jest.mock('./kibana_context');
+jest.mock('@kbn/ml-kibana-context/kibana_context');
 
 export const timefilterMock = dataPluginMock.createStartContract().query.timefilter
   .timefilter as jest.Mocked<TimefilterContract>;

@@ -5,30 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
-import type { StartServicesAccessor } from '@kbn/core/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import {
-  apiHasExecutionContext,
-  apiHasParentApi,
-  apiPublishesTimeRange,
-  apiPublishesTimeslice,
-  fetch$,
-  initializeTimeRangeManager,
-  initializeTitleManager,
-  timeRangeComparators,
-  titleComparators,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { Observable } from 'rxjs';
@@ -42,10 +19,43 @@ import {
   Subscription,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+
+import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+
+import { openLazyFlyout } from '@kbn/presentation-util';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { apiHasExecutionContext } from '@kbn/presentation-publishing/interfaces/has_execution_context';
+import { apiHasParentApi } from '@kbn/presentation-publishing/interfaces/has_parent_api';
+import {
+  apiPublishesTimeRange,
+  apiPublishesTimeslice,
+} from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
+import { fetch$ } from '@kbn/presentation-publishing/interfaces/fetch/fetch';
+import {
+  timeRangeComparators,
+  initializeTimeRangeManager,
+} from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
+import {
+  initializeTitleManager,
+  titleComparators,
+} from '@kbn/presentation-publishing/interfaces/titles/title_manager';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing/publishing_subject';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
-import type { AnomalySwimlaneEmbeddableServices } from '..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { HttpService } from '@kbn/ml-services/http_service';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane';
+
+import type { AnomalySwimlaneEmbeddableServices } from '../types';
 import type { MlDependencies } from '../../application/app';
 import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
@@ -53,14 +63,13 @@ import {
   isViewBySwimLaneData,
   SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
-import { HttpService } from '../../application/services/http_service';
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { MlStartDependencies } from '../../plugin';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeSwimLaneControls, swimLaneComparators } from './initialize_swim_lane_controls';
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
-import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
+import type { AnomalySwimLaneEmbeddableApi } from './types';
 import { AnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
 
 /**
@@ -78,7 +87,7 @@ export const getServices = async (
     getStartServices(),
     import('../../application/services/anomaly_detector_service'),
     import('../../application/services/anomaly_timeline_service'),
-    import('../../application/services/ml_api_service'),
+    import('@kbn/ml-services/ml_api_service'),
   ]);
 
   const httpService = new HttpService(coreStart.http);
@@ -365,6 +374,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                 >
                   {error ? (
                     <EuiCallOut
+                      announceOnMount
                       title={
                         <FormattedMessage
                           id="xpack.ml.swimlaneEmbeddable.errorMessage"

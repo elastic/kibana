@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isJobIdValid } from '../../../../../common/util/job_utils';
+import { isJobIdValid } from '@kbn/ml-common-utils/job_utils/is_job_id_valid';
 
 export function isValidFilterListId(id) {
   //  Filter List ID requires the same format as a Job ID, therefore isJobIdValid can be used

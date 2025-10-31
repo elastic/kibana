@@ -8,9 +8,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { CHART_TYPE } from '../explorer_constants';
-
+import { CHART_TYPE } from '@kbn/ml-common-constants/explorer';
 import { i18n } from '@kbn/i18n';
+
 import { useExplorerChartTooltipStyles } from './explorer_chart_tooltip_styles';
 
 const CHART_DESCRIPTION = {

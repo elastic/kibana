@@ -8,16 +8,19 @@
 import React, { Component } from 'react';
 
 import { EuiPanel } from '@elastic/eui';
+
+import type { CoreStart } from '@kbn/core/public';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
 import type { AnomalySourceDescriptor } from './anomaly_source';
-import { AnomalyJobSelector } from './anomaly_job_selector';
+import { AnomalyJobSelectorLazy } from './anomaly_job_selector_lazy';
 import { LayerSelector } from './layer_selector';
-import type { MlAnomalyLayersType } from './util';
-import { ML_ANOMALY_LAYERS } from './util';
-import type { MlApi } from '../application/services/ml_api_service';
+import type { MlAnomalyLayersType } from './utils/constants';
+import { ML_ANOMALY_LAYERS } from './utils/constants';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
-  mlJobsService: MlApi['jobs'];
+  coreStart: CoreStart;
   jobsManagementPath?: string;
   canCreateJobs: boolean;
 }
@@ -28,6 +31,7 @@ interface State {
 }
 
 export class CreateAnomalySourceEditor extends Component<Props, State> {
+  private _mlJobsService: MlApi['jobs'] | undefined;
   private _isMounted: boolean = false;
   state: State = {};
 
@@ -41,6 +45,21 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
   }
 
   componentDidMount(): void {
+    if (!this._mlJobsService) {
+      const that = this;
+
+      async function initializeMlJobsService() {
+        const { HttpService } = await import('@kbn/ml-services/http_service');
+        const { jobsApiProvider } = await import('@kbn/ml-services/ml_api_service/jobs');
+
+        const httpService = new HttpService(that.props.coreStart.http);
+        that._mlJobsService = jobsApiProvider(httpService);
+        that.render();
+      }
+
+      initializeMlJobsService();
+    }
+
     this._isMounted = true;
   }
 
@@ -73,17 +92,22 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
   };
 
   render() {
+    if (!this._mlJobsService) {
+      return null;
+    }
+
     const selector = this.state.jobId ? (
       <LayerSelector
         onChange={this.onTypicalActualChange}
         typicalActual={this.state.typicalActual || ML_ANOMALY_LAYERS.ACTUAL}
       />
     ) : null;
+
     return (
       <EuiPanel>
-        <AnomalyJobSelector
+        <AnomalyJobSelectorLazy
           onJobChange={this.previewLayer}
-          mlJobsService={this.props.mlJobsService}
+          mlJobsService={this._mlJobsService}
           jobsManagementPath={this.props.jobsManagementPath}
           canCreateJobs={this.props.canCreateJobs}
         />
@@ -92,3 +116,7 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
     );
   }
 }
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default CreateAnomalySourceEditor;

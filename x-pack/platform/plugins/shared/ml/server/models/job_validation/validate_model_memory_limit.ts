@@ -9,11 +9,11 @@ import numeral from '@elastic/numeral';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ALLOWED_DATA_UNITS } from '@kbn/ml-validators';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { MlClient } from '@kbn/ml-client';
 
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
-import type { MlClient } from '../../lib/ml_client';
 
 // The minimum value the backend expects is 1MByte
 const MODEL_MEMORY_LIMIT_MINIMUM_BYTES = 1048576;

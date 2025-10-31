@@ -11,7 +11,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiSpacer,
@@ -23,8 +22,10 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { MlPageHeader } from '../../../components/page_header';
-import { useMlKibana } from '../../../contexts/kibana/kibana_context';
 import { PageTitle } from '../../../components/page_title';
 
 interface Props {

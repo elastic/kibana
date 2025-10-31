@@ -1,0 +1,27 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-http-server",
+    "@kbn/core",
+    "@kbn/utility-types",
+    "@kbn/ml-common-constants",
+    "@kbn/ml-common-types",
+    "@kbn/ml-data-frame-analytics-utils",
+    "@kbn/ml-error-utils",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-saved-objects",
+  ]
+}

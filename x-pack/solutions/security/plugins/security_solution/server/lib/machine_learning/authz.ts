@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { SetupPlugins } from '../../plugin';
 import { MINIMUM_ML_LICENSE } from '../../../common/constants';
 import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_admin_permissions';
@@ -25,7 +25,7 @@ export interface MlAuthz {
  * Builds ML authz services
  *
  * @param license A {@link ILicense} representing the user license
- * @param ml {@link MlPluginSetup} ML services to fetch ML capabilities
+ * @param ml {@link MlServerPluginSetup} ML services to fetch ML capabilities
  * @param request A {@link KibanaRequest} representing the authenticated user
  *
  * @returns A {@link MlAuthz} service object
@@ -57,7 +57,7 @@ export const buildMlAuthz = ({
  * Validates ML authorization for the current request
  *
  * @param license A {@link ILicense} representing the user license
- * @param ml {@link MlPluginSetup} ML services to fetch ML capabilities
+ * @param ml {@link MlServerPluginSetup} ML services to fetch ML capabilities
  * @param request A {@link KibanaRequest} representing the authenticated user
  *
  * @returns A {@link Validation} validation
@@ -108,7 +108,7 @@ export const hasMlLicense = (license: ILicense): boolean => license.hasAtLeast(M
  * Whether the requesting user is an ML Admin
  *
  * @param request A {@link KibanaRequest} representing the authenticated user
- * @param ml {@link MlPluginSetup} ML services to fetch ML capabilities
+ * @param ml {@link MlServerPluginSetup} ML services to fetch ML capabilities
  *
  */
 export const isMlAdmin = async ({
@@ -118,7 +118,7 @@ export const isMlAdmin = async ({
 }: {
   request: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
-  ml: MlPluginSetup;
+  ml: MlServerPluginSetup;
 }): Promise<boolean> => {
   const mlCapabilities = await ml.mlSystemProvider(request, savedObjectsClient).mlCapabilities();
   return hasMlAdminPermissions(mlCapabilities);

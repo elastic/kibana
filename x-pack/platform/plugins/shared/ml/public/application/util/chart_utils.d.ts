@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChartType } from '../explorer/explorer_constants';
+import type { ChartType } from '@kbn/ml-common-constants/explorer';
 
 export declare function numTicksForDateFormat(axisWidth: number, dateFormat: string): number;
 export declare function getChartType(config: any): ChartType;

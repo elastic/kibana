@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
@@ -15,7 +16,11 @@ import type {
 } from '@kbn/maps-plugin/common';
 import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '@kbn/maps-plugin/common';
 import type { MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
-import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
+
+// avoid import from plugin root
+// import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
+const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
+
 import type { DataFilters } from '@kbn/maps-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
@@ -26,16 +31,18 @@ import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/publ
 import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
 import type { DataRequest } from '@kbn/maps-plugin/public';
 import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
 import {
   AnomalySourceField,
   AnomalySourceTooltipProperty,
   ANOMALY_SOURCE_FIELDS,
 } from './anomaly_source_field';
-import { ML_PAGES } from '../../common/constants/locator';
-import type { MlAnomalyLayersType } from './util';
-import { getResultsForJobId, ML_ANOMALY_LAYERS } from './util';
-import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
-import type { MlApi } from '../application/services/ml_api_service';
+import type { MlAnomalyLayersType } from './utils/constants';
+import { getResultsForJobId } from './utils/get_results_for_job_id';
+import { ML_ANOMALY_LAYERS } from './utils/constants';
+import { UpdateAnomalySourceEditorLazy } from './update_anomaly_source_editor_lazy';
 
 const RESULT_LIMIT = 1000;
 
@@ -46,6 +53,7 @@ export type AnomalySourceDescriptor = SerializableRecord & {
 };
 
 export class AnomalySource implements IVectorSource {
+  static coreStart: CoreStart;
   static mlResultsService: MlApi['results'];
   static mlLocator?: LocatorPublic<SerializableRecord>;
 
@@ -73,6 +81,15 @@ export class AnomalySource implements IVectorSource {
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
+    // initalized mlResultsService on first call (done this way to optimize bundle sizes)
+    if (!AnomalySource.mlResultsService) {
+      const { HttpService } = await import('@kbn/ml-services/http_service');
+      const { mlApiProvider } = await import('@kbn/ml-services/ml_api_service');
+      const httpService = new HttpService(AnomalySource.coreStart.http);
+      const mlResultsService = mlApiProvider(httpService).results;
+      AnomalySource.mlResultsService = mlResultsService;
+    }
+
     const results = await getResultsForJobId(
       AnomalySource.mlResultsService,
       this._descriptor.jobId,
@@ -231,7 +248,7 @@ export class AnomalySource implements IVectorSource {
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
     return (
-      <UpdateAnomalySourceEditor
+      <UpdateAnomalySourceEditorLazy
         onChange={onChange}
         typicalActual={this._descriptor.typicalActual}
       />

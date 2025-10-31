@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-jest.mock('../../../services/job_service', () => 'mlJobService');
+jest.mock('@kbn/ml-services/job_service', () => 'mlJobService');
 
 import React from 'react';
+
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent } from '@testing-library/react';
-import { ML_DETECTOR_RULE_APPLIES_TO } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTOR_RULE_APPLIES_TO } from '@kbn/ml-anomaly-utils/detector_rule';
 
 import { EditConditionLink } from './edit_condition_link';
 

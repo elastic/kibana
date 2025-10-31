@@ -18,21 +18,21 @@ jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
 }));
 
-jest.mock('../../../capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-hooks/capabilities/use_permission_check', () => ({
+  usePermissionCheck: () => [true, true],
+}));
+jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
-jest.mock('../../../license', () => ({
+jest.mock('@kbn/ml-license', () => ({
   hasLicenseExpired: () => false,
   isFullLicense: () => false,
 }));
-jest.mock('../../../capabilities/get_capabilities', () => ({
+jest.mock('@kbn/ml-services/capabilities/get_capabilities', () => ({
   getCapabilities: () => {},
 }));
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true,
-}));
-jest.mock('../../../capabilities/check_capabilities', () => ({
-  usePermissionCheck: () => [true, true],
 }));
 
 const calendarsMock = [
@@ -105,6 +105,11 @@ const mockKibanaContext = {
 
 const mockReact = React;
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => {
+    return {
+      services: mockKibanaContext.services,
+    };
+  },
   withKibana: (type) => {
     const EnhancedType = (props) => {
       return mockReact.createElement(type, {

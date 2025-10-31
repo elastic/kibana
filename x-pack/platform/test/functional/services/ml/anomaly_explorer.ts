@@ -6,10 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import type { SwimlaneType } from '@kbn/ml-common-api-schemas/embeddable/anomaly_swimlane_type';
 
-import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
-import type { CreateCaseParams } from '../cases/create';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { CreateCaseParams } from '../cases/create';
+
 import type { MlAnomalyCharts } from './anomaly_charts';
 
 export function MachineLearningAnomalyExplorerProvider(

@@ -7,10 +7,10 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import type { MlClient } from '../../lib/ml_client';
 
-import type { Job } from '../../../common/types/anomaly_detection_jobs';
-import type { Filter, FilterStats } from '../../../common/types/filters';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Filter, FilterStats } from '@kbn/ml-common-types/filters';
+import type { MlClient } from '@kbn/ml-client';
 
 export interface FormFilter {
   filterId: string;

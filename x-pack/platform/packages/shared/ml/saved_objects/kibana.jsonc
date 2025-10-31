@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-saved-objects",
+  "owner": "@elastic/ml-ui"
+}

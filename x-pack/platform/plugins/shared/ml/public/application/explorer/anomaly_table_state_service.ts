@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Observable } from 'rxjs';
 import {
   combineLatest,
@@ -22,15 +20,24 @@ import {
   tap,
 } from 'rxjs';
 import { get, isEqual } from 'lodash';
+
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { InfluencersFilterQuery, MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { ML_JOB_AGGREGATION, getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import type { UrlStateService } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { MlJobService } from '../services/job_service';
-import type { MlApi } from '../services/ml_api_service';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { isModelPlotChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_model_plot_chartable_for_detector';
+import { isModelPlotEnabled } from '@kbn/ml-common-utils/job_utils/is_model_plot_enabled';
+import { isSourceDataChartableForDetector } from '@kbn/ml-common-utils/job_utils/is_source_data_chartable_for_detector';
+import type { MlJobService } from '@kbn/ml-services/job_service';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
+import { MAX_CATEGORY_EXAMPLES } from '@kbn/ml-common-constants/explorer';
+
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { TableSeverityState } from '../components/controls/select_severity';
 import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
@@ -43,13 +50,6 @@ import {
   getSelectionJobIds,
   getSelectionTimeRange,
 } from './explorer_utils';
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
-import { MAX_CATEGORY_EXAMPLES } from './explorer_constants';
-import {
-  isModelPlotChartableForDetector,
-  isModelPlotEnabled,
-  isSourceDataChartableForDetector,
-} from '../../../common/util/job_utils';
 import { StateService } from '../services/state_service';
 import type { Refresh } from '../routing/use_refresh';
 

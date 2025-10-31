@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { scheduleRruleSchemaV3 } from '@kbn/task-manager-plugin/server';
+import type { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
 export const updateScheduledReportParamsSchema = schema.object({
   id: schema.string(),
@@ -16,3 +17,5 @@ export const updateScheduledReportBodySchema = schema.object({
   title: schema.maybe(schema.string()),
   schedule: schema.maybe(scheduleRruleSchemaV3),
 });
+
+export type SerializedTitles = TypeOf<typeof serializedTitlesSchema>;

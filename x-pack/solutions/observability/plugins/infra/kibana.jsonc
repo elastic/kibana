@@ -58,7 +58,6 @@
       "licenseManagement",
       "kibanaUtils",
       "kibanaReact",
-      "ml",
       "controls"
     ]
   }

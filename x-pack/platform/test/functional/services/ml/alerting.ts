@@ -6,10 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
+import { ML_ALERT_TYPES, type MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import type { Rule } from '@kbn/alerting-plugin/common';
-import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-plugin/common/types/alerts';
+
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
 import type { MlApi } from './api';
 import type { MlCommonUI } from './common_ui';
 

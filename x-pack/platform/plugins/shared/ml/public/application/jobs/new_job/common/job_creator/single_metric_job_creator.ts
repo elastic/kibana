@@ -6,27 +6,19 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  type Aggregation,
-  type AggFieldPair,
-  type Field,
-  DOC_COUNT,
-  ML_JOB_AGGREGATION,
-  ES_AGGREGATION,
-} from '@kbn/ml-anomaly-utils';
+import type { Aggregation, AggFieldPair, Field } from '@kbn/ml-anomaly-utils';
+import { DOC_COUNT } from '@kbn/ml-anomaly-utils/field_types';
+import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils/es_aggregation';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import type { Job, Detector, BucketSpan } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { JOB_TYPE, CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 
-import type { MlApi } from '../../../../services/ml_api_service';
 import { JobCreator } from './job_creator';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-  BucketSpan,
-} from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isSparseDataJob } from './util/general';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';

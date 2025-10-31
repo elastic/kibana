@@ -7,12 +7,14 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import { dynamic } from '@kbn/shared-ux-utility';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import type { PageProps } from '../../router';
-import { PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
 import { preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 
 const Page = dynamic(async () => ({

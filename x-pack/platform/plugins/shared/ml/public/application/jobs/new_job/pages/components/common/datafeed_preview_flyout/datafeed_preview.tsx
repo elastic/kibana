@@ -18,9 +18,10 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import type { CombinedJob } from '../../../../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
-import { useMlApi } from '../../../../../../contexts/kibana';
 
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;

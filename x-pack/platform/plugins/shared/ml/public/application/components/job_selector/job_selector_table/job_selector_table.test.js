@@ -10,8 +10,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render } from '@testing-library/react'; // eslint-disable-line import/no-extraneous-dependencies
 import { JobSelectorTable } from './job_selector_table';
 
-jest.mock('../../../contexts/kibana');
-jest.mock('../../node_available_warning', () => {
+jest.mock('@kbn/ml-kibana-context/kibana_context');
+jest.mock('@kbn/ml-node-checks/node_available_warning', () => {
   return { MlNodeAvailableWarningShared: () => <div /> };
 });
 

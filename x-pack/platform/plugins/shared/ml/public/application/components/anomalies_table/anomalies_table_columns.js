@@ -12,19 +12,20 @@ import { get } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_JOB_AGGREGATION, isRuleSupported, isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { isRuleSupported, isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils/anomaly_utils';
 import {
   formatHumanReadableDate,
   formatHumanReadableDateTime,
   formatHumanReadableDateTimeSeconds,
 } from '@kbn/ml-date-utils';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
 
 import { DescriptionCell } from './description_cell';
 import { DetectorCell } from './detector_cell';
 import { EntityCell } from '../entity_cell';
 import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
-import { checkPermission } from '../../capabilities/check_capabilities';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS } from './anomalies_table_constants';
 import { SeverityCell } from './severity_cell';
 import { AnomalyValueDisplay } from './anomaly_value_display';

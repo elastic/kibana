@@ -26,7 +26,7 @@ import type { AIAssistantServiceOpts } from '.';
 import { AIAssistantService } from '.';
 import { retryUntil } from './create_resource_installation_helper.test';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 
@@ -110,7 +110,7 @@ const mockUser1 = authenticatedUser;
 describe('AI Assistant Service', () => {
   let pluginStop$: Subject<void>;
   let assistantServiceOpts: AIAssistantServiceOpts;
-  let ml: MlPluginSetup;
+  let ml: MlServerPluginSetup;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -125,7 +125,7 @@ describe('AI Assistant Service', () => {
     clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
     clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
     clusterClient.indices.get.mockResolvedValue({});
-    ml = mlPluginMock.createSetupContract() as unknown as MlPluginSetup; // Missing SharedServices mock, so manually mocking trainedModelsProvider
+    ml = mlPluginMock.createSetupContract() as unknown as MlServerPluginSetup; // Missing SharedServices mock, so manually mocking trainedModelsProvider
     ml.trainedModelsProvider = jest.fn().mockImplementation(() => ({
       getELSER: jest.fn().mockImplementation(() => '.elser_model_2'),
     }));

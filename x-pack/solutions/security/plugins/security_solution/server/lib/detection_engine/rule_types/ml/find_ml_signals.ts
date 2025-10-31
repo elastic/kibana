@@ -7,7 +7,7 @@
 
 import dateMath from '@kbn/datemath';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type { Filter } from '@kbn/es-query';
 import type { AnomalyResults } from '../../../machine_learning';
 import { getAnomalies, buildAnomalyQuery } from '../../../machine_learning';
@@ -27,7 +27,7 @@ export const findMlSignals = async ({
   exceptionFilter,
   isLoggedRequestsEnabled,
 }: {
-  ml: MlPluginSetup;
+  ml: MlServerPluginSetup;
   request: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
   jobIds: string[];
