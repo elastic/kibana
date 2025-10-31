@@ -7,19 +7,18 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { MacrosDataInput } from './macros_data_input';
-import { DashboardUploadSteps } from '../constants';
-import { getDashboardMigrationStatsMock } from '../../../../__mocks__';
-import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
-import { TestProviders } from '../../../../../../common/mock';
-import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
-import { useAppToastsMock } from '../../../../../../common/hooks/use_app_toasts.mock';
+import { MacrosDataInput, DataInputStep } from './macros_data_input';
+import { getDashboardMigrationStatsMock } from '../../../../dashboards/__mocks__';
+import { SiemMigrationTaskStatus } from '../../../../../../common/siem_migrations/constants';
+import { TestProviders } from '../../../../../common/mock';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockReportSetupMacrosQueryCopied = jest.fn();
 
-jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
+jest.mock('../../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
     services: {
       siemMigrations: {
@@ -39,16 +38,17 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
     },
   }),
 }));
-jest.mock('../../../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../../common/hooks/use_app_toasts');
 
 describe('MacrosDataInput', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   const defaultProps = {
     onMissingResourcesFetched: jest.fn(),
-    dataInputStep: DashboardUploadSteps.MacrosUpload,
+    dataInputStep: DataInputStep.Macros,
     migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     missingMacros: ['macro1', 'macro2'],
+    resourceType: 'dashboard' as const,
   };
 
   beforeEach(() => {
@@ -83,7 +83,7 @@ describe('MacrosDataInput', () => {
   it('does not render sub-steps when dataInputStep is not MacrosUpload', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <MacrosDataInput {...defaultProps} dataInputStep={DashboardUploadSteps.DashboardsUpload} />
+        <MacrosDataInput {...defaultProps} dataInputStep={DataInputStep.Items} />
       </TestProviders>
     );
     expect(queryByTestId('migrationsSubSteps')).not.toBeInTheDocument();

@@ -7,12 +7,12 @@
 
 import { renderHook } from '@testing-library/react';
 import { useMacrosFileUploadStep } from '.';
-import { TestProviders } from '../../../../../../../../common/mock';
-import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
-import { getRuleMigrationStatsMock } from '../../../../../../__mocks__';
-import { SiemMigrationTaskStatus } from '../../../../../../../../../common/siem_migrations/constants';
+import { TestProviders } from '../../../../../../../common/mock';
+import { useUpsertResources } from '../../../../../service/hooks/use_upsert_resources';
+import { getDashboardMigrationStatsMock } from '../../../../../../dashboards/__mocks__';
+import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
 
-jest.mock('../../../../../../service/hooks/use_upsert_resources');
+jest.mock('../../../../../service/hooks/use_upsert_resources');
 const mockUseUpsertResources = useUpsertResources as jest.Mock;
 
 describe('useMacrosFileUploadStep', () => {
@@ -29,7 +29,7 @@ describe('useMacrosFileUploadStep', () => {
 
     const props = {
       status: 'incomplete' as const,
-      migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
+      migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingMacros: [],
       onMacrosCreated: jest.fn(),
     };
@@ -53,7 +53,7 @@ describe('useMacrosFileUploadStep', () => {
 
     const props = {
       status: 'incomplete' as const,
-      migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
+      migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingMacros: [],
       onMacrosCreated: jest.fn(),
     };
@@ -77,7 +77,7 @@ describe('useMacrosFileUploadStep', () => {
 
     const props = {
       status: 'incomplete' as const,
-      migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
+      migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
       missingMacros: [],
       onMacrosCreated: jest.fn(),
     };

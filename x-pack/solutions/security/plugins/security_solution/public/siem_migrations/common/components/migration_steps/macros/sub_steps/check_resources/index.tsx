@@ -16,14 +16,16 @@ export interface CheckResourcesStepProps {
   status: EuiStepStatus;
   migrationStats: RuleMigrationTaskStats | undefined;
   onMissingResourcesFetched: OnMissingResourcesFetched;
+  resourceType: 'rule' | 'dashboard';
 }
 export const useCheckResourcesStep = ({
   status,
   migrationStats,
   onMissingResourcesFetched,
+  resourceType,
 }: CheckResourcesStepProps): EuiStepProps => {
   const { getMissingResources, isLoading, error } = useGetMissingResources(
-    'rule',
+    resourceType,
     onMissingResourcesFetched
   );
 

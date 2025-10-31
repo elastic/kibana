@@ -37,7 +37,11 @@ export const useUpsertResources = (onSuccess: OnSuccess, migrationType: Migratio
       (async () => {
         try {
           dispatch({ type: 'start' });
-          await siemMigrations.rules.upsertMigrationResources(migrationId, data);
+          if (migrationType === 'rule') {
+            await siemMigrations.rules.upsertMigrationResources(migrationId, data);
+          } else {
+            await siemMigrations.dashboards.upsertMigrationResources(migrationId, data);
+          }
 
           onSuccess(data);
           dispatch({ type: 'success' });
@@ -56,7 +60,13 @@ export const useUpsertResources = (onSuccess: OnSuccess, migrationType: Migratio
         }
       })();
     },
-    [siemMigrations.rules, notifications.toasts, onSuccess, migrationType]
+    [
+      siemMigrations.rules,
+      siemMigrations.dashboards,
+      notifications.toasts,
+      onSuccess,
+      migrationType,
+    ]
   );
 
   return { isLoading: state.loading, error: state.error, upsertResources };

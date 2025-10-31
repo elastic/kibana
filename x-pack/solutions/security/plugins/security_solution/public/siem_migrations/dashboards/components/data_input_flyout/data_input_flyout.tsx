@@ -169,7 +169,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
                   missingMacros={missingResourcesIndexed?.macros}
                   migrationStats={migrationStats}
                   onMissingResourcesFetched={onMissingResourcesFetched}
-                  telemetry={undefined}
+                  resourceType="dashboard"
                 />
               </EuiFlexItem>
               <EuiFlexItem>

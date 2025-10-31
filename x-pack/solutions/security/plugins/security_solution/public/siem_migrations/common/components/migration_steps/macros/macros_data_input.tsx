@@ -31,16 +31,28 @@ interface MacrosDataInputSubStepsProps {
   missingMacros: string[];
   onMissingResourcesFetched: OnMissingResourcesFetched;
   telemetry?: SiemRulesMigrationsTelemetry | undefined;
+  resourceType: 'rule' | 'dashboard';
 }
 interface MacrosDataInputProps
-  extends Omit<MacrosDataInputSubStepsProps, 'migrationStats' | 'missingMacros' | 'telemetry'> {
+  extends Omit<
+    MacrosDataInputSubStepsProps,
+    'migrationStats' | 'missingMacros' | 'telemetry' | 'resourceType'
+  > {
   dataInputStep: DataInputStep;
   telemetry?: SiemRulesMigrationsTelemetry | undefined;
   migrationStats?: RuleMigrationTaskStats | DashboardMigrationTaskStats;
   missingMacros?: string[];
+  resourceType: 'rule' | 'dashboard';
 }
 export const MacrosDataInput = React.memo<MacrosDataInputProps>(
-  ({ dataInputStep, telemetry, migrationStats, missingMacros, onMissingResourcesFetched }) => {
+  ({
+    dataInputStep,
+    telemetry,
+    migrationStats,
+    missingMacros,
+    onMissingResourcesFetched,
+    resourceType,
+  }) => {
     const dataInputStatus = useMemo(
       () => getEuiStepStatus(DataInputStep.Macros, dataInputStep),
       [dataInputStep]
@@ -73,6 +85,7 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
                 migrationStats={migrationStats}
                 missingMacros={missingMacros}
                 onMissingResourcesFetched={onMissingResourcesFetched}
+                resourceType={resourceType}
               />
             </EuiFlexItem>
           )}
@@ -86,7 +99,7 @@ MacrosDataInput.displayName = 'MacrosDataInput';
 const END = 10 as const;
 type SubStep = 1 | 2 | 3 | typeof END;
 export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
-  ({ telemetry, migrationStats, missingMacros, onMissingResourcesFetched }) => {
+  ({ telemetry, migrationStats, missingMacros, onMissingResourcesFetched, resourceType }) => {
     const [subStep, setSubStep] = useState<SubStep>(missingMacros.length ? 1 : 3);
 
     // Copy query step
@@ -119,6 +132,7 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
       status: getEuiStepStatus(3, subStep),
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
+      resourceType,
     });
 
     const steps = useMemo<EuiStepProps[]>(

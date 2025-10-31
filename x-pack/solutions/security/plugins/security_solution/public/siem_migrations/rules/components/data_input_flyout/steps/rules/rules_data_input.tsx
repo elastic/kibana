@@ -16,7 +16,7 @@ import * as i18n from './translations';
 import { DataInputStep } from '../../../../../common/components/migration_steps/macros/macros_data_input';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
-import { useCheckResourcesStep } from './sub_steps/check_resources';
+import { useCheckResourcesStep } from '../../../../../common/components/migration_steps/macros/sub_steps/check_resources';
 import type { RuleMigrationStats } from '../../../../types';
 
 interface RulesDataInputSubStepsProps {
@@ -137,6 +137,7 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
       status: getEuiStepStatus(4, subStep),
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
+      resourceType: 'rule',
     });
 
     const steps = useMemo<EuiStepProps[]>(

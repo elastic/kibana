@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import { useAppToasts } from '../../../../../../../../common/hooks/use_app_toasts';
+import { useAppToasts } from '../../../../../../../common/hooks/use_app_toasts';
 import type { SiemMigrationResourceData } from '../../../../../../../../common/siem_migrations/model/common.gen';
 import { RuleResourceIdentifier } from '../../../../../../../../common/siem_migrations/rules/resources';
 import { useUpsertResources } from '../../../../../service/hooks/use_upsert_resources';

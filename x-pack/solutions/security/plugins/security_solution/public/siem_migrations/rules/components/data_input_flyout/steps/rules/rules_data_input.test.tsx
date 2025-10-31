@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RulesDataInput } from './rules_data_input';
-import { DataInputStep } from '../constants';
+import { DataInputStep } from '../../../../../common/components/migration_steps/macros/macros_data_input';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 
 describe('RulesDataInput', () => {
@@ -21,7 +21,7 @@ describe('RulesDataInput', () => {
   it('renders the step number', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesDataInput {...defaultProps} dataInputStep={DataInputStep.Rules} />
+        <RulesDataInput {...defaultProps} dataInputStep={DataInputStep.Items} />
       </TestProviders>
     );
 
@@ -32,7 +32,7 @@ describe('RulesDataInput', () => {
   it('renders the title', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesDataInput {...defaultProps} dataInputStep={DataInputStep.Rules} />
+        <RulesDataInput {...defaultProps} dataInputStep={DataInputStep.Items} />
       </TestProviders>
     );
 
@@ -43,7 +43,7 @@ describe('RulesDataInput', () => {
   it('renders sub-steps when the step is current', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesDataInput {...defaultProps} dataInputStep={DataInputStep.Rules} />
+        <RulesDataInput {...defaultProps} dataInputStep={DataInputStep.Items} />
       </TestProviders>
     );
 
