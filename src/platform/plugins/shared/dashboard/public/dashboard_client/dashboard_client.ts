@@ -36,6 +36,7 @@ const cache = new LRUCache<string, DashboardAPIGetOut>({
 
 export const dashboardClient = {
   create: async (dashboardState: DashboardState, references: Reference[]) => {
+    // TODO replace with call to dashboard REST create endpoint
     return contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
       contentTypeId: DASHBOARD_CONTENT_ID,
       data: dashboardState,
