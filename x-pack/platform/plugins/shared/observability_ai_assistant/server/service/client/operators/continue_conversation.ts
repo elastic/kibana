@@ -15,7 +15,7 @@ import {
   EMPTY,
   from,
   isObservable,
-  map,
+  mergeMap,
   of,
   shareReplay,
   switchMap,
@@ -29,13 +29,19 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
 import type { ToolCallEvent } from '../../../analytics/tool_call';
 import { toolCallEventType } from '../../../analytics/tool_call';
-import type { Message, CompatibleJSONSchema, MessageAddEvent } from '../../../../common';
+import type {
+  Message,
+  CompatibleJSONSchema,
+  MessageAddEvent,
+  ConfirmationRequiredEvent,
+} from '../../../../common';
 import {
   CONTEXT_FUNCTION_NAME,
   createFunctionNotFoundError,
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../../../common';
+import { isConfirmationMessage } from '../../../../common/utils/is_confirmation_message';
 import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
 import { createFunctionLimitExceededError } from '../../../../common/conversation_complete';
 import type { Instruction } from '../../../../common/types';
@@ -247,9 +253,88 @@ export function continueConversation({
 
   const isUserMessage = lastMessage?.role === MessageRole.User;
 
+  // Filter out confirmation messages before sending to LLM
+  const messagesWithoutConfirmation = initialMessages.filter((msg) => !isConfirmationMessage(msg));
+
   return executeNextStep().pipe(handleEvents());
 
   function executeNextStep() {
+    // Check for confirmation/rejection messages (function responses with confirmation metadata)
+    if (isUserMessage && lastMessage.name) {
+      try {
+        const content = JSON.parse(lastMessage.content || '{}');
+        if (content.confirmed !== undefined) {
+          // Find the original function_call in the conversation history
+          // Use slice() to avoid mutating messagesWithoutConfirmation
+          const functionCallMessage = messagesWithoutConfirmation
+            .slice()
+            .reverse()
+            .find(
+              (msg) =>
+                msg.message.role === MessageRole.Assistant &&
+                msg.message.function_call?.name === lastMessage.name
+            );
+
+          if (!functionCallMessage?.message.function_call) {
+            return of(
+              createServerSideFunctionResponseError({
+                name: lastMessage.name,
+                error: new Error('Could not find original function call in conversation history'),
+              })
+            );
+          }
+
+          const functionArgs = functionCallMessage.message.function_call.arguments;
+
+          if (!content.confirmed) {
+            // User cancelled
+            return of(
+              createServerSideFunctionResponseError({
+                name: lastMessage.name,
+                error: new Error('User cancelled operation'),
+              })
+            );
+          }
+          if (!functionClient.hasFunction(lastMessage.name)) {
+            return of(
+              createServerSideFunctionResponseError({
+                name: lastMessage.name,
+                error: new Error('Function not found'),
+              })
+            );
+          }
+          try {
+            const parsedArgs = JSON.parse(functionArgs || '{}');
+            functionClient.validate(lastMessage.name, parsedArgs);
+          } catch (error) {
+            return of(
+              createServerSideFunctionResponseError({
+                name: lastMessage.name,
+                error,
+              })
+            );
+          }
+          // User confirmed - execute the function!
+          return executeFunctionAndCatchError({
+            name: lastMessage.name,
+            args: functionArgs,
+            chat,
+            functionClient,
+            messages: initialMessages.slice(0, -1), // Exclude the confirmation message
+            signal,
+            logger,
+            connectorId,
+            simulateFunctionCalling,
+            analytics,
+            connector,
+            scopes,
+          });
+        }
+      } catch (e) {
+        // Not a confirmation message, fall through
+      }
+    }
+
     if (isUserMessage) {
       const operationName =
         lastMessage.name && lastMessage.name !== CONTEXT_FUNCTION_NAME
@@ -257,7 +342,7 @@ export function continueConversation({
           : 'user_message';
 
       return chat(operationName, {
-        messages: initialMessages,
+        messages: messagesWithoutConfirmation,
         connectorId,
         stream: true,
         ...functionOptions,
@@ -279,6 +364,9 @@ export function continueConversation({
     nextFunctionCallsLeft--;
 
     const isAction = functionCallName && functionClient.hasAction(functionCallName);
+    const functionConfirmationRequiredConfig =
+      functionCallName &&
+      functionClient.getConfirmationConfig(functionCallName, lastMessage.function_call!.arguments);
 
     if (currentFunctionCallsLeft === 0) {
       // create a function call response error so the LLM knows it needs to stop calling functions
@@ -316,6 +404,10 @@ export function continueConversation({
       return EMPTY;
     }
 
+    if (functionConfirmationRequiredConfig) {
+      return EMPTY;
+    }
+
     if (!functionClient.hasFunction(functionCallName)) {
       // tell the LLM the function was not found
       return of(
@@ -331,7 +423,7 @@ export function continueConversation({
       args: lastMessage.function_call!.arguments,
       chat,
       functionClient,
-      messages: initialMessages,
+      messages: messagesWithoutConfirmation,
       signal,
       logger,
       connectorId,
@@ -346,16 +438,17 @@ export function continueConversation({
     return (events$) => {
       const shared$ = events$.pipe(
         shareReplay(),
-        map((event) => {
+        mergeMap((event) => {
           if (event.type === StreamingChatResponseEventType.MessageAdd) {
             const message = event.message;
+            const functionCallName = message.message.function_call?.name;
 
-            if (message.message.function_call?.name === EXIT_LOOP_FUNCTION_NAME) {
-              const args = JSON.parse(message.message.function_call.arguments ?? '{}') as {
+            if (functionCallName === EXIT_LOOP_FUNCTION_NAME) {
+              const args = JSON.parse(message.message.function_call?.arguments ?? '{}') as {
                 response: string;
               };
 
-              return {
+              return of({
                 ...event,
                 message: {
                   ...message,
@@ -364,10 +457,29 @@ export function continueConversation({
                     content: args.response ?? `The model returned an empty response`,
                   },
                 },
-              } satisfies MessageAddEvent;
+              } satisfies MessageAddEvent);
+            }
+
+            if (functionCallName) {
+              const confirmationConfig = functionClient.getConfirmationConfig(
+                functionCallName,
+                message.message.function_call?.arguments
+              );
+
+              if (confirmationConfig) {
+                return from([
+                  event, // Original message add event
+                  {
+                    type: StreamingChatResponseEventType.ConfirmationRequired,
+                    functionName: functionCallName,
+                    functionCallArguments: message.message.function_call?.arguments || '{}',
+                    confirmationConfig,
+                  } satisfies ConfirmationRequiredEvent,
+                ]);
+              }
             }
           }
-          return event;
+          return of(event);
         })
       );
 
@@ -380,7 +492,7 @@ export function continueConversation({
               return EMPTY;
             }
             return continueConversation({
-              messages: initialMessages.concat(extractedMessages),
+              messages: messagesWithoutConfirmation.concat(extractedMessages),
               chat,
               functionCallsLeft: nextFunctionCallsLeft,
               functionClient,

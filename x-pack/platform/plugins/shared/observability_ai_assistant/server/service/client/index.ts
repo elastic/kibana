@@ -38,6 +38,7 @@ import type {
 import { ToolChoiceType } from '@kbn/inference-common';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { CONTEXT_FUNCTION_NAME } from '../../../common';
+import { isConfirmationMessage } from '../../../common/utils/is_confirmation_message';
 import { resourceNames } from '..';
 import type {
   ChatCompletionChunkEvent,
@@ -368,7 +369,12 @@ export class ObservabilityAIAssistantClient {
                 return nextEvents$.pipe(
                   addAnonymizationData(initialMessages.concat(addedMessages)),
                   switchMap((deanonymizedMessages) => {
-                    const lastMessage = last(deanonymizedMessages);
+                    // Filter out confirmation messages before persisting
+                    const messagesToPersist = deanonymizedMessages.filter(
+                      (msg) => !isConfirmationMessage(msg)
+                    );
+
+                    const lastMessage = last(messagesToPersist);
 
                     // if a function request is at the very end, close the stream to consumer
                     // without persisting or updating the conversation. we need to wait
@@ -391,7 +397,7 @@ export class ObservabilityAIAssistantClient {
                             omit(conversation._source, 'messages'),
 
                             // update messages and system message
-                            { messages: deanonymizedMessages, systemMessage },
+                            { messages: messagesToPersist, systemMessage },
 
                             // update title
                             {
@@ -422,7 +428,7 @@ export class ObservabilityAIAssistantClient {
                         labels: {},
                         numeric_labels: {},
                         systemMessage,
-                        messages: deanonymizedMessages,
+                        messages: messagesToPersist,
                         archived: false,
                       })
                     ).pipe(

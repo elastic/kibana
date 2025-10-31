@@ -36,6 +36,7 @@ import {
   aiAssistantSimulatedFunctionCalling,
   getElasticManagedLlmConnector,
   InferenceModelState,
+  isConfirmationMessage,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
@@ -48,6 +49,7 @@ import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_servic
 import type { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
 import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
+import { ConfirmationPrompt } from './confirmation_prompt';
 import type { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
@@ -184,6 +186,9 @@ export function ChatBody({
     isConversationOwnedByCurrentUser,
     user: conversationUser,
     updateConversationAccess,
+    pendingConfirmation,
+    confirmPendingFunction,
+    rejectPendingFunction,
   } = useConversation({
     currentUser,
     initialConversationId,
@@ -203,6 +208,9 @@ export function ChatBody({
       state === ChatState.Loading ||
       conversation.loading
   );
+
+  // Filter out confirmation messages before displaying
+  const displayMessages = messages.filter((msg) => !isConfirmationMessage(msg));
 
   let title = conversation.value?.conversation.title || initialTitle;
   if (!title) {
@@ -551,7 +559,7 @@ export function ChatBody({
               paddingSize="m"
               className={animClassName(euiTheme)}
             >
-              {connectors.connectors?.length === 0 || messages.length === 0 ? (
+              {connectors.connectors?.length === 0 || displayMessages.length === 0 ? (
                 <WelcomeMessage
                   connectors={connectors}
                   knowledgeBase={knowledgeBase}
@@ -571,7 +579,7 @@ export function ChatBody({
               ) : (
                 <ChatTimeline
                   conversationId={conversationId}
-                  messages={messages}
+                  messages={displayMessages}
                   chatService={chatService}
                   currentUser={conversationUser}
                   isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
@@ -606,6 +614,18 @@ export function ChatBody({
           </EuiFlexItem>
         ) : null}
 
+        {pendingConfirmation ? (
+          <EuiFlexItem grow={false}>
+            <ConfirmationPrompt
+              message={pendingConfirmation.confirmationConfig.message}
+              type={pendingConfirmation.confirmationConfig.type}
+              confirmButtonText={pendingConfirmation.confirmationConfig.confirmButtonText}
+              onConfirm={confirmPendingFunction}
+              onCancel={rejectPendingFunction}
+            />
+          </EuiFlexItem>
+        ) : null}
+
         <>
           {conversationId && !isArchived ? sharedBanner : null}
           {conversationId && isArchived ? archivedBanner : null}
@@ -624,7 +644,9 @@ export function ChatBody({
                 className={promptEditorContainerClassName}
               >
                 <PromptEditor
-                  disabled={!connectors.selectedConnector || !hasCorrectLicense}
+                  disabled={
+                    !connectors.selectedConnector || !hasCorrectLicense || !!pendingConfirmation
+                  }
                   hidden={connectors.loading || connectors.connectors?.length === 0}
                   loading={isLoading}
                   onChangeHeight={handleChangeHeight}

@@ -193,7 +193,7 @@ export function useConversation({
     }
   };
 
-  const { next, messages, setMessages, state, stop } = useChat({
+  const { next, messages, setMessages, state, stop, pendingConfirmation, confirmPendingFunction, rejectPendingFunction } = useChat({
     initialMessages,
     initialConversationId,
     chatService,
@@ -284,5 +284,8 @@ export function useConversation({
     },
     updateConversationAccess,
     duplicateConversation,
+    pendingConfirmation,
+    confirmPendingFunction,
+    rejectPendingFunction,
   };
 }

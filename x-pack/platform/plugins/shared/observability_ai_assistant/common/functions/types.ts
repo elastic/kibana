@@ -25,7 +25,15 @@ export type CompatibleJSONSchema = {
   oneOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
   description?: string;
 };
+export interface ConfirmationConfig {
+  message: string;
+  type: 'destructive' | 'warning';
+  confirmButtonText?: string;
+}
 
+export interface ConditionalConfirmationConfig extends ConfirmationConfig {
+  method: string; // 'DELETE' | 'POST' | 'PUT' etc.
+}
 export type FunctionResponse =
   | {
       content?: any;
@@ -41,6 +49,7 @@ export interface FunctionDefinition<
   isInternal?: boolean;
   descriptionForUser?: string;
   parameters?: TParameters;
+  confirmationConfig?: ConfirmationConfig | ConditionalConfirmationConfig[];
 }
 
 export type FunctionRegistry = Map<string, FunctionDefinition>;

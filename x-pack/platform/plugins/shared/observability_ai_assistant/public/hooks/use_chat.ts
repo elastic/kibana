@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { ConfirmationConfig } from '../../common/functions/types';
 import type { ConversationCreateEvent, ConversationUpdateEvent } from '../../common';
 import {
   MessageRole,
@@ -21,7 +22,6 @@ import {
 import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from '..';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
-
 export enum ChatState {
   Ready = 'ready',
   Loading = 'loading',
@@ -35,6 +35,12 @@ export interface UseChatResult {
   state: ChatState;
   next: (messages: Message[], onError?: (error: any) => void) => void;
   stop: () => void;
+  pendingConfirmation: {
+    functionName: string;
+    confirmationConfig: ConfirmationConfig;
+  } | null;
+  confirmPendingFunction: () => void;
+  rejectPendingFunction: () => void;
 }
 
 interface UseChatPropsWithoutContext {
@@ -79,6 +85,10 @@ function useChatWithoutContext({
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
   const [pendingMessages, setPendingMessages] = useState<Message[]>();
+  const [pendingConfirmation, setPendingConfirmation] = useState<{
+    functionName: string;
+    confirmationConfig: ConfirmationConfig;
+  } | null>(null);
 
   const abortControllerRef = useRef(new AbortController());
 
@@ -218,6 +228,13 @@ function useChatWithoutContext({
               completedMessages.push(event.message);
               break;
 
+            case StreamingChatResponseEventType.ConfirmationRequired:
+              setPendingConfirmation({
+                functionName: event.functionName,
+                confirmationConfig: event.confirmationConfig,
+              });
+              break;
+
             case StreamingChatResponseEventType.ConversationCreate:
               setConversationId(event.conversation.id);
               onConversationUpdateRef.current?.(event);
@@ -262,6 +279,46 @@ function useChatWithoutContext({
     ]
   );
 
+  const confirmPendingFunction = useCallback(() => {
+    if (!pendingConfirmation) return;
+
+    const confirmationMessage: Message = {
+      '@timestamp': new Date().toISOString(),
+      message: {
+        role: MessageRole.User,
+        name: pendingConfirmation.functionName,
+        content: JSON.stringify({
+          confirmed: true,
+        }),
+      },
+    };
+
+    setPendingConfirmation(null);
+
+    // Resume conversation with confirmation
+    next([...messages, confirmationMessage]);
+  }, [pendingConfirmation, messages, next]);
+
+  const rejectPendingFunction = useCallback(() => {
+    if (!pendingConfirmation) return;
+
+    const rejectionMessage: Message = {
+      '@timestamp': new Date().toISOString(),
+      message: {
+        role: MessageRole.User,
+        name: pendingConfirmation.functionName,
+        content: JSON.stringify({
+          confirmed: false,
+        }),
+      },
+    };
+
+    setPendingConfirmation(null);
+
+    // Resume conversation with rejection
+    next([...messages, rejectionMessage]);
+  }, [pendingConfirmation, messages, next]);
+
   useEffect(() => {
     return () => {
       abortControllerRef.current.abort();
@@ -282,6 +339,9 @@ function useChatWithoutContext({
   return {
     messages: memoizedMessages,
     setMessages: setMessagesWithAbort,
+    pendingConfirmation,
+    confirmPendingFunction,
+    rejectPendingFunction,
     state: chatState,
     next,
     stop: () => {

@@ -9,6 +9,7 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import { compact, keyBy } from 'lodash';
 import type { Logger } from '@kbn/logging';
+import type { ConfirmationConfig } from '../../../common/functions/types';
 import { type FunctionResponse } from '../../../common/functions/types';
 import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
@@ -106,6 +107,46 @@ export class ChatFunctionClient {
 
   hasFunction(name: string): boolean {
     return this.functionRegistry.has(name);
+  }
+
+  getConfirmationConfig(name: string, args?: string): ConfirmationConfig | undefined {
+    const fn = this.functionRegistry.get(name);
+    const config = fn?.handler.definition.confirmationConfig;
+
+    if (!config) return undefined;
+
+    // If it's a single config, return it
+    if (!Array.isArray(config)) {
+      return config;
+    }
+
+    // It's an array - find matching condition
+    if (!args) return undefined;
+
+    try {
+      const parsedArgs = JSON.parse(args);
+
+      // Find config matching the method
+      const matchingConfig = config.find((c) => {
+        if ('method' in c && c.method === parsedArgs.method) {
+          return true;
+        }
+        // Could add other conditions here later:
+        // if ('path' in c && matchesPath(c.path, parsedArgs.path)) return true;
+        return false;
+      });
+
+      if (matchingConfig) {
+        // Return without the 'method' field (it's metadata)
+        const { method, ...confirmationConfig } = matchingConfig;
+        return confirmationConfig;
+      }
+
+      // No match = no confirmation needed
+      return undefined;
+    } catch (e) {
+      throw new Error(`Error parsing arguments: ${e.message}`);
+    }
   }
 
   async executeFunction({
