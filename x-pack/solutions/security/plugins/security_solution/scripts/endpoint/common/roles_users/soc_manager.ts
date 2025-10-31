@@ -17,7 +17,7 @@ export const getSocManager: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV3: [
+          siemV4: [
             'all',
 
             'policy_management_all',
@@ -28,6 +28,7 @@ export const getSocManager: () => Omit<Role, 'name'> = () => {
             'event_filters_all',
             'host_isolation_exceptions_all',
             'blocklist_all',
+            'endpoint_exceptions_all',
 
             'host_isolation_all',
             'process_operations_all',
