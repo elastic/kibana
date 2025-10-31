@@ -166,7 +166,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-styled",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/openapi-generator",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",
     "@kbn/dom-drag-drop",

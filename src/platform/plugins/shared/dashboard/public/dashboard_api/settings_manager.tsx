@@ -17,7 +17,7 @@ import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
   tags: DashboardState['tags'];
-  timeRestore: DashboardState['timeRestore'];
+  timeRestore: boolean;
   title: DashboardState['title'];
 };
 
@@ -47,7 +47,7 @@ function deserializeState(state: DashboardState) {
     ...state.options,
     description: state.description,
     tags: state.tags,
-    timeRestore: state.timeRestore,
+    timeRestore: Boolean(state.timeRange),
     title: state.title,
   };
 }
@@ -64,7 +64,6 @@ export function initializeSettingsManager(initialState: DashboardState) {
     return {
       ...(description && { description }),
       tags,
-      timeRestore,
       title,
       options,
     };
@@ -108,8 +107,8 @@ export function initializeSettingsManager(initialState: DashboardState) {
             return {
               ...(description && { description }),
               ...(tags && { tags }),
-              ...(typeof timeRestore === 'boolean' && { timeRestore }),
               ...(title && { title }),
+              ...(typeof timeRestore === 'boolean' && { timeRestore }),
               ...(options && { options }),
             };
           })

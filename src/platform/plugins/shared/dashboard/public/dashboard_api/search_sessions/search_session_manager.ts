@@ -8,9 +8,11 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
+
 import { dataService } from '../../services/kibana_services';
+import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
 import { startDashboardSearchSessionIntegration } from './start_dashboard_search_session_integration';
 
 export function initializeSearchSessionManager(

@@ -113,6 +113,7 @@ export function FlameGraphTooltip({
                   display: flex;
                 }
               `}
+              announceOnMount
               color="primary"
               title={
                 <EuiText size="xs">

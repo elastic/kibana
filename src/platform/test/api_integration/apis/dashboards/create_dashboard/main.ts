@@ -31,7 +31,6 @@ export default function ({ getService }: FtrProviderContext) {
         namespaces: ['default'],
         panels: [],
         references: [],
-        timeRestore: false,
         title,
       });
     });

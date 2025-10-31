@@ -173,7 +173,6 @@ export type DashboardApi = CanExpandPanels &
   };
 
 export interface DashboardInternalApi {
-  panelsReload$: Subject<void>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
