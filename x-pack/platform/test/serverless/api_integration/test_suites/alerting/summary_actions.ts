@@ -62,6 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
       'kibana.alert.url',
       'kibana.version',
       'kibana.alert.consecutive_matches',
+      'kibana.alert.state',
     ];
 
     before(async () => {
