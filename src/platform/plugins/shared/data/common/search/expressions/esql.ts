@@ -182,7 +182,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 'Please provide a request object to the expression execution params.'
             );
           }
-
           return request;
         })
       ).pipe(

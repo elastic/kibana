@@ -22,8 +22,12 @@ import {
   type Observable,
 } from 'rxjs';
 
+import { apiPublishesESQLVariables, type PublishesESQLVariables } from '@kbn/esql-types';
+import { apiHasSections } from '@kbn/presentation-containers';
+
 import { useStateFromPublishingSubject } from '../../publishing_subject';
 import { apiHasParentApi, type HasParentApi } from '../has_parent_api';
+import { apiHasUniqueId } from '../has_uuid';
 import {
   isReloadTimeFetchContextEqual,
   type FetchContext,
@@ -52,10 +56,25 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     searchSessionId: of(undefined),
     timeRange: of(undefined),
     timeslice: of(undefined),
+    esqlVariables: of(undefined),
   };
 
+  const sectionId$ =
+    apiHasUniqueId(api) && apiHasParentApi(api) && apiHasSections(api.parentApi)
+      ? api.parentApi.getPanelSection$(api.uuid)
+      : of(undefined);
+
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
-    observables.filters = api.parentApi.filters$;
+    observables.filters = combineLatest([api.parentApi.filters$, sectionId$]).pipe(
+      map(([allFilters, sectionId]) => {
+        const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
+        return allFilters?.filter(
+          (currentFilter) =>
+            currentFilter.meta.controlledBy !== uuid &&
+            (currentFilter.meta.group ? sectionId === currentFilter.meta.group : true)
+        );
+      })
+    );
     observables.query = api.parentApi.query$;
   }
 
@@ -75,6 +94,19 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     observables.timeslice = api.parentApi.timeslice$.pipe(
       map((timeslice) => {
         return hasLocalTimeRange(api) ? undefined : timeslice;
+      })
+    );
+  }
+
+  if (apiHasParentApi(api) && apiPublishesESQLVariables(api.parentApi)) {
+    observables.esqlVariables = combineLatest([api.parentApi.esqlVariables$, sectionId$]).pipe(
+      map(([allVariables, sectionId]) => {
+        const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
+        return allVariables?.filter(
+          (currentVariable) =>
+            currentVariable.meta?.controlledBy !== uuid &&
+            (currentVariable.meta?.group ? sectionId === currentVariable.meta.group : true)
+        );
       })
     );
   }
@@ -114,6 +146,8 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       isReloadTimeFetchContextEqual(prevContext, nextContext)
     ),
     switchMap(async (reloadTimeFetchContext) => {
+      console.log({ api, reloadTimeFetchContext });
+
       let searchSessionId;
       if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
         searchSessionId =
@@ -133,11 +167,15 @@ export function fetch$(api: unknown): Observable<FetchContext> {
 export const useFetchContext = (api: unknown): FetchContext => {
   const context$ = useMemo(() => {
     const typeApi = api as Partial<
-      PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
+      PublishesTimeRange &
+        HasParentApi<
+          Partial<PublishesUnifiedSearch & PublishesSearchSession & PublishesESQLVariables>
+        >
     >;
     return new BehaviorSubject<FetchContext>({
       filters: typeApi?.parentApi?.filters$?.value,
       query: typeApi?.parentApi?.query$?.value,
+      esqlVariables: typeApi.parentApi?.esqlVariables$?.value,
       searchSessionId: typeApi?.parentApi?.searchSessionId$?.value,
       timeRange: typeApi?.timeRange$?.value ?? typeApi?.parentApi?.timeRange$?.value,
       timeslice: typeApi?.timeRange$?.value ? undefined : typeApi?.parentApi?.timeslice$?.value,

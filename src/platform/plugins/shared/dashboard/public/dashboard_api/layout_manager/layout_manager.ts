@@ -235,6 +235,7 @@ export function initializeLayoutManager(
   function getDashboardPanelFromId(panelId: string) {
     const childLayout = layout$.value.panels[panelId];
     const childApi = children$.value[panelId];
+
     if (!childApi || !childLayout) throw new PanelNotFoundError();
     return {
       type: childLayout.type,
@@ -595,6 +596,13 @@ export function initializeLayoutManager(
           sections,
         });
         trackPanel.scrollToBottom$.next();
+      },
+      getPanelSection$: (uuid: string) => {
+        return layout$.pipe(
+          // pinned panels and panels in global section are treated identically; i.e. their section is `undefined`
+          map((layout) => layout.panels[uuid]?.grid?.sectionId),
+          distinctUntilChanged() // only trigger re-fetch when section changes
+        );
       },
     },
     cleanup: () => {

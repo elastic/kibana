@@ -74,6 +74,7 @@ export function apiPublishesInlineEditingCapabilities(
   return isObject(api) && Object.hasOwn(api, 'canEditInline');
 }
 
+// TODO: Remove?
 export const isApiESQLVariablesCompatible = (
   api: unknown | null
 ): api is ESQLVariablesCompatibleDashboardApi => {

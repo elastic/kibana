@@ -22,12 +22,13 @@ export const initializeESQLVariablesManager = (
     PublishesESQLVariable,
     ESQLControlVariable[]
   >({ children$ }, 'esqlVariable$', apiPublishesESQLVariable, []).subscribe((newESQLVariables) => {
+    console.log({ newESQLVariables });
     esqlVariables$.next(newESQLVariables);
   });
 
   return {
     api: {
-      esqlVariables$,
+      esqlVariables$, // USE FETCH TO PUBLISH
     },
     cleanup: () => {
       childrenESQLVariablesSubscription.unsubscribe();

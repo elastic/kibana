@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_SEARCH_TECHNIQUE, OPTIONS_LIST_DEFAULT_SORT } from '@kbn/controls-constants';
-import { dataControlSchema } from './control_schema';
+import { controlSchema, dataControlSchema } from './control_schema';
 
 export const optionsListDisplaySettingsSchema = schema.object({
   placeholder: schema.maybe(schema.string()),
@@ -38,19 +38,21 @@ const optionsListControlBaseParameters = {
   displaySettings: schema.maybe(optionsListDisplaySettingsSchema),
   searchTechnique: schema.maybe(optionsListSearchTechniqueSchema),
   sort: schema.maybe(optionsListSortSchema),
-  selectedOptions: schema.maybe(schema.arrayOf(optionsListSelectionSchema, { defaultValue: [] })),
   existsSelected: schema.maybe(schema.boolean({ defaultValue: false })),
   runPastTimeout: schema.maybe(schema.boolean({ defaultValue: false })),
   singleSelect: schema.maybe(schema.boolean({ defaultValue: false })),
   exclude: schema.maybe(schema.boolean({ defaultValue: false })),
 };
 
-export const optionsListDSLControlSchema = dataControlSchema.extends(
-  optionsListControlBaseParameters
-);
+export const optionsListDSLControlSchema = dataControlSchema
+  .extends(optionsListControlBaseParameters)
+  .extends({
+    selectedOptions: schema.maybe(schema.arrayOf(optionsListSelectionSchema, { defaultValue: [] })),
+  });
 
-export const optionsListESQLControlSchema = schema
-  .object({
+export const optionsListESQLControlSchema = controlSchema
+  .extends(optionsListControlBaseParameters)
+  .extends({
     selectedOptions: schema.arrayOf(schema.string()),
     variableName: schema.string(),
     variableType: schema.oneOf([
@@ -65,5 +67,4 @@ export const optionsListESQLControlSchema = schema
       schema.literal('VALUES_FROM_QUERY'),
     ]),
     availableOptions: schema.maybe(schema.arrayOf(schema.string())),
-  })
-  .extends(optionsListControlBaseParameters);
+  });

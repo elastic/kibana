@@ -43,9 +43,10 @@ export {
   apiIsPresentationContainer,
   combineCompatibleChildrenApis,
   getContainerParentFromAPI,
-  listenForCompatibleApi,
+  apiHasSections,
   type PanelPackage,
   type PresentationContainer,
+  type HasSections,
 } from './interfaces/presentation_container';
 export { apiPublishesSettings, type PublishesSettings } from './interfaces/publishes_settings';
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/can_focus_panel';

@@ -13,6 +13,7 @@ import type { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest, isObservable, map, of, switchMap } from 'rxjs';
 import type { CanAddNewPanel } from './can_add_new_panel';
 import { apiCanAddNewPanel } from './can_add_new_panel';
+import type { CanAddNewSection } from './can_add_new_section';
 
 export interface PanelPackage<SerializedStateType extends object = object> {
   panelType: string;
@@ -71,6 +72,14 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
       typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
       apiPublishesChildren(api)
   );
+};
+
+export interface HasSections extends CanAddNewSection {
+  getPanelSection$: (uuid: string) => Observable<string | undefined>;
+}
+
+export const apiHasSections = (api: unknown): api is HasSections => {
+  return typeof (api as HasSections)?.getPanelSection$ === 'function';
 };
 
 export const apiPublishesChildren = (
