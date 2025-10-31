@@ -59,6 +59,10 @@ else
   BUCKET_NAME="$CALL_ARGUMENT"
 fi
 
+if [[ "$BUCKET_NAME" == */* ]]; then
+  BUCKET_NAME="${BUCKET_NAME%%/*}"
+fi
+
 if [[ -z "$EMAIL" ]]; then
   case "$BUCKET_NAME" in
     "elastic-kibana-coverage-live")
