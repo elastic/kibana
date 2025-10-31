@@ -21,32 +21,7 @@ jest.mock('@elastic/eui', () => ({
 
 describe('translation_results index', () => {
   describe('useResultVisColors', () => {
-    it('returns correct colors for Amsterdam theme', () => {
-      (useEuiTheme as jest.Mock).mockReturnValue({
-        euiTheme: {
-          themeName: 'EUI_THEME_AMSTERDAM',
-          colors: {
-            vis: {
-              euiColorVis0: '#00A69B',
-              euiColorVis5: '#BD9536',
-              euiColorVis7: '#BD6F36',
-              euiColorVis9: '#C15129',
-            },
-          },
-        },
-      });
-
-      const { result } = renderHook(() => useResultVisColors());
-
-      expect(result.current).toEqual({
-        [MigrationTranslationResult.FULL]: '#00A69B',
-        [MigrationTranslationResult.PARTIAL]: '#BD9536',
-        [MigrationTranslationResult.UNTRANSLATABLE]: '#BD6F36',
-        error: '#C15129',
-      });
-    });
-
-    it('returns default colors for other themes (Borealis)', () => {
+    it('returns default colors for Borealis theme', () => {
       (useEuiTheme as jest.Mock).mockReturnValue({
         euiTheme: {
           themeName: 'EUI_THEME_BOREALIS',
