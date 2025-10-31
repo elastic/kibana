@@ -7062,7 +7062,7 @@
             "signature": [
               "{ name: string; backing_indices?: string[] | undefined; timestamp_field?: string | undefined; indices?: string[] | undefined; aliases?: string[] | undefined; attributes?: ",
               "ResolveIndexResponseItemIndexAttrs",
-              "[] | undefined; data_stream?: string | undefined; }"
+              "[] | undefined; data_stream?: string | undefined; mode?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/public/types.ts",
             "deprecated": false,
@@ -13914,6 +13914,14 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
                 "plugin": "securitySolution",

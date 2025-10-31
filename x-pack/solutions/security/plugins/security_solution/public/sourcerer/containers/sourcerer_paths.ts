@@ -18,6 +18,7 @@ import {
   RULES_PATH,
   DATA_QUALITY_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  ENTITY_ANALYTICS_MANAGEMENT_PATH,
 } from '../../../common/constants';
 import { SourcererScopeName } from '../store/model';
 
@@ -43,8 +44,8 @@ const explorePaths = [
   HOSTS_PATH,
   USERS_PATH,
   NETWORK_PATH,
-  OVERVIEW_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  ENTITY_ANALYTICS_MANAGEMENT_PATH,
 ];
 
 export const getScopeFromPath = (

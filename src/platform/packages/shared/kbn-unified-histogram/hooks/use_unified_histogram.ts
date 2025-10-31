@@ -96,6 +96,10 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    */
   relativeTimeRange?: TimeRange;
   /**
+   * The timestamp of the last data request
+   */
+  lastReloadRequestTime?: number;
+  /**
    * The current columns
    */
   columns?: DatatableColumn[];
@@ -190,7 +194,6 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     timeRange,
     table,
     externalVisContext,
-    esqlVariables,
     controlsState,
   } = props;
 
@@ -265,7 +268,6 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       ? {
           ...props,
           ...stateProps,
-          esqlVariables,
           controlsState,
           input$,
           chart,
@@ -282,7 +284,6 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     props,
     requestParams,
     stateProps,
-    esqlVariables,
     controlsState,
   ]);
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(

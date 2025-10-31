@@ -1480,7 +1480,8 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
-        "@seriousme/openapi-schema-validator"
+        "ajv-draft-04",
+        "ajv-formats"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -1914,6 +1915,25 @@
       ],
       "labels": [
         "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "liquidjs",
+      "matchDepNames": [
+        "liquidjs"
+      ],
+      "reviewers": [
+        "team:workflows-eng"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:One Workflow",
         "backport:all-open",
         "release_note:skip"
       ],
@@ -4720,7 +4740,7 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:current-major"
+        "backport:previous-minor"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true

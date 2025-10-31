@@ -44,6 +44,19 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 let connectorType: EmailConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
+const getConfig = (overrides?: {}) => ({
+  service: 'gmail',
+  from: 'bob@example.com',
+  host: null,
+  port: null,
+  secure: false,
+  hasAuth: true,
+  tenantId: null,
+  clientId: null,
+  oauthTokenUrl: null,
+  ...overrides,
+});
+
 beforeEach(() => {
   jest.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
@@ -151,9 +164,19 @@ describe('config validation', () => {
     // empty object
     expect(() => {
       validateConfig(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [from]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type config: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"from\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
 
     // no service or host/port
     expect(() => {
@@ -459,9 +482,28 @@ describe('params validation', () => {
     // empty object
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [subject]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"subject\\"
+          ],
+          \\"message\\": \\"Required\\"
+        },
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"message\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
   });
 
   test('params validation for emails calls validateEmailAddresses', async () => {
@@ -494,14 +536,12 @@ describe('params validation', () => {
     expect(() => {
       validateConfig(
         connectorType,
-        {
+        getConfig({
           service: AdditionalEmailServices.AWS_SES,
-          from: 'bob@example.com',
           host: 'wrong-host',
           port: 123,
           secure: true,
-          hasAuth: true,
-        },
+        }),
         { configurationUtilities }
       );
     }).not.toThrowError();
@@ -519,14 +559,12 @@ describe('params validation', () => {
     expect(() =>
       validateConfig(
         connectorType,
-        {
+        getConfig({
           service: 'other',
-          from: 'bob@example.com',
           host: 'wrong-host',
           port: 123,
           secure: true,
-          hasAuth: true,
-        },
+        }),
         { configurationUtilities: configUtils }
       )
     ).toThrowErrorMatchingInlineSnapshot(
@@ -541,14 +579,12 @@ describe('params validation', () => {
     expect(() =>
       validateConfig(
         connectorType,
-        {
+        getConfig({
           service: 'other',
-          from: 'bob@example.com',
           host: 'wrong-host',
           port: 123,
           secure: true,
-          hasAuth: true,
-        },
+        }),
         { configurationUtilities: configUtils }
       )
     ).not.toThrowError();
@@ -563,14 +599,12 @@ describe('params validation', () => {
     expect(() =>
       validateConfig(
         connectorType,
-        {
+        getConfig({
           service: 'elastic_cloud',
-          from: 'bob@example.com',
           host: 'dockerhost',
           port: 10025,
-          secure: false,
           hasAuth: false,
-        },
+        }),
         { configurationUtilities: configUtils }
       )
     ).not.toThrowError();
@@ -1405,35 +1439,140 @@ describe('execute()', () => {
       secure: true,
     });
   });
+
+  const LongString = ''.padEnd(1000, 'x');
+  const MaxEmailBodyLength = 100;
+
+  test('message parameter is trimmed to the maximum allowed length', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(MaxEmailBodyLength);
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        message: LongString,
+      },
+      configurationUtilities: mockedActionsConfig,
+      config,
+      secrets,
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+
+    const additionalTextWeAdded = 273; // determined manually looking at the output
+    expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(
+      MaxEmailBodyLength + additionalTextWeAdded
+    );
+
+    const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
+    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+  });
+
+  test('message parameter is trimmed to 0 length if configured', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(0);
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        message: LongString,
+      },
+      configurationUtilities: mockedActionsConfig,
+      config,
+      secrets,
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+
+    const additionalTextWeAdded = 271; // determined manually looking at the output
+    expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(additionalTextWeAdded);
+
+    const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
+    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+  });
+
+  test('messageHTML parameter is trimmed to the maximum allowed length', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(MaxEmailBodyLength);
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
+      params: {
+        ...executorOptions.params,
+        message: 'hallo',
+        messageHTML: LongString,
+      },
+      configurationUtilities: mockedActionsConfig,
+      config,
+      secrets,
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+
+    const additionalTextWeAdded = 233; // determined manually looking at the output
+    expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(
+      MaxEmailBodyLength + additionalTextWeAdded
+    );
+
+    const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
+    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+  });
+
+  test('messageHTML parameter is trimmed to 0 length if configured', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(0);
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
+      params: {
+        ...executorOptions.params,
+        message: 'hallo',
+        messageHTML: LongString,
+      },
+      configurationUtilities: mockedActionsConfig,
+      config,
+      secrets,
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+
+    const additionalTextWeAdded = 231; // determined manually looking at the output
+    expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(additionalTextWeAdded);
+
+    const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
+    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+  });
 });
 
 describe('validateConfig AWS SES specific checks', () => {
   const awsSesHost = 'email-smtp.us-east-1.amazonaws.com';
   const awsSesPort = 465;
-  const awsSesConfig = {
-    host: awsSesHost,
-    port: awsSesPort,
-    secure: true,
-  };
+
+  const getSesConfig = (overrides?: {}) => ({
+    ...getConfig({
+      service: AdditionalEmailServices.AWS_SES,
+      host: awsSesHost,
+      port: awsSesPort,
+      secure: true,
+    }),
+    ...overrides,
+  });
 
   let configUtilsWithSes: jest.Mocked<ActionsConfigurationUtilities>;
 
   beforeEach(() => {
     configUtilsWithSes = {
       ...actionsConfigMock.create(),
-      getAwsSesConfig: jest.fn(() => awsSesConfig),
+      getAwsSesConfig: jest.fn(() => getSesConfig()),
     } as unknown as jest.Mocked<ActionsConfigurationUtilities>;
   });
 
   test('throws if both host and port do not match AWS SES config', () => {
-    const config = {
-      service: AdditionalEmailServices.AWS_SES,
-      from: 'bob@example.com',
-      host: 'wrong-host',
-      port: 123,
-      secure: true,
-      hasAuth: true,
-    };
+    const config = getSesConfig({ host: 'wrong-host', port: 123 });
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
@@ -1442,14 +1581,7 @@ describe('validateConfig AWS SES specific checks', () => {
   });
 
   test('throws if host does not match AWS SES config', () => {
-    const config = {
-      service: AdditionalEmailServices.AWS_SES,
-      from: 'bob@example.com',
-      host: 'wrong-host',
-      port: awsSesPort,
-      secure: true,
-      hasAuth: true,
-    };
+    const config = getSesConfig({ host: 'wrong-host' });
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
@@ -1458,14 +1590,7 @@ describe('validateConfig AWS SES specific checks', () => {
   });
 
   test('throws if port does not match AWS SES config', () => {
-    const config = {
-      service: AdditionalEmailServices.AWS_SES,
-      from: 'bob@example.com',
-      host: awsSesHost,
-      port: 123,
-      secure: true,
-      hasAuth: true,
-    };
+    const config = getSesConfig({ port: 123 });
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
@@ -1474,14 +1599,7 @@ describe('validateConfig AWS SES specific checks', () => {
   });
 
   test('throws if secure is not true for AWS SES', () => {
-    const config = {
-      service: AdditionalEmailServices.AWS_SES,
-      from: 'bob@example.com',
-      host: awsSesHost,
-      port: awsSesPort,
-      secure: false,
-      hasAuth: true,
-    };
+    const config = getSesConfig({ secure: false });
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(

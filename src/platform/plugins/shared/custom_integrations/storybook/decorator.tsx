@@ -22,7 +22,7 @@ import { CustomIntegrationsServicesProvider } from '../public/services';
  */
 export const getCustomIntegrationsContextDecorator: Decorator = (story, { globals }) => {
   const ContextProvider = getCustomIntegrationsContextProvider();
-  const darkMode = globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark';
+  const darkMode = globals.euiTheme === 'borealis.dark';
 
   return (
     <I18nProvider>

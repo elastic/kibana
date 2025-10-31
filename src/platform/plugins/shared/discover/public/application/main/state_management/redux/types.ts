@@ -14,6 +14,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
@@ -28,6 +29,7 @@ export interface InternalStateDataRequestParams {
   timeRangeRelative: TimeRange | undefined;
   searchSessionId: string | undefined;
   isSearchSessionRestored: boolean;
+  lastReloadRequestTime?: number;
 }
 
 export interface TabStateGlobalState {
@@ -70,6 +72,7 @@ export interface TabState extends TabItem {
     fieldList?: Partial<UnifiedFieldListRestorableState>;
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
+    metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
   };
 }
 

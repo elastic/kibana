@@ -29,7 +29,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { load } from 'js-yaml';
 import semverGt from 'semver/functions/gt';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pMap from 'p-map';
 
@@ -84,6 +84,7 @@ import type {
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   PackagePolicyConfigRecord,
+  ArchiveEntry,
 } from '../../common/types';
 import {
   FleetError,
@@ -113,6 +114,7 @@ import type {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyPostUpdateCallback,
+  AssetsMap,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -142,7 +144,7 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
-import { compileTemplate } from './epm/agent/agent';
+import { compileTemplate, getMetaVariables } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService, cloudConnectorService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
@@ -580,7 +582,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         useSpaceAwareness &&
         agentPolicy &&
         agentPolicy.space_ids &&
-        agentPolicy.space_ids.length > 1
+        (agentPolicy.space_ids.length > 1 || agentPolicy.space_ids.includes(ALL_SPACES_ID))
       ) {
         await updatePackagePolicySpaces({
           packagePolicyId: newSo.id,
@@ -799,7 +801,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           continue;
         }
         const agentPolicy = agentPoliciesIndexById[newSo.attributes.policy_ids[0]];
-        if (agentPolicy && agentPolicy.space_ids && agentPolicy.space_ids.length > 1) {
+        if (
+          agentPolicy &&
+          agentPolicy.space_ids &&
+          (agentPolicy.space_ids.length > 1 || agentPolicy.space_ids.includes(ALL_SPACES_ID))
+        ) {
           await updatePackagePolicySpaces({
             packagePolicyId: newSo.id,
             currentSpaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
@@ -3211,6 +3217,7 @@ function _compilePackagePolicyInput(
   return compileTemplate(
     // Populate template variables from package- and input-level vars
     Object.assign({}, vars, input.vars),
+    getMetaVariables(pkgInfo, input),
     pkgInputTemplate.buffer.toString()
   );
 }
@@ -3283,6 +3290,32 @@ export function _applyIndexPrivileges(
   return streamOut;
 }
 
+export function _getAssetForTemplatePath(
+  pkgInfo: PackageInfo,
+  assetsMap: AssetsMap,
+  datasetPath: string,
+  templatePath: string
+): ArchiveEntry {
+  const assets = getAssetsDataFromAssetsMap(
+    pkgInfo,
+    assetsMap,
+    (path: string) => path.endsWith(`/agent/stream/${templatePath}`),
+    datasetPath
+  );
+  if (assets.length === 1) {
+    return assets[0];
+  }
+
+  // fallback to old path structure for backward compatibility
+  const [fallbackPkgStreamTemplate] = getAssetsDataFromAssetsMap(
+    pkgInfo,
+    assetsMap,
+    (path: string) => path.endsWith(templatePath),
+    datasetPath
+  );
+  return fallbackPkgStreamTemplate;
+}
+
 function _compilePackageStream(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
@@ -3330,11 +3363,11 @@ function _compilePackageStream(
 
   const datasetPath = packageDataStream.path;
 
-  const [pkgStreamTemplate] = getAssetsDataFromAssetsMap(
+  const pkgStreamTemplate = _getAssetForTemplatePath(
     pkgInfo,
     assetsMap,
-    (path: string) => path.endsWith(streamFromPkg.template_path),
-    datasetPath
+    datasetPath,
+    streamFromPkg.template_path
   );
 
   if (!pkgStreamTemplate || !pkgStreamTemplate.buffer) {
@@ -3346,6 +3379,7 @@ function _compilePackageStream(
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
     Object.assign({}, vars, input.vars, stream.vars),
+    getMetaVariables(pkgInfo, input, streamIn),
     pkgStreamTemplate.buffer.toString()
   );
 
@@ -3813,7 +3847,10 @@ function validateReusableIntegrationsAndSpaceAwareness(
     return;
   }
   for (const agentPolicy of agentPolicies) {
-    if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
+    if (
+      (agentPolicy?.space_ids?.length ?? 0) > 1 ||
+      agentPolicy?.space_ids?.includes(ALL_SPACES_ID)
+    ) {
       throw new FleetError(
         'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
       );

@@ -7,130 +7,113 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StateComparators } from '@kbn/presentation-publishing';
-import {
-  diffComparators,
-  initializeTitleManager,
-  titleComparators,
-} from '@kbn/presentation-publishing';
-import fastIsEqual from 'fast-deep-equal';
-import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
-import type { DashboardSettings, DashboardState } from '../../common';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
+import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
+import type { BehaviorSubject } from 'rxjs';
+import { combineLatestWith, debounceTime, map } from 'rxjs';
+import type { DashboardState, DashboardOptions } from '../../server/content_management';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
 
-// SERIALIZED STATE ONLY TODO: This could be simplified by using src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
-export function initializeSettingsManager(initialState?: DashboardState) {
-  const syncColors$ = new BehaviorSubject<boolean>(
-    initialState?.syncColors ?? DEFAULT_DASHBOARD_STATE.syncColors
-  );
-  function setSyncColors(syncColors: boolean) {
-    if (syncColors !== syncColors$.value) syncColors$.next(syncColors);
-  }
-  const syncCursor$ = new BehaviorSubject<boolean>(
-    initialState?.syncCursor ?? DEFAULT_DASHBOARD_STATE.syncCursor
-  );
-  function setSyncCursor(syncCursor: boolean) {
-    if (syncCursor !== syncCursor$.value) syncCursor$.next(syncCursor);
-  }
-  const syncTooltips$ = new BehaviorSubject<boolean>(
-    initialState?.syncTooltips ?? DEFAULT_DASHBOARD_STATE.syncTooltips
-  );
-  function setSyncTooltips(syncTooltips: boolean) {
-    if (syncTooltips !== syncTooltips$.value) syncTooltips$.next(syncTooltips);
-  }
-  const tags$ = new BehaviorSubject<string[]>(initialState?.tags ?? DEFAULT_DASHBOARD_STATE.tags);
-  function setTags(tags: string[]) {
-    if (!fastIsEqual(tags, tags$.value)) tags$.next(tags);
-  }
-  const titleManager = initializeTitleManager(initialState ?? {});
-  const timeRestore$ = new BehaviorSubject<boolean | undefined>(
-    initialState?.timeRestore ?? DEFAULT_DASHBOARD_STATE.timeRestore
-  );
-  function setTimeRestore(timeRestore: boolean) {
-    if (timeRestore !== timeRestore$.value) timeRestore$.next(timeRestore);
-  }
-  const useMargins$ = new BehaviorSubject<boolean>(
-    initialState?.useMargins ?? DEFAULT_DASHBOARD_STATE.useMargins
-  );
-  function setUseMargins(useMargins: boolean) {
-    if (useMargins !== useMargins$.value) useMargins$.next(useMargins);
-  }
+export type DashboardSettings = Required<DashboardOptions> & {
+  description?: DashboardState['description'];
+  tags: DashboardState['tags'];
+  timeRestore: boolean;
+  title: DashboardState['title'];
+};
 
-  function getSettings(): DashboardSettings {
-    const titleState = titleManager.getLatestState();
+const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {
+  ...DEFAULT_DASHBOARD_OPTIONS,
+  description: undefined,
+  tags: [],
+  timeRestore: false,
+  title: '',
+};
+
+const comparators: StateComparators<DashboardSettings> = {
+  title: 'referenceEquality',
+  description: 'referenceEquality',
+  hidePanelTitles: 'referenceEquality',
+  syncColors: 'referenceEquality',
+  syncCursor: 'referenceEquality',
+  syncTooltips: 'referenceEquality',
+  timeRestore: 'referenceEquality',
+  useMargins: 'referenceEquality',
+  tags: 'deepEquality',
+};
+
+function deserializeState(state: DashboardState) {
+  return {
+    ...state.options,
+    description: state.description,
+    tags: state.tags,
+    timeRestore: Boolean(state.timeRange),
+    title: state.title,
+  };
+}
+
+export function initializeSettingsManager(initialState: DashboardState) {
+  const stateManager = initializeStateManager(
+    deserializeState(initialState),
+    DEFAULT_SETTINGS,
+    comparators
+  );
+
+  function serializeSettings() {
+    const { description, tags, timeRestore, title, ...options } = stateManager.getLatestState();
     return {
-      title: titleState.title ?? '',
-      description: titleState.description,
-      hidePanelTitles: titleState.hidePanelTitles ?? DEFAULT_DASHBOARD_STATE.hidePanelTitles,
-      syncColors: syncColors$.value,
-      syncCursor: syncCursor$.value,
-      syncTooltips: syncTooltips$.value,
-      tags: tags$.value,
-      timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
-      useMargins: useMargins$.value,
+      ...(description && { description }),
+      tags,
+      title,
+      options,
     };
   }
 
-  function setSettings(settings: DashboardSettings) {
-    setSyncColors(settings.syncColors);
-    setSyncCursor(settings.syncCursor);
-    setSyncTooltips(settings.syncTooltips);
-    setTags(settings.tags);
-    setTimeRestore(settings.timeRestore);
-    setUseMargins(settings.useMargins);
-    titleManager.api.setHideTitle(settings.hidePanelTitles);
-    titleManager.api.setDescription(settings.description);
-    titleManager.api.setTitle(settings.title);
-  }
-
-  const comparators: StateComparators<DashboardSettings> = {
-    title: titleComparators.title,
-    description: titleComparators.description,
-    hidePanelTitles: 'referenceEquality',
-    syncColors: 'referenceEquality',
-    syncCursor: 'referenceEquality',
-    syncTooltips: 'referenceEquality',
-    timeRestore: 'referenceEquality',
-    useMargins: 'referenceEquality',
-    tags: 'deepEquality',
-  };
-
   return {
     api: {
-      ...titleManager.api,
-      getSettings,
+      description$: stateManager.api.description$,
+      getSettings: stateManager.getLatestState,
+      hideTitle$: stateManager.api.hidePanelTitles$,
       settings: {
-        syncColors$,
-        syncCursor$,
-        syncTooltips$,
-        useMargins$,
+        syncColors$: stateManager.api.syncColors$,
+        syncCursor$: stateManager.api.syncCursor$,
+        syncTooltips$: stateManager.api.syncTooltips$,
+        useMargins$: stateManager.api.useMargins$,
       },
-      setSettings,
-      setTags,
-      timeRestore$,
+      setSettings: stateManager.reinitializeState,
+      setTags: stateManager.api.setTags,
+      timeRestore$: stateManager.api.timeRestore$,
+      title$: stateManager.api.title$,
     },
     internalApi: {
+      serializeSettings,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([
-          syncColors$,
-          syncCursor$,
-          syncTooltips$,
-          tags$,
-          timeRestore$,
-          useMargins$,
-
-          titleManager.anyStateChange$,
-        ]).pipe(
+        return stateManager.anyStateChange$.pipe(
           debounceTime(100),
-          map(() => getSettings()),
+          map(() => stateManager.getLatestState()),
           combineLatestWith(lastSavedState$),
-          map(([latestState, lastSavedState]) =>
-            diffComparators(comparators, lastSavedState, latestState)
-          )
+          map(([latestState, lastSavedState]) => {
+            const { description, tags, timeRestore, title, ...optionDiffs } = diffComparators(
+              comparators,
+              deserializeState(lastSavedState),
+              latestState,
+              DEFAULT_SETTINGS
+            );
+            // options needs to contain all values and not just diffs since is spread into saved state
+            const options = Object.keys(optionDiffs).length
+              ? { ...serializeSettings().options, ...optionDiffs }
+              : undefined;
+            return {
+              ...(description && { description }),
+              ...(tags && { tags }),
+              ...(title && { title }),
+              ...(typeof timeRestore === 'boolean' && { timeRestore }),
+              ...(options && { options }),
+            };
+          })
         );
       },
       reset: (lastSavedState: DashboardState) => {
-        setSettings(lastSavedState);
+        stateManager.reinitializeState(deserializeState(lastSavedState));
       },
     },
   };
