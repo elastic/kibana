@@ -114,6 +114,7 @@ export const useValueMetrics = ({
         analystHourlyRate,
         attackDiscoveryCount: data?.total ?? 0,
         totalAlerts: alertCount,
+        // @ts-expect-error upgrade typescript v5.9.3
         escalatedAlertsCount: alertCount - filteredAlertsCount ?? 0,
         minutesPerAlert,
       }),
@@ -125,6 +126,7 @@ export const useValueMetrics = ({
         analystHourlyRate,
         attackDiscoveryCount: compareAdData?.total ?? 0,
         totalAlerts: alertCountCompare,
+        // @ts-expect-error upgrade typescript v5.9.3
         escalatedAlertsCount: alertCountCompare - filteredAlertsCountCompare ?? 0,
         minutesPerAlert,
       }),

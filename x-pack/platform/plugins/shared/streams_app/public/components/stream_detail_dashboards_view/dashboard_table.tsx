@@ -65,6 +65,7 @@ export function DashboardsTable({
                 });
               }
               const url = dashboardLocator?.getRedirectUrl(
+                // @ts-expect-error upgrade typescript v5.9.3
                 { dashboardId: id, timeRange: timeState.timeRange } || ''
               );
               if (url) {

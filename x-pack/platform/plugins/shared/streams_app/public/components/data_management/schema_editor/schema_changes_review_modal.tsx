@@ -82,6 +82,7 @@ export function SchemaChangesReviewModal({
   const sortedChanges = React.useMemo(() => {
     return [...changes].sort((a, b) => {
       const getFieldPriority = (field: SchemaField) => {
+        // @ts-expect-error upgrade typescript v5.9.3
         if (reviewRequiredFields.includes(field)) return 1; // Highest priority
         if (autoMappedFields.includes(field)) return 2;
         if (existingFields.includes(field)) return 3; // Lowest priority
@@ -206,6 +207,7 @@ export function SchemaChangesReviewModal({
       }),
       width: '200px',
       render: (status: string, field: SchemaField) => {
+        // @ts-expect-error upgrade typescript v5.9.3
         if (reviewRequiredFields.includes(field)) {
           return (
             <EuiBadge color="warning">

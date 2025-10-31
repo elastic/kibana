@@ -292,7 +292,7 @@ const getEuiProps = (
         href,
         external: isExternal,
         'aria-label': navNode.title,
-        onClick: (e) => {
+        onClick: (e: any) => {
           if (href) {
             eventTracker.clickNavLink({
               id: navNode.id,

@@ -95,6 +95,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
 
           const [, errorMonitor] =
             Object.entries(state).find(
+              // @ts-expect-error upgrade typescript v5.9.3
               ([key]) => fetchError.request.url.indexOf(key) > -1 ?? false
             ) ?? [];
 

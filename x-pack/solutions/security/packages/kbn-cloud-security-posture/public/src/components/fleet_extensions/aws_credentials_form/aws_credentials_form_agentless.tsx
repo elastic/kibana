@@ -129,6 +129,7 @@ const getCloudFormationConfig = (
 
   return {
     isSupported,
+    // @ts-expect-error upgrade typescript v5.9.3
     accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink> || '',
     templateUrl: automationCredentialTemplate || '',
   };

@@ -44,6 +44,7 @@ describe('api_itom', () => {
       await api.addEvent({
         externalService,
         params: itomEventParams,
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 

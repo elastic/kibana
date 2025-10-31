@@ -127,7 +127,9 @@ export class JobsExportService {
       const jobId = j.job_id;
       return {
         jobId,
+        // @ts-expect-error upgrade typescript v5.9.3
         calendarIds: [...new Set(calendarsPerJob[jobId])] ?? [],
+        // @ts-expect-error upgrade typescript v5.9.3
         filterIds: [...new Set(filtersPerJob[jobId])] ?? [],
       };
     });

@@ -27,6 +27,7 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -60,6 +61,7 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -82,6 +84,7 @@ describe('api', () => {
         params,
         config: {},
         secrets: { username: 'elastic', password: 'elastic' },
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -112,6 +115,7 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -159,6 +163,7 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });
@@ -206,6 +211,7 @@ describe('api', () => {
         params: apiParams,
         config: {},
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -235,6 +241,7 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -254,6 +261,7 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -283,6 +291,7 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'comments',
       });
@@ -328,6 +337,7 @@ describe('api', () => {
         params,
         config: {},
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });
@@ -377,6 +387,7 @@ describe('api', () => {
             correlation_id: null,
           },
         },
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -397,6 +408,7 @@ describe('api', () => {
             correlation_id: apiParams.incident.correlation_id,
           },
         },
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -417,6 +429,7 @@ describe('api', () => {
             correlation_id: null,
           },
         },
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -435,6 +448,7 @@ describe('api', () => {
             correlation_id: apiParams.incident.correlation_id,
           },
         },
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
 
@@ -450,6 +464,7 @@ describe('api', () => {
       const res = await api.getFields({
         externalService,
         params: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
       expect(res).toEqual(serviceNowCommonFields);
@@ -461,6 +476,7 @@ describe('api', () => {
       const res = await api.getChoices({
         externalService,
         params: { fields: ['priority'] },
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
       expect(res).toEqual(serviceNowChoices);
@@ -474,6 +490,7 @@ describe('api', () => {
         params: {
           externalId: 'incident-1',
         },
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
       });
       expect(res).toEqual({

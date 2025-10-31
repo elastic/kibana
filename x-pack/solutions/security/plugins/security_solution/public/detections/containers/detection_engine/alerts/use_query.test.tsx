@@ -46,6 +46,7 @@ describe('useQueryAlerts', () => {
         loading: false,
         data: alertsMock,
         response: JSON.stringify(alertsMock, null, 2),
+        // @ts-expect-error upgrade typescript v5.9.3
         request: JSON.stringify({ index: [indexName] ?? [''], body: mockAlertsQuery }, null, 2),
         setQuery: result.current.setQuery,
         refetch: result.current.refetch,

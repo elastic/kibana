@@ -2408,6 +2408,12 @@
       "@a2a-js/sdk/server": [
         "typings/@a2a-js-sdk/server"
       ],
+      "zod": [
+        "typings/zod/v3"
+      ],
+      "zod/v4": [
+        "typings/zod/v4"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

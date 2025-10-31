@@ -713,7 +713,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const readAriaChecked = async (): Promise<boolean> => {
           const statusItem = await testSubjects.find(testSubj);
           return statusItem
-            ? JSON.parse((await statusItem.getAttribute('aria-checked')) || 'null')
+            ? JSON.parse((await statusItem.getAttribute('aria-checked')) || 'null') // @ts-expect-error upgrade typescript v5.9.3
             : null;
         };
 

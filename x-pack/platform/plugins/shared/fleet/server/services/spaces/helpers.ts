@@ -27,6 +27,7 @@ export async function isSpaceAwarenessEnabled(): Promise<boolean> {
 
   const settings = await getSettingsOrUndefined(appContextService.getInternalUserSOClient());
 
+  // @ts-expect-error upgrade typescript v5.9.3
   const res = settings?.use_space_awareness_migration_status === 'success' ?? false;
   setIsSpaceAwarenessEnabledCache(res);
 

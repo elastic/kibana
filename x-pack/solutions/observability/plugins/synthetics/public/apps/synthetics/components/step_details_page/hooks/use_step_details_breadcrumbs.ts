@@ -33,6 +33,7 @@ export const useStepDetailsBreadcrumbs = (extraCrumbs?: Array<{ text: string; hr
       }`,
     },
 
+    // @ts-expect-error upgrade typescript v5.9.3
     { text: `${currentStep?.synthetics.step?.index}. ${currentStep?.synthetics.step?.name}` ?? '' },
   ]);
 };

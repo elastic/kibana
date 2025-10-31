@@ -166,6 +166,7 @@ describe('AlertsDataGrid bulk actions', () => {
     return (
       <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
         <IntlProvider locale="en">
+          {/* @ts-expect-error upgrade typescript v5.9.3 */}
           <AlertsTableContextProvider value={renderContext}>
             <AlertsDataGrid {...({ ...props, renderContext } as BaseAlertsDataGridProps)} />
           </AlertsTableContextProvider>

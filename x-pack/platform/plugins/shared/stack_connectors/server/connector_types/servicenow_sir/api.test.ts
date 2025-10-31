@@ -195,6 +195,7 @@ describe('api_sir', () => {
         params,
         config: { usesTableApi: false },
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });
@@ -224,6 +225,7 @@ describe('api_sir', () => {
         params,
         config: { usesTableApi: false },
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });
@@ -252,6 +254,7 @@ describe('api_sir', () => {
         params,
         config: { usesTableApi: true },
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });
@@ -277,6 +280,7 @@ describe('api_sir', () => {
         params,
         config: { usesTableApi: false },
         secrets: {},
+        // @ts-expect-error upgrade typescript v5.9.3
         logger: mockedLogger,
         commentFieldKey: 'work_notes',
       });

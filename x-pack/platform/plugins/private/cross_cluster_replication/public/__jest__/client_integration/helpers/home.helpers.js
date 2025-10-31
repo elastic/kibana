@@ -10,6 +10,10 @@ import { CrossClusterReplicationHome } from '../../../app/sections/home';
 import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
+/**
+ * @param {object} [props]
+ * @returns {ReturnType<typeof renderWithRouter>}
+ */
 export const setup = (props = {}) => {
   return renderWithRouter(CrossClusterReplicationHome, {
     store: createCrossClusterReplicationStore(),

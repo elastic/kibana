@@ -4,7 +4,9 @@
     "outDir": "target/types",
     "types": [
       "node",
-      "jest",
+      "cheerio",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
   },
