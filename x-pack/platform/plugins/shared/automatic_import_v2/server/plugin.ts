@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreStart,
+  Plugin,
+  Logger,
+  ElasticsearchClient,
+} from '@kbn/core/server';
 
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
@@ -17,6 +23,7 @@ import type {
   AutomaticImportV2PluginRequestHandlerContext,
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
+import { AutomaticImportService } from './services';
 
 export class AutomaticImportV2Plugin
   implements
@@ -30,6 +37,7 @@ export class AutomaticImportV2Plugin
   private readonly logger: Logger;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private automaticImportService: AutomaticImportService | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
@@ -48,19 +56,30 @@ export class AutomaticImportV2Plugin
     plugins: AutomaticImportV2PluginSetupDependencies
   ) {
     this.logger.debug('automaticImportV2: Setup');
+
+    const coreStartServices = core.getStartServices().then(([coreStart]) => ({
+      esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
+    }));
+    const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
+
+    this.automaticImportService = new AutomaticImportService(
+      this.logger,
+      esClientPromise,
+      core.savedObjects
+    );
+
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
       core,
       plugins,
       kibanaVersion: this.kibanaVersion,
+      automaticImportService: this.automaticImportService,
     });
 
     core.http.registerRouteHandlerContext<
       AutomaticImportV2PluginRequestHandlerContext,
       'automaticImportv2'
     >('automaticImportv2', (context, request) => requestContextFactory.create(context, request));
-
-    this.logger.debug('automaticImportV2: Setup complete');
     return {
       actions: plugins.actions,
     };
@@ -77,6 +96,26 @@ export class AutomaticImportV2Plugin
     plugins: AutomaticImportV2PluginStartDependencies
   ): AutomaticImportV2PluginStart {
     this.logger.debug('automaticImportV2: Started');
+
+    if (this.automaticImportService) {
+      if (!plugins.security) {
+        throw new Error('Security service not initialized.');
+      }
+
+      if (!core.savedObjects) {
+        throw new Error('SavedObjects service not initialized.');
+      }
+
+      this.automaticImportService
+        .initialize(core.security, core.savedObjects)
+        .then(() => {
+          this.logger.debug('AutomaticImportService initialized successfully');
+        })
+        .catch((error) => {
+          this.logger.error('Failed to initialize AutomaticImportService', error);
+        });
+    }
+
     return {
       actions: plugins.actions,
       inference: plugins.inference,
@@ -91,5 +130,6 @@ export class AutomaticImportV2Plugin
   public stop() {
     this.pluginStop$.next();
     this.pluginStop$.complete();
+    this.automaticImportService?.stop();
   }
 }

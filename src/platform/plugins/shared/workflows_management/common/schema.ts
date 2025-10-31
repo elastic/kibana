@@ -646,6 +646,7 @@ const staticConnectors: ConnectorContractUnion[] = [
       path: z.string(),
       body: z.any().optional(),
       params: z.any().optional(),
+      headers: z.any().optional(),
     }),
     outputSchema: z.any(),
     description: i18n.translate('workflows.connectors.elasticsearch.request.description', {
@@ -937,6 +938,7 @@ export const getWorkflowZodSchema = (dynamicConnectorTypes: Record<string, Conne
   const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors);
 };
+export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 
 export const getWorkflowZodSchemaLoose = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
@@ -944,6 +946,7 @@ export const getWorkflowZodSchemaLoose = (
   const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, true);
 };
+export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
 
 // Legacy exports for backward compatibility - these will be deprecated
 // TODO: Remove these once all consumers are updated to use the lazy-loaded versions

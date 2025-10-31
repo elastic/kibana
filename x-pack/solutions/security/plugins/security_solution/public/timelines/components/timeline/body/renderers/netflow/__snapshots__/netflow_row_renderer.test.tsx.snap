@@ -10,9 +10,9 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 }
 
 .c0 .euiAccordion + div {
-  background-color: #1d1e24;
+  background-color: #0B1628;
   padding: 0 8px;
-  border: 1px solid #343741;
+  border: 1px solid #243147;
   border-radius: 4px;
 }
 

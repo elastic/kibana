@@ -10,13 +10,9 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
+import type { LensApi, LensRuntimeState, LensSerializedState } from '@kbn/lens-common';
 import { DOC_TYPE } from '../../common/constants';
-import type {
-  LensApi,
-  LensEmbeddableStartServices,
-  LensRuntimeState,
-  LensSerializedState,
-} from './types';
+import type { LensEmbeddableStartServices } from './types';
 
 import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
@@ -66,11 +62,7 @@ export const createLensEmbeddableFactory = (
         initialState
       );
 
-      const initialRuntimeState = await deserializeState(
-        services,
-        initialState.rawState,
-        initialState.references
-      );
+      const initialRuntimeState = await deserializeState(services, initialState.rawState);
 
       /**
        * Observables and functions declared here are used internally to store mutating state values
@@ -120,11 +112,7 @@ export const createLensEmbeddableFactory = (
         parentApi
       );
 
-      const integrationsConfig = initializeIntegrations(
-        getLatestState,
-        dynamicActionsManager?.serializeState,
-        services
-      );
+      const integrationsConfig = initializeIntegrations(getLatestState);
       const actionsConfig = initializeActionApi(
         uuid,
         initialRuntimeState,
@@ -174,11 +162,7 @@ export const createLensEmbeddableFactory = (
           dashboardConfig.reinitializeState(lastSaved?.rawState);
           searchContextConfig.reinitializeState(lastSaved?.rawState);
           if (!lastSaved) return;
-          const lastSavedRuntimeState = await deserializeState(
-            services,
-            lastSaved.rawState,
-            lastSaved.references
-          );
+          const lastSavedRuntimeState = await deserializeState(services, lastSaved.rawState);
           stateConfig.reinitializeRuntimeState(lastSavedRuntimeState);
         },
       });

@@ -31,38 +31,44 @@ toc:
   - file: kibana-audit-events.md
   - file: connectors-kibana.md
     children:
-      - file: connectors-kibana/ai-connector.md
-      - file: connectors-kibana/bedrock-action-type.md
-      - file: connectors-kibana/cases-action-type.md
-      - file: connectors-kibana/crowdstrike-action-type.md
-      - file: connectors-kibana/d3security-action-type.md
-      - file: connectors-kibana/elastic-managed-llm.md
-      - file: connectors-kibana/email-action-type.md
-      - file: connectors-kibana/gemini-action-type.md
-      - file: connectors-kibana/resilient-action-type.md
-      - file: connectors-kibana/index-action-type.md
-      - file: connectors-kibana/jira-action-type.md
-      - file: connectors-kibana/defender-action-type.md
-      - file: connectors-kibana/teams-action-type.md
-      - file: connectors-kibana/obs-ai-assistant-action-type.md
-      - file: connectors-kibana/openai-action-type.md
-      - file: connectors-kibana/opsgenie-action-type.md
-      - file: connectors-kibana/jsm-action-type.md
-      - file: connectors-kibana/pagerduty-action-type.md
-      - file: connectors-kibana/sentinelone-action-type.md
-      - file: connectors-kibana/server-log-action-type.md
-      - file: connectors-kibana/servicenow-action-type.md
-      - file: connectors-kibana/servicenow-sir-action-type.md
-      - file: connectors-kibana/servicenow-itom-action-type.md
-      - file: connectors-kibana/swimlane-action-type.md
-      - file: connectors-kibana/slack-action-type.md
-      - file: connectors-kibana/thehive-action-type.md
-      - file: connectors-kibana/tines-action-type.md
-      - file: connectors-kibana/torq-action-type.md
-      - file: connectors-kibana/webhook-action-type.md
-      - file: connectors-kibana/cases-webhook-action-type.md
-      - file: connectors-kibana/xmatters-action-type.md
-      - file: connectors-kibana/xsoar-action-type.md
+      - file: connectors-kibana/gen-ai-connectors.md
+        children:
+          - file: connectors-kibana/ai-connector.md
+          - file: connectors-kibana/bedrock-action-type.md
+          - file: connectors-kibana/elastic-managed-llm.md
+          - file: connectors-kibana/gemini-action-type.md
+          - file: connectors-kibana/openai-action-type.md
+      - file: connectors-kibana/elastic-connectors.md
+        children:
+          - file: connectors-kibana/cases-action-type.md
+          - file: connectors-kibana/index-action-type.md
+          - file: connectors-kibana/obs-ai-assistant-action-type.md
+          - file: connectors-kibana/server-log-action-type.md
+      - file: connectors-kibana/alerting-cases-connectors.md
+        children:
+          - file: connectors-kibana/crowdstrike-action-type.md
+          - file: connectors-kibana/d3security-action-type.md
+          - file: connectors-kibana/email-action-type.md
+          - file: connectors-kibana/resilient-action-type.md
+          - file: connectors-kibana/jira-action-type.md
+          - file: connectors-kibana/jsm-action-type.md
+          - file: connectors-kibana/defender-action-type.md
+          - file: connectors-kibana/teams-action-type.md
+          - file: connectors-kibana/opsgenie-action-type.md
+          - file: connectors-kibana/pagerduty-action-type.md
+          - file: connectors-kibana/sentinelone-action-type.md
+          - file: connectors-kibana/servicenow-action-type.md
+          - file: connectors-kibana/servicenow-itom-action-type.md
+          - file: connectors-kibana/servicenow-sir-action-type.md
+          - file: connectors-kibana/slack-action-type.md
+          - file: connectors-kibana/swimlane-action-type.md
+          - file: connectors-kibana/thehive-action-type.md
+          - file: connectors-kibana/tines-action-type.md
+          - file: connectors-kibana/torq-action-type.md
+          - file: connectors-kibana/webhook-action-type.md
+          - file: connectors-kibana/cases-webhook-action-type.md
+          - file: connectors-kibana/xmatters-action-type.md
+          - file: connectors-kibana/xsoar-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
   - file: kibana-plugins.md
   - file: commands.md
@@ -72,3 +78,4 @@ toc:
       - file: commands/kibana-verification-code.md
   - file: osquery-exported-fields.md
   - file: osquery-manager-prebuilt-packs.md
+  - file: case-analytics-indices-schema.md
