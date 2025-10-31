@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiModal,
@@ -26,6 +27,10 @@ export interface SettingsModalProps {
   onClose: () => void;
 }
 
+const modalStyles = css`
+  width: 400px;
+`;
+
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const state = useToolbarState();
 
@@ -35,7 +40,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   }
 
   return (
-    <EuiModal onClose={onClose} style={{ width: 400 }} aria-label={'Developer Toolbar Settings'}>
+    <EuiModal onClose={onClose} css={modalStyles} aria-label={'Developer Toolbar Settings'}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>Developer Toolbar Settings</EuiModalHeaderTitle>
       </EuiModalHeader>

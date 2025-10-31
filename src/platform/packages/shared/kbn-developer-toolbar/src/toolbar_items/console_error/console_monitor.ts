@@ -21,6 +21,7 @@ export interface ConsoleErrorInfo {
 export class ConsoleMonitor implements Monitor<ConsoleErrorInfo | null> {
   private static readonly IGNORE_ERRORS = [
     // We're ignoring this error until we migrate to React 18's createRoot API.
+    // https://github.com/elastic/kibana/issues/199100
     'Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead.',
   ] as const;
 

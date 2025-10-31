@@ -43,13 +43,10 @@ interface Config {
 }
 
 export class MemoryMonitor implements Monitor<MemoryInfo> {
-  static readonly checkSupport = (): boolean =>
+  static readonly isSupported = (): boolean =>
     typeof performance !== 'undefined' &&
     'memory' in performance &&
     typeof (performance as any).memory?.usedJSHeapSize === 'number';
-
-  // Keep as a function for parity with original API
-  static readonly isSupported = MemoryMonitor.checkSupport;
 
   private history: number[] = [];
   private callbacks = new Set<Callback>();
@@ -76,11 +73,11 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
   }
 
   isSupported(): boolean {
-    return MemoryMonitor.checkSupport();
+    return MemoryMonitor.isSupported();
   }
 
   startMonitoring(): void {
-    if (!MemoryMonitor.checkSupport()) return;
+    if (!this.isSupported()) return;
     this.stopMonitoring(); // ensure clean start
     this.history.length = 0; // reset
     this.startedAt = performance.now();
