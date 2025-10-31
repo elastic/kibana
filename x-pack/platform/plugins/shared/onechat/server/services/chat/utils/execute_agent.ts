@@ -44,6 +44,7 @@ export const executeAgent$ = ({
         agentParams: {
           nextInput,
           conversation: conversation.rounds,
+          conversationId: conversation.id,
           capabilities,
         },
         onEvent: (event) => {

@@ -86,6 +86,10 @@ export interface AgentEventEmitter {
 
 export interface AgentParams {
   /**
+   * The ID of the conversation.
+   */
+  conversationId: string;
+  /**
    * Previous rounds of conversation.
    * Defaults to an empty list (new conversation)
    */

@@ -24,6 +24,10 @@ export interface RunAgentParams {
    */
   conversation: ConversationRound[];
   /**
+   * The ID of the conversation.
+   */
+  conversationId: string;
+  /**
    * Configuration of the agent to run
    */
   agentConfiguration: AgentConfiguration;
