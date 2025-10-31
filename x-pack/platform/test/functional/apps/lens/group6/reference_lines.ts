@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.createLayer('referenceLine');
 
-      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      await lens.assertLayerCount(2);
       expect(
         await (
           await testSubjects.find('lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger')

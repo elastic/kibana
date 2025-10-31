@@ -92,6 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
+        // TODO rewrite to walk through tabs and assert layers there
         const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
 
         const referenceLineDimensions = await testSubjects.findAllDescendant(

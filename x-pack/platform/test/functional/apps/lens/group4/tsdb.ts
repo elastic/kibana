@@ -111,6 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('defaults to average for rolled up metric', async () => {
           await lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
           await lens.removeLayer();
+          await lens.ensureLayerTabIsActive();
           await lens.waitForField('bytes_gauge');
           await lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
           expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
@@ -148,6 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
       });
 
       // skip count for now as it's a special function and will

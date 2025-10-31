@@ -343,6 +343,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.getLayerCount()).to.eql(2);
       await lens.removeLayer();
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
