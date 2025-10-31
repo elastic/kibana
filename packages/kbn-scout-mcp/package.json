@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "description": "Model Context Protocol server for Scout test framework",
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "scripts": {
+    "test": "../../node_modules/.bin/jest --config ./jest.config.js"
+  },
   "dependencies": {
     "@kbn/scout": "link:../shared/kbn-scout",
     "@kbn/test": "link:../../platform/packages/shared/kbn-test",
@@ -12,5 +15,9 @@
     "@modelcontextprotocol/sdk": "^0.5.0",
     "async-mutex": "^0.5.0",
     "playwright": "^1.48.2"
+  },
+  "devDependencies": {
+    "@kbn/es": "link:../../platform/packages/shared/kbn-es",
+    "@types/jest": "^29.5.5"
   }
 }
