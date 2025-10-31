@@ -253,6 +253,7 @@ export const ScheduledReportFlyoutContent = ({
           <EuiLoadingSpinner size="l" />
         ) : isReportingHealthError ? (
           <EuiCallOut
+            announceOnMount
             title={i18n.CANNOT_LOAD_REPORTING_HEALTH_TITLE}
             iconType="error"
             color="danger"
@@ -261,6 +262,7 @@ export const ScheduledReportFlyoutContent = ({
           </EuiCallOut>
         ) : hasUnmetPrerequisites ? (
           <EuiCallOut
+            announceOnMount
             title={i18n.UNMET_REPORTING_PREREQUISITES_TITLE}
             iconType="error"
             color="danger"
@@ -446,6 +448,7 @@ export const ScheduledReportFlyoutContent = ({
                       />
                       {!readOnly && (
                         <EuiCallOut
+                          announceOnMount
                           title={i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_TITLE}
                           iconType="info"
                           size="s"
@@ -460,6 +463,7 @@ export const ScheduledReportFlyoutContent = ({
                 <>
                   <EuiSpacer size="m" />
                   <EuiCallOut
+                    announceOnMount
                     title={i18n.SCHEDULED_REPORT_FORM_MISSING_EMAIL_CONNECTOR_TITLE}
                     iconType="info"
                     size="s"
