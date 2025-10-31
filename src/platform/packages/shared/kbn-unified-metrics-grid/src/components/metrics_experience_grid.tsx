@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import { useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +31,7 @@ import {
 } from '../common/constants';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
-import { usePaginatedFields, useMetricFieldsQuery, useValueFilters } from '../hooks';
+import { useGridData, useMetricFieldsQuery } from '../hooks';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
 import { MetricsGridLoadingProgress, EmptyState } from './empty_state/empty_state';
@@ -63,18 +63,13 @@ export const MetricsExperienceGrid = ({
     dimensions,
     isFullscreen,
     valueFilters,
-    noDataMetrics,
+
     onPageChange,
     onSearchTermChange,
     onToggleFullscreen,
-    onNoDataMetricsChange,
   } = useMetricsExperienceState();
 
   const { updateTimeRange } = requestParams;
-
-  useEffect(() => {
-    onNoDataMetricsChange([]);
-  }, [valueFilters, dimensions, onNoDataMetricsChange]);
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -116,35 +111,25 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  const onCellLoad = useCallback(
-    (fieldName: string, hasData: boolean) => {
-      if (!hasData) {
-        onNoDataMetricsChange([fieldName]);
-      }
-    },
-    [onNoDataMetricsChange]
-  );
-
   const {
     currentPageFields = [],
     totalPages = 0,
     filteredFieldsCount = 0,
-  } = usePaginatedFields({
+    filters = [],
+  } = useGridData({
     fields,
     dimensions,
-    valueFilters,
     pageSize: PAGE_SIZE,
     currentPage,
     searchTerm,
-    noDataMetrics,
+    valueFilters,
+    timeRange,
   }) ?? {};
 
   const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
     () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
     [filteredFieldsCount]
   );
-
-  const filters = useValueFilters(valueFilters);
 
   if (fields.length === 0) {
     return <EmptyState isLoading={isFieldsLoading} />;
@@ -254,7 +239,6 @@ export const MetricsExperienceGrid = ({
             discoverFetch$={discoverFetch$}
             requestParams={requestParams}
             abortController={abortController}
-            onCellLoad={onCellLoad}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

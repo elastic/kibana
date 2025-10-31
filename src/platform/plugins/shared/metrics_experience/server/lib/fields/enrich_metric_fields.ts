@@ -35,7 +35,7 @@ export function generateMapKey(indexName: string, fieldName: string) {
   return `${fieldName}>${indexName}`;
 }
 
-function buildMetricMetadataMap(
+export function buildMetricMetadataMap(
   response: {
     responses: InferSearchResponseOf<
       {
@@ -70,21 +70,24 @@ function buildMetricMetadataMap(
             if (typeof value === 'string') {
               acc.scopeName = value;
             }
+            return acc;
           }
 
           if (fieldName === 'data_stream.dataset') {
             if (typeof value === 'string') {
               acc.dataSet = value;
             }
+            return acc;
           }
 
           if (fieldName === semconvFlat.unit.name) {
             if (typeof value === 'string') {
               acc.unitFromSample = value;
             }
-          } else {
-            acc.dimensions.push(fieldName);
+            return acc;
           }
+
+          acc.dimensions.push(fieldName);
 
           return acc;
         },
@@ -115,11 +118,13 @@ export async function sampleMetricMetadata({
   metricFields,
   logger,
   timerange: { from, to },
+  kuery,
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   logger: Logger;
   timerange: EpochTimeRange;
+  kuery?: string;
 }): Promise<MetricMetadataMap> {
   if (metricFields.length === 0) {
     return new Map();
@@ -142,15 +147,18 @@ export async function sampleMetricMetadata({
                 },
               },
               ...dateRangeQuery(from, to),
+              ...kqlQuery(kuery),
             ],
           },
         },
         _source: false,
-        fields: dimensions
-          .map((dimension) => dimension.name)
-          .concat(semconvFlat.unit.name)
-          .concat('scope.name')
-          .concat('data_stream.dataset'),
+        fields: kuery
+          ? [field]
+          : dimensions
+              .map((dimension) => dimension.name)
+              .concat(semconvFlat.unit.name)
+              .concat('scope.name')
+              .concat('data_stream.dataset'),
       });
     }
     const response = await esClient.msearch<{ fields: Record<string, any> }>(
@@ -175,12 +183,14 @@ export async function enrichMetricFields({
   indexFieldCapsMap,
   logger,
   timerange,
+  kuery,
 }: {
   esClient: TracedElasticsearchClient;
   metricFields: MetricField[];
   indexFieldCapsMap: IndexFieldCapsMap;
   logger: Logger;
   timerange: EpochTimeRange;
+  kuery?: string;
 }): Promise<MetricField[]> {
   if (metricFields.length === 0) {
     return metricFields;
@@ -191,6 +201,7 @@ export async function enrichMetricFields({
     metricFields,
     logger,
     timerange,
+    kuery,
   });
 
   const uniqueDimensionSets = new Map<string, Array<Dimension>>();
@@ -218,5 +229,5 @@ export async function enrichMetricFields({
         scope,
       };
     })
-    .filter((field): field is MetricField => field !== undefined);
+    .filter((field): field is NonNullable<typeof field> => field !== undefined);
 }

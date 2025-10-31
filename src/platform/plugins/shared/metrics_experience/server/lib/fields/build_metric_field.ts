@@ -39,5 +39,7 @@ export function buildMetricField({
     instrument: typeInfo.time_series_metric,
     unit,
     display,
+    noData: undefined,
+    scope: undefined,
   };
 }
