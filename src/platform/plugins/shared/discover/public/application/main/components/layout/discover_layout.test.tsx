@@ -27,7 +27,8 @@ import type {
   DataTotalHits$,
 } from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { DiscoverLatestFetchDetails, FetchStatus } from '../../../types';
+import type { DiscoverLatestFetchDetails } from '../../../types';
+import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
