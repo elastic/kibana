@@ -830,7 +830,7 @@ export class AlertsClient {
     };
 
     // rejects at the route level if more than 1000 id's are passed in
-    if (ids != null) {
+    if (ids && ids.length > 0) {
       const alerts = ids.map((id) => ({ id, index }));
       const mgetRes = await this.ensureAllAlertsAuthorized({
         alerts,
@@ -863,7 +863,7 @@ export class AlertsClient {
         body: bulkUpdateRequest,
       });
       return bulkUpdateResponse;
-    } else if (query != null) {
+    } else if (query) {
       try {
         // execute search after with query + authorization filter
         // audit results of that query

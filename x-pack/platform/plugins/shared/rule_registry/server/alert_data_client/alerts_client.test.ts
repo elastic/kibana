@@ -942,6 +942,32 @@ describe('AlertsClient', () => {
       expect(esClientMock.mget).not.toHaveBeenCalled();
       expect(esClientMock.bulk).not.toHaveBeenCalled();
     });
+
+    it('should throw error when ids is empty', async () => {
+      await expect(
+        alertsClient.bulkUpdate({
+          ids: [],
+          index: '.alerts-security.alerts-default',
+          addTags: ['urgent', 'production'],
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: no ids or query were provided for updating]`);
+
+      expect(esClientMock.mget).not.toHaveBeenCalled();
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when query is empty', async () => {
+      await expect(
+        alertsClient.bulkUpdate({
+          query: '',
+          index: '.alerts-security.alerts-default',
+          addTags: ['urgent', 'production'],
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: no ids or query were provided for updating]`);
+
+      expect(esClientMock.mget).not.toHaveBeenCalled();
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
   });
 
   describe('bulkUpdate edge cases', () => {
