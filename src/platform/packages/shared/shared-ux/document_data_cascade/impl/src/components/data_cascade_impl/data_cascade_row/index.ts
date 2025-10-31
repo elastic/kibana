@@ -7,17 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/guide.mdx',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
-};
+export { CascadeRowPrimitive, CascadeRowHeaderPrimitive } from './cascade_row';
+export { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';

@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { css } from '@emotion/react';
+import { type UseEuiTheme } from '@elastic/eui';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/guide.mdx',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
-};
+export const styles = (euiTheme: UseEuiTheme['euiTheme']) => ({
+  cascadeHeaderWrapper: css({
+    padding: `${euiTheme.size.s} 0`,
+  }),
+});

@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { css } from '@emotion/react';
+import { type EuiThemeShape } from '@elastic/eui';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/guide.mdx',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
-};
+export const cascadeRowCellStyles = (euiTheme: EuiThemeShape) => ({
+  cellWrapper: css({ width: '100%' }),
+  cellInner: css({
+    border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+    borderRadius: euiTheme.border.radius.small,
+    '& > *': {
+      clipPath: `inset(0 round ${euiTheme.border.radius.small})`,
+    },
+  }),
+});
