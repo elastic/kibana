@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { LookupsDataInput } from './lookups_data_input';
-import { DataInputStep } from '../constants';
+import { DataInputStep } from '../../../../../common/components/migration_steps/macros/macros_data_input';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
@@ -84,7 +84,7 @@ describe('LookupsDataInput', () => {
   it('does not render description when dataInputStep is not LookupsUpload', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <LookupsDataInput {...defaultProps} dataInputStep={DataInputStep.Rules} />
+        <LookupsDataInput {...defaultProps} dataInputStep={DataInputStep.Items} />
       </TestProviders>
     );
     expect(queryByTestId('lookupsUploadDescription')).not.toBeInTheDocument();

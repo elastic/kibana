@@ -41,7 +41,7 @@ describe('useUpsertResources', () => {
       const mockResources = [{ name: 'resource1', type: 'macro' as const, content: 'test' }];
       mockUpsertMigrationResources.mockResolvedValue(undefined);
 
-      const { result } = renderHook(() => useUpsertResources(mockOnSuccess));
+      const { result } = renderHook(() => useUpsertResources(mockOnSuccess, 'dashboard'));
 
       await act(async () => {
         await result.current.upsertResources('migration-id', mockResources);
@@ -59,7 +59,7 @@ describe('useUpsertResources', () => {
       const mockError = new Error('API error');
       mockUpsertMigrationResources.mockRejectedValue(mockError);
 
-      const { result } = renderHook(() => useUpsertResources(mockOnSuccess));
+      const { result } = renderHook(() => useUpsertResources(mockOnSuccess, 'dashboard'));
 
       await act(async () => {
         await result.current.upsertResources('migration-id', []);

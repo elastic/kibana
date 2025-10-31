@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { IconDashboards } from '../../../../../../../common/icons/dashboards';
-import { START_DASHBOARD_MIGRATION_CARD_TITLE } from '../../../../../../../siem_migrations/dashboards/components/status_panels/translations';
+import { START_DASHBOARD_MIGRATION_CARD_TITLE } from '../../../../../../../siem_migrations/dashboards/components/migration_status_panels/translations';
 import { OnboardingCardId } from '../../../../../../constants';
 import type { OnboardingCardConfig } from '../../../../../../types';
 import { checkStartMigrationCardComplete } from './start_migration_check_complete';

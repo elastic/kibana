@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react';
 import { useMissingLookupsListStep } from '.';
 import { TestProviders } from '../../../../../../../../common/mock/test_providers';
-import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
+import { useUpsertResources } from '../../../../../../../common/service/hooks/use_upsert_resources';
 import { getDashboardMigrationStatsMock } from '../../../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../../../common/siem_migrations/constants';
 
-jest.mock('../../../../../../service/hooks/use_upsert_resources');
+jest.mock('../../../../../../../common/service/hooks/use_upsert_resources');
 const mockUseUpsertResources = useUpsertResources as jest.Mock;
 
 describe('useMissingLookupsListStep', () => {

@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { LookupsDataInput } from './lookups_data_input';
-import { DashboardUploadSteps } from '../constants';
+import { DataInputStep } from '../../../../../common/components/migration_steps/macros/macros_data_input';
 import * as i18n from './translations';
 import { getDashboardMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
@@ -38,7 +38,7 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
 describe('LookupsDataInput', () => {
   const defaultProps = {
     onAllLookupsCreated: jest.fn(),
-    dataInputStep: DashboardUploadSteps.LookupsUpload,
+    dataInputStep: DataInputStep.Lookups,
     migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     missingLookups: ['lookup1', 'lookup2'],
   };
@@ -82,7 +82,7 @@ describe('LookupsDataInput', () => {
   it('does not render description when dataInputStep is not LookupsUpload', () => {
     const { queryByText } = render(
       <TestProviders>
-        <LookupsDataInput {...defaultProps} dataInputStep={DashboardUploadSteps.DashboardsUpload} />
+        <LookupsDataInput {...defaultProps} dataInputStep={DataInputStep.Items} />
       </TestProviders>
     );
     expect(queryByText(i18n.LOOKUPS_DATA_INPUT_DESCRIPTION)).not.toBeInTheDocument();
