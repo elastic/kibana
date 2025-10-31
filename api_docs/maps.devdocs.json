@@ -4760,7 +4760,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5799,7 +5799,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6761,7 +6761,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -7758,7 +7758,7 @@
                     "section": "def-common.SOURCE_TYPES",
                     "text": "SOURCE_TYPES"
                   },
-                  ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -8761,7 +8761,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9723,7 +9723,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -10735,7 +10735,7 @@
                     "section": "def-common.SOURCE_TYPES",
                     "text": "SOURCE_TYPES"
                   },
-                  ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -11847,7 +11847,7 @@
                 "section": "def-common.SOURCE_TYPES",
                 "text": "SOURCE_TYPES"
               },
-              ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+              ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12931,7 +12931,7 @@
                     "section": "def-common.SOURCE_TYPES",
                     "text": "SOURCE_TYPES"
                   },
-                  ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+                  ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -14457,7 +14457,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ESQL; readonly esql: string; readonly columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; readonly dataViewId: string; }"
+          ".ESQL; readonly esql: string; readonly dataViewId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/source_schemas/types.ts",
         "deprecated": false,
@@ -15943,7 +15943,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+          ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -16672,7 +16672,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }> | Readonly<{ id?: string | undefined; isAutoSelect?: boolean | undefined; lightModeDefault?: string | undefined; } & { type: ",
+          ".ESQL; esql: string; dataViewId: string; }> | Readonly<{ id?: string | undefined; isAutoSelect?: boolean | undefined; lightModeDefault?: string | undefined; } & { type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -17766,7 +17766,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }"
+          ".ESQL; esql: string; dataViewId: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/schema/v1/layer_schemas/types.ts",
         "deprecated": false,
@@ -20381,7 +20381,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
+          ".ESQL; esql: string; dataViewId: string; }>; }> | Readonly<{ label?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; parent?: string | undefined; visible?: boolean | undefined; attribution?: Readonly<{} & { label: string; url: string; }> | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; alpha?: number | undefined; includeInFitToBounds?: boolean | undefined; } & { id: string; type: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -21439,7 +21439,7 @@
             "section": "def-common.SOURCE_TYPES",
             "text": "SOURCE_TYPES"
           },
-          ".ESQL; esql: string; columns: Readonly<{ original_types?: string[] | undefined; } & { type: string; name: string; }>[]; dataViewId: string; }>; }>, \"joins\"> & { joins?: ",
+          ".ESQL; esql: string; dataViewId: string; }>; }>, \"joins\"> & { joins?: ",
           "JoinDescriptor",
           "[] | undefined; } & RuntimeLayerState"
         ],
