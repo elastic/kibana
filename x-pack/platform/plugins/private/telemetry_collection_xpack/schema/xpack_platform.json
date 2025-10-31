@@ -3567,7 +3567,10 @@
                   }
                 },
                 "totalWithMaxObservables": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases with maximum observables"
+                  }
                 },
                 "totalUsers": {
                   "type": "long"
