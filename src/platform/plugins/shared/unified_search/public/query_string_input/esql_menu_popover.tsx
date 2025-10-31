@@ -248,7 +248,10 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
           return {
             name: query.label,
             onClick: () => {
-              telemetryServiceRef.current.trackRecommendedQueryClicked(QuerySource.HELP);
+              telemetryServiceRef.current.trackRecommendedQueryClicked(
+                QuerySource.HELP,
+                query.label
+              );
               onESQLQuerySubmit?.(query.queryString);
               telemetryServiceRef.current.trackQuerySubmitted({
                 source: QuerySource.HELP,
