@@ -105,15 +105,13 @@ export function loadEmbeddableData(
     }
   };
 
-  const controlESQLVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
-
   async function reload(
     // make reload easier to debug
     sourceId: ReloadReason,
     fetchContext?: FetchContext
   ) {
     addLog(`Embeddable reload reason: ${sourceId}`);
-    console.log({ fetchContext, sourceId });
+
     resetMessages();
 
     // reset the render on reload

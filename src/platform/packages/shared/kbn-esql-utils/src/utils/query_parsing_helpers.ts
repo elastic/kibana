@@ -455,6 +455,8 @@ export const fixESQLQueryWithVariables = (
 
   // filter out the variables that are not used in the query
   // and that they are not of type FIELDS or FUNCTIONS
+  console.log({ esqlVariables });
+  debugger;
   const identifierTypeVariables = esqlVariables?.filter(
     (variable) =>
       currentVariables.includes(variable.key) &&

@@ -69,7 +69,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
         return allFilters?.filter(
           (currentFilter) =>
             currentFilter.meta.controlledBy !== uuid &&
-            (section && currentFilter.meta.group ? section === currentFilter.meta.group : true)
+            (currentFilter.meta.group ? section === currentFilter.meta.group : true)
         );
       })
     );
@@ -103,12 +103,11 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
         const section = api.parentApi?.layout$
           ? api.parentApi?.layout$.getValue().panels[uuid]?.grid?.sectionId
           : undefined;
+
         return allVariables?.filter(
           (currentVariable) =>
-            (currentVariable.meta?.controlledBy
-              ? currentVariable.meta.controlledBy !== uuid
-              : true) &&
-            (section && currentVariable.meta?.group ? section === currentVariable.meta.group : true)
+            currentVariable.meta?.controlledBy !== uuid &&
+            (currentVariable.meta?.group ? section === currentVariable.meta.group : true)
         );
       })
     );
