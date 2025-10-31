@@ -25,6 +25,7 @@ import { backfillClientMock } from '../../../../backfill_client/backfill_client.
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('getRuleTypesByQuery', () => {
   let rulesClient: RulesClient;
@@ -43,6 +44,7 @@ describe('getRuleTypesByQuery', () => {
   const backfillClient = backfillClientMock.create();
   const logger = loggingSystemMock.create().get();
   const eventLogger = eventLoggerMock.create();
+  const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
   const filter = { type: 'mock_filter' };
 
@@ -91,6 +93,7 @@ describe('getRuleTypesByQuery', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
+      elasticsearchClient,
     } as jest.Mocked<ConstructorOptions>;
 
     jest.clearAllMocks();

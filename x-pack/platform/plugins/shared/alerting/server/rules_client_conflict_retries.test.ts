@@ -15,6 +15,7 @@ import {
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
@@ -48,6 +49,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const kibanaVersion = 'v7.10.0';
 const logger = loggingSystemMock.create().get();
@@ -77,6 +79,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   isSystemAction: jest.fn(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  elasticsearchClient,
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:

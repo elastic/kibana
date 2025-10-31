@@ -45,6 +45,7 @@ import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connect
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -66,6 +67,7 @@ const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
 const eventLogger = eventLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -97,6 +99,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  elasticsearchClient,
 };
 
 beforeEach(() => {

@@ -29,6 +29,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { transformAdHocRunToBackfillResult } from '../../transforms';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -40,6 +41,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const backfillClient = backfillClientMock.create();
+const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const filter = fromKueryExpression(
   '((ad_hoc_run_params.attributes.rule.alertTypeId:myType and ad_hoc_run_params.attributes.rule.consumer:myApp) or (ad_hoc_run_params.attributes.rule.alertTypeId:myOtherType and ad_hoc_run_params.attributes.rule.consumer:myApp) or (ad_hoc_run_params.attributes.rule.alertTypeId:myOtherType and ad_hoc_run_params.attributes.rule.consumer:myOtherApp))'
@@ -229,6 +231,7 @@ describe('findBackfill()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
+      elasticsearchClient,
     });
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       filter,

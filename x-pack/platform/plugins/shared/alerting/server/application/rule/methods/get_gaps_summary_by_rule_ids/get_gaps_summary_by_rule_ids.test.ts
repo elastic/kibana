@@ -26,6 +26,7 @@ import { backfillClientMock } from '../../../../backfill_client/backfill_client.
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -40,6 +41,7 @@ const backfillClient = backfillClientMock.create();
 const logger = loggingSystemMock.create().get();
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
+const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
@@ -69,6 +71,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   eventLogger,
+  elasticsearchClient,
 };
 
 const filter = fromKueryExpression(

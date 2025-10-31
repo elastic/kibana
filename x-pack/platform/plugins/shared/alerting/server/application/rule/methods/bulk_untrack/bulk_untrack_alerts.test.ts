@@ -26,6 +26,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -38,6 +39,7 @@ const logger = loggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const alertsService = alertsServiceMock.create();
+const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -68,6 +70,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  elasticsearchClient,
 };
 
 describe('bulkUntrackAlerts()', () => {

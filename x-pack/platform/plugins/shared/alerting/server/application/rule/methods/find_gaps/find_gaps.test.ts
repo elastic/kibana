@@ -28,6 +28,7 @@ import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { getRule } from '../get/get_rule';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 jest.mock('../get/get_rule');
 
@@ -77,6 +78,7 @@ describe('findGaps', () => {
   const backfillClient = backfillClientMock.create();
   const logger = loggingSystemMock.create().get();
   const eventLogger = eventLoggerMock.create();
+  const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
   const params = {
     ruleId: '1',
@@ -117,6 +119,7 @@ describe('findGaps', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
+      elasticsearchClient,
     } as jest.Mocked<ConstructorOptions>;
 
     jest.clearAllMocks();
