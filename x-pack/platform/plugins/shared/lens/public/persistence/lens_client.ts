@@ -27,6 +27,7 @@ import type {
   LensItemMeta,
   LensUpdateRequestQuery,
 } from '../../server/api/routes/visualizations/types';
+import { getLensFeatureFlags } from '../get_feature_flags';
 
 export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
   item: LensItem;
@@ -42,9 +43,12 @@ export type LooseLensAttributes = Omit<LensAttributes, 'visualizationType'> &
   Pick<LensSavedObjectAttributes, 'visualizationType'>;
 
 export class LensClient {
-  private builder = new LensConfigBuilder();
+  private builder: LensConfigBuilder;
 
-  constructor(private http: HttpStart) {}
+  constructor(private http: HttpStart) {
+    const enableAPITransforms = getLensFeatureFlags().apiFormat;
+    this.builder = new LensConfigBuilder(undefined, enableAPITransforms);
+  }
 
   async get(id: string): Promise<LensItemResponse<LensGetResponseBody['meta']>> {
     const {

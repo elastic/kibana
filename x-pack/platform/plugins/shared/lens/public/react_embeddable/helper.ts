@@ -196,6 +196,13 @@ export function transformInitialState(state: LensSerializedAPIConfig): LensSeria
 }
 
 export function transformOutputState(state: LensSerializedState): LensByValueSerializedAPIConfig {
+  if (state.savedObjectId) {
+    return {
+      ...state,
+      attributes: undefined,
+    };
+  }
+
   const enableAPITransforms = getLensFeatureFlags().apiFormat;
   const builder = new LensConfigBuilder(undefined, enableAPITransforms);
   const chartType = builder.getType(state.attributes);

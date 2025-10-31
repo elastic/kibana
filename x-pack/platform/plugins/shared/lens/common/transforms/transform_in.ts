@@ -65,16 +65,16 @@ export const getTransformIn = ({
       throw new Error('attributes are missing');
     }
 
-    const serializedState = isLensAPIFormat(config.attributes)
+    const attributes = isLensAPIFormat(config.attributes)
       ? builder.fromAPIFormat(config.attributes)
       : config.attributes;
-    const { state: lensState, references: lensReferences } = extractLensReferences(serializedState);
+    const { state: lensState, references: lensReferences } = extractLensReferences({
+      ...config,
+      attributes,
+    });
 
     return {
-      state: {
-        ...lensState,
-        attributes: serializedState,
-      },
+      state: lensState,
       ...enhancementsState,
       references: [...lensReferences, ...enhancementsReferences],
     } satisfies LensByValueTransformInResult;
