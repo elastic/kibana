@@ -163,6 +163,7 @@ export function useEsqlDataCascadeHeaderComponent({
         <EuiFlexGroup
           justifyContent={viewModeToggle ? 'spaceBetween' : 'flexEnd'}
           alignItems="center"
+          responsive={false}
         >
           {viewModeToggle && (
             <EuiFlexItem>
