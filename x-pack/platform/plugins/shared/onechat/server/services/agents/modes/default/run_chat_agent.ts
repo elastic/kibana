@@ -8,13 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import type { ChatAgentEvent } from '@kbn/onechat-common';
+import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
 import {
   addRoundCompleteEvent,
   extractRound,
   selectProviderTools,
   conversationToLangchainMessages,
+  prepareConversation,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
@@ -37,14 +38,14 @@ export type RunChatAgentFn = (
 export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
-    conversation = [],
+    conversation,
     agentConfiguration,
     capabilities,
     runId = uuidv4(),
     agentId,
     abortSignal,
   },
-  { logger, request, modelProvider, toolProvider, events }
+  { logger, request, modelProvider, toolProvider, attachments, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -74,9 +75,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
   const graphRecursionLimit = cycleLimit * 2 + 8;
 
-  const initialMessages = conversationToLangchainMessages({
+  const processedConversation = await prepareConversation({
     nextInput,
-    previousRounds: conversation,
+    previousRounds: conversation?.rounds ?? [],
+    attachmentsService: attachments,
+  });
+
+  const initialMessages = conversationToLangchainMessages({
+    conversation: processedConversation,
   });
 
   const agentGraph = createAgentGraph({
@@ -116,8 +122,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     finalize(() => manualEvents$.complete())
   );
 
+  const processedInput: RoundInput = {
+    message: processedConversation.nextInput.message,
+    attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
+  };
+
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: nextInput }),
+    addRoundCompleteEvent({ userInput: processedInput }),
     shareReplay()
   );
 
