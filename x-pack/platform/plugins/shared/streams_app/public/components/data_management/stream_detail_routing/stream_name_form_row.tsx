@@ -86,26 +86,24 @@ export function StreamNameFormRow({
         autoFocus={autoFocus}
         onChange={handleChange}
         maxLength={MAX_NAME_LENGTH - prefix.length}
-        prepend={
-          <>
-            <EuiIcon type="streamsWired" />
-            <EuiFormLabel
-              css={css`
-                inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
-              `}
-              id={descriptionId}
-            >
-              <EuiScreenReaderOnly>
-                <span>
-                  {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
-                    defaultMessage: 'Stream prefix:',
-                  })}
-                </span>
-              </EuiScreenReaderOnly>
-              <EuiTextTruncate text={prefix} truncation="start" />
-            </EuiFormLabel>
-          </>
-        }
+        prepend={[
+          <EuiIcon type="streamsWired" />,
+          <EuiFormLabel
+            css={css`
+              inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
+            `}
+            id={descriptionId}
+          >
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
+                  defaultMessage: 'Stream prefix:',
+                })}
+              </span>
+            </EuiScreenReaderOnly>
+            <EuiTextTruncate text={prefix} truncation="start" />
+          </EuiFormLabel>,
+        ]}
       />
     </EuiFormRow>
   );
