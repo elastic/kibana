@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { type FC, memo, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
@@ -204,6 +204,8 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   } = useKibana().services;
   const { alertsTableRef } = useAlertsContext();
 
+  const onExpandedAlertIndexChangeRef = useRef<(expandedAlertIndex: number | null) => void>();
+
   const { from, to, setQuery } = useGlobalTime();
 
   const dispatch = useDispatch();
@@ -254,6 +256,12 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     expandedAlertIndex,
     itemsPerPage,
   } = useSelector((state: State) => getTable(state, tableType) ?? licenseDefaults);
+
+  useEffect(() => {
+    onExpandedAlertIndexChangeRef.current?.(
+      typeof expandedAlertIndex === 'number' ? expandedAlertIndex : null
+    );
+  }, [expandedAlertIndex]);
 
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
 
@@ -487,18 +495,6 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
 
   const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
 
-  const onExpandedAlertIndexChange = useCallback(
-    (newIndex?: number | null) => {
-      dispatch(
-        dataTableActions.updateExpandedAlertIndex({
-          id: tableType,
-          expandedAlertIndex: newIndex ?? undefined,
-        })
-      );
-    },
-    [dispatch, tableType]
-  );
-
   const onExpandedAlertFlyoutClose = useCallback(() => {
     dispatch(
       dataTableActions.updateExpandedAlertIndex({ id: tableType, expandedAlertIndex: undefined })
@@ -514,6 +510,12 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
    */
   const shouldRenderAdditionalToolbarControls =
     disableAdditionalToolbarControls || tableType === TableId.alertsOnCasePage;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onRenderExpandedAlertView = useCallback((props: any) => {
+    onExpandedAlertIndexChangeRef.current = props.onExpandedAlertIndexChange;
+    return <ExpandedAlertView {...props} />;
+  }, []);
 
   if (isLoading) {
     return null;
@@ -565,8 +567,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               cellActionsOptions={cellActionsOptions}
               showInspectButton
               expandedAlertIndex={expandedAlertIndex}
-              onExpandedAlertIndexChange={onExpandedAlertIndexChange}
-              renderExpandedAlertView={ExpandedAlertView}
+              renderExpandedAlertView={onRenderExpandedAlertView}
               services={services}
               {...tablePropsOverrides}
             />

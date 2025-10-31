@@ -15,7 +15,6 @@ import {
   tableDefaults,
 } from '@kbn/securitysolution-data-table';
 import { useDispatch } from 'react-redux';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { DocumentStatus } from './status';
@@ -54,12 +53,9 @@ export const AlertHeaderTitle = memo(() => {
     refetchFlyoutData,
     getFieldsData,
   } = useDocumentDetailsContext();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
   const dispatch = useDispatch();
 
-  const { expandedAlertIndex, itemsPerPage } = useDeepEqualSelector((state) => {
+  const { expandedAlertIndex, totalCount } = useDeepEqualSelector((state) => {
     return dataTableSelectors.getTableByIdSelector()(state, scopeId) ?? tableDefaults;
   });
 
@@ -157,7 +153,7 @@ export const AlertHeaderTitle = memo(() => {
         <EuiFlexItem grow={false}>
           <EuiPagination
             aria-label=""
-            pageCount={itemsPerPage}
+            pageCount={totalCount}
             activePage={expandedAlertIndex}
             onPageClick={onPaginate}
             compressed
