@@ -5,9 +5,11 @@
  * 2.0.
  */
 if (process.env.NODE_ENV !== 'production') {
-  require('@kbn/setup-node-env');
+  // eslint-disable-next-line import/no-dynamic-require
+  require('' + '@kbn/setup-node-env');
 } else {
-  require('@kbn/setup-node-env/dist');
+  // eslint-disable-next-line import/no-dynamic-require
+  require('' + '@kbn/setup-node-env/dist');
 }
 
 module.exports = require('./regex_worker_task');
