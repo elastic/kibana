@@ -144,6 +144,61 @@ function detectJsxUsage(programPath, properties, t) {
 }
 
 /**
+ * Detect which imports are used in jest.mock() factory functions
+ * Returns a Set of variable names that should not be lazy-loaded
+ * Jest mock factories cannot reference out-of-scope variables
+ */
+function detectJestMockUsage(programPath, properties, t) {
+  const importsUsedInJestMocks = new Set();
+
+  programPath.traverse({
+    CallExpression(callPath) {
+      const { callee } = callPath.node;
+
+      // Check if this is a jest.mock(), jest.doMock(), or jest.unmock() call
+      let isJestMock = false;
+      if (t.isMemberExpression(callee)) {
+        // jest.mock(), jest.doMock(), jest.unmock()
+        if (
+          t.isIdentifier(callee.object, { name: 'jest' }) &&
+          t.isIdentifier(callee.property) &&
+          ['mock', 'doMock', 'unmock'].includes(callee.property.name)
+        ) {
+          isJestMock = true;
+        }
+      }
+
+      if (!isJestMock) {
+        return;
+      }
+
+      // Check the factory function (2nd argument) for import usage
+      const factoryArg = callPath.node.arguments[1];
+      if (!factoryArg) {
+        return;
+      }
+
+      // Traverse the factory function to find import references
+      const factoryPath = callPath.get('arguments.1');
+      if (!factoryPath) {
+        return;
+      }
+
+      factoryPath.traverse({
+        Identifier(idPath) {
+          const name = idPath.node.name;
+          if (properties.has(name) && idPath.isReferencedIdentifier()) {
+            importsUsedInJestMocks.add(name);
+          }
+        },
+      });
+    },
+  });
+
+  return importsUsedInJestMocks;
+}
+
+/**
  * Detect which imports are used in module-level code that runs at initialization
  * Returns a Set of variable names that should not be lazy-loaded
  */
@@ -252,4 +307,5 @@ module.exports = {
   shouldSkipIdentifier,
   detectModuleLevelUsage,
   detectJsxUsage,
+  detectJestMockUsage,
 };

@@ -12,7 +12,30 @@
  * See README.md for detailed examples and documentation.
  */
 
-const { shouldSkipIdentifier, detectModuleLevelUsage, detectJsxUsage } = require('./helpers');
+const {
+  shouldSkipIdentifier,
+  detectModuleLevelUsage,
+  detectJsxUsage,
+  detectJestMockUsage,
+} = require('./helpers');
+
+// Modules that should never be lazy-loaded
+// Supports exact matches ('react') and trailing wildcards ('@testing-library/*')
+const EXCLUDED_MODULES = [
+  'react',
+  'React',
+  '@jest/globals',
+  '@testing-library/*', // Matches @testing-library/react, @testing-library/jest-dom, etc.
+];
+
+// Check if a module path should be excluded
+function isExcludedModule(modulePath) {
+  return EXCLUDED_MODULES.some((pattern) => {
+    // Convert * to .* for regex matching
+    const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
+    return regex.test(modulePath);
+  });
+}
 
 module.exports = function lazyRequirePlugin({ types: t }) {
   /**
@@ -257,15 +280,26 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         }
 
         // =================================================================
-        // PHASE 1.7: Always exclude React (required for JSX runtime)
+        // PHASE 1.7: Exclude modules from the exclusion list
         // =================================================================
-        // React must always be available for JSX to work, even if not explicitly used
+        // Some modules must always be available (e.g., React for JSX, Jest for test structure)
         for (const [varName, propInfo] of properties) {
-          // Check if this is a React import (default, named, or namespace)
-          if (propInfo.moduleRequirePath === 'react' || propInfo.moduleRequirePath === 'React') {
+          if (isExcludedModule(propInfo.moduleRequirePath)) {
             properties.delete(varName);
             declarationsToRemove.delete(varName);
           }
+        }
+
+        // =================================================================
+        // PHASE 1.8: Detect and exclude jest.mock() factory usage
+        // =================================================================
+        // Jest mock factories cannot reference out-of-scope variables
+        const importsUsedInJestMocks = detectJestMockUsage(programPath, properties, t);
+
+        // Exclude from transformation
+        for (const varName of importsUsedInJestMocks) {
+          properties.delete(varName);
+          declarationsToRemove.delete(varName);
         }
 
         // Remove orphaned modules (no properties left)

@@ -457,6 +457,160 @@ describe('@kbn/babel-plugin-lazy-require', () => {
     });
   });
 
+  describe('Module exclusion', () => {
+    it('never transforms imports from excluded modules (@jest/globals)', () => {
+      const code = transformCode(`
+        import { describe, test, expect } from '@jest/globals';
+        describe('test suite', () => {
+          test('test case', () => {
+            expect(true).toBe(true);
+          });
+        });
+      `);
+
+      // Jest globals should not be transformed
+      expect(code).toContain('describe');
+      expect(code).toContain('test');
+      expect(code).toContain('expect');
+      expect(code).not.toContain('get describe');
+      expect(code).not.toContain('get test');
+      expect(code).not.toContain('get expect');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('transforms non-excluded imports even when excluded modules are present', () => {
+      const code = transformCode(`
+        import { describe, test } from '@jest/globals';
+        import { helper } from './utils';
+        describe('test', () => {
+          test('case', () => {
+            helper();
+          });
+        });
+      `);
+
+      // Jest globals not transformed
+      expect(code).toContain('describe');
+      expect(code).toContain('test');
+      expect(code).not.toContain('get describe');
+      expect(code).not.toContain('get test');
+
+      // But helper should be transformed
+      expect(code).toContain('get helper');
+    });
+
+    it('never transforms @testing-library/* modules (wildcard pattern)', () => {
+      const code = transformCode(`
+        import { render, screen } from '@testing-library/react';
+        import userEvent from '@testing-library/user-event';
+        import '@testing-library/jest-dom';
+        import { helper } from './utils';
+
+        test('example', async () => {
+          render(<div>test</div>);
+          await userEvent.click(screen.getByText('test'));
+          helper();
+        });
+      `);
+
+      // Testing library imports not transformed (matched by '@testing-library/*' wildcard)
+      expect(code).toContain('render');
+      expect(code).toContain('screen');
+      expect(code).toContain('userEvent');
+      expect(code).not.toContain('get render');
+      expect(code).not.toContain('get screen');
+      expect(code).not.toContain('get userEvent');
+
+      // But helper should be transformed
+      expect(code).toContain('get helper');
+    });
+
+    it('supports wildcard patterns in module exclusions', () => {
+      // Test that * wildcards work correctly
+      const code1 = transformCode(`
+        import { something } from '@testing-library/user-event';
+        import { other } from '@other-library/module';
+      `);
+
+      // @testing-library/* should be excluded
+      expect(code1).toContain('@testing-library/user-event');
+      expect(code1).not.toContain('get something');
+
+      // @other-library/* should be transformed (not in exclusion list)
+      expect(code1).toContain('get other');
+    });
+  });
+
+  describe('jest.mock() factory handling', () => {
+    it('does not transform imports used in jest.mock() factory functions', () => {
+      const code = transformCode(`
+        import { mockHelper } from './test_utils';
+        import { regularHelper } from './utils';
+
+        jest.mock('./module', () => ({
+          fn: () => mockHelper()
+        }));
+
+        function test() {
+          return regularHelper();
+        }
+      `);
+
+      // mockHelper used in jest.mock() - not transformed
+      expect(code).toContain('mockHelper');
+      expect(code).not.toContain('get mockHelper');
+
+      // regularHelper not used in mock - should be transformed
+      expect(code).toContain('get regularHelper');
+    });
+
+    it('does not transform imports used in jest.doMock() factory functions', () => {
+      const code = transformCode(`
+        import { mockData } from './fixtures';
+
+        jest.doMock('./module', () => mockData);
+
+        function test() {
+          return mockData;
+        }
+      `);
+
+      // mockData used in jest.doMock() - not transformed
+      expect(code).toContain('mockData');
+      expect(code).not.toContain('get mockData');
+      expect(code).not.toContain('_imports');
+    });
+
+    it('handles complex jest.mock() factories with multiple imports', () => {
+      const code = transformCode(`
+        import { mock1, mock2 } from './mocks';
+        import { util1, util2 } from './utils';
+
+        jest.mock('./module', () => {
+          return {
+            method1: () => mock1(),
+            method2: () => mock2()
+          };
+        });
+
+        function test() {
+          util1();
+          util2();
+        }
+      `);
+
+      // mock1 and mock2 used in factory - not transformed
+      expect(code).toContain('mock1');
+      expect(code).toContain('mock2');
+      expect(code).not.toContain('get mock1');
+      expect(code).not.toContain('get mock2');
+
+      // util1 and util2 not in factory - transformed
+      expect(code).toContain('get util1');
+      expect(code).toContain('get util2');
+    });
+  });
+
   describe('JSX and React handling', () => {
     it('never transforms React imports (always needed for JSX runtime)', () => {
       const code = transformCode(`
