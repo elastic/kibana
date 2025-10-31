@@ -13,11 +13,16 @@ import { userEvent } from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_form_context';
 import { AlertsFilterByRuleTags, filterMetadata } from './alerts_filter_by_rule_tags';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
+const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+const data = dataPluginMock.createStartContract();
+
 jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query');
 const mockUseGetRuleTagsQuery = jest.mocked(useGetRuleTagsQuery);
 
@@ -37,7 +42,10 @@ describe('AlertsFilterByRuleTags', () => {
     });
     render(
       <AlertsFiltersFormContextProvider
-        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+        value={{
+          ruleTypeIds: ['.es-query'],
+          services: { http, notifications, unifiedSearch, data },
+        }}
       >
         <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
@@ -56,7 +64,10 @@ describe('AlertsFilterByRuleTags', () => {
     });
     render(
       <AlertsFiltersFormContextProvider
-        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+        value={{
+          ruleTypeIds: ['.es-query'],
+          services: { http, notifications, unifiedSearch, data },
+        }}
       >
         <AlertsFilterByRuleTags value={['tag1']} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
@@ -75,7 +86,10 @@ describe('AlertsFilterByRuleTags', () => {
     });
     render(
       <AlertsFiltersFormContextProvider
-        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+        value={{
+          ruleTypeIds: ['.es-query'],
+          services: { http, notifications, unifiedSearch, data },
+        }}
       >
         <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
@@ -92,7 +106,10 @@ describe('AlertsFilterByRuleTags', () => {
     });
     render(
       <AlertsFiltersFormContextProvider
-        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+        value={{
+          ruleTypeIds: ['.es-query'],
+          services: { http, notifications, unifiedSearch, data },
+        }}
       >
         <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
@@ -111,7 +128,10 @@ describe('AlertsFilterByRuleTags', () => {
     });
     render(
       <AlertsFiltersFormContextProvider
-        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+        value={{
+          ruleTypeIds: ['.es-query'],
+          services: { http, notifications, unifiedSearch, data },
+        }}
       >
         <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>

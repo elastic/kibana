@@ -11,6 +11,8 @@ import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { AlertsFiltersFormProps } from './alerts_filters_form';
 import { AlertsFiltersForm } from './alerts_filters_form';
 import type { AlertsFilter, AlertsFiltersExpression } from '../types';
@@ -31,6 +33,8 @@ import {
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
+const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+const data = dataPluginMock.createStartContract();
 
 const TAG_1 = 'tag1';
 const TAG_2 = 'tag2';
@@ -80,7 +84,7 @@ const TestComponent = (overrides: Partial<AlertsFiltersFormProps>) => {
         ruleTypeIds={[]}
         value={value}
         onChange={mockOnChange}
-        services={{ http, notifications }}
+        services={{ http, notifications, unifiedSearch, data }}
         {...overrides}
       />
     </IntlProvider>
@@ -183,7 +187,7 @@ describe('AlertsFiltersForm', () => {
             { filter: { type: 'ruleTypes', value: 'filter5' } },
           ]}
           onChange={jest.fn()}
-          services={{ http, notifications }}
+          services={{ http, notifications, unifiedSearch, data }}
         />
       </IntlProvider>
     );

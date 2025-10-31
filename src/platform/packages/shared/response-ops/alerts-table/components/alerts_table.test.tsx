@@ -30,6 +30,7 @@ import { applicationServiceMock, notificationServiceMock } from '@kbn/core/publi
 import { afterAll } from '@elastic/synthetics';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type {
   AdditionalContext,
   AlertsDataGridProps,
@@ -310,6 +311,7 @@ describe('AlertsTable', () => {
       licensing: licensingMock.createStart(),
       notifications: notificationServiceMock.createStartContract(),
       settings: settingsServiceMock.createStartContract(),
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     },
   };
 
