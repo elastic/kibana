@@ -378,6 +378,7 @@ export interface ESQLSource extends ESQLAstBaseItem {
  *
  * ```
  * FROM ( <query> )
+ * ```
  */
 export interface ESQLParens extends ESQLAstBaseItem {
   type: 'parens';
