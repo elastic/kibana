@@ -8,9 +8,12 @@
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
-import { getSearchQuery, getSemanticSearchStreamDocument } from './semantic_search_params';
-
-const META_LAYER_INDEX = 'semantic-meta-layer';
+import {
+  META_LAYER_INDEX,
+  ensureMetaLayerIndex,
+  getSearchQuery,
+  getSemanticSearchStreamDocument,
+} from './semantic_search_params';
 
 const indexStreamsForSemanticSearchRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/index',
@@ -36,6 +39,7 @@ const indexStreamsForSemanticSearchRoute = createServerRoute({
     const esClient = scopedClusterClient.asCurrentUser;
 
     try {
+      await ensureMetaLayerIndex(esClient);
       const streams = (await streamsClient.listStreamsWithDataStreamExistence()).flatMap(
         ({ exists, stream }) => {
           if (exists) {

@@ -28,17 +28,21 @@ export const generateSemanticSearchData = async ({
     prompt: GenerateDataForSemanticSearchPrompt,
   });
 
+  const fields = analysis.fields.map((field) => field.name);
+
   try {
     const parsed = JSON.parse(response.content);
     return {
       description: parsed.description || '',
       tags: parsed.tags || [],
+      fields,
     };
   } catch (error) {
     // Fallback if JSON parsing fails
     return {
       description: response.content,
       tags: [],
+      fields,
     };
   }
 };
