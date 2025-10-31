@@ -171,10 +171,9 @@ describe('AlertDetailsAppSection', () => {
     expect(result.queryByTestId('LogRateAnalysis')).not.toBeInTheDocument();
   });
 
-  it('should not render LogRateAnalysis when aiops is enabled and has no evaluation values', () => {
-    mockServices.application.capabilities.aiops.enabled = true;
+  it('should not render LogRateAnalysis when aiops is disabled and has evaluation values', () => {
     const result = renderComponent({}, {
-      'kibana.alert.evaluation.values': [null, null],
+      'kibana.alert.evaluation.values': [2500, 5],
     } as Object);
     expect(result.queryByTestId('LogRateAnalysis')).not.toBeInTheDocument();
   });
