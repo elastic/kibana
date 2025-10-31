@@ -22,7 +22,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
         defaultMessage: 'Workflows Management UI',
       }),
       schema: schema.boolean(),
-      value: false,
+      value: true,
       readonly: true,
       readonlyMode: 'ui',
     },
