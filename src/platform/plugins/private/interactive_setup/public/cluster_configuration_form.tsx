@@ -223,6 +223,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       ) : (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             title={i18n.translate(

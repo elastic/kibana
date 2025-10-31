@@ -13,6 +13,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { WebhookMethods } from '../../../common/auth/constants';
 import type { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../types';
+import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
 export function getConnectorType(): ConnectorTypeModel<
   WebhookConfig,
@@ -54,5 +55,9 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./webhook_connectors')),
     actionParamsFields: lazy(() => import('./webhook_params')),
+    connectorForm: {
+      serializer: formSerializer,
+      deserializer: formDeserializer,
+    },
   };
 }
