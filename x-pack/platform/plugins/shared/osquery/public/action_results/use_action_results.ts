@@ -11,6 +11,7 @@ import type { InspectResponse } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ResultEdges, Direction } from '../../common/search_strategy';
 import { API_VERSIONS } from '../../common/constants';
+import { getAgentIdFromFields } from '../../common/utils/agent_fields';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -92,11 +93,35 @@ export const useActionResults = ({
       });
     },
     {
-      select: (response) => ({
-        edges: response.edges,
-        aggregations: response.aggregations,
-        inspect: response.inspect || { dsl: [], response: [] },
-      }),
+      select: (response) => {
+        const startIndex = activePage * limit;
+        const endIndex = startIndex + limit;
+        const currentPageAgentIds = agentIds?.slice(startIndex, endIndex) || [];
+
+        // Server already filtered by agentIds - build set of responded agents
+        const respondedAgentIds = new Set(
+          response.edges
+            .map((edge) => getAgentIdFromFields(edge.fields))
+            .filter((id): id is string => id !== undefined)
+        );
+
+        const placeholderEdges = currentPageAgentIds
+          .filter((agentId) => agentId && !respondedAgentIds.has(agentId))
+          .map((agentId) => ({
+            _index: '.logs-osquery_manager.action.responses-default',
+            _id: `placeholder-${agentId}`,
+            _source: {},
+            fields: { agent_id: [agentId] },
+          }));
+
+        const mergedEdges = [...response.edges, ...placeholderEdges] as ResultEdges;
+
+        return {
+          edges: mergedEdges,
+          aggregations: response.aggregations,
+          inspect: response.inspect || { dsl: [], response: [] },
+        };
+      },
       initialData: {
         edges: [],
         total: 0,

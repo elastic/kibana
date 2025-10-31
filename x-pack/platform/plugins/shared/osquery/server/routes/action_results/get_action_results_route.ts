@@ -28,7 +28,6 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
-import { getAgentIdFromFields } from '../../../common/utils/agent_fields';
 
 export const getActionResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -104,7 +103,11 @@ export const getActionResultsRoute = (
                 agentIds,
                 kuery: request.query.kuery,
                 startDate: request.query.startDate,
-                pagination: generateTablePaginationOptions(page, pageSize),
+                // Client already sliced agents for current page, so fetch all of them (no pagination)
+                pagination:
+                  agentIds.length > 0
+                    ? generateTablePaginationOptions(0, agentIds.length)
+                    : generateTablePaginationOptions(page, pageSize),
                 sort: {
                   direction: request.query.sortOrder ?? Direction.desc,
                   field: request.query.sort ?? '@timestamp',
@@ -130,32 +133,15 @@ export const getActionResultsRoute = (
             pending: Math.max(0, totalAgentCount - totalResponded),
           };
 
-          let processedEdges = res.edges;
-
-          // Create placeholders for agents that haven't responded
-          if (agentIds.length > 0) {
-            const respondedAgentIds = new Set(
-              res.edges
-                .map((edge) => getAgentIdFromFields(edge.fields))
-                .filter((id): id is string => id !== undefined)
-            );
-            const placeholderEdges = agentIds
-              .filter((agentId) => agentId && !respondedAgentIds.has(agentId))
-              .map((agentId) => ({
-                _index: '.logs-osquery_manager.action.responses-default',
-                _id: `placeholder-${agentId}`,
-                _source: {},
-                fields: { agent_id: [agentId] },
-              }));
-            processedEdges = [...res.edges, ...placeholderEdges] as typeof res.edges;
-          }
+          // Return only real responses - placeholders will be generated client-side
+          const processedEdges = res.edges;
 
           const totalPages = Math.ceil(totalAgentCount / pageSize);
 
           return response.ok({
             body: {
               edges: processedEdges,
-              total: processedEdges.length,
+              total: res.edges.length,
               currentPage: page,
               pageSize,
               totalPages,

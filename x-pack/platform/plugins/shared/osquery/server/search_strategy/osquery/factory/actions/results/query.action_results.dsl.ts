@@ -49,7 +49,16 @@ export const buildActionResultsQuery = ({
 
   // Use structured terms query for agent filtering (more secure and performant than KQL)
   const agentIdsFilter =
-    agentIds && agentIds.length > 0 ? [{ terms: { 'agent.id': agentIds } }] : [];
+    agentIds && agentIds.length > 0
+      ? [
+          {
+            bool: {
+              should: [{ terms: { 'agent.id': agentIds } }, { terms: { agent_id: agentIds } }],
+              minimum_should_match: 1,
+            },
+          },
+        ]
+      : [];
 
   const filterQuery = [...timeRangeFilter, ...agentIdsFilter, getQueryFilter({ filter })];
 
