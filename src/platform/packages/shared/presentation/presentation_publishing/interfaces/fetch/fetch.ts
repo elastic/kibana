@@ -59,11 +59,13 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     observables.filters = api.parentApi.filters$.pipe(
       map((allFilters) => {
         const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
-        const section = api.parentApi?.layout$.getValue().panels[uuid]?.grid?.sectionId;
+        const section = api.parentApi?.layout$
+          ? api.parentApi?.layout$.getValue().panels[uuid]?.grid?.sectionId
+          : undefined;
         return allFilters?.filter(
           (currentFilter) =>
             currentFilter.meta.controlledBy !== uuid &&
-            (currentFilter.meta.group ? currentFilter.meta.group === section : true)
+            (section && currentFilter.meta.group ? section === currentFilter.meta.group : true)
         );
       })
     );

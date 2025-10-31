@@ -11,7 +11,7 @@ import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-pl
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
@@ -50,7 +50,7 @@ export interface TabState extends TabItem {
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
-  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
+  controlGroupState: ControlPanelsState | undefined;
   /**
    * ESQL query variables
    */
