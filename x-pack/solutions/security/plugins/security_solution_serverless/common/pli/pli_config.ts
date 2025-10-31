@@ -30,7 +30,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     complete: [],
   },
   [ProductLine.security]: {
-    search_ai_lake: [ProductFeatureKey.aiValueReport],
+    search_ai_lake: [],
     essentials: [
       ProductFeatureKey.detections,
       ProductFeatureKey.timeline,
