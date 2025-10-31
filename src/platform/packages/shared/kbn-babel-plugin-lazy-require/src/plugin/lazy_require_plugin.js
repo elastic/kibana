@@ -21,17 +21,10 @@ const {
 
 // Modules that should never be lazy-loaded
 // Supports exact matches ('react') and trailing wildcards ('@testing-library/*')
-const EXCLUDED_MODULES = [
-  'react',
-  'React',
-  '@jest/globals',
-  '@testing-library/*', // Matches @testing-library/react, @testing-library/jest-dom, etc.
-];
+const EXCLUDED_MODULES = ['react', 'React', '@jest/globals', '@testing-library/*'];
 
-// Check if a module path should be excluded
 function isExcludedModule(modulePath) {
   return EXCLUDED_MODULES.some((pattern) => {
-    // Convert * to .* for regex matching
     const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
     return regex.test(modulePath);
   });
@@ -67,8 +60,10 @@ module.exports = function lazyRequirePlugin({ types: t }) {
         const importsVar = programPath.scope.generateUidIdentifier('imports');
 
         // =================================================================
-        // PHASE 0: Collect direct re-exports (export { x } from './module')
+        // PHASE 1: Collect require() and import statements, detect exclusions
         // =================================================================
+
+        // Collect direct re-exports (export { x } from './module')
         const directReExportSources = new Set();
         programPath.traverse({
           ExportNamedDeclaration(exportPath) {
@@ -78,9 +73,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           },
         });
 
-        // =================================================================
-        // PHASE 1: Collect require() and import statements
-        // =================================================================
+        // Collect require() and import statements
         programPath.traverse({
           VariableDeclaration(path) {
             if (path.parent !== programPath.node) {
@@ -251,9 +244,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           return;
         }
 
-        // =================================================================
-        // PHASE 1.5: Detect and exclude module-level usage
-        // =================================================================
+        // Detect and exclude module-level usage
         const importsUsedInModuleLevelCode = detectModuleLevelUsage(
           programPath,
           properties,
@@ -267,9 +258,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           declarationsToRemove.delete(varName);
         }
 
-        // =================================================================
-        // PHASE 1.6: Detect and exclude JSX usage
-        // =================================================================
+        // Detect and exclude JSX usage
         // JSX transforms happen at compile time, so components need direct access
         const importsUsedInJsx = detectJsxUsage(programPath, properties, t);
 
@@ -279,9 +268,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           declarationsToRemove.delete(varName);
         }
 
-        // =================================================================
-        // PHASE 1.7: Exclude modules from the exclusion list
-        // =================================================================
+        // Exclude modules from the exclusion list
         // Some modules must always be available (e.g., React for JSX, Jest for test structure)
         for (const [varName, propInfo] of properties) {
           if (isExcludedModule(propInfo.moduleRequirePath)) {
@@ -290,9 +277,7 @@ module.exports = function lazyRequirePlugin({ types: t }) {
           }
         }
 
-        // =================================================================
-        // PHASE 1.8: Detect and exclude jest.mock() factory usage
-        // =================================================================
+        // Detect and exclude jest.mock() factory usage
         // Jest mock factories cannot reference out-of-scope variables
         const importsUsedInJestMocks = detectJestMockUsage(programPath, properties, t);
 
