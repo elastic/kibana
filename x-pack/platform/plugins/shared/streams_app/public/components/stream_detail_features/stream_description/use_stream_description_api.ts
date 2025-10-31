@@ -10,11 +10,11 @@ import { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
-import { getFormattedError } from '../../../../util/errors';
-import { useAIFeatures } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
-import { useUpdateStreams } from '../../../../hooks/use_update_streams';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { getFormattedError } from '../../../util/errors';
+import { useUpdateStreams } from '../../../hooks/use_update_streams';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 
 export const useStreamDescriptionApi = ({
   definition,

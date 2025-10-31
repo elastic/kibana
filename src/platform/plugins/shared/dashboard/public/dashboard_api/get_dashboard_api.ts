@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, debounceTime, merge } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { DASHBOARD_APP_ID } from '../../common/constants';
@@ -174,10 +174,6 @@ export function getDashboardApi({
     },
     isEmbeddedExternally: Boolean(creationOptions?.isEmbeddedExternally),
     isManaged,
-    reload$: merge(
-      unifiedSearchManager.internalApi.controlGroupReload$,
-      unifiedSearchManager.internalApi.panelsReload$
-    ).pipe(debounceTime(0)),
     getSerializedState: () => {
       const { dashboardState, references } = getState();
       return {

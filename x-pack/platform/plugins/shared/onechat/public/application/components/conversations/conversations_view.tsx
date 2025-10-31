@@ -83,9 +83,11 @@ export const OnechatConversationsView: React.FC<{}> = () => {
             paddingSize="m"
           >
             <ConversationHeader
-              isSidebarOpen={isSidebarOpen}
-              onToggleSidebar={() => {
-                setIsSidebarOpen((open) => !open);
+              sidebar={{
+                isOpen: isSidebarOpen,
+                onToggle: () => {
+                  setIsSidebarOpen((open) => !open);
+                },
               }}
             />
           </KibanaPageTemplate.Header>
