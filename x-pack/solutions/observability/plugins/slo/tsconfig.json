@@ -113,6 +113,7 @@
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
     "@kbn/control-group-renderer",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/deeplinks-management"
   ]
 }
