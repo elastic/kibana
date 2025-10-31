@@ -132,6 +132,19 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).to.have.property('type');
         const { type } = response.body;
         expect(type).to.be(ACCESS_CONTROL_TYPE);
+        const { id: createdId } = response.body;
+
+        const getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${createdId}`)
+          .set('kbn-xsrf', 'true')
+          .set(
+            'Authorization',
+            `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+              'base64'
+            )}`
+          )
+          .expect(200);
+        expect(getResponse.body).not.to.have.property('accessControl');
       });
 
       it('should throw when trying to create an access control object with no user', async () => {
@@ -142,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain(
-          `Unable to create "write_restricted" "${ACCESS_CONTROL_TYPE}" saved object. User profile ID not found.: Bad Request`
+          `Unable to create "${ACCESS_CONTROL_TYPE}" with "accessMode". User profile ID not found.: Bad Request`
         );
       });
 
@@ -1044,7 +1057,11 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(403);
           expect(res.body).to.have.property('message');
-          expect(res.body.message).to.contain(`Unable to bulk_update ${ACCESS_CONTROL_TYPE}`);
+          expect(res.body.message).to.contain(
+            `Unable to bulk_update ${ACCESS_CONTROL_TYPE}, access control restrictions for ${ACCESS_CONTROL_TYPE}:`
+          );
+          expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId1}`);
+          expect(res.body.message).to.contain(`${ACCESS_CONTROL_TYPE}:${objectId2}`);
         });
 
         it('returns status if all objects are write-restricted but some are owned by the current user', async () => {
