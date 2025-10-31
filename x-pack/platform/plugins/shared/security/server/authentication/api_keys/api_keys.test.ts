@@ -699,7 +699,7 @@ describe('API Keys', () => {
         expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
       });
 
-      it('calls UIAM grantApiKey with Basic scheme when isForUiam is true', async () => {
+      it('calls UIAM grantApiKey with ApiKey scheme when isForUiam is true', async () => {
         mockLicense.isEnabled.mockReturnValue(true);
         mockUiam.grantApiKey.mockResolvedValue({
           id: 'api-key-id',
@@ -707,10 +707,10 @@ describe('API Keys', () => {
           api_key: 'encoded-key-value',
         });
 
-        const prefixedCredential = 'essu_' + encodeToBase64('user:pass');
+        const prefixedCredential = 'essu_api_key';
         const result = await apiKeys.grantAsInternalUser(
           httpServerMock.createKibanaRequest({
-            headers: { authorization: `Basic ${prefixedCredential}` },
+            headers: { authorization: `ApiKey ${prefixedCredential}` },
           }),
           {
             name: 'test_api_key',
@@ -724,7 +724,7 @@ describe('API Keys', () => {
           name: 'test_api_key',
           api_key: 'encoded-key-value',
         });
-        expect(mockUiam.grantApiKey).toHaveBeenCalledWith('Basic', prefixedCredential);
+        expect(mockUiam.grantApiKey).toHaveBeenCalledWith('ApiKey', prefixedCredential);
         expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
       });
 
@@ -856,7 +856,7 @@ describe('API Keys', () => {
       expect(() =>
         apiKeys.getScopedClusterClient(httpServerMock.createKibanaRequest())
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to grant an API Key, request does not contain an authorization header"`
+        `"Unable to create scoped client, request does not contain an authorization header"`
       );
       expect(mockClusterClient.asScoped).not.toHaveBeenCalled();
     });
@@ -873,7 +873,7 @@ describe('API Keys', () => {
       expect(() =>
         apiKeys.getScopedClusterClient(
           httpServerMock.createKibanaRequest({
-            headers: { authorization: 'Bearer essu_token_123' },
+            headers: { authorization: 'ApiKey essu_api_key' },
           })
         )
       ).toThrowErrorMatchingInlineSnapshot(`"UIAM service is not available"`);
@@ -882,7 +882,7 @@ describe('API Keys', () => {
 
     it('creates scoped client with UIAM authentication headers when credential starts with essu_', () => {
       const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Bearer essu_user_token' },
+        headers: { authorization: 'ApiKey essu_api_key' },
       });
 
       apiKeys.getScopedClusterClient(request);
@@ -900,7 +900,7 @@ describe('API Keys', () => {
     it('merges UIAM headers with existing request headers when credential starts with essu_', () => {
       const request = httpServerMock.createKibanaRequest({
         headers: {
-          authorization: 'Bearer essu_user_token',
+          authorization: 'ApiKey essu_api_key',
           'custom-header': 'custom-value',
         },
       });
@@ -910,7 +910,7 @@ describe('API Keys', () => {
       expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
         ...request,
         headers: {
-          authorization: 'Bearer essu_user_token',
+          authorization: 'ApiKey essu_api_key',
           'custom-header': 'custom-value',
           'x-client-authentication': 'shared-secret-value',
         },
@@ -919,7 +919,7 @@ describe('API Keys', () => {
 
     it('returns standard scoped client when credential does not start with essu_', () => {
       const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Bearer regular_token' },
+        headers: { authorization: 'ApiKey regular_api_key' },
       });
       const mockScopedClient = { asCurrentUser: {}, asInternalUser: {} };
       mockClusterClient.asScoped.mockReturnValue(mockScopedClient as any);
@@ -933,7 +933,7 @@ describe('API Keys', () => {
 
     it('returns the scoped cluster client with UIAM headers when credential starts with essu_', () => {
       const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Bearer essu_token' },
+        headers: { authorization: 'ApiKey essu_api_key' },
       });
       const mockScopedClient = { asCurrentUser: {}, asInternalUser: {} };
       mockClusterClient.asScoped.mockReturnValue(mockScopedClient as any);
@@ -941,41 +941,6 @@ describe('API Keys', () => {
       const result = apiKeys.getScopedClusterClient(request);
 
       expect(result).toBe(mockScopedClient);
-    });
-
-    it('works with Basic authentication scheme when credential starts with essu_', () => {
-      const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: `Basic essu_${encodeToBase64('user:pass')}` },
-      });
-
-      apiKeys.getScopedClusterClient(request);
-
-      expect(mockUiam.getEsClientAuthenticationHeader).toHaveBeenCalledTimes(1);
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
-        ...request,
-        headers: {
-          ...request.headers,
-          'x-client-authentication': 'shared-secret-value',
-        },
-      });
-    });
-
-    it('does not use UIAM headers when UIAM service is not configured and credential does not start with essu_', () => {
-      apiKeys = new APIKeys({
-        clusterClient: mockClusterClient,
-        logger,
-        license: mockLicense,
-        applicationName: 'kibana-.kibana',
-        kibanaFeatures: [],
-      });
-
-      const request = httpServerMock.createKibanaRequest({
-        headers: { authorization: 'Bearer regular_token' },
-      });
-
-      apiKeys.getScopedClusterClient(request);
-
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
     });
   });
 

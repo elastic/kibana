@@ -193,6 +193,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           validate: {
             body: schema.object({
               name: schema.string(),
+              expiration: schema.maybe(schema.string()),
               authcScheme: schema.maybe(schema.string()),
               credential: schema.maybe(schema.string()),
               isForUiam: schema.maybe(schema.boolean()),
@@ -208,7 +209,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               });
             }
 
-            const { name, authcScheme, credential, isForUiam } = request.body;
+            const { name, authcScheme, credential, isForUiam, expiration } = request.body;
             const authcService = getAuthenticationService();
 
             // Create a new request with authentication header if authcScheme and credential are provided
@@ -227,7 +228,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
 
             const result = await authcService.apiKeys.grantAsInternalUser(
               requestToUse,
-              { name },
+              { name, expiration },
               isForUiam
             );
 

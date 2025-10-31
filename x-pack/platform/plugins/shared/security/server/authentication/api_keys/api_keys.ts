@@ -279,8 +279,16 @@ export class APIKeys implements APIKeysType {
       );
     }
 
+    let result: GrantAPIKeyResult;
+    const { expiration, metadata, name } = createParams;
+
     if (isForUiam) {
-      return this.uiamGrantApiKey(authorizationHeader.scheme, authorizationHeader.credentials);
+      return this.uiamGrantApiKey(
+        authorizationHeader.scheme,
+        authorizationHeader.credentials,
+        name,
+        expiration
+      );
     }
 
     // Try to extract optional Elasticsearch client credentials (currently only used by JWT).
@@ -289,7 +297,6 @@ export class APIKeys implements APIKeysType {
       ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
     );
 
-    const { expiration, metadata, name } = createParams;
     const roleDescriptors =
       'role_descriptors' in createParams
         ? createParams.role_descriptors
@@ -306,7 +313,6 @@ export class APIKeys implements APIKeysType {
     );
 
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
-    let result: GrantAPIKeyResult;
     try {
       result = await this.clusterClient.asInternalUser.security.grantApiKey(params);
       this.logger.debug('API key was granted successfully');
@@ -318,7 +324,12 @@ export class APIKeys implements APIKeysType {
     return result;
   }
 
-  private async uiamGrantApiKey(authcScheme: string, credential: string) {
+  private async uiamGrantApiKey(
+    authcScheme: string,
+    credential: string,
+    name: string,
+    expiration?: string
+  ) {
     if (!this.uiam) {
       throw new Error('UIAM service is not available');
     }
@@ -331,12 +342,24 @@ export class APIKeys implements APIKeysType {
     if (!credential.startsWith('essu_')) {
       result = {
         id: 'same_api_key_id',
-        name: 'same_api_key_name',
+        name,
         api_key: credential,
       };
     } else {
       try {
-        result = await this.uiam.grantApiKey(authcScheme, credential);
+        const { id, key, description } = await this.uiam.grantApiKey(
+          authcScheme,
+          credential,
+          name,
+          expiration
+        );
+
+        result = {
+          id,
+          name: description,
+          api_key: key,
+        };
+
         this.logger.debug('API key was granted successfully via UIAM');
         return result;
       } catch (e) {
@@ -357,7 +380,7 @@ export class APIKeys implements APIKeysType {
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     if (authorizationHeader == null) {
       throw new Error(
-        `Unable to grant an API Key, request does not contain an authorization header`
+        `Unable to create scoped client, request does not contain an authorization header`
       );
     }
 

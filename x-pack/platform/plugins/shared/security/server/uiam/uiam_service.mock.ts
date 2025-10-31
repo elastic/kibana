@@ -28,6 +28,5 @@ export const uiamServiceMock = {
       api_key: 'mock-api-key-value',
       expiration: Date.now() + 86400000,
     }),
-    deleteApiKey: jest.fn().mockResolvedValue(undefined),
   }),
 };
