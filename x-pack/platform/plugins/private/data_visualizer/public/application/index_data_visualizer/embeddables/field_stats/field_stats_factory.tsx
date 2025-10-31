@@ -426,6 +426,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             return (
               <EuiFlexItem css={statsTableCss} data-test-subj="dashboardFieldStatsEmbeddedContent">
                 <EuiCallOut
+                  announceOnMount
                   title={
                     <h3>
                       <FormattedMessage
