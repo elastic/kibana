@@ -36,6 +36,8 @@ const fadeOut = keyframes`
   }
 `;
 
+const FADE_WIDTH = 200;
+
 const getErrorOverlayStyles = (euiTheme: EuiThemeComputed, errorType: 'error' | 'warn') => css`
   background-color: ${errorType === 'error'
     ? euiTheme.colors.backgroundBaseDanger
@@ -48,12 +50,22 @@ const getErrorOverlayStyles = (euiTheme: EuiThemeComputed, errorType: 'error' | 
   animation: ${fadeOut} ${DISPLAY_DURATION}ms ease-out forwards;
   position: absolute;
 
+  mask-image: linear-gradient(
+    to left,
+    transparent 0%,
+    transparent 60px,
+    rgba(0, 0, 0, 0.4) ${FADE_WIDTH * 0.5}px,
+    rgba(0, 0, 0, 0.8) ${FADE_WIDTH * 0.75}px,
+    black ${FADE_WIDTH}px
+  );
+
   top: 0;
   bottom: 0;
   left: 0;
   width: auto;
-  max-width: min(720px, 100%);
+  max-width: min(calc(720px + ${FADE_WIDTH}px), 100%);
   padding: ${euiTheme.size.xxs} ${euiTheme.size.s};
+  padding-right: ${FADE_WIDTH}px;
   height: 100%;
   z-index: 100;
 `;
