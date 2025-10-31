@@ -179,8 +179,6 @@ export class SearchInterceptor {
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
-    const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
-    if (sessionOptions?.isRestore) return of(undefined); // don't use cache if restoring a session
 
     return from(Promise.resolve(createRequestHash(hashOptions)));
   }
@@ -444,9 +442,7 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
-    const { abortSignal } = options || {};
-
-    const requestHash = request.params ? createRequestHash(request.params) : undefined;
+    const { abortSignal, requestHash } = options || {};
 
     if (request.id) {
       // just polling an existing search, no need to send the body, just the hash
@@ -550,12 +546,11 @@ export class SearchInterceptor {
    * Creates a new search observable and a corresponding search abort controller
    * If requestHash is defined, tries to return them first from cache.
    */
-  private getSearchResponse$(
-    request: IKibanaSearchRequest,
-    options: IAsyncSearchOptions,
-    requestHash?: string
-  ) {
-    const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
+  private getSearchResponse$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
+    const { requestHash } = options;
+    const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
+    const cached =
+      requestHash && !sessionOptions?.isRestore ? this.responseCache.get(requestHash) : undefined; // don't use cache if restoring a session
 
     const searchAbortController =
       cached?.searchAbortController || new SearchAbortController(this.searchTimeout);
@@ -599,10 +594,10 @@ export class SearchInterceptor {
 
     return this.createRequestHash$(request, searchOptions).pipe(
       switchMap((requestHash) => {
+        searchOptions.requestHash = requestHash;
         const { searchAbortController, response$ } = this.getSearchResponse$(
           request,
-          searchOptions,
-          requestHash
+          searchOptions
         );
 
         this.pendingCount$.next(this.pendingCount$.getValue() + 1);
