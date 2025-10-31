@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BehaviorSubject } from 'rxjs';
+
+import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
+import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import type {
   AggregateQuery,
   ExecutionContextSearch,
@@ -44,6 +48,7 @@ import type {
   PublishingSubject,
   SerializedTitles,
   ViewMode,
+  useSearchApi,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type {
@@ -126,9 +131,9 @@ export interface PreventableEvent {
   preventDefault(): void;
 }
 
-interface LensByValue {
-  // by-value
-  attributes?: Simplify<LensSavedObjectAttributes>;
+export interface LensByValueBase {
+  savedObjectId?: string; // really should be never but creates type issues
+  attributes?: LensSavedObjectAttributes;
 }
 
 export interface LensOverrides {
@@ -150,10 +155,9 @@ export interface LensOverrides {
 /**
  * Lens embeddable props broken down by type
  */
-
-export interface LensByReference {
-  // by-reference
+interface LensByReferenceBase {
   savedObjectId?: string;
+  attributes?: never;
 }
 
 interface ContentManagementProps {
@@ -161,9 +165,12 @@ interface ContentManagementProps {
   managed?: boolean;
 }
 
-export type LensPropsVariants = (LensByValue & LensByReference) & {
+interface LensWithReferences {
+  /**
+   * @deprecated use `state.attributes.references`
+   */
   references?: Reference[];
-};
+}
 
 export interface ViewInDiscoverCallbacks extends LensApiProps {
   canViewUnderlyingData$: PublishingSubject<boolean>;
@@ -259,15 +266,28 @@ interface LensRequestHandlersProps {
  * * Panel settings
  * * other props from the embeddable
  */
-export type LensSerializedState = Simplify<
-  LensPropsVariants &
-    LensOverrides &
+export type LensSerializedSharedState = Simplify<
+  LensOverrides &
+    LensWithReferences &
     LensUnifiedSearchContext &
     LensPanelProps &
     SerializedTitles &
     Omit<LensSharedProps, 'noPadding'> &
     Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
 >;
+
+export type LensByValueSerializedState = Simplify<LensSerializedSharedState & LensByValueBase>;
+export type LensByRefSerializedState = Simplify<LensSerializedSharedState & LensByReferenceBase>;
+
+/**
+ * Combined properties of serialized state stored on dashboard panel
+ *
+ *  Includes:
+ * - Lens document state (for by-value)
+ * - Panel settings
+ * - other props from the embeddable
+ */
+export type LensSerializedState = LensByRefSerializedState | LensByValueSerializedState;
 
 /**
  * Custom props exposed on the Lens exported component
@@ -359,7 +379,7 @@ export interface LensInspectorAdapters {
 }
 
 export type LensApi = Simplify<
-  DefaultEmbeddableApi<LensSerializedState> &
+  DefaultEmbeddableApi<LensSerializedAPIConfig> &
     // This is used by actions to operate the edit action
     HasEditCapabilities &
     // for blocking errors leverage the embeddable panel UI
@@ -381,7 +401,7 @@ export type LensApi = Simplify<
     HasSupportedTriggers &
     PublishesDisabledActionIds &
     // Offers methods to operate from/on the linked saved object
-    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
+    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
     // Let the container know the view mode
     PublishesViewMode &
     // Let the container know the saved object id
@@ -516,3 +536,46 @@ export interface ESQLVariablesCompatibleDashboardApi {
   controlGroupApi$: PublishingSubject<Partial<CanAddNewPanel> | undefined>;
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }
+
+type SearchApi = ReturnType<typeof useSearchApi>;
+
+interface GeneralLensApi {
+  searchSessionId$: BehaviorSubject<string | undefined>;
+  disabledActionIds$: BehaviorSubject<string[] | undefined>;
+  setDisabledActionIds: (ids: string[] | undefined) => void;
+  viewMode$: BehaviorSubject<ViewMode | undefined>;
+  settings: {
+    syncColors$: BehaviorSubject<boolean>;
+    syncCursor$: BehaviorSubject<boolean>;
+    syncTooltips$: BehaviorSubject<boolean>;
+  };
+  forceDSL?: boolean;
+  esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
+  hideTitle$: BehaviorSubject<boolean | undefined>;
+  reload$: BehaviorSubject<void>;
+}
+
+export type LensParentApi = SearchApi &
+  LensRuntimeState &
+  GeneralLensApi &
+  HasSerializedChildState<LensSerializedAPIConfig>;
+
+type LensByValueAPIConfigBase = Omit<LensByValueBase, 'attributes'> & {
+  // Temporarily allow both old and new attributes until all are new types are supported and feature flag removed
+  attributes: LensApiSchemaType | LensByValueBase['attributes'];
+};
+
+export type LensByValueSerializedAPIConfig = Simplify<
+  LensSerializedSharedState & LensByValueAPIConfigBase
+>;
+export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
+
+/**
+ * Combined properties of API config used in dashboard API for lens panels
+ *
+ *  Includes:
+ * - Lens document state (for by-value)
+ * - Panel settings
+ * - other props from the embeddable
+ */
+export type LensSerializedAPIConfig = LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig;

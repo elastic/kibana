@@ -480,6 +480,9 @@ export const filtersAndQueryToApiFormat = (state: LensAttributes) => {
 };
 
 export const filtersAndQueryToLensState = (state: LensApiState) => {
+  if ('layers' in state) {
+    return {};
+  }
   const query =
     state.dataset.type === 'esql'
       ? { esql: state.dataset.query }

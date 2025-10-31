@@ -10,7 +10,9 @@
 import { schema } from '@kbn/config-schema';
 
 export const filterSchema = schema.object({
-  language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')]),
+  language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')], {
+    defaultValue: 'kuery',
+  }),
   /**
    * Filter query
    */

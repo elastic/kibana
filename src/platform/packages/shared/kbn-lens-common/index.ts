@@ -244,6 +244,9 @@ export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
   LensSerializedState,
+  LensByValueSerializedAPIConfig,
+  LensByRefSerializedAPIConfig,
+  LensSerializedAPIConfig,
   LensByReferenceInput,
   LensSavedObjectAttributes,
   VisualizationContextHelper,
@@ -252,8 +255,8 @@ export type {
   DocumentToExpressionReturnType,
   PreventableEvent,
   LensOverrides,
-  LensByReference,
-  LensPropsVariants,
+  LensByValueSerializedState,
+  LensByRefSerializedState,
   ViewInDiscoverCallbacks,
   IntegrationCallbacks,
   LensPublicCallbacks,
@@ -268,6 +271,7 @@ export type {
   LensHasEditPanel,
   LensInspectorAdapters,
   LensApi,
+  LensParentApi,
   LensInternalApi,
   ExpressionWrapperProps,
   GetStateType,
@@ -276,6 +280,8 @@ export type {
   TypedLensSerializedState,
   LensEmbeddableOutput,
   ESQLVariablesCompatibleDashboardApi,
+  LensByValueBase,
+  LensSerializedSharedState,
 } from './embeddable/types';
 export type {
   LensAppLocatorParams,
@@ -294,6 +300,7 @@ export {
   LENS_RANGE_MODES,
 } from './datasources/constants';
 export {
+  LENS_UNKNOWN_VIS,
   LENS_CATEGORY_DISPLAY,
   LENS_NUMBER_DISPLAY,
   LENS_LEGEND_DISPLAY,
