@@ -68,7 +68,6 @@ export function LayerPanel(props: LayerPanelProps) {
     dimensionGroups,
     onRemoveLayer,
     onCloneLayer,
-    registerNewLayerRef,
     layerIndex,
     activeVisualization,
     updateVisualization,
@@ -105,11 +104,6 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const settingsPanelRef = useRef<HTMLDivElement | null>(null);
-
-  const registerLayerRef = useCallback(
-    (el: HTMLDivElement | null) => registerNewLayerRef(layerId, el),
-    [layerId, registerNewLayerRef]
-  );
 
   const closeDimensionEditor = () => {
     if (layerDatasource) {
@@ -362,7 +356,6 @@ export function LayerPanel(props: LayerPanelProps) {
     <>
       <section
         tabIndex={-1}
-        ref={registerLayerRef}
         css={css`
           margin-bottom: ${euiTheme.size.base};
           // disable focus ring for mouse clicks, leave it for keyboard users
