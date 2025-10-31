@@ -23,6 +23,7 @@ import {
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { createToolNotFoundError } from '@kbn/onechat-common';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
@@ -32,7 +33,6 @@ import { toolCallEventType } from '../../../analytics/tool_call';
 import type { Message, CompatibleJSONSchema, MessageAddEvent } from '../../../../common';
 import {
   CONTEXT_FUNCTION_NAME,
-  createFunctionNotFoundError,
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../../../common';
@@ -321,7 +321,7 @@ export function continueConversation({
       return of(
         createServerSideFunctionResponseError({
           name: functionCallName,
-          error: createFunctionNotFoundError(functionCallName),
+          error: createToolNotFoundError(functionCallName),
         })
       );
     }

@@ -8,15 +8,13 @@
 import type { OperatorFunction } from 'rxjs';
 import { catchError, filter, of, share, throwError } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { isToolNotFoundError } from '@kbn/inference-common';
 import { MessageRole } from '../../../../common';
 import type {
   ChatCompletionChunkEvent,
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
-import {
-  isFunctionNotFoundError,
-  StreamingChatResponseEventType,
-} from '../../../../common/conversation_complete';
+import { StreamingChatResponseEventType } from '../../../../common/conversation_complete';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 
 function appendFunctionLimitExceededErrorMessageToAssistantResponse(): OperatorFunction<
@@ -75,7 +73,7 @@ export function catchFunctionNotFoundError(
 
     return shared$.pipe(
       catchError((error) => {
-        if (isFunctionNotFoundError(error)) {
+        if (isToolNotFoundError(error)) {
           if (functionLimitExceeded) {
             return chunksWithoutErrors$.pipe(
               appendFunctionLimitExceededErrorMessageToAssistantResponse()
