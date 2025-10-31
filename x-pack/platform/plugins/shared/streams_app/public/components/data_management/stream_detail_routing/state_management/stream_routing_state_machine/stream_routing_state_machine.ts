@@ -26,7 +26,7 @@ import {
 } from './stream_actors';
 import { routingConverter } from '../../utils';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
-import { selectCurrentRule, selectCurrentStream } from './selectors';
+import { selectCurrentRule } from './selectors';
 import {
   createRoutingSamplesMachineImplementations,
   routingSamplesMachine,
@@ -118,7 +118,7 @@ export const streamRoutingMachine = setup({
       isSchema(routingDefinitionListSchema, context.routing.map(routingConverter.toAPIDefinition)),
     isValidChild: ({ context }) => {
       const currentRule = selectCurrentRule(context);
-      const currentStream = selectCurrentStream(context);
+      const currentStream = context.definition.stream;
 
       return isChildOf(currentStream.name, currentRule.destination);
     },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -17,10 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import {
-  selectCurrentStream,
-  useStreamsRoutingSelector,
-} from './state_management/stream_routing_state_machine';
+import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
   value: string;
@@ -40,14 +37,11 @@ export function StreamNameFormRow({
 }: StreamNameFormRowProps) {
   const descriptionId = useGeneratedHtmlId();
 
-  const parentStreamName = useStreamsRoutingSelector((snapshot) =>
-    selectCurrentStream(snapshot.context)
-  ).name;
-  const prefix = parentStreamName + '.';
+  const parentStreamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition)
+    .stream.name;
 
-  const partitionName = useMemo(() => {
-    return value.replace(prefix, '');
-  }, [value, prefix]);
+  const prefix = parentStreamName + '.';
+  const partitionName = value.replace(prefix, '');
 
   const helpText =
     value.length >= MAX_NAME_LENGTH && !readOnly
