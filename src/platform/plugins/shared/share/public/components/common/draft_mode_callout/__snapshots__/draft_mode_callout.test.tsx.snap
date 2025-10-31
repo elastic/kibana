@@ -73,11 +73,3 @@ exports[`DraftModeCallout Default case renders a default callout when custom pro
   />
 </div>
 `;
-
-exports[`DraftModeCallout Node override case renders a component override when a node prop is provided 1`] = `
-<p
-  data-test-subj="overriddenDraftModeCallOut"
->
-  Component override
-</p>
-`;
