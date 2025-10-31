@@ -202,11 +202,11 @@ export class SyntheticsPrivateLocation {
     }
 
     try {
-        const result = await this.packagePolicyService.bulkCreate({
-          newPolicies,
-          spaceId,
-        });
-        if (result?.created && result?.created?.length > 0 && testRunId) {
+      const result = await this.packagePolicyService.bulkCreate({
+        newPolicies,
+        spaceId,
+      });
+      if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
         void scheduleCleanUpTask(this.server);
       }
@@ -333,20 +333,20 @@ export class SyntheticsPrivateLocation {
       `[editingMonitors] Creating ${policiesToCreate.length} policies, updating ${policiesToUpdate.length} policies, and deleting ${policiesToDelete.length} policies`
     );
 
-      const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
-        this.packagePolicyService.bulkCreate({
-          newPolicies: policiesToCreate,
-          spaceId,
-        }),
-        this.packagePolicyService.bulkUpdate({
-          policiesToUpdate,
-          spaceId,
-        }),
-        this.packagePolicyService.bulkDelete({
-          policyIdsToDelete: policiesToDelete,
-          spaceId,
-        }),
-      ]);
+    const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
+      this.packagePolicyService.bulkCreate({
+        newPolicies: policiesToCreate,
+        spaceId,
+      }),
+      this.packagePolicyService.bulkUpdate({
+        policiesToUpdate,
+        spaceId,
+      }),
+      this.packagePolicyService.bulkDelete({
+        policyIdsToDelete: policiesToDelete,
+        spaceId,
+      }),
+    ]);
 
     const failedUpdates = failedUpdatesRes?.map(({ packagePolicy, error }) => {
       const policyConfig = configs.find(({ config }) => {
@@ -410,8 +410,8 @@ export class SyntheticsPrivateLocation {
         if (failedPolicies?.length === policyIdsToDelete.length) {
           throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
         }
-      );
-      return result;
+        return result;
+      }
     }
   }
 
