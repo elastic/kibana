@@ -8,7 +8,11 @@
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CreatedAtSearchResponse } from './scheduled_reports_service';
-import { transformResponse, transformSingleResponse } from './transforms';
+import {
+  transformBulkDeleteResponse,
+  transformListResponse,
+  transformSingleResponse,
+} from './transforms';
 import type { ScheduledReportType } from '../../types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { omit } from 'lodash';
@@ -189,68 +193,70 @@ const nextRunResponse: BulkGetResult = [
 
 const mockLogger = loggingSystemMock.createLogger();
 
-describe('transformResponse', () => {
+describe('transformListResponse', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should correctly transform the responses', () => {
-    expect(transformResponse(mockLogger, soResponse, lastRunResponse, nextRunResponse)).toEqual({
-      page: 1,
-      per_page: 10,
-      total: 2,
-      data: [
-        {
-          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-          created_at: '2025-05-06T21:10:17.137Z',
-          created_by: 'elastic',
-          enabled: true,
-          jobtype: 'printable_pdf_v2',
-          last_run: '2025-05-06T12:00:00.500Z',
-          next_run: '2025-09-10T16:49:00.000Z',
-          payload: jsonPayload,
-          schedule: {
-            rrule: {
-              freq: 3,
-              interval: 3,
-              byhour: [12],
-              byminute: [0],
-              tzid: 'UTC',
+    expect(transformListResponse(mockLogger, soResponse, lastRunResponse, nextRunResponse)).toEqual(
+      {
+        page: 1,
+        per_page: 10,
+        total: 2,
+        data: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            created_at: '2025-05-06T21:10:17.137Z',
+            created_by: 'elastic',
+            enabled: true,
+            jobtype: 'printable_pdf_v2',
+            last_run: '2025-05-06T12:00:00.500Z',
+            next_run: '2025-09-10T16:49:00.000Z',
+            payload: jsonPayload,
+            schedule: {
+              rrule: {
+                freq: 3,
+                interval: 3,
+                byhour: [12],
+                byminute: [0],
+                tzid: 'UTC',
+              },
             },
+            space_id: 'a-space',
+            title: '[Logs] Web Traffic',
           },
-          space_id: 'a-space',
-          title: '[Logs] Web Traffic',
-        },
-        {
-          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-          created_at: '2025-05-06T21:12:06.584Z',
-          created_by: 'not-elastic',
-          enabled: true,
-          jobtype: 'PNGV2',
-          last_run: '2025-05-06T21:12:07.198Z',
-          next_run: '2025-09-12T08:30:00.000Z',
-          notification: {
-            email: {
-              to: ['user@elastic.co'],
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            created_at: '2025-05-06T21:12:06.584Z',
+            created_by: 'not-elastic',
+            enabled: true,
+            jobtype: 'PNGV2',
+            last_run: '2025-05-06T21:12:07.198Z',
+            next_run: '2025-09-12T08:30:00.000Z',
+            notification: {
+              email: {
+                to: ['user@elastic.co'],
+              },
             },
-          },
-          payload: jsonPayload,
-          title: 'Another cool dashboard',
-          schedule: {
-            rrule: {
-              freq: 1,
-              interval: 3,
-              tzid: 'UTC',
+            payload: jsonPayload,
+            title: 'Another cool dashboard',
+            schedule: {
+              rrule: {
+                freq: 1,
+                interval: 3,
+                tzid: 'UTC',
+              },
             },
+            space_id: 'a-space',
           },
-          space_id: 'a-space',
-        },
-      ],
-    });
+        ],
+      }
+    );
   });
 
   it('should still calculate the next_run date when nextRunResponse is undefined', () => {
-    expect(transformResponse(mockLogger, soResponse, lastRunResponse)).toEqual({
+    expect(transformListResponse(mockLogger, soResponse, lastRunResponse)).toEqual({
       page: 1,
       per_page: 10,
       total: 2,
@@ -306,7 +312,7 @@ describe('transformResponse', () => {
 
   it('should correctly transform the responses with rrule.dtstart field', () => {
     expect(
-      transformResponse(
+      transformListResponse(
         mockLogger,
         {
           ...soResponse,
@@ -468,7 +474,7 @@ describe('transformResponse', () => {
       score: 0,
     };
     expect(
-      transformResponse(
+      transformListResponse(
         mockLogger,
         {
           page: 1,
@@ -520,7 +526,7 @@ describe('transformResponse', () => {
       },
     };
 
-    expect(transformResponse(mockLogger, soResponse, thisLastRunResponse)).toEqual({
+    expect(transformListResponse(mockLogger, soResponse, thisLastRunResponse)).toEqual({
       page: 1,
       per_page: 10,
       total: 2,
@@ -578,7 +584,7 @@ describe('transformResponse', () => {
     const malformedSo1 = { ...savedObjects[0], namespaces: [], score: 0 };
     const malformedSo2 = { ...omit(savedObjects[1], 'namespaces'), score: 0 };
     expect(
-      transformResponse(
+      transformListResponse(
         mockLogger,
         {
           page: 1,
@@ -643,7 +649,7 @@ describe('transformResponse', () => {
   });
 
   it('handles undefined last run response', () => {
-    expect(transformResponse(mockLogger, soResponse)).toEqual({
+    expect(transformListResponse(mockLogger, soResponse)).toEqual({
       page: 1,
       per_page: 10,
       total: 2,
@@ -694,6 +700,21 @@ describe('transformResponse', () => {
           space_id: 'a-space',
         },
       ],
+    });
+  });
+});
+
+describe('transformBulkDeleteResponse', () => {
+  it('should return the deleted ids, errors and the sum of items in total', () => {
+    expect(
+      transformBulkDeleteResponse({
+        deletedSchedulesIds: ['1', '2'],
+        errors: [{ id: 'test', message: 'Test' }],
+      })
+    ).toEqual({
+      scheduled_report_ids: ['1', '2'],
+      errors: [{ id: 'test', message: 'Test' }],
+      total: 3,
     });
   });
 });

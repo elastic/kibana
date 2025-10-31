@@ -12,7 +12,7 @@ import type { ReportingAPIClient } from '@kbn/reporting-public';
 import { useKibana } from '@kbn/reporting-public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { isEmpty } from 'lodash';
 import { supportedReportTypes } from '../report_params';
 import { queryClient } from '../../query_client';
@@ -68,6 +68,7 @@ export const ScheduledReportFlyoutShareWrapper = ({
     return (
       <EuiFlyoutBody>
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.SCHEDULED_REPORT_NO_REPORT_TYPES_TITLE}
           color="warning"
           iconType="warning"

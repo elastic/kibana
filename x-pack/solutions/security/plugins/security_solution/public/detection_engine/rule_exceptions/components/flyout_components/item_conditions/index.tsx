@@ -212,7 +212,11 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       </SectionHeader>
       {includesRuleWithEQLSequenceStatement && (
         <>
-          <EuiCallOut data-test-subj="eqlSequenceCallout" title={eqlCalloutWarning} />
+          <EuiCallOut
+            announceOnMount
+            data-test-subj="eqlSequenceCallout"
+            title={eqlCalloutWarning}
+          />
           <EuiSpacer />
         </>
       )}

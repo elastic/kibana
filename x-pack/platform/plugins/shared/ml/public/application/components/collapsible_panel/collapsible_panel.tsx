@@ -54,7 +54,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
       <EuiSplitPanel.Inner color={isOpen ? 'plain' : 'subdued'}>
         <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize={'s'}>
+            <EuiFlexGroup gutterSize={'xs'}>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   aria-label={
@@ -75,7 +75,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
                   }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem css={{ minWidth: '67px' }} grow={false}>
                 <EuiTitle size="xxs">
                   <h2>{header}</h2>
                 </EuiTitle>
@@ -84,7 +84,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
           </EuiFlexItem>
           {headerItems ? (
             <EuiFlexItem grow={false}>
-              <PanelHeaderItems headerItems={headerItems} />
+              <PanelHeaderItems compressed={true} headerItems={headerItems} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
@@ -114,7 +114,7 @@ export interface OverviewStatsBarProps {
 
 export const OverviewStatsBar: FC<OverviewStatsBarProps> = ({ inputStats, dataTestSub }) => {
   return (
-    <EuiFlexGroup data-test-subj={dataTestSub} alignItems={'center'} gutterSize={'m'}>
+    <EuiFlexGroup data-test-subj={dataTestSub} alignItems={'center'} gutterSize={'s'}>
       {inputStats.map(({ value, label, 'data-test-subj': dataTestSubjValue }) => {
         return (
           <EuiFlexItem grow={false} key={label}>
