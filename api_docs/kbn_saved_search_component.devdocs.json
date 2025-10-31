@@ -277,9 +277,9 @@
             "signature": [
               {
                 "pluginId": "discover",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibDiscoverPluginApi",
-                "section": "def-public.NonPersistedDisplayOptions",
+                "section": "def-common.NonPersistedDisplayOptions",
                 "text": "NonPersistedDisplayOptions"
               },
               " | undefined"
