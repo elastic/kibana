@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
