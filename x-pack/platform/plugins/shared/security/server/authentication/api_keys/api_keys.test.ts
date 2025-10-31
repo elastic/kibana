@@ -741,7 +741,7 @@ describe('API Keys', () => {
 
         const result = await apiKeys.grantAsInternalUser(
           httpServerMock.createKibanaRequest({
-            headers: { authorization: 'Bearer regular_token' },
+            headers: { authorization: 'ApiKey regular_api_key' },
           }),
           {
             name: 'test_api_key',
@@ -753,7 +753,7 @@ describe('API Keys', () => {
         expect(result).toEqual({
           id: 'same_api_key_id',
           name: 'test_api_key',
-          api_key: 'regular_token',
+          api_key: 'regular_api_key',
         });
         expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
         expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
