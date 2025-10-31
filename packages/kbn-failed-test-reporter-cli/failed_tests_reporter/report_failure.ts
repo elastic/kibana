@@ -65,17 +65,25 @@ export async function createFailureIssue(
   if (isScout) {
     const scoutFailure = failure as ScoutTestFailureExtended;
 
+    // Extract Playwright config path from command
+    const getPlaywrightConfigPath = (command?: string): string => {
+      if (!command) return 'N/A';
+      const configMatch = command.match(/--config\s+(\S+)/);
+      return configMatch ? configMatch[1] : 'N/A';
+    };
+
     // Create table format for Scout test details
     const scoutDetailsTable = [
       '| Field | Value |',
       '|-------|-------|',
       `| Test ID | ${scoutFailure.id} |`,
       `| Target | ${scoutFailure.target} |`,
-      `| Duration | ${(scoutFailure.duration / 1000).toFixed(2) + 's'} |`,
       `| Location | ${scoutFailure.location} |`,
+      `| Duration | ${(scoutFailure.duration / 1000).toFixed(2) + 's'} |`,
       scoutFailure.kibanaModule
-        ? `| Kibana Module | ${scoutFailure.kibanaModule.id} (${scoutFailure.kibanaModule.type}) |`
-        : '| Kibana Module | N/A |',
+        ? `| Module | ${scoutFailure.kibanaModule.id} (${scoutFailure.kibanaModule.type}) |`
+        : '| Module | N/A |',
+      `| Config path | ${getPlaywrightConfigPath(scoutFailure.commandLine)} |`,
       `| Code Owners | ${scoutFailure.owners} |`,
     ];
 
@@ -88,6 +96,7 @@ export async function createFailureIssue(
       );
 
       if (hasScreenshots) {
+        bodyContent.push('');
         bodyContent.push(
           'Failure screenshots are available in the Buildkite HTML report and artifacts.'
         );
@@ -128,9 +137,9 @@ export async function updateFailureIssue(
   // Create comment with target information for Scout failures
   const isScout = failure && isScoutFailure(failure);
   const commentText = isScout
-    ? `**New Scout Test Failure**\n\n**Target:** ${
-        (failure as ScoutTestFailureExtended).target
-      }\n\nBuild: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`
+    ? `New failure for "${failure.target}" target: [${
+        pipeline || 'CI Build'
+      } - ${branch}](${buildUrl})`
     : `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
 
   await api.addIssueComment(issue.github.number, commentText);
