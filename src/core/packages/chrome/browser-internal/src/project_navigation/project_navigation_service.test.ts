@@ -459,7 +459,7 @@ describe('initNavigation()', () => {
       isExternalLink: true,
       path: 'group1.node-0',
       sideNavStatus: 'visible',
-      title: 'Users and roles',
+      title: 'Members',
     });
 
     // performance
@@ -532,7 +532,7 @@ describe('initNavigation()', () => {
     expect(node?.children?.length).toBe(3); // Only 3 links without billing
 
     // Verify the links are userAndRoles, performance, deployment (no billing)
-    expect(node.children![0].title).toBe('Users and roles');
+    expect(node.children![0].title).toBe('Members');
     expect(node.children![1].title).toBe('Performance');
     expect(node.children![2].title).toBe('Project'); // deployment
 
