@@ -59,6 +59,7 @@ export const AgentlessStepConfirmData = ({
     return (
       <>
         <EuiCallOut
+          announceOnMount
           color="success"
           title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.successText', {
             defaultMessage: 'Incoming data received from agentless integration',
@@ -73,6 +74,7 @@ export const AgentlessStepConfirmData = ({
     return (
       <>
         <EuiCallOut
+          announceOnMount
           color="danger"
           title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.failureText', {
             defaultMessage: 'No incoming data received from agentless integration',

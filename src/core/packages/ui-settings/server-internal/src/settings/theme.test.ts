@@ -41,9 +41,6 @@ describe('theme settings', () => {
     const validate = getValidationFn(themeSettings['theme:name']);
 
     it('should only accept expected values', () => {
-      // TODO: Remove amsterdam theme
-      // https://github.com/elastic/eui-private/issues/170
-      expect(() => validate('amsterdam')).not.toThrow();
       expect(() => validate('borealis')).not.toThrow();
 
       expect(() => validate(true)).toThrow();
@@ -84,9 +81,9 @@ describe('theme settings', () => {
         expect(
           getThemeSettings({
             ...defaultOptions,
-            defaultTheme: 'amsterdam',
+            defaultTheme: 'borealis',
           })['theme:name'].value
-        ).toBe('amsterdam');
+        ).toBe('borealis');
       });
     });
   });
@@ -94,17 +91,17 @@ describe('theme settings', () => {
 
 describe('process.env.KBN_OPTIMIZER_THEMES handling', () => {
   it('defaults to properties of first tag', () => {
-    process.env.KBN_OPTIMIZER_THEMES = 'v8dark,v8light';
+    process.env.KBN_OPTIMIZER_THEMES = 'borealisdark,borealislight';
     let settings = getThemeSettings({ ...defaultOptions, isDist: false });
     expect(settings['theme:darkMode'].value).toBe('enabled');
 
-    process.env.KBN_OPTIMIZER_THEMES = 'v8light,v8dark';
+    process.env.KBN_OPTIMIZER_THEMES = 'borealislight,borealisdark';
     settings = getThemeSettings({ ...defaultOptions, isDist: false });
     expect(settings['theme:darkMode'].value).toBe('disabled');
   });
 
   it('ignores the value when isDist is true', () => {
-    process.env.KBN_OPTIMIZER_THEMES = 'v8dark';
+    process.env.KBN_OPTIMIZER_THEMES = 'borealisdark';
     const settings = getThemeSettings({ ...defaultOptions, isDist: true });
     expect(settings['theme:darkMode'].value).toBe('disabled');
   });

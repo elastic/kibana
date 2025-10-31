@@ -1241,10 +1241,10 @@
           },
           {
             "parentPluginId": "navigation",
-            "id": "def-common.DEFAULT_ROUTES.workplace_ai",
+            "id": "def-common.DEFAULT_ROUTES.workplaceai",
             "type": "string",
             "tags": [],
-            "label": "workplace_ai",
+            "label": "workplaceai",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,
