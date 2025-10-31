@@ -123,6 +123,7 @@ const ESQLDataCascade = React.memo(
 
     const { rowActions, rowHeaderMeta, rowHeaderTitle } = useEsqlDataCascadeRowHeaderComponents(
       queryMeta,
+      props.columns,
       togglePopover
     );
 

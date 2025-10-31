@@ -296,6 +296,7 @@ export const useEsqlDataCascadeRowActionHelpers = (
 
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
+  selectedColumns: string[],
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover']
 ) {
   /**
@@ -315,8 +316,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
               // @ts-expect-error - necessary to match the data shape expectation
               { flattened: rowData },
               rowGroup,
-              false,
-              48
+              false
             )}
           </div>
         );
@@ -342,6 +342,10 @@ export function useEsqlDataCascadeRowHeaderComponents(
     [editorQueryMeta.groupByFields]
   );
 
+  const namedColumnsFromQuery = useMemo(() => {
+    return editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier);
+  }, [editorQueryMeta.appliedFunctions]);
+
   /**
    * Renders the meta part of the row header.
    */
@@ -349,39 +353,45 @@ export function useEsqlDataCascadeRowHeaderComponents(
     NonNullable<DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['rowHeaderMetaSlots']>
   >(
     ({ rowData }) =>
-      editorQueryMeta.appliedFunctions.map(({ identifier }) => {
-        return (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <FormattedMessage
-              id="discover.esql_data_cascade.grouping.function"
-              defaultMessage="<bold>{identifier}: </bold><badge>{identifierValue}</badge>"
-              values={{
-                identifier,
-                identifierValue: rowData[identifier] as string | number,
-                bold: (chunks) => (
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" textAlign="right">
-                      <p>{chunks}</p>
-                    </EuiText>
-                  </EuiFlexItem>
-                ),
-                badge: ([chunk]) => {
-                  return (
+      selectedColumns
+        .map((selectedColumn) => {
+          if (namedColumnsFromQuery.indexOf(selectedColumn) < 0) {
+            return null;
+          }
+
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <FormattedMessage
+                id="discover.esql_data_cascade.grouping.function"
+                defaultMessage="<bold>{selectedColumn}: </bold><badge>{selectedColumnValue}</badge>"
+                values={{
+                  selectedColumn,
+                  selectedColumnValue: rowData[selectedColumn] as string | number,
+                  bold: (chunks) => (
                     <EuiFlexItem grow={false}>
-                      {Number.isNaN(Number(chunk)) ? (
-                        <EuiBadge color="hollow">{chunk}</EuiBadge>
-                      ) : (
-                        <NumberBadge value={Number(chunk)} shortenAtExpSize={3} />
-                      )}
+                      <EuiText size="s" textAlign="right">
+                        <p>{chunks}</p>
+                      </EuiText>
                     </EuiFlexItem>
-                  );
-                },
-              }}
-            />
-          </EuiFlexGroup>
-        );
-      }),
-    [editorQueryMeta.appliedFunctions]
+                  ),
+                  badge: ([chunk]) => {
+                    return (
+                      <EuiFlexItem grow={false}>
+                        {Number.isNaN(Number(chunk)) ? (
+                          <EuiBadge color="hollow">{chunk}</EuiBadge>
+                        ) : (
+                          <NumberBadge value={Number(chunk)} shortenAtExpSize={3} />
+                        )}
+                      </EuiFlexItem>
+                    );
+                  },
+                }}
+              />
+            </EuiFlexGroup>
+          );
+        })
+        .filter(Boolean),
+    [namedColumnsFromQuery, selectedColumns]
   );
 
   const rowActions = useCallback<
