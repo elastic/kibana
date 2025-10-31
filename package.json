@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.19.6",
+  "version": "8.19.7",
   "branch": "8.19",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -102,7 +102,10 @@
     "@types/react-dom": "~18.2.0",
     "@xstate5/react/**/xstate": "^5.19.2",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "^3.3.2"
+    "globby/fast-glob": "^3.3.2",
+    "vega-expression": "5.2.1",
+    "vega-interpreter": "1.2.1",
+    "vega-util": "1.17.4"
   },
   "dependencies": {
     "@appland/sql-parser": "^1.5.1",
@@ -1330,7 +1333,7 @@
     "utility-types": "^3.10.0",
     "uuid": "10.0.0",
     "vega": "^5.33.0",
-    "vega-interpreter": "^1.0.4",
+    "vega-interpreter": "1.2.1",
     "vega-lite": "^5.21.0",
     "vega-schema-url-parser": "^2.2.0",
     "vega-spec-injector": "^0.0.2",
@@ -1761,7 +1764,7 @@
     "cache-manager-fs-hash": "^2.0.0",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
-    "chromedriver": "^141.0.1",
+    "chromedriver": "^141.0.2",
     "clean-webpack-plugin": "^4.0.0",
     "cli-progress": "^3.12.0",
     "cli-table3": "^0.6.1",
