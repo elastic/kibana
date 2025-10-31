@@ -10,11 +10,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsServices } from '../../../../../types';
-import { selectYamlString } from '../selectors';
+import { selectWorkflow, selectYamlString } from '../selectors';
 import type { RootState } from '../types';
 
 export interface TestWorkflowParams {
-  workflowId?: string;
   inputs: Record<string, unknown>;
 }
 
@@ -28,10 +27,12 @@ export const testWorkflowThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/testWorkflowThunk',
-  async ({ workflowId, inputs }, { getState, rejectWithValue, extra: { services } }) => {
+  async ({ inputs }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     try {
       const yamlString = selectYamlString(getState());
+      const workflow = selectWorkflow(getState());
+
       if (!yamlString) {
         return rejectWithValue('No YAML content to test');
       }
@@ -41,8 +42,8 @@ export const testWorkflowThunk = createAsyncThunk<
         inputs,
       };
 
-      if (workflowId) {
-        requestBody.workflowId = workflowId;
+      if (workflow?.id) {
+        requestBody.workflowId = workflow.id;
       }
 
       // Make the API call to test the workflow
