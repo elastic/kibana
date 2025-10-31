@@ -92,12 +92,12 @@ export class ExistingFailedTestIssues {
       if (isScout) {
         // For Scout failures, match by test name only. We don't create a new issue for each target where the same test fails, but only one + adding comments for each target failure.
         const isExistingScoutFailure = 'id' in f && 'target' in f && 'location' in f;
-        if (isExistingScoutFailure && f.name === failure.name) {
+        if (isExistingScoutFailure && f.name === failure.name && issue !== undefined) {
           return issue;
         }
       } else {
         // For FTR failures, use original matching logic
-        if (f.classname === failure.classname && f.name === failure.name) {
+        if (f.classname === failure.classname && f.name === failure.name && issue !== undefined) {
           return issue;
         }
       }

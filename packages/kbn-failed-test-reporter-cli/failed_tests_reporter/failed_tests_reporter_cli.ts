@@ -52,7 +52,10 @@ run(
       if (process.env.BUILDKITE === 'true') {
         branch = process.env.BUILDKITE_BRANCH || '';
         pipeline = process.env.BUILDKITE_PIPELINE_SLUG || '';
-        isPr = process.env.BUILDKITE_PULL_REQUEST === 'true';
+        // BUILDKITE_PULL_REQUEST is set to the PR number (e.g., "12345") for PRs, or "false" for non-PR builds
+        isPr = !!(
+          process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
+        );
         // Allow GitHub updates for PRs for 1 time experiment
         updateGithub = isPr || process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
         prependTitle = process.env.PREPEND_FAILURE_TITLE || '';
