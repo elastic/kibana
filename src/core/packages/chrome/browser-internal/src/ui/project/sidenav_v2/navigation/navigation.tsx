@@ -23,7 +23,6 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import { NavigationTour } from '@kbn/core-chrome-navigation-tour';
 import useObservable from 'react-use/lib/useObservable';
-import { RedirectNavigationAppLinks } from './redirect_app_links';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
@@ -76,22 +75,20 @@ export const Navigation = (props: ChromeNavigationProps) => {
           props.isCollapsed ? 'collapsed' : 'expanded'
         }
       />
-      <RedirectNavigationAppLinks application={props.application}>
-        <NavigationComponent
-          items={navItems}
-          logo={logoItem}
-          sidePanelFooter={
-            <NavigationFeedbackSnippet
-              solutionId={solutionId}
-              feedbackUrlParams={feedbackUrlParams}
-            />
-          }
-          isCollapsed={props.isCollapsed}
-          setWidth={props.setWidth}
-          activeItemId={activeItemId}
-          data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
-        />
-      </RedirectNavigationAppLinks>
+      <NavigationComponent
+        items={navItems}
+        logo={logoItem}
+        sidePanelFooter={
+          <NavigationFeedbackSnippet
+            solutionId={solutionId}
+            feedbackUrlParams={feedbackUrlParams}
+          />
+        }
+        isCollapsed={props.isCollapsed}
+        setWidth={props.setWidth}
+        activeItemId={activeItemId}
+        data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
+      />
     </>
   );
 };
