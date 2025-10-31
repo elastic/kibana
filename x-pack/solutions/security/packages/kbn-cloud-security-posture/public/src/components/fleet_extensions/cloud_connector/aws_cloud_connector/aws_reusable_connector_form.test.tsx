@@ -84,7 +84,7 @@ describe('AWSReusableConnectorForm', () => {
       expect(screen.getByText(/To streamline your AWS integration process/i)).toBeInTheDocument();
 
       // Verify the combo box label is present
-      expect(screen.getByText('AWS Cloud Connector')).toBeInTheDocument();
+      expect(screen.getByText('Role ARN')).toBeInTheDocument();
 
       // Verify combo box is rendered
       const comboBox = screen.getByRole('combobox');

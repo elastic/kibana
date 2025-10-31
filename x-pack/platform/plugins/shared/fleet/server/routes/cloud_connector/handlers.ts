@@ -72,16 +72,12 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
     const cloudConnectors = await cloudConnectorService.getList(internalSoClient, {
       page: page ? parseInt(page, 10) : undefined,
       perPage: perPage ? parseInt(perPage, 10) : undefined,
+      cloudProvider,
     });
-
-    // Filter by cloudProvider if provided
-    const filteredConnectors = cloudProvider
-      ? cloudConnectors.filter((connector) => connector.cloudProvider === cloudProvider)
-      : cloudConnectors;
 
     logger.info('Successfully retrieved cloud connectors list');
     const body: GetCloudConnectorsResponse = {
-      items: filteredConnectors,
+      items: cloudConnectors,
     };
     return response.ok({ body });
   } catch (error) {

@@ -132,13 +132,20 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     logger.debug('Getting cloud connectors list');
 
     try {
-      const cloudConnectors = await soClient.find<CloudConnectorSOAttributes>({
+      const findOptions: any = {
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: options?.page || 1,
         perPage: options?.perPage || 20,
         sortField: 'created_at',
         sortOrder: 'desc',
-      });
+      };
+
+      // Add cloudProvider filter if specified
+      if (options?.cloudProvider) {
+        findOptions.filter = `${CLOUD_CONNECTOR_SAVED_OBJECT_TYPE}.attributes.cloudProvider: "${options.cloudProvider}"`;
+      }
+
+      const cloudConnectors = await soClient.find<CloudConnectorSOAttributes>(findOptions);
 
       logger.debug('Successfully retrieved cloud connectors list');
 

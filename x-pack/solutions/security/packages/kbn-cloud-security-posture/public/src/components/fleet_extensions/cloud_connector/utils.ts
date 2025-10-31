@@ -417,13 +417,17 @@ export const updateInputVarsWithAzureCredentials = (
 
   // Update Azure-specific fields - always create new objects instead of mutating
   if (credentials?.tenantId !== undefined) {
+    // Update tenant_id if it exists
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID] = {
         ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID],
         value: credentials.tenantId,
       };
-    } else {
+    }
+    // Update azure.credentials.tenant_id if it exists
+    if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID] = {
+        ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID],
         value: credentials.tenantId,
       };
     }
@@ -438,13 +442,17 @@ export const updateInputVarsWithAzureCredentials = (
   }
 
   if (credentials?.clientId !== undefined) {
+    // Update client_id if it exists
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID] = {
         ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID],
         value: credentials.clientId,
       };
-    } else {
+    }
+    // Update azure.credentials.client_id if it exists
+    if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]) {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID] = {
+        ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID],
         value: credentials.clientId,
       };
     }
