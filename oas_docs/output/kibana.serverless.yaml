@@ -65425,9 +65425,14 @@ paths:
         - $ref: '#/components/parameters/SLOs_kbn_xsrf'
         - $ref: '#/components/parameters/SLOs_space_id'
         - description: Indicates if the API returns only outdated SLO or all SLO definitions
-          example: true
           in: query
           name: includeOutdatedOnly
+          schema:
+            type: boolean
+        - description: Indicates if the API returns SLO health data with definitions
+          example: true
+          in: query
+          name: includeHealth
           schema:
             type: boolean
         - description: Filters the SLOs by tag
@@ -83473,6 +83478,22 @@ components:
         - statusCode
         - error
         - message
+    SLOs_artifacts:
+      description: Links to related assets for the SLO
+      properties:
+        dashboards:
+          description: Array of dashboard references
+          items:
+            type: object
+            properties:
+              id:
+                description: Dashboard saved-object id
+                type: string
+            required:
+              - id
+          type: array
+      title: Artifacts
+      type: object
     SLOs_budgeting_method:
       description: The budgeting method to use when computing the rollup data.
       enum:
@@ -83593,6 +83614,8 @@ components:
       description: |
         The create SLO API request body varies depending on the type of indicator, time window and budgeting method.
       properties:
+        artifacts:
+          $ref: '#/components/schemas/SLOs_artifacts'
         budgetingMethod:
           $ref: '#/components/schemas/SLOs_budgeting_method'
         description:
@@ -84407,6 +84430,8 @@ components:
       title: SLO definition response
       type: object
       properties:
+        artifacts:
+          $ref: '#/components/schemas/SLOs_artifacts'
         budgetingMethod:
           $ref: '#/components/schemas/SLOs_budgeting_method'
         createdAt:
@@ -84714,6 +84739,8 @@ components:
       description: |
         The update SLO API request body varies depending on the type of indicator, time window and budgeting method. Partial update is handled.
       properties:
+        artifacts:
+          $ref: '#/components/schemas/SLOs_artifacts'
         budgetingMethod:
           $ref: '#/components/schemas/SLOs_budgeting_method'
         description:
