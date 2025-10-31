@@ -1464,6 +1464,29 @@ paths:
                   default: elastic-ai-agent
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
+                attachments:
+                  description: Optional attachments to send with the message.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      data:
+                        additionalProperties: {}
+                        description: Payload of the attachment.
+                        type: object
+                      hidden:
+                        description: When true, the attachment will not be displayed in the UI.
+                        type: boolean
+                      id:
+                        description: Optional id for the attachment.
+                        type: string
+                      type:
+                        description: Type of the attachment.
+                        type: string
+                    required:
+                      - type
+                      - data
+                  type: array
                 capabilities:
                   additionalProperties: false
                   description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
@@ -1546,6 +1569,29 @@ paths:
                   default: elastic-ai-agent
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
+                attachments:
+                  description: Optional attachments to send with the message.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      data:
+                        additionalProperties: {}
+                        description: Payload of the attachment.
+                        type: object
+                      hidden:
+                        description: When true, the attachment will not be displayed in the UI.
+                        type: boolean
+                      id:
+                        description: Optional id for the attachment.
+                        type: string
+                      type:
+                        description: Type of the attachment.
+                        type: string
+                    required:
+                      - type
+                      - data
+                  type: array
                 capabilities:
                   additionalProperties: false
                   description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.

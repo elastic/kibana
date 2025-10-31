@@ -15,7 +15,6 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import useObservable from 'react-use/lib/useObservable';
-import { EuiIconBackgroundTask } from '@kbn/background-search';
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
@@ -214,8 +213,7 @@ export const useDashboardMenuItems = ({
       backgroundSearch: {
         ...topNavStrings.backgroundSearch,
         id: 'backgroundSearch',
-        // TODO: Replace when the backgroundTask icon is available in EUI
-        iconType: EuiIconBackgroundTask,
+        iconType: 'backgroundTask',
         iconOnly: true,
         testId: 'openBackgroundSearchFlyoutButton',
         run: () =>
