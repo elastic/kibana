@@ -113,6 +113,7 @@ export const findAttackDiscoveriesRoute = (
               perPage: query.per_page,
               sortField: query.sort_field,
               sortOrder: query.sort_order,
+              globalQuery: query.global_query,
               withReplacements: query.with_replacements ?? true, // public APIs default to applying replacements in responses as a convenience to non-Kibana clients
             },
             logger,

@@ -11,11 +11,21 @@ import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import React, { useMemo } from 'react';
 
 import { TableId } from '@kbn/securitysolution-data-table';
+import { getEsQueryConfig } from '@kbn/data-service';
+import { useBrowserFields } from '../../../../../../data_view_manager/hooks/use_browser_fields';
+import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
+import { SourcererScopeName } from '../../../../../../sourcerer/store/model';
+import { combineQueries } from '../../../../../../common/lib/kuery';
+import { buildTimeRangeFilter } from '../../../../../../detections/components/alerts_table/helpers';
+import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
+import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
+import { inputsSelectors } from '../../../../../../common/store';
 import { EaseAlertsTab } from './ease/wrapper';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common';
 import { AlertsTable } from '../../../../../../detections/components/alerts_table';
 import { getColumns } from '../../../../../../detections/configurations/security_solution_detections/columns';
+import { DataViewManagerScopeName } from '../../../../../../data_view_manager/constants';
 
 interface Props {
   attackDiscovery: AttackDiscovery;
@@ -25,7 +35,21 @@ interface Props {
 const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) => {
   const {
     application: { capabilities },
+    uiSettings,
   } = useKibana().services;
+
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
+  const { to: globalTo, from: globalFrom } = useGlobalTime();
+
+  const { dataView } = useDataView(SourcererScopeName.detections);
+  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
+  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
 
   // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
   //  https://github.com/elastic/kibana/issues/218731
@@ -45,6 +69,46 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
     }),
     [originalAlertIds]
   );
+
+  const timeRangeFilter = useMemo(
+    () => buildTimeRangeFilter(globalFrom, globalTo),
+    [globalFrom, globalTo]
+  );
+  const filters = useMemo(
+    () => [
+      ...globalFilters,
+      ...timeRangeFilter,
+      {
+        query: { terms: { _id: originalAlertIds } },
+        meta: {},
+      },
+    ],
+    [globalFilters, originalAlertIds, timeRangeFilter]
+  );
+
+  const newQuery = useMemo(() => {
+    const combinedQuery = combineQueries({
+      config: getEsQueryConfig(uiSettings),
+      dataProviders: [],
+      dataViewSpec,
+      dataView,
+      browserFields,
+      filters,
+      kqlQuery: globalQuery,
+      kqlMode: globalQuery.language,
+    });
+
+    if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
+      return { bool: {} };
+    }
+
+    try {
+      const filter = JSON.parse(combinedQuery?.filterQuery);
+      return { bool: { filter } };
+    } catch {
+      return { bool: {} };
+    }
+  }, [browserFields, dataView, dataViewSpec, filters, globalQuery, uiSettings]);
 
   const id = useMemo(() => `attack-discovery-alerts-${attackDiscovery.id}`, [attackDiscovery.id]);
 
@@ -75,7 +139,7 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
             id={id}
             tableType={TableId.alertsOnCasePage}
             ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
-            query={alertIdsQuery}
+            query={newQuery}
             showAlertStatusWithFlapping={false}
           />
         </div>

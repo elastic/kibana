@@ -18,6 +18,20 @@ import type { AttackDiscoveryAlert, Replacements } from '@kbn/elastic-assistant-
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
+import { getEsQueryConfig } from '@kbn/data-service';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useKibana } from '../../../../common/lib/kibana';
+import { combineQueries } from '../../../../common/lib/kuery';
+import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { inputsSelectors } from '../../../../common/store';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { SearchBarSection } from '../../../../detections/components/alerts/search_bar/search_bar_section';
 import { useAttackDiscoveryHistoryTimerange } from '../../use_attack_discovery_history_timerange';
 import { AttackDiscoveryPanel } from '../attack_discovery_panel';
 import { EmptyPrompt } from '../empty_states/empty_prompt';
@@ -60,11 +74,26 @@ const HistoryComponent: React.FC<Props> = ({
   onToggleShowAnonymized,
   showAnonymized,
 }) => {
+  const { uiSettings } = useKibana().services;
+
   const { assistantAvailability, http } = useAssistantContext();
 
   const { ids: filterByAlertIds, setIdsUrl: setFilterByAlertIds } = useIdsFromUrl();
   const { historyStart, setHistoryStart, historyEnd, setHistoryEnd } =
     useAttackDiscoveryHistoryTimerange();
+
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
+  const { to: globalTo, from: globalFrom } = useGlobalTime();
+
+  const { dataView } = useDataView(SourcererScopeName.detections);
+  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
+  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
 
   // search bar query:
   const [query, setQuery] = useLocalStorage<string>(
@@ -116,6 +145,41 @@ const HistoryComponent: React.FC<Props> = ({
 
   const [selectedConnectorNames, setSelectedConnectorNames] = useState<string[]>([]);
 
+  const timeRangeFilter = useMemo(
+    () => buildTimeRangeFilter(globalFrom, globalTo),
+    [globalFrom, globalTo]
+  );
+  const filters = useMemo(
+    () => [...globalFilters, ...timeRangeFilter],
+    [globalFilters, timeRangeFilter]
+  );
+
+  const newQuery = useMemo(() => {
+    const combinedQuery = combineQueries({
+      config: getEsQueryConfig(uiSettings),
+      dataProviders: [],
+      dataViewSpec,
+      dataView,
+      browserFields,
+      filters,
+      kqlQuery: globalQuery,
+      kqlMode: globalQuery.language,
+    });
+
+    if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
+      return { bool: {} };
+    }
+
+    try {
+      const filter = JSON.parse(combinedQuery?.filterQuery);
+      return { bool: { filter } };
+    } catch {
+      return { bool: {} };
+    }
+  }, [browserFields, dataView, dataViewSpec, filters, globalQuery, uiSettings]);
+
+  console.log(`[TEST] newQuery: ${JSON.stringify(newQuery)}`);
+
   const {
     cancelRequest: cancelFindAttackDiscoveriesRequest,
     data,
@@ -123,7 +187,7 @@ const HistoryComponent: React.FC<Props> = ({
     refetch: refetchFindAttackDiscoveries,
   } = useFindAttackDiscoveries({
     connectorNames: selectedConnectorNames,
-    end: historyEnd,
+    end: globalTo,
     ids: filterByAlertIds.length > 0 ? filterByAlertIds : undefined,
     http,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
@@ -131,8 +195,9 @@ const HistoryComponent: React.FC<Props> = ({
     perPage,
     search: query?.trim(),
     shared,
-    start: historyStart,
+    start: globalFrom,
     status: selectedAlertWorkflowStatus,
+    globalQuery: JSON.stringify(newQuery),
   });
 
   const {
@@ -188,8 +253,31 @@ const HistoryComponent: React.FC<Props> = ({
     refetchFindAttackDiscoveries,
   ]);
 
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { sourcererDataView: oldSourcererDataViewSpec, loading: oldSourcererDataViewIsLoading } =
+    useSourcererDataView(SourcererScopeName.detections);
+  // TODO rename to just dataView and status once we remove the newDataViewPickerEnabled feature flag
+  const { dataView: experimentalDataView, status: experimentalDataViewStatus } = useDataView(
+    SourcererScopeName.detections
+  );
+  const isDataViewLoading: boolean = useMemo(
+    () =>
+      newDataViewPickerEnabled
+        ? experimentalDataViewStatus === 'loading' || experimentalDataViewStatus === 'pristine'
+        : oldSourcererDataViewIsLoading,
+    [experimentalDataViewStatus, newDataViewPickerEnabled, oldSourcererDataViewIsLoading]
+  );
+
   return (
     <div data-test-subj="history">
+      {!isDataViewLoading && (
+        <SearchBarSection
+          dataView={newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataViewSpec}
+        />
+      )}
+
+      <EuiSpacer size="m" />
+
       <SearchAndFilter
         aiConnectors={aiConnectors}
         connectorNames={connectorNames}

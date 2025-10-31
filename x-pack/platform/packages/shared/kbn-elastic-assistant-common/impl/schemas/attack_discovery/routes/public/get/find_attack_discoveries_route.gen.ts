@@ -69,6 +69,10 @@ export const AttackDiscoveryFindRequestQuery = z.object({
    */
   shared: BooleanFromString.optional(),
   /**
+   * Elastic global query
+   */
+  global_query: z.string().optional(),
+  /**
    * Field used to sort results. See `AttackDiscoveryFindSortField` for allowed values.
    */
   sort_field: AttackDiscoveryFindSortField.optional().default('@timestamp'),
