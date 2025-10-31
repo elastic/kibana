@@ -307,7 +307,7 @@ export const useDiscoverHistogram = (
     }
 
     const subscription = stateContainer.dataState.fetchChart$.subscribe((latestFetchDetails) => {
-      console.debug('Use Unified Histogram - Fetch triggered');
+      // console.debug('Use Unified Histogram - Fetch triggered');
       triggerUnifiedHistogramFetch.current(latestFetchDetails);
     });
 
@@ -321,7 +321,7 @@ export const useDiscoverHistogram = (
     if (!collectedFetchParams || !usedFetchParams) {
       return;
     }
-    console.log('Use Unified Histogram - comparing fetch params');
+    // console.log('Use Unified Histogram - comparing fetch params');
     const changedParams = Object.keys(collectedFetchParams).filter((key) => {
       return (
         collectedFetchParams[key as keyof UnifiedHistogramFetchParamsExternal] !==
@@ -330,7 +330,7 @@ export const useDiscoverHistogram = (
     });
 
     if (changedParams.length === 1 && changedParams[0] === 'externalVisContext') {
-      console.log('Use Unified Histogram - externalVisContext changed, triggering fetch');
+      // console.log('Use Unified Histogram - externalVisContext changed, triggering fetch');
       triggerUnifiedHistogramFetch.current({
         visContext: collectedFetchParams.externalVisContext,
       });

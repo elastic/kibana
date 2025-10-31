@@ -42,7 +42,7 @@ export const useLensProps = ({
 }) => {
   const buildLensProps = useCallback(() => {
     const visContext = lensVisService.getStateValue().visContext;
-    console.log('useLensProps - buildLensProps called', visContext);
+    // console.log('useLensProps - buildLensProps called', visContext);
     if (!visContext) {
       return;
     }
