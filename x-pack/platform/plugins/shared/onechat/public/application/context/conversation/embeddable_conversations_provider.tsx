@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import React, { useMemo, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -42,13 +42,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     agentId: contextProps.agentId,
   });
 
-  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
-
   const hasInitializedConversationIdRef = useRef(false);
 
-  const setConversationIdAndPersist = useCallback(
+  const setConversationId = useCallback(
     (id?: string) => {
-      setConversationId(id);
       if (id !== persistedConversationId) {
         updatePersistedConversationId(id);
       }
@@ -60,12 +57,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     async (id: string) => {
       try {
         const conversation = await services.conversationsService.get({ conversationId: id });
-        setConversationIdAndPersist(conversation.id ?? undefined);
+        setConversationId(conversation.id ?? undefined);
       } catch {
-        setConversationIdAndPersist(undefined);
+        setConversationId(undefined);
       }
     },
-    [services.conversationsService, setConversationIdAndPersist]
+    [services.conversationsService, setConversationId]
   );
 
   // One-time initialization per provider instance:
@@ -77,29 +74,29 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     if (hasInitializedConversationIdRef.current) return;
 
     if (contextProps.newConversation) {
-      setConversationIdAndPersist(undefined);
+      setConversationId(undefined);
     } else if (persistedConversationId) {
       validateAndSetConversationId(persistedConversationId);
     } else {
-      setConversationIdAndPersist(undefined);
+      setConversationId(undefined);
     }
     hasInitializedConversationIdRef.current = true;
   }, [
     contextProps.newConversation,
     persistedConversationId,
-    setConversationIdAndPersist,
+    setConversationId,
     validateAndSetConversationId,
   ]);
 
   const onConversationCreated = useCallback(
     ({ conversationId: id }: { conversationId: string }) => {
-      setConversationIdAndPersist(id);
+      setConversationId(id);
     },
-    [setConversationIdAndPersist]
+    [setConversationId]
   );
 
   const conversationActions = useConversationActions({
-    conversationId,
+    conversationId: persistedConversationId,
     queryClient,
     conversationsService: services.conversationsService,
     onConversationCreated,
@@ -107,22 +104,22 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const conversationContextValue = useMemo(
     () => ({
-      conversationId,
+      conversationId: persistedConversationId,
       shouldStickToBottom: true,
       isEmbeddedContext: true,
       sessionTag: contextProps.sessionTag,
       agentId: contextProps.agentId,
       initialMessage: contextProps.initialMessage,
-      setConversationId: setConversationIdAndPersist,
+      setConversationId,
       conversationActions,
     }),
     [
-      conversationId,
+      persistedConversationId,
       contextProps.sessionTag,
       contextProps.agentId,
       contextProps.initialMessage,
       conversationActions,
-      setConversationIdAndPersist,
+      setConversationId,
     ]
   );
 
