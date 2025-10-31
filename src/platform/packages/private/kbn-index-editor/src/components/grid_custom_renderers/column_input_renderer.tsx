@@ -17,6 +17,7 @@ import {
   useEuiTheme,
   EuiFocusTrap,
   findElementBySelectorOrRef,
+  EuiPopover,
 } from '@elastic/eui';
 import type { HTMLAttributes, KeyboardEvent } from 'react';
 import React, { useCallback, useMemo } from 'react';
@@ -141,7 +142,7 @@ export const AddColumnHeader = ({
       defaultMessage="Add a column…"
     />
   ) : (
-    columnName
+    initialColumnName
   );
 
   const errorMessage = useMemo(() => {
@@ -163,8 +164,37 @@ export const AddColumnHeader = ({
     return false;
   }, [columnIndex]);
 
-  if (isColumnInEditMode) {
-    return (
+  const triggerButton = (
+    <EuiButtonEmpty
+      data-test-subj="indexEditorindexEditorColumnNameButton"
+      aria-label={i18n.translate('indexEditor.columnHeaderEdit.aria', {
+        defaultMessage: 'Edit column name',
+      })}
+      css={{
+        color: euiTheme.colors.textSubdued,
+        width: '100%',
+        height: euiTheme.size.xl,
+      }}
+      tabIndex={-1}
+      flush="left"
+      contentProps={{
+        css: {
+          justifyContent: 'left',
+        },
+      }}
+      onClick={() => setEditingColumnIndex(columnIndex)}
+    >
+      {columnLabel}
+    </EuiButtonEmpty>
+  );
+
+  return (
+    <EuiPopover
+      ownFocus={false}
+      button={triggerButton}
+      isOpen={isColumnInEditMode}
+      closePopover={() => setEditingColumnIndex(null)}
+    >
       <EuiFocusTrap initialFocus="input" returnFocus={returnFocus}>
         <EuiForm component="form" onSubmit={onSubmit}>
           <EuiToolTip
@@ -175,6 +205,7 @@ export const AddColumnHeader = ({
             <EuiFieldText
               data-test-subj="indexEditorindexEditorColumnNameInput"
               value={columnName}
+              id="columnName"
               fullWidth
               controlOnly
               compressed
@@ -200,30 +231,6 @@ export const AddColumnHeader = ({
           </EuiToolTip>
         </EuiForm>
       </EuiFocusTrap>
-    );
-  }
-
-  return (
-    <EuiButtonEmpty
-      data-test-subj="indexEditorindexEditorColumnNameButton"
-      aria-label={i18n.translate('indexEditor.columnHeaderEdit.aria', {
-        defaultMessage: 'Edit column name',
-      })}
-      css={{
-        color: euiTheme.colors.textSubdued,
-        width: '100%',
-        height: euiTheme.size.xl,
-      }}
-      tabIndex={-1}
-      flush="left"
-      contentProps={{
-        css: {
-          justifyContent: 'left',
-        },
-      }}
-      onClick={() => setEditingColumnIndex(columnIndex)}
-    >
-      {columnLabel}
-    </EuiButtonEmpty>
+    </EuiPopover>
   );
 };
