@@ -626,7 +626,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         ) : null}
         <UseBug177756ReBroadcastMouseDown>
           <WrapWithUseBug223981FixRepositionSuggestWidget
-            isEmbeddable={isEmbeddable ?? false}
+            isEmbeddable={isEmbeddable}
             editor={_editor}
           >
             {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
@@ -662,7 +662,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 fontSize: isFullScreen ? 16 : 12,
                 lineHeight: isFullScreen ? 24 : 21,
                 contextmenu: enableCustomContextMenu,
-                fixedOverflowWidgets: !isEmbeddable ? true : false,
+                fixedOverflowWidgets: !isEmbeddable,
                 // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
                 'bracketPairColorization.enabled': false,
                 ...options,
