@@ -32,7 +32,6 @@ import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_f
 import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/form_based/esql_layer/utils';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import type { LayerPanelProps } from './types';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
 import { useInitializeChart } from './use_initialize_chart';
