@@ -20,6 +20,7 @@ import {
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
+import type { AIAssistedCreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/ai_assisted/index.gen';
 import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import type { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import type { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
@@ -64,6 +65,17 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
 
   return {
+    /**
+     * AI assisted rule creation
+     */
+    aiAssistedCreateRule(props: AIAssistedCreateRuleProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(getRouteUrlForSpace('/internal/detection_engine/ai_assisted/_create', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     /**
       * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
 the migration process. A successful migration will result in both the old and new indices being present.
@@ -537,6 +549,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   };
 }
 
+export interface AIAssistedCreateRuleProps {
+  body: AIAssistedCreateRuleRequestBodyInput;
+}
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
 }

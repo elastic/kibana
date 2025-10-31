@@ -148,6 +148,17 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.ADD_NEW_RULE}
                 </SecuritySolutionLinkButton>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SecuritySolutionLinkButton
+                  data-test-subj="create-new-rule-ai-assisted"
+                  fill
+                  iconType="sparkles"
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.aiAssistedRuleCreate}
+                >
+                  {'AI rule creation'}
+                </SecuritySolutionLinkButton>
+              </EuiFlexItem>
               {isDoesNotMatchForIndicatorMatchRuleEnabled && <RuleFeatureTour />}
             </EuiFlexGroup>
           </HeaderPage>

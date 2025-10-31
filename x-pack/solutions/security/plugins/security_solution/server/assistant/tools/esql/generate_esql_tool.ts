@@ -75,6 +75,7 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
 
         const { messages } = result;
         const lastMessage = messages[messages.length - 1];
+
         return lastMessage.content;
       },
       {
