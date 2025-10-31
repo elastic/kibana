@@ -480,7 +480,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInServerless missing timestamps', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240929
+    describe.skip('@skipInServerless missing timestamps', () => {
       beforeEach(async () => {
         await es.indices.delete({ index: 'myfakeindex-1', ignore_unavailable: true });
         await es.indices.create({
