@@ -1427,7 +1427,11 @@ describe('Ad Hoc Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         5,
-        `skipping updating alerts with maintenance windows for rule test:rule-id: 'test': rule execution has been cancelled.`
+        `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
+        `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -1513,7 +1517,11 @@ describe('Ad Hoc Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         5,
-        `skipping updating alerts with maintenance windows for rule test:rule-id: 'test': rule execution has been cancelled.`
+        `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
+        `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
