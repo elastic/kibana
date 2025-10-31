@@ -130,7 +130,7 @@ const ESQLEditorInternal = function ESQLEditor({
   disableAutoFocus,
   controlsContext,
   esqlVariables,
-  indexEditorContext,
+  onOpenQueryInNewTab,
   expandToFitQueryOnMount,
   dataErrorsControl,
   formLabel,
@@ -773,7 +773,7 @@ const ESQLEditorInternal = function ESQLEditor({
     query,
     onLookupIndexCreate,
     onNewFieldsAddedToLookupIndex,
-    indexEditorContext?.onOpenIndexInDiscover
+    onOpenQueryInNewTab
   );
 
   useDebounceWithOptions(
