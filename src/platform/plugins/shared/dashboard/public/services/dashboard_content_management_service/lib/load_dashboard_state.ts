@@ -86,36 +86,11 @@ export const loadDashboardState = async ({
   const { references, attributes, managed, version, accessControl, createdBy } =
     rawDashboardContent;
 
-  const {
-    refreshInterval,
-    description,
-    timeRestore,
-    options,
-    panels,
-    filters,
-    query,
-    timeRange,
-    title,
-    tags,
-  } = attributes;
-
   return {
     managed,
     references,
     resolveMeta: { ...resolveMeta, version },
-    dashboardInput: {
-      options,
-      refreshInterval,
-      timeRestore,
-      description,
-      timeRange,
-      filters,
-      panels,
-      query,
-      title,
-      tags,
-      controlGroupInput: attributes.controlGroupInput,
-    },
+    dashboardInput: attributes,
     dashboardFound: true,
     dashboardId: savedObjectId,
     accessControl,

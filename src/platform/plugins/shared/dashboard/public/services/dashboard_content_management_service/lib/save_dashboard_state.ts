@@ -19,23 +19,15 @@ import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { getDashboardBackupService } from '../../dashboard_backup_service';
 import { contentManagementService, coreServices } from '../../kibana_services';
 import type { SaveDashboardProps, SaveDashboardReturn } from '../types';
-import { getSerializedState } from '../../../dashboard_api/get_serialized_state';
 
 export const saveDashboardState = async ({
-  controlGroupReferences,
   lastSavedId,
   saveOptions,
   dashboardState,
-  panelReferences,
+  references,
   accessMode,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   const dashboardContentManagementCache = getDashboardContentManagementCache();
-
-  const { attributes, references } = getSerializedState({
-    controlGroupReferences,
-    dashboardState,
-    panelReferences,
-  });
 
   /**
    * Save the saved object using the content management
@@ -47,7 +39,7 @@ export const saveDashboardState = async ({
       ? await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
           id: idToSaveTo,
           contentTypeId: DASHBOARD_CONTENT_ID,
-          data: attributes,
+          data: dashboardState,
           options: {
             references,
             /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
@@ -56,7 +48,7 @@ export const saveDashboardState = async ({
         })
       : await contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
           contentTypeId: DASHBOARD_CONTENT_ID,
-          data: attributes,
+          data: dashboardState,
           options: {
             references,
             accessControl: {

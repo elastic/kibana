@@ -63,7 +63,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
       <ContentEditorFlyoutWarningsCallOut warningMessages={getWarnings()} />
       {isReadonly && (
         <>
-          <EuiCallOut size="s" title={readonlyReason} iconType="info" />
+          <EuiCallOut size="s" title={readonlyReason} iconType="info" announceOnMount={false} />
           <EuiSpacer size="l" />
         </>
       )}

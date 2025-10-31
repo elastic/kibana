@@ -23,46 +23,40 @@ describe('savedObjectToItem', () => {
     attributes: {},
   };
 
-  const getSavedObjectForAttributes = (
-    attributes: DashboardSavedObjectAttributes
-  ): SavedObject<DashboardSavedObjectAttributes> => {
-    return {
-      ...commonSavedObject,
-      attributes,
-    };
-  };
-
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   it('should convert saved object to item with all attributes', () => {
-    const input = getSavedObjectForAttributes({
-      title: 'title',
-      description: 'description',
-      timeRestore: true,
-      panelsJSON: JSON.stringify([
-        {
-          embeddableConfig: { enhancements: {} },
-          gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          id: '1',
-          panelIndex: '1',
-          title: 'title1',
-          type: 'type1',
-          version: '2',
+    const input: SavedObject<DashboardSavedObjectAttributes> = {
+      ...commonSavedObject,
+      attributes: {
+        title: 'title',
+        description: 'description',
+        timeRestore: true,
+        panelsJSON: JSON.stringify([
+          {
+            embeddableConfig: { enhancements: {} },
+            gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+            id: '1',
+            panelIndex: '1',
+            title: 'title1',
+            type: 'type1',
+            version: '2',
+          },
+        ]),
+        optionsJSON: JSON.stringify({
+          hidePanelTitles: true,
+          useMargins: false,
+          syncColors: false,
+          syncTooltips: false,
+          syncCursor: false,
+        }),
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{"query":{"query":"test","language":"KQL"}}',
         },
-      ]),
-      optionsJSON: JSON.stringify({
-        hidePanelTitles: true,
-        useMargins: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: false,
-      }),
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{"query":{"query":"test","language":"KQL"}}',
       },
-    });
+    };
 
     const { item, error } = savedObjectToItem(input, false);
     expect(error).toBeNull();
@@ -71,7 +65,6 @@ describe('savedObjectToItem', () => {
       attributes: {
         title: 'title',
         description: 'description',
-        timeRestore: true,
         panels: [
           {
             config: {
@@ -98,13 +91,16 @@ describe('savedObjectToItem', () => {
   });
 
   it('should not supply defaults for missing properties', () => {
-    const input = getSavedObjectForAttributes({
-      title: 'title',
-      description: 'description',
-      timeRestore: false,
-      panelsJSON: '[]',
-      kibanaSavedObjectMeta: {},
-    });
+    const input: SavedObject<DashboardSavedObjectAttributes> = {
+      ...commonSavedObject,
+      attributes: {
+        title: 'title',
+        description: 'description',
+        timeRestore: false,
+        panelsJSON: '[]',
+        kibanaSavedObjectMeta: {},
+      },
+    };
 
     const { item, error } = savedObjectToItem(input, false);
     expect(error).toBeNull();
@@ -113,7 +109,6 @@ describe('savedObjectToItem', () => {
       attributes: {
         title: 'title',
         description: 'description',
-        timeRestore: false,
         panels: [],
       },
     });
@@ -203,17 +198,9 @@ describe('savedObjectToItem', () => {
     };
     const { item, error } = savedObjectToItem(input, false, { isAccessControlEnabled: true });
     expect(error).toBeNull();
-    expect(item).toEqual({
-      ...commonSavedObject,
-      attributes: {
-        title: 'title',
-        description: 'my description',
-        timeRestore: false,
-      },
-      accessControl: {
-        owner: 'owner1',
-        accessMode: 'write_restricted',
-      },
+    expect(item?.accessControl).toEqual({
+      owner: 'owner1',
+      accessMode: 'write_restricted',
     });
   });
 });
