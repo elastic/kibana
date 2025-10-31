@@ -216,7 +216,7 @@ describe('getActionResultsRoute', () => {
       });
     });
 
-    it('should create placeholders for agents that have not responded', async () => {
+    it('should return only real ES responses (placeholders generated client-side)', async () => {
       const mockActionResults = createMockActionResultsResponse(2, {
         totalResponded: 2,
         successCount: 2,
@@ -241,23 +241,18 @@ describe('getActionResultsRoute', () => {
 
       const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
 
-      // Should have 5 edges total: 2 real + 3 placeholders
-      expect(responseBody.edges).toHaveLength(5);
+      // Server returns ONLY real ES responses (2 agents responded)
+      expect(responseBody.edges).toHaveLength(2);
 
-      // Count placeholders (IDs starting with "placeholder-")
+      // Verify NO placeholders in server response (client-side responsibility)
       const placeholderCount = responseBody.edges.filter((edge: any) =>
         edge._id.startsWith('placeholder-')
       ).length;
 
-      expect(placeholderCount).toBe(3);
+      expect(placeholderCount).toBe(0);
 
-      // Verify placeholders have correct agent IDs
-      const placeholderAgentIds = responseBody.edges
-        .filter((edge: any) => edge._id.startsWith('placeholder-'))
-        .map((edge: any) => edge.fields.agent_id[0])
-        .sort();
-
-      expect(placeholderAgentIds).toEqual(['agent-2', 'agent-3', 'agent-4']);
+      // Verify aggregations show pending agents (for client to generate placeholders)
+      expect(responseBody.aggregations.pending).toBe(3);
     });
 
     it('should calculate aggregations correctly', async () => {
@@ -295,7 +290,7 @@ describe('getActionResultsRoute', () => {
     });
 
     it('should handle pagination parameters correctly', async () => {
-      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(10));
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
 
       const mockContext = createMockContext(mockSearchFn);
       const mockRequest = createMockRequest({
@@ -315,8 +310,8 @@ describe('getActionResultsRoute', () => {
       expect(mockSearchFn).toHaveBeenCalledWith(
         expect.objectContaining({
           pagination: expect.objectContaining({
-            activePage: 2,
-            querySize: 50,
+            activePage: 0,
+            querySize: 1,
           }),
           sort: {
             direction: Direction.asc,
@@ -336,7 +331,7 @@ describe('getActionResultsRoute', () => {
     });
 
     it('should use default pagination values when not provided', async () => {
-      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(10));
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
 
       const mockContext = createMockContext(mockSearchFn);
       const mockRequest = createMockRequest({
@@ -353,7 +348,7 @@ describe('getActionResultsRoute', () => {
         expect.objectContaining({
           pagination: expect.objectContaining({
             activePage: 0,
-            querySize: 100,
+            querySize: 1,
           }),
           sort: {
             direction: Direction.desc,
@@ -364,7 +359,7 @@ describe('getActionResultsRoute', () => {
       );
     });
 
-    it('should create placeholders ONLY for non-responded agents on current page (not all agents)', async () => {
+    it('should return only real ES responses for current page (placeholders generated client-side)', async () => {
       const totalAgents = 1000;
       const allAgentIds = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
 
@@ -399,30 +394,17 @@ describe('getActionResultsRoute', () => {
 
       const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
 
-      expect(responseBody.edges).toHaveLength(20);
+      expect(responseBody.edges).toHaveLength(5);
 
-      const placeholders = responseBody.edges.filter((edge: any) =>
+      const placeholderCount = responseBody.edges.filter((edge: any) =>
         edge._id.startsWith('placeholder-')
-      );
-      expect(placeholders).toHaveLength(15);
+      ).length;
+      expect(placeholderCount).toBe(0);
 
       const realResponses = responseBody.edges.filter(
         (edge: any) => !edge._id.startsWith('placeholder-')
       );
       expect(realResponses).toHaveLength(5);
-
-      const placeholderAgentIds = placeholders.map((edge: any) => edge.fields.agent_id[0]).sort();
-
-      const expectedPlaceholderAgents = currentPageAgentIds
-        .filter((id) => !respondedAgentIds.includes(id))
-        .sort();
-
-      expect(placeholderAgentIds).toEqual(expectedPlaceholderAgents);
-
-      // Critical: Verify NOT creating placeholders for all 1000 agents
-      // If the bug existed, we'd see 995 placeholders (1000 - 5 responded)
-      expect(placeholders.length).toBe(15);
-      expect(placeholders.length).not.toBe(995);
 
       expect(responseBody.aggregations).toEqual({
         totalRowCount: 0,
@@ -435,7 +417,7 @@ describe('getActionResultsRoute', () => {
       expect(responseBody.totalPages).toBe(Math.ceil(currentPageAgentIds.length / pageSize));
     });
 
-    it('should handle page 1 with large agent set efficiently', async () => {
+    it('should handle page 1 with large agent set efficiently (no server-side placeholders)', async () => {
       const totalAgents = 100;
       const allAgentIds = Array.from({ length: totalAgents }, (_, i) => `agent-${i}`);
 
@@ -470,14 +452,14 @@ describe('getActionResultsRoute', () => {
 
       const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
 
-      expect(responseBody.edges).toHaveLength(20);
+      expect(responseBody.edges).toHaveLength(10);
 
-      const placeholders = responseBody.edges.filter((edge: any) =>
+      const placeholderCount = responseBody.edges.filter((edge: any) =>
         edge._id.startsWith('placeholder-')
-      );
-      expect(placeholders).toHaveLength(10);
+      ).length;
+      expect(placeholderCount).toBe(0);
 
-      expect(placeholders.length).not.toBe(90); // Bug would create 90 placeholders
+      expect(responseBody.aggregations.pending).toBe(10);
     });
 
     it('should handle empty page (all agents responded) without creating placeholders', async () => {
