@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { useStreamFeatures } from './stream_features/hooks/use_stream_features';
-import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
-import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
+import { useAIFeatures } from '../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
+import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { StreamFeaturesFlyout } from './stream_features/stream_features_flyout';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
 
