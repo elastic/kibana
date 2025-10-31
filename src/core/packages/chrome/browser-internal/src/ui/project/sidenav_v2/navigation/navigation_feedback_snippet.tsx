@@ -23,7 +23,7 @@ const feedbackSnippetId = 'sideNavigationFeedback';
 
 const feedbackUrls: { [id in SolutionId]: string } = {
   es: 'https://ela.st/search-nav-feedback',
-  workplace_ai: 'https://ela.st/search-nav-feedback',
+  workplaceai: 'https://ela.st/search-nav-feedback',
   oblt: 'https://ela.st/o11y-nav-feedback',
   security: 'https://ela.st/security-nav-feedback',
 };

@@ -48,6 +48,7 @@ describe('When defining a kibana role for Endpoint security access', { tags: '@e
       .should('deep.equal', [
         'Endpoint List Displays all hosts running Elastic Defend and their relevant integration details.Endpoint List sub-feature privilegeAllReadNone',
         'Automatic Troubleshooting Access to the automatic troubleshooting.Automatic Troubleshooting sub-feature privilegeAllReadNone',
+        'SOC Management Access to SOC management capabilities including AI value reporting and analytics.SOC Management sub-feature privilegeAllNone',
         'Global Artifact Management Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) across all policies. This privilege controls global assignment rights only; privileges for each artifact type are required for full artifact management.Global Artifact Management sub-feature privilegeAllNone',
         'Trusted Applications Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.Trusted Applications sub-feature privilegeAllReadNone',
         'Trusted Devices Manage security exceptions for USB and external devices.Trusted Devices sub-feature privilegeAllReadNone',

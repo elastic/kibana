@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type YAML from 'yaml';
+import YAML from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
@@ -117,7 +117,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
 
 export interface WorkflowYAMLEditorProps {
   workflowYaml: string;
-  readOnly?: boolean;
+  isExecutionYaml?: boolean;
   stepExecutions?: WorkflowStepExecutionDto[];
   'data-testid'?: string;
   highlightDiff?: boolean;
@@ -131,7 +131,7 @@ export interface WorkflowYAMLEditorProps {
 
 export const WorkflowYAMLEditor = ({
   workflowYaml,
-  readOnly = false,
+  isExecutionYaml = false,
   stepExecutions,
   highlightDiff = false,
   onMount,
@@ -175,9 +175,19 @@ export const WorkflowYAMLEditor = ({
   // Refs / Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
-  const yamlDocument = useSelector(selectYamlDocument);
   const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
-  const yamlDocumentRef = useRef<YAML.Document | null>(null);
+  // The current yaml document in the editor (could be unsaved)
+  const currentYamlDocument = useSelector(selectYamlDocument);
+
+  const yamlDocument = useMemo(() => {
+    // if the yaml comes from an execution, we need to parse it to get the correct yaml document
+    if (isExecutionYaml) {
+      return YAML.parseDocument(workflowYaml, { keepSourceTokens: true });
+    }
+    return currentYamlDocument;
+  }, [isExecutionYaml, workflowYaml, currentYamlDocument]);
+
+  const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
   yamlDocumentRef.current = yamlDocument || null;
 
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
@@ -417,7 +427,7 @@ export const WorkflowYAMLEditor = ({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
     isEditorMounted,
-    readOnly,
+    readOnly: isExecutionYaml,
   });
 
   const updateContainerPosition = (
@@ -487,8 +497,8 @@ export const WorkflowYAMLEditor = ({
   const completionProvider = useCompletionProvider();
 
   const options = useMemo(() => {
-    return { ...editorOptions, readOnly };
-  }, [readOnly]);
+    return { ...editorOptions, readOnly: isExecutionYaml };
+  }, [isExecutionYaml]);
 
   useEffect(() => {
     // Monkey patching
