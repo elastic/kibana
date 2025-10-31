@@ -112,6 +112,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       sessionTag: contextProps.sessionTag,
       agentId: contextProps.agentId,
       initialMessage: contextProps.initialMessage,
+      browserApiTools: contextProps.browserApiTools,
       setConversationId: (id: string) => {
         setConversationId(id);
       },
@@ -122,6 +123,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       contextProps.sessionTag,
       contextProps.agentId,
       contextProps.initialMessage,
+      contextProps.browserApiTools,
       conversationActions,
     ]
   );

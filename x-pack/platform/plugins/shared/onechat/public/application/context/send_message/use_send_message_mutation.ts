@@ -6,7 +6,8 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
+import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
@@ -23,13 +24,18 @@ interface UseSendMessageMutationProps {
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
   const { reportConverseError } = useReportConverseError();
-  const { conversationActions } = useConversationContext();
+  const { conversationActions, browserApiTools } = useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
   const [agentReasoning, setAgentReasoning] = useState<string | null>(null);
   const conversationId = useConversationId();
   const isMutatingNewConversationRef = useRef(false);
   const agentId = useAgentId();
   const messageControllerRef = useRef<AbortController | null>(null);
+
+  const browserApiToolsMetadata = useMemo(() => {
+    if (!browserApiTools) return undefined;
+    return browserApiTools.map(toToolMetadata);
+  }, [browserApiTools]);
   const {
     pendingMessageState: { error, pendingMessage },
     setPendingMessage,
@@ -54,6 +60,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationId,
       agentId,
       connectorId,
+      browserApiTools: browserApiToolsMetadata,
     });
 
     return subscribeToChatEvents(events$);
