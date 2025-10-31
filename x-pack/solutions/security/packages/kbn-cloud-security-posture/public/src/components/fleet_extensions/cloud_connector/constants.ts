@@ -8,6 +8,7 @@ export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 export const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS =
   'cloud_formation_cloud_connectors_template';
+export const ARM_TEMPLATE_URL_CLOUD_CONNECTORS = 'arm_template_cloud_connectors_url';
 
 export const AWS_SINGLE_ACCOUNT = 'single-account';
 export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
