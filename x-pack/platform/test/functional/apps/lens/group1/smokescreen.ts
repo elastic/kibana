@@ -882,6 +882,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await lens.openStyleSettingsFlyout();
         });
+        after(async () => {
+          await lens.closeFlyoutWithBackButton();
+        });
         it(`points should be visible when Point visibility is 'Auto'`, async () => {
           await testSubjects.click('xy_point_visibility_auto');
           const { lines } = await elasticChart.getChartDebugData('xyVisChart');
@@ -905,6 +908,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await lens.waitForVisualization('xyVisChart');
 
           await lens.openStyleSettingsFlyout();
+        });
+        after(async () => {
+          await lens.closeFlyoutWithBackButton();
         });
         it(`points should be visible when Point visibility is 'Auto'`, async () => {
           await testSubjects.click('xy_point_visibility_auto');
