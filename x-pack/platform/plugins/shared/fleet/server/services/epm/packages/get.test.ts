@@ -673,6 +673,320 @@ owner: elastic`,
       });
       expect(packages.find((item) => item.id === 'fleet_server')).toBeDefined();
     });
+
+    describe('latest version detection for installed packages', () => {
+      it('should fetch latest version for installed packages when excludeInstallStatus=false', async () => {
+        MockRegistry.fetchList.mockResolvedValue([
+          {
+            name: 'nginx',
+            version: '1.0.0',
+            title: 'Nginx',
+          } as any,
+        ]);
+
+        // Mock that nginx is installed
+        const soClient = savedObjectsClientMock.create();
+        soClient.find.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'nginx',
+              attributes: {
+                name: 'nginx',
+                version: '1.0.0',
+                install_status: 'installed',
+              },
+            },
+          ],
+        } as any);
+
+        // Mock that there's a newer bundled version available
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+          name: 'nginx',
+          version: '1.5.0',
+        } as any);
+
+        const packages = await getPackages({
+          savedObjectsClient: soClient,
+          excludeInstallStatus: false,
+        });
+
+        // Should have called fetchFindLatestPackageOrUndefined for the installed package
+        expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledWith('nginx', {
+          prerelease: false,
+        });
+
+        // Package should have the newer bundled version
+        const nginxPackage = packages.find((item) => item.id === 'nginx');
+        expect(nginxPackage?.version).toBe('1.5.0');
+      });
+
+      it('should NOT fetch latest version for installed packages when excludeInstallStatus=true', async () => {
+        MockRegistry.fetchList.mockResolvedValue([
+          {
+            name: 'nginx',
+            version: '1.0.0',
+            title: 'Nginx',
+          } as any,
+        ]);
+
+        const soClient = savedObjectsClientMock.create();
+        soClient.find.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'nginx',
+              attributes: {
+                name: 'nginx',
+                version: '1.0.0',
+                install_status: 'installed',
+              },
+            },
+          ],
+        } as any);
+
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+          name: 'nginx',
+          version: '1.5.0',
+        } as any);
+
+        const packages = await getPackages({
+          savedObjectsClient: soClient,
+          excludeInstallStatus: true,
+        });
+
+        // Should NOT have called fetchFindLatestPackageOrUndefined when excludeInstallStatus=true
+        expect(MockRegistry.fetchFindLatestPackageOrUndefined).not.toHaveBeenCalled();
+
+        // Package should have the registry version (not bundled)
+        const nginxPackage = packages.find((item) => item.id === 'nginx');
+        expect(nginxPackage?.version).toBe('1.0.0');
+      });
+
+      it('should handle multiple installed packages and fetch latest version for each', async () => {
+        MockRegistry.fetchList.mockResolvedValue([
+          {
+            name: 'nginx',
+            version: '1.0.0',
+            title: 'Nginx',
+          } as any,
+          {
+            name: 'apache',
+            version: '2.0.0',
+            title: 'Apache',
+          } as any,
+          {
+            name: 'mysql',
+            version: '3.0.0',
+            title: 'MySQL',
+          } as any,
+        ]);
+
+        const soClient = savedObjectsClientMock.create();
+        soClient.find.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'nginx',
+              attributes: {
+                name: 'nginx',
+                version: '1.0.0',
+                install_status: 'installed',
+              },
+            },
+            {
+              id: 'apache',
+              attributes: {
+                name: 'apache',
+                version: '2.0.0',
+                install_status: 'installed',
+              },
+            },
+          ],
+        } as any);
+
+        // Mock different latest versions for each package
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockImplementation(async (pkgName) => {
+          if (pkgName === 'nginx') {
+            return { name: 'nginx', version: '1.5.0' } as any;
+          }
+          if (pkgName === 'apache') {
+            return { name: 'apache', version: '2.3.0' } as any;
+          }
+          return undefined;
+        });
+
+        const packages = await getPackages({
+          savedObjectsClient: soClient,
+          excludeInstallStatus: false,
+        });
+
+        // Should have called fetchFindLatestPackageOrUndefined for both installed packages
+        expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledWith('nginx', {
+          prerelease: false,
+        });
+        expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledWith('apache', {
+          prerelease: false,
+        });
+
+        // Should NOT have called it for mysql (not installed)
+        expect(MockRegistry.fetchFindLatestPackageOrUndefined).not.toHaveBeenCalledWith(
+          'mysql',
+          expect.anything()
+        );
+
+        // Packages should have the newer versions
+        const nginxPackage = packages.find((item) => item.id === 'nginx');
+        expect(nginxPackage?.version).toBe('1.5.0');
+
+        const apachePackage = packages.find((item) => item.id === 'apache');
+        expect(apachePackage?.version).toBe('2.3.0');
+
+        // MySQL should have registry version (not installed, so not checked)
+        const mysqlPackage = packages.find((item) => item.id === 'mysql');
+        expect(mysqlPackage?.version).toBe('3.0.0');
+      });
+
+      it('should handle errors when fetching latest version gracefully', async () => {
+        MockRegistry.fetchList.mockResolvedValue([
+          {
+            name: 'nginx',
+            version: '1.0.0',
+            title: 'Nginx',
+          } as any,
+        ]);
+
+        const soClient = savedObjectsClientMock.create();
+        soClient.find.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'nginx',
+              attributes: {
+                name: 'nginx',
+                version: '1.0.0',
+                install_status: 'installed',
+              },
+            },
+          ],
+        } as any);
+
+        // Mock an error when fetching latest version
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockRejectedValue(
+          new Error('Registry unavailable')
+        );
+
+        // Should not throw, should fall back to registry version
+        const packages = await getPackages({
+          savedObjectsClient: soClient,
+          excludeInstallStatus: false,
+        });
+
+        const nginxPackage = packages.find((item) => item.id === 'nginx');
+        expect(nginxPackage?.version).toBe('1.0.0'); // Falls back to registry version
+      });
+
+      it('should pass prerelease parameter when fetching latest versions', async () => {
+        MockRegistry.fetchList.mockResolvedValue([
+          {
+            name: 'nginx',
+            version: '1.0.0',
+            title: 'Nginx',
+          } as any,
+        ]);
+
+        const soClient = savedObjectsClientMock.create();
+        soClient.find.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'nginx',
+              attributes: {
+                name: 'nginx',
+                version: '1.0.0',
+                install_status: 'installed',
+              },
+            },
+          ],
+        } as any);
+
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+          name: 'nginx',
+          version: '2.0.0-beta.1',
+        } as any);
+
+        await getPackages({
+          savedObjectsClient: soClient,
+          excludeInstallStatus: false,
+          prerelease: true,
+        });
+
+        expect(MockRegistry.fetchFindLatestPackageOrUndefined).toHaveBeenCalledWith('nginx', {
+          prerelease: true,
+        });
+      });
+
+      it('should skip latest version check for installed packages not in registry', async () => {
+        MockRegistry.fetchList.mockResolvedValue([
+          {
+            name: 'nginx',
+            version: '1.0.0',
+            title: 'Nginx',
+          } as any,
+          {
+            name: 'apache',
+            version: '2.0.0',
+            title: 'Apache',
+          } as any,
+        ]);
+
+        const soClient = savedObjectsClientMock.create();
+        soClient.find.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'nginx',
+              attributes: {
+                name: 'nginx',
+                version: '1.0.0',
+                install_status: 'installed',
+              },
+            },
+            {
+              id: 'apache',
+              attributes: {
+                name: 'apache',
+                version: '2.0.0',
+                install_status: 'installed',
+              },
+            },
+          ],
+        } as any);
+
+        // Mock to track which packages are checked
+        const checkedPackages: string[] = [];
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockImplementation(async (pkgName) => {
+          checkedPackages.push(pkgName);
+          if (pkgName === 'nginx') {
+            return { name: 'nginx', version: '1.5.0' } as any;
+          }
+          if (pkgName === 'apache') {
+            return { name: 'apache', version: '2.1.0' } as any;
+          }
+          return undefined;
+        });
+
+        const packages = await getPackages({
+          savedObjectsClient: soClient,
+          excludeInstallStatus: false,
+        });
+
+        // Both nginx and apache should be checked (both in registry and installed)
+        expect(checkedPackages).toContain('nginx');
+        expect(checkedPackages).toContain('apache');
+
+        // Verify the versions were updated
+        const nginxPackage = packages.find((item) => item.id === 'nginx');
+        expect(nginxPackage?.version).toBe('1.5.0');
+
+        const apachePackage = packages.find((item) => item.id === 'apache');
+        expect(apachePackage?.version).toBe('2.1.0');
+      });
+    });
   });
 
   describe('getInstalledPackages', () => {
