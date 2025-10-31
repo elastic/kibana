@@ -52,7 +52,7 @@ export const securitySolutionToolInternal = (
             {
               type: ToolResultType.other,
               data: {
-                message: `When generating ES|QL queries for logs, you **MUST ALWAYS** use the following from clause:
+                message: `When generating ES|QL queries for logs, you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES, for entity analytics data call the entity analytics tool instead):
                 "FROM ${dataView.getIndexPattern()}"`,
                 // apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*
               },
