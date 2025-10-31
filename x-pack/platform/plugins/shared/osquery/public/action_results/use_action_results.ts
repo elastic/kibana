@@ -7,10 +7,11 @@
 
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import { useMemo } from 'react';
 import type { InspectResponse } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ResultEdges, Direction } from '../../common/search_strategy';
-import { API_VERSIONS } from '../../common/constants';
+import { API_VERSIONS, ACTION_RESPONSES_INDEX } from '../../common/constants';
 import { getAgentIdFromFields } from '../../common/utils/agent_fields';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -69,15 +70,17 @@ export const useActionResults = ({
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  const currentPageAgentIds = useMemo(() => {
+    const startIndex = activePage * limit;
+    const endIndex = startIndex + limit;
+
+    return agentIds?.slice(startIndex, endIndex) || [];
+  }, [agentIds, activePage, limit]);
+
   return useQuery<ActionResultsResponse, Error, ActionResultsArgs>(
     ['actionResults', { actionId, activePage, limit, direction, sortField }],
-    () => {
-      // Only send ~20-100 IDs per page, NOT all agents (avoids URL length issues)
-      const startIndex = activePage * limit;
-      const endIndex = startIndex + limit;
-      const currentPageAgentIds = agentIds?.slice(startIndex, endIndex) || [];
-
-      return http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
+    () =>
+      http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
         version: API_VERSIONS.public.v1,
         query: {
           page: activePage,
@@ -90,14 +93,9 @@ export const useActionResults = ({
             agentIds: currentPageAgentIds.join(','),
           }),
         },
-      });
-    },
+      }),
     {
       select: (response) => {
-        const startIndex = activePage * limit;
-        const endIndex = startIndex + limit;
-        const currentPageAgentIds = agentIds?.slice(startIndex, endIndex) || [];
-
         // Server already filtered by agentIds - build set of responded agents
         const respondedAgentIds = new Set(
           response.edges
@@ -108,7 +106,7 @@ export const useActionResults = ({
         const placeholderEdges = currentPageAgentIds
           .filter((agentId) => agentId && !respondedAgentIds.has(agentId))
           .map((agentId) => ({
-            _index: '.logs-osquery_manager.action.responses-default',
+            _index: `${ACTION_RESPONSES_INDEX}-default`,
             _id: `placeholder-${agentId}`,
             _source: {},
             fields: { agent_id: [agentId] },

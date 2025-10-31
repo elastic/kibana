@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { isEmpty } from 'lodash';
@@ -33,7 +34,7 @@ export const buildActionResultsQuery = ({
     filter = filter + ` AND ${kuery}`;
   }
 
-  const timeRangeFilter =
+  const timeRangeFilter: estypes.QueryDslQueryContainer[] =
     startDate && !isEmpty(startDate)
       ? [
           {
@@ -47,20 +48,26 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  // Use structured terms query for agent filtering (more secure and performant than KQL)
-  const agentIdsFilter =
+  const agentIdsFilter: estypes.QueryDslQueryContainer[] =
     agentIds && agentIds.length > 0
       ? [
           {
             bool: {
-              should: [{ terms: { 'agent.id': agentIds } }, { terms: { agent_id: agentIds } }],
+              should: [
+                { terms: { 'agent.id': agentIds } },
+                { terms: { agent_id: agentIds } },
+              ] as estypes.QueryDslQueryContainer[],
               minimum_should_match: 1,
             },
           },
         ]
       : [];
 
-  const filterQuery = [...timeRangeFilter, ...agentIdsFilter, getQueryFilter({ filter })];
+  const filterQuery: estypes.QueryDslQueryContainer[] = [
+    ...timeRangeFilter,
+    ...agentIdsFilter,
+    getQueryFilter({ filter }),
+  ];
 
   let baseIndex: string;
   if (useNewDataStream) {

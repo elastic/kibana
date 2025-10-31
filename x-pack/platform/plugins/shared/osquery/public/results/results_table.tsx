@@ -405,7 +405,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         <EuiPanel hasShadow={false} data-test-subj={'osqueryResultsPanel'}>
           <EuiCallOut
             announceOnMount
-            title={generateEmptyDataMessage(aggregations.totalResponded)}
+            title={generateEmptyDataMessage(data?.aggregations.totalResponded ?? 0)}
           />
         </EuiPanel>
       ) : (
