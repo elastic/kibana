@@ -139,7 +139,8 @@ export function UnifiedHistogramChart({
     request,
     hits,
     chartVisible,
-    fetchParams, // TODO: use fetch$
+    fetch$,
+    fetchParams,
     onTotalHitsChange,
   });
 

@@ -8,19 +8,20 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { UnifiedHistogramInput$ } from '../../../types';
+import type { UnifiedHistogramFetch$, UnifiedHistogramFetchParams } from '../../../types';
 import { UnifiedHistogramFetchStatus } from '../../../types';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { useTotalHits } from './use_total_hits';
 import { useEffect as mockUseEffect } from 'react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { of, Subject, throwError } from 'rxjs';
+import { of, ReplaySubject, throwError } from 'rxjs';
 import { waitFor, renderHook } from '@testing-library/react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SearchSourceSearchOptions } from '@kbn/data-plugin/common';
 import { DataViewType } from '@kbn/data-plugin/common';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { getFetchParamsMock } from '../../../__mocks__/fetch_params';
 
 jest.mock('react-use/lib/useDebounce', () => {
   return jest.fn((...args) => {
@@ -29,9 +30,8 @@ jest.mock('react-use/lib/useDebounce', () => {
 });
 
 describe('useTotalHits', () => {
-  const timeRange = { from: 'now-15m', to: 'now' };
-  const fetch$: UnifiedHistogramInput$ = new Subject();
-  const getDeps = () => ({
+  let fetch$: UnifiedHistogramFetch$ = new ReplaySubject(1);
+  const getDeps = (fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock()) => ({
     services: {
       data: dataPluginMock.createStartContract(),
       expressions: {
@@ -53,12 +53,13 @@ describe('useTotalHits', () => {
       total: undefined,
     },
     chartVisible: false,
-    filters: [],
-    query: { query: '', language: 'kuery' },
-    getTimeRange: () => timeRange,
+    fetchParams,
     fetch$,
-    abortController: new AbortController(),
     onTotalHitsChange: jest.fn(),
+  });
+
+  beforeEach(() => {
+    fetch$ = new ReplaySubject(1);
   });
 
   it('should fetch total hits on first execution', async () => {
@@ -81,36 +82,38 @@ describe('useTotalHits', () => {
       });
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const data = dataPluginMock.createStartContract();
+    const fetchParams = getFetchParamsMock({
+      query: { query: 'test query', language: 'kuery' },
+      filters: [{ meta: { index: 'test' }, query: { match_all: {} } }],
+    });
     jest
       .spyOn(data.query.timefilter.timefilter, 'createFilter')
       .mockClear()
-      .mockReturnValue(timeRange as any);
-    const query = { query: 'test query', language: 'kuery' };
-    const filters: Filter[] = [{ meta: { index: 'test' }, query: { match_all: {} } }];
+      .mockReturnValue(fetchParams.timeRange as any);
     const adapter = new RequestAdapter();
     const { rerender } = renderHook(() =>
       useTotalHits({
-        ...getDeps(),
+        ...getDeps(fetchParams),
         services: { data } as any,
         request: {
           searchSessionId: '123',
           adapter,
         },
-        query,
-        filters,
-        fetch$,
         onTotalHitsChange,
       })
     );
-    fetch$.next({ type: 'fetch' });
+    fetch$.next(fetchParams);
     rerender();
     expect(onTotalHitsChange).toBeCalledTimes(1);
     expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.loading, undefined);
     expect(setFieldSpy).toHaveBeenCalledWith('index', dataViewWithTimefieldMock);
-    expect(setFieldSpy).toHaveBeenCalledWith('query', query);
+    expect(setFieldSpy).toHaveBeenCalledWith('query', fetchParams.query);
     expect(setFieldSpy).toHaveBeenCalledWith('size', 0);
     expect(setFieldSpy).toHaveBeenCalledWith('trackTotalHits', true);
-    expect(setFieldSpy).toHaveBeenCalledWith('filter', [...filters, timeRange]);
+    expect(setFieldSpy).toHaveBeenCalledWith('filter', [
+      ...fetchParams.filters,
+      fetchParams.timeRange,
+    ]);
     expect(fetchSpy).toHaveBeenCalled();
     expect(fetchOptions?.inspector?.adapter).toBe(adapter);
     expect(fetchOptions?.sessionId).toBe('123');
@@ -124,14 +127,15 @@ describe('useTotalHits', () => {
 
   it('should not fetch total hits if isPlainRecord is true', async () => {
     const onTotalHitsChange = jest.fn();
-    const deps = {
-      ...getDeps(),
-      isPlainRecord: true,
-      onTotalHitsChange,
+    const fetchParams = getFetchParamsMock({
       query: { esql: 'from test' },
+    });
+    const deps = {
+      ...getDeps(fetchParams),
+      onTotalHitsChange,
     };
     const { rerender } = renderHook(() => useTotalHits(deps));
-    fetch$.next({ type: 'fetch' });
+    fetch$.next(fetchParams);
     rerender();
     expect(onTotalHitsChange).not.toHaveBeenCalled();
   });
@@ -175,7 +179,7 @@ describe('useTotalHits', () => {
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
-    fetch$.next({ type: 'fetch' });
+    fetch$.next(options.fetchParams);
     rerender();
     expect(onTotalHitsChange).toBeCalledTimes(1);
     expect(setFieldSpy).toHaveBeenCalled();
@@ -183,7 +187,7 @@ describe('useTotalHits', () => {
     await waitFor(() => {
       expect(onTotalHitsChange).toBeCalledTimes(2);
     });
-    fetch$.next({ type: 'fetch' });
+    fetch$.next(options.fetchParams);
     rerender();
     expect(abortSpy).toHaveBeenCalled();
     expect(onTotalHitsChange).toBeCalledTimes(3);
@@ -201,8 +205,9 @@ describe('useTotalHits', () => {
       .spyOn(searchSourceInstanceMock, 'fetch$')
       .mockClear()
       .mockReturnValue(throwError(() => error));
-    const { rerender } = renderHook(() => useTotalHits({ ...getDeps(), onTotalHitsChange }));
-    fetch$.next({ type: 'fetch' });
+    const options = { ...getDeps(), onTotalHitsChange };
+    const { rerender } = renderHook(() => useTotalHits(options));
+    fetch$.next(options.fetchParams);
     rerender();
     await waitFor(() => {
       expect(onTotalHitsChange).toBeCalledTimes(2);
@@ -215,23 +220,21 @@ describe('useTotalHits', () => {
       .spyOn(searchSourceInstanceMock, 'setOverwriteDataViewType')
       .mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
+    const fetchParams = getFetchParamsMock({
+      filters: [{ meta: { index: 'test' }, query: { match_all: {} } }],
+      dataView: {
+        ...dataViewWithTimefieldMock,
+        type: DataViewType.ROLLUP,
+      } as any,
+    });
     const data = dataPluginMock.createStartContract();
     jest
       .spyOn(data.query.timefilter.timefilter, 'createFilter')
       .mockClear()
-      .mockReturnValue(timeRange as any);
+      .mockReturnValue(fetchParams.timeRange as any);
     const filters: Filter[] = [{ meta: { index: 'test' }, query: { match_all: {} } }];
-    const { rerender } = renderHook(() =>
-      useTotalHits({
-        ...getDeps(),
-        dataView: {
-          ...dataViewWithTimefieldMock,
-          type: DataViewType.ROLLUP,
-        } as any,
-        filters,
-      })
-    );
-    fetch$.next({ type: 'fetch' });
+    const { rerender } = renderHook(() => useTotalHits(getDeps(fetchParams)));
+    fetch$.next(fetchParams);
     rerender();
     expect(setOverwriteDataViewTypeSpy).toHaveBeenCalledWith(undefined);
     expect(setFieldSpy).toHaveBeenCalledWith('filter', filters);

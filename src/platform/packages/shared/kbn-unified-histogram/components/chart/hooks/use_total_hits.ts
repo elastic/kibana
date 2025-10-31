@@ -16,6 +16,7 @@ import type { MutableRefObject } from 'react';
 import { useEffect, useRef, useCallback } from 'react';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import type {
+  UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
   UnifiedHistogramHitsContext,
   UnifiedHistogramRequestContext,
@@ -29,6 +30,7 @@ export const useTotalHits = ({
   request,
   hits,
   chartVisible,
+  fetch$,
   fetchParams,
   onTotalHitsChange,
 }: {
@@ -36,6 +38,7 @@ export const useTotalHits = ({
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   chartVisible: boolean;
+  fetch$: UnifiedHistogramFetch$;
   fetchParams: UnifiedHistogramFetchParams;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
 }) => {
@@ -43,25 +46,26 @@ export const useTotalHits = ({
   const parentAbortController = fetchParams.abortController;
   const abortController = useRef<AbortController>();
 
-  const fetch = useStableCallback((params: UnifiedHistogramFetchParams) => {
+  const fetch = useStableCallback(() => {
     fetchTotalHits({
       services,
       abortController,
-      dataView: params.dataView,
+      dataView: fetchParams.dataView,
       request,
       hits,
       chartVisible,
-      filters: params.filters,
-      query: params.query,
-      timeRange: params.timeRange,
+      filters: fetchParams.filters,
+      query: fetchParams.query,
+      timeRange: fetchParams.timeRange,
       onTotalHitsChange,
       isPlainRecord,
     });
   });
 
   useEffect(() => {
-    fetch(fetchParams);
-  }, [fetch, fetchParams.triggeredAt]); // eslint-disable-line react-hooks/exhaustive-deps
+    const subscription = fetch$.subscribe(fetch);
+    return () => subscription.unsubscribe();
+  }, [fetch, fetch$]);
 
   const onAbort = useCallback(() => {
     abortController.current?.abort();
