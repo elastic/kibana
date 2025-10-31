@@ -329,8 +329,8 @@ const ESQLEditorInternal = function ESQLEditor({
     openTimePickerPopover();
   });
 
-  monaco.editor.registerCommand('esql.recommendedQuery.accept', () => {
-    telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE);
+  monaco.editor.registerCommand('esql.recommendedQuery.accept', (queryLabel: string) => {
+    telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
   });
 
   const controlCommands = [

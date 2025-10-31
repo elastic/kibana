@@ -121,6 +121,12 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
             'The UI surface where the recommendation was shown. Possible values are: help|autocomplete',
         },
       },
+      recommended_query: {
+        type: 'keyword',
+        _meta: {
+          description: 'The label of the recommended query that was clicked',
+        },
+      },
     },
   });
 });

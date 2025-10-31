@@ -127,9 +127,13 @@ export class ESQLEditorTelemetryService {
     });
   }
 
-  public trackRecommendedQueryClicked(source: QuerySource.HELP | QuerySource.AUTOCOMPLETE) {
+  public trackRecommendedQueryClicked(
+    source: QuerySource.HELP | QuerySource.AUTOCOMPLETE,
+    label: string
+  ) {
     this._reportEvent(ESQL_RECOMMENDED_QUERY_CLICKED, {
       trigger_source: source,
+      recommended_query: label,
     });
   }
 }
