@@ -113,8 +113,12 @@ export class ObservabilityAIAssistantClient {
   ) {}
 
   private getConversationWithMetaFields = async (
-    conversationId: string
+    conversationId: string | undefined
   ): Promise<SearchHit<Conversation> | undefined> => {
+    if (!conversationId) {
+      return undefined;
+    }
+
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
       index: resourceNames.writeIndexAlias.conversations,
       query: {
@@ -219,7 +223,7 @@ export class ObservabilityAIAssistantClient {
   } => {
     return withActiveInferenceSpan('RunTools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
-      const conversationId = persist ? predefinedConversationId ?? v4() : '';
+      const conversationId = persist ? predefinedConversationId || v4() : undefined;
       let resolveConversationRequest: (value: ConversationCreateRequest | undefined) => void;
       const conversationRequestPromise = new Promise<ConversationCreateRequest | undefined>(
         (resolve) => {
@@ -398,7 +402,7 @@ export class ObservabilityAIAssistantClient {
                       archived: false,
                     };
 
-                    if (!persist || isFunctionRequest) {
+                    if (!persist || !conversationId || isFunctionRequest) {
                       resolveConversationRequest(conversationCreateRequest);
                       return of();
                     }

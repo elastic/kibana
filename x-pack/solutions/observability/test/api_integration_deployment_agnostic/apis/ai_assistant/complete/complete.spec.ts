@@ -11,9 +11,9 @@ import {
   type Conversation,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import type { Readable } from 'stream';
-import { omit, pick } from 'lodash';
+import { last, omit, pick } from 'lodash';
 import { PassThrough } from 'stream';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type {
   ChatCompletionChunkEvent,
   ConversationCreateEvent,
@@ -34,7 +34,7 @@ import {
 } from '../utils/conversation';
 
 interface NonStreamingChatResponse {
-  conversationId: string;
+  conversationId: string | undefined;
   connectorId: string;
   data?: string;
 }
@@ -44,6 +44,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const roleScopedSupertest = getService('roleScopedSupertest');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
+
+  async function getPersistedConversationById(
+    conversationId: string | undefined
+  ): Promise<Conversation | undefined> {
+    const conversations = await observabilityAIAssistantAPIClient.editor({
+      endpoint: 'POST /internal/observability_ai_assistant/conversations',
+    });
+
+    return conversations.body.conversations.find(
+      (conversation) => conversation.conversation.id === conversationId
+    );
+  }
 
   const messages: Message[] = [
     {
@@ -315,13 +327,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('when isStream:false and persist:true', () => {
       let nonStreamingResponse: NonStreamingChatResponse;
-      let persistedConversation: Conversation;
+      const assistantResponse = 'Hello from non-streamed flow';
 
       before(async () => {
         await clearConversations(es);
 
         void proxy.interceptTitle('Title for non-streamed conversation');
-        void proxy.interceptWithResponse('Hello from non-streamed flow');
+        void proxy.interceptWithResponse(assistantResponse);
 
         const response = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
@@ -342,44 +354,35 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
         nonStreamingResponse = response.body as NonStreamingChatResponse;
-
-        const searchResponse = await es.search<Conversation>({
-          index: '.kibana-observability-ai-assistant-conversations-*',
-          query: {
-            term: { 'conversation.id': nonStreamingResponse.conversationId },
-          },
-          size: 1,
-        });
-
-        const hit = searchResponse.hits.hits[0];
-        expect(hit).to.be.ok();
-
-        persistedConversation = hit!._source!;
       });
 
       after(async () => {
         await clearConversations(es);
       });
 
-      it('returns the persisted conversation metadata', () => {
-        expect(nonStreamingResponse.conversationId).to.be(persistedConversation.conversation.id);
+      it('returns the assistant response and conversation metadata', () => {
+        expect(nonStreamingResponse.conversationId).to.be.a('string');
         expect(nonStreamingResponse.connectorId).to.be(connectorId);
-        expect(nonStreamingResponse.data).to.contain('Hello from non-streamed flow');
+        expect(nonStreamingResponse.data).to.be(assistantResponse);
       });
 
-      it('persists the assistant response in the stored conversation', () => {
-        const lastMessage =
-          persistedConversation.messages[persistedConversation.messages.length - 1]?.message;
+      it('persists the assistant response in the stored conversation', async () => {
+        const persistedConversation = await getPersistedConversationById(
+          nonStreamingResponse.conversationId
+        );
+
+        const lastMessage = last(persistedConversation?.messages)?.message;
         expect(lastMessage?.role).to.eql(MessageRole.Assistant);
-        expect(lastMessage?.content).to.contain('Hello');
+        expect(lastMessage?.content).to.be(assistantResponse);
       });
     });
 
     describe('when isStream:false and persist:false', () => {
       let nonStreamingResponse: NonStreamingChatResponse;
+      const assistantResponse = 'Hello from non-streamed flow without persistence';
 
       before(async () => {
-        void proxy.interceptWithResponse('Hello from non-streamed flow without persistence');
+        void proxy.interceptWithResponse(assistantResponse);
 
         const response = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
@@ -402,12 +405,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         nonStreamingResponse = response.body as NonStreamingChatResponse;
       });
 
-      it('returns the connector metadata and assistant response', () => {
-        expect(nonStreamingResponse.conversationId).to.have.length(0);
+      it('returns the assistant response', () => {
+        expect(nonStreamingResponse.conversationId).to.be(undefined);
         expect(nonStreamingResponse.connectorId).to.be(connectorId);
-        expect(nonStreamingResponse.data).to.contain(
-          'Hello from non-streamed flow without persistence'
+        expect(nonStreamingResponse.data).to.be(assistantResponse);
+      });
+
+      it('does not persist the conversation', async () => {
+        const persistedConversation = await getPersistedConversationById(
+          nonStreamingResponse.conversationId
         );
+        expect(persistedConversation).to.be(undefined);
       });
     });
 
