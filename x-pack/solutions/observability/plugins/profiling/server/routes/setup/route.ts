@@ -50,11 +50,11 @@ export function registerSetupRoute({
           : true;
 
         const core = await context.core;
-
         const profilingStatus = await dependencies.start.profilingDataAccess.services.getStatus({
           esClient: core.elasticsearch.client,
           soClient: core.savedObjects.client,
           spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
+          isServerless: dependencies.esCapabilities.serverless,
         });
 
         return response.ok({ body: { ...profilingStatus, has_required_role: hasRequiredRole } });

@@ -18,7 +18,7 @@ export interface ProfilingSetupOptions {
 }
 
 export interface SetupStateType {
-  type: 'self-managed';
+  type: 'self-managed' | 'serverless';
   setupState: SetupState;
 }
 

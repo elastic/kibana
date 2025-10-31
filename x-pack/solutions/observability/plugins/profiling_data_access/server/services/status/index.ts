@@ -16,12 +16,24 @@ export interface HasSetupParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
+  isServerless?: boolean;
 }
 
 export function createGetStatusService(params: RegisterServicesParams) {
-  return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatus> => {
+  return async ({
+    esClient,
+    soClient,
+    spaceId,
+    isServerless,
+  }: HasSetupParams): Promise<ProfilingStatus> => {
     try {
-      const { type, setupState } = await getSetupState({ ...params, esClient, soClient, spaceId });
+      const { type, setupState } = await getSetupState({
+        ...params,
+        esClient,
+        soClient,
+        spaceId,
+        isServerless,
+      });
 
       params.logger.debug(
         () => `Set up state for: ${type}: ${JSON.stringify(setupState, null, 2)}`
