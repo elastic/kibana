@@ -38,6 +38,7 @@ import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { FeedbackButton } from '../feedback_button';
 import { AssetImage } from '../asset_image';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -63,6 +64,32 @@ export function StreamListView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [streamsRepositoryClient, timeState.start, timeState.end]
   );
+  const aiFeatures = useAIFeatures();
+
+  const [isIndexingStreams, setIsIndexingStreams] = React.useState(false);
+  const onIndexStreams = React.useCallback(async () => {
+    if (!aiFeatures?.genAiConnectors.selectedConnector) return;
+    try {
+      setIsIndexingStreams(true);
+      await streamsRepositoryClient.fetch('PUT /internal/streams/index', {
+        params: {
+          query: { connectorId: aiFeatures.genAiConnectors.selectedConnector },
+        },
+        signal: null,
+      });
+    } catch (error) {
+      core.notifications.toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.streams.streamsListView.indexStreamsForSemanticSearchErrorTitle',
+          {
+            defaultMessage: 'Failed to index streams for semantic search',
+          }
+        ),
+      });
+    } finally {
+      setIsIndexingStreams(false);
+    }
+  }, [streamsRepositoryClient, core.notifications, aiFeatures?.genAiConnectors.selectedConnector]);
 
   const {
     features: { groupStreams },
@@ -120,6 +147,28 @@ export function StreamListView() {
                   {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
                     defaultMessage: 'Create Group stream',
                   })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {aiFeatures?.genAiConnectors.selectedConnector && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  isLoading={isIndexingStreams}
+                  onClick={onIndexStreams}
+                  aria-label={i18n.translate(
+                    'xpack.streams.streamsListView.indexStreamsForSemanticSearchButtonLabel',
+                    {
+                      defaultMessage: 'Index streams for semantic search',
+                    }
+                  )}
+                >
+                  {i18n.translate(
+                    'xpack.streams.streamsListView.indexStreamsForSemanticSearchButtonLabel',
+                    {
+                      defaultMessage: 'Index streams for semantic search',
+                    }
+                  )}
                 </EuiButton>
               </EuiFlexItem>
             )}

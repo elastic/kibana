@@ -1,0 +1,6 @@
+Stream Name: {{{stream_name}}}
+
+Dataset Analysis:
+{{{dataset_analysis}}}
+
+Provide a semantic search-optimized description for this observability data stream. The description should help users find this stream when they ask natural language questions about their logs, metrics, traces, events, or other observability data.
