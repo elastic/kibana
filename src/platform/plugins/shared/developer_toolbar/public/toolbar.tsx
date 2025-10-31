@@ -10,10 +10,8 @@
 import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
 import type { Observable } from 'rxjs';
-import type { DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
-import type { DeveloperToolbarProps } from '@kbn/developer-toolbar/toolbar';
-import { DeveloperToolbar } from '@kbn/developer-toolbar/toolbar';
-import { DeveloperToolbarItem } from '@kbn/developer-toolbar';
+import type { DeveloperToolbarItemProps, DeveloperToolbarProps } from '@kbn/developer-toolbar';
+import { DeveloperToolbar, DeveloperToolbarItem } from '@kbn/developer-toolbar';
 import useObservable from 'react-use/lib/useObservable';
 
 export const Toolbar = ({

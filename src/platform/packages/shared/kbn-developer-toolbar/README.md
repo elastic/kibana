@@ -15,7 +15,7 @@ A development toolbar for Kibana with real-time performance monitoring and custo
 The toolbar meant to be rendered once by chrome
 
 ```tsx
-import { DeveloperToolbar } from '@kbn/developer-toolbar/toolbar';
+import { DeveloperToolbar } from '@kbn/developer-toolbar';
 
 function App() {
   return (

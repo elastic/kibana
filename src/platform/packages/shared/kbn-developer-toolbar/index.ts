@@ -11,3 +11,4 @@ export {
   DeveloperToolbarItem,
   type DeveloperToolbarItemProps,
 } from './src/components/developer_toolbar_item';
+export { DeveloperToolbar, type DeveloperToolbarProps } from './src/components/developer_toolbar';
