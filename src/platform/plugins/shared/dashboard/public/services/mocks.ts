@@ -86,9 +86,3 @@ export const mockDashboardBackupService = {
     .mockReturnValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
   dashboardHasUnsavedEdits: jest.fn(),
 };
-
-export const mockDashboardContentManagementCache = {
-  fetchDashboard: jest.fn(),
-  addDashboard: jest.fn(),
-  deleteDashboard: jest.fn(),
-};

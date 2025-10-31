@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { coreServices } from '../../services/kibana_services';
 import { dashboardClient } from '../../dashboard_client';
-import { SaveDashboardProps, SaveDashboardReturn } from './types';
+import type { SaveDashboardProps, SaveDashboardReturn } from './types';
 
 export const saveDashboard = async ({
   lastSavedId,
