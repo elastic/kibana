@@ -174,7 +174,6 @@ describe('#importSavedObjectsFromStream', () => {
         objectLimit,
         supportedTypes,
         createAccessControlImportTransforms: undefined,
-        request,
         typeRegistry,
       };
       expect(mockCollectSavedObjects).toHaveBeenCalledWith(collectSavedObjectsOptions);
@@ -596,7 +595,6 @@ describe('#importSavedObjectsFromStream', () => {
           readStream,
           objectLimit,
           supportedTypes,
-          request,
           typeRegistry,
           createAccessControlImportTransforms,
         };
@@ -616,7 +614,6 @@ describe('#importSavedObjectsFromStream', () => {
           readStream,
           objectLimit,
           supportedTypes,
-          request,
           typeRegistry,
         };
         expect(mockCollectSavedObjects).toHaveBeenCalledWith(collectSavedObjectsOptions);

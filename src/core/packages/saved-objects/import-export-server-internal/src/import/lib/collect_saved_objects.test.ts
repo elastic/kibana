@@ -210,7 +210,7 @@ describe('collectSavedObjects()', () => {
           [`b:2`, { isOnlyReference: true }],
         ]);
 
-        const error = { type: 'missing_access_control_metadata' };
+        const error = { type: 'unexpected_access_control_metadata' };
         const { title } = obj4.attributes;
         const errors = [{ error, type: obj4.type, id: obj4.id, meta: { title } }];
         expect(result).toEqual({ collectedObjects, errors, importStateMap });
