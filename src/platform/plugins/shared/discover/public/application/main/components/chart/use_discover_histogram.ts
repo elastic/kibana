@@ -17,9 +17,10 @@ import {
   canImportVisContext,
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
+  type UnifiedHistogramFetchParamsExternal,
 } from '@kbn/unified-histogram';
 import { isEqual } from 'lodash';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
 import useLatest from 'react-use/lib/useLatest';
@@ -242,7 +243,41 @@ export const useDiscoverHistogram = (
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
 
-  // TODO: Refetch when externalVisContext gets updated after reverting changes in discover session
+  const collectedFetchParams: UnifiedHistogramFetchParamsExternal | undefined = useMemo(() => {
+    return {
+      searchSessionId,
+      requestAdapter: inspectorAdapters.requests,
+      dataView,
+      query,
+      filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
+      timeRange: timeRangeMemoized,
+      relativeTimeRange,
+      breakdownField,
+      esqlVariables,
+      controlsState: currentTabControlState,
+      // visContext should be in sync with current query
+      externalVisContext:
+        isEsqlMode && canImportVisContext(savedSearchState?.visContext)
+          ? savedSearchState?.visContext
+          : undefined,
+    };
+  }, [
+    breakdownField,
+    currentTabControlState,
+    dataView,
+    esqlVariables,
+    filtersMemoized,
+    inspectorAdapters.requests,
+    isEsqlMode,
+    relativeTimeRange,
+    searchSessionId,
+    timeRangeMemoized,
+    query,
+    savedSearchState?.visContext,
+  ]);
+
+  const usedFetchParamsRef = useRef<UnifiedHistogramFetchParamsExternal | null>(null);
+
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
       const visContext = latestFetchDetails?.visContext ?? savedSearchState?.visContext;
@@ -251,23 +286,15 @@ export const useDiscoverHistogram = (
         isEsqlMode,
       });
 
-      unifiedHistogramApi?.fetch({
+      const nextFetchParams = {
+        ...collectedFetchParams,
         abortController: latestFetchDetails?.abortController ?? getAbortController(),
-        searchSessionId,
-        requestAdapter: inspectorAdapters.requests,
-        dataView,
-        query,
-        filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
-        timeRange: timeRangeMemoized,
-        relativeTimeRange,
         columns: isEsqlMode ? esqlQueryColumns : undefined,
         table: isEsqlMode ? table : undefined,
-        breakdownField,
-        esqlVariables,
-        controlsState: currentTabControlState,
-        // visContext should be in sync with current query
         externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
-      });
+      };
+      usedFetchParamsRef.current = nextFetchParams;
+      unifiedHistogramApi?.fetch(nextFetchParams);
     }
   );
 
@@ -288,6 +315,27 @@ export const useDiscoverHistogram = (
       subscription.unsubscribe();
     };
   }, [stateContainer.dataState.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
+
+  useEffect(() => {
+    const usedFetchParams = usedFetchParamsRef.current;
+    if (!collectedFetchParams || !usedFetchParams) {
+      return;
+    }
+    console.log('Use Unified Histogram - comparing fetch params');
+    const changedParams = Object.keys(collectedFetchParams).filter((key) => {
+      return (
+        collectedFetchParams[key as keyof UnifiedHistogramFetchParamsExternal] !==
+        usedFetchParams[key as keyof UnifiedHistogramFetchParamsExternal]
+      );
+    });
+
+    if (changedParams.length === 1 && changedParams[0] === 'externalVisContext') {
+      console.log('Use Unified Histogram - externalVisContext changed, triggering fetch');
+      triggerUnifiedHistogramFetch.current({
+        visContext: collectedFetchParams.externalVisContext,
+      });
+    }
+  }, [collectedFetchParams, triggerUnifiedHistogramFetch]);
 
   const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
     internalStateActions.setOverriddenVisContextAfterInvalidation
@@ -311,7 +359,6 @@ export const useDiscoverHistogram = (
               overriddenVisContextAfterInvalidation: undefined,
             })
           );
-          triggerUnifiedHistogramFetch.current({ visContext: nextVisContext });
           break;
         case UnifiedHistogramExternalVisContextStatus.automaticallyOverridden:
           // if the visualization was invalidated as incompatible and rebuilt
@@ -341,12 +388,7 @@ export const useDiscoverHistogram = (
           break;
       }
     },
-    [
-      dispatch,
-      setOverriddenVisContextAfterInvalidation,
-      stateContainer.savedSearchState,
-      triggerUnifiedHistogramFetch,
-    ]
+    [dispatch, setOverriddenVisContextAfterInvalidation, stateContainer.savedSearchState]
   );
 
   const onBreakdownFieldChange = useCallback<
@@ -466,7 +508,7 @@ function getUnifiedHistogramTableForEsql({
   if (
     !isEsqlMode ||
     !documentsValue?.result ||
-    documentsValue?.fetchStatus !== FetchStatus.COMPLETE
+    ![FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus)
   ) {
     return {
       table: undefined,
