@@ -32,7 +32,7 @@ export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-ast.esql.definitions.metadataDoc', {
     defaultMessage: 'Metadata',
   }),
-  sortText: '1',
+  sortText: 'C',
 });
 
 export const getMetadataSuggestions = (command: ESQLAstAllCommands, queryText: string) => {
