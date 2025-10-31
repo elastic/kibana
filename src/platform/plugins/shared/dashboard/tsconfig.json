@@ -91,7 +91,8 @@
     "@kbn/controls-constants",
     "@kbn/controls-renderer",
     "@kbn/presentation-util",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/controls-plugin"
   ],
   "exclude": ["target/**/*"]
 }

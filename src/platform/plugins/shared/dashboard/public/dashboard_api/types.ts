@@ -182,4 +182,5 @@ export interface DashboardInternalApi {
     controlGroupInput: ControlsGroupState | undefined;
     controlGroupReferences: Reference[];
   };
+  arePanelsRelated$: BehaviorSubject<(a: string, b: string) => boolean>;
 }

@@ -23,7 +23,6 @@ import {
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { type Filter } from '@kbn/es-query';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
 
@@ -60,7 +59,6 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
-import { FieldsGroupNames } from '@kbn/unified-field-list';
 
 export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,

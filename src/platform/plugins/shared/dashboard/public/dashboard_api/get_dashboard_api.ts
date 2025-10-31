@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { getReferencesForPanelId } from '../../common';
 
@@ -137,6 +137,27 @@ export function getDashboardApi({
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
 
+  const arePanelsRelated$ = new BehaviorSubject<(a: string, b: string) => boolean>(() => false);
+
+  const relatedPanelSubscription = esqlVariablesManager.internalApi.esqlRelatedPanels$
+    .pipe(
+      map((esqlRelatedPanels) => (uuid: string) => {
+        const relatedPanelUUIDs = [];
+
+        const esqlRelatedPanelUUIDs = esqlRelatedPanels.get(uuid);
+        if (esqlRelatedPanelUUIDs) {
+          for (const relatedUUID of esqlRelatedPanelUUIDs) {
+            relatedPanelUUIDs.push(relatedUUID);
+          }
+        }
+
+        return relatedPanelUUIDs;
+      })
+    )
+    .subscribe((getRelatedPanels) =>
+      arePanelsRelated$.next((a: string, b: string) => getRelatedPanels(a).includes(b))
+    );
+
   const isFetchPaused$ = new BehaviorSubject<boolean>(false); // TODO: Make this work and probably move it to another file
 
   const dashboardApi = {
@@ -243,6 +264,7 @@ export function getDashboardApi({
     ...unifiedSearchManager.internalApi,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
+    arePanelsRelated$,
     // serializeControls: () => controlGroupManager.internalApi.serializeControlGroup(),
     // untilControlsInitialized: controlGroupManager.internalApi.untilControlsInitialized,
   };
@@ -269,6 +291,7 @@ export function getDashboardApi({
       layoutManager.cleanup();
       esqlVariablesManager.cleanup();
       timesliceManager.cleanup();
+      relatedPanelSubscription.unsubscribe();
     },
   };
 }
