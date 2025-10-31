@@ -114,13 +114,17 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
 
             {uploadStatus.overallImportStatus === STATUS.FAILED ? <ImportErrors /> : null}
 
-            {uploadStatus.overallImportStatus !== STATUS.ABORTED ? (
-              <EuiButton onClick={() => abortImport()}>
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.cancelButton"
-                  defaultMessage="Cancel"
-                />
-              </EuiButton>
+            {uploadStatus.overallImportStatus === STATUS.STARTED ? (
+              <>
+                <EuiSpacer />
+
+                <EuiButton onClick={() => abortImport()}>
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.uploadView.cancelButton"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButton>
+              </>
             ) : null}
           </>
         ) : null}
