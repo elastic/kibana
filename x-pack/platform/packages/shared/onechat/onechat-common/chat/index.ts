@@ -7,6 +7,7 @@
 
 export {
   type RoundInput,
+  type RawRoundInput,
   type AssistantResponse,
   type ToolCallWithResult,
   type ConversationRound,

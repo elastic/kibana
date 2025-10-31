@@ -126,7 +126,7 @@ export function FormBasedDataPanel({
         >
           <EuiFlexItem grow={null}>
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               data-test-subj="indexPattern-no-indexpatterns"
               title={i18n.translate('xpack.lens.indexPattern.noDataViewsLabel', {
                 defaultMessage: 'No data views',
