@@ -29,6 +29,7 @@ export interface FieldSelectorProps {
   error?: string;
   suggestions?: FieldSuggestion[];
   autoFocus?: boolean;
+  labelAppend?: React.ReactNode;
 }
 
 /**
@@ -48,6 +49,7 @@ export const FieldSelector = ({
   error,
   suggestions = [],
   autoFocus,
+  labelAppend,
 }: FieldSelectorProps) => {
   const comboBoxOptions = useMemo(
     () =>
@@ -97,6 +99,7 @@ export const FieldSelector = ({
         isInvalid={isInvalid}
         error={error}
         fullWidth={fullWidth}
+        labelAppend={labelAppend}
       >
         <EuiComboBox
           data-test-subj={dataTestSubj}
