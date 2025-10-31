@@ -41,6 +41,9 @@ export const getFailedDocsErrorsColumns = (): Array<EuiBasicTableColumn<FailedDo
     render: (_, { message }) => {
       return <ErrorMessage errorMessage={message} />;
     },
+    mobileOptions: {
+      width: '100%',
+    },
   },
   {
     name: (
