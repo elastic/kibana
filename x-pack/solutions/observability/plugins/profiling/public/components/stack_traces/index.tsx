@@ -85,6 +85,7 @@ export function StackTraces({
         {state.status === AsyncStatus.Settled && isExecutableType && displayAgentCallout && (
           <EuiFlexItem grow={false}>
             <EuiCallOut
+              announceOnMount
               iconType="warning"
               title={i18n.translate('xpack.profiling.stackTraces.euiCallOut.wrongAgentTitle', {
                 defaultMessage: 'No executable names available',
