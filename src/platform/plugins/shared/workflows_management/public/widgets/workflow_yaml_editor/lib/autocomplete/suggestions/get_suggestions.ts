@@ -101,7 +101,12 @@ export function getSuggestions(
   // steps:
   // - name: search-errors
   //   type: |<-
-  if (lineParseResult?.matchType === 'type' && autocompleteContext.dynamicConnectorTypes) {
+  if (
+    lineParseResult?.matchType === 'type' &&
+    autocompleteContext.dynamicConnectorTypes &&
+    autocompleteContext.focusedStepInfo &&
+    !autocompleteContext.isInTriggersContext
+  ) {
     const adjustedRange = {
       ...autocompleteContext.range,
       startColumn: lineParseResult.valueStartIndex + 1,
