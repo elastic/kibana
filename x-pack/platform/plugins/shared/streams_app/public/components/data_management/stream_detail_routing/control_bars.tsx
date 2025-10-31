@@ -79,6 +79,34 @@ export const EditRoutingRuleControls = ({
   );
 };
 
+export const EditSuggestedRuleControls = ({ onSave }: { onSave?: () => void }) => {
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { cancelChanges, saveEditedSuggestion } = useStreamRoutingEvents();
+
+  const canSave = routingSnapshot.can({ type: 'suggestion.saveSuggestion' });
+  const hasPrivileges = routingSnapshot.context.definition.privileges.manage;
+
+  const handleUpdate = () => {
+    if (onSave) {
+      onSave();
+    }
+    saveEditedSuggestion();
+  };
+
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
+      <EuiFlexItem grow={false}>
+        <CancelButton onClick={cancelChanges} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <PrivilegesTooltip hasPrivileges={hasPrivileges}>
+          <UpdateButton isLoading={false} isDisabled={!canSave} onClick={handleUpdate} />
+        </PrivilegesTooltip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const RemoveButton = ({
   isDisabled,
   onDelete,
@@ -125,8 +153,8 @@ const SaveButton = (props: EuiButtonPropsForButton) => (
 
 const UpdateButton = (props: EuiButtonPropsForButton) => (
   <EuiButton data-test-subj="streamsAppStreamDetailRoutingUpdateButton" size="s" fill {...props}>
-    {i18n.translate('xpack.streams.streamDetailRouting.change', {
-      defaultMessage: 'Change routing',
+    {i18n.translate('xpack.streams.streamDetailRouting.update', {
+      defaultMessage: 'Update',
     })}
   </EuiButton>
 );

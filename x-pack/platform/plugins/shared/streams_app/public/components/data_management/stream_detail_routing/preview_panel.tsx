@@ -52,7 +52,8 @@ export function PreviewPanel() {
     content = <EditingPanel />;
   } else if (
     routingSnapshot.matches({ ready: 'creatingNewRule' }) ||
-    routingSnapshot.matches({ ready: 'reviewSuggestedRule' })
+    routingSnapshot.matches({ ready: 'reviewSuggestedRule' }) ||
+    routingSnapshot.matches({ ready: 'editingSuggestedRule' })
   ) {
     content = <SamplePreviewPanel enableActions />;
   }
