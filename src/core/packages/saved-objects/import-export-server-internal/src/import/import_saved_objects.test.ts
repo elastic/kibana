@@ -41,9 +41,6 @@ import {
   type ImportSavedObjectsOptions,
 } from './import_saved_objects';
 import type { ImportStateMap } from './lib';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-
-const request = httpServerMock.createKibanaRequest();
 
 // Simple implementation of createAccessControlImportTransforms just so we can test that it is called
 const createAccessControlImportTransforms: AccessControlImportTransformsFactory = (
