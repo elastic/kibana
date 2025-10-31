@@ -370,6 +370,12 @@ export const getNavigationTreeDefinition = ({
                             }
                           ),
                         },
+                        {
+                          // We include this link here to ensure that sidenav panel opens when user lands to legacy management landing page
+                          // https://github.com/elastic/kibana/issues/240275
+                          link: 'management',
+                          sideNavStatus: 'hidden',
+                        },
                       ],
                       id: STACK_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to open the panel programmatically
                       renderAs: 'panelOpener',
