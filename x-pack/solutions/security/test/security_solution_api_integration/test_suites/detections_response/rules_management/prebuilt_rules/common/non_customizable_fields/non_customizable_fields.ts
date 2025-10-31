@@ -8,11 +8,11 @@
 import expect from 'expect';
 
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import { generatePrebuiltRulesPackageBuffer } from '@kbn/security-solution-test-api-clients/prebuilt_rules_package_generation';
 import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   getCustomQueryRuleParams,
-  createPrebuiltRulesPackage,
   installFleetPackageByUpload,
   installPrebuiltRules,
   deletePrebuiltRulesFleetPackage,
@@ -32,14 +32,14 @@ export default ({ getService }: FtrProviderContext) => {
   const retryService = getService('retry');
 
   const installPrebuiltRulesFromUploadedPackage = async () => {
-    const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
+    const securityDetectionEnginePackageBuffer = await generatePrebuiltRulesPackageBuffer({
       packageName: PREBUILT_RULES_PACKAGE_NAME,
       packageSemver: MOCK_PKG_VERSION,
       prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
     });
     await installFleetPackageByUpload({
       getService,
-      packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
+      packageBuffer: securityDetectionEnginePackageBuffer,
     });
   };
 

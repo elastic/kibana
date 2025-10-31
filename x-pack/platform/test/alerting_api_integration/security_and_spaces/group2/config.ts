@@ -7,6 +7,8 @@
 
 import { createTestConfig } from '../../common/config';
 
+export const EmailMaximumBodyLength = 10000;
+
 export default createTestConfig('security_and_spaces', {
   disabledPlugins: [],
   license: 'trial',
@@ -20,5 +22,6 @@ export default createTestConfig('security_and_spaces', {
     'crowdstrikeConnectorOn',
     'microsoftDefenderEndpointOn',
   ],
+  emailMaximumBodyLength: EmailMaximumBodyLength,
   indexRefreshInterval: '1s',
 });
