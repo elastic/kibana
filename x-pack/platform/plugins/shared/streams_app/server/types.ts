@@ -16,6 +16,7 @@ export interface StreamsAppSetupDependencies {
 
 export interface StreamsAppStartDependencies {
   streams: StreamsPluginStart;
+  foo?: undefined;
 }
 
 export interface StreamsAppServerSetup {}
