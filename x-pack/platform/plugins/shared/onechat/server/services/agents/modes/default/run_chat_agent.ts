@@ -7,14 +7,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
-import { createUserMessage, isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
+import {
+  createUserMessage,
+  isStreamEvent,
+  toolsToLangchain,
+} from '@kbn/onechat-genai-utils/langchain';
 import type { ChatAgentEvent } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
-import {
-  addRoundCompleteEvent,
-  extractRound,
-  selectProviderTools,
-} from '../utils';
+import { addRoundCompleteEvent, extractRound, selectProviderTools } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
 import { createAgentGraph } from './graph';
@@ -75,7 +75,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
   const graphRecursionLimit = cycleLimit * 2 + 8;
 
-  const initialMessages = [createUserMessage(nextInput.message)]
+  const initialMessages = [createUserMessage(nextInput.message)];
 
   const agentGraph = createAgentGraph({
     logger,
@@ -134,7 +134,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       });
     },
     error: () => {
-      revertToCheckpoint() // if there are errors we need to revert to the checkpoint to maintain correct message state
+      revertToCheckpoint(); // if there are errors we need to revert to the checkpoint to maintain correct message state
     },
   });
 
