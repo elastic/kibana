@@ -138,33 +138,53 @@ export const getAnswerPrompt = ({
   customInstructions,
   discussion,
   handoverNote,
+  searchInterrupted = false,
   capabilities,
 }: {
   customInstructions?: string;
   discussion: BaseMessageLike[];
   handoverNote?: string;
+  searchInterrupted?: boolean;
   capabilities: ResolvedAgentCapabilities;
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
+
+  let searchInterruptedMessages: BaseMessageLike[] = [];
+  if (searchInterrupted) {
+    searchInterruptedMessages = [
+      [
+        'ai',
+        'The research process was interrupted because it exceeded the maximum allowed steps. I cannot perform any more actions. Handing over for a final answer based on the information gathered so far',
+      ],
+      ['user', 'Ack. Proceed to answer as best as you can with the collected information'],
+    ];
+  }
+
   return [
     [
       'system',
       `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
-Your role is to provide a clear, well-reasoned answer to the user's question using the information gathered by prior research steps.
+Your role is to be the **final answering agent** in a multi-agent flow. Your **ONLY** capability is to generate a natural language response to the user.
+
+## IMPORTANT CONTEXT FROM THE PREVIOUS STEP
+The previous agent has completed its research and provided the following handover note:
+---
+${
+  handoverNote ??
+  (searchInterrupted
+    ? 'Research was interrupted, please answer to the user as best as you can with the collected information'
+    : 'No handover note was provided.')
+}
+---
+Use the context above to inform your final answer.
 
 ## INSTRUCTIONS
 - Carefully read the original discussion and the gathered information.
 - Synthesize an accurate response that directly answers the user's question.
 - Do not hedge. If the information is complete, provide a confident and final answer.
 - If there are still uncertainties or unresolved issues, acknowledge them clearly and state what is known and what is not.
-
-## IMPORTANT CONTEXT FROM THE PREVIOUS STEP
-The previous agent has completed its research and provided the following handover note:
----
-${handoverNote ?? 'No handover note was provided.'}
----
-Use the context above to inform your final answer.
+- You do not have access to any tools. You MUST NOT, under any circumstances, attempt to call or generate syntax for any tool
 
 ## GUIDELINES
 - Do not mention the research process or that you are an AI or assistant.
@@ -188,6 +208,8 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - Current date: ${formatDate()}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
+- [ ] I answered with a text response
+- [ ] I did not call any tool
 - [ ] All claims are grounded in tool output, conversation history or user-provided content.
 - [ ] I asked for missing mandatory parameters only when required.
 - [ ] The answer stays within the user's requested scope.
@@ -195,24 +217,25 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] No internal tool process or names revealed (unless user asked).`,
     ],
     ...discussion,
+    ...searchInterruptedMessages,
   ];
 };
 
 function renderVisualizationPrompt() {
-  const { tabularData } = ToolResultType;
+  const { tabularData, visualization } = ToolResultType;
   const { tagName, attributes } = visualizationElement;
   const chartTypeNames = Object.values(ChartType)
     .map((chartType) => `\`${chartType}\``)
     .join(', ');
 
   return `### RENDERING VISUALIZATIONS
-      When a tool call returns a result of type "${tabularData}", you may render a visualization in the UI by emitting a custom XML element:
+      When a tool call returns a result of type "${tabularData}" or "${visualization}", you may render a visualization in the UI by emitting a custom XML element:
 
       <${tagName} ${attributes.toolResultId}="TOOL_RESULT_ID_HERE" />
 
       **Rules**
-      * The \`<${tagName}>\` element must only be used to render tool results of type \`${tabularData}\`.
-      * You can specify an optional chart type by adding the \`${attributes.chartType}\` attribute with one of the following values: ${chartTypeNames}.
+      * The \`<${tagName}>\` element must only be used to render tool results of type \`${tabularData}\` or \`${visualization}\`.
+      * You can specify an optional chart type by adding the \`${attributes.chartType}\` attribute with one of the following values: ${chartTypeNames}. Only for "${tabularData}" type.
       * If the user does NOT specify a chart type in their message, you MUST omit the \`chart-type\` attribute. The system will choose an appropriate chart type automatically.
       * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
       * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.

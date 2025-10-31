@@ -7429,7 +7429,7 @@
         "description": [
           "\nSaved object document as stored in `_source` of doc in ES index\nSimilar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]\n"
         ],
-        "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+        "path": "src/core/packages/saved-objects/common/src/server_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7440,7 +7440,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7454,7 +7454,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7468,7 +7468,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7483,7 +7483,7 @@
               "SavedObjectsMigrationVersion",
               " | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7497,7 +7497,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7511,7 +7511,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7525,7 +7525,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7539,7 +7539,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7554,7 +7554,7 @@
               "SavedObjectReference",
               "[] | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7568,7 +7568,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7582,7 +7582,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7596,7 +7596,7 @@
             "signature": [
               "[typeMapping: string]:  any"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9062,12 +9062,12 @@
                 "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "maps",
@@ -9857,12 +9857,12 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "maps",

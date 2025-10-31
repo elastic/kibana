@@ -38,6 +38,7 @@ export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamIte
         </EuiFormRow>
         <EuiSpacer size="xs" />
         <EuiCallOut
+          announceOnMount
           size="s"
           title={i18n.translate('xpack.synthetics.paramValueField.euiCallOut.newValue', {
             defaultMessage:

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import type { Type } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { SUB_ACTION } from '../../../common/thehive/constants';
 import {
@@ -39,12 +39,12 @@ export class TheHiveConnector extends CaseConnector<
 > {
   private url: string;
   private apiKey: string;
-  private organisation: string | null;
+  private organisation: string | null | undefined;
   private urlWithoutTrailingSlash: string;
 
   constructor(
     params: ServiceParams<TheHiveConfig, TheHiveSecrets>,
-    pushToServiceParamsExtendedSchema: Record<string, Type<unknown>>
+    pushToServiceParamsExtendedSchema: Record<string, z.ZodType<unknown>>
   ) {
     super(params, pushToServiceParamsExtendedSchema);
 
