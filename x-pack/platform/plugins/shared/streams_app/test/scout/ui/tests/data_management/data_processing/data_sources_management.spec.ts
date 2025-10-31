@@ -28,7 +28,6 @@ test.describe(
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
 
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-      await pageObjects.streams.switchToColumnsView();
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
@@ -59,6 +58,7 @@ test.describe(
 
       // Assert that the custom samples are correctly displayed in the preview
       await pageObjects.streams.closeFlyout();
+      await pageObjects.streams.switchToColumnsView();
       const rows = await pageObjects.streams.getPreviewTableRows();
       for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
         await pageObjects.streams.expectCellValueContains({

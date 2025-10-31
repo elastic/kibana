@@ -28,6 +28,7 @@ import {
   TRANSACTION_NAME_FIELD,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
   getAvailableResourceFields,
+  RESOURCE_FIELDS,
 } from '@kbn/discover-utils';
 import type { TraceDocument } from '@kbn/discover-utils/src';
 import { formatFieldValue } from '@kbn/discover-utils/src';
@@ -194,6 +195,7 @@ export const createResourceFieldsWithOtelFallback = ({
   share,
   fieldFormats,
 }: Omit<ResourceFieldsProps, 'fields' | 'getAvailableFields'>): ResourceFieldDescriptor[] => {
+  const resourceDoc = getUnformattedFields(row, RESOURCE_FIELDS);
   const availableFields = getAvailableResourceFields(row.flattened);
 
   return availableFields.map((name) => {
@@ -207,7 +209,7 @@ export const createResourceFieldsWithOtelFallback = ({
       value,
       property,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
-      Icon: getResourceBadgeIcon(name, row.flattened as Readonly<Record<FieldKey, FieldValue>>),
+      Icon: getResourceBadgeIcon(name, resourceDoc),
     };
   });
 };
