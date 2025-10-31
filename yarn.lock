@@ -2664,12 +2664,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@108.0.0":
+"@elastic/eui@file:./elastic_eui_108.0.0_feat_flyout_system_0032.tgz":
   version "108.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-108.0.0.tgz#409fc6c49f19651832c411072482cd79bcdbd17c"
-  integrity sha512-W9l/jGlhxYYT0pN9vpaGmeR7nWYwTpmiLCkX8HnYOORQLUY6eXz5+9ng6WY68XzHWTcWUOMQB15OSyisj4VLVw==
+  resolved "file:./elastic_eui_108.0.0_feat_flyout_system_0032.tgz#3078a603d74938366de248c83dccd8aa22e6e99b"
   dependencies:
-    "@elastic/eui-theme-common" "6.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2702,6 +2700,7 @@
     unified "^9.2.2"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
+    use-sync-external-store "^1.6.0"
     uuid "^8.3.0"
     vfile "^4.2.1"
 
@@ -33392,7 +33391,7 @@ use-sync-external-store@1.2.2:
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.2.tgz#c3b6390f3a30eba13200d2302dcdf1e7b57b2ef9"
   integrity sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==
 
-use-sync-external-store@^1.0.0, use-sync-external-store@^1.2.0, use-sync-external-store@^1.4.0:
+use-sync-external-store@^1.0.0, use-sync-external-store@^1.2.0, use-sync-external-store@^1.4.0, use-sync-external-store@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
   integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==
