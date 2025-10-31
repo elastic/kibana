@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import { DATA_STREAM_INDEX_PATTERN } from '@kbn/fleet-plugin/server/services/data_streams';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
 
@@ -408,7 +407,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // clean up test data
       await es.deleteByQuery({
-        index: DATA_STREAM_INDEX_PATTERN,
+        index: 'logs-system.system-default',
         query: {
           bool: {
             filter: {
