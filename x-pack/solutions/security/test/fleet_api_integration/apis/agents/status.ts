@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { DATA_STREAM_INDEX_PATTERN } from '@kbn/fleet-plugin/server/services/data_streams';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
 
@@ -354,6 +355,20 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
+
+      // clean up test data
+      await es.deleteByQuery({
+        index: DATA_STREAM_INDEX_PATTERN,
+        query: {
+          bool: {
+            filter: {
+              terms: {
+                'agent.id': ['agent1', 'agent2'],
+              },
+            },
+          },
+        },
+      });
 
       const { body: apiResponse1 } = await supertest
         .get(`/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2`)
