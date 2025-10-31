@@ -38,7 +38,6 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   type UseEuiTheme,
-  EuiTextTruncate,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
