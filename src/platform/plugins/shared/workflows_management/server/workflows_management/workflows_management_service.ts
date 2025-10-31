@@ -832,7 +832,7 @@ export class WorkflowsService {
       if (isTestRun) {
         must.push({
           term: {
-            isTestRun: params.executionTypes[0] === ExecutionType.TEST,
+            isTestRun,
           },
         });
       } else {
@@ -841,7 +841,7 @@ export class WorkflowsService {
         must.push({
           bool: {
             should: [
-              { term: { isTestRun } },
+              { term: { isTestRun: false } },
               { bool: { must_not: { exists: { field: 'isTestRun' } } } },
             ],
             minimum_should_match: 1,
