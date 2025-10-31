@@ -20,7 +20,7 @@ import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 jest.mock('../user_privileges');
 jest.mock('../user_privileges');
 jest.mock('../../../detections/components/user_info', () => ({
-  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
+  useUserData: jest.fn().mockReturnValue([{ hasIndexWrite: true }]),
 }));
 jest.mock('../../hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
@@ -125,6 +125,7 @@ describe('Actions', () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: { loading: false, canWriteEventFilters: true },
+        rulesPrivileges: { read: true, edit: true },
       });
     });
 

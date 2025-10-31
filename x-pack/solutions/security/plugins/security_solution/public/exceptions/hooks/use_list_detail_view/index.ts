@@ -29,6 +29,7 @@ import {
 import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
 import { useInvalidateFetchRuleByIdQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_rule_by_id_query';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../use_endpoint_exceptions_capability';
 
 interface ReferenceModalState {
@@ -54,13 +55,14 @@ export const useListDetailsView = (exceptionListId: string) => {
   const { navigateToApp } = services.application;
 
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
+  const { read: canReadRules, edit: canEditRules } = useUserPrivileges().rulesPrivileges;
 
-  const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
+  const [{ loading: userInfoLoading }] = useUserData();
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const canUserWriteCurrentList =
     exceptionListId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
       ? canWriteEndpointExceptions
-      : canUserCRUD;
+      : canEditRules;
 
   const [isLoading, setIsLoading] = useState<boolean>();
   const [showManageButtonLoader, setShowManageButtonLoader] = useState<boolean>(false);
@@ -411,7 +413,7 @@ export const useListDetailsView = (exceptionListId: string) => {
   return {
     isLoading: isLoading || userInfoLoading,
     invalidListId,
-    isReadOnly: !canUserWriteCurrentList,
+    isReadOnly: !!(!canUserWriteCurrentList && canReadRules),
     list,
     listName: list?.name,
     listDescription: list?.description,
