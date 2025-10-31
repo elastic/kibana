@@ -147,6 +147,7 @@ export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) =>
       {documentError && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18nTexts.addDocumentErrorMessage}
             color="danger"
             iconType="warning"
