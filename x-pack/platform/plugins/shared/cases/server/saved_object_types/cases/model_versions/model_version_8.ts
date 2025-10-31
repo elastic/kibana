@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectsModelVersion,
+} from '@kbn/core-saved-objects-server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { casesSchemaV7 } from '../schemas';
 import { casesSchemaV8 } from '../schemas';
+
+type SchemaV7 = TypeOf<typeof casesSchemaV7>;
+type SchemaV8 = TypeOf<typeof casesSchemaV8>;
+const backfillFn: SavedObjectModelDataBackfillFn<SchemaV7, SchemaV8> = ({ attributes }) => {
+  return { attributes: { total_observables: attributes.observables?.length ?? 0 } };
+};
 
 /**
  * Adds the total_events field to the cases SO.
@@ -23,9 +34,7 @@ export const modelVersion8: SavedObjectsModelVersion = {
     },
     {
       type: 'data_backfill',
-      backfillFn: (_doc) => {
-        return { attributes: { total_observables: 0 } };
-      },
+      backfillFn,
     },
   ],
   schemas: {
