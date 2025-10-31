@@ -13,7 +13,7 @@ import {
   ENDPOINT_PACKAGE_NAME,
   PREBUILT_RULES_PACKAGE_NAME,
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
-import { createPrebuiltRulesPackage } from '../../../../../utils';
+import { generatePrebuiltRulesPackageZipFile } from '@kbn/security-solution-test-api-clients/prebuilt_rules_package_generation';
 
 const BUNDLED_PACKAGE_DIR = `${os.tmpdir()}/mock_bundled_fleet_packages`;
 
@@ -91,47 +91,45 @@ export const PREBUILT_RULE_ASSET_B: PrebuiltRuleAsset = {
   language: 'eql',
 };
 
+export const PREBUILT_RULE_A_ASSET_ID = `${PREBUILT_RULE_ID_A}_${PREBUILT_RULE_ASSET_A.version}`;
+export const PREBUILT_RULE_B_ASSET_ID = `${PREBUILT_RULE_ID_B}_${PREBUILT_RULE_ASSET_B.version}`;
+
 function cleanUpBundledPackagesFolder(): void {
   rmSync(BUNDLED_PACKAGE_DIR, { recursive: true, force: true });
 }
 
-function setUpBundledPackages(): void {
+async function setUpBundledPackages(): Promise<void> {
   cleanUpBundledPackagesFolder();
 
-  const MOCK_PREBUILT_RULES_PKG_FOR_IMPORTING_PREBUILT_RULES = createPrebuiltRulesPackage({
-    packageName: PREBUILT_RULES_PACKAGE_NAME,
-    packageSemver: MOCK_PKG_VERSION,
-    prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
-  });
-  const MOCK_BETA_PREBUILT_RULES_PKG = createPrebuiltRulesPackage({
-    packageName: PREBUILT_RULES_PACKAGE_NAME,
-    packageSemver: MOCK_PKG_VERSION,
-    prebuiltRuleAssets: [
-      {
-        ...PREBUILT_RULE_ASSET_A,
-        name: `Mock prebuilt rule A, package ${MOCK_BETA_PKG_VERSION}`,
-        version: PREBUILT_RULE_ASSET_A.version + 1,
-      },
-      {
-        ...PREBUILT_RULE_ASSET_B,
-        name: `Mock prebuilt rule B, package ${MOCK_BETA_PKG_VERSION}`,
-        version: PREBUILT_RULE_ASSET_B.version + 1,
-      },
-    ],
-  });
-  const MOCK_ENDPOINT_PKG = createPrebuiltRulesPackage({
-    packageName: ENDPOINT_PACKAGE_NAME,
-    packageSemver: MOCK_PKG_VERSION,
-    prebuiltRuleAssets: [],
-  });
-
-  MOCK_PREBUILT_RULES_PKG_FOR_IMPORTING_PREBUILT_RULES.writeZip(
-    `${BUNDLED_PACKAGE_DIR}/${PREBUILT_RULES_PACKAGE_NAME}-${MOCK_PKG_VERSION}.zip`
-  );
-  MOCK_BETA_PREBUILT_RULES_PKG.writeZip(
-    `${BUNDLED_PACKAGE_DIR}/${PREBUILT_RULES_PACKAGE_NAME}-${MOCK_BETA_PKG_VERSION}.zip`
-  );
-  MOCK_ENDPOINT_PKG.writeZip(
-    `${BUNDLED_PACKAGE_DIR}/${ENDPOINT_PACKAGE_NAME}-${MOCK_PKG_VERSION}.zip`
-  );
+  await Promise.all([
+    generatePrebuiltRulesPackageZipFile({
+      packageName: PREBUILT_RULES_PACKAGE_NAME,
+      packageSemver: MOCK_PKG_VERSION,
+      prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
+      filePath: `${BUNDLED_PACKAGE_DIR}/${PREBUILT_RULES_PACKAGE_NAME}-${MOCK_PKG_VERSION}.zip`,
+    }),
+    generatePrebuiltRulesPackageZipFile({
+      packageName: PREBUILT_RULES_PACKAGE_NAME,
+      packageSemver: MOCK_PKG_VERSION,
+      prebuiltRuleAssets: [
+        {
+          ...PREBUILT_RULE_ASSET_A,
+          name: `Mock prebuilt rule A, package ${MOCK_BETA_PKG_VERSION}`,
+          version: PREBUILT_RULE_ASSET_A.version + 1,
+        },
+        {
+          ...PREBUILT_RULE_ASSET_B,
+          name: `Mock prebuilt rule B, package ${MOCK_BETA_PKG_VERSION}`,
+          version: PREBUILT_RULE_ASSET_B.version + 1,
+        },
+      ],
+      filePath: `${BUNDLED_PACKAGE_DIR}/${PREBUILT_RULES_PACKAGE_NAME}-${MOCK_BETA_PKG_VERSION}.zip`,
+    }),
+    generatePrebuiltRulesPackageZipFile({
+      packageName: ENDPOINT_PACKAGE_NAME,
+      packageSemver: MOCK_PKG_VERSION,
+      prebuiltRuleAssets: [],
+      filePath: `${BUNDLED_PACKAGE_DIR}/${ENDPOINT_PACKAGE_NAME}-${MOCK_PKG_VERSION}.zip`,
+    }),
+  ]);
 }

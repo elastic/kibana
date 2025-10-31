@@ -1,0 +1,113 @@
+{
+  "id": "cps",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "cps",
+        "id": "def-public.CPSConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "CPSConfigType",
+        "description": [],
+        "path": "src/platform/plugins/shared/cps/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cps",
+            "id": "def-public.CPSConfigType.cpsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "cpsEnabled",
+            "description": [],
+            "path": "src/platform/plugins/shared/cps/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cps",
+      "id": "def-public.CPSPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CPSPluginSetup",
+      "description": [],
+      "path": "src/platform/plugins/shared/cps/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "cps",
+          "id": "def-public.CPSPluginSetup.cpsEnabled",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "cpsEnabled",
+          "description": [],
+          "signature": [
+            "boolean | undefined"
+          ],
+          "path": "src/platform/plugins/shared/cps/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cps",
+      "id": "def-server.CPSServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CPSServerSetup",
+      "description": [],
+      "path": "src/platform/plugins/shared/cps/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "cps",
+          "id": "def-server.CPSServerSetup.getCpsEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "getCpsEnabled",
+          "description": [],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "src/platform/plugins/shared/cps/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

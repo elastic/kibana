@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { Optional } from 'utility-types';
+
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { Optional } from 'utility-types';
+import type { lensCMGetResultSchema } from '../../../content_management';
 import type {
   lensCreateRequestBodySchema,
+  lensCreateRequestQuerySchema,
   lensCreateResponseBodySchema,
   lensDeleteRequestParamsSchema,
   lensGetRequestParamsSchema,
@@ -18,13 +21,21 @@ import type {
   lensSearchResponseBodySchema,
   lensUpdateRequestBodySchema,
   lensUpdateRequestParamsSchema,
+  lensUpdateRequestQuerySchema,
   lensUpdateResponseBodySchema,
 } from './schema';
+import type { lensItemMetaSchema, lensResponseItemSchema } from './schema/common';
 
+export type LensItemMeta = TypeOf<typeof lensItemMetaSchema>;
+export type LensResponseItem = TypeOf<typeof lensResponseItemSchema>;
+export type CMItemResultMeta = TypeOf<typeof lensCMGetResultSchema>['meta'];
+
+export type LensCreateRequestQuery = TypeOf<typeof lensCreateRequestQuerySchema>;
 export type LensCreateRequestBody = TypeOf<typeof lensCreateRequestBodySchema>;
 export type LensCreateResponseBody = TypeOf<typeof lensCreateResponseBodySchema>;
 
 export type LensUpdateRequestParams = TypeOf<typeof lensUpdateRequestParamsSchema>;
+export type LensUpdateRequestQuery = TypeOf<typeof lensUpdateRequestQuerySchema>;
 export type LensUpdateRequestBody = TypeOf<typeof lensUpdateRequestBodySchema>;
 export type LensUpdateResponseBody = TypeOf<typeof lensUpdateResponseBodySchema>;
 

@@ -130,6 +130,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiCallOut
+                    announceOnMount
                     title={
                       showIsOnlySelfManaged
                         ? i18n.translate(
@@ -161,6 +162,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiCallOut
+                  announceOnMount
                   title={i18n.translate(
                     'xpack.contentConnectors.createConnector.connectorDescriptionBadge.elasticManagedDiscontinuedTitle',
                     {
