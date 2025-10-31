@@ -71,7 +71,6 @@ export async function getESUpgradeStatus(
             ...existingExcludedActions,
             ...excludedActions,
           ];
-
         } else if (correctiveActionType === 'reindex') {
           const excludedActions = matchExclusionPattern(deprecation.index!, dataSourceExclusions);
           const existingExcludedActions =
