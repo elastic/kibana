@@ -36,7 +36,6 @@ import { formatLegacyActions } from '../../../../rules_client/lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
@@ -52,7 +51,6 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -81,7 +79,6 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn().mockImplementation((id) => id === 'system_action-id'),
-  elasticsearchClient,
 };
 
 beforeEach(() => {

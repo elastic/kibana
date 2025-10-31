@@ -58,7 +58,6 @@ export interface RulesClientFactoryOpts {
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
-  elasticsearchClient: ElasticsearchClient;
 }
 
 export class RulesClientFactory {
@@ -85,7 +84,6 @@ export class RulesClientFactory {
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
-  private elasticsearchClient!: ElasticsearchClient;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -114,7 +112,6 @@ export class RulesClientFactory {
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
-    this.elasticsearchClient = options.elasticsearchClient;
   }
 
   public async create(
@@ -158,7 +155,6 @@ export class RulesClientFactory {
       backfillClient: this.backfillClient,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
-      elasticsearchClient: this.elasticsearchClient,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);

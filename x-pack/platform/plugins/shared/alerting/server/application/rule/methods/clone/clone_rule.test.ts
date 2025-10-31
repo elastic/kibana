@@ -26,7 +26,6 @@ import type { RuleDomain } from '../../types';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('clone', () => {
   const taskManager = taskManagerMock.createStart();
@@ -38,7 +37,6 @@ describe('clone', () => {
   const auditLogger = auditLoggerMock.create();
   const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
   const backfillClient = backfillClientMock.create();
-  const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
   const kibanaVersion = 'v8.2.0';
   const createAPIKeyMock = jest.fn();
@@ -72,7 +70,6 @@ describe('clone', () => {
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    elasticsearchClient,
   };
 
   let rulesClient: RulesClient;

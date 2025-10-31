@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { ALERT_MUTED, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -74,29 +73,13 @@ async function unmuteAllWithOCC(context: RulesClientContext, params: UnmuteAllRu
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-  const esClient = context.elasticsearchClient;
   const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
 
-  if (indices && indices.length > 0) {
-    try {
-      await esClient.updateByQuery({
-        index: indices,
-        conflicts: 'proceed',
-        refresh: true,
-        query: {
-          term: { [ALERT_RULE_UUID]: id },
-        },
-        script: {
-          source: `ctx._source['${ALERT_MUTED}'] = false;`,
-          lang: 'painless',
-        },
-      });
-    } catch (error) {
-      context.logger.error(
-        `Error updating muted field for all alerts in rule ${id}: ${error.message}`
-      );
-    }
-  }
+  await context.alertsService?.unmuteAllAlerts({
+    ruleId: id,
+    indices,
+    logger: context.logger,
+  });
 
   const updateAttributes = updateMetaAttributes(context, {
     muteAll: false,

@@ -25,8 +25,6 @@ import { getBeforeSetup, setGlobalDate } from './lib';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
-import { ALERT_MUTED, ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -38,7 +36,10 @@ const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
-const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
+const alertsService = {
+  muteAlertInstance: jest.fn(),
+  unmuteAlertInstance: jest.fn(),
+};
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
@@ -62,17 +63,17 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
-  alertsService: null,
+  alertsService: alertsService as any,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
-  elasticsearchClient,
 };
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
-  elasticsearchClient.updateByQuery.mockClear();
+  alertsService.muteAlertInstance.mockClear();
+  alertsService.unmuteAlertInstance.mockClear();
   (rulesClientParams.getAlertIndicesAlias as jest.Mock).mockReturnValue(['.alerts-default']);
 });
 
@@ -98,19 +99,11 @@ describe('muteInstance()', () => {
 
     await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
 
-    expect(elasticsearchClient.updateByQuery).toHaveBeenCalledWith({
-      index: ['.alerts-default'],
-      conflicts: 'proceed',
-      refresh: true,
-      query: {
-        bool: {
-          must: [{ term: { [ALERT_INSTANCE_ID]: '2' } }, { term: { [ALERT_RULE_UUID]: '1' } }],
-        },
-      },
-      script: {
-        source: `ctx._source['${ALERT_MUTED}'] = true;`,
-        lang: 'painless',
-      },
+    expect(alertsService.muteAlertInstance).toHaveBeenCalledWith({
+      ruleId: '1',
+      alertInstanceId: '2',
+      indices: ['.alerts-default'],
+      logger: rulesClientParams.logger,
     });
 
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -144,7 +137,7 @@ describe('muteInstance()', () => {
     });
 
     await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(elasticsearchClient.updateByQuery).not.toHaveBeenCalled();
+    expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -166,7 +159,7 @@ describe('muteInstance()', () => {
     });
 
     await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(elasticsearchClient.updateByQuery).not.toHaveBeenCalled();
+    expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -325,14 +318,14 @@ describe('muteInstance()', () => {
 
       await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
 
-      expect(elasticsearchClient.updateByQuery).not.toHaveBeenCalled();
+      expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
       expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     });
 
-    test('logs error but continues when ES updateByQuery fails', async () => {
+    test('logs error but continues when alertsService fails', async () => {
       const loggerMock = loggingSystemMock.create().get();
       const rulesClient = new RulesClient({ ...rulesClientParams, logger: loggerMock });
-      elasticsearchClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+      alertsService.muteAlertInstance.mockRejectedValueOnce(new Error('ES connection failed'));
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: RULE_SAVED_OBJECT_TYPE,
@@ -350,9 +343,6 @@ describe('muteInstance()', () => {
 
       await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
 
-      expect(loggerMock.error).toHaveBeenCalledWith(
-        'Error updating muted field for alert instance 2: ES connection failed'
-      );
       expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     });
   });

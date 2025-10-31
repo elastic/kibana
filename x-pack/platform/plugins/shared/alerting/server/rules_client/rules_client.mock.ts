@@ -23,7 +23,6 @@ import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { fieldsToExcludeFromPublicApi } from './rules_client';
 import type { RulesClientContext } from './types';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const create = () => {
   const kibanaVersion = 'v8.17.0';
@@ -36,7 +35,6 @@ const create = () => {
   const auditLogger = auditLoggerMock.create();
   const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
   const backfillClient = backfillClientMock.create();
-  const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
   const rulesClientParams: jest.Mocked<RulesClientContext> = {
     taskManager,
@@ -67,7 +65,6 @@ const create = () => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     minimumScheduleIntervalInMs: 0,
     fieldsToExcludeFromPublicApi,
-    elasticsearchClient,
   };
 
   return rulesClientParams;

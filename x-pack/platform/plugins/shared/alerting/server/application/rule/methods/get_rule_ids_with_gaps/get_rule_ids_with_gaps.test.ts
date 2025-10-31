@@ -26,7 +26,6 @@ import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connect
 import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('getRuleIdsWithGaps', () => {
   let rulesClient: RulesClient;
@@ -45,7 +44,6 @@ describe('getRuleIdsWithGaps', () => {
   const backfillClient = backfillClientMock.create();
   const logger = loggingSystemMock.create().get();
   const eventLogger = eventLoggerMock.create();
-  const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
   const params = {
     start: '2024-01-01T00:00:00.000Z',
@@ -86,7 +84,6 @@ describe('getRuleIdsWithGaps', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
-      elasticsearchClient,
     } as jest.Mocked<ConstructorOptions>;
 
     jest.clearAllMocks();

@@ -9,7 +9,6 @@ import type { RulesClientContext } from '../../../../rules_client';
 import { unmuteAll } from './unmute_all';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ALERT_MUTED, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 jest.mock('../../../../lib/retry_if_conflicts', () => ({
@@ -28,7 +27,7 @@ jest.mock('../../../../saved_objects', () => ({
 
 const loggerErrorMock = jest.fn();
 const getBulkMock = jest.fn();
-const updateByQueryMock = jest.fn().mockResolvedValue({ updated: 1 });
+const unmuteAllAlertsMock = jest.fn();
 
 const savedObjectsMock = savedObjectsRepositoryMock.create();
 savedObjectsMock.get = jest.fn().mockReturnValue({
@@ -52,8 +51,8 @@ const context = {
     ensureRuleTypeEnabled: () => {},
   },
   getUserName: async () => {},
-  elasticsearchClient: {
-    updateByQuery: updateByQueryMock,
+  alertsService: {
+    unmuteAllAlerts: unmuteAllAlertsMock,
   },
   getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
   spaceId: 'default',
@@ -72,17 +71,10 @@ describe('unmuteAll', () => {
     await unmuteAll(context, validParams);
 
     expect(savedObjectsMock.get).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'rule-123');
-    expect(updateByQueryMock).toHaveBeenCalledWith({
-      index: ['.alerts-default'],
-      conflicts: 'proceed',
-      refresh: true,
-      query: {
-        term: { [ALERT_RULE_UUID]: 'rule-123' },
-      },
-      script: {
-        source: `ctx._source['${ALERT_MUTED}'] = false;`,
-        lang: 'painless',
-      },
+    expect(unmuteAllAlertsMock).toHaveBeenCalledWith({
+      ruleId: 'rule-123',
+      indices: ['.alerts-default'],
+      logger: context.logger,
     });
   });
 
@@ -97,7 +89,7 @@ describe('unmuteAll', () => {
     );
   });
 
-  it('should not call ES updateByQuery when no alert indices exist', async () => {
+  it('should not call alertsService when no alert indices exist', async () => {
     (context.getAlertIndicesAlias as jest.Mock).mockReturnValue([]);
     const validParams = {
       id: 'rule-123',
@@ -105,25 +97,23 @@ describe('unmuteAll', () => {
 
     await unmuteAll(context, validParams);
 
-    expect(updateByQueryMock).not.toHaveBeenCalled();
+    expect(unmuteAllAlertsMock).not.toHaveBeenCalled();
   });
 
-  it('should log error but continue when ES updateByQuery fails', async () => {
+  it('should continue when alertsService fails', async () => {
     const loggerMock = loggingSystemMock.create().get();
     const contextWithLogger = {
       ...context,
       logger: loggerMock,
       getAlertIndicesAlias: jest.fn().mockReturnValue(['.alerts-default']),
+      alertsService: {
+        unmuteAllAlerts: jest.fn().mockRejectedValueOnce(new Error('ES connection failed')),
+      },
     };
-    updateByQueryMock.mockRejectedValueOnce(new Error('ES connection failed'));
     const validParams = {
       id: 'rule-123',
     };
 
     await unmuteAll(contextWithLogger, validParams);
-
-    expect(loggerMock.error).toHaveBeenCalledWith(
-      'Error updating muted field for all alerts in rule rule-123: ES connection failed'
-    );
   });
 });

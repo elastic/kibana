@@ -38,7 +38,6 @@ import {
 import { backfillClientMock } from './backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import type { ActionsAuthorizationMock } from '@kbn/actions-plugin/server/authorization/actions_authorization.mock';
@@ -104,7 +103,6 @@ beforeEach(() => {
     securityService: securityServiceMock.createStart(),
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
-    elasticsearchClient: elasticsearchClientMock.createClusterClient().asInternalUser,
   };
 
   rulesClientFactoryParams.actions = actionsMock.createStart();

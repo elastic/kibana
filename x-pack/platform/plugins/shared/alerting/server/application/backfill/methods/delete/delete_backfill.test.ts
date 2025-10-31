@@ -17,7 +17,6 @@ import {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core-saved-objects-api-server-mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -48,7 +47,6 @@ const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const backfillClient = backfillClientMock.create();
 const logger = loggingSystemMock.create().get();
-const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
@@ -77,7 +75,6 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isSystemAction: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  elasticsearchClient,
 };
 
 const fakeRuleName = 'fakeRuleName';

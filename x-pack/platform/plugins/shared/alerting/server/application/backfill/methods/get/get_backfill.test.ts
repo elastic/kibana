@@ -28,7 +28,6 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { transformAdHocRunToBackfillResult } from '../../transforms';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -41,7 +40,6 @@ const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const backfillClient = backfillClientMock.create();
 const logger = loggingSystemMock.create().get();
-const elasticsearchClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
 const fakeRuleName = 'fakeRuleName';
 
@@ -130,7 +128,6 @@ describe('getBackfill()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
-      elasticsearchClient,
     });
     unsecuredSavedObjectsClient.get.mockResolvedValue(mockAdHocRunSO);
   });
