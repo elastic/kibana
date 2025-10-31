@@ -41,7 +41,6 @@ export const useServicesBootstrap = (props: UseUnifiedHistogramProps) => {
 
   const [api] = useState<UnifiedHistogramApi>(() => ({
     fetch: (params) => {
-      // console.log('UnifiedHistogramApi.fetch called with params:', params);
       setFetchParams(processFetchParams({ params, services }));
     },
     ...pick(

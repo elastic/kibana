@@ -293,7 +293,7 @@ export const useDiscoverHistogram = (
         table: isEsqlMode ? table : undefined,
         externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       };
-      console.debug('Use Unified Histogram - triggering fetch', nextFetchParams);
+      // console.debug('Use Unified Histogram - triggering fetch', nextFetchParams);
       usedFetchParamsRef.current = nextFetchParams;
       unifiedHistogramApi?.fetch(nextFetchParams);
     }
@@ -303,14 +303,13 @@ export const useDiscoverHistogram = (
    * Data fetching
    */
   useEffect(() => {
-    if (!unifiedHistogramApi) {
+    if (!unifiedHistogramApi || !triggerUnifiedHistogramFetch.current) {
       return;
     }
 
-    const subscription = stateContainer.dataState.fetchChart$.subscribe((latestFetchDetails) => {
-      // console.debug('Use Unified Histogram - Fetch triggered');
-      triggerUnifiedHistogramFetch.current(latestFetchDetails);
-    });
+    const subscription = stateContainer.dataState.fetchChart$.subscribe(
+      triggerUnifiedHistogramFetch.current
+    );
 
     return () => {
       subscription.unsubscribe();

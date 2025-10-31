@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, ReplaySubject } from 'rxjs';
 import { EuiPageSidebar } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
@@ -27,7 +27,7 @@ import type {
   DataTotalHits$,
 } from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { FetchStatus } from '../../../types';
+import { DiscoverLatestFetchDetails, FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -76,6 +76,10 @@ async function mountComponent(
   }
 
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+
+  const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails>(1);
+  fetchChart$.next({});
+  stateContainer.dataState.fetchChart$ = fetchChart$;
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,

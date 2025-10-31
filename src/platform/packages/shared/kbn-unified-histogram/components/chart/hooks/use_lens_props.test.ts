@@ -19,7 +19,9 @@ describe('useLensProps', () => {
   it('should return lens props', async () => {
     const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
     const onLoad = jest.fn();
-    const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock();
+    const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock({
+      relativeTimeRange: { from: '2025-09-30T22:00:00.000Z', to: '2025-10-31T13:16:54.878Z' },
+    });
     const lensVisMock = await getLensVisMock({
       filters: fetchParams.filters,
       query: fetchParams.query,
@@ -56,6 +58,7 @@ describe('useLensProps', () => {
     const fetchParams: UnifiedHistogramFetchParams = getFetchParamsMock({
       query,
       esqlVariables,
+      relativeTimeRange: { from: '2025-09-30T22:00:00.000Z', to: '2025-10-31T13:16:54.878Z' },
     });
     const lensVisMock = await getLensVisMock({
       filters: fetchParams.filters,
