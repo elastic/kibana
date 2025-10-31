@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SyntheticsServerSetup } from '../../../types';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
@@ -63,7 +64,9 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     }
 
     const agentPolicySpaces =
-      agentPolicy.space_ids && agentPolicy.space_ids.length > 0
+      agentPolicy.space_ids &&
+      agentPolicy.space_ids.length > 0 &&
+      !agentPolicy.space_ids.includes(ALL_SPACES_ID)
         ? agentPolicy.space_ids
         : // If space_ids is not set, assume agent policy space awareness is disabled and return all spaces
           await getAllSpaceIds(server);
@@ -76,7 +79,10 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       spaces: repo.getLocationSpaces({ agentPolicySpaces, locationSpaces: location.spaces }),
     });
 
-    if (!formattedLocation.spaces!.every((s) => agentPolicySpaces.includes(s))) {
+    if (
+      !agentPolicy.space_ids?.includes(ALL_SPACES_ID) &&
+      !formattedLocation.spaces!.every((s) => agentPolicySpaces.includes(s))
+    ) {
       return response.badRequest({
         body: {
           message: `Invalid spaces. Private location spaces [${location.spaces?.join(

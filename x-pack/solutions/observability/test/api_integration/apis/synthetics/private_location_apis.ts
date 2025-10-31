@@ -242,5 +242,24 @@ export default function ({ getService }: FtrProviderContext) {
       );
       expect(response.status).to.be(400);
     });
+
+    it('can create private location in any space if agent policy has "*" space id', async () => {
+      const { SPACE_ID } = await monitorTestService.addsNewSpace([
+        'minimal_all',
+        'can_manage_private_locations',
+      ]);
+
+      // create a fleet policy that is available to all spaces
+      const apiResponse = await testPrivateLocations.addFleetPolicy(undefined, ['*']);
+      const agentPolicyId = apiResponse.body.item.id;
+
+      const location = getLocation({ agentPolicyId, spaces: [SPACE_ID] });
+      const response = await supertest
+        .post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
+        .set('kbn-xsrf', 'true')
+        .send(location);
+
+      expect(response.status).to.be(200);
+    });
   });
 }

@@ -13,6 +13,7 @@ import type { FieldValues, Path, PathValue } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import { selectAgentPolicies } from '../../../state/agent_policies';
 import type { ClientPluginsStart } from '../../../../../plugin';
 
@@ -53,26 +54,23 @@ export const SpaceSelector = <T extends FieldValues>({
       if (!selectedPolicy) {
         throw new Error('Selected agent policy not found, this should never happen');
       }
-      const policySpaceIds = selectedPolicy.spaceIds || [];
 
-      data.spacesDataPromise.then((spacesData) => {
-        const spacesArray = Array.from(spacesData.spacesMap);
-        const formattedSpaces = spacesArray.flatMap(([spaceId, spaceData]) => {
-          if (!selectedPolicy.spaceIds) {
-            policySpaceIds.push(spaceId);
-            return [{ id: spaceId, label: spaceData.name }];
-          }
-          return selectedPolicy.spaceIds.includes(spaceId)
-            ? [
-                {
-                  id: spaceId,
-                  label: spaceData.name,
-                },
-              ]
-            : [];
+      data.spacesDataPromise.then(({ spacesMap }) => {
+        const policySpaceIds = selectedPolicy.spaceIds || [];
+        const spaceOptions: { id: string; label: string }[] = [];
+        const spaceOptionBySpaceId: Record<string, { id: string; label: string }> = {};
+        spacesMap.forEach((spaceData, spaceId) => {
+          spaceOptionBySpaceId[spaceId] = { id: spaceId, label: spaceData.name };
         });
-        setSpacesList(formattedSpaces);
-        setValue(NAMESPACES_NAME, policySpaceIds as PathValue<T, Path<T>>);
+
+        // If the policy belongs to all spaces or fleet agent policies are not space aware, show all spaces
+        if (policySpaceIds.includes(ALL_SPACES_ID) || !policySpaceIds.length) {
+          spaceOptions.push(...Object.values(spaceOptionBySpaceId));
+        } else {
+          spaceOptions.push(...policySpaceIds.map((spaceId) => spaceOptionBySpaceId[spaceId]));
+        }
+        setSpacesList(spaceOptions);
+        setValue(NAMESPACES_NAME, spaceOptions.map((space) => space.id) as PathValue<T, Path<T>>);
       });
     }
   }, [
