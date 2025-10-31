@@ -106,6 +106,7 @@ import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
 import { disableBrowserInputWhenBothEnabled } from './model_versions/synthetics_disable_browser_input';
+import { backfillAgentPolicyAgentlessKeepAlive } from './model_versions/agent_policy_agentless_keep_alive';
 
 /*
  * Saved object types and mappings
@@ -357,6 +358,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '8': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyAgentlessKeepAlive,
+            },
+          ],
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -424,6 +433,14 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 required_versions: { type: 'flattened', index: false },
               },
+            },
+          ],
+        },
+        '3': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyAgentlessKeepAlive,
             },
           ],
         },
