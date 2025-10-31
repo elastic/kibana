@@ -11,12 +11,11 @@ import { useEuiTheme } from '@elastic/eui';
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
   const ilmTimelineBarHeight = euiTheme.size.s;
-  const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
 
   const timelineIconColors = {
-    hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVis9,
-    warm: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis5,
-    cold: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiTheme.colors.vis.euiColorVis1,
+    hot: euiTheme.colors.vis.euiColorVis6,
+    warm: euiTheme.colors.vis.euiColorVis9,
+    cold: euiTheme.colors.vis.euiColorVis2,
     frozen: euiTheme.colors.vis.euiColorVis4,
   };
 
