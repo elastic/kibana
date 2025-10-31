@@ -33,7 +33,7 @@ export async function createFailureIssue(
   // For Scout tests, use suite name instead of classname for better clarity
   // For FTR tests, use the existing logic with prependTitle
   const title = isScout
-    ? `Failed Test: ${failure.classname} - ${failure.name}`
+    ? `Failing test: ${failure.classname} - ${failure.name}`
     : prependTitle && prependTitle.trim() !== ''
     ? `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`
     : `Failing test: ${failure.classname} - ${failure.name}`;
