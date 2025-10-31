@@ -35,7 +35,7 @@ export const useTotalHits = ({
   onTotalHitsChange,
 }: {
   services: UnifiedHistogramServices;
-  request: UnifiedHistogramRequestContext | undefined;
+  request: UnifiedHistogramRequestContext | undefined; // TODO: drop in favor of fetchParams
   hits: UnifiedHistogramHitsContext | undefined;
   chartVisible: boolean;
   fetch$: UnifiedHistogramFetch$;

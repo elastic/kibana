@@ -29,7 +29,7 @@ export const processFetchParams = ({
 }): UnifiedHistogramFetchParams => {
   const query = params.query ?? services.data.query.queryString.getDefaultQuery();
   const relativeTimeRange =
-    params.timeRange ?? services.data.query.timefilter.timefilter.getTimeDefaults();
+    params.relativeTimeRange ?? services.data.query.timefilter.timefilter.getTimeDefaults();
 
   return {
     ...params,
