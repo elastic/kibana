@@ -33,8 +33,6 @@ import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { AllRulesTabs } from './rules_table_toolbar';
 import { RulesTableUtilityBar } from '../rules_table_utility_bar/rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
-import { useUserData } from '../../../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useBulkDuplicateExceptionsConfirmation } from './bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
@@ -52,6 +50,7 @@ import { BulkActionEditTypeEnum } from '../../../../../common/api/detection_engi
 import { BulkFillRuleGapsModal } from '../../../rule_gaps/components/bulk_fill_rule_gaps';
 import { useBulkFillRuleGapsConfirmation } from '../../../rule_gaps/components/bulk_fill_rule_gaps/use_bulk_fill_rule_gaps_confirmation';
 import { BulkFillRuleGapsRuleLimitErrorModal } from './bulk_actions/bulk_schedule_gap_fills_rule_limit_error_modal';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -75,8 +74,7 @@ const NO_ITEMS_MESSAGE = (
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const modalTitleId = useGeneratedHtmlId();
 
-  const [{ canUserCRUD }] = useUserData();
-  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const rulesTableContext = useRulesTableContext();
@@ -199,7 +197,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const { loading: isLoadingJobs, jobs: mlJobs, startMlJobs } = useStartMlJobs();
   const rulesColumns = useRulesColumns({
-    hasCRUDPermissions: hasPermissions,
+    hasCRUDPermissions: canEditRules,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -209,7 +207,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   });
 
   const monitoringColumns = useMonitoringColumns({
-    hasCRUDPermissions: hasPermissions,
+    hasCRUDPermissions: canEditRules,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -221,7 +219,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const isSelectAllCalled = useRef(false);
 
   const isTableSelectable =
-    hasPermissions &&
+    canEditRules &&
     (selectedTab === AllRulesTabs.management || selectedTab === AllRulesTabs.monitoring);
 
   const euiBasicTableSelectionProps = useMemo(
@@ -375,7 +373,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           )}
           <RulesTableFilters />
           <RulesTableUtilityBar
-            canBulkEdit={hasPermissions}
+            canBulkEdit={canEditRules}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
             onToggleSelectAll={toggleSelectAll}
             isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
