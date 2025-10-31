@@ -42,9 +42,9 @@ jest.mock('react-redux', () => ({
 }));
 
 // Mock lazy loaded components
-const WorkflowYAMLEditorMock = ({ workflowYaml, readOnly, highlightDiff }: any) => (
+const WorkflowYAMLEditorMock = ({ workflowYaml, isExecutionYaml, highlightDiff }: any) => (
   <div data-test-subj="workflow-yaml-editor">
-    {readOnly && <span data-test-subj="read-only-indicator">{'Read Only'}</span>}
+    {isExecutionYaml && <span data-test-subj="read-only-indicator">{'Read Only'}</span>}
     {highlightDiff && <span data-test-subj="highlight-diff-indicator">{'Highlight Diff'}</span>}
     <div data-test-subj="yaml-content">{workflowYaml || 'No YAML'}</div>
   </div>

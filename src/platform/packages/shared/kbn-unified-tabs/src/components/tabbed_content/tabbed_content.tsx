@@ -38,7 +38,6 @@ export interface TabbedContentProps
     | 'onClearRecentlyClosed'
     | 'disableCloseButton'
     | 'disableInlineLabelEditing'
-    | 'disablePreview'
     | 'disableDragAndDrop'
     | 'disableTabsBarMenu'
   > {
@@ -48,12 +47,13 @@ export interface TabbedContentProps
   'data-test-subj'?: string;
   services: TabsServices;
   hideTabsBar?: boolean;
-  renderContent: (selectedItem: TabItem) => React.ReactNode;
+  renderContent?: (selectedItem: TabItem) => React.ReactNode;
   createItem: () => TabItem;
   customNewTabButton?: React.ReactElement;
   onChanged: (state: TabbedContentState) => void;
-  getPreviewData: (item: TabItem) => TabPreviewData;
+  getPreviewData?: (item: TabItem) => TabPreviewData;
   onEBTEvent: (event: TabsEBTEvent) => void;
+  tabContentIdOverride?: string;
 }
 
 export interface TabbedContentState {
@@ -72,18 +72,19 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   renderContent,
   createItem,
   onChanged,
+  tabContentIdOverride,
   onClearRecentlyClosed,
   getPreviewData,
   onEBTEvent,
   customNewTabButton,
   disableCloseButton = false,
   disableInlineLabelEditing = false,
-  disablePreview = false,
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
-  const [tabContentId] = useState(() => htmlIdGenerator()());
+  const [generatedId] = useState(() => tabContentIdOverride ?? htmlIdGenerator()());
+  const tabContentId = tabContentIdOverride ?? generatedId;
   const state = useMemo(
     () => prepareStateFromProps(managedItems, managedSelectedItemId),
     [managedItems, managedSelectedItemId]
@@ -321,6 +322,38 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     });
   }, [state, maxItemsCount, onDuplicate, onCloseOtherTabs, onCloseTabsToTheRight]);
 
+  const tabsBar = (
+    <TabsBar
+      ref={tabsBarApi}
+      items={items}
+      selectedItem={selectedItem}
+      recentlyClosedItems={recentlyClosedItems}
+      unsavedItemIds={unsavedItemIds}
+      maxItemsCount={maxItemsCount}
+      tabContentId={tabContentId}
+      getTabMenuItems={getTabMenuItems}
+      services={services}
+      onAdd={onAdd}
+      onLabelEdited={onLabelEdited}
+      onSelect={onSelect}
+      onSelectRecentlyClosed={onSelectRecentlyClosed}
+      onClearRecentlyClosed={onClearRecentlyClosed}
+      onReorder={onReorder}
+      onClose={onClose}
+      getPreviewData={getPreviewData}
+      onEBTEvent={onEBTEvent}
+      customNewTabButton={customNewTabButton}
+      disableCloseButton={disableCloseButton}
+      disableInlineLabelEditing={disableInlineLabelEditing}
+      disableDragAndDrop={disableDragAndDrop}
+      disableTabsBarMenu={disableTabsBarMenu}
+    />
+  );
+
+  if (!renderContent) {
+    return tabsBar;
+  }
+
   return (
     <EuiFlexGroup
       responsive={false}
@@ -328,36 +361,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       gutterSize="none"
       className="eui-fullHeight"
     >
-      {!hideTabsBar && (
-        <EuiFlexItem grow={false}>
-          <TabsBar
-            ref={tabsBarApi}
-            items={items}
-            selectedItem={selectedItem}
-            recentlyClosedItems={recentlyClosedItems}
-            unsavedItemIds={unsavedItemIds}
-            maxItemsCount={maxItemsCount}
-            tabContentId={tabContentId}
-            getTabMenuItems={getTabMenuItems}
-            services={services}
-            onAdd={onAdd}
-            onLabelEdited={onLabelEdited}
-            onSelect={onSelect}
-            onSelectRecentlyClosed={onSelectRecentlyClosed}
-            onClearRecentlyClosed={onClearRecentlyClosed}
-            onReorder={onReorder}
-            onClose={onClose}
-            getPreviewData={getPreviewData}
-            onEBTEvent={onEBTEvent}
-            customNewTabButton={customNewTabButton}
-            disableCloseButton={disableCloseButton}
-            disableInlineLabelEditing={disableInlineLabelEditing}
-            disablePreview={disablePreview}
-            disableDragAndDrop={disableDragAndDrop}
-            disableTabsBarMenu={disableTabsBarMenu}
-          />
-        </EuiFlexItem>
-      )}
+      {!hideTabsBar && <EuiFlexItem grow={false}>{tabsBar}</EuiFlexItem>}
       {selectedItem ? (
         <EuiFlexItem
           data-test-subj="unifiedTabs_selectedTabContent"

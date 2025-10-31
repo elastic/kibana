@@ -34,6 +34,7 @@ export type ESQLSingleAstItem =
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
+  | ESQLParens
   | ESQLColumn
   | ESQLDatePeriodLiteral
   | ESQLTimeDurationLiteral
@@ -370,6 +371,18 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * ```
    */
   selector?: ESQLStringLiteral | undefined;
+}
+
+/**
+ * Represents any expression wrapped in parentheses.
+ *
+ * ```
+ * FROM ( <query> )
+ * ```
+ */
+export interface ESQLParens extends ESQLAstBaseItem {
+  type: 'parens';
+  child: ESQLAstExpression;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {
