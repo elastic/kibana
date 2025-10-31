@@ -386,7 +386,7 @@ export class SearchInterceptor {
         id = response.id;
 
         if (!isRunningResponse(response)) {
-          searchTracker?.complete();
+          searchTracker?.complete(response);
         }
       }),
       map((response) => {
@@ -420,7 +420,7 @@ export class SearchInterceptor {
         } else {
           // Don't error out the search or cancel if it is being saved to the background
           if (!isSavedToBackground) {
-            searchTracker?.error();
+            searchTracker?.error(e);
             cancel();
           }
           return throwError(e);
