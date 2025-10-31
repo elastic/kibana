@@ -42,6 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await onechat.countAgentsListRows()).to.equal(1);
       await onechat.agentExistsOrFail(agents[0].id);
       await search.clear();
+      expect(await search.getValue()).to.be('');
     });
 
     it('filters on labels', async function () {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { ToolType } from '@kbn/onechat-common';
 import { subj } from '@kbn/test-subj-selector';
 import { AGENT_BUILDER_APP_ID } from '../../onechat/common/constants';
@@ -411,8 +410,11 @@ export class OneChatPageObject extends FtrService {
       },
       clear: async () => {
         await this.find.clickByCssSelector(clearButtonSelector);
+      },
+      getValue: async () => {
         const search = await findSearch();
-        expect(await search.getAttribute('value')).to.be('');
+        const value = await search.getAttribute('value');
+        return value;
       },
     };
   }
