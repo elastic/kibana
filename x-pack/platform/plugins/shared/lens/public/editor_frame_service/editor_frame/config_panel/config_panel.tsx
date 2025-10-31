@@ -370,7 +370,7 @@ export function LayerPanels(
           padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
             calc(400px + ${euiTheme.size.base});
           margin-left: -400px;
-          ${useEuiOverflowScroll('y')}
+          ${useEuiOverflowScroll('y', true)}
           ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
             padding-left: ${euiTheme.size.base};
             margin-left: 0;
