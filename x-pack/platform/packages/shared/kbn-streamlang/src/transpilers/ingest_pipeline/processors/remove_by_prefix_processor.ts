@@ -14,12 +14,7 @@ import type { IngestPipelineRemoveByPrefixProcessor } from '../../../../types/pr
 export const processRemoveByPrefixProcessor = (
   removeByPrefixProcessor: IngestPipelineRemoveByPrefixProcessor
 ): IngestProcessorContainer[] => {
-  const {
-    fields,
-    description,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    ignore_failure,
-  } = removeByPrefixProcessor;
+  const { fields, description, ignore_failure: ignoreFailure } = removeByPrefixProcessor;
 
   // Type assertion to handle optional fields that may exist at runtime but aren't in the type
   const processorWithOptionalFields =
@@ -47,8 +42,9 @@ int depth = 0;
 // Try to navigate as deep as possible through nested subobjects
 for (int i = 0; i < pathParts.length - 1; i++) {
   String part = pathParts[i];
-  if (currentObj != null && currentObj.containsKey(part) && currentObj[part] instanceof Map) {
-    currentObj = currentObj[part];
+  Object next = currentObj != null ? currentObj.get(part) : null;
+  if (next instanceof Map) {
+    currentObj = (Map) next;
     depth = i + 1;
   } else {
     break;
@@ -66,17 +62,11 @@ for (int i = depth; i < pathParts.length; i++) {
 
 // Remove the field and all fields with this prefix from currentObj
 if (currentObj != null) {
-  List keysToRemove = new ArrayList();
-  for (entry in currentObj.entrySet()) {
+  currentObj.entrySet().removeIf(entry -> {
     String key = entry.getKey();
     // Match exact key or keys that start with remainingPath followed by a dot
-    if (key.equals(remainingPath) || key.startsWith(remainingPath + '.')) {
-      keysToRemove.add(key);
-    }
-  }
-  for (key in keysToRemove) {
-    currentObj.remove(key);
-  }
+    return key.equals(remainingPath) || key.startsWith(remainingPath + '.');
+  });
 }`;
 
       return navigationScript;
@@ -92,7 +82,7 @@ if (currentObj != null) {
     scriptProcessor.tag = processorWithOptionalFields.tag;
   }
   if (description !== undefined) scriptProcessor.description = description;
-  if (ignore_failure !== undefined) scriptProcessor.ignore_failure = ignore_failure;
+  if (ignoreFailure !== undefined) scriptProcessor.ignore_failure = ignoreFailure;
 
   const result: IngestProcessorContainer = {
     script: scriptProcessor,
