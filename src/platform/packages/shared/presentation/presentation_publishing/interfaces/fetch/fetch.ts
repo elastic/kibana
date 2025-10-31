@@ -18,16 +18,16 @@ import {
   merge,
   of,
   switchMap,
-  tap,
   withLatestFrom,
   type Observable,
 } from 'rxjs';
 
-import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import { apiPublishesESQLVariables, type PublishesESQLVariables } from '@kbn/esql-types';
 import { apiHasSections } from '@kbn/presentation-containers';
 
 import { useStateFromPublishingSubject } from '../../publishing_subject';
 import { apiHasParentApi, type HasParentApi } from '../has_parent_api';
+import { apiHasUniqueId } from '../has_uuid';
 import {
   isReloadTimeFetchContextEqual,
   type FetchContext,
@@ -42,7 +42,6 @@ import {
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
 } from './publishes_unified_search';
-import { apiHasUniqueId } from '../has_uuid';
 
 function hasLocalTimeRange(api: unknown) {
   return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
@@ -52,7 +51,6 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
   const observables: {
     [key in keyof Omit<FetchContext, 'isReload'>]: Observable<FetchContext[key]>;
   } = {
-    // sectionId: of(undefined),
     filters: of(undefined),
     query: of(undefined),
     searchSessionId: of(undefined),
@@ -169,11 +167,15 @@ export function fetch$(api: unknown): Observable<FetchContext> {
 export const useFetchContext = (api: unknown): FetchContext => {
   const context$ = useMemo(() => {
     const typeApi = api as Partial<
-      PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
+      PublishesTimeRange &
+        HasParentApi<
+          Partial<PublishesUnifiedSearch & PublishesSearchSession & PublishesESQLVariables>
+        >
     >;
     return new BehaviorSubject<FetchContext>({
       filters: typeApi?.parentApi?.filters$?.value,
       query: typeApi?.parentApi?.query$?.value,
+      esqlVariables: typeApi.parentApi?.esqlVariables$?.value,
       searchSessionId: typeApi?.parentApi?.searchSessionId$?.value,
       timeRange: typeApi?.timeRange$?.value ?? typeApi?.parentApi?.timeRange$?.value,
       timeslice: typeApi?.timeRange$?.value ? undefined : typeApi?.parentApi?.timeslice$?.value,

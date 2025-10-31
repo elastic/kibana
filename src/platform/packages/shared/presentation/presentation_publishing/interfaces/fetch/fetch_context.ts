@@ -13,8 +13,6 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import fastIsEqual from 'fast-deep-equal';
 
 export interface FetchContext {
-  // sectionId?: string;
-
   isReload: boolean;
   filters: Filter[] | undefined;
   query: Query | AggregateQuery | undefined;
@@ -33,7 +31,6 @@ export function isReloadTimeFetchContextEqual(
   currentContext: ReloadTimeFetchContext
 ): boolean {
   return (
-    // previousContext.sectionId === currentContext.sectionId &&
     isReloadTimestampEqualForFetch(
       previousContext.reloadTimestamp,
       currentContext.reloadTimestamp
