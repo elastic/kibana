@@ -473,8 +473,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
-
-  const canCreateLookupIndex = useCanCreateLookupIndex();
+  const canCreateLookupIndex = useCanCreateLookupIndex(indexEditorContext);
 
   const getJoinIndices = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
     async (cacheOptions) => {
@@ -773,7 +772,7 @@ const ESQLEditorInternal = function ESQLEditor({
     query,
     onLookupIndexCreate,
     onNewFieldsAddedToLookupIndex,
-    indexEditorContext?.onOpenIndexInDiscover
+    indexEditorContext
   );
 
   useDebounceWithOptions(

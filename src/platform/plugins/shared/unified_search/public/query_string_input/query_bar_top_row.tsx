@@ -236,8 +236,12 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   };
   /** Optional configurations for the lookup join index editor */
   esqlIndexEditorConfig?: {
-    /** Callback function invoked to open the current index in Discover */
-    onOpenIndexInDiscover: IndexEditorContext['onOpenIndexInDiscover'];
+    /** Enables the index editor if true, the default is false */
+    enabled: boolean;
+    /** Callback function invoked to open the current index in Discover
+     * If not provided, the "Open in Discover" button will open the index in a new browser tab
+     */
+    onOpenIndexInDiscover?: IndexEditorContext['onOpenIndexInDiscover'];
   };
   useBackgroundSearchButton?: boolean;
   showProjectPicker?: boolean;
