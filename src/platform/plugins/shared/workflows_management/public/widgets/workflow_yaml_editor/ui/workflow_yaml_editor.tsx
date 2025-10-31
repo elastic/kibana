@@ -600,7 +600,7 @@ export const WorkflowYAMLEditor = ({
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          rightSide={<WorkflowYAMLEditorShortcuts />}
+          rightSide={<WorkflowYAMLEditorShortcuts onOpenActionsMenu={setActionsPopoverOpen} />}
         />
       </div>
     </div>

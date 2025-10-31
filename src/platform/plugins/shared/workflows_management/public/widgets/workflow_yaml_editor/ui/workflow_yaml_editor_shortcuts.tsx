@@ -15,14 +15,20 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isMac } from '../../../shared/utils/is_mac';
 
-export function WorkflowYAMLEditorShortcuts() {
+export interface WorkflowYAMLEditorShortcutsProps {
+  onOpenActionsMenu: (open: boolean) => void;
+}
+
+export function WorkflowYAMLEditorShortcuts({
+  onOpenActionsMenu,
+}: WorkflowYAMLEditorShortcutsProps) {
   const styles = useMemoCss(componentStyles);
 
   const commandKey = isMac() ? '⌘' : 'Ctrl';
 
   return (
     <div>
-      <EuiText size="xs" css={styles.withKbd}>
+      <EuiText size="xs" css={styles.withKbd} onClick={() => onOpenActionsMenu(true)}>
         <p css={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <b>
             <FormattedMessage
@@ -42,6 +48,7 @@ export function WorkflowYAMLEditorShortcuts() {
 const componentStyles = {
   withKbd: ({ euiTheme }: UseEuiTheme) =>
     css({
+      cursor: 'pointer',
       '& kbd': {
         borderColor: euiTheme.colors.borderBaseSubdued,
       },
