@@ -41,6 +41,9 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'text',
       index: false,
     },
+    isTestRun: {
+      type: 'boolean',
+    },
     createdBy: {
       type: 'keyword',
     },
