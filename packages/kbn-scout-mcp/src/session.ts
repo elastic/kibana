@@ -652,40 +652,6 @@ export class ScoutSession {
   }
 
   /**
-   * Format accessibility tree into a readable format with element references
-   * @deprecated Use getAriaSnapshot() instead
-   */
-  private formatAccessibilityTree(
-    node: any,
-    indent: string = '',
-    refCounter = { value: 0 }
-  ): string {
-    if (!node) return '';
-
-    const ref = `e${++refCounter.value}`;
-    let result = `${indent}- ${node.role}`;
-
-    if (node.name) {
-      result += ` "${node.name}"`;
-    }
-
-    result += ` [ref=${ref}]`;
-
-    if (node.value) {
-      result += ` value="${node.value}"`;
-    }
-
-    if (node.children && node.children.length > 0) {
-      result += '\n';
-      result += node.children
-        .map((child: any) => this.formatAccessibilityTree(child, indent + '  ', refCounter))
-        .join('\n');
-    }
-
-    return result;
-  }
-
-  /**
    * Close the session and cleanup resources
    */
   async close(): Promise<void> {

@@ -46,8 +46,6 @@ export interface NavigateParams {
 export interface ClickParams {
   testSubj?: string;
   selector?: string;
-  /** Element reference from ARIA snapshot (e.g., 'e1', 'e2') for precise targeting */
-  ref?: string;
   /** Human-readable description of the element being clicked (for audit/permission) */
   element?: string;
 }
@@ -55,8 +53,6 @@ export interface ClickParams {
 export interface TypeParams {
   testSubj?: string;
   selector?: string;
-  /** Element reference from ARIA snapshot (e.g., 'e1', 'e2') for precise targeting */
-  ref?: string;
   /** Human-readable description of the element (for audit/permission) */
   element?: string;
   text: string;
@@ -80,8 +76,6 @@ export interface WaitForParams {
   text?: string;
   testSubj?: string;
   selector?: string;
-  /** Element reference from ARIA snapshot (e.g., 'e1', 'e2') for precise targeting */
-  ref?: string;
   state?: 'visible' | 'hidden' | 'attached' | 'detached';
 }
 

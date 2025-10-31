@@ -106,11 +106,9 @@ export async function scoutClick(session: ScoutSession, params: ClickParams): Pr
   }
 
   // Validate at least one targeting method is provided
-  if (!params.ref && !params.testSubj && !params.selector) {
+  if (!params.testSubj && !params.selector) {
     return response
-      .setError(
-        'Either ref, testSubj, or selector parameter must be provided. Run snapshot tool to get element refs.'
-      )
+      .setError('Either testSubj or selector parameter must be provided.')
       .buildAsToolResult();
   }
 
@@ -118,21 +116,6 @@ export async function scoutClick(session: ScoutSession, params: ClickParams): Pr
     const page = await session.getPage();
     let targetDescription: string;
     let codeSnippet: string;
-
-    // Note: ref parameter is prepared for future Playwright API that supports querying by aria ref
-    // For now, we prioritize testSubj and selector
-    if (params.ref) {
-      // Future implementation: query by ARIA snapshot ref
-      return response
-        .setError(
-          'Element reference (ref) support is not yet implemented. Use testSubj or selector instead.'
-        )
-        .addSection(
-          'Tip',
-          'You can use testSubj parameter with Kibana test subjects, or selector with CSS/ARIA selectors.'
-        )
-        .buildAsToolResult();
-    }
 
     if (params.testSubj) {
       const selector = subj(params.testSubj);
@@ -186,11 +169,9 @@ export async function scoutType(session: ScoutSession, params: TypeParams): Prom
   }
 
   // Validate at least one targeting method is provided
-  if (!params.ref && !params.testSubj && !params.selector) {
+  if (!params.testSubj && !params.selector) {
     return response
-      .setError(
-        'Either ref, testSubj, or selector parameter must be provided. Run snapshot tool to get element refs.'
-      )
+      .setError('Either testSubj or selector parameter must be provided.')
       .buildAsToolResult();
   }
 
@@ -212,19 +193,6 @@ export async function scoutType(session: ScoutSession, params: TypeParams): Prom
     let targetDescription: string = '';
     let codeSnippet: string = '';
     let locator;
-
-    // Note: ref parameter is prepared for future Playwright API
-    if (params.ref) {
-      return response
-        .setError(
-          'Element reference (ref) support is not yet implemented. Use testSubj or selector instead.'
-        )
-        .addSection(
-          'Tip',
-          'You can use testSubj parameter with Kibana test subjects, or selector with CSS/ARIA selectors.'
-        )
-        .buildAsToolResult();
-    }
 
     if (params.testSubj) {
       const selector = subj(params.testSubj);
@@ -439,15 +407,6 @@ export async function scoutWaitFor(
       response.setResult(resultMessage);
       response.addCode(codeSnippet);
       return response.buildAsToolResult();
-    }
-
-    // Note: ref parameter prepared for future implementation
-    if (params.ref) {
-      return response
-        .setError(
-          'Element reference (ref) support is not yet implemented. Use testSubj, selector, or text instead.'
-        )
-        .buildAsToolResult();
     }
 
     // Wait for text
