@@ -43,7 +43,6 @@ import { createIndexPatternService } from '../../../data_views_service/service';
 import { LayerActions } from '../../../editor_frame_service/editor_frame/config_panel/layer_actions/layer_actions';
 import { getSharedActions } from '../../../editor_frame_service/editor_frame/config_panel/layer_actions/layer_actions';
 import { getRemoveOperation } from '../../../utils';
-import { useFocusUpdate } from '../../../editor_frame_service/editor_frame/config_panel/use_focus_update';
 
 import type { LayerTabsProps } from './types';
 
@@ -172,8 +171,6 @@ export function LayerTabs({
 
   const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
 
-  const { removeRef: removeLayerRef } = useFocusUpdate(layerIds);
-
   const onRemoveLayer = useCallback(
     async (layerToRemoveId: string) => {
       const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerToRemoveId];
@@ -202,8 +199,6 @@ export function LayerTabs({
           layerIds,
         })
       );
-
-      removeLayerRef(layerToRemoveId);
     },
     [
       activeVisualization.id,
@@ -213,7 +208,6 @@ export function LayerTabs({
       layerIds,
       framePublicAPI.datasourceLayers,
       uiActions,
-      removeLayerRef,
     ]
   );
 
@@ -402,7 +396,6 @@ export function LayerTabs({
           customNewTabButton={addLayerButton || undefined}
           tabContentIdOverride={LENS_LAYER_TABS_CONTENT_ID}
           disableInlineLabelEditing
-          disablePreview
           disableDragAndDrop
           disableTabsBarMenu
           disableCloseButton

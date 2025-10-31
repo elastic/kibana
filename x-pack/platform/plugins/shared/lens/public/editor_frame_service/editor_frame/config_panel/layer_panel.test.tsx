@@ -113,7 +113,6 @@ describe('LayerPanel', () => {
       onRemoveDimension: jest.fn(),
       core: coreMock.createStart(),
       layerIndex: 0,
-      registerNewLayerRef: jest.fn(),
       toggleFullscreen: jest.fn(),
       onEmptyDimensionAdd: jest.fn(),
       onChangeIndexPattern: jest.fn(),

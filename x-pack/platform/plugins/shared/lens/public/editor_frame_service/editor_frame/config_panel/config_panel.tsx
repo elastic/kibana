@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, memo, useCallback } from 'react';
+import React, { useEffect, useMemo, memo, useCallback } from 'react';
 import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import {
@@ -24,7 +24,6 @@ import {
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
 import type { ConfigPanelWrapperProps, LayerPanelProps } from './types';
-import { useFocusUpdate } from './use_focus_update';
 import {
   setLayerDefaultDimension,
   useLensDispatch,
@@ -41,6 +40,7 @@ import {
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
 import { useEditorFrameService } from '../../editor_frame_service_context';
+import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const { visualizationMap } = useEditorFrameService();
@@ -74,8 +74,19 @@ export function ConfigPanel(
 
   const layerIds = activeVisualization.getLayerIds(visualization.state);
 
-  const { removeRef: removeLayerRef, registerNewRef: registerNewLayerRef } =
-    useFocusUpdate(layerIds);
+  const focusLayerTabsContent = () => {
+    setTimeout(() => {
+      const element = document.getElementById(LENS_LAYER_TABS_CONTENT_ID);
+      element?.focus();
+    }, 0);
+  };
+
+  useEffect(() => {
+    if (selectedLayerId) {
+      focusLayerTabsContent();
+    }
+    // Needs layerIds to refocus when layers are removed
+  }, [selectedLayerId, layerIds]);
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -199,7 +210,7 @@ export function ConfigPanel(
         })
       );
 
-      removeLayerRef(layerToRemoveId);
+      focusLayerTabsContent();
     },
     [
       activeVisualization.id,
@@ -209,7 +220,6 @@ export function ConfigPanel(
       layerIds,
       props.framePublicAPI.datasourceLayers,
       props.uiActions,
-      removeLayerRef,
     ]
   );
 
@@ -299,7 +309,6 @@ export function ConfigPanel(
         registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
         dimensionGroups={layerConfig.config.groups}
         activeVisualization={activeVisualization}
-        registerNewLayerRef={registerNewLayerRef}
         key={selectedLayerId}
         layerId={selectedLayerId}
         layerIndex={layerIds.indexOf(selectedLayerId)}
