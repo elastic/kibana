@@ -175,6 +175,18 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         }
       );
 
+      core.http.resources.register(
+        {
+          path: MOCK_IDP_LOGOUT_PATH,
+          validate: false,
+          options: { authRequired: false },
+          security: { authz: { enabled: false, reason: '' } },
+        },
+        async (context, request, response) => {
+          return response.redirected({ headers: { location: '/' } });
+        }
+      );
+
       router.post(
         {
           path: '/mock_idp/grant_api_key',
@@ -280,13 +292,16 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               });
             }
 
-            // Call a secure endpoint to verify the API key works
-            const currentUser = await scopedClient.asCurrentUser.security.authenticate();
+            // Call Elasticsearch info endpoint to verify the API key works
+            // Note: info() doesn't require special security privileges unlike security.authenticate()
+            const esInfo = await scopedClient.asCurrentUser.info();
 
             return response.ok({
               body: {
-                ...currentUser,
-                message: 'Successfully authenticated with UIAM API Key to ES',
+                cluster_name: esInfo.cluster_name,
+                cluster_uuid: esInfo.cluster_uuid,
+                version: esInfo.version,
+                message: 'Successfully authenticated with API Key to ES',
               },
             });
           } catch (err) {
@@ -296,18 +311,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               body: { message: err.message },
             });
           }
-        }
-      );
-
-      core.http.resources.register(
-        {
-          path: MOCK_IDP_LOGOUT_PATH,
-          validate: false,
-          options: { authRequired: false },
-          security: { authz: { enabled: false, reason: '' } },
-        },
-        async (context, request, response) => {
-          return response.redirected({ headers: { location: '/' } });
         }
       );
     },

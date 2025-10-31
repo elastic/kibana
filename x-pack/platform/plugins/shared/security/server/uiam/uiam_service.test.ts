@@ -199,6 +199,27 @@ describe('UiamService', () => {
         [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
       });
     });
+
+    it('returns the correct header for different UIAM instances with different secrets', () => {
+      const customUiamService = new UiamService(
+        loggingSystemMock.createLogger(),
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://custom-uiam.service',
+              sharedSecret: 'custom-secret-123',
+              ssl: { verificationMode: 'none' },
+            },
+          },
+          { serverless: true }
+        ).uiam
+      );
+
+      expect(customUiamService.getEsClientAuthenticationHeader()).toEqual({
+        [ES_CLIENT_AUTHENTICATION_HEADER]: 'custom-secret-123',
+      });
+    });
   });
 
   describe('#refreshSessionTokens', () => {
@@ -377,6 +398,25 @@ describe('UiamService', () => {
       });
     });
 
+    it('properly calls UIAM service to grant an API key without expiration', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'api-key-id-no-exp',
+          name: 'test-key-no-exp',
+          api_key: 'encoded-key-no-expiration',
+        }),
+      });
+
+      await expect(uiamService.grantApiKey('Bearer', 'access-token')).resolves.toEqual({
+        id: 'api-key-id-no-exp',
+        name: 'test-key-no-exp',
+        api_key: 'encoded-key-no-expiration',
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
     it('throws error if granting API key fails with 400 status code', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
@@ -409,6 +449,78 @@ describe('UiamService', () => {
         }),
         dispatcher: AGENT_MOCK,
       });
+    });
+
+    it('throws error with "Unknown error" message if error response has no message', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: new Headers(),
+        json: async () => ({ error: {} }),
+      });
+
+      await expect(uiamService.grantApiKey('Bearer', 'access-token')).rejects.toThrowError(
+        'Unknown error'
+      );
+    });
+
+    it('throws error if granting API key fails with 401 unauthorized status code', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Unauthorized' } }),
+      });
+
+      await expect(uiamService.grantApiKey('Bearer', 'invalid-token')).rejects.toThrowError(
+        'Unauthorized'
+      );
+    });
+
+    it('throws error if granting API key fails with 403 forbidden status code', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Forbidden' } }),
+      });
+
+      await expect(uiamService.grantApiKey('Bearer', 'access-token')).rejects.toThrowError(
+        'Forbidden'
+      );
+    });
+
+    it('throws error if granting API key fails with 500 server error status code', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Internal Server Error' } }),
+      });
+
+      await expect(uiamService.grantApiKey('Bearer', 'access-token')).rejects.toThrowError(
+        'Internal Server Error'
+      );
+    });
+
+    it('uses custom dispatcher when configured', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          id: 'api-key-id',
+          name: 'test-key',
+          api_key: 'encoded-key-value',
+        }),
+      });
+
+      await uiamService.grantApiKey('Bearer', 'access-token');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          dispatcher: AGENT_MOCK,
+        })
+      );
     });
   });
 
