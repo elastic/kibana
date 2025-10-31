@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { checkForDuplicateDashboardTitle } from './check_for_duplicate_dashboard_title';
 export { dashboardClient } from './dashboard_client';
 export { findService } from './find_service';
 

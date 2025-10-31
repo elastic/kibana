@@ -21,6 +21,7 @@ import type { DashboardState } from '../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../utils/extract_title_and_count';
 import { DashboardSaveModal } from './save_modal';
+import { checkForDuplicateDashboardTitle } from '../../dashboard_client';
 
 /**
  * @description exclusively for user directed dashboard save actions, also
@@ -73,7 +74,7 @@ export async function openSaveModal({
 
           try {
             if (
-              !(await dashboardContentManagementService.checkForDuplicateDashboardTitle({
+              !(await checkForDuplicateDashboardTitle({
                 title: newTitle,
                 onTitleDuplicate,
                 lastSavedTitle: title,
@@ -178,7 +179,7 @@ function generateDashboardNotSavedToast(title: string, errorMessage: any) {
 async function getSaveAsTitle(title: string) {
   const [baseTitle, baseCount] = extractTitleAndCount(title);
   let saveAsTitle = `${baseTitle} (${baseCount + 1})`;
-  await getDashboardContentManagementService().checkForDuplicateDashboardTitle({
+  await checkForDuplicateDashboardTitle({
     title: saveAsTitle,
     lastSavedTitle: title,
     copyOnSave: true,

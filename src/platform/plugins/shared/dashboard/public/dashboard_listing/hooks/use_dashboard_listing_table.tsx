@@ -35,7 +35,11 @@ import {
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import type { DashboardSavedObjectUserContent } from '../types';
-import { dashboardClient, findService } from '../../dashboard_client';
+import {
+  checkForDuplicateDashboardTitle,
+  dashboardClient,
+  findService,
+} from '../../dashboard_client';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -155,13 +159,12 @@ export const useDashboardListingTable = ({
                   return;
                 }
 
-                const validTitle =
-                  await dashboardContentManagementService.checkForDuplicateDashboardTitle({
-                    title: value,
-                    copyOnSave: false,
-                    lastSavedTitle: dashboard.attributes.title,
-                    isTitleDuplicateConfirmed: false,
-                  });
+                const validTitle = await checkForDuplicateDashboardTitle({
+                  title: value,
+                  copyOnSave: false,
+                  lastSavedTitle: dashboard.attributes.title,
+                  isTitleDuplicateConfirmed: false,
+                });
 
                 if (!validTitle) {
                   throw new Error(dashboardListingErrorStrings.getDuplicateTitleWarning(value));

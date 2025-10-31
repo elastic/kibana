@@ -8,7 +8,6 @@
  */
 
 import { DashboardContentManagementCache } from './dashboard_content_management_cache';
-import { checkForDuplicateDashboardTitle } from './lib/check_for_duplicate_dashboard_title';
 import { saveDashboardState } from './lib/save_dashboard_state';
 
 let dashboardContentManagementCache: DashboardContentManagementCache;
@@ -22,6 +21,5 @@ export const getDashboardContentManagementCache = () => {
 export const getDashboardContentManagementService = () => {
   return {
     saveDashboardState,
-    checkForDuplicateDashboardTitle,
   };
 };
