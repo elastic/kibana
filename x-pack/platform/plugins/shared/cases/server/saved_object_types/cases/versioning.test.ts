@@ -148,4 +148,16 @@ describe('caseSavedObjectType model version transformations', () => {
       });
     });
   });
+
+  describe('Model version 7 to 8', () => {
+    it('properly backfill the total_observables field when converting from v7 to v8', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 7,
+        toVersion: 8,
+      });
+
+      expect(migrated.attributes).toHaveProperty('total_observables');
+    });
+  });
 });
