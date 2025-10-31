@@ -13,11 +13,8 @@ import userEvent from '@testing-library/user-event';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  formSerializer,
-  formDeserializer,
-} from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
