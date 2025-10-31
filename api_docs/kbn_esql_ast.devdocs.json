@@ -8748,10 +8748,6 @@
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts"
           },
           {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts"
-          },
-          {
             "plugin": "@kbn/esql-composer",
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts"
           },
@@ -11970,10 +11966,6 @@
               {
                 "plugin": "@kbn/esql-utils",
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts"
-              },
-              {
-                "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts"
               }
             ]
           },

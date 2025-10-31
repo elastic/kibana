@@ -757,15 +757,15 @@
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "kibanaOverview",
@@ -1678,15 +1678,15 @@
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "kibanaOverview",
@@ -2599,15 +2599,15 @@
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "kibanaOverview",
