@@ -24,7 +24,7 @@ Set the alert delay value to 1 or turn on **Alert flapping detection**.
 
 ::::{dropdown} Reports created in non-default Kibana spaces aren't shown in the Reporting UI
 
-Applies to: {{stack}} 9.1.0, 9.1.1
+Applies to: {{stack}} 9.1.0, 9.1.1, 9.1.2
 
 **Details**
 
