@@ -184,13 +184,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
             <EuiFlexItem grow={4} css={styles.rowHeaderTitleWrapper}>
               <RowTitleSlot rowData={rowInstance.original} nodePath={nodePath} />
             </EuiFlexItem>
-            <EuiFlexItem
-              grow={6}
-              css={styles.rowHeaderSlotContainer}
-              style={{
-                maxWidth: `${Math.min(10 + Math.max(headerMetaSlots?.length ?? 0, 1) * 15, 60)}%`,
-              }}
-            >
+            <EuiFlexItem grow={6} css={styles.rowHeaderSlotContainer}>
               <EuiFlexGroup
                 direction="row"
                 gutterSize={size}
@@ -199,11 +193,17 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                 css={styles.rowHeaderSlotContainerInner}
               >
                 <React.Fragment>
-                  {headerMetaSlots?.map((metaSlot, index) => (
-                    <EuiFlexItem css={styles.rowHeaderSlotItemWrapper} key={index}>
-                      {metaSlot}
+                  {Boolean(headerMetaSlots?.length) && (
+                    <EuiFlexItem>
+                      <EuiFlexGroup gutterSize={size}>
+                        {headerMetaSlots?.map((metaSlot, index) => (
+                          <EuiFlexItem css={styles.rowHeaderSlotItemWrapper} key={index}>
+                            {metaSlot}
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
                     </EuiFlexItem>
-                  ))}
+                  )}
                 </React.Fragment>
                 <React.Fragment>
                   {Boolean(headerActions?.length) && (
