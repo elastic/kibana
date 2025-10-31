@@ -606,6 +606,7 @@ export const QueryBarTopRow = React.memo(
           onRefresh={onRefresh}
           onRefreshChange={props.onRefreshChange}
           showUpdateButton={false}
+          canRoundRelativeUnits={false}
           recentlyUsedRanges={recentlyUsedRanges}
           locale={i18n.getLocale()}
           commonlyUsedRanges={commonlyUsedRanges}
