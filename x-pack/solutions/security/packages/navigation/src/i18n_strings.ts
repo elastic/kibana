@@ -268,6 +268,11 @@ export const i18nStrings = {
     title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.title', {
       defaultMessage: 'Stack Management',
     }),
+    home: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.home', {
+        defaultMessage: 'Home',
+      }),
+    },
     serverlessTitle: i18n.translate(
       'securitySolutionPackages.navLinks.stackManagement_v2.serverlessTitle',
       { defaultMessage: 'Admin and Settings' }
