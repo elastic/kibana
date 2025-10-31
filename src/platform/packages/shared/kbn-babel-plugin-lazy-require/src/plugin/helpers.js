@@ -35,7 +35,13 @@ function isInTypeContext(path, t) {
         t.isTSIndexedAccessType(parentNode) ||
         t.isTSMappedType(parentNode) ||
         t.isTSConditionalType(parentNode) ||
-        t.isTSExpressionWithTypeArguments(parentNode))
+        t.isTSExpressionWithTypeArguments(parentNode) ||
+        t.isTSDeclareMethod(parentNode) ||
+        t.isTSMethodSignature(parentNode) ||
+        t.isTSDeclareFunction(parentNode) ||
+        t.isTSFunctionType(parentNode) ||
+        t.isTSConstructSignatureDeclaration(parentNode) ||
+        t.isTSCallSignatureDeclaration(parentNode))
     ) {
       return true;
     }
@@ -136,6 +142,27 @@ function detectJsxUsage(programPath, properties, t) {
         (t.isJSXOpeningElement(jsxIdPath.parent) || t.isJSXClosingElement(jsxIdPath.parent))
       ) {
         importsUsedInJsx.add(name);
+      }
+    },
+    JSXMemberExpression(jsxMemberPath) {
+      // Handle cases like <Context.Provider> or <Module.Component>
+      // We need to mark the root object (Context, Module) as used in JSX
+      if (
+        t.isJSXOpeningElement(jsxMemberPath.parent) ||
+        t.isJSXClosingElement(jsxMemberPath.parent)
+      ) {
+        // Traverse to find the root identifier
+        let current = jsxMemberPath.node;
+        while (t.isJSXMemberExpression(current.object)) {
+          current = current.object;
+        }
+        // current.object should now be a JSXIdentifier
+        if (t.isJSXIdentifier(current.object)) {
+          const name = current.object.name;
+          if (properties.has(name)) {
+            importsUsedInJsx.add(name);
+          }
+        }
       }
     },
   });

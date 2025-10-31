@@ -764,5 +764,65 @@ describe('@kbn/babel-plugin-lazy-require', () => {
       expect(code).not.toContain('get React');
       expect(code).not.toContain('get Item');
     });
+
+    it('does not transform imports used in JSX member expressions (Context.Provider)', () => {
+      const code = transformCode(`
+        import React from 'react';
+        import { PerformanceContext } from './contexts';
+        import { helper } from './utils';
+        export default () => (
+          <PerformanceContext.Provider value={{}}>
+            <div>{helper()}</div>
+          </PerformanceContext.Provider>
+        );
+      `);
+
+      // PerformanceContext used in JSX member expression - not transformed
+      expect(code).toContain('PerformanceContext');
+      expect(code).not.toContain('get PerformanceContext');
+
+      // helper not used in JSX - transformed
+      expect(code).toContain('get helper');
+    });
+
+    it('does not transform imports in nested JSX member expressions', () => {
+      const code = transformCode(`
+        import { Theme } from './theme';
+        import { utility } from './utils';
+        export default () => (
+          <Theme.Dark.Container>
+            {utility()}
+          </Theme.Dark.Container>
+        );
+      `);
+
+      // Theme used in nested JSX member expression - not transformed
+      expect(code).toContain('Theme');
+      expect(code).not.toContain('get Theme');
+
+      // utility not used in JSX - transformed
+      expect(code).toContain('get utility');
+    });
+
+    it('handles Context.Provider pattern correctly (React context usage)', () => {
+      const code = transformCode(`
+        import React, { useMemo } from 'react';
+        import { MyContext } from './context';
+        import { helper } from './utils';
+
+        export function MyProvider({ children }) {
+          const value = useMemo(() => helper(), []);
+          return <MyContext.Provider value={value}>{children}</MyContext.Provider>;
+        }
+      `);
+
+      // MyContext used in JSX member expression - NOT transformed
+      expect(code).toContain('MyContext');
+      expect(code).not.toContain('get MyContext');
+      expect(code).toMatch(/import.*MyContext.*from.*\.\/context/);
+
+      // helper not used in JSX - transformed
+      expect(code).toContain('get helper');
+    });
   });
 });
