@@ -1125,6 +1125,34 @@ describe('TaskScheduling', () => {
       const result = taskScheduling.runSoon(id);
       await expect(result).rejects.toEqual(404);
     });
+
+    test('applies stateOverrides when provided', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      const originalState = { foo: 'bar', unchanged: true };
+      const stateOverrides = { foo: 'baz', newProp: 123 };
+
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Idle, state: originalState })
+      );
+      mockTaskStore.update.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, state: { ...originalState, ...stateOverrides } })
+      );
+
+      await taskScheduling.runSoonWithState(id, stateOverrides);
+
+      expect(mockTaskStore.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id,
+          status: TaskStatus.Idle,
+          state: { foo: 'baz', unchanged: true, newProp: 123 },
+          runAt: expect.any(Date),
+          scheduledAt: expect.any(Date),
+        }),
+        { validate: false }
+      );
+    });
   });
 
   describe('bulkSchedule', () => {

@@ -281,6 +281,41 @@ export class TaskScheduling {
   }
 
   /**
+   * Run task.
+   *
+   * @param taskId - The task being scheduled.
+   * @param stateOverrides - Optional state to override the current task state with when running now.
+   * @returns {Promise<RunSoonResult>}
+   */
+  public async runSoonWithState(
+    taskId: string,
+    stateOverrides?: ConcreteTaskInstance['state']
+  ): Promise<RunSoonResult> {
+    const task = await this.getNonRunningTask(taskId);
+    try {
+      await this.store.update(
+        {
+          ...task,
+          ...(stateOverrides ? { state: { ...task.state, ...stateOverrides } } : {}),
+          status: TaskStatus.Idle,
+          scheduledAt: new Date(),
+          runAt: new Date(),
+        },
+        { validate: false }
+      );
+    } catch (e) {
+      if (e.statusCode === 409) {
+        this.logger.debug(
+          `Failed to update the task (${taskId}) for runSoon due to conflict (409)`
+        );
+      } else {
+        this.logger.error(`Failed to update the task (${taskId}) for runSoon`);
+        throw e;
+      }
+    }
+    return { id: task.id };
+  }
+  /**
    * Schedules a task with an Id
    *
    * @param task - The task being scheduled.
