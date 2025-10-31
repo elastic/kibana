@@ -15,7 +15,7 @@ interface ConversationContextValue {
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;
-  setConversationId?: (conversationId: string) => void;
+  setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
 }
 
