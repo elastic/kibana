@@ -10,9 +10,11 @@
 import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 
-import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiThemeProvider, EuiWrappingPopover } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { topNavStrings } from '../../_dashboard_app_strings';
 
@@ -104,13 +106,25 @@ export const SaveMenu = ({
   );
 };
 
-export function showSaveMenu(props: SaveMenuProps) {
+export function showSaveMenu({
+  coreServices,
+  ...props
+}: SaveMenuProps & { coreServices: CoreStart }) {
   if (isOpen) {
     cleanup();
     return;
   }
 
+  const theme = coreServices.theme.getTheme();
+
   isOpen = true;
   document.body.appendChild(container);
-  ReactDOM.render(<SaveMenu {...props} />, container);
+  ReactDOM.render(
+    <KibanaContextProvider services={coreServices}>
+      <EuiThemeProvider colorMode={theme.darkMode ? 'dark' : 'light'}>
+        <SaveMenu {...props} />
+      </EuiThemeProvider>
+    </KibanaContextProvider>,
+    container
+  );
 }

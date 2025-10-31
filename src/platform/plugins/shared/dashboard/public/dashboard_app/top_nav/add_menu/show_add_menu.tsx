@@ -15,6 +15,8 @@ import {
   type EuiContextMenuPanelDescriptor,
   EuiContextMenu,
   EuiWrappingPopover,
+  EuiThemeProvider,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -278,15 +280,19 @@ export function showAddMenu({ dashboardApi, anchorElement, coreServices }: AddMe
     return;
   }
 
+  const theme = coreServices.theme.getTheme();
+
   isOpen = true;
   document.body.appendChild(container);
   ReactDOM.render(
     <KibanaContextProvider services={coreServices}>
-      <AddMenu
-        dashboardApi={dashboardApi}
-        anchorElement={anchorElement}
-        coreServices={coreServices}
-      />
+      <EuiThemeProvider colorMode={theme.darkMode ? 'dark' : 'light'}>
+        <AddMenu
+          dashboardApi={dashboardApi}
+          anchorElement={anchorElement}
+          coreServices={coreServices}
+        />
+      </EuiThemeProvider>
     </KibanaContextProvider>,
     container
   );
