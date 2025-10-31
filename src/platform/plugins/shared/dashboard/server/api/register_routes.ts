@@ -23,6 +23,7 @@ import {
   getDashboardListResultAPISchema,
   getDashboardUpdateResultSchema,
 } from '../content_management/v1/schema';
+import { rest } from 'lodash';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -68,13 +69,15 @@ const formatResult = (item: DashboardItem) => {
     updatedBy,
     error,
     managed,
-    references,
     version,
+    // TODO rest contains spaces and namespaces
+    // These should not be spread into data and instead be moved to meta
+    ...rest
   } = item;
   return {
     id,
     type,
-    data: { ...attributes, references },
+    data: { ...attributes, ...rest },
     meta: { createdAt, updatedAt, createdBy, updatedBy, error, managed, version },
   };
 };
