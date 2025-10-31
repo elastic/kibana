@@ -32,6 +32,8 @@ export function useWorkflowsMonacoTheme() {
         'editorHoverWidget.foreground': euiTheme.colors.textParagraph,
         'editorHoverWidget.background': euiTheme.colors.backgroundBasePlain,
         'editorHoverWidget.border': euiTheme.colors.borderBaseSubdued,
+        'editorLineNumber.foreground': euiTheme.colors.textDisabled,
+        'editorLineNumber.activeForeground': euiTheme.colors.textPrimary,
       },
     });
   }, [euiTheme]);
