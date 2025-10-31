@@ -215,16 +215,7 @@ export class Plugin
           visibleIn: [],
         },
       ],
-      keywords: [
-        'alerts',
-        'observability',
-        'alert',
-        'alerting',
-        'overview',
-        'actions',
-        'rule',
-        'rules',
-      ],
+      keywords: ['alerts', 'observability', 'rules'],
     },
   ];
 
