@@ -202,8 +202,21 @@ export interface CodeEditorProps {
    */
   onFocus?: () => void;
   onBlur?: () => void;
+  /* custom css for suggestion widget is not needed for embedded console */
+  isEmbeddable?: boolean;
 }
 
+const WrapWithUseBug223981FixRepositionSuggestWidget: React.FC<
+  PropsWithChildren<{ isEmbeddable: boolean; editor: monaco.editor.IStandaloneCodeEditor | null }>
+> = ({ isEmbeddable = false, editor, children }) => {
+  return !isEmbeddable ? (
+    <UseBug223981FixRepositionSuggestWidget editor={editor}>
+      {children}
+    </UseBug223981FixRepositionSuggestWidget>
+  ) : (
+    children
+  );
+};
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   languageId,
   value,
@@ -241,6 +254,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   htmlId,
   onFocus,
   onBlur,
+  isEmbeddable = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -611,7 +625,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <UseBug177756ReBroadcastMouseDown>
-          <UseBug223981FixRepositionSuggestWidget editor={_editor}>
+          <WrapWithUseBug223981FixRepositionSuggestWidget
+            isEmbeddable={isEmbeddable ?? false}
+            editor={_editor}
+          >
             {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
             <MonacoEditor
               theme={theme}
@@ -645,13 +662,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 fontSize: isFullScreen ? 16 : 12,
                 lineHeight: isFullScreen ? 24 : 21,
                 contextmenu: enableCustomContextMenu,
-                fixedOverflowWidgets: true,
+                fixedOverflowWidgets: !isEmbeddable ? true : false,
                 // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
                 'bracketPairColorization.enabled': false,
                 ...options,
               }}
             />
-          </UseBug223981FixRepositionSuggestWidget>
+          </WrapWithUseBug223981FixRepositionSuggestWidget>
         </UseBug177756ReBroadcastMouseDown>
       </FullScreenDisplay>
     </div>

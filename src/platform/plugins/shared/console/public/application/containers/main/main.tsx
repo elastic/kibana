@@ -361,6 +361,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
               loading={!done}
               inputEditorValue={inputEditorValue}
               setInputEditorValue={setInputEditorValue}
+              isEmbeddable={isEmbeddable}
             />
           )}
           {currentTab === HISTORY_TAB_ID && <History />}
