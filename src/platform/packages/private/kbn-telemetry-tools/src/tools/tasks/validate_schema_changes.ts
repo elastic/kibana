@@ -9,45 +9,56 @@
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ListrTask } from 'listr2';
-import path from 'node:path';
+import { relative } from 'node:path';
 import { readFile } from 'fs/promises';
 import type {
   TelemetrySchemaObject,
   TelemetrySchemaValue,
 } from '../../schema_ftr_validations/schema_to_config_schema';
 import type { TaskContext } from './task_context';
+import { fetchTelemetrySchemaAtRevision, isTelemetrySchemaModified } from './git';
 
-const GIT_BASE_URL = 'https://raw.githubusercontent.com/elastic/kibana';
+export function validateSchemaChanges({ baselineSha, roots, reporter }: TaskContext): ListrTask[] {
+  const isPullRequestPipeline =
+    Boolean(process.env.GITHUB_PR_BASE_OWNER) &&
+    Boolean(process.env.GITHUB_PR_BASE_REPO) &&
+    Boolean(process.env.GITHUB_PR_NUMBER);
 
-export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext): ListrTask[] {
   return [
     ...roots.flatMap((root): ListrTask[] => {
-      const relativePath = path.relative(REPO_ROOT, root.config.output);
+      const path = relative(REPO_ROOT, root.config.output);
       return [
+        {
+          task: async () => {
+            root.configChanged = await isTelemetrySchemaModified({ path });
+          },
+          title: `Checking if ${path} telemetry schema has changed`,
+          enabled: (_) => isPullRequestPipeline,
+        },
         {
           task: async () => {
             if (!baselineSha) {
               throw new Error('Cannot fetch the baseline for comparison, no SHA specified.');
             }
-            const url = `${GIT_BASE_URL}/${baselineSha}/${relativePath}`;
-            const response = await fetch(url);
-            if (!response.ok) {
-              throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
-            }
-            root.upstreamMapping = await response.json();
+            root.upstreamMapping = await fetchTelemetrySchemaAtRevision({
+              path,
+              ref: baselineSha,
+            });
           },
-          title: `Downloading /${baselineSha}/${relativePath} from ${GIT_BASE_URL}`,
+          title: `Downloading /${baselineSha}/${path} from Github`,
+          enabled: (_) => Boolean(!isPullRequestPipeline || root.configChanged),
         },
         {
           task: async () => {
             const newMapping = await readFile(root.config.output, 'utf-8');
             const errors = validateSchemaDiff(JSON.parse(newMapping), root.upstreamMapping);
             if (errors.length) {
-              const reporterWithContext = reporter.withContext({ name: relativePath });
+              const reporterWithContext = reporter.withContext({ name: path });
               errors.forEach((error) => reporterWithContext.report(error));
             }
           },
-          title: `PR checks in modified attributes in ${relativePath}`,
+          title: `PR checks in modified attributes in ${path}`,
+          enabled: (_) => Boolean(!isPullRequestPipeline || root.configChanged),
         },
       ];
     }),
