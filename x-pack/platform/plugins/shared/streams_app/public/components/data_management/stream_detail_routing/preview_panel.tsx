@@ -12,7 +12,6 @@ import {
   EuiIcon,
   EuiLoadingElastic,
   EuiProgress,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -237,16 +236,13 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
 
   return (
     <>
-      <EuiSpacer size="s" />
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
-        <EuiFlexItem grow={false}>
-          <DocumentMatchFilterControls
-            onFilterChange={setDocumentMatchFilter}
-            matchedDocumentPercentage={approximateMatchingPercentage}
-            isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
-          />
-        </EuiFlexItem>
+        <DocumentMatchFilterControls
+          onFilterChange={setDocumentMatchFilter}
+          matchedDocumentPercentage={approximateMatchingPercentage}
+          isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
+        />
         {content}
       </EuiFlexGroup>
     </>

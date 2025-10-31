@@ -28,6 +28,7 @@ test.describe(
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
 
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+      await pageObjects.streams.switchToColumnsView();
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {

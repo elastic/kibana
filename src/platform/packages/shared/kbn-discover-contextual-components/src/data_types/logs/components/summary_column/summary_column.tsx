@@ -77,7 +77,7 @@ const SummaryCell = ({
   const rowHeight = maybeNullishRowHeight ?? DEFAULT_ROW_COUNT;
   const isSingleLine = rowHeight === SINGLE_ROW_COUNT;
 
-  // Use enhanced version that returns actual field names (including OTel fields)
+  // For logs, also resolve otel field names directly, even if no alias exists
   const resourceFields =
     isTracesSummary && isTraceDocument(row)
       ? createResourceFields({
@@ -132,7 +132,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
 
   const isTraceDoc = isTracesSummary && isTraceDocument(row);
 
-  // Use enhanced version that returns actual field names (including OTel fields)
+  // For logs, also resolve otel field names directly, even if no alias exists
   const resourceFields = isTraceDoc
     ? createResourceFields({
         row,
