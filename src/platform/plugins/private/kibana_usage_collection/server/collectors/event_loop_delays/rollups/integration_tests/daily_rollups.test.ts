@@ -66,7 +66,7 @@ function createRawEventLoopDelaysDailyDocs() {
     createRawObject(moment()),
     createRawObject(moment()),
     createRawObject(moment().subtract(1, 'days')),
-    createRawObject(moment().subtract(3, 'days')),
+    createRawObject(moment().subtract(2.5, 'days')), // could be considered 4 days if we use 3 and the check is performed the following hour
   ];
 
   const outdatedRawEventLoopDelaysDaily = [
