@@ -24,6 +24,7 @@ import {
 } from 'rxjs';
 
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import { apiHasSections } from '@kbn/presentation-containers';
 
 import { useStateFromPublishingSubject } from '../../publishing_subject';
 import { apiHasParentApi, type HasParentApi } from '../has_parent_api';
@@ -51,6 +52,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
   const observables: {
     [key in keyof Omit<FetchContext, 'isReload'>]: Observable<FetchContext[key]>;
   } = {
+    // sectionId: of(undefined),
     filters: of(undefined),
     query: of(undefined),
     searchSessionId: of(undefined),
@@ -59,17 +61,19 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     esqlVariables: of(undefined),
   };
 
+  const sectionId$ =
+    apiHasUniqueId(api) && apiHasParentApi(api) && apiHasSections(api.parentApi)
+      ? api.parentApi.getPanelSection$(api.uuid)
+      : of(undefined);
+
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
-    observables.filters = api.parentApi.filters$.pipe(
-      map((allFilters) => {
+    observables.filters = combineLatest([api.parentApi.filters$, sectionId$]).pipe(
+      map(([allFilters, sectionId]) => {
         const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
-        const section = api.parentApi?.layout$
-          ? api.parentApi?.layout$.getValue().panels[uuid]?.grid?.sectionId
-          : undefined;
         return allFilters?.filter(
           (currentFilter) =>
             currentFilter.meta.controlledBy !== uuid &&
-            (currentFilter.meta.group ? section === currentFilter.meta.group : true)
+            (currentFilter.meta.group ? sectionId === currentFilter.meta.group : true)
         );
       })
     );
@@ -97,17 +101,13 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
   }
 
   if (apiHasParentApi(api) && apiPublishesESQLVariables(api.parentApi)) {
-    observables.esqlVariables = api.parentApi.esqlVariables$.pipe(
-      map((allVariables) => {
+    observables.esqlVariables = combineLatest([api.parentApi.esqlVariables$, sectionId$]).pipe(
+      map(([allVariables, sectionId]) => {
         const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
-        const section = api.parentApi?.layout$
-          ? api.parentApi?.layout$.getValue().panels[uuid]?.grid?.sectionId
-          : undefined;
-
         return allVariables?.filter(
           (currentVariable) =>
             currentVariable.meta?.controlledBy !== uuid &&
-            (currentVariable.meta?.group ? section === currentVariable.meta.group : true)
+            (currentVariable.meta?.group ? sectionId === currentVariable.meta.group : true)
         );
       })
     );
