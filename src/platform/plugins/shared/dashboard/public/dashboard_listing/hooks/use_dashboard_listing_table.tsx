@@ -159,7 +159,7 @@ export const useDashboardListingTable = ({
           fn: async (value: string, id: string) => {
             if (id) {
               try {
-                const [dashboard] = await findService.findByIds([id]);
+                const dashboard = await findService.findById(id);
                 if (dashboard.status === 'error') {
                   return;
                 }
