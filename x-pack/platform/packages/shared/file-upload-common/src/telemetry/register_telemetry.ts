@@ -103,6 +103,12 @@ export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSet
           description: 'Whether the analysis was successful.',
         },
       },
+      analysis_cancelled: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the analysis was cancelled.',
+        },
+      },
       overrides_used: {
         type: 'boolean',
         _meta: {
@@ -177,6 +183,12 @@ export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSet
           description: 'Whether the file upload was successful.',
         },
       },
+      upload_cancelled: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the file upload was cancelled.',
+        },
+      },
       upload_time_ms: {
         type: 'integer',
         _meta: {
@@ -218,6 +230,12 @@ export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSet
         type: 'boolean',
         _meta: {
           description: 'Whether the upload session was successful.',
+        },
+      },
+      session_cancelled: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the upload session was cancelled.',
         },
       },
       session_time_ms: {

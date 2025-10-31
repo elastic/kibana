@@ -7,14 +7,15 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
-import type {
-  FileUploadTelemetryService,
-  FindFileStructureResponse,
-  FormattedOverrides,
-  ImportFailure,
-  ImportResults,
-  IngestPipeline,
-  InputOverrides,
+import {
+  isAbortError,
+  type FileUploadTelemetryService,
+  type FindFileStructureResponse,
+  type FormattedOverrides,
+  type ImportFailure,
+  type ImportResults,
+  type IngestPipeline,
+  type InputOverrides,
 } from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { type DataTableRecord } from '@kbn/discover-utils';
@@ -190,6 +191,10 @@ export class FileWrapper {
         analysisStatus: STATUS.COMPLETED,
       };
     } catch (e) {
+      const analysisStatus = this.analysisAbortController?.signal.aborted
+        ? STATUS.ABORTED
+        : STATUS.FAILED;
+      this.analysisAbortController = null;
       return {
         fileContents: '',
         results: null,
@@ -198,7 +203,7 @@ export class FileWrapper {
         serverSettings: null,
         analysisError: e,
         overrides: {},
-        analysisStatus: STATUS.FAILED,
+        analysisStatus,
       };
     }
   }
@@ -231,6 +236,11 @@ export class FileWrapper {
         sampleDocs,
       };
     } catch (e) {
+      const analysisStatus = this.analysisAbortController?.signal.aborted
+        ? STATUS.ABORTED
+        : STATUS.FAILED;
+      this.analysisAbortController = null;
+
       return {
         fileContents,
         results: null,
@@ -239,7 +249,7 @@ export class FileWrapper {
         serverSettings: null,
         analysisError: e,
         overrides: {},
-        analysisStatus: STATUS.FAILED,
+        analysisStatus,
       };
     }
   }
@@ -364,7 +374,8 @@ export class FileWrapper {
 
       return resp;
     } catch (error) {
-      this.setStatus({ importStatus: STATUS.FAILED });
+      this.setStatus({ importStatus: isAbortError(error) ? STATUS.ABORTED : STATUS.FAILED });
+      this.uploadFileTelemetry(undefined, getFileClashes, new Date().getTime() - startTime);
       return;
     }
   }
@@ -377,6 +388,7 @@ export class FileWrapper {
     if (analysisResults?.results) {
       this.fileUploadTelemetryService.trackAnalyzeFile({
         analysis_success: true,
+        analysis_cancelled: false,
         upload_session_id: this.uploadSessionId,
         file_id: this.fileId,
         file_type: analysisResults.results.format,
@@ -393,6 +405,8 @@ export class FileWrapper {
       });
     } else {
       this.fileUploadTelemetryService.trackAnalyzeFile({
+        analysis_success: false,
+        analysis_cancelled: analysisResults?.analysisStatus === STATUS.ABORTED,
         upload_session_id: this.uploadSessionId,
         file_id: this.fileId,
         file_type: 'unknown',
@@ -404,7 +418,6 @@ export class FileWrapper {
         num_fields_found: 0,
         delimiter: '',
         preview_success: false,
-        analysis_success: false,
         overrides_used: Object.keys(overrides).length > 0,
         analysis_time_ms: analysisTimeMs,
       });
@@ -412,11 +425,12 @@ export class FileWrapper {
   }
 
   private uploadFileTelemetry(
-    resp: ImportResults,
+    resp: ImportResults | undefined,
     getFileClashes: () => FileClash | null,
     uploadTimeMs: number
   ) {
-    const failureCount = resp.failures ? resp.failures.length : 0;
+    const importStatus = this.getStatus().importStatus;
+    const failureCount = resp?.failures ? resp.failures.length : 0;
     const fileClash = getFileClashes();
     this.fileUploadTelemetryService.trackUploadFile({
       upload_session_id: this.uploadSessionId,
@@ -424,9 +438,10 @@ export class FileWrapper {
       file_size_bytes: this.file.size ?? 0,
       mapping_clash_new_fields: fileClash?.newFields?.length ?? 0,
       mapping_clash_missing_fields: fileClash?.missingFields?.length ?? 0,
-      documents_success: resp.docCount !== undefined ? resp.docCount - failureCount : 0,
+      documents_success: resp?.docCount !== undefined ? resp.docCount - failureCount : 0,
       documents_failed: failureCount,
-      upload_success: resp.success,
+      upload_success: resp?.success === true,
+      upload_cancelled: importStatus === STATUS.ABORTED,
       upload_time_ms: uploadTimeMs,
     });
   }

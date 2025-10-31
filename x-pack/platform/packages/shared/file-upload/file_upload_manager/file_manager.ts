@@ -523,12 +523,13 @@ export class FileUploadManager {
 
     const isExistingIndex = this.isExistingIndexUpload();
     const files = this.getFiles();
-    const sendTelemetry = this.collectTelemetry(
+    const { sendTelemetry } = this.sendTelemetryProvider(
       files,
       new Date().getTime(),
       isExistingIndex,
       dataViewName
     );
+    const { checkImportAborted } = this.checkImportAbortedProvider(sendTelemetry);
 
     if (mappings === null || pipelines === null || this.commonFileFormat === null) {
       this.setStatus({
@@ -588,7 +589,7 @@ export class FileUploadManager {
         signal
       );
 
-      this.checkImportAborted();
+      checkImportAborted();
 
       this.docCountService.startIndexSearchableCheck(indexName);
 
@@ -606,7 +607,7 @@ export class FileUploadManager {
         throw initializeImportResp.error;
       }
     } catch (e) {
-      this.checkImportAborted();
+      checkImportAborted();
 
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
@@ -668,7 +669,7 @@ export class FileUploadManager {
       return null;
     }
 
-    this.checkImportAborted();
+    checkImportAborted();
 
     const totalDocCount = files.reduce((acc, file) => {
       const { docCount, failures } = file.getStatus();
@@ -709,7 +710,7 @@ export class FileUploadManager {
       }
     }
 
-    this.checkImportAborted();
+    checkImportAborted();
 
     let dataViewResp;
     if (this.autoCreateDataView && dataViewName !== null) {
@@ -743,7 +744,7 @@ export class FileUploadManager {
       }
     }
 
-    this.checkImportAborted();
+    checkImportAborted();
 
     this.setStatus({
       overallImportStatus: STATUS.COMPLETED,
@@ -855,63 +856,75 @@ export class FileUploadManager {
       });
     }
   }
-  private collectTelemetry(
+  private sendTelemetryProvider(
     files: FileWrapper[],
     startTime: number,
     isExistingIndex: boolean,
     dataViewName: string | null | undefined
   ) {
-    return (success: boolean) => {
-      const containsAutoAddedSemanticTextField =
-        this.getMappings().json.properties?.content?.type === 'semantic_text';
+    return {
+      sendTelemetry: (success: boolean) => {
+        const containsAutoAddedSemanticTextField =
+          this.getMappings().json.properties?.content?.type === 'semantic_text';
 
-      const { mappingClashTotalNewFields, mappingClashTotalMissingFields } =
-        this.getFileClashTotals();
+        const { mappingClashTotalNewFields, mappingClashTotalMissingFields } =
+          this.getFileClashTotals();
 
-      this.fileUploadTelemetryService.trackUploadSession({
-        upload_session_id: this.uploadSessionId,
-        total_files: files.length,
-        total_size_bytes: files.reduce((acc, file) => acc + file.getSizeInBytes(), 0),
-        session_success: success,
-        session_time_ms: new Date().getTime() - startTime,
-        new_index_created: isExistingIndex === false,
-        data_view_created: this.autoCreateDataView && dataViewName !== null,
-        mapping_clash_total_new_fields: mappingClashTotalNewFields,
-        mapping_clash_total_missing_fields: mappingClashTotalMissingFields,
-        contains_auto_added_semantic_text_field: containsAutoAddedSemanticTextField,
-      });
+        this.fileUploadTelemetryService.trackUploadSession({
+          upload_session_id: this.uploadSessionId,
+          total_files: files.length,
+          total_size_bytes: files.reduce((acc, file) => acc + file.getSizeInBytes(), 0),
+          session_success: success,
+          session_cancelled: this.importAbortController?.signal.aborted ?? false,
+          session_time_ms: new Date().getTime() - startTime,
+          new_index_created: isExistingIndex === false,
+          data_view_created: this.autoCreateDataView && dataViewName !== null,
+          mapping_clash_total_new_fields: mappingClashTotalNewFields,
+          mapping_clash_total_missing_fields: mappingClashTotalMissingFields,
+          contains_auto_added_semantic_text_field: containsAutoAddedSemanticTextField,
+        });
+      },
     };
   }
 
-  private checkImportAborted() {
-    if (this.importAbortController?.signal.aborted) {
-      this.setStatus({ overallImportStatus: STATUS.ABORTED });
-      const { modelDeployed, indexCreated, pipelineCreated, fileImport, dataViewCreated } =
-        this._uploadStatus$.getValue();
-      this.setStatus({
-        modelDeployed:
-          modelDeployed === STATUS.STARTED || modelDeployed === STATUS.NOT_STARTED
-            ? STATUS.ABORTED
-            : modelDeployed,
-        indexCreated:
-          indexCreated === STATUS.STARTED || indexCreated === STATUS.NOT_STARTED
-            ? STATUS.ABORTED
-            : indexCreated,
-        pipelineCreated:
-          pipelineCreated === STATUS.STARTED || pipelineCreated === STATUS.NOT_STARTED
-            ? STATUS.ABORTED
-            : pipelineCreated,
-        fileImport:
-          fileImport === STATUS.STARTED || fileImport === STATUS.NOT_STARTED
-            ? STATUS.ABORTED
-            : fileImport,
-        dataViewCreated:
-          dataViewCreated === STATUS.STARTED || dataViewCreated === STATUS.NOT_STARTED
-            ? STATUS.ABORTED
-            : dataViewCreated,
-      });
-      throw new AbortError();
-    }
+  private checkImportAbortedProvider(
+    sendTelemetry: (success: boolean, cancelled?: boolean) => void
+  ) {
+    return {
+      checkImportAborted: () => {
+        if (this.importAbortController?.signal.aborted) {
+          this.setStatus({ overallImportStatus: STATUS.ABORTED });
+          const { modelDeployed, indexCreated, pipelineCreated, fileImport, dataViewCreated } =
+            this._uploadStatus$.getValue();
+          this.setStatus({
+            modelDeployed:
+              modelDeployed === STATUS.STARTED || modelDeployed === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : modelDeployed,
+            indexCreated:
+              indexCreated === STATUS.STARTED || indexCreated === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : indexCreated,
+            pipelineCreated:
+              pipelineCreated === STATUS.STARTED || pipelineCreated === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : pipelineCreated,
+            fileImport:
+              fileImport === STATUS.STARTED || fileImport === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : fileImport,
+            dataViewCreated:
+              dataViewCreated === STATUS.STARTED || dataViewCreated === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : dataViewCreated,
+          });
+
+          sendTelemetry(false);
+
+          throw new AbortError();
+        }
+      },
+    };
   }
 }
 
