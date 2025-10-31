@@ -15,13 +15,6 @@ export interface EmbeddableConversationDependencies {
 
 export interface EmbeddableConversationProps {
   /**
-   * Explicit conversation ID to load a specific conversation.
-   * Takes priority over sessionTag/agentId-based restoration.
-   * If not provided, the flyout will attempt to restore the last conversation.
-   */
-  conversationId?: string;
-
-  /**
    * Force starting a new conversation, ignoring any stored conversation IDs.
    * When true, a fresh conversation is always created.
    * @default false
