@@ -137,7 +137,11 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(sanitizeScores(body.scores.host!)).to.eql([
+          const sortedScores = sanitizeScores(body.scores.host!).sort((a, b) =>
+            String(a.id_value).localeCompare(String(b.id_value))
+          );
+
+          expect(sortedScores).to.eql([
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
@@ -592,7 +596,11 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: 2,
           });
 
-          expect(sanitizeScores(body.scores.host!)).to.eql([
+          const sortedScores = sanitizeScores(body.scores.host!).sort((a, b) =>
+            String(a.id_value).localeCompare(String(b.id_value))
+          );
+
+          expect(sortedScores).to.eql([
             {
               criticality_level: 'extreme_impact',
               criticality_modifier: 2.0,

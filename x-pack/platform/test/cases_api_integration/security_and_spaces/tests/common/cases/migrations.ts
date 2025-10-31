@@ -132,6 +132,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           updated_at: null,
           updated_by: null,
           observables: [],
+          total_observables: 0,
         });
       });
     });
