@@ -380,7 +380,11 @@ export function DataDriftIndexPatternsEditor({
             </EuiFormRow>
           ) : null}
 
-          {dataViewMsg ? <EuiCallOut color="primary">{dataViewMsg}</EuiCallOut> : null}
+          {dataViewMsg ? (
+            <EuiCallOut announceOnMount color="primary">
+              {dataViewMsg}
+            </EuiCallOut>
+          ) : null}
 
           <EuiFormRow id="analyzeDriftData">
             <EuiFlexGroup>
