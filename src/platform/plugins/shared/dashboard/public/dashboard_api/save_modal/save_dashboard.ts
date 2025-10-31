@@ -8,34 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Reference } from '@kbn/content-management-utils';
-import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import type { DashboardState } from '../../../common';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { coreServices } from '../../services/kibana_services';
 import { dashboardClient } from '../../dashboard_client';
-
-export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
-
-export interface SaveDashboardProps {
-  dashboardState: DashboardState;
-  references: Reference[];
-  saveOptions: SavedDashboardSaveOpts;
-  searchSourceReferences?: Reference[];
-  lastSavedId?: string;
-}
-
-export interface GetDashboardStateReturn {
-  attributes: DashboardState;
-  references: Reference[];
-}
-
-export interface SaveDashboardReturn {
-  id?: string;
-  error?: string;
-  references?: Reference[];
-  redirectRequired?: boolean;
-}
+import { SaveDashboardProps, SaveDashboardReturn } from './types';
 
 export const saveDashboard = async ({
   lastSavedId,
