@@ -39,6 +39,7 @@ import {
   type PublishesUnifiedSearch,
 } from './publishes_unified_search';
 import { apiHasUniqueId } from '../has_uuid';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 
 function hasLocalTimeRange(api: unknown) {
   return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
@@ -53,6 +54,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     searchSessionId: of(undefined),
     timeRange: of(undefined),
     timeslice: of(undefined),
+    esqlVariables: of(undefined),
   };
 
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
@@ -92,6 +94,10 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     );
   }
 
+  if (apiHasParentApi(api) && apiPublishesESQLVariables(api.parentApi)) {
+    observables.esqlVariables = api.parentApi.esqlVariables$;
+  }
+
   return combineLatest(observables);
 }
 
@@ -127,6 +133,8 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       isReloadTimeFetchContextEqual(prevContext, nextContext)
     ),
     switchMap(async (reloadTimeFetchContext) => {
+      console.log({ reloadTimeFetchContext });
+
       let searchSessionId;
       if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
         searchSessionId =

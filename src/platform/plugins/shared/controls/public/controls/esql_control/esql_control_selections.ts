@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  debounceTime,
+  filter,
+  map,
+  merge,
+  switchMap,
+} from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import {
   fetch$,
@@ -59,10 +68,13 @@ export const selectionComparators: StateComparators<
 };
 
 export function initializeESQLControlSelections(
+  uuid: string,
   parentApi: unknown,
   initialState: ESQLControlState,
   setDataLoading: (loading: boolean) => void
 ) {
+  const sectionId$: Observable<string> = parentApi?.getPanelSection$(uuid);
+
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
@@ -126,7 +138,7 @@ export function initializeESQLControlSelections(
     });
 
   // derive ESQL control variable from state.
-  const getEsqlVariable = () => {
+  const getEsqlVariable = (sectionId?: string) => {
     const isSingleSelect = singleSelect$.value;
     const selectedValues = selectedOptions$.value;
 
@@ -150,16 +162,21 @@ export function initializeESQLControlSelections(
       key: variableName$.value,
       value,
       type: variableType$.value,
+      meta: {
+        controlledBy: uuid,
+        ...(sectionId && { group: sectionId }),
+      },
     };
   };
   const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
   const variableSubscriptions = combineLatest([
+    sectionId$,
     variableName$,
     variableType$,
     selectedOptions$,
     availableOptions$,
     singleSelect$,
-  ]).subscribe(() => esqlVariable$.next(getEsqlVariable()));
+  ]).subscribe(([sectionId]) => esqlVariable$.next(getEsqlVariable(sectionId)));
 
   return {
     cleanup: () => {
