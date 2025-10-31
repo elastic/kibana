@@ -120,6 +120,7 @@ export class DataViewsService extends FtrService {
     // TODO: remove in https://github.com/elastic/kibana/issues/239313
     if (await this.testSubjects.exists('nav-tour-skip-button')) {
       await this.testSubjects.click('nav-tour-skip-button');
+      await this.testSubjects.waitForDeleted('nav-tour-skip-button');
     }
     const selectedDataView = await this.getSelectedName();
     if (name === selectedDataView) {
