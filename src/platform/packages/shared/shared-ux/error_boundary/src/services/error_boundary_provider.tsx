@@ -34,9 +34,11 @@ export const KibanaErrorBoundaryProvider: FC<
 > = ({ children, analytics }) => {
   const parentContext = useContext(Context);
   const value: KibanaErrorBoundaryServices = useMemo(() => {
-    // FIXME: analytics dep is optional - know when not to overwrite
     if (parentContext) {
-      return parentContext;
+      // Only use the parent context if it has the same analytics service
+      if (parentContext.errorService.getAnalyticsReference() === analytics) {
+        return parentContext;
+      }
     }
 
     return {
