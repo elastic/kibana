@@ -16,3 +16,4 @@ packages:
   enabled:
     - kbn-streamlang-tests
   disabled:
+    - kbn-scout
