@@ -1319,7 +1319,7 @@ describe('subqueries (parens)', () => {
       src,
       `FROM
   index1,
-  (  FROM index2
+  (FROM index2
     | WHERE a > 10
     | EVAL b = a * 2
     | STATS cnt = COUNT(*)
@@ -1327,7 +1327,7 @@ describe('subqueries (parens)', () => {
     | SORT cnt DESC
     | LIMIT 10),
   index3,
-  (  FROM index4 | STATS COUNT(*))
+  (FROM index4 | STATS COUNT(*))
 
   | WHERE d > 10
   | STATS max = MAX(*)

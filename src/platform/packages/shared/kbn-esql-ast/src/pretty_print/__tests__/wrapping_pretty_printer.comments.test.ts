@@ -953,7 +953,7 @@ FROM index`;
 
       const expected = `FROM
   index1,
-  /* before subquery */ (  /* inside start */ FROM index2 /* after source */
+  /* before subquery */ (/* inside start */ FROM index2 /* after source */
     | WHERE a > 10 /* after where */
     | EVAL b = a * 2
     | STATS cnt = COUNT(*)
@@ -961,7 +961,7 @@ FROM index`;
     | SORT cnt DESC
     | LIMIT 10) /* after first subquery */,
   index3,
-  (  FROM index4 | STATS COUNT(*)) /* after second */
+  (FROM index4 | STATS COUNT(*)) /* after second */
 
   | WHERE d > 10
   | STATS max = MAX(*)

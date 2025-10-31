@@ -681,7 +681,7 @@ export class WrappingPrettyPrinter {
 
     .on('visitParensExpression', (ctx, inp: Input): Output => {
       const child = ctx.visitChild(inp);
-      const formatted = `(${child.txt})`;
+      const formatted = `(${child.txt.trimStart()})`;
 
       return this.decorateWithComments(inp, ctx.node, formatted);
     })

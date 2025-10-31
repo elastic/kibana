@@ -95,21 +95,18 @@ export class Visitor<
         return null;
       })
       .on('visitParensExpression', (ctx): ESQLProperNode | null => {
-        // Parens can contain subqueries: FROM (FROM index | WHERE x > 10)
-        const childQuery = ctx.child();
+        const parens = ctx.node;
+        const parensLocation = parens.location;
 
-        if (childQuery?.type === 'query' && childQuery.location) {
-          const isPosInsideChild = childQuery.location.min <= pos && childQuery.location.max >= pos;
-
-          if (isPosInsideChild) {
-            // The position is inside a subquery, so we need to search within it recursively.
-            // We can't use visitExpression because subqueries are full AST trees, not simple expressions.
-            // We handle only the special case of query children, letting visitExpression handle everything else.
-            return Visitor.findNodeAtOrAfter(childQuery, pos);
-          }
+        if (!parensLocation) {
+          return null;
         }
 
-        // For non-query children (expressions) or positions outside the child bounds,
+        // Handle position before opening "("
+        if (parensLocation.min > pos) {
+          return parens;
+        }
+
         return null;
       })
       .on('visitCommand', visitCommand)
@@ -212,27 +209,19 @@ export class Visitor<
 
         const childQuery = ctx.child();
 
+        // Handle comments between end of subquery content and closing ")"
         if (childQuery?.type === 'query' && childQuery.location) {
-          const isPosInsideChild = childQuery.location.min <= pos && childQuery.location.max >= pos;
-
-          if (isPosInsideChild) {
-            return Visitor.findNodeAtOrBefore(childQuery, pos);
-          }
-
-          const isPosAfterChild = childQuery.location.max < pos && pos <= parensLocation.max;
-          if (isPosAfterChild) {
-            // Position is after the subquery ends but still inside the parens bounds.
-            // In the AST, child.max ends before the closing ")", and parens.max includes ")".
-            // Example: "FROM (FROM index | LIMIT 10 /* comment */ )"
-            //                ^                      ^            ^ ^
-            //                |                      |            | |
-            //          parens.min              child.max   pos   parens.max
-            // The comment pos is between child.max and parens.max.
-            // Comments in this gap should attach to the parens node, not to LIMIT.
+          if (childQuery.location.max < pos && pos <= parensLocation.max) {
             return parens;
           }
         }
 
+        // Handle comments immediately after closing ")"
+        if (pos > parensLocation.max) {
+          return parens;
+        }
+
+        // For comments inside parens but before/during content, continue visiting children
         return null;
       })
       .on('visitCommand', visitCommand)
