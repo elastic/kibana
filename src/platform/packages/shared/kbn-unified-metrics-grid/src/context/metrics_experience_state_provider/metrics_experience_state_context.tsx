@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { createContext } from 'react';
 import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
@@ -19,6 +19,8 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
   onValuesChange: (value: Array<ValueFilter>) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
+  noDataMetrics: string[];
+  onNoDataMetricsChange: (value: string[]) => void;
 }
 
 export const MetricsExperienceStateContext =
@@ -30,6 +32,8 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   const [valueFilters, setValueFilters] = useRestorableState('valueFilters', []);
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
+
+  const [noDataMetrics, setNoDataMetrics] = useState<string[]>([]);
 
   const onDimensionsChange = useCallback(
     (nextDimensions: string[]) => {
@@ -63,6 +67,19 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
     setIsFullscreen(!isFullscreen);
   }, [isFullscreen, setIsFullscreen]);
 
+  const onNoDataMetricsChange = useCallback(
+    (metrics: string[]) => {
+      if (metrics.length === 0) {
+        setNoDataMetrics([]);
+      } else {
+        setNoDataMetrics((prev) => [
+          ...new Set([...prev, ...metrics].sort((a, b) => a.localeCompare(b))),
+        ]);
+      }
+    },
+    [setNoDataMetrics]
+  );
+
   return (
     <MetricsExperienceStateContext.Provider
       value={{
@@ -71,11 +88,13 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
         isFullscreen,
         searchTerm,
         valueFilters,
+        noDataMetrics,
         onPageChange,
         onDimensionsChange,
         onValuesChange,
         onSearchTermChange,
         onToggleFullscreen,
+        onNoDataMetricsChange,
       }}
     >
       {children}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import { useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
@@ -63,12 +63,18 @@ export const MetricsExperienceGrid = ({
     dimensions,
     isFullscreen,
     valueFilters,
+    noDataMetrics,
     onPageChange,
     onSearchTermChange,
     onToggleFullscreen,
+    onNoDataMetricsChange,
   } = useMetricsExperienceState();
 
   const { updateTimeRange } = requestParams;
+
+  useEffect(() => {
+    onNoDataMetricsChange([]);
+  }, [valueFilters, dimensions, onNoDataMetricsChange]);
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -103,6 +109,15 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
+  const onCellLoad = useCallback(
+    (fieldName: string, hasData: boolean) => {
+      if (!hasData) {
+        onNoDataMetricsChange([fieldName]);
+      }
+    },
+    [onNoDataMetricsChange]
+  );
+
   const {
     currentPageFields = [],
     totalPages = 0,
@@ -114,6 +129,7 @@ export const MetricsExperienceGrid = ({
     pageSize: PAGE_SIZE,
     currentPage,
     searchTerm,
+    noDataMetrics,
   }) ?? {};
 
   const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
@@ -219,6 +235,7 @@ export const MetricsExperienceGrid = ({
             discoverFetch$={discoverFetch$}
             requestParams={requestParams}
             abortController={abortController}
+            onCellLoad={onCellLoad}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
