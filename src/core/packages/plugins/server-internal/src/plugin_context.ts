@@ -268,6 +268,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       setSpacesExtension: deps.savedObjects.setSpacesExtension,
       registerType: deps.savedObjects.registerType,
       getDefaultIndex: deps.savedObjects.getDefaultIndex,
+      isAccessControlEnabled: deps.savedObjects.isAccessControlEnabled,
     },
     status: {
       core$: deps.status.core$,

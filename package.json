@@ -167,6 +167,7 @@
     "@hapi/wreck": "^18.1.0",
     "@hello-pangea/dnd": "18.0.1",
     "@kbn/aad-fixtures-plugin": "link:x-pack/platform/test/alerting_api_integration/common/plugins/aad",
+    "@kbn/access-control-test-plugin": "link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin",
     "@kbn/actions-plugin": "link:x-pack/platform/plugins/shared/actions",
     "@kbn/actions-simulators-plugin": "link:x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators",
     "@kbn/actions-types": "link:src/platform/packages/shared/kbn-actions-types",
