@@ -12,7 +12,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { render } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   buildCustomThresholdAlert,
   buildCustomThresholdRule,

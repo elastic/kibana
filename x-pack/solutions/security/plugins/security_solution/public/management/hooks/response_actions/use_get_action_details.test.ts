@@ -11,7 +11,7 @@ import { useGetActionDetails } from './use_get_action_details';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
-import { useQuery as _useQuery } from '@tanstack/react-query';
+import { useQuery as _useQuery } from '@kbn/react-query';
 
 const useQueryMock = _useQuery as jest.Mock;
 

@@ -11,7 +11,7 @@ import { RuleDefinition } from './rule_definition';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import type { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as capabilities from '../../../lib/capabilities';
 
 jest.mock('./rule_actions', () => ({

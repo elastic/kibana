@@ -133,6 +133,7 @@
     "@kbn/content-management-content-editor",
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/core-http-browser-mocks",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

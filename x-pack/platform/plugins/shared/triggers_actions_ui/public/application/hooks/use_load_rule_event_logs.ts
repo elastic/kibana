@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import datemath from '@kbn/datemath';
 import { useKibana } from '../../common/lib/kibana';
 import type {

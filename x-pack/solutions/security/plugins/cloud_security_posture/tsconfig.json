@@ -70,6 +70,7 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/licensing-types",
     "@kbn/react-kibana-context-theme",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

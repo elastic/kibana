@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';

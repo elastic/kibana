@@ -16,12 +16,8 @@ import {
   ATTACK_DISCOVERY_INTERNAL_FIND,
   transformAttackDiscoveryAlertFromApi,
 } from '@kbn/elastic-assistant-common';
-import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback, useRef } from 'react';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';

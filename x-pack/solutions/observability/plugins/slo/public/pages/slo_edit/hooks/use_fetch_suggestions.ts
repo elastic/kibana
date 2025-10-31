@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export function useFetchSLOSuggestions() {

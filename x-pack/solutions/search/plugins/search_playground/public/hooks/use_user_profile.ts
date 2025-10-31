@@ -6,7 +6,7 @@
  */
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 
 export const useUserProfile = (): UserProfileWithAvatar | undefined => {

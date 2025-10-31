@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { type DataView } from '@kbn/data-views-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';

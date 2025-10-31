@@ -17,7 +17,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ExperimentalFeatures } from '../common/config';

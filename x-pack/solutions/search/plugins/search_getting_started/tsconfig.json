@@ -22,6 +22,7 @@
     "@kbn/serverless",
     "@kbn/analytics",
     "@kbn/config-schema",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*"

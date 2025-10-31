@@ -31,6 +31,7 @@
     "@kbn/es-query",
     "@kbn/fields-metadata-plugin",
     "@kbn/field-utils",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
+    "@kbn/react-query"
   ]
 }
