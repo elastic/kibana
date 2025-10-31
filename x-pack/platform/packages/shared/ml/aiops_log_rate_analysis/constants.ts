@@ -37,12 +37,8 @@ export const RANDOM_SAMPLER_SEED = 3867412;
 export const useLogRateAnalysisBarColors = () => {
   const { euiTheme } = useEuiTheme();
   return {
-    barColor: euiTheme.flags.hasVisColorAdjustment
-      ? euiTheme.colors.vis.euiColorVis0
-      : euiTheme.colors.vis.euiColorVis0,
-    barHighlightColor: euiTheme.flags.hasVisColorAdjustment
-      ? 'orange'
-      : euiTheme.colors.vis.euiColorVis8,
+    barColor: euiTheme.colors.vis.euiColorVis0,
+    barHighlightColor: euiTheme.colors.vis.euiColorVis8,
   };
 };
 

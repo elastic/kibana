@@ -352,7 +352,7 @@
             "tags": [],
             "label": "runner",
             "description": [
-              "\nOnechat runner scoped to the current execution.\nCan be used to run other workchat primitive as part of the tool execution."
+              "\nOnechat runner scoped to the current execution."
             ],
             "signature": [
               {
@@ -1810,7 +1810,7 @@
             "tags": [],
             "label": "runner",
             "description": [
-              "\nOnechat runner scoped to the current execution.\nCan be used to run other workchat primitive as part of the tool execution."
+              "\nOnechat runner scoped to the current execution."
             ],
             "signature": [
               {

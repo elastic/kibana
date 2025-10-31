@@ -36,6 +36,7 @@
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
     "@kbn/control-group-renderer",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/es-ui-shared-plugin"
   ]
 }

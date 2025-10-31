@@ -5,8 +5,18 @@
  * 2.0.
  */
 
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
+import React from 'react';
+
+import { coreMock } from '@kbn/core/public/mocks';
+
 import type { ChangePasswordFormValues } from './change_password_modal';
-import { validateChangePasswordForm } from './change_password_modal';
+import { ChangePasswordModal, validateChangePasswordForm } from './change_password_modal';
+import * as currentUserModule from '../../../components/use_current_user';
+import { securityMock } from '../../../mocks';
+import { Providers } from '../users_management_app';
 
 describe('ChangePasswordModal', () => {
   describe('#validateChangePasswordForm', () => {
@@ -131,6 +141,328 @@ describe('ChangePasswordModal', () => {
             false
           )
         ).toMatchInlineSnapshot(`Object {}`);
+      });
+    });
+  });
+
+  describe('render', () => {
+    const coreStart = coreMock.createStart();
+    const authc = securityMock.createSetup().authc;
+    const history = createMemoryHistory({ initialEntries: ['/users'] });
+    const onCancelMock = jest.fn();
+    const onSuccessMock = jest.fn();
+
+    const renderChangePasswordModal = (
+      username: string,
+      defaultValues?: ChangePasswordFormValues
+    ) => {
+      return render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <ChangePasswordModal
+              username={username}
+              defaultValues={defaultValues}
+              onCancel={onCancelMock}
+              onSuccess={onSuccessMock}
+            />
+          </Providers>
+        )
+      );
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // Mock useCurrentUser to return a different user by default
+      jest.spyOn(currentUserModule, 'useCurrentUser').mockReturnValue({
+        loading: false,
+        value: {
+          username: 'different_user',
+          roles: [],
+          full_name: '',
+          email: '',
+          enabled: true,
+          authentication_realm: { name: 'native', type: 'native' },
+          lookup_realm: { name: 'native', type: 'native' },
+          authentication_provider: { type: 'basic', name: 'basic' },
+          authentication_type: 'realm',
+          elastic_cloud_user: false,
+        },
+        error: undefined,
+      });
+    });
+
+    it(`does not render the current password field when changing another user's password`, () => {
+      renderChangePasswordModal('otheruser');
+
+      // Should not show current password field
+      expect(
+        screen.queryByTestId('editUserChangePasswordCurrentPasswordInput')
+      ).not.toBeInTheDocument();
+
+      // Should show new password and confirm password fields
+      expect(screen.getByTestId('editUserChangePasswordNewPasswordInput')).toBeInTheDocument();
+      expect(screen.getByTestId('editUserChangePasswordConfirmPasswordInput')).toBeInTheDocument();
+
+      // Should show username display
+      expect(screen.getByText('otheruser')).toBeInTheDocument();
+    });
+
+    it('renders system user warning for kibana user', () => {
+      renderChangePasswordModal('kibana');
+
+      expect(screen.getByText('Kibana will lose connection to Elasticsearch')).toBeInTheDocument();
+      expect(
+        screen.getByText(/After changing the password for the kibana user/)
+      ).toBeInTheDocument();
+    });
+
+    it('renders system user warning for kibana_system user', () => {
+      renderChangePasswordModal('kibana_system');
+
+      expect(screen.getByText('Kibana will lose connection to Elasticsearch')).toBeInTheDocument();
+      expect(
+        screen.getByText(/After changing the password for the kibana_system user/)
+      ).toBeInTheDocument();
+    });
+
+    it('renders cancel and submit buttons', () => {
+      renderChangePasswordModal('testuser');
+
+      expect(screen.getByTestId('changePasswordFormCancelButton')).toBeInTheDocument();
+      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeInTheDocument();
+    });
+
+    it('disables submit button when the form is empty', () => {
+      renderChangePasswordModal('testuser');
+
+      const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
+      expect(submitButton).toBeDisabled();
+    });
+
+    it('disables submit button when passwords do not match', async () => {
+      const user = userEvent.setup();
+      const { unmount } = renderChangePasswordModal('testuser');
+
+      const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
+      expect(submitButton).toBeDisabled();
+
+      const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
+      const confirmPasswordInput = screen.getByTestId('editUserChangePasswordConfirmPasswordInput');
+
+      await user.type(newPasswordInput, 'ValidPassword123');
+      await user.type(confirmPasswordInput, 'DifferentPassword456');
+
+      await waitFor(() => {
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
+      });
+
+      unmount();
+    });
+
+    it('disables submit button when password is too short', async () => {
+      const user = userEvent.setup();
+      const { unmount } = renderChangePasswordModal('testuser');
+
+      const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
+      expect(submitButton).toBeDisabled();
+
+      const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
+      const confirmPasswordInput = screen.getByTestId('editUserChangePasswordConfirmPasswordInput');
+
+      await user.type(newPasswordInput, 'short');
+      await user.type(confirmPasswordInput, 'short');
+
+      await waitFor(() => {
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
+      });
+
+      unmount();
+    });
+
+    it('enables submit button when valid matching passwords are entered', async () => {
+      const user = userEvent.setup();
+      const { unmount } = renderChangePasswordModal('testuser');
+
+      const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
+      expect(submitButton).toBeDisabled();
+
+      const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
+      const confirmPasswordInput = screen.getByTestId('editUserChangePasswordConfirmPasswordInput');
+
+      await user.type(newPasswordInput, 'ValidPassword123');
+      await user.type(confirmPasswordInput, 'ValidPassword123');
+
+      await waitFor(() => {
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeEnabled();
+      });
+
+      unmount();
+    });
+
+    it('calls onCancel when cancel button is clicked', async () => {
+      const user = userEvent.setup();
+      const { unmount } = renderChangePasswordModal('testuser');
+
+      const cancelButton = screen.getByTestId('changePasswordFormCancelButton');
+      await user.click(cancelButton);
+
+      expect(onCancelMock).toHaveBeenCalledTimes(1);
+
+      unmount();
+    });
+
+    describe('when rendered for current user', () => {
+      beforeEach(() => {
+        // Mock useCurrentUser to return the current user
+        jest.spyOn(currentUserModule, 'useCurrentUser').mockReturnValue({
+          loading: false,
+          value: {
+            username: 'currentuser',
+            roles: [],
+            full_name: '',
+            email: '',
+            enabled: true,
+            authentication_realm: { name: 'native', type: 'native' },
+            lookup_realm: { name: 'native', type: 'native' },
+            authentication_provider: { type: 'basic', name: 'basic' },
+            authentication_type: 'realm',
+            elastic_cloud_user: false,
+          },
+          error: undefined,
+        });
+      });
+
+      it('renders current password field when changing own password', () => {
+        renderChangePasswordModal('currentuser');
+
+        // Should show current password field
+        expect(
+          screen.getByTestId('editUserChangePasswordCurrentPasswordInput')
+        ).toBeInTheDocument();
+
+        // Should show new password and confirm password fields
+        expect(screen.getByTestId('editUserChangePasswordNewPasswordInput')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('editUserChangePasswordConfirmPasswordInput')
+        ).toBeInTheDocument();
+
+        // Should NOT show username display
+        expect(screen.queryByText('currentuser')).not.toBeInTheDocument();
+      });
+
+      it('disables submit button when current password is not provided', async () => {
+        const user = userEvent.setup();
+        const { unmount } = renderChangePasswordModal('currentuser');
+
+        const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
+        expect(submitButton).toBeDisabled();
+
+        const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
+        const confirmPasswordInput = screen.getByTestId(
+          'editUserChangePasswordConfirmPasswordInput'
+        );
+
+        // Fill in new password and confirm password, but not current password
+        await user.type(newPasswordInput, 'ValidPassword123');
+        await user.type(confirmPasswordInput, 'ValidPassword123');
+
+        await waitFor(() => {
+          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
+        });
+
+        unmount();
+      });
+
+      it('disables submit button when only current password is provided', async () => {
+        const user = userEvent.setup();
+        const { unmount } = renderChangePasswordModal('currentuser');
+
+        const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
+        expect(submitButton).toBeDisabled();
+
+        const currentPasswordInput = screen.getByTestId(
+          'editUserChangePasswordCurrentPasswordInput'
+        );
+
+        await user.type(currentPasswordInput, 'OldPassword123');
+
+        await waitFor(() => {
+          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
+        });
+
+        unmount();
+      });
+
+      it('disables submit button when passwords do not match', async () => {
+        const user = userEvent.setup();
+        const { unmount } = renderChangePasswordModal('currentuser');
+
+        const currentPasswordInput = screen.getByTestId(
+          'editUserChangePasswordCurrentPasswordInput'
+        );
+        const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
+        const confirmPasswordInput = screen.getByTestId(
+          'editUserChangePasswordConfirmPasswordInput'
+        );
+
+        await user.type(currentPasswordInput, 'OldPassword123');
+        await user.type(newPasswordInput, 'ValidPassword123');
+        await user.type(confirmPasswordInput, 'DifferentPassword456');
+
+        await waitFor(() => {
+          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
+        });
+
+        unmount();
+      });
+
+      it('disables submit button when password is too short', async () => {
+        const user = userEvent.setup();
+        const { unmount } = renderChangePasswordModal('currentuser');
+
+        const currentPasswordInput = screen.getByTestId(
+          'editUserChangePasswordCurrentPasswordInput'
+        );
+        const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
+        const confirmPasswordInput = screen.getByTestId(
+          'editUserChangePasswordConfirmPasswordInput'
+        );
+
+        await user.type(currentPasswordInput, 'OldPassword123');
+        await user.type(newPasswordInput, 'short');
+        await user.type(confirmPasswordInput, 'short');
+
+        await waitFor(() => {
+          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
+        });
+
+        unmount();
+      });
+
+      it('enables submit button when all password fields are valid for current user', async () => {
+        const user = userEvent.setup();
+        const { unmount } = renderChangePasswordModal('currentuser');
+
+        const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
+        expect(submitButton).toBeDisabled();
+
+        const currentPasswordInput = screen.getByTestId(
+          'editUserChangePasswordCurrentPasswordInput'
+        );
+        const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
+        const confirmPasswordInput = screen.getByTestId(
+          'editUserChangePasswordConfirmPasswordInput'
+        );
+
+        await user.type(currentPasswordInput, 'OldPassword123');
+        await user.type(newPasswordInput, 'ValidPassword123');
+        await user.type(confirmPasswordInput, 'ValidPassword123');
+
+        await waitFor(() => {
+          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeEnabled();
+        });
+
+        unmount();
       });
     });
   });
