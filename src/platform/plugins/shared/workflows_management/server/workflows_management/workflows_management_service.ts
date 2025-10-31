@@ -24,7 +24,7 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
+import {
   ConnectorTypeInfo,
   CreateWorkflowCommand,
   EsWorkflow,
@@ -826,12 +826,28 @@ export class WorkflowsService {
         },
       });
     }
-    if (params.executionTypes) {
-      must.push({
-        terms: {
-          executionType: params.executionTypes,
-        },
-      });
+    if (params.executionTypes && params.executionTypes?.length === 1) {
+      const isTestRun = params.executionTypes[0] === ExecutionType.TEST;
+
+      if (isTestRun) {
+        must.push({
+          term: {
+            isTestRun: params.executionTypes[0] === ExecutionType.TEST,
+          },
+        });
+      } else {
+        // the field isTestRun do not exist for regular runs
+        // so we need to check for both cases: field not existing or field being false
+        must.push({
+          bool: {
+            should: [
+              { term: { isTestRun } },
+              { bool: { must_not: { exists: { field: 'isTestRun' } } } },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      }
     }
 
     const page = params.page ?? 1;
