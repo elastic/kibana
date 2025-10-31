@@ -181,4 +181,11 @@ describe('getSSLSettingsFromConfig', () => {
       verificationMode: 'certificate',
     });
   });
+
+  test('get verificationMode eql "full", if both values eql undefined', () => {
+    const nodeOption = getSSLSettingsFromConfig(undefined, undefined);
+    expect(nodeOption).toMatchObject({
+      verificationMode: 'full',
+    });
+  });
 });
