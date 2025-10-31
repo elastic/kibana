@@ -27,6 +27,7 @@ const mockProps: UserPanelProps = {
   userName: 'test',
   contextID: 'test-user-panel',
   scopeId: 'test-scope-id',
+  isPreviewMode: false,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');

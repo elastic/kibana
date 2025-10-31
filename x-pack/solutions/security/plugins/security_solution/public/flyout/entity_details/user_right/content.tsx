@@ -7,6 +7,7 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import type { UserItem } from '../../../../common/search_strategy';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -31,8 +32,7 @@ interface UserPanelContentProps {
   scopeId: string;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isPreviewMode?: boolean;
-  isLinkEnabled: boolean;
+  isPreviewMode: boolean;
 }
 
 export const UserPanelContent = ({
@@ -45,13 +45,18 @@ export const UserPanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
-  isLinkEnabled,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
 
+  const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
+    'entityDetailsHighlightsEnabled'
+  );
+
   return (
     <FlyoutBody>
-      <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
+      {isEntityDetailsHighlightsAIEnabled && (
+        <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
+      )}
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
@@ -60,7 +65,6 @@ export const UserPanelContent = ({
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
-            isLinkEnabled={isLinkEnabled}
             entityType={EntityType.user}
           />
           <EuiHorizontalRule />
@@ -74,7 +78,6 @@ export const UserPanelContent = ({
         value={userName}
         field={EntityIdentifierFields.userName}
         isPreviewMode={isPreviewMode}
-        isLinkEnabled={isLinkEnabled}
         openDetailsPanel={openDetailsPanel}
       />
       <ObservedEntity

@@ -295,6 +295,7 @@ paths:
             type: string
       responses:
         '200':
+          description: A successful response.
           content:
             application/json:
               schema:
@@ -475,6 +476,7 @@ paths:
                   }
       responses:
         '200':
+          description: A successful response.
           content:
             application/json:
               schema:
