@@ -235,21 +235,46 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
+      await es.index({
+        id: 'agent-without-metrics',
+        index: '.fleet-agents',
+        refresh: 'wait_for',
+        document: {
+          access_api_key_id: 'api-key-2',
+          active: true,
+          policy_id: 'policy1',
+          type: 'PERMANENT',
+          local_metadata: { host: { hostname: 'host2' } },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:14:25Z',
+          last_checkin: '2022-06-27T12:27:29Z',
+          tags: ['existingTag'],
+          agent: { id: 'agent-without-metrics', version: '9.2.0' },
+        },
+      });
+
       const { body: apiResponse } = await supertest
         .get(`/api/fleet/agents?withMetrics=true`)
         .expect(200);
 
       expect(apiResponse).to.have.keys('page', 'total', 'items');
-      expect(apiResponse.total).to.eql(4);
+      expect(apiResponse.total).to.eql(5);
 
       const agent1: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent1');
       //  As both of the indexed items have the same agent id, and each one has its own memory/cpu item, the metrics should include both values combined as each is now uniquely counted towards total memory/cpu usage
       expect(agent1.metrics?.memory_size_byte_avg).to.eql('51021840');
       expect(agent1.metrics?.cpu_avg).to.eql('0.01166');
 
-      const agent2: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent2');
-      expect(agent2.metrics?.memory_size_byte_avg).equal(undefined);
-      expect(agent2.metrics?.cpu_avg).equal(undefined);
+      const agentWithoutMetrics: Agent = apiResponse.items.find(
+        (agent: any) => agent.id === 'agent-without-metrics'
+      );
+      expect(agentWithoutMetrics.metrics?.memory_size_byte_avg).equal(undefined);
+      expect(agentWithoutMetrics.metrics?.cpu_avg).equal(undefined);
+
+      await es.delete({
+        id: 'agent-without-metrics',
+        index: '.fleet-agents',
+      });
     });
 
     it('should return a status summary if getStatusSummary provided', async () => {
@@ -265,7 +290,7 @@ export default function ({ getService }: FtrProviderContext) {
         enrolling: 0,
         error: 0,
         inactive: 0,
-        offline: 4,
+        offline: 5,
         online: 0,
         orphaned: 0,
         unenrolled: 0,
