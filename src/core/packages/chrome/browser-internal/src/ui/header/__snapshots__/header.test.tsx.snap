@@ -175,34 +175,29 @@ exports[`Header renders 1`] = `
           </button>
         </div>
       </div>
-      <div
-        class="css-2tq5q7-redirectAppLinksStyles-Header"
-        data-test-subj="kbnRedirectAppLink"
+      <nav
+        aria-label="Breadcrumbs"
+        class="euiBreadcrumbs euiHeaderBreadcrumbs emotion-euiHeaderBreadcrumbs"
+        data-test-subj="breadcrumbs"
       >
-        <nav
-          aria-label="Breadcrumbs"
-          class="euiBreadcrumbs euiHeaderBreadcrumbs emotion-euiHeaderBreadcrumbs"
-          data-test-subj="breadcrumbs"
+        <ol
+          class="euiBreadcrumbs__list emotion-euiBreadcrumbs__list-isTruncated"
         >
-          <ol
-            class="euiBreadcrumbs__list emotion-euiBreadcrumbs__list-isTruncated"
+          <li
+            class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+            data-test-subj="euiBreadcrumb"
           >
-            <li
-              class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
-              data-test-subj="euiBreadcrumb"
+            <span
+              aria-current="page"
+              class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-onlyChild-isTruncatedLast"
+              data-test-subj="breadcrumb first last"
+              title="test"
             >
-              <span
-                aria-current="page"
-                class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-onlyChild-isTruncatedLast"
-                data-test-subj="breadcrumb first last"
-                title="test"
-              >
-                test
-              </span>
-            </li>
-          </ol>
-        </nav>
-      </div>
+              test
+            </span>
+          </li>
+        </ol>
+      </nav>
       <div
         class="euiHeaderSection emotion-euiHeaderSection-right"
       >
