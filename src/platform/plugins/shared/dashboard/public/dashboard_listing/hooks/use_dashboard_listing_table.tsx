@@ -46,7 +46,7 @@ const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 const toTableListViewSavedObject = (
   hit: DashboardSearchAPIResult['hits'][number]
 ): DashboardSavedObjectUserContent => {
-  const { title, description, timeRestore } = hit.attributes;
+  const { title, description, timeRange } = hit.attributes;
   return {
     type: 'dashboard',
     id: hit.id,
@@ -59,7 +59,7 @@ const toTableListViewSavedObject = (
     attributes: {
       title,
       description,
-      timeRestore,
+      timeRestore: Boolean(timeRange),
     },
   };
 };
@@ -217,7 +217,7 @@ export const useDashboardListingTable = ({
           options: {
             // include only tags references in the response to save bandwidth
             includeReferences: ['tag'],
-            fields: ['title', 'description', 'timeRestore'],
+            fields: ['title', 'description', 'timeRange'],
           },
         })
         .then(({ total, hits }) => {

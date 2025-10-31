@@ -14,7 +14,8 @@ import type {
   FramePublicAPI,
   UserMessage,
   AnnotationGroups,
-} from '../../types';
+  DataViewsState,
+} from '@kbn/lens-common';
 import type {
   State,
   XYState,
@@ -39,7 +40,6 @@ import type {
 } from '@kbn/event-annotation-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { DataViewsState } from '../../state_management';
 import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -2465,7 +2465,7 @@ describe('xy_visualization', () => {
         });
         expect(config.groups[0].accessors).toEqual([
           {
-            color: '#f04e98',
+            color: '#BC1E70',
             columnId: 'an1',
             customIcon: IconCircle,
             triggerIconType: 'custom',

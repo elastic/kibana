@@ -11,15 +11,14 @@ import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map } from 'rxjs';
-import type { DashboardState } from '../../common';
-import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
+import type { DashboardState, DashboardOptions } from '../../server/content_management';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
 
 export type DashboardSettings = Required<DashboardOptions> & {
-  description?: DashboardAttributes['description'];
-  tags: DashboardAttributes['tags'];
-  timeRestore: DashboardAttributes['timeRestore'];
-  title: DashboardAttributes['description'];
+  description?: DashboardState['description'];
+  tags: DashboardState['tags'];
+  timeRestore: boolean;
+  title: DashboardState['title'];
 };
 
 const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {
@@ -47,7 +46,7 @@ function deserializeState(state: DashboardState) {
     ...state.options,
     description: state.description,
     tags: state.tags,
-    timeRestore: state.timeRestore,
+    timeRestore: Boolean(state.timeRange),
     title: state.title,
   };
 }
@@ -64,7 +63,6 @@ export function initializeSettingsManager(initialState: DashboardState) {
     return {
       ...(description && { description }),
       tags,
-      timeRestore,
       title,
       options,
     };
@@ -107,8 +105,8 @@ export function initializeSettingsManager(initialState: DashboardState) {
             return {
               ...(description && { description }),
               ...(tags && { tags }),
-              ...(typeof timeRestore === 'boolean' && { timeRestore }),
               ...(title && { title }),
+              ...(typeof timeRestore === 'boolean' && { timeRestore }),
               ...(options && { options }),
             };
           })

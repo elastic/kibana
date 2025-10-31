@@ -156,7 +156,7 @@ export const optionsSchema = schema.object({
 export function getDashboardStateSchema() {
   return {
     controlGroupInput: schema.maybe(controlsGroupSchema),
-    description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
+    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(filterSchema)),
     options: schema.maybe(optionsSchema),
     panels: schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
@@ -170,10 +170,6 @@ export function getDashboardStateSchema() {
       )
     ),
     timeRange: schema.maybe(timeRangeSchema),
-    timeRestore: schema.boolean({
-      defaultValue: false,
-      meta: { description: 'Whether to restore time upon viewing this dashboard' },
-    }),
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
     version: schema.maybe(schema.number({ meta: { deprecated: true } })),
   };
