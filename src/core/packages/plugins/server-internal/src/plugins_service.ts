@@ -36,6 +36,7 @@ import type { PluginsConfigType } from './plugins_config';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
+import { PluginFeatureFlagsTransformer } from './plugin_feature_flags_transformer';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -146,6 +147,14 @@ export class PluginsService
 
   public getExposedPluginConfigsToUsage() {
     return this.pluginConfigUsageDescriptors;
+  }
+
+  // Register the plugin feature flags transformer.
+  public registerFeatureFlagsTransformer() {
+    const pluginFlagsTransformer = new PluginFeatureFlagsTransformer(this.configService);
+    this.configService.registerConfigTransformer((path, config) =>
+      pluginFlagsTransformer.transform(path, config)
+    );
   }
 
   public async preboot(deps: PluginsServicePrebootSetupDeps) {

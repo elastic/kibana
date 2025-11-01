@@ -56,6 +56,7 @@ export class FeatureFlagsService {
   private readonly logger: Logger;
   private readonly stop$ = new Subject<void>();
   private readonly overrides$ = new BehaviorSubject<Record<string, unknown>>({});
+  private readonly enableAllFlags$ = new BehaviorSubject<boolean | null>(null);
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private initialFeatureFlagsGetter: InitialFeatureFlagsGetter = async () => ({});
 
@@ -78,8 +79,9 @@ export class FeatureFlagsService {
 
     this.core.configService
       .atPath<FeatureFlagsConfig>(featureFlagsConfig.path)
-      .subscribe(({ overrides = {} }) => {
-        this.overrides$.next(getFlattenedObject(overrides));
+      .subscribe(({ overrides = {}, enableAllFlags }) => {
+        this.overrides$.next(getFlattenedObject(overrides || {}));
+        this.enableAllFlags$.next(enableAllFlags ?? null);
       });
 
     return {
@@ -193,12 +195,22 @@ export class FeatureFlagsService {
     flagName: string,
     fallbackValue: T
   ): Promise<T> {
-    const override = get(this.overrides$.value, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
-    const value =
-      typeof override !== 'undefined'
-        ? (override as T)
-        : // We have to bind the evaluation or the client will lose its internal context
-          await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
+    let value: T;
+
+    // 1. Check overrides first (highest priority)
+    const override = get(this.overrides$.value, flagName);
+    if (typeof override !== 'undefined') {
+      value = override as T;
+    }
+    // 2. Check master flag (only for boolean flags)
+    else if (this.enableAllFlags$.value !== null && typeof fallbackValue === 'boolean') {
+      value = this.enableAllFlags$.value as T;
+    }
+    // 3. Fall back to provider evaluation
+    else {
+      value = await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
+    }
+
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
     // TODO: increment usage counter
     return value;

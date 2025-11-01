@@ -11,7 +11,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { PluginsConfigType } from './plugins_config';
-import { PluginsConfig } from './plugins_config';
+import { PluginsConfig, config } from './plugins_config';
 
 describe('PluginsConfig', () => {
   it('retrieves additionalPluginPaths from config.paths when in production mode', () => {
@@ -20,8 +20,8 @@ describe('PluginsConfig', () => {
       initialize: true,
       paths: ['some-path', 'another-path'],
     };
-    const config = new PluginsConfig(rawConfig, env);
-    expect(config.additionalPluginPaths).toEqual(['some-path', 'another-path']);
+    const pluginsConfig = new PluginsConfig(rawConfig, env);
+    expect(pluginsConfig.additionalPluginPaths).toEqual(['some-path', 'another-path']);
   });
 
   it('retrieves additionalPluginPaths from config.paths when in development mode', () => {
@@ -30,8 +30,8 @@ describe('PluginsConfig', () => {
       initialize: true,
       paths: ['some-path', 'another-path'],
     };
-    const config = new PluginsConfig(rawConfig, env);
-    expect(config.additionalPluginPaths).toEqual(['some-path', 'another-path']);
+    const pluginsConfig = new PluginsConfig(rawConfig, env);
+    expect(pluginsConfig.additionalPluginPaths).toEqual(['some-path', 'another-path']);
   });
 
   it('retrieves shouldEnableAllPlugins', () => {
@@ -41,8 +41,8 @@ describe('PluginsConfig', () => {
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
     };
-    const config = new PluginsConfig(rawConfig, env);
-    expect(config.shouldEnableAllPlugins).toEqual(true);
+    const pluginsConfig = new PluginsConfig(rawConfig, env);
+    expect(pluginsConfig.shouldEnableAllPlugins).toEqual(true);
   });
 
   it('retrieves included plugin groups', () => {
@@ -53,7 +53,42 @@ describe('PluginsConfig', () => {
       forceEnableAllPlugins: true,
       allowlistPluginGroups: ['search'],
     };
-    const config = new PluginsConfig(rawConfig, env);
-    expect(config.allowlistPluginGroups).toEqual(['search']);
+    const pluginsConfig = new PluginsConfig(rawConfig, env);
+    expect(pluginsConfig.allowlistPluginGroups).toEqual(['search']);
+  });
+
+  describe('schema validation', () => {
+    it('accepts featureFlags.enableAllFlags as optional boolean', () => {
+      const validConfig = {
+        initialize: true,
+        paths: [],
+        featureFlags: {
+          enableAllFlags: true,
+        },
+      };
+
+      expect(() => config.schema.validate(validConfig)).not.toThrow();
+    });
+
+    it('accepts valid config without featureFlags object', () => {
+      const validConfig = {
+        initialize: true,
+        paths: [],
+      };
+
+      expect(() => config.schema.validate(validConfig)).not.toThrow();
+    });
+
+    it('fails validation with invalid featureFlags.enableAllFlags type', () => {
+      const invalidConfig = {
+        initialize: true,
+        paths: [],
+        featureFlags: {
+          enableAllFlags: 'not-a-boolean',
+        },
+      };
+
+      expect(() => config.schema.validate(invalidConfig)).toThrow();
+    });
   });
 });

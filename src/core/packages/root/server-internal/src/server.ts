@@ -595,5 +595,6 @@ export class Server {
 
   public setupCoreConfig() {
     registerServiceConfig(this.configService);
+    this.plugins.registerFeatureFlagsTransformer();
   }
 }
