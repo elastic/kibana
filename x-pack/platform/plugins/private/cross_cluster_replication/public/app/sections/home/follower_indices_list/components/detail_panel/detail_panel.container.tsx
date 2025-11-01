@@ -6,6 +6,7 @@
  */
 
 import { connect } from 'react-redux';
+import type { ApiStatus, FollowerIndex } from '../../../../../../../common/types';
 import { DetailPanel as DetailPanelView } from './detail_panel';
 
 import {
@@ -13,14 +14,29 @@ import {
   getSelectedFollowerIndexId,
   getApiStatus,
 } from '../../../../../store/selectors';
+import { getFollowerIndex } from '../../../../../store/actions';
 import { SECTIONS } from '../../../../../constants';
 
 const scope = SECTIONS.FOLLOWER_INDEX;
 
-const mapStateToProps = (state) => ({
+interface StateProps {
+  followerIndexId: string;
+  followerIndex: FollowerIndex;
+  apiStatus: ApiStatus;
+}
+
+interface DispatchProps {
+  getFollowerIndex: (id: string) => void;
+}
+
+const mapStateToProps = (state: any): StateProps => ({
   followerIndexId: getSelectedFollowerIndexId('detail')(state),
   followerIndex: getSelectedFollowerIndex('detail')(state),
   apiStatus: getApiStatus(scope)(state),
 });
 
-export const DetailPanel = connect(mapStateToProps)(DetailPanelView);
+const mapDispatchToProps = (dispatch: any): DispatchProps => ({
+  getFollowerIndex: (id: string) => dispatch(getFollowerIndex(id)),
+});
+
+export const DetailPanel = connect(mapStateToProps, mapDispatchToProps)(DetailPanelView);
