@@ -6185,10 +6185,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-chat@link:src/platform/packages/shared/deeplinks/chat":
-  version "0.0.0"
-  uid ""
-
 "@kbn/deeplinks-devtools@link:src/platform/packages/shared/deeplinks/devtools":
   version "0.0.0"
   uid ""
@@ -6222,6 +6218,10 @@
   uid ""
 
 "@kbn/deeplinks-workflows@link:src/platform/packages/shared/deeplinks/workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/deeplinks-workplace-ai@link:src/platform/packages/shared/deeplinks/workplace_ai":
   version "0.0.0"
   uid ""
 
@@ -9258,6 +9258,10 @@
   uid ""
 
 "@kbn/workplace-ai-app@link:x-pack/solutions/workplaceai/plugins/workplace_ai_app":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workplace-ai-connectors-plugin@link:x-pack/solutions/workplace_ai/plugins/workplace_ai_connectors":
   version "0.0.0"
   uid ""
 
