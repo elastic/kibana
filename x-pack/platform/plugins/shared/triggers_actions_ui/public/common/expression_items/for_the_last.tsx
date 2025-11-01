@@ -16,7 +16,10 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiFieldNumber,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import type { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
@@ -28,6 +31,7 @@ export interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
   errors: IErrorObject;
+  isTimeSizeBelowRecommended?: boolean;
   onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
@@ -52,6 +56,13 @@ const FOR_LAST_LABEL = i18n.translate(
     defaultMessage: 'for the last',
   }
 );
+
+const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
+  'xpack.triggersActionsUI.common.expressionItems.forTheLast.recommendedTimeSizeError',
+  {
+    defaultMessage: 'Minimum 5 minutes recommended',
+  }
+);
 export const ForLastExpression = ({
   timeWindowSize,
   timeWindowUnit = 's',
@@ -60,6 +71,7 @@ export const ForLastExpression = ({
   onChangeWindowSize,
   onChangeWindowUnit,
   popupPosition,
+  isTimeSizeBelowRecommended = false,
   description = FOR_LAST_LABEL,
 }: ForLastExpressionProps) => {
   const [alertDurationPopoverOpen, setAlertDurationPopoverOpen] = useState(false);
@@ -101,12 +113,16 @@ export const ForLastExpression = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiFormRow
-              isInvalid={Number(errors.timeWindowSize?.length) > 0}
-              error={errors.timeWindowSize as string[]}
+              isInvalid={Number(errors.timeWindowSize?.length) > 0 || isTimeSizeBelowRecommended}
+              error={
+                isTimeSizeBelowRecommended
+                  ? [RECOMMENDED_TIMESIZE_WARNING]
+                  : (errors.timeWindowSize as string[])
+              }
             >
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"
-                isInvalid={Number(errors.timeWindowSize?.length) > 0}
+                isInvalid={Number(errors.timeWindowSize?.length) > 0 || isTimeSizeBelowRecommended}
                 min={0}
                 value={timeWindowSize || ''}
                 onChange={(e) => {
@@ -134,6 +150,7 @@ export const ForLastExpression = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {isTimeSizeBelowRecommended && <RecommendedTimeSizeWarning />}
       </div>
     </EuiPopover>
   );
@@ -141,3 +158,33 @@ export const ForLastExpression = ({
 
 // eslint-disable-next-line import/no-default-export
 export { ForLastExpression as default };
+
+function RecommendedTimeSizeWarning() {
+  const description = i18n.translate(
+    'xpack.triggersActionsUI.observability.rules.customThreshold.recommendedTimeSizeWarning.description',
+    {
+      defaultMessage:
+        'Recommended minimum value is 5 minutes. This is to ensure, that the alert has enough data to evaluate. If you choose a lower values, the alert may not work as expected.',
+    }
+  );
+
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.triggersActionsUI.observability.rules.customThreshold.recommendedTimeSizeWarning.title',
+          { defaultMessage: `Value is too low, possible alerting noise` }
+        )}
+        color="warning"
+        iconType="warning"
+        size="s"
+        css={css`
+          max-width: 400px;
+        `}
+      >
+        <p>{description}</p>
+      </EuiCallOut>
+    </>
+  );
+}

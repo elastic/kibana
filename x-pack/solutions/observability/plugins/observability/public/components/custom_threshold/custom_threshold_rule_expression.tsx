@@ -72,12 +72,27 @@ export const defaultExpression: MetricExpression = {
     },
   ],
   threshold: [100],
-  timeSize: 1,
+  timeSize: 5,
   timeUnit: 'm',
 };
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 const EMPTY_FILTERS: Filter[] = [];
+
+const convertToMinutes = (timeWindowSize: number, timeWindowUnit: TimeUnitChar): number => {
+  switch (timeWindowUnit) {
+    case 's':
+      return timeWindowSize / 60;
+    case 'm':
+      return timeWindowSize;
+    case 'h':
+      return timeWindowSize * 60;
+    case 'd':
+      return timeWindowSize * 60 * 24;
+    default:
+      return timeWindowSize;
+  }
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
@@ -97,7 +112,7 @@ export default function Expressions(props: Props) {
     [ruleParams.groupBy]
   );
 
-  const [timeSize, setTimeSize] = useState<number | undefined>(1);
+  const [timeSize, setTimeSize] = useState<number | undefined>(5);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
@@ -117,6 +132,9 @@ export default function Expressions(props: Props) {
     }),
     [dataView]
   );
+
+  const isTimeSizeBelowRecommended =
+    timeSize && timeUnit ? convertToMinutes(timeSize, timeUnit) < 5 : false;
 
   const initSearchSource = async (resetDataView: boolean, thisData: DataPublicPluginStart) => {
     let initialSearchConfiguration = resetDataView ? undefined : ruleParams.searchConfiguration;
@@ -635,6 +653,7 @@ export default function Expressions(props: Props) {
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         display="fullWidth"
+        isTimeSizeBelowRecommended={isTimeSizeBelowRecommended}
       />
 
       <EuiSpacer size="m" />
