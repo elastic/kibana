@@ -127,7 +127,14 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('waffleGroupByDropdown');
       const contextMenu = await testSubjects.find('groupByContextMenu');
       const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
-      await menuItems[0].click();
+
+      // Retry the click to handle animations/overlays from previous interactions
+      await retry.tryForTime(5000, async () => {
+        await menuItems[0].click();
+        // Verify the click worked by checking if the custom field input appears
+        await testSubjects.existOrFail('groupByCustomField', { timeout: 1000 });
+      });
+
       const groupByCustomField = await testSubjects.find('groupByCustomField');
       await comboBox.setElement(groupByCustomField, field);
       await testSubjects.click('groupByCustomFieldAddButton');

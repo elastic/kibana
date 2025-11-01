@@ -39,6 +39,7 @@ export function runFtrCli() {
       }
 
       const esVersion = esVersionInput ? new EsVersion(esVersionInput) : EsVersion.getDefault();
+      const ftrLogOutput = flagsReader.string('ftr-log-output');
       const settingOverrides = {
         mochaOpts: {
           bail: flagsReader.boolean('bail'),
@@ -59,6 +60,7 @@ export function runFtrCli() {
         },
         updateBaselines: flagsReader.boolean('updateBaselines') || flagsReader.boolean('u'),
         updateSnapshots: flagsReader.boolean('updateSnapshots') || flagsReader.boolean('u'),
+        ...(ftrLogOutput ? { ftrLogOutput } : {}),
       };
 
       const config = await readConfigFile(log, esVersion, configPaths[0], settingOverrides);
@@ -134,6 +136,7 @@ export function runFtrCli() {
           'exclude-tag',
           'kibana-install-dir',
           'es-version',
+          'ftr-log-output',
         ],
         boolean: [
           'bail',
@@ -168,6 +171,7 @@ export function runFtrCli() {
           --updateSnapshots  replace inline and file snapshots with whatever is generated from the test
           -u                 replace both baseline screenshots and snapshots
           --kibana-install-dir  directory where the Kibana install being tested resides
+          --ftr-log-output=<minimal|full>  control FTR log verbosity (default: minimal)
           --throttle         enable network throttling in Chrome browser
           --headless         run browser in headless mode
           --dry-run          report tests without executing them

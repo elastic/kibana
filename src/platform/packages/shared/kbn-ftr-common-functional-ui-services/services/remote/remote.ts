@@ -12,13 +12,23 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import type { BrowserConfig } from './webdriver';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
+import { BrowserLogBuffer } from './browser_log_buffer';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
+  const ftrLogOutput = config.get('ftrLogOutput');
   type BrowserStorage = 'sessionStorage' | 'localStorage';
+
+  // Create browser log buffer
+  const browserLogBuffer = new BrowserLogBuffer(log);
+
+  // Disable buffering if ftrLogOutput is set to 'full'
+  if (ftrLogOutput === 'full') {
+    browserLogBuffer.disable();
+  }
 
   const getSessionStorageItem = async (key: string) => {
     try {
@@ -82,11 +92,12 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   consoleLog$.subscribe({
     next({ message, level }) {
       const msg = message.replace(/\\n/g, '\n');
-      log[level === 'SEVERE' || level === 'error' ? 'warning' : 'debug'](
-        `browser[${level}] ${msg}`
-      );
+      browserLogBuffer.addLog(msg, level);
     },
   });
+
+  // Make browser log buffer accessible to other services (e.g., reporter)
+  (lifecycle as any).browserLogBuffer = browserLogBuffer;
 
   lifecycle.beforeTests.add(async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
@@ -101,6 +112,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   lifecycle.beforeEachTest.add(async () => {
     await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
+    // Clear buffer before each test to ensure clean slate
+    browserLogBuffer.clear();
   });
 
   lifecycle.afterTestSuite.add(async () => {

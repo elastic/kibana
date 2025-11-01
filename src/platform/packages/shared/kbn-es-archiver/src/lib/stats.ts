@@ -9,6 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { cloneDeep } from 'lodash';
+import chalk from 'chalk';
 
 export interface IndexStats {
   skipped: boolean;
@@ -30,8 +31,10 @@ export interface IndexStats {
 export type Stats = ReturnType<typeof createStats>;
 
 export function createStats(name: string, log: ToolingLog) {
-  const info = (msg: string, ...args: any[]) => log.info(`[${name}] ${msg}`, ...args);
-  const debug = (msg: string, ...args: any[]) => log.debug(`[${name}] ${msg}`, ...args);
+  const info = (msg: string, ...args: any[]) =>
+    log.write(`${chalk.green('[FTR] [Test Data]')} ${msg}`, ...args);
+  const debug = (msg: string, ...args: any[]) =>
+    log.write(`${chalk.green('[FTR] [Test Data]')} ${msg}`, ...args);
 
   const indices: Record<string, IndexStats> = {};
   const getOrCreate = (index: string) => {

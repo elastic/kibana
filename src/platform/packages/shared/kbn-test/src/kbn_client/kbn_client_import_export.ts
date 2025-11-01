@@ -13,6 +13,7 @@ import { existsSync } from 'fs';
 import Path from 'path';
 
 import FormData from 'form-data';
+import chalk from 'chalk';
 import { isAxiosResponseError } from '@kbn/dev-utils';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -61,7 +62,14 @@ export class KbnClientImportExport {
     this.log.debug('resolved import for', path, 'to', src);
 
     const objects = await parseArchive(src);
-    this.log.info('importing', objects.length, 'saved objects', { space: options?.space });
+    this.log.write(
+      `${chalk.yellow('[FTR]')} [Test Data] importing`,
+      objects.length,
+      'saved objects',
+      {
+        space: options?.space,
+      }
+    );
 
     const formData = new FormData();
     formData.append('file', objects.map((obj) => JSON.stringify(obj)).join('\n'), 'import.ndjson');
@@ -78,7 +86,7 @@ export class KbnClientImportExport {
     });
 
     if (resp.data.success) {
-      this.log.success('import success');
+      this.log.write(`${chalk.yellow('[FTR]')} [Test Data] import success`);
       return resp.data;
     } else {
       throw createFailError(
@@ -97,7 +105,9 @@ export class KbnClientImportExport {
     this.log.debug('unloading docs from archive at', src);
 
     const objects = await parseArchive(src, { stripSummary: true });
-    this.log.info('deleting', objects.length, 'objects', { space: options?.space });
+    this.log.write(`${chalk.yellow('[FTR]')} [Test Cleanup] deleting`, objects.length, 'objects', {
+      space: options?.space,
+    });
 
     const { deleted, missing } = await this.savedObjects.bulkDelete({
       space: options?.space,
@@ -105,10 +115,14 @@ export class KbnClientImportExport {
     });
 
     if (missing) {
-      this.log.info(missing, 'saved objects were already deleted');
+      this.log.write(
+        `${chalk.yellow('[FTR]')} [Test Cleanup]`,
+        missing,
+        'saved objects were already deleted'
+      );
     }
 
-    this.log.success(deleted, 'saved objects deleted');
+    this.log.write(`${chalk.yellow('[FTR]')} [Test Cleanup]`, deleted, 'saved objects deleted');
   }
 
   async save(path: string, options: { types: string[]; space?: string }) {

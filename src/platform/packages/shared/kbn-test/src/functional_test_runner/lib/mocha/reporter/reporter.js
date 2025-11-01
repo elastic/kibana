@@ -8,10 +8,13 @@
  */
 
 import { format } from 'util';
+import Path from 'path';
+import stripAnsi from 'strip-ansi';
 
 import Mocha from 'mocha';
 import { ToolingLogTextWriter } from '@kbn/tooling-log';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { REPO_ROOT } from '@kbn/repo-info';
 import moment from 'moment';
 
 import { recordLog, snapshotLogsForRunnable, setupJUnitReportGeneration } from '../../../../mocha';
@@ -34,6 +37,17 @@ export function MochaReporterProvider({ getService }) {
   return class MochaReporter extends Mocha.reporters.Base {
     constructor(runner, options) {
       super(runner, options);
+
+      // Progress tracking
+      this.totalTests = 0;
+      this.completedTests = 0;
+      this.testTimings = [];
+      this.currentTest = null;
+      this.logIndentLevel = 0;
+
+      // Store reference to reporter instance for log wrapper
+      this.runner = runner;
+
       runner.on('start', this.onStart);
       runner.on('hook', this.onHookStart);
       runner.on('hook end', this.onHookEnd);
@@ -73,6 +87,42 @@ export function MochaReporterProvider({ getService }) {
     }
 
     onStart = () => {
+      // Count total tests
+      this.totalTests = this.runner.suite.total();
+      log.write(colors.progress(`Starting ${this.totalTests} tests...`));
+
+      // Wrap log writers to add indentation only to external logs
+      const originalWriters = log.getWriters();
+      const wrappedWriters = originalWriters.map((writer) => ({
+        ...writer,
+        write: (msg) => {
+          // Only indent external logs (those with source labels)
+          if (this.logIndentLevel > 0 && msg.args && msg.args.length > 0) {
+            const firstArg = String(msg.args[0]);
+            const cleanFirstArg = stripAnsi(firstArg);
+            // Check if this is an external log (starts with [Source])
+            if (cleanFirstArg.match(/^\[(?:Kibana|Browser|Test Data|Test Cleanup|ES|FTR)\]/)) {
+              const indent = ' '.repeat(this.logIndentLevel);
+              const lines = firstArg.split('\n');
+              const indentedFirstArg = lines
+                .map((line) =>
+                  // Only indent if line is not empty
+                  line.trim() ? indent + line : line
+                )
+                .join('\n');
+              writer.write({
+                ...msg,
+                args: [indentedFirstArg, ...msg.args.slice(1)],
+              });
+              return;
+            }
+          }
+          // Not an external log, write as-is
+          writer.write(msg);
+        },
+      }));
+      log.setWriters(wrappedWriters);
+
       if (config.get('mochaReporter.captureLogOutput')) {
         log.warning(
           'debug logs are being captured, only error logs will be written to the console'
@@ -119,47 +169,81 @@ export function MochaReporterProvider({ getService }) {
     };
 
     onHookStart = (hook) => {
-      log.write(`-> ${colors.suite(hook.title)}`);
-      log.indent(2);
+      // Show hook header with location
+      const hookTitle = hook.title.replace(/^"(before|after)( each| all)?" hook/, '$1$2 hook');
+      const filePath = hook.file ? colors.gray(`(${Path.relative(REPO_ROOT, hook.file)})`) : '';
+
+      // Indent hooks under test if a test is running, otherwise at suite level
+      const indent = this.currentTest ? '      ' : '  ';
+      log.write(`${indent}${colors.gray(hookTitle)} ${filePath}`);
     };
 
     onHookEnd = () => {
-      log.indent(-2);
+      // No-op - hook header already shown
     };
 
     onSuiteStart = (suite) => {
       if (!suite.root) {
-        log.write('-: ' + colors.suite(suite.title));
-      }
+        // Get the file path relative to REPO_ROOT
+        const filePath = suite.file ? Path.relative(REPO_ROOT, suite.file) : '';
+        const fileInfo = filePath ? colors.gray(` (${filePath})`) : '';
 
-      log.indent(2);
+        log.write('');
+        log.write(colors.suite(suite.title) + fileInfo);
+
+        // Set indent for suite-level logs (e.g., before all hooks)
+        this.logIndentLevel = 2;
+      }
     };
 
     onSuiteEnd = () => {
-      if (log.indent(-2) === 0) {
-        log.write('');
-      }
+      // No-op
     };
 
     onTestStart = (test) => {
-      log.write(`-> ${test.title}`);
-      log.indent(2);
+      this.currentTest = test;
+      const filePath = test.file ? Path.relative(REPO_ROOT, test.file) : '';
+      const lineNumber = test.line ? `:L${test.line}` : '';
+      const fileInfo = filePath ? colors.gray(` (${filePath}${lineNumber})`) : '';
+      log.write(`    ${colors.suite(test.title)}${fileInfo}`);
+
+      // Set indent for test-level logs
+      this.logIndentLevel = 6;
     };
 
     onTestEnd = (test) => {
       snapshotLogsForRunnable(test);
-      log.indent(-2);
+
+      // Track progress and timings
+      this.completedTests++;
+
+      this.testTimings.push({
+        title: test.fullTitle(),
+        duration: test.duration || 0,
+      });
+
+      // Display progress and add separation after each test
+      log.write(colors.progress(`    Progress: ${this.completedTests}/${this.totalTests} tests`));
+      log.write('');
+
+      this.currentTest = null;
+      // Reset indent back to suite level
+      this.logIndentLevel = 2;
     };
 
     onPending = (test) => {
-      log.write('-> ' + colors.pending(test.title));
-      log.indent(2);
+      this.currentTest = test;
+      const filePath = test.file ? Path.relative(REPO_ROOT, test.file) : '';
+      const lineNumber = test.line ? `:L${test.line}` : '';
+      const fileInfo = filePath ? colors.gray(` (${filePath}${lineNumber})`) : '';
+      log.write(`    ${test.title}${fileInfo}`);
+      log.write(colors.pending(`      skipped`));
     };
 
     onPass = (test) => {
       const time = colors.speed(test.speed, ` (${ms(test.duration)})`);
       const pass = colors.pass(`${symbols.ok} pass`);
-      log.write(`- ${pass} ${time}`);
+      log.write(`      ${pass} ${time}`);
     };
 
     onFail = (runnable) => {
@@ -170,6 +254,10 @@ export function MochaReporterProvider({ getService }) {
       //  - In order to fix the numbering and indentation we monkey-patch
       //    Mocha.reporters.Base.consoleLog and parse the logged output.
       //
+      const time = colors.speed(runnable.speed, ` (${ms(runnable.duration)})`);
+      const fail = colors.fail(`${symbols.err} fail`);
+      log.write(`      ${fail} ${time}`);
+
       let output = '';
       const realLog = Mocha.reporters.Base.consoleLog;
       Mocha.reporters.Base.consoleLog = (...args) => (output += `${format(...args)}\n`);
@@ -193,12 +281,15 @@ export function MochaReporterProvider({ getService }) {
         .slice(errorMarkerStart)
         // move leading colors behind leading spaces
         .map((line) => line.replace(/^((?:\[.+m)+)(\s+)/, '$2$1'))
-        .map((line) => ` ${line}`)
+        .map((line) => `        ${line}`)
         .join('\n');
 
-      log.write(
-        `- ${colors.fail(`${symbols.err} fail: ${runnable.fullTitle()}`)}` + '\n' + errorMessage
-      );
+      // Flush buffered browser logs on failure
+      if (lifecycle.browserLogBuffer) {
+        lifecycle.browserLogBuffer.flush();
+      }
+
+      log.write(errorMessage);
 
       // Prefer to reuse the nice Mocha nested title format for final summary
       const nestedTitleFormat = outputLines
@@ -220,6 +311,20 @@ export function MochaReporterProvider({ getService }) {
     onEnd = () => {
       if (originalLogWriters) {
         log.setWriters(originalLogWriters);
+      }
+
+      // Display slowest tests summary
+      if (this.testTimings.length > 0) {
+        const slowestTests = this.testTimings.sort((a, b) => b.duration - a.duration).slice(0, 10);
+
+        log.write('');
+        log.write(colors.suite('Slowest tests:'));
+        slowestTests.forEach((test, index) => {
+          const duration = ms(test.duration);
+          const formattedDuration = colors.speed('slow', '(' + duration + ')');
+          log.write(`  ${index + 1}. ${test.title} ${formattedDuration}`);
+        });
+        log.write('');
       }
 
       writeEpilogue(log, this.stats, failuresOverTime);

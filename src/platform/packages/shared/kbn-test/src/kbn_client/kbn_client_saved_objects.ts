@@ -8,6 +8,7 @@
  */
 
 import { chunk } from 'lodash';
+import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   SavedObjectsBulkDeleteResponse,
@@ -271,7 +272,11 @@ export class KbnClientSavedObjects {
     });
     const deleted = resp.data.deleted;
 
-    this.log.success('deleted', deleted, 'objects');
+    this.log.write(
+      `${chalk.yellow('[FTR]')} [Saved Objects] [Cleanup]`,
+      deleted,
+      'objects deleted'
+    );
   }
 
   public async cleanStandardList(options?: { space?: string }) {
