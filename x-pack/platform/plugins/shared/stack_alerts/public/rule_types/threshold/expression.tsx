@@ -67,7 +67,7 @@ function isString(value: unknown): value is string {
 }
 
 // normalize the `index` parameter to be a string array
-function indexParamToArray(index: string | string[]): string[] {
+export function indexParamToArray(index: string | string[]): string[] {
   if (!index) return [];
   return isString(index) ? [index] : index;
 }
