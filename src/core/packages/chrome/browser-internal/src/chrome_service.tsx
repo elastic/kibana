@@ -551,6 +551,7 @@ export class ChromeService {
         docLinks={docLinks}
         kibanaVersion={injectedMetadata.getKibanaVersion()}
         prependBasePath={http.basePath.prepend}
+        uiSettings={uiSettings}
       >
         <Router history={application.history}>
           <>
