@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const missingMonitoringDataParamsSchema = stackMonitoringCommonSchema.extends({});
+export const missingMonitoringDataParamsSchema = stackMonitoringCommonSchema.extends({
+  duration: schema.string(),
+});
 export type MissingMonitoringDataParams = TypeOf<typeof missingMonitoringDataParamsSchema>;
