@@ -1,0 +1,8 @@
+/**
+ * Kibana package manifest for @kbn/scout-mcp
+ */
+{
+  "type": "shared-common",
+  "id": "@kbn/scout-mcp",
+  "owner": "@elastic/appex-qa"
+}
