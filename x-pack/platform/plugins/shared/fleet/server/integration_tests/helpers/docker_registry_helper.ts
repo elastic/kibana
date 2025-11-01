@@ -17,8 +17,8 @@ import pRetry from 'p-retry';
 
 const BEFORE_SETUP_TIMEOUT = 30 * 60 * 1000; // 30 minutes;
 
-const DOCKER_START_TIMEOUT = 6 * 60 * 1000; // 6 minutes
-// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
+const DOCKER_START_TIMEOUT = 10 * 60 * 1000; // 10 minutes
+// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-verify-and-promote
 // which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
 const DOCKER_IMAGE =
   process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
