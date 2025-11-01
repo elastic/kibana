@@ -290,6 +290,7 @@ The 8.19.2 release includes the following known issues, enhancements, and fixes.
 [[known-issues-8.19.2]]
 === Known issues
 include::CHANGELOG.asciidoc[tag=known-issue-3610]
+include::CHANGELOG.asciidoc[tag=known-issue-2462]
 
 [float]
 [[enhancement-v8.19.2]]
@@ -300,8 +301,6 @@ Search::
 [float]
 [[fixes-v8.19.2]]
 === Fixes
-Alerting::
-* Fixes an issue that prevents reports from showing in the Reporting UI when they're created in a non-default {kib} space ({kibana-pull}230876[#230876]).
 Dashboards and Visualizations::
 * Fixes screen reader-only header in the Dashboards list ({kibana-pull}230470[#230470]).
 Elastic Observability solution::
@@ -369,7 +368,7 @@ include::CHANGELOG.asciidoc[tag=known-issue-230275]
 After creating a report in a non-default {kib} space, the document exists in the `.kibana-reporting` index but isn't shown in the Reporting UI.
 
 *Resolved* +
-This issue is resolved in 8.19.0, 8.19.2, 9.1.0, and 9.1.2.
+This issue is resolved in 8.19.3, 9.1.3, and 9.2.0.
 ====
 // end::known-issue-2462[]
 
