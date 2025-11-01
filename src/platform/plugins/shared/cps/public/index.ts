@@ -10,8 +10,15 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { CpsPlugin } from './plugin';
 
-export type { CPSPluginSetup, CPSConfigType } from './types';
-
 export function plugin(initContext: PluginInitializerContext) {
   return new CpsPlugin(initContext);
 }
+
+export type {
+  CPSPluginSetup,
+  CPSPluginStart,
+  CPSConfigType,
+  Project,
+  ProjectTagsResponse,
+} from './types';
+export type { CPSManager, ProjectsData } from './services/cps_manager';
