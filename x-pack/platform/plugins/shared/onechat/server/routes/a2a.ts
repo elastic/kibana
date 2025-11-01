@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { KibanaRequest } from '@kbn/core/server';
 import path from 'node:path';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
@@ -25,8 +26,9 @@ export function registerA2ARoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const getBaseUrl = () => {
-    return getKibanaUrl(coreSetup, pluginsSetup.cloud);
+  const getBaseUrl = async (request: KibanaRequest) => {
+    const [, startDeps] = await coreSetup.getStartServices();
+    return getKibanaUrl(coreSetup, pluginsSetup.cloud, request, startDeps.spaces);
   };
 
   const a2aAdapter = new KibanaA2AAdapter(logger, getInternalServices, getBaseUrl);
