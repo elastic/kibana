@@ -12,8 +12,6 @@ import Os from 'os';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import globby from 'globby';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { TarOptionsWithAliasesAsyncFile } from 'tar';
-import * as tar from 'tar';
 import execa from 'execa';
 import {
   ARCHIVE_FILE_NAME,
@@ -24,8 +22,10 @@ import {
 import {
   buildRemoteArchiveUri,
   ensureLocalCacheRoot,
+  getTarCreateArgs,
   isCiEnvironment,
   resolveCurrentCommitSha,
+  resolveTarEnvironment,
   withGcsAuth,
 } from './utils';
 
@@ -51,36 +51,65 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
 
   const temporaryDir = await Fs.promises.mkdtemp(Path.join(Os.tmpdir(), 'kbn-ts-cache-'));
 
-  const archivePath = Path.join(temporaryDir, ARCHIVE_FILE_NAME);
+  try {
+    // Provide tar with a null-delimited file list to avoid path parsing overhead.
+    const fileListPath = Path.join(temporaryDir, 'ts-artifacts.list');
+    const nullDelimiter = '\0';
+    const fileListContent = Buffer.from(`${matches.join(nullDelimiter)}${nullDelimiter}`, 'utf8');
+    await Fs.promises.writeFile(fileListPath, fileListContent);
 
-  const tarOptions: TarOptionsWithAliasesAsyncFile = {
-    cwd: REPO_ROOT,
-    gzip: true,
-    file: archivePath,
-    portable: true,
-  };
+    if (isCiEnvironment()) {
+      const remotePath = buildRemoteArchiveUri(commitSha);
 
-  await tar.create(tarOptions, matches);
+      const tarArgs = getTarCreateArgs('-', fileListPath);
 
-  if (isCiEnvironment()) {
-    const remotePath = buildRemoteArchiveUri(commitSha);
+      await withGcsAuth(log, async () => {
+        const tarProcess = execa('tar', tarArgs, {
+          cwd: REPO_ROOT,
+          stdout: 'pipe',
+          stderr: 'inherit',
+          env: resolveTarEnvironment(),
+        });
 
-    await withGcsAuth(log, async () => {
-      await execa('gcloud', ['storage', 'cp', archivePath, remotePath], {
-        cwd: REPO_ROOT,
-        stdio: 'inherit',
+        const uploadProcess = execa('gcloud', ['storage', 'cp', '-', remotePath], {
+          cwd: REPO_ROOT,
+          stdin: 'pipe',
+          stdout: 'inherit',
+          stderr: 'inherit',
+        });
+
+        if (!tarProcess.stdout || !uploadProcess.stdin) {
+          tarProcess.kill();
+          uploadProcess.kill();
+          throw new Error('Failed to stream TypeScript cache archive to GCS.');
+        }
+
+        tarProcess.stdout.pipe(uploadProcess.stdin);
+
+        await Promise.all([tarProcess, uploadProcess]);
       });
-      return undefined;
-    });
 
-    log.info(`Uploaded TypeScript build artifacts to ${remotePath}.`);
-  } else {
-    await ensureLocalCacheRoot();
+      log.info(`Streamed TypeScript build artifacts to ${remotePath}.`);
+    } else {
+      await ensureLocalCacheRoot();
 
-    const destinationPath = Path.join(LOCAL_CACHE_ROOT, `${commitSha}.tar.gz`);
+      const archivePath = Path.join(temporaryDir, ARCHIVE_FILE_NAME);
+      const tarArgs = getTarCreateArgs(archivePath, fileListPath);
 
-    await Fs.promises.rename(archivePath, destinationPath);
+      await execa('tar', tarArgs, {
+        cwd: REPO_ROOT,
+        stdout: 'inherit',
+        stderr: 'inherit',
+        env: resolveTarEnvironment(),
+      });
 
-    log.info(`Archived TypeScript build artifacts locally at ${destinationPath}.`);
+      const destinationPath = Path.join(LOCAL_CACHE_ROOT, `${commitSha}.tar`);
+
+      await Fs.promises.rename(archivePath, destinationPath);
+
+      log.info(`Archived TypeScript build artifacts locally at ${destinationPath}.`);
+    }
+  } finally {
+    await Fs.promises.rm(temporaryDir, { recursive: true, force: true });
   }
 }

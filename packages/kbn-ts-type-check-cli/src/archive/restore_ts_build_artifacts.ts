@@ -8,21 +8,25 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import * as tar from 'tar';
+import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   buildCandidateShaList,
   cleanTypeCheckArtifacts,
+  getTarPlatformOptions,
+  resolveTarEnvironment,
   isCiEnvironment,
   locateLocalArchive,
   locateRemoteArchive,
   readRecentCommitShas,
   resolveCurrentCommitSha,
+  withGcsAuth,
 } from './utils';
 import { MAX_COMMITS_TO_CHECK } from './constants';
 
 export async function restoreTSBuildArtifacts(log: SomeDevLog) {
   try {
+    log.info(`Restoring TypeScript build artifacts`);
     const currentSha = await resolveCurrentCommitSha();
     const history = await readRecentCommitShas(MAX_COMMITS_TO_CHECK);
     const candidateShas = buildCandidateShaList(currentSha, history);
@@ -43,17 +47,13 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
 
     await cleanTypeCheckArtifacts(log);
 
-    try {
-      await tar.extract({
-        file: archiveCandidate.archivePath,
-        cwd: REPO_ROOT,
-        gzip: true,
-        strict: true,
-      });
-    } finally {
-      if (archiveCandidate.cleanup) {
-        await archiveCandidate.cleanup();
-      }
+    log.info(`Cleaned artifacts`);
+
+    if (archiveCandidate.kind === 'remote') {
+      log.info(`Streaming TypeScript build artifacts from ${archiveCandidate.remotePath}`);
+      await withRemoteTarExtraction(archiveCandidate.remotePath, log);
+    } else {
+      await extractLocalArchive(archiveCandidate.archivePath);
     }
 
     log.info(`Restored TypeScript build artifacts from commit ${archiveCandidate.sha}.`);
@@ -62,3 +62,46 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
     log.warning(`Failed to restore TypeScript build artifacts: ${restoreErrorDetails}`);
   }
 }
+
+const extractBaseArgs = ['--directory', REPO_ROOT, ...getTarPlatformOptions()];
+
+const buildExtractArgs = (fileArg: string) => ['--extract', '--file', fileArg, ...extractBaseArgs];
+
+const extractLocalArchive = async (archivePath: string) => {
+  const tarArgs = buildExtractArgs(archivePath);
+  await execa('tar', tarArgs, {
+    cwd: REPO_ROOT,
+    stdout: 'inherit',
+    stderr: 'inherit',
+    env: resolveTarEnvironment(),
+  });
+};
+
+const withRemoteTarExtraction = async (remotePath: string, log: SomeDevLog) => {
+  await withGcsAuth(log, async () => {
+    const tarArgs = buildExtractArgs('-');
+    const tarProcess = execa('tar', tarArgs, {
+      cwd: REPO_ROOT,
+      stdin: 'pipe',
+      stdout: 'inherit',
+      stderr: 'inherit',
+      env: resolveTarEnvironment(),
+    });
+
+    const catProcess = execa('gcloud', ['storage', 'cat', remotePath], {
+      cwd: REPO_ROOT,
+      stdout: 'pipe',
+      stderr: 'inherit',
+    });
+
+    if (!catProcess.stdout || !tarProcess.stdin) {
+      tarProcess.kill();
+      catProcess.kill();
+      throw new Error('Failed to establish stream between gcloud and tar.');
+    }
+
+    catProcess.stdout.pipe(tarProcess.stdin);
+
+    await Promise.all([catProcess, tarProcess]);
+  });
+};

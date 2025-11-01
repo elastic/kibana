@@ -8,7 +8,6 @@
  */
 import Fs from 'fs';
 import Path from 'path';
-import Os from 'os';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
@@ -23,11 +22,24 @@ import {
   TYPE_CHECK_CONFIG_GLOB,
 } from './constants';
 
-interface ArchiveCandidate {
-  archivePath: string;
-  sha: string;
-  cleanup?: () => Promise<void>;
-}
+export type ArchiveCandidate =
+  | {
+      kind: 'local';
+      archivePath: string;
+      sha: string;
+    }
+  | {
+      kind: 'remote';
+      remotePath: string;
+      sha: string;
+    };
+
+const TAR_PLATFORM_OPTIONS =
+  process.platform === 'linux'
+    ? ['--no-same-owner', '--no-same-permissions', '--numeric-owner', '--delay-directory-restore']
+    : [];
+
+export const getTarPlatformOptions = () => TAR_PLATFORM_OPTIONS;
 
 export async function resolveCurrentCommitSha(): Promise<string | undefined> {
   if (process.env.BUILDKITE_COMMIT) {
@@ -54,7 +66,7 @@ export function isCiEnvironment() {
 }
 
 export function buildRemoteArchiveUri(sha: string) {
-  return `${GCS_BUCKET_URI}/${sha}.tar.gz`;
+  return `${GCS_BUCKET_URI}/${sha}.tar`;
 }
 
 export async function withGcsAuth<TReturn>(
@@ -110,10 +122,10 @@ export async function locateLocalArchive(shas: string[]): Promise<ArchiveCandida
   }
 
   for (const sha of shas) {
-    const candidatePath = Path.join(LOCAL_CACHE_ROOT, `${sha}.tar.gz`);
+    const candidatePath = Path.join(LOCAL_CACHE_ROOT, `${sha}.tar`);
     try {
       await Fs.promises.access(candidatePath);
-      return { archivePath: candidatePath, sha };
+      return { kind: 'local', archivePath: candidatePath, sha };
     } catch (error) {
       continue;
     }
@@ -129,35 +141,20 @@ export async function locateRemoteArchive(
   return await withGcsAuth(log, async () => {
     for (const sha of shas) {
       const remotePath = buildRemoteArchiveUri(sha);
-
       try {
-        await execa('gcloud', ['storage', 'ls', remotePath], { cwd: REPO_ROOT });
+        await execa('gcloud', ['storage', 'stat', remotePath], {
+          cwd: REPO_ROOT,
+          stdio: 'ignore',
+        });
       } catch (error) {
         continue;
       }
 
-      const downloadPath = Path.join(Os.tmpdir(), `kbn-ts-cache-${sha}-${Date.now()}.tar.gz`);
-
-      try {
-        await execa('gcloud', ['storage', 'cp', remotePath, downloadPath], {
-          cwd: REPO_ROOT,
-          stdio: 'inherit',
-        });
-
-        return {
-          archivePath: downloadPath,
-          sha,
-          cleanup: async () => {
-            await Fs.promises.rm(downloadPath, { force: true });
-          },
-        };
-      } catch (error) {
-        log.warning(
-          `Failed to download TypeScript build artifacts from ${remotePath}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
+      return {
+        kind: 'remote',
+        remotePath,
+        sha,
+      };
     }
 
     return undefined;
@@ -197,3 +194,20 @@ export async function cleanTypeCheckArtifacts(log: SomeDevLog) {
     );
   }
 }
+
+export const getTarCreateArgs = (fileArg: string, fileListPath: string): string[] => [
+  '--create',
+  '--file',
+  fileArg,
+  '--directory',
+  REPO_ROOT,
+  '--null',
+  '--files-from',
+  fileListPath,
+];
+
+export const resolveTarEnvironment = (): NodeJS.ProcessEnv => ({
+  ...process.env,
+  COPYFILE_DISABLE: '1',
+  COPY_EXTENDED_ATTRIBUTES_DISABLE: '1',
+});
