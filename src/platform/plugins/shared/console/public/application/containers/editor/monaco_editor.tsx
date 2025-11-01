@@ -55,6 +55,7 @@ const useStyles = () => {
 };
 
 export interface EditorProps {
+  isEmbeddable: boolean;
   localStorageValue: string | undefined;
   value: string;
   setValue: (value: string) => void;
@@ -66,6 +67,7 @@ export const MonacoEditor = ({
   value,
   setValue,
   customParsedRequestsProvider,
+  isEmbeddable,
 }: EditorProps) => {
   const context = useServicesContext();
   const {
@@ -314,6 +316,7 @@ export const MonacoEditor = ({
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
         enableCustomContextMenu={true}
+        isEmbeddable={isEmbeddable}
       />
     </div>
   );
