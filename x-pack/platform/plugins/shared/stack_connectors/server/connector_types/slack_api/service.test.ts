@@ -115,7 +115,7 @@ const postBlockkitResponse = createAxiosResponse({
   },
 });
 
-const createExternalServiceMock = ({ config }: { config: SlackApiConfig }) =>
+const createExternalServiceMock = ({ config }: { config?: SlackApiConfig } = {}) =>
   createExternalService(
     {
       secrets: { token: 'token' },
@@ -135,16 +135,7 @@ describe('Slack API service', () => {
       connectorId: 'test-connector-id',
     });
 
-    const configWithAllowedChannels = {
-      allowedChannels: [
-        { id: 'general-id', name: 'general' },
-        { id: 'alerts-id', name: 'alerts' },
-        { id: 'test-channel-id', name: 'test-channel' },
-        { name: '#general' },
-      ],
-    };
-
-    service = createExternalServiceMock({ config: configWithAllowedChannels });
+    service = createExternalServiceMock();
   });
 
   beforeEach(() => {
@@ -238,6 +229,7 @@ describe('Slack API service', () => {
       requestMock.mockImplementation(() => postMessageResponse);
 
       await service.postMessage({
+        channels: ['general', 'privat'],
         channelIds: ['QWEERTYU987', 'POIUYT123'],
         text: 'a message',
       });
@@ -402,7 +394,7 @@ describe('Slack API service', () => {
     });
   });
 
-  describe.only('Channel names', () => {
+  describe('Channel names', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -446,18 +438,29 @@ describe('Slack API service', () => {
         );
       });
 
-      it.each([['channelNames'], ['channelIds']])(
-        'should throw an error if allowedChannels is an empty array for %s',
-        async (key) => {
-          service = createExternalServiceMock({
-            config: { allowedChannels: [] },
-          });
+      it('should throw an error if allowedChannels is an empty array for %s', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [] },
+        });
 
-          expect(await service[method]({ [key]: ['not-in-list'], text })).toEqual(
-            errorNoAllowedChannelsRes
-          );
-        }
-      );
+        expect(await service[method]({ channelNames: ['not-in-list'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should post a message if allowedChannels is an empty array and use channelsIds', async () => {
+        service = createExternalServiceMock({ config: {} });
+
+        await service[method]({ channelIds: ['channel-id-1'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-id-1' }),
+          })
+        );
+      });
 
       it('should post a message if allowedChannels is an empty array and use channels', async () => {
         service = createExternalServiceMock({ config: {} });
@@ -513,13 +516,19 @@ describe('Slack API service', () => {
         );
       });
 
-      it('should throw if allowedChannels.name is set and channelIds is used', async () => {
+      it('should not throw if allowedChannels.name is set and channelIds is used', async () => {
         service = createExternalServiceMock({
           config: { allowedChannels: [{ name: 'my-channel-name' }] },
         });
 
-        expect(await service[method]({ channelIds: ['not-in-list'], text })).toEqual(
-          errorNoAllowedChannelsRes
+        await service[method]({ channelIds: ['channel-id-1'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-id-1' }),
+          })
         );
       });
 
