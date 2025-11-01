@@ -83,7 +83,8 @@ export const loadDashboardState = async ({
     };
   }
 
-  const { references, attributes, managed, version } = rawDashboardContent;
+  const { references, attributes, managed, version, accessControl, createdBy } =
+    rawDashboardContent;
 
   return {
     managed,
@@ -92,5 +93,7 @@ export const loadDashboardState = async ({
     dashboardInput: attributes,
     dashboardFound: true,
     dashboardId: savedObjectId,
+    accessControl,
+    createdBy,
   };
 };

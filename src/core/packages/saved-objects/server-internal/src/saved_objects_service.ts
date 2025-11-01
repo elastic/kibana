@@ -126,7 +126,11 @@ export class SavedObjectsService
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
-  private typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: REMOVED_TYPES });
+
+  private typeRegistry = new SavedObjectTypeRegistry({
+    legacyTypes: REMOVED_TYPES,
+  });
+
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -173,6 +177,8 @@ export class SavedObjectsService
     registerCoreObjectTypes(this.typeRegistry);
 
     const skipMigration = this.config.migration.skip;
+    const accessControlEnabled = this.config.enableAccessControl;
+    this.typeRegistry.setAccessControlEnabled(accessControlEnabled);
 
     return {
       status$: calculateStatus$(
@@ -225,6 +231,7 @@ export class SavedObjectsService
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
+      isAccessControlEnabled: () => accessControlEnabled,
     };
   }
 
