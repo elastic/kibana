@@ -36,7 +36,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
 };
 
 const manualRunOperations: Record<AlertingEntity, string[]> = {
-  rule: ['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
+  rule: ['deleteBackfill', 'fillGaps', 'scheduleBackfill', 'createGapAutoFillScheduler'],
   alert: [],
 };
 

@@ -168,7 +168,14 @@ describe('getRuleIdsWithGaps', () => {
           filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND (kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled)`,
           aggs: {
             latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
+            unique_rule_ids: expect.objectContaining({
+              terms: expect.objectContaining({
+                field: 'rule.id',
+                size: 10000,
+                order: { oldest_gap_timestamp: 'asc' },
+              }),
+              aggs: { oldest_gap_timestamp: { min: { field: '@timestamp' } } },
+            }),
           },
         })
       );
@@ -203,7 +210,14 @@ describe('getRuleIdsWithGaps', () => {
           ),
           aggs: {
             latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
+            unique_rule_ids: expect.objectContaining({
+              terms: expect.objectContaining({
+                field: 'rule.id',
+                size: 10000,
+                order: { oldest_gap_timestamp: 'asc' },
+              }),
+              aggs: { oldest_gap_timestamp: { min: { field: '@timestamp' } } },
+            }),
           },
         })
       );
@@ -230,7 +244,14 @@ describe('getRuleIdsWithGaps', () => {
           filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z"`,
           aggs: {
             latest_gap_timestamp: { max: { field: '@timestamp' } },
-            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
+            unique_rule_ids: expect.objectContaining({
+              terms: expect.objectContaining({
+                field: 'rule.id',
+                size: 10000,
+                order: { oldest_gap_timestamp: 'asc' },
+              }),
+              aggs: { oldest_gap_timestamp: { min: { field: '@timestamp' } } },
+            }),
           },
         })
       );

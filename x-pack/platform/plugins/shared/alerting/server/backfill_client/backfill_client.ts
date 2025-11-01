@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import pMap from 'p-map';
 import type {
   ISavedObjectsRepository,
   Logger,
@@ -189,13 +189,54 @@ export class BackfillClient {
     const chunkSize = 10;
     const allSavedObjects: Array<SavedObject<AdHocRunSO>> = [];
 
+    const totalStartMs = Date.now();
+    const chunks: Array<{
+      startIndex: number;
+      items: Array<SavedObjectsBulkCreateObject<AdHocRunSO>>;
+    }> = [];
     for (let i = 0; i < adHocSOsToCreate.length; i += chunkSize) {
-      const chunk = adHocSOsToCreate.slice(i, i + chunkSize);
-      const bulkCreateChunkResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
-        chunk
-      );
-      allSavedObjects.push(...bulkCreateChunkResponse.saved_objects);
+      chunks.push({ startIndex: i, items: adHocSOsToCreate.slice(i, i + chunkSize) });
     }
+
+    // Pre-size result array to preserve original order regardless of parallel completion order
+    const orderedResults: Array<SavedObject<AdHocRunSO>> = new Array(adHocSOsToCreate.length);
+
+    const chunkConcurrency = 10;
+    await pMap(
+      chunks,
+      async ({ startIndex, items }, idx) => {
+        const chunkStartMs = Date.now();
+        const response = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(items);
+        const chunkEndMs = Date.now();
+        const elapsedMs = chunkEndMs - chunkStartMs;
+
+        // Place results in the correct positions
+        response.saved_objects.forEach((so, j) => {
+          orderedResults[startIndex + j] = so;
+        });
+
+        // Logging per-chunk and per-SO average timings
+        this.logger.info(
+          `backfillClient.bulkQueue: created ${items.length} SOs in ${elapsedMs}ms (chunk ${
+            idx + 1
+          }/${chunks.length}, range ${startIndex}-${startIndex + items.length - 1}, avg ~${(
+            elapsedMs / items.length
+          ).toFixed(2)}ms/SO)`
+        );
+      },
+      { concurrency: chunkConcurrency }
+    );
+
+    const totalElapsedMs = Date.now() - totalStartMs;
+    this.logger.info(
+      `backfillClient.bulkQueue: created ${adHocSOsToCreate.length} SOs across ${
+        chunks.length
+      } chunks in ${totalElapsedMs}ms (avg ~${(totalElapsedMs / adHocSOsToCreate.length).toFixed(
+        2
+      )}ms/SO)`
+    );
+
+    allSavedObjects.push(...orderedResults);
 
     const transformedResponse: ScheduleBackfillResults = allSavedObjects.map(
       (so: SavedObject<AdHocRunSO>, index: number) => {
@@ -288,8 +329,9 @@ export class BackfillClient {
         for (let i = 0; i < backfillSOs.length; i += 10) {
           const chunk = backfillSOs.slice(i, i + 10);
           await Promise.all(
-            chunk.map((backfill) =>
-              updateGaps({
+            chunk.map((backfill) => {
+              const ruleGaps = gaps?.filter((gap) => gap.ruleId === backfill.rule.id);
+              return updateGaps({
                 backfillSchedule: backfill.schedule,
                 ruleId: backfill.rule.id,
                 start: new Date(backfill.start),
@@ -300,9 +342,9 @@ export class BackfillClient {
                 logger: this.logger,
                 backfillClient: this,
                 actionsClient,
-                gaps,
-              })
-            )
+                gaps: ruleGaps,
+              });
+            })
           );
         }
       } catch {
@@ -387,17 +429,15 @@ export class BackfillClient {
 
   public async findOverlappingBackfills({
     ruleId,
-    start,
-    end,
+    ranges,
     savedObjectsRepository,
     actionsClient,
   }: {
     ruleId: string;
-    start: Date;
-    end: Date;
+    ranges: { start: Date; end: Date }[];
     savedObjectsRepository: ISavedObjectsRepository;
     actionsClient: ActionsClient;
-  }) {
+  }): Promise<ScheduleBackfillResult[]> {
     const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
 
     // Create a point in time finder for efficient pagination
@@ -405,10 +445,14 @@ export class BackfillClient {
       type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
       perPage: 100,
       hasReference: [{ id: ruleId, type: RULE_SAVED_OBJECT_TYPE }],
-      filter: `
-        ad_hoc_run_params.attributes.start <= "${end.toISOString()}" and
-        ad_hoc_run_params.attributes.end >= "${start.toISOString()}"
-      `,
+      filter: ranges
+        .map(
+          (range) => `
+        (ad_hoc_run_params.attributes.start <= "${range.end.toISOString()}" and
+        ad_hoc_run_params.attributes.end >= "${range.start.toISOString()}")
+      `
+        )
+        .join(' OR '),
     });
 
     try {

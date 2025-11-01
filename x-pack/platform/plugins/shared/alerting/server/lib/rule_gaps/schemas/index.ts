@@ -48,6 +48,9 @@ const findGapsBaseParamsSchema = schema.object(
     ),
     sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     statuses: schema.maybe(schema.arrayOf(gapStatusSchema)),
+    hasUnfilledIntervals: schema.maybe(schema.boolean()),
+    hasInProgressIntervals: schema.maybe(schema.boolean()),
+    hasFilledIntervals: schema.maybe(schema.boolean()),
   },
   {
     validate({ start, end }) {

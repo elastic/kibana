@@ -87,6 +87,7 @@ describe('findGapsRoute', () => {
           {
             _id: 'gap-1',
             '@timestamp': '2024-01-30T00:00:00.000Z',
+            rule_id: 'abc',
             status: 'unfilled',
             range: {
               gte: '2023-11-16T08:00:00.000Z',

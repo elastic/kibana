@@ -81,6 +81,14 @@ export const configSchema = schema.object({
   maintenanceWindow: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  gapAutoFillScheduler: schema.maybe(
+    schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      timeout: schema.maybe(
+        schema.string({ validate: validateDurationSchema, defaultValue: '40s' })
+      ),
+    })
+  ),
   disabledRuleTypes: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
   ),

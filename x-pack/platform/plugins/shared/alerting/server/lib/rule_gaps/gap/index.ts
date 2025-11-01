@@ -36,7 +36,7 @@ export class Gap {
   private _inProgressIntervals: Interval[];
   private _internalFields?: InternalFields;
   private _timestamp?: string;
-  readonly ruleId: string;
+  readonly _ruleId: string;
 
   constructor({
     ruleId,
@@ -55,7 +55,7 @@ export class Gap {
     if (timestamp) {
       this._timestamp = timestamp;
     }
-    this.ruleId = ruleId;
+    this._ruleId = ruleId;
   }
 
   public fillGap(interval: Interval): void {
@@ -138,6 +138,10 @@ export class Gap {
 
   public get internalFields() {
     return this._internalFields;
+  }
+
+  public get ruleId() {
+    return this._ruleId;
   }
 
   public getState() {
