@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/core/server';
@@ -17,77 +16,54 @@ import type {
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import {
   AlertHistoryEsIndexConnectorId,
-  ALERT_HISTORY_PREFIX,
   buildAlertHistoryDocument,
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type { BulkOperationType, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  ParamsSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/es_index';
+import type {
+  ActionParamsType,
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/es_index';
 
 export type ESIndexConnectorType = ConnectorType<
   ConnectorTypeConfigType,
-  {},
+  ConnectorTypeSecretsType,
   ActionParamsType,
   unknown
 >;
 export type ESIndexConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
-  {},
+  ConnectorTypeSecretsType,
   ActionParamsType
 >;
 
 // config definition
 
-export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
-
-const ConfigSchema = z
-  .object({
-    index: z.string(),
-    refresh: z.boolean().default(false),
-    executionTimeField: z.string().nullable().default(null),
-  })
-  .strict();
-
-// params definition
-
-export type ActionParamsType = z.infer<typeof ParamsSchema>;
-
-// see: https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-index.html
-// - timeout not added here, as this seems to be a generic thing we want to do
-//   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
-const ParamsSchema = z
-  .object({
-    documents: z.array(z.record(z.string(), z.any())),
-    indexOverride: z
-      .string()
-      .nullable()
-      .default(null)
-      .refine(
-        (pattern) => pattern === null || (pattern && pattern.startsWith(ALERT_HISTORY_PREFIX)),
-        {
-          message: `index must start with "${ALERT_HISTORY_PREFIX}"`,
-        }
-      ),
-  })
-  .strict();
-
-export const ConnectorTypeId = '.index';
 // connector type definition
 export function getConnectorType(): ESIndexConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'basic',
-    name: i18n.translate('xpack.stackConnectors.esIndex.title', {
-      defaultMessage: 'Index',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {
-      secrets: { schema: z.object({}).strict().default({}) },
+      secrets: {
+        schema: SecretsSchema,
+      },
       config: {
         schema: ConfigSchema,
       },
