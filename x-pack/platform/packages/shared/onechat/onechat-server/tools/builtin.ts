@@ -5,12 +5,23 @@
  * 2.0.
  */
 
+import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod';
 import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
 import type { EsqlToolDefinition } from '@kbn/onechat-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/onechat-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/onechat-common/tools/types/workflow';
 import type { ToolHandlerFn } from './handler';
+
+/**
+ * Information exposed to the {@link ToolAvailabilityHandler}.
+ */
+export interface ToolAvailabilityContext {
+  request: any;
+  spaceId: string;
+}
+
+export type ToolAvailabilityHandler = (context: ToolAvailabilityContext) => MaybePromise<boolean>;
 
 /**
  * Built-in tool, as registered as static tool.
@@ -29,9 +40,18 @@ export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObje
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<z.infer<RunInput>>;
+  /**
+   * Optional handler which can be defined to add conditional availability of the tool.
+   */
+  isAvailable?: ToolAvailabilityHandler;
 }
 
-type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'>;
+type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> & {
+  /**
+   * Optional handler which can be defined to add conditional availability of the tool.
+   */
+  isAvailable?: ToolAvailabilityHandler;
+};
 
 export type StaticEsqlTool = StaticToolRegistrationMixin<EsqlToolDefinition>;
 export type StaticIndexSearchTool = StaticToolRegistrationMixin<IndexSearchToolDefinition>;
