@@ -103,7 +103,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"webhookUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+            message: `error validating connector type secrets: Field \"webhookUrl\": Required`,
           });
         });
     });
@@ -124,7 +124,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating action type secrets: error configuring slack action: target url \"http://slack.mynonexistent.com/other/stuff/in/the/path\" is not added to the Kibana config xpack.actions.allowedHosts`,
+            message: `error validating connector type secrets: error configuring slack action: target url \"http://slack.mynonexistent.com/other/stuff/in/the/path\" is not added to the Kibana config xpack.actions.allowedHosts`,
           });
         });
     });
@@ -146,7 +146,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl',
+              'error validating connector type secrets: error configuring slack action: unable to parse host name from webhookUrl',
           });
         });
     });
@@ -210,7 +210,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(result.status).to.eql('error');
       expect(result.message).to.eql(
-        `error validating action params: [\n  {\n    "code": "too_small",\n    "minimum": 1,\n    "type": "string",\n    "inclusive": true,\n    "exact": false,\n    "message": "String must contain at least 1 character(s)",\n    "path": [\n      "message"\n    ]\n  }\n]`
+        `error validating action params: Field "message": String must contain at least 1 character(s)`
       );
     });
 

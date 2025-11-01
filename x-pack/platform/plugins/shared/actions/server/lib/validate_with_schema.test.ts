@@ -157,11 +157,11 @@ test('should throw with expected error when validators fail', () => {
 
   expect(() =>
     validateConfig(actionType, testValue, { configurationUtilities })
-  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type config: test error"`);
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating connector type config: test error"`);
 
   expect(() =>
     validateSecrets(actionType, testValue, { configurationUtilities })
-  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type secrets: test error"`);
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating connector type secrets: test error"`);
 
   expect(() =>
     validateConnector(actionType, { config: testValue, secrets: { user: 'test' } })
@@ -195,25 +195,9 @@ test('should work with @kbn/zod', () => {
 
   expect(() => validateParams(actionType, { bar: 2 }, { configurationUtilities }))
     .toThrowErrorMatchingInlineSnapshot(`
-    "error validating action params: [
-      {
-        \\"code\\": \\"invalid_type\\",
-        \\"expected\\": \\"string\\",
-        \\"received\\": \\"undefined\\",
-        \\"path\\": [
-          \\"foo\\"
-        ],
-        \\"message\\": \\"Required\\"
-      },
-      {
-        \\"code\\": \\"unrecognized_keys\\",
-        \\"keys\\": [
-          \\"bar\\"
-        ],
-        \\"path\\": [],
-        \\"message\\": \\"Unrecognized key(s) in object: 'bar'\\"
-      }
-    ]"
+    "error validating action params: 2 errors:
+     [1]: Unrecognized key(s) in object: 'bar';
+     [2]: Field \\"foo\\": Required"
   `);
 });
 
@@ -301,11 +285,11 @@ test('should throw an error when custom validators fail', () => {
 
   expect(() =>
     validateConfig(actionType, testValue, { configurationUtilities })
-  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type config: test error"`);
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating connector type config: test error"`);
 
   expect(() =>
     validateSecrets(actionType, testValue, { configurationUtilities })
-  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type secrets: test error"`);
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating connector type secrets: test error"`);
 });
 
 describe('validateConnectors', () => {
