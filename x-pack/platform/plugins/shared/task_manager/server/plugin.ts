@@ -332,6 +332,7 @@ export class TaskManagerPlugin
       security,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
+      basePath: http.basePath,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
