@@ -20,6 +20,7 @@ import React, { useMemo, useCallback } from 'react';
 import type { Filter, FilterKey } from '../../../../../../common/custom_link/custom_link_types';
 import { DEFAULT_OPTION, FILTER_SELECT_OPTIONS, getSelectOptions } from './helper';
 import { SuggestionsSelect } from '../../../../shared/suggestions_select';
+import eventEmitter from './event-emmiter';
 
 export function FiltersSection({
   filters,
@@ -32,7 +33,11 @@ export function FiltersSection({
     (key: Filter['key'], value: Filter['value'], idx: number) => {
       const newFilters = [...filters];
       newFilters[idx] = { key, value };
+      console.log('BEFORE:', { newFilters, filters, idx, key, value });
       onChangeFilters(newFilters);
+      console.log('AFTER:', { newFilters, filters, idx, key, value });
+
+      // eventEmitter.emit('clear-selected-suggestions', []);
     },
     [filters, onChangeFilters]
   );
@@ -45,10 +50,12 @@ export function FiltersSection({
     const newFilters = [...filters];
     newFilters.splice(idx, 1);
 
+    console.log('on remove', { idx, newFilters, filters: [...filters] });
     // if there is only one item left it should not be removed
     // but reset to empty
     if (isEmpty(newFilters)) {
       onChangeFilters([{ key: '', value: '' }]);
+      eventEmitter.emit('clear-selected-suggestions', []);
     } else {
       onChangeFilters(newFilters);
     }
@@ -79,8 +86,9 @@ export function FiltersSection({
 
       {filters.map((filter, idx) => {
         const { key, value } = filter;
-        const filterId = `filter-${idx}`;
+        const filterId = `filter-${key}-${value}`;
         const selectOptions = getSelectOptions(filters, key);
+        console.log({ filterId });
         return (
           <React.Fragment key={filterId}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -148,7 +156,11 @@ export function FiltersSection({
       <AddFilterButton
         onClick={handleAddFilter}
         // Disable button when user has already added all items available
-        isDisabled={filters.length === FILTER_SELECT_OPTIONS.length - 1}
+        // or item is not properly setup (does not have key or value)
+        isDisabled={
+          filters.length === FILTER_SELECT_OPTIONS.length - 1 ||
+          filters.some((filter) => isEmpty(filter.key) || isEmpty(filter.value))
+        }
       />
     </>
   );
