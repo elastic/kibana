@@ -63,6 +63,7 @@ export const getMonitorAlertDocument = (
   'kibana.alert.evaluation.value':
     (useLatestChecks ? monitorSummary.checks?.downWithinXChecks : monitorSummary.checks?.down) ?? 1,
   'monitor.tags': monitorSummary.monitorTags ?? [],
+  'monitor.step_info': monitorSummary.stepInfo,
   ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),
 });
 
@@ -98,6 +99,7 @@ export interface MonitorSummaryData {
     down: number;
   };
   params?: StatusRuleParams;
+  stepInfo?: string;
 }
 
 export const getMonitorSummary = ({
@@ -109,6 +111,7 @@ export const getMonitorSummary = ({
   reason,
   checks,
   params,
+  stepInfo = '',
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
   const { downThreshold } = getConditionType(params?.condition);
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
@@ -175,6 +178,7 @@ export const getMonitorSummary = ({
     downThreshold,
     timestamp,
     monitorTags: monitorInfo.tags,
+    stepInfo,
   };
 };
 
@@ -362,3 +366,98 @@ export const UNAVAILABLE_LABEL = i18n.translate(
 export const HOST_LABEL = i18n.translate('xpack.synthetics.alertRules.monitorStatus.host.label', {
   defaultMessage: 'Host',
 });
+
+/**
+ * Extracts step action from error message.
+ * For example, from "error executing step: locator.textContent: Timeout 50000ms exceeded."
+ * it will extract "locator.textContent"
+ */
+const extractStepActionFromError = (errorMessage: string): string | undefined => {
+  // Pattern: "error executing step: <action>: <error details>"
+  const stepMatch = errorMessage.match(/error executing step:\s*([^:]+):/i);
+
+  if (stepMatch) {
+    return stepMatch[1].trim();
+  }
+
+  // Fallback to find a pattern like `locator.click`
+  const actionMatch = errorMessage.match(/\b\w+\.\w+\b/);
+  if (actionMatch) {
+    return actionMatch[0];
+  }
+
+  return undefined;
+};
+
+const MAX_SCRIPT_LENGTH = 200;
+
+/**
+ * Formats step information for display in alert messages
+ */
+export const formatStepInformation = (
+  stepInfo: {
+    stepName?: string;
+    stepAction?: string;
+    scriptSource?: string;
+    stepNumber?: number;
+  } | null,
+  context?: {
+    monitorName?: string;
+    locationName?: string;
+    timestamp?: string;
+  }
+): string => {
+  if (!stepInfo) {
+    return '';
+  }
+
+  const parts: string[] = [];
+
+  if (
+    context?.monitorName &&
+    stepInfo.stepNumber &&
+    stepInfo.stepName &&
+    context?.locationName &&
+    context?.timestamp
+  ) {
+    const date = new Date(context.timestamp);
+    const timeStr = date.toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'UTC',
+    });
+    const dateStr = date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+
+    parts.push(
+      `\n[${context.monitorName}] has failed on step [${stepInfo.stepNumber}] [${stepInfo.stepName}] in [${context.locationName}] at [${timeStr}] on [${dateStr}].`
+    );
+  }
+
+  if (stepInfo.stepName) {
+    parts.push(`\n- Step name: ${stepInfo.stepName}  `);
+  }
+
+  if (stepInfo.stepAction) {
+    const extractedAction = extractStepActionFromError(stepInfo.stepAction);
+    if (extractedAction) {
+      parts.push(`\n- Step action: ${extractedAction}  `);
+    }
+  }
+
+  if (stepInfo.scriptSource) {
+    // Limit script source to first 200 characters to avoid too long messages
+    const truncatedScript = stepInfo.scriptSource.substring(0, MAX_SCRIPT_LENGTH);
+    const script =
+      stepInfo.scriptSource.length > MAX_SCRIPT_LENGTH ? `${truncatedScript}...` : truncatedScript;
+    parts.push(`\n- Script: ${script}  `);
+  }
+
+  return parts.join('');
+};
