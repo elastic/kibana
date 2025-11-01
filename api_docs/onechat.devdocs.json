@@ -398,7 +398,7 @@
           "tags": [],
           "label": "agents",
           "description": [
-            "\nAgents setup contract, can be used to register built-in agents."
+            "\nAgents setup contract, which can be used to register built-in agents."
           ],
           "signature": [
             "AgentsSetup"
@@ -414,7 +414,7 @@
           "tags": [],
           "label": "tools",
           "description": [
-            "\nTools setup contract, can be used to register built-in tools."
+            "\nTools setup contract, which can be used to register built-in tools."
           ],
           "signature": [
             {
@@ -424,6 +424,22 @@
               "section": "def-server.ToolsSetup",
               "text": "ToolsSetup"
             }
+          ],
+          "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "onechat",
+          "id": "def-server.OnechatPluginSetup.attachments",
+          "type": "Object",
+          "tags": [],
+          "label": "attachments",
+          "description": [
+            "\nAttachments setup contract, which can be used to register attachment types."
+          ],
+          "signature": [
+            "AttachmentsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/onechat/server/types.ts",
           "deprecated": false,

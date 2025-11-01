@@ -6265,6 +6265,18 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_EMAIL_BODY_LENGTH",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_EMAIL_BODY_LENGTH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.DEFAULT_MICROSOFT_EXCHANGE_URL",
         "type": "string",
         "tags": [],
@@ -6408,6 +6420,18 @@
         "signature": [
           "\"/internal/actions\""
         ],
+        "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.MAX_EMAIL_BODY_LENGTH",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_EMAIL_BODY_LENGTH",
+        "description": [],
         "path": "x-pack/platform/plugins/shared/actions/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
