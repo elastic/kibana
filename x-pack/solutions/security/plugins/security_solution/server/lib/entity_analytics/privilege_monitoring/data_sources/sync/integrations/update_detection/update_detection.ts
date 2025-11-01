@@ -27,6 +27,10 @@ export const createUpdateDetectionService = (
       'info',
       `Completed update detection for source ${source.id}. Processed ${users.length} users.`
     );
+    dataClient.log(
+      'info',
+      `TEMP LOG, Debugging: Completed update detection details: ${JSON.stringify(users)}`
+    );
   };
   return {
     updateDetection,
