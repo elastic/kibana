@@ -29,8 +29,9 @@ import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
 import { FieldActionsCell } from './field_actions';
 import { FieldParent } from './field_parent';
 import { FieldStatusBadge } from './field_status';
+import { FieldResultBadge } from './field_result';
 import type { TControls } from './hooks/use_controls';
-import type { SchemaField } from './types';
+import type { SchemaField, SchemaEditorField } from './types';
 import { FieldType } from './field_type';
 
 export function FieldsTable({
@@ -43,6 +44,7 @@ export function FieldsTable({
   withToolbar,
   selectedFields,
   onFieldSelection,
+  editableFields,
 }: {
   isLoading: boolean;
   controls: TControls;
@@ -53,6 +55,7 @@ export function FieldsTable({
   withToolbar: boolean | EuiDataGridToolBarVisibilityOptions;
   selectedFields: string[];
   onFieldSelection: (names: string[], checked: boolean) => void;
+  editableFields?: string[];
 }) {
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
@@ -72,10 +75,18 @@ export function FieldsTable({
         filteredFields,
         selectedFields,
         onFieldSelection,
-        stream.name
+        stream.name,
+        editableFields
       ),
     ];
-  }, [withTableActions, filteredFields, selectedFields, onFieldSelection, stream.name]);
+  }, [
+    withTableActions,
+    filteredFields,
+    selectedFields,
+    onFieldSelection,
+    stream.name,
+    editableFields,
+  ]);
 
   const trailingColumns = useMemo(() => {
     if (!withTableActions) return undefined;
@@ -184,6 +195,14 @@ const createCellRenderer =
       return EMPTY_CONTENT;
     }
 
+    if (columnId === 'result') {
+      const editorField = field as SchemaEditorField;
+      if (editorField.result) {
+        return <FieldResultBadge result={editorField.result} />;
+      }
+      return EMPTY_CONTENT;
+    }
+
     return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;
   };
 
@@ -212,12 +231,15 @@ const createFieldSelectionCellRenderer = (
   fields: SchemaField[],
   selectedFields: string[],
   onChange: (names: string[], checked: boolean) => void,
-  streamName: string
+  streamName: string,
+  editableFields?: string[]
 ): EuiDataGridControlColumn => ({
   id: 'field-selection',
   width: 40,
   headerCellRender: () => {
-    const selectableFields = fields.filter((field) => isSelectableField(streamName, field));
+    const selectableFields = fields.filter((field) =>
+      isSelectableField(streamName, field, editableFields)
+    );
     if (selectableFields.length === 0) {
       return;
     }
@@ -242,7 +264,7 @@ const createFieldSelectionCellRenderer = (
   rowCellRender: ({ rowIndex }) => {
     const field = fields[rowIndex];
 
-    if (!isSelectableField(streamName, field)) return null;
+    if (!isSelectableField(streamName, field, editableFields)) return null;
 
     return (
       <EuiCheckbox
@@ -273,7 +295,17 @@ const filterFieldsByControls = (fields: SchemaField[], controls: TControls) => {
   return filteredByGroupsFields;
 };
 
-export const isSelectableField = (streamName: string, field: SchemaField) => {
+export const isSelectableField = (
+  streamName: string,
+  field: SchemaField,
+  editableFields?: string[]
+) => {
+  // If editableFields is provided, use it to determine selectability
+  if (editableFields && !editableFields.includes(field.name)) {
+    return false;
+  }
+
+  // Otherwise, use the default logic
   return (
     field.status !== 'inherited' &&
     field.parent === streamName &&

@@ -13,7 +13,7 @@ import { Streams } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
-import type { SchemaField } from '../schema_editor/types';
+import type { SchemaEditorField } from '../schema_editor/types';
 import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
@@ -21,10 +21,14 @@ import {
 import { isSelectableField } from '../schema_editor/schema_editor_table';
 
 interface DetectedFieldsEditorProps {
-  detectedFields: SchemaField[];
+  schemaEditorFields: SchemaEditorField[];
+  editableFields?: string[];
 }
 
-export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorProps) => {
+export const DetectedFieldsEditor = ({
+  schemaEditorFields,
+  editableFields,
+}: DetectedFieldsEditorProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { mapField, unmapField } = useStreamEnrichmentEvents();
@@ -32,12 +36,12 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
   const [selectedFields, setSelectedFields] = React.useState<string[]>(
-    detectedFields
-      .filter((field) => isSelectableField(definition.stream.name, field))
+    schemaEditorFields
+      .filter((field) => isSelectableField(definition.stream.name, field, editableFields))
       .map(({ name }) => name)
   );
 
-  const hasFields = detectedFields.length > 0;
+  const hasFields = schemaEditorFields.length > 0;
 
   if (!hasFields) {
     return (
@@ -78,9 +82,10 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
         </EuiText>
       )}
       <SchemaEditor
-        defaultColumns={['name', 'type', 'format', 'status', 'source']}
-        fields={detectedFields}
+        defaultColumns={['name', 'type', 'format', 'status', 'source', 'result']}
+        fields={schemaEditorFields}
         stream={definition.stream}
+        editableFields={editableFields}
         onFieldUpdate={(field) => {
           if (field.status === 'mapped') {
             mapField(field);
