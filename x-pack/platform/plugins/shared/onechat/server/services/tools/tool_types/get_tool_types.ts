@@ -11,6 +11,7 @@ import { getEsqlToolType } from './esql';
 import { getIndexSearchToolType } from './index_search';
 import { getWorkflowToolType } from './workflow';
 import { getBuiltinToolType } from './builtin';
+import { getMcpToolType } from './mcp';
 
 export const getToolTypeDefinitions = ({
   workflowsManagement,
@@ -22,6 +23,7 @@ export const getToolTypeDefinitions = ({
     getEsqlToolType(),
     getIndexSearchToolType(),
     getWorkflowToolType({ workflowsManagement }),
+    getMcpToolType(),
   ];
   return toolTypes;
 };

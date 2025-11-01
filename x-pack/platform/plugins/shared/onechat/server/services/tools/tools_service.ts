@@ -15,6 +15,7 @@ import type { Runner } from '@kbn/onechat-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
@@ -25,6 +26,7 @@ import {
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
 import { createPersistedProviderFn } from './persisted';
+import { createMcpProviderFn } from './mcp';
 import { createToolRegistry } from './tool_registry';
 import { getToolTypeInfo } from './utils';
 
@@ -37,6 +39,7 @@ export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
+  actions: ActionsPluginStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
 }
@@ -70,6 +73,7 @@ export class ToolsService {
     getRunner,
     elasticsearch,
     spaces,
+    actions,
     uiSettings,
     savedObjects,
   }: ToolsServiceStartDeps): ToolsServiceStart {
@@ -88,11 +92,16 @@ export class ToolsService {
       esClient: elasticsearch.client.asInternalUser,
       toolTypes,
     });
+    const mcpProviderFn = createMcpProviderFn({
+      logger: logger.get('mcp-provider'),
+      actions,
+    });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
       const space = getCurrentSpaceId({ request, spaces });
       const builtinProvider = await builtinProviderFn({ request, space });
       const persistedProvider = await persistedProviderFn({ request, space });
+      const mcpProvider = await mcpProviderFn({ request, space });
 
       return createToolRegistry({
         getRunner,
@@ -100,6 +109,7 @@ export class ToolsService {
         request,
         builtinProvider,
         persistedProvider,
+        mcpProvider,
       });
     };
 

@@ -34,62 +34,88 @@ describe('validateToolSelection (unit)', () => {
 
   it('returns error if tool id does not exist globally', async () => {
     const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
+    const result = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
       toolSelection: [{ tool_ids: ['nonexistent'] }],
     });
-    expect(errors.join(' ')).toMatch(/Tool id 'nonexistent' does not exist/);
+    expect(result.errors.join(' ')).toMatch(/Tool id 'nonexistent' does not exist/);
   });
 
   it('passes for wildcard tool selection', async () => {
     const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
+    const result = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
       toolSelection: [{ tool_ids: ['*'] }],
     });
-    expect(errors).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
   });
 
   it('passes for valid tool id', async () => {
     const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
+    const result = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
       toolSelection: [{ tool_ids: ['toolA'] }],
     });
-    expect(errors).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
   });
 
   it('passes for multiple valid tool ids', async () => {
     const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
+    const result = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
       toolSelection: [{ tool_ids: ['toolA', 'toolB'] }],
     });
-    expect(errors).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
   });
 
   it('returns error for mix of valid and invalid tool ids', async () => {
     const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
+    const result = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
       toolSelection: [{ tool_ids: ['toolA', 'nonexistent'] }],
     });
-    expect(errors.join(' ')).toMatch(/Tool id 'nonexistent' does not exist/);
-    expect(errors).toHaveLength(1);
+    expect(result.errors.join(' ')).toMatch(/Tool id 'nonexistent' does not exist/);
+    expect(result.errors).toHaveLength(1);
   });
 
   it('handles empty tool_ids array', async () => {
     const registry = makeRegistry([toolA, toolB]);
-    const errors = await validateToolSelection({
+    const result = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
       toolSelection: [{ tool_ids: [] }],
     });
-    expect(errors).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('auto-filters invalid tools when autoFilter is true', async () => {
+    const registry = makeRegistry([toolA, toolB]);
+    const result = await validateToolSelection({
+      toolRegistry: registry as any,
+      request: mockRequest,
+      toolSelection: [{ tool_ids: ['toolA', 'nonexistent', 'toolB', 'another-missing'] }],
+      autoFilter: true,
+    });
+    expect(result.errors).toHaveLength(0);
+    expect(result.filteredTools).toEqual(['nonexistent', 'another-missing']);
+    expect(result.filteredSelection).toEqual([{ tool_ids: ['toolA', 'toolB'] }]);
+  });
+
+  it('returns empty selection when all tools are filtered out', async () => {
+    const registry = makeRegistry([toolA, toolB]);
+    const result = await validateToolSelection({
+      toolRegistry: registry as any,
+      request: mockRequest,
+      toolSelection: [{ tool_ids: ['nonexistent1', 'nonexistent2'] }],
+      autoFilter: true,
+    });
+    expect(result.errors).toHaveLength(0);
+    expect(result.filteredTools).toEqual(['nonexistent1', 'nonexistent2']);
+    expect(result.filteredSelection).toEqual([]);
   });
 });

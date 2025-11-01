@@ -14,6 +14,10 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/se
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AttachmentServiceSetup } from './services/attachments';
 
@@ -23,6 +27,7 @@ export interface OnechatSetupDependencies {
   inference: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
   features: FeaturesPluginSetup;
+  actions: ActionsPluginSetup;
 }
 
 export interface OnechatStartDependencies {
@@ -30,6 +35,7 @@ export interface OnechatStartDependencies {
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
   spaces?: SpacesPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export interface AttachmentsSetup {
