@@ -172,15 +172,11 @@ export const createExternalService = (
   const validateChannels = ({
     channels,
     allowedList,
-    ignoreEmptyAllowedList = true,
   }: {
     channels?: string[];
     allowedList?: string[];
-    ignoreEmptyAllowedList?: boolean;
   }) => {
-    if (!channels || !channels.length || !allowedList) return;
-
-    if (ignoreEmptyAllowedList && !allowedList.length) return;
+    if (!channels || !channels.length || !allowedList || !allowedList.length) return;
 
     const normalizeChannel = (name: string) => name.replace(/^#/, '');
 
@@ -215,7 +211,6 @@ export const createExternalService = (
       validateChannels({
         channels: channelNames,
         allowedList: allowedChannelNames,
-        ignoreEmptyAllowedList: false,
       });
 
       return channelNames[0];

@@ -438,16 +438,6 @@ describe('Slack API service', () => {
         );
       });
 
-      it('should throw an error if allowedChannels is an empty array for %s', async () => {
-        service = createExternalServiceMock({
-          config: { allowedChannels: [] },
-        });
-
-        expect(await service[method]({ channelNames: ['not-in-list'], text })).toEqual(
-          errorNoAllowedChannelsRes
-        );
-      });
-
       it('should post a message if allowedChannels is an empty array and use channelsIds', async () => {
         service = createExternalServiceMock({ config: {} });
 
