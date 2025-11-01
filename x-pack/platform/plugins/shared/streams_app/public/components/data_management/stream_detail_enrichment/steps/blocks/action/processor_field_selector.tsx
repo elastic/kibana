@@ -17,6 +17,7 @@ export interface ProcessorFieldSelectorProps {
   placeholder?: string;
   label?: string;
   onChange?: (value: string) => void;
+  labelAppend?: React.ReactNode;
 }
 
 export const ProcessorFieldSelector = ({
@@ -25,6 +26,7 @@ export const ProcessorFieldSelector = ({
   placeholder,
   label,
   onChange,
+  labelAppend,
 }: ProcessorFieldSelectorProps) => {
   const suggestions = useEnrichmentFieldSuggestions();
 
@@ -73,6 +75,7 @@ export const ProcessorFieldSelector = ({
       dataTestSubj="streamsAppProcessorFieldSelectorComboFieldText"
       isInvalid={fieldState.invalid}
       error={fieldState.error?.message}
+      labelAppend={labelAppend}
     />
   );
 };
