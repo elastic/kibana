@@ -66,6 +66,20 @@ describe('EsqlService', () => {
     });
   });
 
+  it('can load the sources endpoints', async () => {
+    const url = '/internal/esql/autocomplete/sources/local';
+    const result = await testbed.GET(url).send().expect(200);
+
+    expect(result.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'lookup_index1', type: 'Lookup' }),
+        expect.objectContaining({ name: 'lookup_index2', type: 'Lookup' }),
+        expect.objectContaining({ name: 'ts_index1', type: 'Timeseries' }),
+        expect.objectContaining({ name: 'ts_index2', type: 'Timeseries' }),
+      ])
+    );
+  });
+
   it('can load the inference endpoints by type', async () => {
     const url = '/internal/esql/autocomplete/inference_endpoints/rerank';
     const result = await testbed.GET(url).send().expect(200);

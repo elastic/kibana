@@ -8,13 +8,14 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  IndicesAutocompleteResult,
-  IndexAutocompleteItem,
-  ResolveIndexResponse,
+import {
+  type IndicesAutocompleteResult,
+  type IndexAutocompleteItem,
+  type ResolveIndexResponse,
+  SOURCES_TYPES,
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type { ESQLSourceResult, InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 import { getListOfCCSIndices } from '../lookup/utils';
 
 export interface EsqlServiceOptions {
@@ -67,6 +68,95 @@ export class EsqlService {
     };
 
     return result;
+  }
+
+  public async getAllIndices(scope: 'local' | 'all' = 'local'): Promise<ESQLSourceResult[]> {
+    const { client } = this.options;
+
+    // Determine which sources to query based on scope
+    const namesToQuery = scope === 'local' ? ['*'] : ['*', '*:*'];
+
+    // hidden and not, important for finding timeseries mode
+    const allSources = (await client.indices.resolveIndex({
+      name: namesToQuery,
+      expand_wildcards: 'all',
+    })) as ResolveIndexResponse;
+
+    const availableSources = (await client.indices.resolveIndex({
+      name: namesToQuery,
+      expand_wildcards: 'open',
+    })) as ResolveIndexResponse;
+
+    const suggestedIndices = this.processSuggestedIndices(availableSources.indices ?? []);
+    const suggestedAliases = this.processSuggestedAliases(availableSources.aliases ?? []);
+    const suggestedDataStreams = this.processSuggestedDataStreams(
+      availableSources.data_streams ?? [],
+      allSources.indices
+    );
+
+    return [...suggestedIndices, ...suggestedAliases, ...suggestedDataStreams];
+  }
+
+  private getIndexSourceType(mode?: string): SOURCES_TYPES {
+    const modeTypeMap: Record<string, SOURCES_TYPES> = {
+      time_series: SOURCES_TYPES.TIMESERIES,
+      lookup: SOURCES_TYPES.LOOKUP,
+    };
+
+    return modeTypeMap[mode ?? ''] || SOURCES_TYPES.INDEX;
+  }
+
+  private processSuggestedIndices(indices: ResolveIndexResponse['indices']): ESQLSourceResult[] {
+    return (
+      indices?.map((index) => {
+        // for remote clusters the format is cluster:indexName
+        const [_, indexName] = index.name.split(':');
+        return {
+          name: index.name,
+          type: this.getIndexSourceType(index.mode),
+          // Extra hidden flag to flag system indices in the UI
+          hidden: indexName?.startsWith('.') || index.name.startsWith('.'),
+        };
+      }) ?? []
+    );
+  }
+
+  private processSuggestedAliases(aliases: ResolveIndexResponse['aliases']): ESQLSourceResult[] {
+    return (
+      aliases?.map((alias) => {
+        // for remote clusters the format is cluster:aliasName
+        const [_, aliasName] = alias.name.split(':');
+        return {
+          name: alias.name,
+          type: SOURCES_TYPES.ALIAS,
+          // Extra hidden flag to flag system aliases in the UI
+          hidden: aliasName?.startsWith('.') || alias.name.startsWith('.'),
+        };
+      }) ?? []
+    );
+  }
+
+  private processSuggestedDataStreams(
+    dataStreams: ResolveIndexResponse['data_streams'],
+    indices: ResolveIndexResponse['indices']
+  ): ESQLSourceResult[] {
+    const indexModeMap = new Map(indices?.map((idx) => [idx.name, idx.mode]) ?? []);
+
+    return (
+      dataStreams?.map((dataStream) => {
+        const backingIndices = dataStream.backing_indices || [];
+        // Determine if any of the backing indices are time_series
+        const isTimeSeries = backingIndices.some(
+          (indexName) => indexModeMap.get(indexName) === 'time_series'
+        );
+        return {
+          name: dataStream.name,
+          type: isTimeSeries ? SOURCES_TYPES.TIMESERIES : SOURCES_TYPES.DATA_STREAM,
+          // Extra hidden flag to flag system data streams in the UI
+          hidden: dataStream.name.startsWith('.'),
+        };
+      }) ?? []
+    );
   }
 
   public async getInferenceEndpoints(

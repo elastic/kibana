@@ -14,4 +14,6 @@ export enum SOURCES_TYPES {
   TIMESERIES = 'Timeseries',
   INTEGRATION = 'Integration',
   ALIAS = 'Alias',
+  DATA_STREAM = 'Data Stream',
+  LOOKUP = 'Lookup',
 }
