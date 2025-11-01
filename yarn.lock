@@ -4773,6 +4773,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/babel-plugin-lazy-require@link:src/platform/packages/shared/kbn-babel-plugin-lazy-require":
+  version "0.0.0"
+  uid ""
+
 "@kbn/babel-preset@link:packages/kbn-babel-preset":
   version "0.0.0"
   uid ""
