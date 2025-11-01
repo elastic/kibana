@@ -86,6 +86,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
           defaultMessage: 'Project ID',
         }),
         sortable: true,
+        'data-test-subj': 'profilingStorageExplorerHostsTableProjectId',
       },
       {
         field: 'hostName',
@@ -192,6 +193,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
 
   return (
     <EuiInMemoryTable
+      data-test-subj="profilingStorageExplorerHostsTable"
       items={data}
       columns={columns}
       sorting={sorting}

@@ -37,7 +37,8 @@ export function parseServerFlags(flags: FlagsReader) {
   ]);
   const isStateful = flags.boolean('stateful');
 
-  if (!(serverlessType || isStateful) || (serverlessType && isStateful)) {
+  const flagsCount = [serverlessType, isStateful].filter(Boolean).length;
+  if (flagsCount !== 1) {
     throw createFlagError(`Expected exactly one of --serverless=<type> or --stateful flag`);
   }
 
