@@ -18,12 +18,12 @@ import { i18n } from '@kbn/i18n';
 import { isCondition } from '@kbn/streamlang';
 import { getSegments, MAX_NESTING_LEVEL } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { MemoPreviewTable, PreviewFlyout } from '../shared';
+import { MemoPreviewTable, PreviewFlyout, type PreviewTableMode } from '../shared';
 import { buildCellActions } from './cell_actions';
 import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import {
@@ -120,6 +120,8 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     (snapshot) => snapshot.context.definition.stream.name
   );
 
+  const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
+
   const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
   const documents = useStreamSamplesSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
@@ -143,6 +145,10 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   }>();
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>();
+
+  const handleSetVisibleColumns = useCallback((newVisibleColumns: string[]) => {
+    setVisibleColumns(newVisibleColumns.length > 0 ? newVisibleColumns : undefined);
+  }, []);
 
   const docViewsRegistry = useDocViewerSetup();
 
@@ -206,8 +212,15 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
             setSorting={setSorting}
             toolbarVisibility={true}
             displayColumns={visibleColumns}
-            setVisibleColumns={setVisibleColumns}
+            setVisibleColumns={handleSetVisibleColumns}
             cellActions={cellActions}
+            mode={viewMode}
+            streamName={streamName}
+            viewModeToggle={{
+              currentMode: viewMode,
+              setViewMode,
+              isDisabled: false,
+            }}
           />
         </RowSelectionContext.Provider>
         <PreviewFlyout
