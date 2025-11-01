@@ -43,6 +43,7 @@ import {
   extractAndWriteDownloadSourcesSecrets,
   extractAndUpdateDownloadSourceSecrets,
 } from './secrets';
+import { isSSLSecretStorageEnabled } from './secrets';
 
 function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
   const { ssl, source_id: sourceId, ...attributes } = so.attributes;
@@ -165,7 +166,7 @@ class DownloadSourceService {
       data.ssl = JSON.stringify(downloadSource.ssl);
     }
     // Store secret values if enabled; if not, store plain text values
-    if (await isSecretStorageEnabled(esClient, soClient)) {
+    if (await isSSLSecretStorageEnabled(esClient, soClient)) {
       const { downloadSource: downloadSourceWithSecrets } =
         await extractAndWriteDownloadSourcesSecrets({
           downloadSource,
