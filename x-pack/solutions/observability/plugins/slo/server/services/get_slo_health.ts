@@ -257,15 +257,26 @@ function getTransformHealth(
   transformStat?: TransformGetTransformStatsTransformStats
 ): HealthStatus {
   if (!transformStat) {
-    return 'missing';
+    return {
+      status: 'missing',
+    };
   }
-  return transformStat.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
+  const transformState = transformStat.state?.toLowerCase();
+  return transformStat.health?.status?.toLowerCase() === 'green'
+    ? {
+        status: 'healthy',
+        transformState: transformState as HealthStatus['transformState'],
+      }
+    : {
+        status: 'unhealthy',
+        transformState: transformState as HealthStatus['transformState'],
+      };
 }
 
 function computeHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
   item: { sloId: string; sloInstanceId: string; sloRevision: number }
-): { overall: HealthStatus; rollup: HealthStatus; summary: HealthStatus } {
+): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
   const rollup = getTransformHealth(
     transformStatsById[getSLOTransformId(item.sloId, item.sloRevision)]
   );
@@ -273,8 +284,8 @@ function computeHealth(
     transformStatsById[getSLOSummaryTransformId(item.sloId, item.sloRevision)]
   );
 
-  const overall: HealthStatus =
-    rollup === 'healthy' && summary === 'healthy' ? 'healthy' : 'unhealthy';
+  const overall: 'healthy' | 'unhealthy' =
+    rollup.status === 'healthy' && summary.status === 'healthy' ? 'healthy' : 'unhealthy';
 
   return { overall, rollup, summary };
 }

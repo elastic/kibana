@@ -1464,6 +1464,29 @@ paths:
                   default: elastic-ai-agent
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
+                attachments:
+                  description: Optional attachments to send with the message.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      data:
+                        additionalProperties: {}
+                        description: Payload of the attachment.
+                        type: object
+                      hidden:
+                        description: When true, the attachment will not be displayed in the UI.
+                        type: boolean
+                      id:
+                        description: Optional id for the attachment.
+                        type: string
+                      type:
+                        description: Type of the attachment.
+                        type: string
+                    required:
+                      - type
+                      - data
+                  type: array
                 capabilities:
                   additionalProperties: false
                   description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
@@ -1546,6 +1569,29 @@ paths:
                   default: elastic-ai-agent
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
+                attachments:
+                  description: Optional attachments to send with the message.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      data:
+                        additionalProperties: {}
+                        description: Payload of the attachment.
+                        type: object
+                      hidden:
+                        description: When true, the attachment will not be displayed in the UI.
+                        type: boolean
+                      id:
+                        description: Optional id for the attachment.
+                        type: string
+                      type:
+                        description: Type of the attachment.
+                        type: string
+                    required:
+                      - type
+                      - data
+                  type: array
                 capabilities:
                   additionalProperties: false
                   description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
@@ -65906,9 +65952,14 @@ paths:
         - $ref: '#/components/parameters/SLOs_kbn_xsrf'
         - $ref: '#/components/parameters/SLOs_space_id'
         - description: Indicates if the API returns only outdated SLO or all SLO definitions
-          example: true
           in: query
           name: includeOutdatedOnly
+          schema:
+            type: boolean
+        - description: Indicates if the API returns SLO health data with definitions
+          example: true
+          in: query
+          name: includeHealth
           schema:
             type: boolean
         - description: Filters the SLOs by tag
@@ -83954,6 +84005,22 @@ components:
         - statusCode
         - error
         - message
+    SLOs_artifacts:
+      description: Links to related assets for the SLO
+      properties:
+        dashboards:
+          description: Array of dashboard references
+          items:
+            type: object
+            properties:
+              id:
+                description: Dashboard saved-object id
+                type: string
+            required:
+              - id
+          type: array
+      title: Artifacts
+      type: object
     SLOs_budgeting_method:
       description: The budgeting method to use when computing the rollup data.
       enum:
@@ -84074,6 +84141,8 @@ components:
       description: |
         The create SLO API request body varies depending on the type of indicator, time window and budgeting method.
       properties:
+        artifacts:
+          $ref: '#/components/schemas/SLOs_artifacts'
         budgetingMethod:
           $ref: '#/components/schemas/SLOs_budgeting_method'
         description:
@@ -84888,6 +84957,8 @@ components:
       title: SLO definition response
       type: object
       properties:
+        artifacts:
+          $ref: '#/components/schemas/SLOs_artifacts'
         budgetingMethod:
           $ref: '#/components/schemas/SLOs_budgeting_method'
         createdAt:
@@ -85195,6 +85266,8 @@ components:
       description: |
         The update SLO API request body varies depending on the type of indicator, time window and budgeting method. Partial update is handled.
       properties:
+        artifacts:
+          $ref: '#/components/schemas/SLOs_artifacts'
         budgetingMethod:
           $ref: '#/components/schemas/SLOs_budgeting_method'
         description:
