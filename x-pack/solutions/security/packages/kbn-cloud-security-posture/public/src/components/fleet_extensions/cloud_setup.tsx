@@ -265,8 +265,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
                         templateName
                       )
                     ),
-                    supports_cloud_connector:
-                      showCloudConnectors && value === SetupTechnology.AGENTLESS,
+                    supports_cloud_connector: showCloudConnectors,
                     cloud_connector_id: undefined,
                   },
                 });
