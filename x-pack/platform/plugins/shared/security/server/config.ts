@@ -28,6 +28,7 @@ interface ProvidersCommonConfigType {
   description?: Type<string>;
   hint?: Type<string>;
   icon?: Type<string>;
+  origin?: Type<string[] | string>;
   session?: Type<{ idleTimeout?: Duration | null; lifespan?: Duration | null }>;
 }
 
@@ -49,6 +50,7 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     description: schema.maybe(schema.string()),
     hint: schema.maybe(schema.string()),
     icon: schema.maybe(schema.string()),
+    origin: schema.maybe(schema.oneOf([schema.uri(), schema.arrayOf(schema.uri())])),
     accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
     session: schema.object({
       idleTimeout: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
