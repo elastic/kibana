@@ -223,3 +223,17 @@ export const CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE = i18n.translate(
     defaultMessage: 'Context window length is only applicable for chat completion tasks.',
   }
 );
+
+export const TEMPERATURE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.temperatureTextFieldLabel',
+  {
+    defaultMessage: 'Temperature',
+  }
+);
+
+export const TEMPERATURE_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.temperatureValidationMessage',
+  {
+    defaultMessage: 'Temperature must be a number between 0 and 1.',
+  }
+);
