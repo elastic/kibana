@@ -17,6 +17,11 @@ import {
   capabilitySchema,
 } from './common';
 
+export const calculatedIdentitySchema = z.object({
+  filterOnAtLeastOneOf: z.array(z.string()),
+  script: z.string(),
+});
+
 export const entityDefinitionSchema = z.object({
   id: z.string().regex(/^[\w-]+$/),
   version: semVerSchema,
@@ -26,6 +31,7 @@ export const entityDefinitionSchema = z.object({
   filter: filterSchema,
   indexPatterns: arrayOfStringsSchema,
   identityFields: z.array(identityFieldsSchema),
+  calculatedIdentity: z.optional(calculatedIdentitySchema),
   capabilities: z.optional(z.array(capabilitySchema)),
   displayNameTemplate: z.string(),
   metadata: z.optional(z.array(metadataSchema)),

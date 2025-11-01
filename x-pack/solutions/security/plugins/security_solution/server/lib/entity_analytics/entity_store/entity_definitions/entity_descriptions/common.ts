@@ -13,6 +13,8 @@ import type { FieldDescription } from '../../installation/types';
 
 import { oldestValue, newestValue } from './field_utils';
 
+export const CALCULATED_IDENTITY_FIELD = 'Calculated_entity_id';
+
 export const getCommonFieldDescriptions = (ecsField: BaseECSEntityField): FieldDescription[] => {
   return [
     oldestValue({
