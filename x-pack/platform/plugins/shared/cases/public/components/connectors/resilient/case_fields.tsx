@@ -21,7 +21,7 @@ import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
 import { generateJSONValidator } from '../validate_json';
-import { JsonEditorField } from '../json_editor_field';
+import { AdditionalFormFields } from './additional_form_fields';
 
 const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const { http } = useKibana().services;
@@ -48,6 +48,20 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
   const severity = severityData?.data;
   const isLoadingIncidentTypes = isLoadingIncidentTypesData || isFetchingIncidentTypesData;
   const isLoadingSeverity = isLoadingSeverityData || isFetchingSeverityData;
+
+  const additionalFieldsProps = useMemo(() => {
+    return {
+      componentProps: { connector },
+      config: {
+        defaultValue: '',
+        validations: [
+          {
+            validator: generateJSONValidator({ maxAdditionalFields: 50 }),
+          },
+        ],
+      },
+    };
+  }, [connector]);
 
   const severitySelectOptions: EuiSelectOption[] = useMemo(
     () =>
@@ -131,31 +145,12 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
           },
         }}
       />
-
       <UseField
         path="fields.additionalFields"
-        component={JsonEditorField}
-        config={{
-          label: i18n.ADDITIONAL_FIELDS_LABEL,
-          validations: [
-            {
-              validator: generateJSONValidator({ maxAdditionalFields: 50 }),
-            },
-          ],
-        }}
-        componentProps={{
-          euiCodeEditorProps: {
-            fullWidth: true,
-            height: '200px',
-            options: {
-              fontSize: '12px',
-              renderValidationDecorations: 'off',
-            },
-          },
-          dataTestSubj: 'additionalFieldsEditor',
-        }}
+        config={additionalFieldsProps.config}
+        component={AdditionalFormFields}
+        componentProps={additionalFieldsProps.componentProps}
       />
-
       <EuiSpacer size="m" />
     </span>
   );

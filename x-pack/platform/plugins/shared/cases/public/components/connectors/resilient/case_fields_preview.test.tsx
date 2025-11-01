@@ -11,19 +11,23 @@ import { screen } from '@testing-library/react';
 import { connector } from '../mock';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
+import { useGetFields } from './use_get_fields';
 import FieldsPreview from './case_fields_preview';
 
 import { renderWithTestingProviders } from '../../../common/mock';
 import { createQueryWithMarkup } from '../../../common/test_utils';
+import { resilientFields } from './mocks';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
+jest.mock('./use_get_fields');
 
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
+const useGetFieldsMock = useGetFields as jest.Mock;
 
-describe('Jira Fields: Preview', () => {
+describe('Resilient Fields: Preview', () => {
   const useGetIncidentTypesResponse = {
     isLoading: false,
     isFetching: false,
@@ -62,15 +66,38 @@ describe('Jira Fields: Preview', () => {
     },
   };
 
+  const useGetFieldsResponse = {
+    isLoading: false,
+    isFetching: false,
+    data: {
+      data: resilientFields,
+    },
+  };
+
   const fields = {
     incidentTypes: ['19', '21'],
     severityCode: '5',
-    additionalFields: '{"testField":"testValue"}',
+    additionalFields: `{
+      "customField1": "customValue1",
+      "test_text": "some text",
+      "test_text_area": "some textarea",
+      "test_boolean": false,
+      "test_number": 1234,
+      "test_select": 110,
+      "test_multi_select": [
+        120,
+        130
+      ],
+      "test_date_picker": 1234567890123,
+      "test_date_time_picker": 1234567890123,
+      "resolution_summary": "some resolution summary"
+    }`,
   };
 
   beforeEach(() => {
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
+    useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
     jest.clearAllMocks();
   });
 
@@ -81,6 +108,16 @@ describe('Jira Fields: Preview', () => {
 
     expect(getByTextWithMarkup('Incident types: Malware, Denial of Service')).toBeInTheDocument();
     expect(getByTextWithMarkup('Severity: Medium')).toBeInTheDocument();
-    expect(getByTextWithMarkup('{"testField":"testValue"}')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test text: some text')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test textarea: some textarea')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test boolean: false')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test number: 1234')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test select: Option 2')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test multiselect: Option 3, Option 4')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Test datepicker: February 13, 2009')).toBeInTheDocument();
+    expect(
+      getByTextWithMarkup('Test datetimepicker: February 13, 2009 @ 23:31:30')
+    ).toBeInTheDocument();
+    expect(getByTextWithMarkup('Resolution summary: some resolution summary')).toBeInTheDocument();
   });
 });
