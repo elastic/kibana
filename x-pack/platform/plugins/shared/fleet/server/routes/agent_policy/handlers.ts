@@ -351,14 +351,10 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const monitoringEnabled = request.body.monitoring_enabled;
   const logger = appContextService.getLogger().get('httpCreateAgentPolicyHandler');
 
-  const {
-    has_fleet_server: hasFleetServer,
-    force,
-    space_ids: spaceIds,
-    ...newPolicy
-  } = request.body;
+  const { has_fleet_server: hasFleetServer, force, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+  const { space_ids: spaceIds } = request.body;
 
   logger.debug(`Creating agent policy [${newPolicy.name}]`);
 
@@ -401,9 +397,11 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       (spaceIds.length > 1 || (spaceIds.length === 0 && spaceIds[0]) !== spaceId)
     ) {
       await updateAgentPolicySpaces({
-        agentPolicyId: agentPolicy.id,
+        agentPolicy: {
+          ...agentPolicy,
+          space_ids: spaceIds,
+        },
         currentSpaceId: spaceId,
-        newSpaceIds: spaceIds,
         authorizedSpaces,
         options: { force },
       });
@@ -543,8 +541,9 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { force, bumpRevision, space_ids: spaceIds, ...data } = request.body;
+  const { force, bumpRevision, ...data } = request.body;
 
+  const spaceIds = data.space_ids;
   let spaceId = fleetContext.spaceId;
 
   logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
@@ -560,11 +559,10 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
         context
       );
       await updateAgentPolicySpaces({
-        agentPolicyId: request.params.agentPolicyId,
+        agentPolicy: { ...data, id: request.params.agentPolicyId },
         currentSpaceId: spaceId,
-        newSpaceIds: spaceIds,
         authorizedSpaces,
-        options: { force, validateUniqueName: true },
+        options: { force },
       });
 
       spaceId = spaceIds[0];
