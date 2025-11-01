@@ -13,7 +13,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import globby from 'globby';
 import { asyncForEachWithLimit } from '@kbn/std';
-import { format } from 'util';
 import {
   CACHE_IGNORE_GLOBS,
   GCLOUD_ACTIVATE_SCRIPT,
@@ -142,13 +141,7 @@ export async function locateRemoteArchive(
   return await withGcsAuth(log, async () => {
     for (const sha of shas) {
       const remotePath = buildRemoteArchiveUri(sha);
-      try {
-        await execa('gcloud', ['storage', 'stat', remotePath], {
-          cwd: REPO_ROOT,
-          stdio: 'inherit',
-        });
-      } catch (error) {
-        log.warning(`Failed to retrieve archive for sha ${sha}: ${format(error)}`);
+      if (!(await remoteArchiveExists(remotePath))) {
         continue;
       }
 
@@ -162,6 +155,27 @@ export async function locateRemoteArchive(
     return undefined;
   });
 }
+
+const remoteArchiveExists = async (remotePath: string): Promise<boolean> => {
+  const commands: Array<[cmd: string, args: string[]]> = [
+    ['gsutil', ['-q', 'ls', remotePath]],
+    ['gcloud', ['storage', 'ls', '--uri', remotePath]],
+  ];
+
+  for (const [cmd, args] of commands) {
+    try {
+      await execa(cmd, args, {
+        cwd: REPO_ROOT,
+        stdio: 'ignore',
+      });
+      return true;
+    } catch (error) {
+      continue;
+    }
+  }
+
+  return false;
+};
 
 export async function cleanTypeCheckArtifacts(log: SomeDevLog) {
   const directoryMatches = await globby(TYPES_DIRECTORY_GLOB, {
