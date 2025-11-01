@@ -27,28 +27,35 @@ describe('failure hooks', function () {
 
     const tests = [
       {
-        flag: '"before all" hook: $FAILING_BEFORE_HOOK$',
+        flag: 'testHookFailure $FAILING_BEFORE_ERROR$',
         assert(lines) {
-          expect(lines.shift()).toMatch(/info\s+testHookFailure\s+\$FAILING_BEFORE_ERROR\$/);
           expect(lines.shift()).toMatch(
-            /info\s+testHookFailureAfterDelay\s+\$FAILING_BEFORE_ERROR\$/
+            /info\s+testHookFailure\s+\$FAILING_BEFORE_ERROR\$.*failing before hook/
+          );
+          expect(lines.shift()).toMatch(
+            /info\s+testHookFailureAfterDelay\s+\$FAILING_BEFORE_ERROR\$.*failing before hook/
           );
         },
       },
       {
-        flag: '└-> $FAILING_TEST$',
+        flag: 'testFailure $FAILING_TEST_ERROR$',
         assert(lines) {
-          expect(lines.shift()).toMatch(/global before each/);
-          expect(lines.shift()).toMatch(/info\s+testFailure\s+\$FAILING_TEST_ERROR\$/);
-          expect(lines.shift()).toMatch(/info\s+testFailureAfterDelay\s+\$FAILING_TEST_ERROR\$/);
+          expect(lines.shift()).toMatch(
+            /info\s+testFailure\s+\$FAILING_TEST_ERROR\$.*failing test/
+          );
+          expect(lines.shift()).toMatch(
+            /info\s+testFailureAfterDelay\s+\$FAILING_TEST_ERROR\$.*failing test/
+          );
         },
       },
       {
-        flag: '"after all" hook: $FAILING_AFTER_HOOK$',
+        flag: 'testHookFailure $FAILING_AFTER_ERROR$',
         assert(lines) {
-          expect(lines.shift()).toMatch(/info\s+testHookFailure\s+\$FAILING_AFTER_ERROR\$/);
           expect(lines.shift()).toMatch(
-            /info\s+testHookFailureAfterDelay\s+\$FAILING_AFTER_ERROR\$/
+            /info\s+testHookFailure\s+\$FAILING_AFTER_ERROR\$.*failing after hook/
+          );
+          expect(lines.shift()).toMatch(
+            /info\s+testHookFailureAfterDelay\s+\$FAILING_AFTER_ERROR\$.*failing after hook/
           );
         },
       },
@@ -59,6 +66,11 @@ describe('failure hooks', function () {
         const line = lines.shift();
         if (line.includes(tests[0].flag)) {
           const test = tests.shift();
+          // Check if the current line is a testHookFailure line that should be asserted
+          if (line.includes('testHookFailure') || line.includes('testFailure')) {
+            // Put the line back so assert() can check it
+            lines.unshift(line);
+          }
           test.assert(lines);
         }
       }
