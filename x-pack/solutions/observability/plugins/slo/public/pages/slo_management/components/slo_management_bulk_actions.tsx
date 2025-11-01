@@ -37,15 +37,19 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
       hasFocus: false,
       items: [
         {
-          'data-test-subj': 'sloSloManagementTableBulkDeleteButton',
+          'data-test-subj': 'sloSloManagementTableBulkResetButton',
+          icon: 'refresh',
           onClick: () => {
-            triggerAction({ items, type: 'bulk_delete', onConfirm: () => resetSelectedItems() });
+            triggerAction({
+              items,
+              type: 'bulk_reset',
+              onConfirm: () => resetSelectedItems(),
+            });
             setIsOpen(false);
           },
-          icon: 'trash',
           name: i18n.translate(
-            'xpack.slo.sloManagementTable.sloSloManagementTableBulkDeleteButtonLabel',
-            { defaultMessage: 'Delete' }
+            'xpack.slo.sloManagementTable.sloSloManagementTableBulkResetButtonLabel',
+            { defaultMessage: 'Reset' }
           ),
         },
         {
@@ -64,6 +68,18 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
             { defaultMessage: 'Purge Rollup Data' }
           ),
         },
+        {
+          'data-test-subj': 'sloSloManagementTableBulkDeleteButton',
+          onClick: () => {
+            triggerAction({ items, type: 'bulk_delete', onConfirm: () => resetSelectedItems() });
+            setIsOpen(false);
+          },
+          icon: 'trash',
+          name: i18n.translate(
+            'xpack.slo.sloManagementTable.sloSloManagementTableBulkDeleteButtonLabel',
+            { defaultMessage: 'Delete' }
+          ),
+        },
       ],
     },
   ];
@@ -74,6 +90,9 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
       panelPaddingSize="none"
       button={
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.slo.sloManagementTable.selectedSLOsButtonLabel', {
+            defaultMessage: 'Selected SLOs actions',
+          })}
           data-test-subj="sloManagementTableBulkMenuButton"
           css={{
             blockSize: '16px',

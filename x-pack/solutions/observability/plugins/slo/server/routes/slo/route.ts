@@ -28,6 +28,7 @@ import { putSloSettings } from './put_slo_settings';
 import { resetSLORoute } from './reset_slo';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
+import { bulkResetSLORoute, getBulkResetStatusRoute } from './bulk_reset';
 import { bulkPurgeRollupRoute } from './purge_rollup_data';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
@@ -52,6 +53,8 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getPreviewData,
     ...getSLOGroupingsRoute,
     ...resetSLORoute,
+    ...bulkResetSLORoute,
+    ...getBulkResetStatusRoute,
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,
     ...getSLOStatsOverview,
