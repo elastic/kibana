@@ -311,7 +311,7 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'date') {
-      const { from, formats, ignore_failure, to, output_format } = formState;
+      const { from, formats, ignore_failure, to, output_format, timezone, locale } = formState;
 
       return {
         processorDefinition: {
@@ -322,6 +322,8 @@ export const convertFormStateToProcessor = (
           ignore_failure,
           to: isEmpty(to) ? undefined : to,
           output_format: isEmpty(output_format) ? undefined : output_format,
+          timezone: isEmpty(timezone) ? undefined : timezone,
+          locale: isEmpty(locale) ? undefined : locale,
         },
       };
     }
