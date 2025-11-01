@@ -8,8 +8,8 @@
  */
 
 import { checkForDuplicateDashboardTitle } from './check_for_duplicate_dashboard_title';
-import { extractTitleAndCount } from '../../../utils/extract_title_and_count';
-import { contentManagementService } from '../../kibana_services';
+import { extractTitleAndCount } from '../utils/extract_title_and_count';
+import { contentManagementService } from '../services/kibana_services';
 
 describe('checkForDuplicateDashboardTitle', () => {
   const newTitle = 'Shiny dashboard (1)';

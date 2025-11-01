@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardSearchIn, DashboardSearchOut } from '../../../../server/content_management';
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { extractTitleAndCount } from '../../../utils/extract_title_and_count';
-import { contentManagementService } from '../../kibana_services';
+import { extractTitleAndCount } from '../utils/extract_title_and_count';
+import { dashboardClient } from './dashboard_client';
 
 export interface DashboardDuplicateTitleCheckProps {
   title: string;
@@ -53,15 +51,9 @@ export async function checkForDuplicateDashboardTitle({
 
   const [baseDashboardName] = extractTitleAndCount(title);
 
-  const { hits } = await contentManagementService.client.search<
-    DashboardSearchIn,
-    DashboardSearchOut
-  >({
-    contentTypeId: DASHBOARD_CONTENT_ID,
-    query: {
-      text: `${baseDashboardName}*`,
-      limit: 20,
-    },
+  const { hits } = await dashboardClient.search({
+    search: baseDashboardName,
+    size: 20,
     options: {
       onlyTitle: true,
     },

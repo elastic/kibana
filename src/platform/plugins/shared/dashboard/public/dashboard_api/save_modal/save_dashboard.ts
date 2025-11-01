@@ -8,26 +8,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getDashboardContentManagementCache } from '..';
-import type {
-  DashboardCreateIn,
-  DashboardCreateOut,
-  DashboardUpdateIn,
-  DashboardUpdateOut,
-} from '../../../../server/content_management';
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { getDashboardBackupService } from '../../dashboard_backup_service';
-import { contentManagementService, coreServices } from '../../kibana_services';
-import type { SaveDashboardProps, SaveDashboardReturn } from '../types';
+import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { coreServices } from '../../services/kibana_services';
+import { dashboardClient } from '../../dashboard_client';
+import type { SaveDashboardProps, SaveDashboardReturn } from './types';
 
-export const saveDashboardState = async ({
+export const saveDashboard = async ({
   lastSavedId,
   saveOptions,
   dashboardState,
   references,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
-  const dashboardContentManagementCache = getDashboardContentManagementCache();
-
   /**
    * Save the saved object using the content management
    */
@@ -35,23 +26,9 @@ export const saveDashboardState = async ({
 
   try {
     const result = idToSaveTo
-      ? await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
-          id: idToSaveTo,
-          contentTypeId: DASHBOARD_CONTENT_ID,
-          data: dashboardState,
-          options: {
-            references,
-            /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
-            mergeAttributes: false,
-          },
-        })
-      : await contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
-          contentTypeId: DASHBOARD_CONTENT_ID,
-          data: dashboardState,
-          options: {
-            references,
-          },
-        });
+      ? await dashboardClient.update(idToSaveTo, dashboardState, references)
+      : await dashboardClient.create(dashboardState, references);
+
     const newId = result.item.id;
 
     if (newId) {
@@ -70,8 +47,6 @@ export const saveDashboardState = async ({
       if (newId !== lastSavedId) {
         getDashboardBackupService().clearState(lastSavedId);
         return { redirectRequired: true, id: newId, references };
-      } else {
-        dashboardContentManagementCache.deleteDashboard(newId); // something changed in an existing dashboard, so delete it from the cache so that it can be re-fetched
       }
     }
     return { id: newId, references };
