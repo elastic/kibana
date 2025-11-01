@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Boom from '@hapi/boom';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -17,6 +16,7 @@ import type {
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { ApiExecutionContext } from './types';
+import { isForbiddenSpacesError } from './utils';
 
 export interface PerforOpenPointInTimeParams {
   type: string | string[];
@@ -52,7 +52,7 @@ export const performOpenPointInTime = async <T>(
     try {
       namespaces = await spacesExtension.getSearchableNamespaces(options.namespaces);
     } catch (err) {
-      if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+      if (isForbiddenSpacesError(err)) {
         // The user is not authorized to access any space, throw a bad request error.
         throw SavedObjectsErrorHelpers.createBadRequestError();
       }
