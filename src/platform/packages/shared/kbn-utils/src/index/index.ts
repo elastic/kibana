@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/json';
-export * from './src/path';
-export * from './src/streams';
-export * from './src/index/index';
+export * from './to_valid_index_name';
