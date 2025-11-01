@@ -290,6 +290,41 @@ export const CONSOLE_COMMANDS = {
       defaultMessage: 'Cancel a pending action on the host',
     }),
   },
+  memoryDump: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.memoryDump.about', {
+      defaultMessage: 'Generate a memory dump on the host',
+    }),
+    typeArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.typeArgAbout', {
+      defaultMessage: 'Type of memory dump to generate. Valid values are "kernel" or "process"',
+    }),
+    pidArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.pidArgAbout', {
+      defaultMessage:
+        'Process ID to generate a memory dump for. Valid only when "type" is "process"',
+    }),
+    entityIdArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.entityIdArgAbout',
+      {
+        defaultMessage:
+          'Process Entity ID to generate a memory dump for. Valid only when "type" is "process"',
+      }
+    ),
+    agentResultMissing: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.agentResultMissing',
+      { defaultMessage: 'Agent result missing' }
+    ),
+    resultFileLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultFileLabel',
+      { defaultMessage: 'File' }
+    ),
+    resultFileSizeLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultFileSizeLabel',
+      { defaultMessage: 'Size' }
+    ),
+    resultRemainingFreeDiskSpaceLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultRemainingFreeDiskSpaceLabel',
+      { defaultMessage: 'Disk free space' }
+    ),
+  },
 };
 
 export const CROWDSTRIKE_CONSOLE_COMMANDS = {
@@ -445,3 +480,20 @@ export const ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE = (count: 
       'This artifact is associated with {count} {count, plural, =1 {policy that is} other {policies that are}} not accessible in active space',
     values: { count },
   });
+
+/**
+ * Labels for the response action status (as defined in ResponseActionStatus)
+ */
+export const RESPONSE_ACTION_STATUS = Object.freeze({
+  failedMessage: i18n.translate('xpack.securitySolution.responseActionStatus.failed', {
+    defaultMessage: 'Action failed',
+  }),
+
+  pendingMessage: i18n.translate('xpack.securitySolution.responseActionStatus.pending', {
+    defaultMessage: 'Action pending',
+  }),
+
+  successMessage: i18n.translate('xpack.securitySolution.responseActionStatus.success', {
+    defaultMessage: 'Action successful',
+  }),
+});
