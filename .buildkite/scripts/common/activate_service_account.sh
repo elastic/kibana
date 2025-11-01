@@ -42,6 +42,7 @@ if [[ "$CURRENT_GCLOUD_USER" != "$GCLOUD_SA_PROXY_EMAIL" ]]; then
       else
         echo "Activated service account $GCLOUD_SA_PROXY_EMAIL"
       fi
+      echo "OK"
     else
       echo "gcloud is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
       exit 1
@@ -56,6 +57,10 @@ elif [[ "$CALL_ARGUMENT" =~ ^gs://* ]]; then
   BUCKET_NAME="${CALL_ARGUMENT:5}"
 else
   BUCKET_NAME="$CALL_ARGUMENT"
+fi
+
+if [[ "$BUCKET_NAME" == */* ]]; then
+  BUCKET_NAME="${BUCKET_NAME%%/*}"
 fi
 
 if [[ -z "$EMAIL" ]]; then
