@@ -10,6 +10,7 @@ import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/gra
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
+import { getDefaultIndexPatterns } from './constants';
 
 interface GraphContextServices {
   logger: Logger;
@@ -36,12 +37,11 @@ export const getGraph = async ({
   showUnknownTarget,
   nodesLimit,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
-  indexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
-
+  indexPatterns = indexPatterns ?? getDefaultIndexPatterns(spaceId);
   logger.trace(
-    `Fetching graph for [originEventIds: ${originEventIds.join(
-      ', '
-    )}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
+    `Fetching graph for [originEventIds: ${originEventIds
+      .map((e) => e.id)
+      .join(', ')}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
   const results = await fetchGraph({

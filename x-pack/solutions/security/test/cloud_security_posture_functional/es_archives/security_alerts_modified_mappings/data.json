@@ -1066,3 +1066,241 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "838ea37ab43ab7d2754d007fbe8191be53d7d637bea62f6189f8db1503c0e251",
+    "index": ".internal.alerts-security.alerts-default-000001",
+    "source": {
+      "@timestamp": "2024-10-15T14:30:00.000Z",
+      "actor": {
+        "entity": {
+          "id": "test-user@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "test-user@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "test-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.DeleteRole",
+        "agent_id_status": "missing",
+        "category": [
+          "iam"
+        ],
+        "dataset": "gcp.audit",
+        "id": "test-event-id-time-range",
+        "ingested": "2024-10-15T14:25:00.000Z",
+        "module": "gcp",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "deletion"
+        ]
+      },
+      "event.kind": "signal",
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "iam.roles.delete",
+              "resource": "projects/test-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-time-range-test"
+          },
+          "resource_name": "projects/test-project-id/roles/testRole",
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "kibana.alert.ancestors": [
+        {
+          "depth": 0,
+          "id": "test-ancestor-id",
+          "index": ".ds-logs-gcp.audit-default-2024.10.01-000001",
+          "type": "event"
+        }
+      ],
+      "kibana.alert.depth": 1,
+      "kibana.alert.intended_timestamp": "2024-10-15T14:30:00.000Z",
+      "kibana.alert.last_detected": "2024-10-15T14:30:00.000Z",
+      "kibana.alert.original_event.action": "google.iam.admin.v1.DeleteRole",
+      "kibana.alert.original_event.agent_id_status": "missing",
+      "kibana.alert.original_event.category": [
+        "iam"
+      ],
+      "kibana.alert.original_event.dataset": "gcp.audit",
+      "kibana.alert.original_event.id": "test-event-id-time-range",
+      "kibana.alert.original_event.ingested": "2024-10-15T14:25:00.000Z",
+      "kibana.alert.original_event.kind": "event",
+      "kibana.alert.original_event.module": "gcp",
+      "kibana.alert.original_event.outcome": "success",
+      "kibana.alert.original_event.provider": "activity",
+      "kibana.alert.original_event.type": [
+        "deletion"
+      ],
+      "kibana.alert.original_time": "2024-10-01T10:15:00.000Z",
+      "kibana.alert.reason": "iam event created high alert GCP IAM Role Deletion.",
+      "kibana.alert.risk_score": 73,
+      "kibana.alert.rule.actions": [],
+      "kibana.alert.rule.author": [
+        "Elastic"
+      ],
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.created_at": "2024-10-01T10:00:00.000Z",
+      "kibana.alert.rule.created_by": "elastic",
+      "kibana.alert.rule.description": "Test rule for time range functionality",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [],
+      "kibana.alert.rule.execution.timestamp": "2024-10-15T14:30:00.000Z",
+      "kibana.alert.rule.execution.uuid": "test-execution-uuid",
+      "kibana.alert.rule.false_positives": [],
+      "kibana.alert.rule.from": "now-6m",
+      "kibana.alert.rule.immutable": true,
+      "kibana.alert.rule.indices": [
+        "filebeat-*",
+        "logs-gcp*"
+      ],
+      "kibana.alert.rule.interval": "5m",
+      "kibana.alert.rule.license": "Elastic License v2",
+      "kibana.alert.rule.max_signals": 100,
+      "kibana.alert.rule.name": "GCP IAM Role Deletion Test",
+      "kibana.alert.rule.note": "",
+      "kibana.alert.rule.parameters": {
+        "author": [
+          "Elastic"
+        ],
+        "description": "Test rule for time range functionality",
+        "exceptions_list": [],
+        "false_positives": [],
+        "from": "now-6m",
+        "immutable": true,
+        "index": [
+          "filebeat-*",
+          "logs-gcp*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 100,
+        "note": "",
+        "query": "event.dataset:gcp.audit and event.action:google.iam.admin.v*.DeleteRole and event.outcome:success\n",
+        "references": [],
+        "related_integrations": [
+          {
+            "integration": "audit",
+            "package": "gcp",
+            "version": "^2.0.0"
+          }
+        ],
+        "required_fields": [
+          {
+            "ecs": true,
+            "name": "event.action",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.dataset",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.outcome",
+            "type": "keyword"
+          }
+        ],
+        "risk_score": 73,
+        "risk_score_mapping": [],
+        "rule_id": "test-time-range-rule-id",
+        "rule_source": {
+          "is_customized": false,
+          "type": "external"
+        },
+        "setup": "Test setup",
+        "severity": "high",
+        "severity_mapping": [],
+        "threat": [],
+        "timestamp_override": "event.ingested",
+        "to": "now",
+        "type": "query",
+        "version": 1
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.references": [],
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.risk_score": 73,
+      "kibana.alert.rule.risk_score_mapping": [],
+      "kibana.alert.rule.rule_id": "test-time-range-rule-id",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.severity": "high",
+      "kibana.alert.rule.severity_mapping": [],
+      "kibana.alert.rule.tags": [
+        "Test"
+      ],
+      "kibana.alert.rule.threat": [],
+      "kibana.alert.rule.timestamp_override": "event.ingested",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2024-10-01T10:00:00.000Z",
+      "kibana.alert.rule.updated_by": "elastic",
+      "kibana.alert.rule.uuid": "test-rule-uuid",
+      "kibana.alert.rule.version": 1,
+      "kibana.alert.severity": "high",
+      "kibana.alert.start": "2024-10-15T14:30:00.000Z",
+      "kibana.alert.status": "active",
+      "kibana.alert.uuid": "838ea37ab43ab7d2754d007fbe8191be53d7d637bea62f6189f8db1503c0e251",
+      "kibana.alert.workflow_assignee_ids": [],
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_tags": [],
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.version": "9.0.0",
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/test-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "192.168.1.100"
+        ],
+        "user": [
+          "test-user@example.com"
+        ]
+      },
+      "service": {
+        "name": "iam.googleapis.com"
+      },
+      "source": {
+        "ip": "192.168.1.100"
+      },
+      "tags": [],
+      "target": {
+        "entity": {
+          "id": "projects/test-project-id/roles/testRole"
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/400.0.0"
+      }
+    }
+  }
+}

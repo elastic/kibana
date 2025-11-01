@@ -45,7 +45,7 @@ export const defineGraphRoute = (router: CspRouter) =>
         const { nodesLimit, showUnknownTarget = false } = request.body;
         const { originEventIds, start, end, indexPatterns, esQuery } = request.body
           .query as GraphRequest['query'];
-        const spaceId = await cspContext.spacesService?.getSpaceId(request);
+        const spaceId = cspContext.spacesService?.getSpaceId(request);
         const isGraphEnabled = await (
           await context.core
         ).uiSettings.client.get(SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING);

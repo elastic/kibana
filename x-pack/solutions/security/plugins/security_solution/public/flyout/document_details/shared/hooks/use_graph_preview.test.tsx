@@ -34,6 +34,8 @@ const eventMockGetFieldsData: GetFieldsData = (field: string) => {
     return;
   } else if (field === 'kibana.alert.original_event.id') {
     return;
+  } else if (field === 'kibana.alert.original_time') {
+    return;
   } else if (field === 'event.id') {
     return 'eventId';
   } else if (field === 'actor.entity.id') {
@@ -72,6 +74,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current).toStrictEqual({
       hasGraphRepresentation: false,
       timestamp: mockFieldData['@timestamp'][0],
+      originalEventTime: mockFieldData['kibana.alert.original_time'][0],
       eventIds: ['eventId'],
       actorIds: [],
       action: ['action'],
@@ -94,6 +97,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current).toStrictEqual({
       hasGraphRepresentation: false,
       timestamp: mockFieldData['@timestamp'][0],
+      originalEventTime: mockFieldData['kibana.alert.original_time'][0],
       eventIds: ['eventId'],
       actorIds: ['actorId'],
       action: undefined,
@@ -123,6 +127,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current).toStrictEqual({
       hasGraphRepresentation: false,
       timestamp: mockFieldData['@timestamp'][0],
+      originalEventTime: mockFieldData['kibana.alert.original_time'][0],
       eventIds: ['eventId'],
       actorIds: ['actorId'],
       action: undefined,
@@ -156,6 +161,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current).toStrictEqual({
       hasGraphRepresentation: false,
       timestamp: mockFieldData['@timestamp'][0],
+      originalEventTime: mockFieldData['kibana.alert.original_time'][0],
       eventIds: [],
       actorIds: ['actorId'],
       action: ['action'],
@@ -189,6 +195,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current).toStrictEqual({
       hasGraphRepresentation: false,
       timestamp: null,
+      originalEventTime: mockFieldData['kibana.alert.original_time'][0],
       eventIds: ['eventId'],
       actorIds: ['actorId'],
       action: ['action'],
@@ -214,6 +221,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current).toStrictEqual({
       hasGraphRepresentation: true,
       timestamp: mockFieldData['@timestamp'][0],
+      originalEventTime: null,
       eventIds: ['eventId'],
       actorIds: ['actorId'],
       action: ['action'],
@@ -227,6 +235,8 @@ describe('useGraphPreview', () => {
       if (field === 'kibana.alert.uuid') {
         return;
       } else if (field === 'kibana.alert.original_event.id') {
+        return;
+      } else if (field === 'kibana.alert.original_time') {
         return;
       } else if (field === 'event.id') {
         return ['id1', 'id2'];
@@ -255,6 +265,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current).toStrictEqual({
       hasGraphRepresentation: true,
       timestamp: mockFieldData['@timestamp'][0],
+      originalEventTime: null,
       eventIds: ['id1', 'id2'],
       actorIds: ['actorId1', 'actorId2'],
       action: ['action1', 'action2'],
@@ -280,6 +291,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current).toStrictEqual({
       hasGraphRepresentation: true,
       timestamp: mockFieldData['@timestamp'][0],
+      originalEventTime: mockFieldData['kibana.alert.original_time'][0],
       eventIds: ['eventId'],
       actorIds: ['actorId'],
       action: ['action'],
@@ -319,6 +331,7 @@ describe('useGraphPreview', () => {
     expect(hookResult.result.current).toStrictEqual({
       hasGraphRepresentation: true,
       timestamp: mockFieldData['@timestamp'][0],
+      originalEventTime: mockFieldData['kibana.alert.original_time'][0],
       eventIds: ['id1', 'id2'],
       actorIds: ['actorId1', 'actorId2'],
       action: ['action1', 'action2'],
