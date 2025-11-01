@@ -6,6 +6,11 @@ source .buildkite/scripts/common/util.sh
 
 echo "--- yarn install and bootstrap"
 
+if [[ "${CI:-}" != "true" ]]; then
+  yarn kbn bootstrap
+  exit 0
+fi
+
 BOOTSTRAP_PARAMS=()
 if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
