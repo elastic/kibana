@@ -10,7 +10,7 @@ import type {
   PostAttackDiscoveryBulkResponse,
 } from '@kbn/elastic-assistant-common';
 import { ATTACK_DISCOVERY_BULK } from '@kbn/elastic-assistant-common';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { KibanaServices } from '../../../common/lib/kibana';

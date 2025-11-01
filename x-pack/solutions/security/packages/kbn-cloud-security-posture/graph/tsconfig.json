@@ -18,6 +18,7 @@
     "@kbn/i18n-react",
     "@kbn/storybook",
     "@kbn/data-plugin",
-    "@kbn/core-application-browser-mocks"
+    "@kbn/core-application-browser-mocks",
+    "@kbn/react-query"
   ]
 }

@@ -25,7 +25,8 @@
     "@kbn/wc-genai-utils",
     "@kbn/inference-plugin",
     "@kbn/actions-plugin",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"

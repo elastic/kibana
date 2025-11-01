@@ -38,6 +38,7 @@
     "@kbn/wc-genai-utils",
     "@kbn/workchat-framework-plugin",
     "@kbn/logging",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

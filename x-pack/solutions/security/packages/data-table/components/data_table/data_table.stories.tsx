@@ -8,7 +8,7 @@
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { DragDropContext, DropResult, ResponderProvided } from '@hello-pangea/dnd';
 

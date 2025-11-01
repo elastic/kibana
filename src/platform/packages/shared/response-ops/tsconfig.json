@@ -7,5 +7,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/storybook",
+    "@kbn/react-query",
   ]
 }

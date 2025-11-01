@@ -9,7 +9,7 @@
 
 import React, { PropsWithChildren } from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { BehaviorSubject } from 'rxjs';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';

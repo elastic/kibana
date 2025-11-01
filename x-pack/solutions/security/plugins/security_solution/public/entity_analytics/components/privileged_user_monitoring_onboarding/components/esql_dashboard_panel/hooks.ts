@@ -6,7 +6,7 @@
  */
 
 import { getESQLResults, getIndexPatternFromESQLQuery, prettifyQuery } from '@kbn/esql-utils';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
