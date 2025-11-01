@@ -11,6 +11,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import agent from 'elastic-apm-node';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
@@ -23,6 +24,7 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecution: EsWorkflowExecution;
   workflowExecutionGraph: WorkflowGraph;
   workflowLogger: IWorkflowEventLogger;
+  taskManager?: TaskManagerStartContract;
 }
 
 /**
@@ -52,6 +54,7 @@ export class WorkflowExecutionRuntimeManager {
   private workflowTransaction?: any; // APM transaction instance
   private workflowGraph: WorkflowGraph;
   private nextNodeId: string | undefined;
+  private taskManager?: TaskManagerStartContract;
 
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
@@ -63,6 +66,7 @@ export class WorkflowExecutionRuntimeManager {
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
     this.workflowExecutionState = workflowExecutionRuntimeManagerInit.workflowExecutionState;
+    this.taskManager = workflowExecutionRuntimeManagerInit.taskManager;
   }
 
   public get workflowExecution() {
@@ -415,6 +419,9 @@ export class WorkflowExecutionRuntimeManager {
           );
         }
       }
+
+      // Re-enable scheduled tasks for this workflow when it completes
+      await this.reEnableScheduledTasks(workflowExecution.workflowId, workflowExecution.spaceId);
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
@@ -440,5 +447,33 @@ export class WorkflowExecutionRuntimeManager {
         tags: ['workflow', 'execution', 'complete'],
       }
     );
+  }
+
+  /**
+   * Re-enables scheduled tasks for a workflow when the workflow execution completes.
+   * This is needed because scheduled tasks are disabled when workflows enter WAITING state.
+   */
+  private async reEnableScheduledTasks(workflowId: string, spaceId: string): Promise<void> {
+    if (!this.taskManager) {
+      this.workflowLogger?.logDebug(
+        'TaskManager not available, skipping scheduled task re-enabling'
+      );
+      return;
+    }
+
+    try {
+      // Re-enable the tasks
+      await this.taskManager.bulkEnable([`task:workflow:${workflowId}:scheduled`], true);
+
+      this.workflowLogger?.logInfo(
+        `Successfully re-enabled scheduled tasks for workflow ${workflowId}`
+      );
+    } catch (error) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      this.workflowLogger?.logError(
+        `Failed to re-enable scheduled tasks for workflow ${workflowId}`,
+        errorObj
+      );
+    }
   }
 }
