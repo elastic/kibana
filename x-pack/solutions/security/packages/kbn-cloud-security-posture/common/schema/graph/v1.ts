@@ -50,6 +50,10 @@ export const DOCUMENT_TYPE_EVENT = 'event' as const;
 export const DOCUMENT_TYPE_ALERT = 'alert' as const;
 export const DOCUMENT_TYPE_ENTITY = 'entity' as const;
 
+// The entity.engineMetadata field is not currently exposed by the enrich policy
+// TODO: Remove hardcoded value once https://github.com/elastic/kibana/issues/232226 is implemented
+export const DEFAULT_ENGINE_METADATA_TYPE = 'generic';
+
 export const entitySchema = schema.object({
   name: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
@@ -57,6 +61,11 @@ export const entitySchema = schema.object({
   host: schema.maybe(
     schema.object({
       ip: schema.maybe(schema.string()),
+    })
+  ),
+  engineMetadata: schema.maybe(
+    schema.object({
+      type: schema.maybe(schema.string()),
     })
   ),
 });

@@ -12,6 +12,7 @@ import {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import {
+  DEFAULT_ENGINE_METADATA_TYPE,
   DOCUMENT_TYPE_ENTITY,
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
@@ -195,6 +196,9 @@ ${
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
         ""
       ),
+      ",\\"engineMetadata\\":", "{",
+        "\\"type\\":\\"${DEFAULT_ENGINE_METADATA_TYPE}\\"",
+      "}",
     "}",
   "}")
 | EVAL targetDocData = CONCAT("{",
@@ -209,6 +213,9 @@ ${
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
         ""
       ),
+      ",\\"engineMetadata\\":", "{",
+        "\\"type\\":\\"${DEFAULT_ENGINE_METADATA_TYPE}\\"",
+      "}",
     "}",
   "}")
 `
