@@ -30,7 +30,7 @@ export const getIndicatorFieldAndValue = (
 
   return {
     key,
-    value,
+    value: (!Array.isArray(value) && value) || '',
   };
 };
 
