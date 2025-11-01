@@ -275,6 +275,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
       const saveButton = (
         <EuiButton
+          data-test-subj="agentFormSaveButton"
           form={agentFormId}
           size={size}
           type="submit"
@@ -412,7 +413,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>{isCreateMode ? labels.agents.newAgent : agentName}</EuiFlexItem>
+            <EuiFlexItem data-test-subj="agentFormPageTitle">
+              {isCreateMode ? labels.agents.newAgent : agentName}
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         description={
