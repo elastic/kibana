@@ -196,6 +196,10 @@ export class HeadlessChromiumDriver {
    * statically.
    */
   private async injectScreenshottingErrorHeader(error: Error, containerSelector: string) {
+    // FIXME This relies on code generation from strings.
+    if (true) {
+      return;
+    }
     await this.page.evaluate(
       (selector: string, text: string) => {
         let container = document.querySelector(selector);
