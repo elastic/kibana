@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import path from 'node:path';
-import fs from 'node:fs';
 import type { ToolingLog } from '@kbn/tooling-log';
+import fs from 'node:fs';
+import path from 'node:path';
+import { ScoutReport, ScoutReportError } from '../base';
 import { buildFailureHtml } from './html';
 import type { TestFailure } from './test_failure';
-import { ScoutReport, ScoutReportError } from '../base';
 
 const saveTestFailuresReport = (
   reportPath: string,
@@ -73,9 +73,9 @@ export class ScoutFailureReport extends ScoutReport {
     );
     fs.mkdirSync(destination, { recursive: true });
 
-    // Generate HTML report for each failed test with embedded screenshots
+    // Generate HTML report for each failed test with screenshots as separate artifacts
     for (const failure of testFailures) {
-      const htmlContent = buildFailureHtml(failure);
+      const htmlContent = buildFailureHtml(failure, destination);
       const htmlReportPath = path.join(destination, `${failure.id}.html`);
       saveTestFailuresReport(
         htmlReportPath,
