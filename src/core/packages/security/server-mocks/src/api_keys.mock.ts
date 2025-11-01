@@ -21,5 +21,6 @@ export const apiKeysMock = {
       validate: jest.fn(),
       invalidate: jest.fn(),
       invalidateAsInternalUser: jest.fn(),
+      getScopedClusterClient: jest.fn(),
     }),
 };

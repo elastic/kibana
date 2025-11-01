@@ -9,6 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
@@ -63,10 +64,12 @@ export interface APIKeys {
    * Tries to grant an API key for the current user.
    * @param request Request instance.
    * @param createParams Create operation parameters.
+   * @param isForUiam Indicates whether the API key is being granted for UIAM purposes.
    */
   grantAsInternalUser(
     request: KibanaRequest,
-    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams
+    createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
+    isForUiam?: boolean
   ): Promise<GrantAPIKeyResult | null>;
 
   /**
@@ -90,6 +93,15 @@ export interface APIKeys {
    * @param params The params to invalidate the API keys.
    */
   invalidateAsInternalUser(params: InvalidateAPIKeysParams): Promise<InvalidateAPIKeyResult | null>;
+
+  /**
+   * Creates a scoped Elasticsearch client with UIAM authentication headers if
+   * the ApiKey in the request is a UIAM ApiKey, otherwise returns a standard scoped client.
+   * @param request Request instance.
+   * @returns A scoped cluster client with UIAM authentication headers.
+   * @throws Error if UIAM service is not available.
+   */
+  getScopedClusterClient(request: KibanaRequest): IScopedClusterClient;
 }
 
 export type CreateAPIKeyParams =
