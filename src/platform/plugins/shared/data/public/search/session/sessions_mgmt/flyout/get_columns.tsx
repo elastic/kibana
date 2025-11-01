@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// @ts-ignore - unused but kept for reference
 import type { SearchSessionsMgmtTable } from '../components/table';
 import { columns } from '../components/table';
 import { ACTION } from '../types';
+// @ts-ignore - unused but kept for reference
+import type { UISession } from '../types';
 
+// @ts-ignore - unused but kept for reference
 type GetColumnsFn = React.ComponentProps<typeof SearchSessionsMgmtTable>['getColumns'];
 
-export const getColumns: GetColumnsFn = ({
+// @ts-ignore - unused but kept for reference
+interface ExtendedGetColumnsProps {
+  onInspectSession?: (session: UISession) => void;
+}
+
+export const getColumns: any = ({
   core,
   kibanaVersion,
   searchUsageCollector,
@@ -21,7 +30,8 @@ export const getColumns: GetColumnsFn = ({
   timezone,
   onActionComplete,
   onBackgroundSearchOpened,
-}) => [
+  onInspectSession,
+}: any) => [
   columns.nameColumn({
     core,
     kibanaVersion,
@@ -33,6 +43,7 @@ export const getColumns: GetColumnsFn = ({
     core,
     api,
     onActionComplete,
-    allowedActions: [ACTION.EXTEND, ACTION.RENAME, ACTION.DELETE],
+    onInspectSession,
+    allowedActions: [ACTION.INSPECT, ACTION.EXTEND, ACTION.RENAME, ACTION.DELETE],
   }),
 ];

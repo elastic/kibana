@@ -50,6 +50,7 @@ export function packageFilter(pkg: string) {
     // The EUI team owns the EUI packages, and are not covered by renovate
     pkg !== '@elastic/eui' &&
     pkg !== '@elastic/eui-theme-borealis' &&
+    pkg !== '@elastic/eui-theme-common' && // TEST: is a peer dependency of EUI custom build
     // Operations owns node, and is not covered by renovate
     pkg !== '@types/node'
   );
