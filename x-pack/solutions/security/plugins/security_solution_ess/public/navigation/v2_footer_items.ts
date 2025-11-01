@@ -56,8 +56,20 @@ export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
     sideNavVersion: 'v2',
     children: [
       {
+        id: 'stack_management_home',
         breadcrumbStatus: 'hidden',
-        children: [{ link: 'monitoring' }],
+        children: [
+          {
+            // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
+            // https://github.com/elastic/kibana/issues/241518
+            // And that the sidenav panel opens when user lands to legacy management landing page
+            // https://github.com/elastic/kibana/issues/240275
+            link: 'management',
+            title: i18nStrings.stackManagementV2.home.title,
+            breadcrumbStatus: 'hidden',
+          },
+          { link: 'monitoring' },
+        ],
       },
       {
         title: i18nStrings.stackManagementV2.alertsAndInsights.title,
@@ -135,12 +147,6 @@ export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
           { link: 'management:license_management' },
           { link: 'management:upgrade_assistant' },
         ],
-      },
-      {
-        // We include this link here to ensure that sidenav panel opens when user lands to legacy management landing page
-        // https://github.com/elastic/kibana/issues/240275
-        link: 'management',
-        sideNavStatus: 'hidden',
       },
     ],
   },
