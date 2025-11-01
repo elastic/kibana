@@ -36,6 +36,9 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
       return;
     }
 
+    log.info(`Checking ${candidateShas.length} shas`);
+    log.info(candidateShas.join(', '));
+
     const archiveCandidate = isCiEnvironment()
       ? await locateRemoteArchive(log, candidateShas)
       : await locateLocalArchive(candidateShas);
