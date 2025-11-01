@@ -20,6 +20,7 @@ import type {
 } from 'react';
 import React, { useRef, useMemo, useCallback, cloneElement, useEffect, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 import { focusAdjacentTrigger } from '../../utils/focus_adjacent_trigger';
@@ -264,6 +265,10 @@ export const SideNavPopover = ({
         ownFocus={false}
         panelPaddingSize="none"
         repositionOnScroll
+        panelProps={{
+          ...euiIncludeSelectorInFocusTrap.prop,
+          'data-test-subj': `side-nav-popover-${label}`,
+        }}
       >
         <div
           ref={(ref) => {
