@@ -38,6 +38,8 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   type UseEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -229,6 +231,10 @@ interface InternalUnifiedDataTableProps {
    */
   showFullScreenButton?: boolean;
   /**
+   * Optional callback that gets fired when entering or exiting full screen mode
+   */
+  onFullScreenChange?: (isFullScreen: boolean) => void;
+  /**
    * Determines whether the keyboard shortcuts button should be displayed
    */
   showKeyboardShortcuts?: boolean;
@@ -329,6 +335,7 @@ interface InternalUnifiedDataTableProps {
     hit: DataTableRecord,
     displayedRows: DataTableRecord[],
     displayedColumns: string[],
+    expandedDocSetter: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void,
     columnsMeta?: DataTableColumnsMeta
   ) => JSX.Element | undefined;
   /**
@@ -555,6 +562,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       disableCellPopover = false,
       customBulkActions,
       shouldKeepAdHocDataViewImmutable,
+      onFullScreenChange,
     },
     ref
   ) => {
@@ -1073,26 +1081,28 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
 
       const leftControls = (
-        <>
+        <EuiFlexGroup>
           {Boolean(selectedDocsCount) && (
-            <DataTableDocumentToolbarBtn
-              isPlainRecord={isPlainRecord}
-              isFilterActive={isFilterActive}
-              rows={rows!}
-              setIsFilterActive={setIsFilterActive}
-              selectedDocsState={selectedDocsState}
-              enableComparisonMode={enableComparisonMode}
-              setIsCompareActive={setIsCompareActive}
-              fieldFormats={fieldFormats}
-              pageIndex={unifiedDataTableContextValue.pageIndex}
-              pageSize={unifiedDataTableContextValue.pageSize}
-              toastNotifications={toastNotifications}
-              columns={visibleColumns}
-              customBulkActions={customBulkActions}
-            />
+            <EuiFlexItem grow={false}>
+              <DataTableDocumentToolbarBtn
+                isPlainRecord={isPlainRecord}
+                isFilterActive={isFilterActive}
+                rows={rows!}
+                setIsFilterActive={setIsFilterActive}
+                selectedDocsState={selectedDocsState}
+                enableComparisonMode={enableComparisonMode}
+                setIsCompareActive={setIsCompareActive}
+                fieldFormats={fieldFormats}
+                pageIndex={unifiedDataTableContextValue.pageIndex}
+                pageSize={unifiedDataTableContextValue.pageSize}
+                toastNotifications={toastNotifications}
+                columns={visibleColumns}
+                customBulkActions={customBulkActions}
+              />
+            </EuiFlexItem>
           )}
-          {externalAdditionalControls}
-        </>
+          <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
+        </EuiFlexGroup>
       );
 
       if (!renderCustomToolbar && inTableSearchControl) {
@@ -1385,6 +1395,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 cellContext={cellContextWithInTableSearchSupport}
                 renderCellPopover={renderCustomPopover}
                 virtualizationOptions={virtualizationOptions}
+                onFullScreenChange={onFullScreenChange}
               />
             )}
           </div>
@@ -1427,7 +1438,13 @@ const InternalUnifiedDataTable = React.forwardRef<
           )}
           {canSetExpandedDoc &&
             expandedDoc &&
-            renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
+            renderDocumentView!(
+              expandedDoc,
+              displayedRows,
+              displayedColumns,
+              setExpandedDoc!,
+              columnsMeta
+            )}
         </span>
       </UnifiedDataTableContext.Provider>
     );

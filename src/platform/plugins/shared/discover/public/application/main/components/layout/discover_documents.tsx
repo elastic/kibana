@@ -62,7 +62,6 @@ import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -83,6 +82,10 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
+import {
+  useGetDocumentViewRenderer,
+  type DiscoverGridFlyoutProps,
+} from './helpers/render_document_view';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -211,6 +214,9 @@ function DiscoverDocumentsComponent({
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
+
+  const documentViewRenderer = useGetDocumentViewRenderer(docViewerRef);
+
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
       dispatch(
@@ -301,35 +307,34 @@ function DiscoverDocumentsComponent({
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
+      expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc'],
       customColumnsMeta?: DataTableColumnsMeta
-    ) => (
-      <DiscoverGridFlyout
-        dataView={dataView}
-        hit={hit}
-        hits={displayedRows}
-        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
-        savedSearchId={persistedDiscoverSession?.id}
-        onFilter={onAddFilter}
-        onRemoveColumn={onRemoveColumnWithTracking}
-        onAddColumn={onAddColumnWithTracking}
-        onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
-        query={query}
-        initialTabId={initialDocViewerTabId}
-        docViewerRef={docViewerRef}
-      />
-    ),
+    ) =>
+      documentViewRenderer({
+        dataView,
+        hit,
+        hits: displayedRows,
+        // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
+        columns: displayedColumns,
+        columnsMeta: customColumnsMeta,
+        savedSearchId: persistedDiscoverSession?.id!,
+        query,
+        initialTabId: initialDocViewerTabId,
+        onFilter: onAddFilter,
+        onRemoveColumn: onRemoveColumnWithTracking,
+        onAddColumn: onAddColumnWithTracking,
+        setExpandedDoc: expandedDocSetter,
+        onClose: expandedDocSetter.bind(null, undefined),
+      }),
     [
+      documentViewRenderer,
       dataView,
       persistedDiscoverSession?.id,
+      query,
+      initialDocViewerTabId,
       onAddFilter,
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
-      setExpandedDoc,
-      query,
-      initialDocViewerTabId,
     ]
   );
 
@@ -341,6 +346,8 @@ function DiscoverDocumentsComponent({
     },
     [dispatch, setDataGridUiState]
   );
+
+  const cascadeConfig = useCurrentTabSelector((state) => state.uiState.cascadedDocuments);
 
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
   const cellRendererDensity = useMemo(
@@ -500,6 +507,9 @@ function DiscoverDocumentsComponent({
             cellActionsHandling="append"
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
+            viewModeToggle={viewModeToggle}
+            cascadeConfig={cascadeConfig}
+            onCascadeGroupingChange={stateContainer.actions.onCascadeGroupingChange}
           />
         </CellActionsProvider>
       </div>

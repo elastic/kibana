@@ -82,7 +82,8 @@ export interface DataTotalHitsMsg extends DataMsg {
 
 export interface DiscoverDataStateContainer {
   /**
-   * Implicitly starting fetching data from ES
+   * Implicitly starting fetching data from ES,
+   * optionally with a new query (otherwise the current one from app state is used)
    */
   fetch: () => void;
   /**

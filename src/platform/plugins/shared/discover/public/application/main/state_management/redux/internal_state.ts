@@ -283,6 +283,14 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.uiState.metricsGrid = action.payload.metricsGridState;
       }),
+
+    setCascadeUiState: (
+      state,
+      action: TabAction<{ cascadeUiState: TabState['uiState']['cascadedDocuments'] }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.cascadedDocuments = action.payload.cascadeUiState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
