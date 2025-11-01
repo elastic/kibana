@@ -13,7 +13,7 @@ import { resolve } from 'path';
 import url from 'url';
 
 import { isKibanaDistributable } from '@kbn/repo-info';
-import { readKeystore } from '../keystore/read_keystore';
+import { readKeystore } from '../keystore/lib/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
 

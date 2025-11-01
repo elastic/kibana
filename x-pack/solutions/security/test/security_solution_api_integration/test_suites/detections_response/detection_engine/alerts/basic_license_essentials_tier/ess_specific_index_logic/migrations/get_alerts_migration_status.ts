@@ -9,11 +9,11 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { getIndexNameFromLoad } from '../../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
 } from '../../../../../../../config/services/detections_response';
+import { getIndexNameFromLoad } from '../../../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../../config/services/common';
 
 import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';

@@ -27,10 +27,8 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
-    {
-      "path": "security_solution_api_integration/config/services/detections_response/tsconfig.json"
-    },
     "@kbn/security-solution-test-api-clients",
+    "@kbn/security_solution_api_integration",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",

@@ -18,12 +18,12 @@ import type {
   RuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { createRuleWithExceptionEntries, getSimpleRule } from '../../../../utils';
 import {
   deleteAllAlerts,
   deleteAllRules,
   createRule,
 } from '../../../../../../config/services/detections_response';
+import { createRuleWithExceptionEntries, getSimpleRule } from '../../../../utils';
 import {
   createListsIndex,
   deleteAllExceptions,

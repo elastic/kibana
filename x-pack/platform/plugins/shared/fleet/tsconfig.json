@@ -19,7 +19,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../../../src/setup_node_env/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
@@ -125,6 +124,7 @@
     "@kbn/licensing-types",
     "@kbn/alerting-plugin",
     "@kbn/spaces-utils",
+    "@kbn/setup-node-env",
     "@kbn/react-query",
   ]
 }

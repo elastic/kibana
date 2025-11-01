@@ -9,8 +9,8 @@ import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DEFAULT_ANOMALY_SCORE } from '@kbn/security-solution-plugin/common/constants';
 import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
-import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 import { deleteAllRules } from '../../../../config/services/detections_response/rules';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   assetCriticalityRouteHelpersFactory,
