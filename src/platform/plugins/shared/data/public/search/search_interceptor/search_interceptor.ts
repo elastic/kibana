@@ -173,11 +173,8 @@ export class SearchInterceptor {
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
     const { sessionId } = options;
-    // Preference is used to ensure all queries go to the same set of shards and it doesn't need to be hashed
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference
-    const { preference, ...params } = request.params || {};
     const hashOptions = {
-      ...params,
+      ...request.params,
       sessionId,
     };
 
@@ -185,7 +182,7 @@ export class SearchInterceptor {
     const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
     if (sessionOptions?.isRestore) return of(undefined); // don't use cache if restoring a session
 
-    return from(createRequestHash(hashOptions));
+    return from(Promise.resolve(createRequestHash(hashOptions)));
   }
 
   /*
@@ -449,6 +446,21 @@ export class SearchInterceptor {
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
+    const requestHash = request.params ? createRequestHash(request.params) : undefined;
+
+    if (request.id) {
+      // just polling an existing search, no need to send the body, just the hash
+
+      const { params, ...requestWithoutParams } = request;
+      if (params) {
+        const { body, ...paramsWithoutBody } = params;
+        request = {
+          ...requestWithoutParams,
+          params: paramsWithoutBody,
+        };
+      }
+    }
+
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
@@ -460,6 +472,7 @@ export class SearchInterceptor {
           body: JSON.stringify({
             ...request,
             ...searchOptions,
+            requestHash,
             stream:
               strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
               strategy === ENHANCED_ES_SEARCH_STRATEGY ||

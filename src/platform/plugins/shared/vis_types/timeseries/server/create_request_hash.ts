@@ -7,18 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Sha256 } from '@kbn/crypto-browser';
+import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
 /**
- * Generate the hash for this request. Ignores the `preference` parameter since it generally won't
+ * Generate the hash for this request so that, in the future, this hash can be used to look up
+ * existing search IDs for this request. Ignores the `preference` parameter since it generally won't
  * match from one request to another identical request.
- *
- * (Preference is used to ensure all queries go to the same set of shards and it doesn't need to be hashed
- * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference)
  */
-export function createRequestHash(keys: Record<string, any>) {
+export function createRequestHash(keys: Record<any, any>) {
   const { preference, ...params } = keys;
-  const hash = new Sha256().update(stringify(params), 'utf8').digest('hex');
-  return hash;
+  return createHash(`sha256`).update(stringify(params)).digest('hex');
 }
