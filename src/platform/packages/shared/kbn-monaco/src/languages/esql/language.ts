@@ -14,6 +14,7 @@ import {
   suggest,
   validateQuery,
   getHoverItem,
+  getSignatureHelp,
   type ESQLCallbacks,
 } from '@kbn/esql-validation-autocomplete';
 import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
@@ -164,6 +165,53 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         }
 
         return item;
+      },
+    };
+  },
+  getSignatureProvider: (deps?: ESQLDependencies): monaco.languages.SignatureHelpProvider => {
+    const alphanumeric = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
+
+    return {
+      signatureHelpTriggerCharacters: ['(', ',', ' ', ...alphanumeric],
+      signatureHelpRetriggerCharacters: [',', ' ', ...alphanumeric],
+
+      async provideSignatureHelp(
+        model: monaco.editor.ITextModel,
+        position: monaco.Position,
+        token: monaco.CancellationToken,
+        context: monaco.languages.SignatureHelpContext
+      ): Promise<monaco.languages.SignatureHelpResult | null> {
+        // When triggered by command from autocomplete, wait for the snippet to be inserted
+        // triggerKind: 1 = Invoke (command), 2 = TriggerCharacter, 3 = ContentChange
+        if (context.triggerKind === 1) {
+          await new Promise((resolve) => setTimeout(resolve, 150));
+        }
+
+        const fullText = model.getValue();
+        const offset = monacoPositionToOffset(fullText, position);
+        const signatureHelp = await getSignatureHelp(fullText, offset, deps);
+
+        if (!signatureHelp) {
+          return null;
+        }
+
+        const { signatures, activeSignature, activeParameter } = signatureHelp;
+
+        return {
+          value: {
+            signatures: signatures.map(({ label, documentation, parameters }) => ({
+              label,
+              documentation: documentation ? { value: documentation } : undefined,
+              parameters: parameters.map(({ label: paramLabel, documentation: paramDoc }) => ({
+                label: paramLabel,
+                documentation: paramDoc ? { value: paramDoc } : undefined,
+              })),
+            })),
+            activeSignature,
+            activeParameter,
+          },
+          dispose: () => {},
+        };
       },
     };
   },

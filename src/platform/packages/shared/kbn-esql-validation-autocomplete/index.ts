@@ -24,3 +24,6 @@ export { suggest } from './src/autocomplete/autocomplete';
 export { getPolicyHelper, getSourcesHelper } from './src/shared/resources_helpers';
 // Hover function
 export { getHoverItem } from './src/hover';
+// Signature help function
+export { getSignatureHelp } from './src/signature_help';
+export type { SignatureHelpItem } from './src/signature_help';
