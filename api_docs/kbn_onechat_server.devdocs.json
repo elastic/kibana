@@ -369,6 +369,22 @@
           },
           {
             "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.AgentHandlerContext.attachments",
+            "type": "Object",
+            "tags": [],
+            "label": "attachments",
+            "description": [
+              "\nAttachment service to interact with attachments."
+            ],
+            "signature": [
+              "AttachmentsService"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
             "id": "def-common.AgentHandlerContext.resultStore",
             "type": "Object",
             "tags": [],
