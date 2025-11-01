@@ -12,7 +12,12 @@ import { PipelineTreeNodeLabel } from './pipeline_tree_node_label';
 describe('PipelineTreeNodeLabel', () => {
   it('renders', () => {
     const { getByTestId } = render(
-      <PipelineTreeNodeLabel pipelineName="test-pipeline" isManaged={false} isDeprecated={false} />
+      <PipelineTreeNodeLabel
+        pipelineName="test-pipeline"
+        isManaged={false}
+        isDeprecated={false}
+        onClick={() => {}}
+      />
     );
 
     const label = getByTestId('pipelineTreeNode-test-pipeline');
@@ -25,6 +30,7 @@ describe('PipelineTreeNodeLabel', () => {
         pipelineName="managed-pipeline"
         isManaged={true}
         isDeprecated={false}
+        onClick={() => {}}
       />
     );
 
@@ -37,6 +43,7 @@ describe('PipelineTreeNodeLabel', () => {
         pipelineName="deprecated-pipeline"
         isManaged={false}
         isDeprecated={true}
+        onClick={() => {}}
       />
     );
 
@@ -45,20 +52,48 @@ describe('PipelineTreeNodeLabel', () => {
 
   it('renders both managed and deprecated icons when both flags are true', () => {
     const { getByTestId } = render(
-      <PipelineTreeNodeLabel pipelineName="both" isManaged={true} isDeprecated={true} />
+      <PipelineTreeNodeLabel
+        pipelineName="both"
+        isManaged={true}
+        isDeprecated={true}
+        onClick={() => {}}
+      />
     );
 
     expect(getByTestId('pipelineTreeNode-both-managedIcon')).toBeInTheDocument();
     expect(getByTestId('pipelineTreeNode-both-deprecatedIcon')).toBeInTheDocument();
   });
 
-  it('truncates long pipeline names', () => {
-    const longName = 'a'.repeat(100);
+  it('calls onClick when clicked', () => {
+    const handleClick = jest.fn();
     const { getByTestId } = render(
-      <PipelineTreeNodeLabel pipelineName={longName} isManaged={false} isDeprecated={false} />
+      <PipelineTreeNodeLabel
+        pipelineName="clickable-pipeline"
+        isManaged={false}
+        isDeprecated={false}
+        onClick={handleClick}
+      />
     );
 
-    const label = getByTestId(`pipelineTreeNode-${longName}`);
+    const label = getByTestId('pipelineTreeNode-clickable-pipeline-link');
+    label.click();
+
+    expect(handleClick).toHaveBeenCalled();
+  });
+
+  it('truncates long pipeline names', () => {
+    const handleClick = jest.fn();
+    const longName = 'a'.repeat(100);
+    const { getByTestId } = render(
+      <PipelineTreeNodeLabel
+        pipelineName={longName}
+        isManaged={false}
+        isDeprecated={false}
+        onClick={handleClick}
+      />
+    );
+
+    const label = getByTestId(`pipelineTreeNode-${longName}-link`);
     expect(label.textContent).toBe(`${longName.slice(0, 30)}...`);
   });
 });

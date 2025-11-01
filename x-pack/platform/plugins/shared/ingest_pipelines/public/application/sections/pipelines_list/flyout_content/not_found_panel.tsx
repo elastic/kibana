@@ -59,17 +59,6 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
           iconType="warning"
           data-test-subj="missingCustomPipeline"
         >
-          {isCustom && (
-            <p data-test-subj="cause">
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.missingCustomPipeline.text"
-                defaultMessage="The pipeline {pipelineName} does not exist."
-                values={{
-                  pipelineName: <EuiCode>{pipelineName}</EuiCode>,
-                }}
-              />
-            </p>
-          )}
           <EuiButton
             color="warning"
             onClick={onCreatePipeline}
@@ -102,7 +91,7 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
   const pipelineErrorTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiSplitPanel.Inner data-test-subj="pipelineErrorFlyout">
+    <EuiSplitPanel.Inner data-test-subj="pipelineErrorFlyout" paddingSize="l">
       {pipelineName && (
         <EuiTitle id="notFoundFlyoutTitle" data-test-subj="title">
           <h2 id={pipelineErrorTitleId}>{pipelineName}</h2>
