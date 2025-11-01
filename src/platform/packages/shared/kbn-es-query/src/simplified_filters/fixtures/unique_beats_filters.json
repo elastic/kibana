@@ -1,0 +1,5913 @@
+[
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4624"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.code": "4624"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "microsoft"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.module": "microsoft"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "microsoft.defender_atp"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "microsoft.defender_atp"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "user",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "user"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "user",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.action",
+      "negate": true,
+      "params": {
+        "query": "existing_user",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "existing_user"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "existing_user",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "threatintel.otx"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "threatintel.otx"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "otx.title"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "otx.title",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "threatintel.misp"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "threatintel.misp"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.file.hash.sha1"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.file.hash.sha1",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "log.level",
+      "negate": false,
+      "params": {
+        "query": "ERROR"
+      },
+      "type": "phrase",
+      "value": "ERROR"
+    },
+    "query": {
+      "match": {
+        "log.level": {
+          "query": "ERROR",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "activemq.log"
+      },
+      "type": "phrase",
+      "value": "activemq.log"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "activemq.log",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "tls.established"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "tls.established",
+      "negate": false,
+      "type": "exists",
+      "value": "exists",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4722"
+      },
+      "type": "phrase",
+      "value": "4722"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4722",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4625"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.code": "4625"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "winlog.provider_name",
+      "negate": false,
+      "params": {
+        "query": "Microsoft-Windows-Security-Auditing"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "winlog.provider_name": "Microsoft-Windows-Security-Auditing"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "okta.system"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "okta.system"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "envoyproxy.log"
+      },
+      "type": "phrase",
+      "value": "envoyproxy.log"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "envoyproxy.log",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4725"
+      },
+      "type": "phrase",
+      "value": "4725"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4725",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.file.hash.md5"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.file.hash.md5",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "process",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "process"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "process",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.action",
+      "negate": false,
+      "params": {
+        "query": "process_started",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "process_started"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "process_started",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "auditd",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "auditd"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "auditd",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4799"
+      },
+      "type": "phrase",
+      "value": "4799"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4799",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "query",
+      "negate": false,
+      "type": "custom",
+      "value": "{\"prefix\":{\"osquery.result.name\":\"pack_ossec-rootkit\"}}"
+    },
+    "query": {
+      "prefix": {
+        "osquery.result.name": "pack_ossec-rootkit"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "osquery",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "osquery"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "osquery",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
+      "key": "fileset.name",
+      "negate": false,
+      "params": {
+        "query": "result",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "result"
+    },
+    "query": {
+      "match": {
+        "fileset.name": {
+          "query": "result",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4720"
+      },
+      "type": "phrase",
+      "value": "4720"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4720",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "queue",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "azure.namespace",
+      "negate": false,
+      "params": {
+        "query": "Microsoft.Storage/storageAccounts/queueServices"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "azure.namespace": "Microsoft.Storage/storageAccounts/queueServices"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.action",
+      "negate": true,
+      "params": {
+        "query": "flow_started"
+      },
+      "type": "phrase",
+      "value": "flow_started"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "flow_started",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.kind",
+      "negate": false,
+      "params": {
+        "query": "event"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.kind": "event"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "suricata"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "suricata",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "threatintel.malwarebazaar"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "threatintel.malwarebazaar"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "kafka.topic.name",
+      "negate": true,
+      "params": {
+        "query": "__consumer_offsets",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "__consumer_offsets"
+    },
+    "query": {
+      "match": {
+        "kafka.topic.name": {
+          "query": "__consumer_offsets",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "socket",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "socket"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "socket",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "threatintel.abusemalware"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "threatintel.abusemalware"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.file.hash.sha256"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.file.hash.sha256",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.type"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
+      "key": "threat.indicator.type",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "event.dataset"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "threatintel.abuseurl"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "threatintel.abuseurl"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.url.domain"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.url.domain",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4733",
+        "4729",
+        "4757",
+        "4786",
+        "4788",
+        "4752",
+        "4762",
+        "4747"
+      ],
+      "type": "phrases",
+      "value": "4733, 4729, 4757, 4786, 4788, 4752, 4762, 4747"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4733"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4729"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4757"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4786"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4788"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4752"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4762"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4747"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.kind",
+      "negate": false,
+      "params": {
+        "query": "alert"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.kind": "alert"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.file.pe.imphash"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.file.pe.imphash",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4625"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4625",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.outcome",
+      "negate": false,
+      "params": {
+        "query": "FAILURE"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.outcome": "FAILURE"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "osquery.result.columns.status",
+      "negate": false,
+      "params": {
+        "query": "Live",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "Live"
+    },
+    "query": {
+      "match": {
+        "osquery.result.columns.status": {
+          "query": "Live",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4648"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.code": "4648"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "controlledBy": "1545388837304",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "redis.keyspace.id",
+      "negate": false,
+      "params": [
+        "db0",
+        "db1"
+      ],
+      "type": "phrases",
+      "value": "db0, db1"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "redis.keyspace.id": "db0"
+            }
+          },
+          {
+            "match_phrase": {
+              "redis.keyspace.id": "db1"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.action",
+      "negate": false,
+      "params": {
+        "query": "socket_opened",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "socket_opened"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "socket_opened",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "Host",
+      "disabled": true,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "host",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "host"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "host",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "Login",
+      "disabled": true,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "login",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "login"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "login",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "User",
+      "disabled": true,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "user",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "user"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "user",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "Process",
+      "disabled": true,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[3].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "process",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "process"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "process",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "Socket",
+      "disabled": true,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[4].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "socket",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "socket"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "socket",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "Package",
+      "disabled": true,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[5].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "package",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "package"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "package",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "login",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "login"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "login",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "controlledBy": "1532342651170",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "azure.application_id",
+      "negate": false,
+      "params": {
+        "query": "42cb59a9-d5be-400b-a5c4-69b0a0026ac6"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "azure.application_id": "42cb59a9-d5be-400b-a5c4-69b0a0026ac6"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "kubernetes.controllermanager"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": {
+          "query": "kubernetes.controllermanager"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.ip"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.ip",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "aws.cloudtrail"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "aws.cloudtrail"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4720",
+        "4722",
+        "4723",
+        "4724",
+        "4725",
+        "4726",
+        "4738",
+        "4740",
+        "4767",
+        "4781",
+        "4798"
+      ],
+      "type": "phrases",
+      "value": "4720, 4722, 4723, 4724, 4725, 4726, 4738, 4740, 4767, 4781, 4798"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4720"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4722"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4723"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4724"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4725"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4726"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4738"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4740"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4767"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4781"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4798"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.url.original"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.url.original",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "coredns.stats.panic.count"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "coredns.stats.panic.count",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "activemq.audit"
+      },
+      "type": "phrase",
+      "value": "activemq.audit"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "activemq.audit",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "osquery.result.name",
+      "negate": false,
+      "params": {
+        "query": "pack_it-compliance_deb_packages",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "pack_it-compliance_deb_packages"
+    },
+    "query": {
+      "match": {
+        "osquery.result.name": {
+          "query": "pack_it-compliance_deb_packages",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "package",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "package"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "package",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "postgresql.log"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "postgresql.log"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.file.hash.ssdeep"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.file.hash.ssdeep",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4740"
+      },
+      "type": "phrase",
+      "value": "4740"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4740",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4625"
+      ],
+      "type": "phrases",
+      "value": "4625"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4625"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "host",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "host"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "host",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "redis.key.expire.ttl",
+      "negate": false,
+      "params": {
+        "gte": 0,
+        "lt": null
+      },
+      "type": "range",
+      "value": "0 to +âˆž"
+    },
+    "range": {
+      "redis.key.expire.ttl": {
+        "gte": 0,
+        "lt": null
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "_id",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    },
+    "query": {
+      "exists": {
+        "field": "_id"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "system",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "system"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "system",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.kind",
+      "negate": false,
+      "params": {
+        "query": "event",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "event"
+    },
+    "query": {
+      "match": {
+        "event.kind": {
+          "query": "event",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.action",
+      "negate": false,
+      "params": {
+        "query": "connected-to",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "connected-to"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "connected-to",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "auditd.summary.object.primary"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
+      "key": "auditd.summary.object.primary",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "tags"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "tags",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4723",
+        "4724"
+      ],
+      "type": "phrases",
+      "value": "4723, 4724"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4723"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4724"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.provider"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.provider",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4672"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4672",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4740"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.code": "4740"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4738"
+      ],
+      "type": "phrases",
+      "value": "4738"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4738"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4781"
+      ],
+      "type": "phrases",
+      "value": "4781"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4781"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "aws.s3access.http_status",
+      "negate": true,
+      "params": {
+        "query": "200"
+      },
+      "type": "phrase",
+      "value": "200"
+    },
+    "query": {
+      "match": {
+        "aws.s3access.http_status": {
+          "query": "200",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "fileset.name",
+      "negate": false,
+      "params": {
+        "query": "s3access"
+      },
+      "type": "phrase",
+      "value": "s3access"
+    },
+    "query": {
+      "match": {
+        "fileset.name": {
+          "query": "s3access",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "kubernetes.proxy"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "kubernetes.proxy"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.outcome",
+      "negate": false,
+      "params": {
+        "query": "success",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "success"
+    },
+    "query": {
+      "match": {
+        "event.outcome": {
+          "query": "success",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4734",
+        "4730",
+        "4758",
+        "4748",
+        "4763",
+        "4753",
+        "4792",
+        "4789"
+      ],
+      "type": "phrases",
+      "value": "4734, 4730, 4758, 4748, 4763, 4753, 4792, 4789"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4734"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4730"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4758"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4748"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4763"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4753"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4792"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4789"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.url.path"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.url.path",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.url.full"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.url.full",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "type",
+      "negate": false,
+      "params": {
+        "query": "mongodb",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "mongodb",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "type": {
+          "query": "mongodb",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "status",
+      "negate": true,
+      "params": {
+        "query": "OK",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "OK",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+    },
+    "query": {
+      "match": {
+        "status": {
+          "query": "OK",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "query",
+      "negate": false,
+      "type": "custom",
+      "value": "{\"terms\":{\"cef.extensions.categoryDeviceGroup\":[\"/VPN\",\"/IDS/Network\",\"/Firewall\"]}}"
+    },
+    "query": {
+      "terms": {
+        "cef.extensions.categoryDeviceGroup": [
+          "/VPN",
+          "/IDS/Network",
+          "/Firewall"
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "threatintel"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.module": "threatintel"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.category",
+      "negate": false,
+      "params": {
+        "query": "threat"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.category": "threat"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
+      "key": "event.kind",
+      "negate": false,
+      "params": {
+        "query": "enrichment"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.kind": "enrichment"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[3].meta.index",
+      "key": "event.type",
+      "negate": false,
+      "params": {
+        "query": "indicator"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.type": "indicator"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "tls.client.ja3"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "tls.client.ja3",
+      "negate": false,
+      "type": "exists",
+      "value": "exists",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "santa",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "santa"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "santa",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "log",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "log"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "log",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4778",
+        "4779"
+      ],
+      "type": "phrases",
+      "value": "4778, 4779"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4778"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4779"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "network.protocol",
+      "negate": false,
+      "params": {
+        "query": "http",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "http",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "network.protocol": {
+          "query": "http",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4625",
+        "4771"
+      ],
+      "type": "phrases",
+      "value": "4625, 4771"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4625"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4771"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "redis",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "redis"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "redis",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "fileset.name",
+      "negate": false,
+      "params": {
+        "query": "log",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "log"
+    },
+    "query": {
+      "match": {
+        "fileset.name": {
+          "query": "log",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "logstash",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "logstash"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "logstash",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "fileset.name",
+      "negate": false,
+      "params": {
+        "query": "slowlog",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "slowlog"
+    },
+    "query": {
+      "match": {
+        "fileset.name": {
+          "query": "slowlog",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4625",
+        "4740"
+      ],
+      "type": "phrases",
+      "value": "4625, 4740"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4625"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4740"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.file.hash.tlsh"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.file.hash.tlsh",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.action",
+      "negate": true,
+      "params": {
+        "query": "flow_terminated"
+      },
+      "type": "phrase",
+      "value": "flow_terminated"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "flow_terminated",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4740"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4740",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "osquery.result.name",
+      "negate": false,
+      "params": {
+        "query": "pack_it-compliance_mounts",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "pack_it-compliance_mounts"
+    },
+    "query": {
+      "match": {
+        "osquery.result.name": {
+          "query": "pack_it-compliance_mounts",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.first_seen"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.first_seen",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4624"
+      ],
+      "type": "phrases",
+      "value": "4624"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4624"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "redis.key.type",
+      "negate": false,
+      "params": {
+        "query": "list",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "list"
+    },
+    "query": {
+      "match": {
+        "redis.key.type": {
+          "query": "list",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4672"
+      ],
+      "type": "phrases",
+      "value": "4672"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4672"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.action",
+      "negate": false,
+      "params": {
+        "query": "socket_closed",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "socket_closed"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "socket_closed",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "ibmmq"
+      },
+      "type": "phrase",
+      "value": "ibmmq"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "ibmmq",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4740"
+      ],
+      "type": "phrases",
+      "value": "4740"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4740"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "redis.key.type",
+      "negate": false,
+      "params": {
+        "query": "string",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "string"
+    },
+    "query": {
+      "match": {
+        "redis.key.type": {
+          "query": "string",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "azure.activitylogs.identity.claims_initiated_by_user.fullname"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "azure.activitylogs.identity.claims_initiated_by_user.fullname",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.url.threat"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "abusech.url.threat",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.category",
+      "negate": false,
+      "params": {
+        "query": "authentication"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.category": "authentication"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.file.extension"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.file.extension",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "o365.audit"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "o365.audit"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "ComplianceDLPSharePoint",
+        "ComplianceDLPExchange"
+      ],
+      "type": "phrases",
+      "value": "ComplianceDLPSharePoint, ComplianceDLPExchange"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "ComplianceDLPSharePoint"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "ComplianceDLPExchange"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "event.duration"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.duration",
+      "negate": false,
+      "type": "exists",
+      "value": "exists",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "tls.detailed.server_certificate.public_key_size"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "tls.detailed.server_certificate.public_key_size",
+      "negate": false,
+      "type": "exists",
+      "value": "exists",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4731",
+        "4732",
+        "4733",
+        "4734",
+        "4735",
+        "4737",
+        "4764",
+        "4727",
+        "4728",
+        "4729",
+        "4730",
+        "4754",
+        "4755",
+        "4756",
+        "4757",
+        "4758",
+        "4799",
+        "4749",
+        "4750",
+        "4751",
+        "4752",
+        "4753",
+        "4759",
+        "4760",
+        "4761",
+        "4762",
+        "4763",
+        "4744",
+        "4745",
+        "4746",
+        "4748"
+      ],
+      "type": "phrases",
+      "value": "4731, 4732, 4733, 4734, 4735, 4737, 4764, 4727, 4728, 4729, 4730, 4754, 4755, 4756, 4757, 4758, 4799, 4749, 4750, 4751, 4752, 4753, 4759, 4760, 4761, 4762, 4763, 4744, 4745, 4746, 4748"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4731"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4732"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4733"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4734"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4735"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4737"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4764"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4727"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4728"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4729"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4730"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4754"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4755"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4756"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4757"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4758"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4799"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4749"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4750"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4751"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4752"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4753"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4759"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4760"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4761"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4762"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4763"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4744"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4745"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4746"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4748"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "network.direction",
+      "negate": false,
+      "params": {
+        "query": "inbound"
+      },
+      "type": "phrase",
+      "value": "inbound"
+    },
+    "query": {
+      "match": {
+        "network.direction": {
+          "query": "inbound",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "tls.client.server_name"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "tls.client.server_name",
+      "negate": false,
+      "type": "exists",
+      "value": "exists",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4731",
+        "4727",
+        "4754",
+        "4744",
+        "4759",
+        "4779",
+        "4790",
+        "4783"
+      ],
+      "type": "phrases",
+      "value": "4731, 4727, 4754, 4744, 4759, 4779, 4790, 4783"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4731"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4727"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4754"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4744"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4759"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4779"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4790"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4783"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.url.tags"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "abusech.url.tags",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "metricset.name",
+      "negate": false,
+      "params": {
+        "query": "service"
+      },
+      "type": "phrase",
+      "value": "service"
+    },
+    "query": {
+      "match": {
+        "metricset.name": {
+          "query": "service",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4735",
+        "4737",
+        "4755",
+        "4750",
+        "4760",
+        "4745",
+        "4791",
+        "4784",
+        "4764"
+      ],
+      "type": "phrases",
+      "value": "4735, 4737, 4755, 4750, 4760, 4745, 4791, 4784, 4764"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4735"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4737"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4755"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4750"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4760"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4745"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4791"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4784"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4764"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "file.type",
+      "negate": false,
+      "params": {
+        "query": "file",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "file"
+    },
+    "query": {
+      "match": {
+        "file.type": {
+          "query": "file",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "cassandra.request.headers.op",
+      "negate": false,
+      "params": {
+        "query": "QUERY",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "QUERY",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "cassandra.request.headers.op": {
+          "query": "QUERY",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "cassandra.response.headers.op",
+      "negate": true,
+      "params": {
+        "query": "ERROR",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "ERROR",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+    },
+    "query": {
+      "match": {
+        "cassandra.response.headers.op": {
+          "query": "ERROR",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.type",
+      "negate": true,
+      "params": {
+        "query": "flow",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "flow",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "event.type": {
+          "query": "flow",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "status",
+      "negate": false,
+      "params": {
+        "query": "OK",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "OK",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "status": {
+          "query": "OK",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "mysql",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "mysql"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "mysql",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "fileset.name",
+      "negate": false,
+      "params": {
+        "query": "error",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "error"
+    },
+    "query": {
+      "match": {
+        "fileset.name": {
+          "query": "error",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "cyberarkpas.audit"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "cyberarkpas.audit"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "threatintel.threatq"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "threatintel.threatq"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "type",
+      "negate": false,
+      "params": {
+        "query": "http",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "http",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "network.protocol": {
+          "query": "http",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "http.response.status_code",
+      "negate": true,
+      "params": {
+        "gte": 200,
+        "lt": 299
+      },
+      "type": "range",
+      "value": "200 to 299",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+    },
+    "range": {
+      "http.response.status_code": {
+        "gte": 200,
+        "lte": 299
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "mongodb",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "mongodb",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "mongodb",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "type",
+      "negate": false,
+      "params": {
+        "query": "mysql",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "mysql",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "type": {
+          "query": "mysql",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "mysql",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "mysql",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "mysql",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "nfs.status",
+      "negate": true,
+      "params": {
+        "query": "NFSERR_NOENT",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "NFSERR_NOENT",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "nfs.status": {
+          "query": "NFSERR_NOENT",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "nfs.status",
+      "negate": true,
+      "params": {
+        "query": "NFS_OK",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "NFS_OK",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+    },
+    "query": {
+      "match": {
+        "nfs.status": {
+          "query": "NFS_OK",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "nfs-ecs",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "nfs-ecs",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "nfs-ecs",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.dataset",
+      "negate": true,
+      "params": {
+        "query": "flow",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "flow",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "flow",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "pgsql",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "pgsql",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "pgsql",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "thrift",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "thrift",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "thrift",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4732",
+        "4728",
+        "4756",
+        "4751",
+        "4761",
+        "4746",
+        "4785",
+        "4787"
+      ],
+      "type": "phrases",
+      "value": "4732, 4728, 4756, 4751, 4761, 4746, 4785, 4787"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4732"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4728"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4756"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4751"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4761"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4746"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4785"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4787"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.url.blacklists.spamhaus_dbl"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "abusech.url.blacklists.spamhaus_dbl",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.url.blacklists.surbl"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
+      "key": "abusech.url.blacklists.surbl",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.outcome",
+      "negate": false,
+      "params": {
+        "query": "failure",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "failure"
+    },
+    "query": {
+      "match": {
+        "event.outcome": {
+          "query": "failure",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "coredns.stats.dns.request.do.count"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "coredns.stats.dns.request.do.count",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "file_integrity",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "file_integrity"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "file_integrity",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.url.scheme"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.url.scheme",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "network.direction",
+      "negate": false,
+      "params": {
+        "query": "outbound"
+      },
+      "type": "phrase",
+      "value": "outbound"
+    },
+    "query": {
+      "match": {
+        "network.direction": {
+          "query": "outbound",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "308",
+        "319",
+        "295",
+        "22",
+        "38",
+        "300",
+        "302"
+      ],
+      "type": "phrases",
+      "value": "308, 319, 295, 22, 38, 300, 302"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "308"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "319"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "295"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "22"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "38"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "300"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "302"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4767"
+      ],
+      "type": "phrases",
+      "value": "4767"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4767"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4624",
+        "4672"
+      ],
+      "type": "phrases",
+      "value": "4624, 4672"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4624"
+            }
+          },
+          {
+            "match_phrase": {
+              "event.code": "4672"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4738"
+      },
+      "type": "phrase",
+      "value": "4738"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4738",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.marking.tlp"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "threat.indicator.marking.tlp",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "powershell.command.invocation_details.type",
+      "negate": false,
+      "params": {
+        "query": "CommandInvocation"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "powershell.command.invocation_details.type": "CommandInvocation"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "controlledBy": "1565367993423",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "aerospike.namespace.name",
+      "negate": false,
+      "params": {
+        "query": "metricbeat"
+      },
+      "type": "phrase",
+      "value": "metricbeat"
+    },
+    "query": {
+      "match": {
+        "aerospike.namespace.name": {
+          "query": "metricbeat",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "blob",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "azure.namespace",
+      "negate": false,
+      "params": {
+        "query": "Microsoft.Storage/storageAccounts/blobServices"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "azure.namespace": "Microsoft.Storage/storageAccounts/blobServices"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "auditd.data.syscall",
+      "negate": false,
+      "params": {
+        "query": "bind",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "bind"
+    },
+    "query": {
+      "match": {
+        "auditd.data.syscall": {
+          "query": "bind",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
+      "key": "auditd.data.socket.family",
+      "negate": true,
+      "params": {
+        "query": "netlink",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "netlink"
+    },
+    "query": {
+      "match": {
+        "auditd.data.socket.family": {
+          "query": "netlink",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "osquery.result.name",
+      "negate": false,
+      "params": {
+        "query": "pack_it-compliance_os_version",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "pack_it-compliance_os_version"
+    },
+    "query": {
+      "match": {
+        "osquery.result.name": {
+          "query": "pack_it-compliance_os_version",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "windows",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "windows"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "windows",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "metricset.name",
+      "negate": false,
+      "params": {
+        "query": "service",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "service"
+    },
+    "query": {
+      "match": {
+        "metricset.name": {
+          "query": "service",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.action",
+      "negate": false,
+      "params": {
+        "query": "process_stopped",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "process_stopped"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "process_stopped",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "dhcpv4",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "dhcpv4",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "dhcpv4",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "controlledBy": "1547791659064",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "network.direction",
+      "negate": false,
+      "params": [
+        "inbound",
+        "outbound"
+      ],
+      "type": "phrases",
+      "value": "inbound, outbound"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "network.direction": "inbound"
+            }
+          },
+          {
+            "match_phrase": {
+              "network.direction": "outbound"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "controlledBy": "1547791714688",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "flow.locality",
+      "negate": false,
+      "params": {
+        "query": "public",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "public"
+    },
+    "query": {
+      "match": {
+        "flow.locality": {
+          "query": "public",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": [
+        "4799"
+      ],
+      "type": "phrases",
+      "value": "4799"
+    },
+    "query": {
+      "bool": {
+        "minimum_should_match": 1,
+        "should": [
+          {
+            "match_phrase": {
+              "event.code": "4799"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.malwarebazaar.intelligence.downloads"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "abusech.malwarebazaar.intelligence.downloads",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.action",
+      "negate": true,
+      "params": {
+        "query": "existing_package",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "existing_package"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "existing_package",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "tls.detailed.version"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "tls.detailed.version",
+      "negate": false,
+      "type": "exists",
+      "value": "exists",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "misp.published"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "misp.published",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "Denied Destination IPs",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.action",
+      "negate": false,
+      "params": {
+        "query": "denied"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.action": "denied"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "query",
+      "negate": false,
+      "type": "custom",
+      "value": "{\"exists\":{\"field\":\"tls\"}}",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "exists": {
+        "field": "tls"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "fileset.name",
+      "negate": false,
+      "params": {
+        "query": "vpcflow"
+      },
+      "type": "phrase",
+      "value": "vpcflow"
+    },
+    "query": {
+      "match": {
+        "fileset.name": {
+          "query": "vpcflow",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "aws.vpcflow.action",
+      "negate": false,
+      "params": {
+        "query": "REJECT"
+      },
+      "type": "phrase",
+      "value": "REJECT"
+    },
+    "query": {
+      "match": {
+        "aws.vpcflow.action": {
+          "query": "REJECT",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.action",
+      "negate": false,
+      "params": {
+        "query": "netflow_flow",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "netflow_flow"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "netflow_flow",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "oracle.sysmetric"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "oracle.sysmetric"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4726"
+      },
+      "type": "phrase",
+      "value": "4726"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4726",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "event.reference"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.reference",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "windows.service.exit_code"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "windows.service.exit_code",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "windows.service.exit_code",
+      "negate": true,
+      "params": {
+        "query": "0",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "0"
+    },
+    "query": {
+      "match": {
+        "windows.service.exit_code": {
+          "query": "0",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
+      "key": "windows.service.exit_code",
+      "negate": true,
+      "params": {
+        "query": "ERROR_SERVICE_NEVER_STARTED",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "ERROR_SERVICE_NEVER_STARTED"
+    },
+    "query": {
+      "match": {
+        "windows.service.exit_code": {
+          "query": "ERROR_SERVICE_NEVER_STARTED",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.module",
+      "negate": false,
+      "params": {
+        "query": "icinga",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "icinga"
+    },
+    "query": {
+      "match": {
+        "event.module": {
+          "query": "icinga",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "fileset.name",
+      "negate": false,
+      "params": {
+        "query": "debug",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "debug"
+    },
+    "query": {
+      "match": {
+        "fileset.name": {
+          "query": "debug",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4624"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4624",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "query",
+      "negate": false,
+      "type": "custom",
+      "value": "{\"term\":{\"event.category\":\"network\"}}"
+    },
+    "query": {
+      "term": {
+        "event.category": "network"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "aws.sns"
+      },
+      "type": "phrase",
+      "value": "aws.sns"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "aws.sns",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "network.protocol",
+      "negate": false,
+      "params": {
+        "query": "dns",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "dns",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "network.protocol": {
+          "query": "dns",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "threat.indicator.file.mime_type"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "threat.indicator.file.mime_type",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.duration",
+      "negate": false,
+      "params": {
+        "gte": 0,
+        "lt": 1000000000
+      },
+      "type": "range",
+      "value": "0 to 1,000,000,000",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "range": {
+      "event.duration": {
+        "gte": 0,
+        "lt": 1000000000
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "event.action",
+      "negate": false,
+      "params": {
+        "query": "executed",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "executed"
+    },
+    "query": {
+      "match": {
+        "event.action": {
+          "query": "executed",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.kind",
+      "negate": false,
+      "params": {
+        "query": "metric"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.kind": "metric"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "controlledBy": "1532342651170",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "azure.app_state.application_id",
+      "negate": false,
+      "params": {
+        "query": "42cb59a9-d5be-400b-a5c4-69b0a0026ac6"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "azure.app_state.application_id": "42cb59a9-d5be-400b-a5c4-69b0a0026ac6"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "gcp.audit"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "gcp.audit"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4767"
+      },
+      "type": "phrase",
+      "value": "4767"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4767",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.malwarebazaar.intelligence.uploads"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "abusech.malwarebazaar.intelligence.uploads",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "Partition Metricset",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "metricset.name",
+      "negate": false,
+      "params": {
+        "query": "partition",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "partition"
+    },
+    "query": {
+      "match": {
+        "metricset.name": {
+          "query": "partition",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "file",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "azure.namespace",
+      "negate": false,
+      "params": {
+        "query": "Microsoft.Storage/storageAccounts/fileServices"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "azure.namespace": "Microsoft.Storage/storageAccounts/fileServices"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "metricset.name",
+      "negate": false,
+      "params": {
+        "query": "apiserver"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "metricset.name": "apiserver"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "auditd.summary.object.type",
+      "negate": false,
+      "params": {
+        "query": "socket",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "socket"
+    },
+    "query": {
+      "match": {
+        "auditd.summary.object.type": {
+          "query": "socket",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[3].meta.index",
+      "key": "query",
+      "negate": false,
+      "type": "custom",
+      "value": "{\"terms\":{\"auditd.data.syscall\":[\"accept\",\"accept4\",\"recvfrom\",\"recvmsg\"]}}"
+    },
+    "query": {
+      "terms": {
+        "auditd.data.syscall": [
+          "accept",
+          "accept4",
+          "recvfrom",
+          "recvmsg"
+        ]
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.url.url_status"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "abusech.url.url_status",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "cassandra",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "cassandra",
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+    },
+    "query": {
+      "match": {
+        "event.dataset": {
+          "query": "cassandra",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.url.larted"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "abusech.url.larted",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "osquery.result.name",
+      "negate": false,
+      "params": {
+        "query": "pack_it-compliance_kernel_modules",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "pack_it-compliance_kernel_modules"
+    },
+    "query": {
+      "match": {
+        "osquery.result.name": {
+          "query": "pack_it-compliance_kernel_modules",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "kubernetes.scheduler"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "kubernetes.scheduler"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.malwarebazaar.tags"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "abusech.malwarebazaar.tags",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.malware.virustotal.link"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "abusech.malware.virustotal.link",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "exists": {
+      "field": "abusech.malware.virustotal.result"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
+      "key": "abusech.malware.virustotal.result",
+      "negate": false,
+      "type": "exists",
+      "value": "exists"
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.code",
+      "negate": false,
+      "params": {
+        "query": "4781"
+      },
+      "type": "phrase",
+      "value": "4781"
+    },
+    "query": {
+      "match": {
+        "event.code": {
+          "query": "4781",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "apply": true,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "auditd.summary.object.secondary",
+      "negate": true,
+      "params": {
+        "query": "0",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "0"
+    },
+    "query": {
+      "match": {
+        "auditd.summary.object.secondary": {
+          "query": "0",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": "table",
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "azure.namespace",
+      "negate": false,
+      "params": {
+        "query": "Microsoft.Storage/storageAccounts/tableServices"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "azure.namespace": "Microsoft.Storage/storageAccounts/tableServices"
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
+      "key": "fileset.name",
+      "negate": false,
+      "params": {
+        "query": "main",
+        "type": "phrase"
+      },
+      "type": "phrase",
+      "value": "main"
+    },
+    "query": {
+      "match": {
+        "fileset.name": {
+          "query": "main",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "globalState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "input.type",
+      "negate": false,
+      "params": {
+        "query": "netflow"
+      },
+      "type": "phrase",
+      "value": "netflow"
+    },
+    "query": {
+      "match": {
+        "input.type": {
+          "query": "netflow",
+          "type": "phrase"
+        }
+      }
+    }
+  },
+  {
+    "$state": {
+      "store": "appState"
+    },
+    "meta": {
+      "alias": null,
+      "disabled": false,
+      "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "key": "event.dataset",
+      "negate": false,
+      "params": {
+        "query": "fortinet.firewall"
+      },
+      "type": "phrase"
+    },
+    "query": {
+      "match_phrase": {
+        "event.dataset": "fortinet.firewall"
+      }
+    }
+  }
+]

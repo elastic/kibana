@@ -60,6 +60,7 @@
     "@kbn/data-service-server",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/field-formats-common",
+    "@kbn/es-query-server",
   ],
   "exclude": ["target/**/*"]
 }

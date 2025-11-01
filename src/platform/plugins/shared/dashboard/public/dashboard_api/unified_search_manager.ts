@@ -11,7 +11,14 @@ import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import {
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
+  fromStoredFilter,
+  isFilterPinned,
+  toStoredFilter,
+} from '@kbn/es-query';
+import type { SimplifiedFilter } from '@kbn/es-query-server';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
@@ -42,6 +49,44 @@ import { cleanFiltersForSerialize } from '../../common';
 
 export const COMPARE_DEBOUNCE = 100;
 
+/**
+ * Dashboard FilterManager Integration - SimplifiedFilter Support
+ *
+ * The FilterManager now supports SimplifiedFilter format alongside the standard Filter format.
+ * This enables Dashboard code to work with filters using a more intuitive structure when needed.
+ *
+ * Available SimplifiedFilter Methods (via dataService.query.filterManager):
+ * - getSimplifiedFilters() - Get all filters as SimplifiedFilter[]
+ * - setSimplifiedFilters(filters) - Set all filters from SimplifiedFilter[]
+ * - addSimplifiedFilters(filters) - Add SimplifiedFilter(s) to existing filters
+ * - getSimplifiedAppFilters() - Get app-state filters as SimplifiedFilter[]
+ * - setSimplifiedAppFilters(filters) - Set app-state filters from SimplifiedFilter[]
+ * - getSimplifiedGlobalFilters() - Get global filters as SimplifiedFilter[]
+ * - setSimplifiedGlobalFilters(filters) - Set global filters from SimplifiedFilter[]
+ *
+ * Example Usage:
+ * ```typescript
+ * import type { SimplifiedFilter } from '@kbn/es-query-server';
+ *
+ * // Get filters in SimplifiedFilter format for easier manipulation
+ * const simplifiedFilters = filterManager.getSimplifiedFilters();
+ *
+ * // Work with simplified structure
+ * const newFilter: SimplifiedFilter = {
+ *   condition: {
+ *     type: 'equals',
+ *     field: 'status',
+ *     value: 'active'
+ *   }
+ * };
+ *
+ * // Set filters back using SimplifiedFilter format
+ * filterManager.setSimplifiedAppFilters([...simplifiedFilters, newFilter]);
+ * ```
+ *
+ * Note: All SimplifiedFilter methods automatically convert to/from the internal Filter format,
+ * maintaining full compatibility with existing Dashboard state and serialization.
+ */
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
@@ -95,9 +140,11 @@ export function initializeUnifiedSearchManager(
     }
   }
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
+  const unifiedSearchFilters$ = new BehaviorSubject<SimplifiedFilter[] | undefined>(
+    initialState.filters
+  );
   // setAndSyncUnifiedSearchFilters method not needed since filters synced with 2-way data binding
-  function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
+  function setUnifiedSearchFilters(unifiedSearchFilters: SimplifiedFilter[] | undefined) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
       unifiedSearchFilters$.next(unifiedSearchFilters);
     }
@@ -129,7 +176,10 @@ export function initializeUnifiedSearchManager(
   controlGroupSubscriptions.add(
     combineLatest([unifiedSearchFilters$, controlGroupFilters$]).subscribe(
       ([unifiedSearchFilters, controlGroupFilters]) => {
-        filters$.next([...(unifiedSearchFilters ?? []), ...(controlGroupFilters ?? [])]);
+        filters$.next([
+          ...((unifiedSearchFilters ?? []).map(toStoredFilter) as Filter[]),
+          ...(controlGroupFilters ?? []),
+        ]);
       }
     )
   );
@@ -150,7 +200,7 @@ export function initializeUnifiedSearchManager(
     creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage
   ) {
     // apply filters and query to the query service
-    filterManager.setAppFilters(cloneDeep(unifiedSearchFilters$.value ?? []));
+    filterManager.setSimplifiedAppFilters(cloneDeep(unifiedSearchFilters$.value ?? []));
     queryString.setQuery(query$.value ?? queryString.getDefaultQuery());
 
     /**
@@ -187,11 +237,11 @@ export function initializeUnifiedSearchManager(
       dataService.query,
       {
         get: () => ({
-          filters: unifiedSearchFilters$.value ?? [],
+          filters: (unifiedSearchFilters$.value ?? []).map(toStoredFilter) as Filter[],
           query: query$.value ?? dataService.query.queryString.getDefaultQuery(),
         }),
         set: ({ filters: newFilters, query: newQuery }) => {
-          setUnifiedSearchFilters(cleanFiltersForSerialize(newFilters));
+          setUnifiedSearchFilters(cleanFiltersForSerialize(newFilters)?.map(fromStoredFilter));
           setQuery(newQuery);
         },
         state$: combineLatest([query$, unifiedSearchFilters$]).pipe(
@@ -199,7 +249,7 @@ export function initializeUnifiedSearchManager(
           map(([query, unifiedSearchFilters]) => {
             return {
               query: query ?? dataService.query.queryString.getDefaultQuery(),
-              filters: unifiedSearchFilters ?? [],
+              filters: (unifiedSearchFilters ?? []).map(toStoredFilter) as Filter[],
             };
           }),
           distinctUntilChanged()
@@ -265,12 +315,15 @@ export function initializeUnifiedSearchManager(
   }
 
   const comparators = {
-    filters: (a, b) =>
-      compareFilters(
-        (a ?? []).filter((f) => !isFilterPinned(f)),
-        (b ?? []).filter((f) => !isFilterPinned(f)),
-        COMPARE_ALL_OPTIONS
-      ),
+    filters: (a, b) => {
+      const legacyFilterA = (a ?? [])
+        .map(toStoredFilter)
+        .filter((f) => !isFilterPinned(f as Filter)) as Filter[];
+      const legacyFilterB = (b ?? [])
+        .map(toStoredFilter)
+        .filter((f) => !isFilterPinned(f as Filter)) as Filter[];
+      return compareFilters(legacyFilterA, legacyFilterB, COMPARE_ALL_OPTIONS);
+    },
     query: 'deepEquality',
     refreshInterval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
       timeRestore$.value ? fastIsEqual(a, b) : true,
@@ -290,7 +343,9 @@ export function initializeUnifiedSearchManager(
     'filters' | 'query' | 'refreshInterval' | 'timeRange'
   > => {
     // pinned filters are not serialized when saving the dashboard
-    const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
+    const serializableFilters = unifiedSearchFilters$.value?.filter(
+      (f) => !isFilterPinned(toStoredFilter(f) as Filter)
+    );
 
     const timeRange =
       timeRestore$.value && timeRange$.value
@@ -357,7 +412,9 @@ export function initializeUnifiedSearchManager(
       },
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
-          ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
+          ...(unifiedSearchFilters$.value ?? []).filter((f) =>
+            isFilterPinned(toStoredFilter(f) as Filter)
+          ),
           ...(lastSavedState.filters ?? []),
         ]);
         if (lastSavedState.query) {
