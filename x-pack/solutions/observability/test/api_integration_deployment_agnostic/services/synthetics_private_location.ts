@@ -45,22 +45,27 @@ export class PrivateLocationTestService {
       .expect(200);
   }
 
-  async addTestPrivateLocation(spaceId?: string) {
-    const apiResponse = await this.addFleetPolicy(uuidv4());
+  async addTestPrivateLocation(spaceId = 'default') {
+    const apiResponse = await this.addFleetPolicy(uuidv4(), [spaceId]);
     const testPolicyId = apiResponse.body.item.id;
     return (await this.setTestLocations([testPolicyId], spaceId))[0];
   }
 
-  async addFleetPolicy(name: string) {
+  async addFleetPolicy(name: string, spaceIds = ['default']) {
     return await this.retry.try(async () => {
       const response = await this.supertestWithAuth
-        .post('/api/fleet/agent_policies?sys_monitoring=true')
+        .post(
+          `${
+            spaceIds[0] !== 'default' ? `/s/${spaceIds[0]}` : ``
+          }/api/fleet/agent_policies?sys_monitoring=true`
+        )
         .set('kbn-xsrf', 'true')
         .send({
           name,
           description: '',
           namespace: 'default',
           monitoring_enabled: [],
+          space_ids: spaceIds.length > 1 ? spaceIds : undefined,
         });
       return response;
     });
