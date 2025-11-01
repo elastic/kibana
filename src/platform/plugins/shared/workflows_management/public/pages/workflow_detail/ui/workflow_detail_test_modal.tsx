@@ -16,10 +16,12 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useAsyncThunk } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
 import {
+  selectHasChanges,
   selectIsTestModalOpen,
   selectWorkflowDefinition,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+import { runWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/run_workflow_thunk';
 import { testWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/test_workflow_thunk';
 
 export const WorkflowDetailTestModal = () => {
@@ -31,16 +33,22 @@ export const WorkflowDetailTestModal = () => {
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const definition = useSelector(selectWorkflowDefinition);
+  const hasChanges = useSelector(selectHasChanges);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
+  const runWorkflow = useAsyncThunk(runWorkflowThunk);
+
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>) => {
-      const result = await testWorkflow({ inputs });
-      if (result) {
-        setSelectedExecution(result.workflowExecutionId);
+      const workflowExecutionId = hasChanges
+        ? (await testWorkflow({ inputs }))?.workflowExecutionId
+        : (await runWorkflow({ inputs }))?.workflowExecutionId;
+
+      if (workflowExecutionId) {
+        setSelectedExecution(workflowExecutionId);
       }
     },
-    [testWorkflow, setSelectedExecution]
+    [hasChanges, runWorkflow, testWorkflow, setSelectedExecution]
   );
 
   const closeModal = useCallback(() => {

@@ -10,7 +10,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../common';
-import { createIndexWithMappings } from '../../common/create_index';
+import { createOrUpdateIndex } from '../../common/create_index';
 
 export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
@@ -21,7 +21,7 @@ export class WorkflowExecutionRepository {
   private async ensureIndexExists() {
     if (this.indexInitialized) return; // Only 1 boolean check after first time
 
-    await createIndexWithMappings({
+    await createOrUpdateIndex({
       esClient: this.esClient,
       indexName: this.indexName,
       mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
