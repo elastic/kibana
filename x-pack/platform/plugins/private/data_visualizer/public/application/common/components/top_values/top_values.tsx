@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   useEuiTheme,
   euiScrollBarStyles,
+  EuiTextTruncate,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -77,6 +78,7 @@ export const TopValues: FC<TopValuesProps> = ({
 
   const fieldDataTopValuesContainer = css({ paddingTop: euiTheme.size.xs });
   const topValuesValueLabelContainer = css({ marginRight: euiTheme.size.m });
+  const labelStyles = css({ textOverflow: 'ellipsis' });
 
   if (stats === undefined || !stats.topValues) return null;
   const { fieldName, sampleCount, approximate } = stats;
@@ -175,6 +177,7 @@ export const TopValues: FC<TopValuesProps> = ({
 
   return (
     <ExpandedRowPanel
+      grow={true}
       dataTestSubj={'dataVisualizerFieldDataTopValues'}
       className={classNames('dvPanel__wrapper', compressed ? 'dvPanel--compressed' : undefined)}
       css={css`
@@ -205,17 +208,24 @@ export const TopValues: FC<TopValuesProps> = ({
           ? topValues.map((value) => {
               const fieldValue = value.key_as_string ?? (value.key ? value.key.toString() : '');
               const displayValue = fieldValue === '' ? EMPTY_EXAMPLE : fieldValue;
+              const label: string = value.key
+                ? kibanaFieldFormat(value.key, fieldFormat)
+                : displayValue;
 
               return (
                 <EuiFlexGroup gutterSize="xs" alignItems="center" key={displayValue}>
-                  <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
+                  <EuiFlexItem
+                    css={css`
+                      max-inline-size: calc(100% - 52px);
+                    `}
+                    data-test-subj="dataVisualizerFieldDataTopValueBar"
+                  >
                     <EuiProgress
                       value={value.percent}
                       max={1}
                       color={barColor}
                       size="xs"
-                      label={value.key ? kibanaFieldFormat(value.key, fieldFormat) : displayValue}
-                      className="eui-textTruncate"
+                      label={<EuiTextTruncate css={labelStyles} text={label} />}
                       css={topValuesValueLabelContainer}
                       valueText={`${value.doc_count}${
                         totalDocuments !== undefined
