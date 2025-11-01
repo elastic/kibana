@@ -38,11 +38,18 @@ interface Props {
   isConvertedToSecret: boolean;
   onToggleSecretAndClearValue: (secretEnabled: boolean) => void;
   type: FormType;
+  disabled?: boolean;
 }
 
 export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
-  const { type, inputs, useSecretsStorage, isConvertedToSecret, onToggleSecretAndClearValue } =
-    props;
+  const {
+    type,
+    inputs,
+    useSecretsStorage,
+    isConvertedToSecret,
+    onToggleSecretAndClearValue,
+    disabled,
+  } = props;
   const showmTLSText = type === outputType.Elasticsearch || type === outputType.RemoteElasticsearch;
   const showAccordionOpen =
     !!inputs.sslKeySecretInput.value ||
@@ -53,6 +60,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
   return (
     <>
       <EuiAccordion
+        isDisabled={disabled}
         initialIsOpen={showAccordionOpen}
         id="advancedSSLOptions"
         data-test-subj="advancedSSLOptionsButton"
@@ -130,6 +138,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
             multiline={true}
             sortable={false}
             {...inputs.sslCertificateAuthoritiesInput.props}
+            disabled={disabled}
           />
           <EuiFormRow
             fullWidth
@@ -145,6 +154,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               fullWidth
               rows={5}
               {...inputs.sslCertificateInput.props}
+              disabled={disabled}
               placeholder={i18n.translate(
                 'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
                 {
@@ -171,6 +181,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 fullWidth
                 rows={5}
                 {...inputs.sslKeyInput.props}
+                disabled={disabled}
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
                   {
@@ -198,6 +209,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 fullWidth
                 rows={5}
                 {...inputs.sslKeySecretInput.props}
+                disabled={disabled}
                 data-test-subj="sslKeySecretInput"
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder',

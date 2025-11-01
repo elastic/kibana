@@ -24294,6 +24294,9 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  proxy_headers: {}
+                                  proxy_url:
+                                    type: string
                                   secrets:
                                     additionalProperties: true
                                     type: object
@@ -24334,6 +24337,7 @@ paths:
                                     type: string
                                 required:
                                   - sourceURI
+                                  - proxy_headers
                               features:
                                 additionalProperties:
                                   additionalProperties: false
