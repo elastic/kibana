@@ -348,6 +348,13 @@ export class BasicPrettyPrinter {
       return this.decorateWithComments(ctx.node, formatted);
     })
 
+    .on('visitParensExpression', (ctx) => {
+      const child = ctx.visitChild();
+      const formatted = `(${child})`;
+
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
     .on('visitFunctionCallExpression', (ctx) => {
       const opts = this.opts;
       const node = ctx.node;

@@ -94,6 +94,21 @@ export class Visitor<
         }
         return null;
       })
+      .on('visitParensExpression', (ctx): ESQLProperNode | null => {
+        const parens = ctx.node;
+        const parensLocation = parens.location;
+
+        if (!parensLocation) {
+          return null;
+        }
+
+        // If position is before "(", return parens to prevent diving into subquery
+        if (parensLocation.min > pos) {
+          return parens;
+        }
+
+        return null;
+      })
       .on('visitCommand', visitCommand)
       .on('visitHeaderCommand', visitCommand)
       .on('visitQuery', (ctx): ESQLProperNode | null => {
@@ -180,6 +195,29 @@ export class Visitor<
           if (isAfter) {
             return ctx.visitExpression(node, undefined) || node;
           }
+        }
+
+        return null;
+      })
+      .on('visitParensExpression', (ctx): ESQLProperNode | null => {
+        const parens = ctx.node;
+        const parensLocation = parens.location;
+
+        if (!parensLocation) {
+          return null;
+        }
+
+        const childQuery = ctx.child();
+
+        if (childQuery?.type === 'query' && childQuery.location) {
+          if (childQuery.location.max < pos && pos <= parensLocation.max) {
+            return parens;
+          }
+        }
+
+        // If position is after ")", return parens to prevent diving into subquery
+        if (pos > parensLocation.max) {
+          return parens;
         }
 
         return null;

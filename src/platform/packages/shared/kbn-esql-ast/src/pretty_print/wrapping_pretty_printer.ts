@@ -679,6 +679,13 @@ export class WrappingPrettyPrinter {
       return this.decorateWithComments(inp, ctx.node, formatted);
     })
 
+    .on('visitParensExpression', (ctx, inp: Input): Output => {
+      const child = ctx.visitChild(inp);
+      const formatted = `(${child.txt})`;
+
+      return this.decorateWithComments(inp, ctx.node, formatted);
+    })
+
     .on('visitFunctionCallExpression', (ctx, inp: Input): Output => {
       const node = ctx.node;
       let operator = ctx.operator();
