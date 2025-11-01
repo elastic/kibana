@@ -7,8 +7,7 @@
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import type { UseQueryOptions } from '@kbn/react-query';
-import { useQuery, useQueryClient } from '@kbn/react-query';
-import { useCallback } from 'react';
+import { useQuery } from '@kbn/react-query';
 import type { GetJobsSummaryArgs } from '../api/get_jobs_summary';
 import { getJobsSummary } from '../api/get_jobs_summary';
 
@@ -29,14 +28,4 @@ export const useFetchJobsSummaryQuery = (
       ...options,
     }
   );
-};
-
-export const useInvalidateFetchJobsSummaryQuery = () => {
-  const queryClient = useQueryClient();
-
-  return useCallback(() => {
-    queryClient.invalidateQueries(GET_JOBS_SUMMARY_QUERY_KEY, {
-      refetchType: 'active',
-    });
-  }, [queryClient]);
 };

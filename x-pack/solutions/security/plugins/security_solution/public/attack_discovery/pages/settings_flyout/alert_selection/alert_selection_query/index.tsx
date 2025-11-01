@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OnTimeChangeProps, EuiSuperUpdateButtonProps } from '@elastic/eui';
+import type { EuiSuperUpdateButtonProps, OnTimeChangeProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FilterManager } from '@kbn/data-plugin/public';
@@ -23,8 +23,6 @@ import { useCreateDataView } from '../../../../../common/hooks/use_create_data_v
 import type { AlertsSelectionSettings } from '../../types';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
-export const MAX_ALERTS = 500;
-export const MIN_ALERTS = 50;
 export const STEP = 50;
 export const NO_INDEX_PATTERNS: DataView[] = [];
 

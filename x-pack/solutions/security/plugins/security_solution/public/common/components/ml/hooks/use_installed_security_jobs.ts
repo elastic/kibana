@@ -53,13 +53,6 @@ export const useInstalledSecurityJobs = (): UseInstalledSecurityJobsReturn => {
   return { isLicensed, isMlUser, jobs: securityJobs, loading: isFetching };
 };
 
-export const useInstalledSecurityJobsIds = () => {
-  const { jobs, loading } = useInstalledSecurityJobs();
-  const jobIds = useMemo(() => jobs.map((job) => job.id), [jobs]);
-
-  return { jobIds, loading };
-};
-
 export const useInstalledSecurityJobNameById = () => {
   const { jobs, loading } = useInstalledSecurityJobs();
 

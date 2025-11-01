@@ -8,11 +8,7 @@
 import type { Action } from 'redux';
 import type { DataViewBase } from '@kbn/es-query';
 import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
-import type {
-  GetHostPolicyResponse,
-  ISOLATION_ACTIONS,
-  MetadataListResponse,
-} from '../../../../../common/endpoint/types';
+import type { ISOLATION_ACTIONS, MetadataListResponse } from '../../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../../common/types';
 import type { GetPolicyListResponse } from '../../policy/types';
 import type { EndpointState } from '../types';
@@ -24,16 +20,6 @@ export interface ServerReturnedEndpointList {
 
 export interface ServerFailedToReturnEndpointList {
   type: 'serverFailedToReturnEndpointList';
-  payload: ServerApiError;
-}
-
-export interface ServerReturnedEndpointPolicyResponse {
-  type: 'serverReturnedEndpointPolicyResponse';
-  payload: GetHostPolicyResponse;
-}
-
-export interface ServerFailedToReturnEndpointPolicyResponse {
-  type: 'serverFailedToReturnEndpointPolicyResponse';
   payload: ServerApiError;
 }
 

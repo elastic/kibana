@@ -55,16 +55,6 @@ export const useRuleDetailsContextMock = {
 };
 
 // do not delete
-export const useRuleDetailsContext = jest
-  .fn<jest.Mocked<RuleDetailsContextType>, []>()
-  .mockImplementation(useRuleDetailsContextMock.create);
-
-// do not delete
-export const useRuleDetailsContextOptional = jest
-  .fn<jest.Mocked<RuleDetailsContextType>, []>()
-  .mockImplementation(useRuleDetailsContextMock.create);
-
-// do not delete
 export const RulesTableContextProvider = jest
   .fn()
   .mockImplementation(({ children }: { children: React.ReactNode }) => <>{children}</>);

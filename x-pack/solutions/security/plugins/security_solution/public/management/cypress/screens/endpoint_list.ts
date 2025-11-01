@@ -23,7 +23,6 @@ interface ListRowOptions {
 
 export const TABLE_ROW_ACTIONS_MENU = 'tableRowActionsMenuPanel';
 export const AGENT_HOSTNAME_CELL = 'hostnameCellLink';
-export const AGENT_POLICY_CELL = 'policyNameCellLink';
 export const TABLE_ROW_ACTIONS = 'endpointTableRowActions';
 
 const pageById: DeepReadonly<EndpointManagementPageMap> = getEndpointManagementPageMap();

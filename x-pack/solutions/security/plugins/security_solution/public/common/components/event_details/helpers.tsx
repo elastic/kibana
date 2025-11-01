@@ -32,5 +32,3 @@ export const getIconFromType = (type: string | null | undefined) => {
       return 'question';
   }
 };
-
-export const EVENT_FIELDS_TABLE_CLASS_NAME = 'event-fields-table';

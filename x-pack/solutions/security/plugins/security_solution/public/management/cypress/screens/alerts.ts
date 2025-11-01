@@ -61,9 +61,3 @@ export const openInvestigateInTimelineView = (): void => {
 export const openResponderFromEndpointAlertDetails = (): void => {
   cy.getByTestSubj('endpointResponseActions-action-item').click();
 };
-
-export const addAlertToCase = (caseId: string, caseOwner: string): void => {
-  cy.getByTestSubj('add-to-existing-case-action').click();
-  cy.getByTestSubj(`cases-table-row-select-${caseId}`).click();
-  cy.contains(`An alert was added to \"Test ${caseOwner} case`);
-};

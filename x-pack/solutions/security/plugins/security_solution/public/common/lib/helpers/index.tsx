@@ -24,9 +24,3 @@ export const asArrayIfExists: WrapArrayIfExitts = (value) =>
  * Creates a Union Type for all the values of an object
  */
 export type ValueOf<T> = T[keyof T];
-
-/**
- * Global variables
- */
-
-export const gutterTimeline = '70px'; // Michael: Temporary until timeline is moved.

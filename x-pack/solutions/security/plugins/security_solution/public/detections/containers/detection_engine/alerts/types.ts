@@ -58,12 +58,6 @@ export interface AlertsIndex {
   index_mapping_outdated: boolean;
 }
 
-export interface CheckSignalIndex {
-  name: string;
-  index_mapping_outdated: boolean;
-  indexExists: boolean;
-}
-
 export type CasesFromAlertsResponse = Array<{ id: string; title: string }>;
 
 export interface Privilege {

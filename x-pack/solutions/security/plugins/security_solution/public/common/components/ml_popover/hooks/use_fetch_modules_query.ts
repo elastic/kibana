@@ -6,8 +6,7 @@
  */
 
 import type { UseQueryOptions } from '@kbn/react-query';
-import { useQuery, useQueryClient } from '@kbn/react-query';
-import { useCallback } from 'react';
+import { useQuery } from '@kbn/react-query';
 import { getModules } from '../api';
 import type { GetModulesProps, Module } from '../types';
 
@@ -28,12 +27,4 @@ export const useFetchModulesQuery = (
       ...options,
     }
   );
-};
-
-export const useInvalidateFetchModulesQuery = () => {
-  const queryClient = useQueryClient();
-
-  return useCallback(() => {
-    queryClient.invalidateQueries(GET_MODULES_QUERY_KEY, { refetchType: 'active' });
-  }, [queryClient]);
 };

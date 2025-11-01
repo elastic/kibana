@@ -109,8 +109,6 @@ export const showLoading = ({
   loadingConnectorId: string | null;
 }): boolean => isLoading && (loadingConnectorId === connectorId || attackDiscoveriesCount === 0);
 
-export const showSummary = (attackDiscoveriesCount: number) => attackDiscoveriesCount > 0;
-
 export const showFailurePrompt = ({
   connectorId,
   failureReason,

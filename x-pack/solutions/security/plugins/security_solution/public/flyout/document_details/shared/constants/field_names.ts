@@ -6,7 +6,6 @@
  */
 
 export const ANCESTOR_ID = 'kibana.alert.ancestors.id';
-export const RULE_PARAMETERS_INDEX = 'kibana.alert.rule.parameters.index';
 export const RULE_INDICES = 'kibana.alert.rule.indices';
 export const ENTRY_LEADER_ENTITY_ID = 'process.entry_leader.entity_id';
 export const ENTRY_LEADER_START = 'process.entry_leader.start';

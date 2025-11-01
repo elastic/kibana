@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 /**
  * @deprecated, use getRiskSeverityColors or useRiskSeverityColors from /common/utils/risk_color_palette.tsx instead
  */
@@ -23,5 +24,3 @@ const MAX_ALLOWED_RESULTS = 100;
  * */
 export const getPageCount = (count: number = 0) =>
   Math.ceil(Math.min(count || 0, MAX_ALLOWED_RESULTS) / ITEMS_PER_PAGE);
-
-export const openAlertsFilter = { field: 'kibana.alert.workflow_status', value: 'open' };

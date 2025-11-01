@@ -8,9 +8,9 @@
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 import {
   createKibanaContextProviderMock,
-  createUseUiSettingMock,
-  createUseUiSetting$Mock,
   createStartServicesMock,
+  createUseUiSetting$Mock,
+  createUseUiSettingMock,
   createWithKibanaMock,
 } from '../kibana_react.mock';
 import { APP_UI_ID } from '../../../../../common/constants';

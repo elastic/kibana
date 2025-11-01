@@ -29,8 +29,6 @@ export interface RiskScoreOverTimeProps<T extends EntityType> {
 
 const CHART_HEIGHT = 180;
 
-export const scoreFormatter = (d: number) => Math.round(d).toString();
-
 const RiskScoreOverTimeComponent = React.memo(
   <T extends EntityType>({
     from,

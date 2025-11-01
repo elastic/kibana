@@ -6,14 +6,13 @@
  */
 
 import type { PrimitiveOrArrayOfPrimitives } from '../../../common/lib/kuery';
-import type { ColumnId } from './body/column_id';
 import type { DataProvider, QueryOperator } from './data_providers/data_provider';
+
 export type {
   OnColumnSorted,
   OnColumnsSorted,
   OnColumnRemoved,
   OnColumnResized,
-  OnFetchMoreRecords as OnChangePage,
   OnPinEvent,
   OnRowSelected,
   OnSelectAll,
@@ -40,9 +39,3 @@ export type OnDataProviderEdited = ({
   value: PrimitiveOrArrayOfPrimitives;
   type: DataProvider['type'];
 }) => void;
-
-/** Invoked when a user selects a new minimap time range */
-export type OnRangeSelected = (range: string) => void;
-
-/** Invoked when a user updates a column's filter */
-export type OnFilterChange = (filter: { columnId: ColumnId; filter: string }) => void;

@@ -148,11 +148,6 @@ interface Params {
   criticalityLevel: CriticalityLevelWithUnassigned;
 }
 
-export interface ModalState {
-  visible: boolean;
-  toggle: (next: boolean) => void;
-}
-
 export interface Entity {
   name: string;
   type: EntityType;

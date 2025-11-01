@@ -30,7 +30,3 @@ export const DEFAULT_DASHBOARDS_RESPONSE = [
     score: 0,
   },
 ];
-
-export const getDashboardsByTagIds = jest
-  .fn()
-  .mockImplementation(() => Promise.resolve(DEFAULT_DASHBOARDS_RESPONSE));

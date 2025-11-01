@@ -52,7 +52,6 @@ export enum TELEMETRY_EVENT {
   // Bulk edit alert suppression
   SET_ALERT_SUPPRESSION_FOR_THRESHOLD = 'set_alert_suppression_for_threshold',
   SET_ALERT_SUPPRESSION = 'set_alert_suppression',
-  DELETE_ALERT_SUPPRESSION = 'delete_alert_suppression',
 
   // AI assistant on rule creation form
   OPEN_ASSISTANT_ON_RULE_QUERY_ERROR = 'open_assistant_on_rule_query_error',

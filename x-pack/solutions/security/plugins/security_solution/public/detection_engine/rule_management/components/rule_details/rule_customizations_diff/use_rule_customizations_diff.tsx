@@ -12,8 +12,6 @@ import type { RuleResponse } from '../../../../../../common/api/detection_engine
 import { useFetchPrebuiltRuleBaseVersionQuery } from '../../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
 import { RuleCustomizationsFlyout } from './rule_customizations_flyout';
 
-export const PREBUILT_RULE_CUSTOMIZATIONS_FLYOUT_ANCHOR = 'PrebuiltRuleCustomizationsPreview';
-
 interface UseRuleCustomizationsDiffProps {
   rule: RuleResponse | null;
 }
