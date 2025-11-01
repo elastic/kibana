@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CloudConnector, CloudConnectorVars, CloudProvider } from '../models/cloud_connector';
+import type { CloudConnector, CloudProvider, CloudConnectorVars } from '../models/cloud_connector';
 
 // Request interfaces
 export interface CreateCloudConnectorRequest {

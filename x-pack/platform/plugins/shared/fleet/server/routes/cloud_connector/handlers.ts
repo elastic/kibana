@@ -16,6 +16,7 @@ import type {
   CreateCloudConnectorResponse,
   UpdateCloudConnectorResponse,
   DeleteCloudConnectorResponse,
+  UpdateCloudConnectorRequest,
 } from '../../../common/types/rest_spec/cloud_connector';
 import type {
   CreateCloudConnectorRequestSchema,
@@ -61,7 +62,7 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
-  const { page, perPage } = request.query;
+  const { page, perPage, cloudProvider } = request.query;
   const logger = appContextService
     .getLogger()
     .get('CloudConnectorService getCloudConnectorsHandler');
@@ -71,6 +72,7 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
     const cloudConnectors = await cloudConnectorService.getList(internalSoClient, {
       page: page ? parseInt(page, 10) : undefined,
       perPage: perPage ? parseInt(perPage, 10) : undefined,
+      cloudProvider,
     });
 
     logger.info('Successfully retrieved cloud connectors list');
@@ -136,7 +138,8 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
     const result = await cloudConnectorService.update(
       internalSoClient,
       cloudConnectorId,
-      request.body
+      // Type cast is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
+      request.body as Partial<UpdateCloudConnectorRequest>
     );
     logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
     const body: UpdateCloudConnectorResponse = {
