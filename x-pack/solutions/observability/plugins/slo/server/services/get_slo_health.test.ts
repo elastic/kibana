@@ -99,8 +99,12 @@ describe('GetSLOHealth', () => {
           Object {
             "health": Object {
               "overall": "unhealthy",
-              "rollup": "missing",
-              "summary": "missing",
+              "rollup": Object {
+                "status": "missing",
+              },
+              "summary": Object {
+                "status": "missing",
+              },
             },
             "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
             "sloInstanceId": "*",
@@ -177,10 +181,12 @@ describe('GetSLOHealth', () => {
           {
             id: getSLOTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOSummaryTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
         ],
       });
@@ -195,8 +201,14 @@ describe('GetSLOHealth', () => {
             Object {
               "health": Object {
                 "overall": "healthy",
-                "rollup": "healthy",
-                "summary": "healthy",
+                "rollup": Object {
+                  "status": "healthy",
+                  "transformState": "started",
+                },
+                "summary": Object {
+                  "status": "healthy",
+                  "transformState": "started",
+                },
               },
               "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
               "sloInstanceId": "*",
@@ -241,10 +253,12 @@ describe('GetSLOHealth', () => {
           {
             id: getSLOTransformId(slo.id, slo.revision),
             health: { status: 'yellow' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOSummaryTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
         ],
       });
@@ -259,8 +273,14 @@ describe('GetSLOHealth', () => {
             Object {
               "health": Object {
                 "overall": "unhealthy",
-                "rollup": "unhealthy",
-                "summary": "healthy",
+                "rollup": Object {
+                  "status": "unhealthy",
+                  "transformState": "started",
+                },
+                "summary": Object {
+                  "status": "healthy",
+                  "transformState": "started",
+                },
               },
               "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
               "sloInstanceId": "*",
@@ -309,15 +329,18 @@ describe('GetSLOHealth', () => {
           {
             id: getSLOTransformId(slo1.id, slo1.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOTransformId(slo2.id, slo2.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           // Missing summary transform for slo1
           {
             id: getSLOSummaryTransformId(slo2.id, slo2.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
         ],
       });
@@ -330,8 +353,9 @@ describe('GetSLOHealth', () => {
       });
 
       expect(result.data).toHaveLength(2);
-      expect(result.data[0].health.summary).toBe('missing');
-      expect(result.data[1].health.summary).toBe('healthy');
+      expect(result.data[0].health.summary.status).toBe('missing');
+      expect(result.data[1].health.summary.status).toBe('healthy');
+      expect(result.data[1].health.summary.transformState).toBe('started');
     });
 
     it('shows only 1 missing summary transform', async () => {
@@ -367,15 +391,18 @@ describe('GetSLOHealth', () => {
           {
             id: getSLOTransformId(slo1.id, slo1.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOTransformId(slo2.id, slo2.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           // Missing summary transform for slo1
           {
             id: getSLOSummaryTransformId(slo2.id, slo2.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
         ],
       });
@@ -388,12 +415,12 @@ describe('GetSLOHealth', () => {
       });
 
       const missingSummaryTotal = result.data.filter(
-        (res) => res.health.summary === 'missing'
+        (res) => res.health.summary.status === 'missing'
       ).length;
       expect(missingSummaryTotal).toBe(1);
       expect(result.data).toHaveLength(2);
-      expect(result.data[0].health.summary).toBe('missing');
-      expect(result.data[1].health.summary).toBe('healthy');
+      expect(result.data[0].health.summary.status).toBe('missing');
+      expect(result.data[1].health.summary.status).toBe('healthy');
     });
   });
 
@@ -434,10 +461,12 @@ describe('GetSLOHealth', () => {
           {
             id: getSLOTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOSummaryTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
         ],
       });
@@ -486,10 +515,12 @@ describe('GetSLOHealth', () => {
           {
             id: getSLOTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOSummaryTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
         ],
       });
@@ -538,10 +569,12 @@ describe('GetSLOHealth', () => {
           {
             id: getSLOTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOSummaryTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
         ],
       });
@@ -586,10 +619,12 @@ describe('GetSLOHealth', () => {
           {
             id: getSLOTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOSummaryTransformId(slo.id, slo.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
         ]),
       } as any);
@@ -699,18 +734,22 @@ describe('GetSLOHealth', () => {
           {
             id: getSLOTransformId(slo1.id, slo1.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOSummaryTransformId(slo1.id, slo1.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOTransformId(slo2.id, slo2.revision),
             health: { status: 'red' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
           {
             id: getSLOSummaryTransformId(slo2.id, slo2.revision),
             health: { status: 'green' },
+            state: 'started',
           } as TransformGetTransformStatsTransformStats,
         ],
       } as any);

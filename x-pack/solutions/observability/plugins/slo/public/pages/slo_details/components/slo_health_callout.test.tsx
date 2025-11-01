@@ -117,8 +117,14 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'healthy',
-              rollup: 'healthy',
-              summary: 'healthy',
+              rollup: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'healthy',
+                transformState: 'started',
+              },
             },
             state: 'running',
           },
@@ -145,8 +151,14 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'unhealthy',
-              rollup: 'unhealthy',
-              summary: 'healthy',
+              rollup: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'healthy',
+                transformState: 'started',
+              },
             },
             state: 'running',
           },
@@ -176,8 +188,13 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'unhealthy',
-              rollup: 'missing',
-              summary: 'healthy',
+              rollup: {
+                status: 'missing',
+              },
+              summary: {
+                status: 'healthy',
+                transformState: 'started',
+              },
             },
             state: 'running',
           },
@@ -207,8 +224,14 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'unhealthy',
-              rollup: 'healthy',
-              summary: 'unhealthy',
+              rollup: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
             },
             state: 'running',
           },
@@ -238,8 +261,13 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'unhealthy',
-              rollup: 'healthy',
-              summary: 'missing',
+              rollup: {
+                status: 'healthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'missing',
+              },
             },
             state: 'running',
           },
@@ -269,8 +297,13 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'unhealthy',
-              rollup: 'unhealthy',
-              summary: 'missing',
+              rollup: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'missing',
+              },
             },
             state: 'running',
           },
@@ -309,8 +342,13 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'unhealthy',
-              rollup: 'missing',
-              summary: 'unhealthy',
+              rollup: {
+                status: 'missing',
+              },
+              summary: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
             },
             state: 'running',
           },
@@ -349,8 +387,14 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'unhealthy',
-              rollup: 'unhealthy',
-              summary: 'unhealthy',
+              rollup: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
             },
             state: 'running',
           },
@@ -389,8 +433,12 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'unhealthy',
-              rollup: 'missing',
-              summary: 'missing',
+              rollup: {
+                status: 'missing',
+              },
+              summary: {
+                status: 'missing',
+              },
             },
             state: 'running',
           },
@@ -427,8 +475,13 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'unhealthy',
-              rollup: 'missing',
-              summary: 'healthy',
+              rollup: {
+                status: 'missing',
+              },
+              summary: {
+                status: 'healthy',
+                transformState: 'started',
+              },
             },
             state: 'running',
           },
@@ -462,8 +515,14 @@ describe('SloHealthCallout', () => {
             sloName: 'Test SLO',
             health: {
               overall: 'unhealthy',
-              rollup: 'unhealthy',
-              summary: 'healthy',
+              rollup: {
+                status: 'unhealthy',
+                transformState: 'started',
+              },
+              summary: {
+                status: 'healthy',
+                transformState: 'started',
+              },
             },
             state: 'running',
           },
