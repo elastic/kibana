@@ -10,6 +10,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_item';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
 import { FILTERS_FORM_ITEM_SUBJ } from '../constants';
 import { alertsFiltersMetadata } from '../filters_metadata';
 import type { AlertsFilterComponentType, AlertsFiltersType } from '../types';
@@ -26,15 +27,18 @@ export interface AlertsFiltersFormItemProps<T> {
   onValueChange: (newFilterValue: T) => void;
   isDisabled?: boolean;
   errors?: { type?: string; value?: string };
+  solution?: RuleTypeSolution;
 }
 
-const options: Array<EuiSuperSelectOption<AlertsFiltersType>> = Object.values(
-  alertsFiltersMetadata
-).map((filterMeta) => ({
-  value: filterMeta.id as AlertsFiltersType,
-  dropdownDisplay: filterMeta.displayName,
-  inputDisplay: filterMeta.displayName,
-}));
+const options = (solution?: RuleTypeSolution): Array<EuiSuperSelectOption<AlertsFiltersType>> =>
+  Object.values(alertsFiltersMetadata)
+    .map((filterMeta) => ({
+      value: filterMeta.id as AlertsFiltersType,
+      dropdownDisplay: filterMeta.displayName,
+      inputDisplay: filterMeta.displayName,
+    }))
+    // only include kql filters for observability solution
+    .filter((filter) => !(filter.value === 'kql' && solution === 'security'));
 
 export const AlertsFiltersFormItem = <T,>({
   type,
@@ -43,6 +47,7 @@ export const AlertsFiltersFormItem = <T,>({
   onValueChange,
   isDisabled = false,
   errors,
+  solution,
 }: AlertsFiltersFormItemProps<T>) => {
   const FilterComponent = type
     ? (alertsFiltersMetadata[type].component as AlertsFilterComponentType<T>)
@@ -64,7 +69,7 @@ export const AlertsFiltersFormItem = <T,>({
         isInvalid={Boolean(errors?.type)}
       >
         <EuiSuperSelect
-          options={options}
+          options={options(solution)}
           valueOfSelected={type}
           onChange={onTypeChange}
           disabled={isDisabled}

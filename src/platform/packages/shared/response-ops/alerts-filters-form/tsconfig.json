@@ -27,5 +27,8 @@
     "@kbn/alerting-types",
     "@kbn/es-query",
     "@kbn/rule-data-utils",
+    "@kbn/alerts-ui-shared",
+    "@kbn/unified-search-plugin",
+    "@kbn/data-plugin",
   ]
 }
