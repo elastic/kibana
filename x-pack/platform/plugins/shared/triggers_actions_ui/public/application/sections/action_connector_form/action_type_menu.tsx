@@ -106,6 +106,7 @@ export const ActionTypeMenu = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(([id, details]) => {
       const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
@@ -116,15 +117,26 @@ export const ActionTypeMenu = ({
       return details.enabledInConfig === true && !shouldHideInUi;
     })
     .map(([id, actionType]) => {
-      const actionTypeModel = actionTypeRegistry.get(id);
-      return {
-        iconClass: actionTypeModel ? actionTypeModel.iconClass : '',
-        selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
-        actionType,
-        name: actionType.name,
-        isExperimental: actionTypeModel.isExperimental,
-        isDeprecated: actionType.isDeprecated,
-      };
+      if (actionTypeRegistry.has(id)) {
+        const actionTypeModel = actionTypeRegistry.get(id);
+        return {
+          iconClass: actionTypeModel ? actionTypeModel.iconClass : '',
+          selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
+          actionType,
+          name: actionType.name,
+          isExperimental: actionTypeModel.isExperimental,
+          isDeprecated: actionType.isDeprecated,
+        };
+      } else {
+        return {
+          iconClass: actionType.ui_fields.iconClass,
+          selectMessage: actionType.ui_fields.selectMessage,
+          actionType,
+          name: actionType.name,
+          isExperimental: false,
+          isDeprecated: false,
+        };
+      }
     });
 
   const filteredConnectors = useMemo(

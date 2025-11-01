@@ -21,6 +21,8 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -91,6 +93,10 @@ export interface ExecuteOptions<Source = unknown> {
   taskInfo?: TaskInfo;
 }
 
+export interface GetAxiosParams {
+  actionId: string;
+}
+
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
   currentUser?: AuthenticatedUser | null;
   checkCanExecuteFn?: (connectorTypeId: string) => Promise<void>;
@@ -134,6 +140,62 @@ export class ActionExecutor {
     }
     this.isInitialized = true;
     this.actionExecutorContext = actionExecutorContext;
+  }
+
+  public async getAxiosInstance({
+    actionId,
+    request,
+  }: GetAxiosParams & { request: KibanaRequest }): Promise<AxiosInstance> {
+    const { actionTypeRegistry, spaces } = this.actionExecutorContext!;
+
+    const spaceId = spaces && spaces.getSpaceId(request);
+    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+    const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
+
+    const { actionTypeId, config, secrets } = actionInfo;
+
+    const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
+    const logger = this.actionExecutorContext!.logger.get(loggerId);
+    const actionType = actionTypeRegistry.get(actionTypeId);
+    const configurationUtilities = actionTypeRegistry.getUtils();
+    let validatedConfig;
+    let validatedSecrets;
+    try {
+      const validationResult = validateAction(
+        {
+          actionId,
+          actionType,
+          params: {},
+          config,
+          secrets,
+        },
+        { configurationUtilities }
+      );
+      validatedConfig = validationResult.validatedConfig;
+      validatedSecrets = validationResult.validatedSecrets;
+    } catch (err) {
+      return err.result;
+    }
+
+    try {
+      logger.debug('validated config and secret');
+      let auth;
+      if (validatedConfig.hasAuth) {
+        auth = {
+          username: validatedSecrets.username as unknown as string,
+          password: validatedSecrets.password as unknown as string,
+        };
+      }
+      return axios.create({
+        baseURL: validatedConfig.url as unknown as string,
+        method: validatedConfig.method as unknown as string,
+        auth,
+      });
+    } catch (error) {
+      logger.error(`${error}`);
+    }
+
+    return axios.create();
   }
 
   public async execute({
@@ -522,6 +584,7 @@ export class ActionExecutor {
             await checkCanExecuteFn(actionTypeId);
           }
 
+          // @ts-ignore
           rawResult = await actionType.executor({
             actionId,
             services,

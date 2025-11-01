@@ -22,6 +22,7 @@ import { getOAuthAccessToken } from './get_oauth_access_token';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
+import { axiosTestRoute } from './connector/axios_test';
 
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;
@@ -40,6 +41,7 @@ export function defineRoutes(opts: RouteOptions) {
   updateConnectorRoute(router, licenseState);
   listTypesRoute(router, licenseState);
   executeConnectorRoute(router, licenseState);
+  axiosTestRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);
   getGlobalExecutionKPIRoute(router, licenseState);
 

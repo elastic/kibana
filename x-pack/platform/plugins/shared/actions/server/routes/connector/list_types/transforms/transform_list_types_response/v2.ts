@@ -23,6 +23,7 @@ export const transformListTypesResponse = (
       isSystemActionType,
       subFeature,
       isDeprecated,
+      uiFields,
     }) => ({
       id,
       name,
@@ -34,6 +35,7 @@ export const transformListTypesResponse = (
       is_system_action_type: isSystemActionType,
       sub_feature: subFeature,
       is_deprecated: isDeprecated,
+      ui_fields: uiFields,
     })
   );
 };
