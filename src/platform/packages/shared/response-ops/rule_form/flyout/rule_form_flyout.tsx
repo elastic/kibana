@@ -69,7 +69,7 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>({
           </RuleFormErrorPromptWrapper>
         }
       >
-        <RuleForm {...ruleFormProps} isFlyout />
+        <RuleForm {...ruleFormProps} isFlyout focusTrapProps={focusTrapProps} />
       </Suspense>
     </EuiFlyoutResizable>
   );
