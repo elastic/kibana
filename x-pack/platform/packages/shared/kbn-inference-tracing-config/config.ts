@@ -10,6 +10,7 @@ import type {
   InferenceTracingExportConfig,
   InferenceTracingLangfuseExportConfig,
   InferenceTracingPhoenixExportConfig,
+  InferenceTracingOtlpExportConfig,
 } from './types';
 
 const scheduledDelay = schema.conditional(
@@ -34,11 +35,23 @@ const phoenixExportConfigSchema: Type<InferenceTracingPhoenixExportConfig> = sch
   scheduled_delay: scheduledDelay,
 });
 
+const otlpExportConfigSchema: Type<InferenceTracingOtlpExportConfig> = schema.object({
+  url: schema.string(),
+  headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  scheduled_delay: scheduledDelay,
+});
+
 export const inferenceTracingExportConfigSchema: Type<InferenceTracingExportConfig> = schema.oneOf([
   schema.object({
     langfuse: langfuseExportConfigSchema,
   }),
   schema.object({
     phoenix: phoenixExportConfigSchema,
+  }),
+  schema.object({
+    grpc: otlpExportConfigSchema,
+  }),
+  schema.object({
+    http: otlpExportConfigSchema,
   }),
 ]);

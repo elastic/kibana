@@ -57,10 +57,31 @@ export interface InferenceTracingPhoenixExportConfig {
 }
 
 /**
+ * Configuration schema for the OTLP exporter (gRPC or HTTP).
+ */
+export interface InferenceTracingOtlpExportConfig {
+  /**
+   * The URL for OTLP receiver endpoint.
+   */
+  url: string;
+  /**
+   * Optional headers for authentication or metadata.
+   */
+  headers?: Record<string, string>;
+  /**
+   * The delay in milliseconds before the exporter sends another
+   * batch of spans.
+   */
+  scheduled_delay: number;
+}
+
+/**
  * Configuration schema for inference tracing exporters.
  *
  * @internal
  */
 export type InferenceTracingExportConfig =
   | { langfuse: InferenceTracingLangfuseExportConfig }
-  | { phoenix: InferenceTracingPhoenixExportConfig };
+  | { phoenix: InferenceTracingPhoenixExportConfig }
+  | { grpc: InferenceTracingOtlpExportConfig }
+  | { http: InferenceTracingOtlpExportConfig };
