@@ -251,7 +251,7 @@ export function ShowShareModal({
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
       },
-      accessModeContainer: (
+      accessModeContainer: savedObjectId ? (
         <AccessModeContainer
           accessControl={accessControl}
           createdBy={createdBy}
@@ -261,7 +261,7 @@ export function ShowShareModal({
           accessControlClient={accessControlClient}
           contentTypeId={CONTENT_ID}
         />
-      ),
+      ) : undefined,
     },
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
