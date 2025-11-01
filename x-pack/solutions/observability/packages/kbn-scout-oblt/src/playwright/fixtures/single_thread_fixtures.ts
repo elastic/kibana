@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { test as base, mergeTests } from '@kbn/scout';
+import { test as base, apiTest as apiBase, mergeTests } from '@kbn/scout';
 import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
 
 import { extendPageObjects } from '../page_objects';
 import type { ObltApiServicesFixture, ObltTestFixtures, ObltWorkerFixtures } from './types';
-import { sloDataFixture } from './worker';
+import { sloDataFixture, profilingClientFixture } from './worker';
 
 const baseFixture = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
   pageObjects: async (
@@ -40,7 +40,23 @@ const baseFixture = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
     { scope: 'worker' },
   ],
 });
+
+const apiFixture = apiBase.extend<ObltApiServicesFixture>({
+  apiServices: [
+    async (
+      { apiServices, kbnClient }: { apiServices: ApiServicesFixture; kbnClient: KbnClient },
+      use: (extendedApiServices: ObltApiServicesFixture) => Promise<void>
+    ) => {
+      const extendedApiServices = apiServices as ObltApiServicesFixture;
+      // extend with Observability specific API services
+      // extendedApiServices.<service_name> = getServiceApiHelper(kbnClient);
+      await use(extendedApiServices);
+    },
+    { scope: 'worker' },
+  ],
+});
 /**
  * Should be used for the test spec files executed sequentially.
  */
-export const test = mergeTests(baseFixture, sloDataFixture);
+export const test = mergeTests(baseFixture, sloDataFixture, profilingClientFixture);
+export const apiTest = mergeTests(apiFixture, profilingClientFixture);
