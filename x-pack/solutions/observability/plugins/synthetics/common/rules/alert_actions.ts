@@ -208,14 +208,16 @@ function getWebhookActionParams(
 
 function getSlackAPIActionParams(
   { defaultActionMessage, defaultRecoveryMessage }: Translations,
-  allowedChannels: Array<{ id: string; name: string }>,
+  allowedChannels: Array<{ id?: string; name: string }>,
   recovery = false
 ): SlackApiActionParams {
   return {
     subAction: 'postMessage',
     subActionParams: {
       text: recovery ? defaultRecoveryMessage : defaultActionMessage,
-      channelIds: allowedChannels.map((channel) => channel.id),
+      channelIds: allowedChannels
+        .map((channel) => channel.id)
+        .filter((id): id is string => id !== undefined),
     },
   };
 }

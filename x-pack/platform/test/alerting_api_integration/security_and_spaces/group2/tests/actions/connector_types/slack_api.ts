@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 export default function slackTest({ getService }: FtrProviderContext) {
@@ -71,6 +72,58 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"token\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+          });
+        });
+    });
+
+    it('should create a slack connector with allowedChannels name only', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A slack api action',
+          connector_type_id: '.slack_api',
+          config: {
+            allowedChannels: [
+              {
+                name: '#general',
+              },
+            ],
+          },
+          secrets: {
+            token: 'some token',
+          },
+        })
+        .expect(200);
+
+      expect(createdAction.config.allowedChannels).to.eql([{ name: '#general' }]);
+    });
+
+    it('should respond with a 400 Bad Request when creating a slack action with allowedChannels but name is missing', async () => {
+      await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A slack api action',
+          connector_type_id: '.slack_api',
+          config: {
+            allowedChannels: [
+              {
+                id: '#general-1',
+              },
+            ],
+          },
+          secrets: {
+            token: 'some token',
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'error validating action type config: [\n  {\n    "code": "invalid_type",\n    "expected": "string",\n    "received": "undefined",\n    "path": [\n      "allowedChannels",\n      0,\n      "name"\n    ],\n    "message": "Required"\n  }\n]',
           });
         });
     });

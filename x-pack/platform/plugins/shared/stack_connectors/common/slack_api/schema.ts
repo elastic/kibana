@@ -19,7 +19,7 @@ export const SlackApiConfigSchema = z
       .array(
         z
           .object({
-            id: z.string().min(1),
+            id: z.string().min(1).optional(),
             name: z.string().min(1),
           })
           .strict()
@@ -44,8 +44,13 @@ export const ValidChannelIdParamsSchema = z
 
 export const PostMessageSubActionParamsSchema = z
   .object({
+    /**
+     * @deprecated Use `channelNames` or `channelIds` instead
+     * `channelNames` takes priority over `channelIds` and `channels`
+     */
     channels: z.array(z.string()).max(1).optional(),
     channelIds: z.array(z.string()).max(1).optional(),
+    channelNames: z.array(z.string().max(200).superRefine(validateChannelName)).max(1).optional(),
     text: z.string().min(1),
   })
   .strict();
@@ -68,10 +73,31 @@ export function validateBlockkit(text: string, ctx: z.RefinementCtx) {
   }
 }
 
+export function validateChannelName(value: string | undefined, ctx: z.RefinementCtx) {
+  if (!value || value.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Channel name cannot be empty',
+    });
+    return;
+  }
+  if (!value.startsWith('#')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Channel name must start with #',
+    });
+  }
+}
+
 export const PostBlockkitSubActionParamsSchema = z
   .object({
+    /**
+     * @deprecated Use `channelNames` or `channelIds` instead
+     * `channelNames` takes priority over `channelIds` and `channels`
+     */
     channels: z.array(z.string()).max(1).optional(),
     channelIds: z.array(z.string()).max(1).optional(),
+    channelNames: z.array(z.string().superRefine(validateChannelName)).max(1).optional(),
     text: z.string().superRefine(validateBlockkit),
   })
   .strict();
