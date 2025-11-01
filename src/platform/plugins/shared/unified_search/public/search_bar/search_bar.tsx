@@ -162,6 +162,9 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    */
   esqlVariablesConfig?: QueryBarTopRowProps['esqlVariablesConfig'];
 
+  /** Optional configurations for the lookup join index editor */
+  onOpenQueryInNewTab?: QueryBarTopRowProps['onOpenQueryInNewTab'];
+
   esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
 
@@ -782,6 +785,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlEditorInitialState={this.props.esqlEditorInitialState}
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
+          onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           showProjectPicker={this.props.showProjectPicker}
         />
