@@ -123,3 +123,8 @@ export const updateShowThreatIndicatorAlertsFilter = actionCreator<{
   id: string;
   showOnlyThreatIndicatorAlerts: boolean;
 }>('UPDATE_SHOW_THREAT_INDICATOR_ALERTS_FILTER');
+
+export const updateExpandedAlertIndex = actionCreator<{
+  id: string;
+  expandedAlertIndex?: number;
+}>('UPDATE_EXPANDED_ALERT_INDEX');

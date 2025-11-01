@@ -24,6 +24,7 @@ import {
   updateColumnOrder,
   updateColumns,
   updateColumnWidth,
+  updateExpandedAlertIndex,
   updateIsLoading,
   updateItemsPerPage,
   updateItemsPerPageOptions,
@@ -275,6 +276,16 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
           ...state.tableById[id].additionalFilters,
           showOnlyThreatIndicatorAlerts,
         },
+      },
+    },
+  }))
+  .case(updateExpandedAlertIndex, (state, { id, expandedAlertIndex }) => ({
+    ...state,
+    tableById: {
+      ...state.tableById,
+      [id]: {
+        ...state.tableById[id],
+        expandedAlertIndex,
       },
     },
   }))

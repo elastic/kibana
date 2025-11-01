@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { type FC, memo, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
@@ -23,6 +23,8 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useOnExpandableFlyoutClose } from '../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
@@ -63,6 +65,7 @@ import { useCellActionsOptions } from '../../hooks/trigger_actions_alert_table/u
 import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { AlertTableCellContextProvider } from '../../configurations/security_solution_detections/cell_value_context';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -77,6 +80,8 @@ const MAX_ACTION_BUTTON_COUNT = 6;
 const DEFAULT_DATA_GRID_HEIGHT = 600;
 
 const ALERT_TABLE_CONSUMERS: ResponseOpsAlertsTableProps['consumers'] = [AlertConsumers.SIEM];
+
+const DEFAULT_TABLE_PAGE_SIZE = 50;
 
 // Highlight rows with building block alerts
 const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
@@ -148,6 +153,34 @@ const casesConfiguration = {
 };
 const emptyInputFilters: Filter[] = [];
 
+const ExpandedAlertView: GetSecurityAlertsTableProp<'renderExpandedAlertView'> = ({
+  tableType,
+  alerts,
+  pageIndex,
+  pageSize,
+  expandedAlertIndex,
+}) => {
+  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
+  const alert = alerts[expandedAlertIndex - pageIndex * pageSize] as Alert | undefined;
+
+  useEffect(() => {
+    if (alert) {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: alert._id,
+            indexName: alert._index,
+            scopeId: tableType,
+          },
+        },
+      });
+    }
+  }, [alert, closeFlyout, openFlyout, tableType]);
+
+  return null;
+};
+
 const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
@@ -170,6 +203,8 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     cases,
   } = useKibana().services;
   const { alertsTableRef } = useAlertsContext();
+
+  const onExpandedAlertIndexChangeRef = useRef<(expandedAlertIndex: number | null) => void>();
 
   const { from, to, setQuery } = useGlobalTime();
 
@@ -218,7 +253,15 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     viewMode: tableView = eventsDefaultModel.viewMode,
     columns,
     totalCount: count,
+    expandedAlertIndex,
+    itemsPerPage,
   } = useSelector((state: State) => getTable(state, tableType) ?? licenseDefaults);
+
+  useEffect(() => {
+    onExpandedAlertIndexChangeRef.current?.(
+      typeof expandedAlertIndex === 'number' ? expandedAlertIndex : null
+    );
+  }, [expandedAlertIndex]);
 
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
 
@@ -397,7 +440,17 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
         })),
       })
     );
+    dispatch(
+      dataTableActions.updateItemsPerPage({ id: tableType, itemsPerPage: DEFAULT_TABLE_PAGE_SIZE })
+    );
   }, [dispatch, tableType, finalColumns, isDataTableInitialized]);
+
+  const onPageSizeChange = useCallback(
+    (newPageSize: number) => {
+      dispatch(dataTableActions.updateItemsPerPage({ id: tableType, itemsPerPage: newPageSize }));
+    },
+    [dispatch, tableType]
+  );
 
   const toolbarVisibility = useMemo(
     () => ({
@@ -442,6 +495,14 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
 
   const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
 
+  const onExpandedAlertFlyoutClose = useCallback(() => {
+    dispatch(
+      dataTableActions.updateExpandedAlertIndex({ id: tableType, expandedAlertIndex: undefined })
+    );
+  }, [dispatch, tableType]);
+
+  useOnExpandableFlyoutClose({ callback: onExpandedAlertFlyoutClose });
+
   /**
    * We want to hide additional controls (like grouping) if the table is being rendered
    * in the cases page OR if the user of the table explicitly set `disableAdditionalToolbarControls`
@@ -449,6 +510,12 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
    */
   const shouldRenderAdditionalToolbarControls =
     disableAdditionalToolbarControls || tableType === TableId.alertsOnCasePage;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onRenderExpandedAlertView = useCallback((props: any) => {
+    onExpandedAlertIndexChangeRef.current = props.onExpandedAlertIndexChange;
+    return <ExpandedAlertView {...props} />;
+  }, []);
 
   if (isLoading) {
     return null;
@@ -480,7 +547,8 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               onLoaded={onLoaded}
               additionalContext={additionalContext}
               height={alertTableHeight}
-              pageSize={50}
+              pageSize={itemsPerPage}
+              onPageSizeChange={onPageSizeChange}
               runtimeMappings={runtimeMappings}
               toolbarVisibility={toolbarVisibility}
               renderCellValue={CellValue}
@@ -498,6 +566,8 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               }
               cellActionsOptions={cellActionsOptions}
               showInspectButton
+              expandedAlertIndex={expandedAlertIndex}
+              renderExpandedAlertView={onRenderExpandedAlertView}
               services={services}
               {...tablePropsOverrides}
             />
