@@ -126,6 +126,7 @@ export type MlAnomalyDetectionAlertParams = {
   includeInterim: boolean;
   lookbackInterval: string | null | undefined;
   topNBuckets: number | null | undefined;
+  customFilter?: string | null;
 } & RuleTypeParams;
 
 export type MlAnomalyDetectionAlertAdvancedSettings = Pick<

@@ -11,6 +11,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { lazy } from 'react';
+import { fromKueryExpression } from '@kbn/es-query';
 import type { MlCapabilities } from '../../../common/types/capabilities';
 import type { MlCoreSetup } from '../../plugin';
 import { ML_ALERT_TYPES } from '../../../common';
@@ -50,6 +51,7 @@ export function registerAnomalyDetectionRule(
           resultType: new Array<string>(),
           topNBuckets: new Array<string>(),
           lookbackInterval: new Array<string>(),
+          customFilter: new Array<string>(),
         } as Record<keyof MlAnomalyDetectionAlertParams, string[]>,
       };
 
@@ -108,6 +110,18 @@ export function registerAnomalyDetectionRule(
             defaultMessage: 'Number of buckets is invalid',
           })
         );
+      }
+
+      if (ruleParams.customFilter) {
+        try {
+          fromKueryExpression(ruleParams.customFilter);
+        } catch (e) {
+          validationResult.errors.customFilter.push(
+            i18n.translate('xpack.ml.alertTypes.anomalyDetection.customFilter.errorMessage', {
+              defaultMessage: 'Custom filter must be valid KQL syntax.',
+            })
+          );
+        }
       }
 
       return validationResult;
