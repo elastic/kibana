@@ -10,12 +10,19 @@ import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../common/mock/endpoint';
 import { FLYOUT_HOST_ISOLATION_PANEL_TEST_ID } from './test_ids';
 import { IsolateHostPanelContent } from './content';
+import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../common';
+
+jest.mock('../../../common/experimental_features_service');
 
 describe('<IsolateHostPanelContent />', () => {
   let appContextMock: AppContextTestRender;
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
+
     appContextMock = createAppRootMockRenderer();
   });
 
