@@ -194,12 +194,13 @@ export const createExternalService = (
     channelIds?: string[];
     channelNames?: string[];
   }): string => {
-    const hasChannels = channelNames.length > 0 || channelIds.length > 0 || channels?.length > 0;
+    const hasChannels = channelNames.length > 0 || channelIds.length > 0 || channels.length > 0;
 
     if (!hasChannels) {
       throw new Error(`The channel is empty`);
     }
-    // priority: channelNames > channelIds
+
+    // priority: channelNames > channelIds > channels
     if (channelNames.length > 0) {
       validateChannels(channelNames, allowedChannelNames);
       return channelNames[0];

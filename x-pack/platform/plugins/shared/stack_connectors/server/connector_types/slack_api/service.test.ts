@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { createExternalService } from './service';
-import type { SlackApiService } from '../../../common/slack_api/types';
+import type { SlackApiConfig, SlackApiService } from '../../../common/slack_api/types';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
@@ -115,6 +115,17 @@ const postBlockkitResponse = createAxiosResponse({
   },
 });
 
+const createExternalServiceMock = ({ config }: { config: SlackApiConfig }) =>
+  createExternalService(
+    {
+      secrets: { token: 'token' },
+      config,
+    },
+    logger,
+    configurationUtilities,
+    connectorUsageCollector
+  );
+
 describe('Slack API service', () => {
   let service: SlackApiService;
 
@@ -123,23 +134,17 @@ describe('Slack API service', () => {
       logger,
       connectorId: 'test-connector-id',
     });
+
     const configWithAllowedChannels = {
       allowedChannels: [
-        { id: 'QWEERTYU987', name: 'general' },
-        { id: 'POIUYT123', name: 'alerts' },
-        { id: 'channel_id_1', name: 'test-channel' },
+        { id: 'general-id', name: 'general' },
+        { id: 'alerts-id', name: 'alerts' },
+        { id: 'test-channel-id', name: 'test-channel' },
         { name: '#general' },
       ],
     };
-    service = createExternalService(
-      {
-        secrets: { token: 'token' },
-        config: configWithAllowedChannels,
-      },
-      logger,
-      configurationUtilities,
-      connectorUsageCollector
-    );
+
+    service = createExternalServiceMock({ config: configWithAllowedChannels });
   });
 
   beforeEach(() => {
@@ -274,55 +279,6 @@ describe('Slack API service', () => {
       });
     });
 
-    test('should call request with only channelNames argument', async () => {
-      requestMock.mockImplementation(() => postMessageResponse);
-
-      await service.postMessage({
-        channelNames: ['#general'],
-        text: 'a message',
-      });
-
-      expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toHaveBeenNthCalledWith(1, {
-        axios,
-        headers: {
-          Authorization: 'Bearer token',
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-        logger,
-        configurationUtilities,
-        method: 'post',
-        url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: '#general', text: 'a message' },
-        connectorUsageCollector,
-      });
-    });
-
-    test('should call request with channelNames and channelIds arguments', async () => {
-      requestMock.mockImplementation(() => postMessageResponse);
-
-      await service.postMessage({
-        channelNames: ['#general'],
-        channelIds: ['QWEERTYU987'],
-        text: 'a message',
-      });
-
-      expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toHaveBeenNthCalledWith(1, {
-        axios,
-        headers: {
-          Authorization: 'Bearer token',
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-        logger,
-        configurationUtilities,
-        method: 'post',
-        url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: '#general', text: 'a message' },
-        connectorUsageCollector,
-      });
-    });
-
     test('should throw an error if request to slack fail', async () => {
       requestMock.mockImplementation(() => {
         throw new Error('request fail');
@@ -413,55 +369,6 @@ describe('Slack API service', () => {
       });
     });
 
-    test('should call request with only channelNames argument', async () => {
-      requestMock.mockImplementation(() => postBlockkitResponse);
-
-      await service.postBlockkit({
-        channelNames: ['#general'],
-        text: JSON.stringify(testBlock),
-      });
-
-      expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toHaveBeenNthCalledWith(1, {
-        axios,
-        logger,
-        headers: {
-          Authorization: 'Bearer token',
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-        configurationUtilities,
-        method: 'post',
-        url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: '#general', blocks: testBlock.blocks },
-        connectorUsageCollector,
-      });
-    });
-
-    test('should call request with channelNames and channelIds arguments', async () => {
-      requestMock.mockImplementation(() => postBlockkitResponse);
-
-      await service.postBlockkit({
-        channelNames: ['#general'],
-        channelIds: ['QWEERTYU987'],
-        text: JSON.stringify(testBlock),
-      });
-
-      expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toHaveBeenNthCalledWith(1, {
-        axios,
-        logger,
-        headers: {
-          Authorization: 'Bearer token',
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-        configurationUtilities,
-        method: 'post',
-        url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: '#general', blocks: testBlock.blocks },
-        connectorUsageCollector,
-      });
-    });
-
     test('should throw an error if text is invalid JSON', async () => {
       expect(
         await service.postBlockkit({
@@ -495,253 +402,307 @@ describe('Slack API service', () => {
     });
   });
 
-  describe('Post message or blockkit using channelNames', () => {
-    const allowedChannels = [{ id: 'channel-id-1', name: '#channel-1' }];
-    let serviceWithAllowedChannels: SlackApiService;
-    let serviceWithAllowedChannelsUndefined: SlackApiService;
-    let serviceWithAllowedChannelsEmptyArray: SlackApiService;
+  describe.only('Channel names', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
 
-    beforeAll(() => {
-      serviceWithAllowedChannels = createExternalService(
-        {
-          config: { allowedChannels },
-          secrets: { token: 'token' },
-        },
-        logger,
-        configurationUtilities,
-        connectorUsageCollector
+    const methods = [
+      ['postMessage', 'hello'],
+      ['postBlockkit', JSON.stringify(testBlock)],
+    ] as const;
+
+    const errorNoAllowedChannelsRes = {
+      actionId: SLACK_API_CONNECTOR_ID,
+      message: 'error posting slack message',
+      serviceMessage:
+        'One or more provided channel names are not included in the allowed channels list',
+      status: 'error',
+    };
+
+    const errorNoChannelsRes = {
+      actionId: SLACK_API_CONNECTOR_ID,
+      message: 'error posting slack message',
+      serviceMessage: 'The channel is empty',
+      status: 'error',
+    };
+
+    describe.each(methods)('%s', (method, text) => {
+      it.each([
+        ['channelNames', '#channel-1'],
+        ['channelIds', 'channel-id-1'],
+        ['channels', 'my-channel'],
+      ])('should post a message if allowedChannels is undefined and use %s', async (key, value) => {
+        service = createExternalServiceMock({ config: {} });
+
+        await service[method]({ [key]: [value], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: value }),
+          })
+        );
+      });
+
+      it.each([['channelNames'], ['channelIds']])(
+        'should throw an error if allowedChannels is an empty array for %s',
+        async (key) => {
+          service = createExternalServiceMock({
+            config: { allowedChannels: [] },
+          });
+
+          expect(await service[method]({ [key]: ['not-in-list'], text })).toEqual(
+            errorNoAllowedChannelsRes
+          );
+        }
       );
 
-      serviceWithAllowedChannelsUndefined = createExternalService(
-        {
-          secrets: { token: 'token' },
+      it('should post a message if allowedChannels is an empty array and use channels', async () => {
+        service = createExternalServiceMock({ config: {} });
+
+        await service[method]({ channels: ['my-channel'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'my-channel' }),
+          })
+        );
+      });
+
+      it('should throw an error if channelNames is not in allowedChannels', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ name: 'channel-name' }] },
+        });
+
+        expect(await service[method]({ channelNames: ['not-in-list'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should throw an error if channelIds is not in allowedChannels', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'channel-1-id', name: 'channel-name' }] },
+        });
+
+        expect(await service[method]({ channelIds: ['not-in-list'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should validate against allowedChannels.name for channelNames', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'channel-1-id', name: 'my-channel-name' }] },
+        });
+
+        expect(await service[method]({ channelNames: ['channel-1-id'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should validate against allowedChannels.id for channelIds', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'channel-1-id', name: 'my-channel-name' }] },
+        });
+
+        expect(await service[method]({ channelIds: ['my-channel-name'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should throw if allowedChannels.name is set and channelIds is used', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ name: 'my-channel-name' }] },
+        });
+
+        expect(await service[method]({ channelIds: ['not-in-list'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
+
+      it('should not validate again allowChannels properties for channels', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'my-channel', name: 'my-channel' }] },
+        });
+
+        await service[method]({ channels: ['my-channel'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'my-channel' }),
+          })
+        );
+      });
+
+      it('should throw an error if allowedChannels, channelNames, channelIds, and channels are not provided', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ id: 'my-channel-id', name: 'my-channel-name' }] },
+        });
+
+        expect(await service[method]({ text })).toEqual(errorNoChannelsRes);
+      });
+
+      it('should throw an error if channelNames, channelIds, and channels are not provided but allowedChannels is', async () => {
+        service = createExternalServiceMock({
           config: {},
-        },
-        logger,
-        configurationUtilities,
-        connectorUsageCollector
-      );
+        });
 
-      serviceWithAllowedChannelsEmptyArray = createExternalService(
-        {
-          secrets: { token: 'token' },
-          config: { allowedChannels: [] },
-        },
-        logger,
-        configurationUtilities,
-        connectorUsageCollector
-      );
-    });
-
-    test('should use the channel name in the request if it is included in allowedChannels when postMessage', async () => {
-      requestMock.mockImplementation(() => postMessageResponse);
-
-      await expect(
-        serviceWithAllowedChannels.postMessage({
-          channelNames: ['#channel-1'],
-          channelIds: ['channel-id-1'],
-          text: 'hello',
-        })
-      ).resolves.not.toThrow();
-
-      expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toHaveBeenNthCalledWith(1, {
-        axios,
-        headers: {
-          Authorization: 'Bearer token',
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-        logger,
-        configurationUtilities,
-        method: 'post',
-        url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: '#channel-1', text: 'hello' },
-        connectorUsageCollector,
-      });
-    });
-
-    test('should throw an error if channelNames is not in allowedChannels when postMessage', async () => {
-      requestMock.mockImplementation(() => postMessageResponse);
-      await expect(
-        serviceWithAllowedChannels.postMessage({
-          channelNames: ['#channel-2'],
-          channelIds: ['channel-id-1'],
-          text: 'hello',
-        })
-      ).resolves.toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
-        message: 'error posting slack message',
-        serviceMessage:
-          'One or more provided channel names are not included in the allowed channels list',
-        status: 'error',
+        expect(await service[method]({ text })).toEqual(errorNoChannelsRes);
       });
 
-      expect(requestMock).not.toHaveBeenCalled();
-    });
+      it('channelNames should take priority over channelIds and channels', async () => {
+        service = createExternalServiceMock({
+          config: {},
+        });
 
-    test('should use the channel name in the request if it is included in allowedChannels when postBlockkit', async () => {
-      requestMock.mockImplementation(() => postBlockkitResponse);
+        await service[method]({
+          channelNames: ['channel-name'],
+          channelIds: ['channel-id'],
+          channels: ['channel'],
+          text,
+        });
 
-      await serviceWithAllowedChannels.postBlockkit({
-        channelNames: ['#channel-1'],
-        channelIds: ['channel-id-1'],
-        text: JSON.stringify(testBlock),
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-name' }),
+          })
+        );
       });
 
-      expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toHaveBeenNthCalledWith(1, {
-        axios,
-        headers: {
-          Authorization: 'Bearer token',
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-        logger,
-        configurationUtilities,
-        method: 'post',
-        url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: '#channel-1', blocks: testBlock.blocks },
-        connectorUsageCollector,
-      });
-    });
+      it('channelIds should take priority over channels', async () => {
+        service = createExternalServiceMock({
+          config: {},
+        });
 
-    test('should throw an error if channelNames is not in allowedChannels when postBlockkit', async () => {
-      requestMock.mockImplementation(() => postBlockkitResponse);
-      await expect(
-        serviceWithAllowedChannels.postBlockkit({
-          channelNames: ['#channel-2'],
-          channelIds: ['channel-id-1'],
-          text: JSON.stringify(testBlock),
-        })
-      ).resolves.toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
-        message: 'error posting slack message',
-        serviceMessage:
-          'One or more provided channel names are not included in the allowed channels list',
-        status: 'error',
-      });
-      expect(requestMock).not.toHaveBeenCalled();
-    });
+        await service[method]({
+          channelIds: ['channel-id'],
+          channels: ['channel'],
+          text,
+        });
 
-    test('should an throw error if no channels are provided when postMessage', async () => {
-      requestMock.mockImplementation(() => postMessageResponse);
-      await expect(
-        service.postMessage({
-          text: 'hello',
-        })
-      ).resolves.toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
-        message: 'error posting slack message',
-        serviceMessage: 'The channel is empty',
-        status: 'error',
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-id' }),
+          })
+        );
       });
 
-      expect(requestMock).not.toHaveBeenCalled();
-    });
+      it('channelNames should take priority over channelIds', async () => {
+        service = createExternalServiceMock({
+          config: {},
+        });
 
-    test('should throw an error if no channels are provided when postBlockkit', async () => {
-      requestMock.mockImplementation(() => postBlockkitResponse);
-      await expect(
-        service.postBlockkit({
-          text: JSON.stringify(testBlock),
-        })
-      ).resolves.toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
-        message: 'error posting slack message',
-        serviceMessage: 'The channel is empty',
-        status: 'error',
+        await service[method]({
+          channelNames: ['channel-name'],
+          channelIds: ['channel-id'],
+          text,
+        });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-name' }),
+          })
+        );
       });
 
-      expect(requestMock).not.toHaveBeenCalled();
-    });
+      it('channelNames should take priority over channels', async () => {
+        service = createExternalServiceMock({
+          config: {},
+        });
 
-    test('should call request if allowedChannels list is undefined, but channels are provided when postMessage', async () => {
-      requestMock.mockImplementation(() => postMessageResponse);
+        await service[method]({
+          channelNames: ['channel-name'],
+          channels: ['channel'],
+          text,
+        });
 
-      await expect(
-        serviceWithAllowedChannelsUndefined.postMessage({
-          channelNames: ['#channel-1'],
-          channelIds: ['channel-id-1'],
-          text: 'hello',
-        })
-      ).resolves.not.toThrow();
+        expect(requestMock).toHaveBeenCalledTimes(1);
 
-      expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toHaveBeenNthCalledWith(1, {
-        axios,
-        headers: {
-          Authorization: 'Bearer token',
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-        logger,
-        configurationUtilities,
-        method: 'post',
-        url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: '#channel-1', text: 'hello' },
-        connectorUsageCollector,
-      });
-    });
-
-    test('should call request if allowedChannels list is undefined, but channels are provided when postBlockkit', async () => {
-      requestMock.mockImplementation(() => postBlockkitResponse);
-
-      await serviceWithAllowedChannelsUndefined.postBlockkit({
-        channelNames: ['#channel-1'],
-        channelIds: ['channel-id-1'],
-        text: JSON.stringify(testBlock),
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-name' }),
+          })
+        );
       });
 
-      expect(requestMock).toHaveBeenCalledTimes(1);
-      expect(requestMock).toHaveBeenNthCalledWith(1, {
-        axios,
-        headers: {
-          Authorization: 'Bearer token',
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-        logger,
-        configurationUtilities,
-        method: 'post',
-        url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: '#channel-1', blocks: testBlock.blocks },
-        connectorUsageCollector,
-      });
-    });
+      it('should take the first provided channel for channelNames', async () => {
+        service = createExternalServiceMock({ config: {} });
 
-    test('should throw error if allowedChannels list is [], but channels are provided when postMessage', async () => {
-      requestMock.mockImplementation(() => postMessageResponse);
+        await service[method]({ channelNames: ['channel-name-1', 'channel-name-2'], text });
 
-      await expect(
-        serviceWithAllowedChannelsEmptyArray.postMessage({
-          channelNames: ['#channel-1'],
-          text: 'hello',
-        })
-      ).resolves.toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
-        message: 'error posting slack message',
-        serviceMessage:
-          'One or more provided channel names are not included in the allowed channels list',
-        status: 'error',
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-name-1' }),
+          })
+        );
       });
 
-      expect(requestMock).not.toHaveBeenCalled();
-    });
+      it('should take the first provided channel for channelIds', async () => {
+        service = createExternalServiceMock({ config: {} });
 
-    test('should throw error if allowedChannels list is [], but channels are provided when postBlockkit', async () => {
-      requestMock.mockImplementation(() => postMessageResponse);
+        await service[method]({ channelIds: ['channel-id-1', 'channel-id-2'], text });
 
-      await expect(
-        serviceWithAllowedChannelsEmptyArray.postBlockkit({
-          channelNames: ['#channel-1'],
-          text: JSON.stringify(testBlock),
-        })
-      ).resolves.toEqual({
-        actionId: SLACK_API_CONNECTOR_ID,
-        message: 'error posting slack message',
-        serviceMessage:
-          'One or more provided channel names are not included in the allowed channels list',
-        status: 'error',
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-id-1' }),
+          })
+        );
       });
 
-      expect(requestMock).not.toHaveBeenCalled();
+      it('should take the first provided channel for channels', async () => {
+        service = createExternalServiceMock({ config: {} });
+
+        await service[method]({ channels: ['channel-1', 'channel-2'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: 'channel-1' }),
+          })
+        );
+      });
+
+      it('should validate correctly if the allowedChannels does not start with # but the channelNames does', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ name: 'channel-1' }] },
+        });
+
+        await service[method]({ channelNames: ['#channel-1'], text });
+
+        expect(requestMock).toHaveBeenCalledTimes(1);
+
+        expect(requestMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ channel: '#channel-1' }),
+          })
+        );
+      });
+
+      it('should validate correctly if the allowedChannels does not start with # but contains it', async () => {
+        service = createExternalServiceMock({
+          config: { allowedChannels: [{ name: 'channel-#-1' }] },
+        });
+
+        expect(await service[method]({ channelNames: ['#channel-1'], text })).toEqual(
+          errorNoAllowedChannelsRes
+        );
+      });
     });
   });
 });
