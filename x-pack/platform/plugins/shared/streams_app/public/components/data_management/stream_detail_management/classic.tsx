@@ -30,6 +30,7 @@ const classicStreamManagementSubTabs = [
   'schemaEditor',
   'schema',
   'references',
+  'dashboardGeneration',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
