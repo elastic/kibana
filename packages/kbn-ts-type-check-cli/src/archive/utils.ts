@@ -13,6 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import globby from 'globby';
 import { asyncForEachWithLimit } from '@kbn/std';
+import { format } from 'util';
 import {
   CACHE_IGNORE_GLOBS,
   GCLOUD_ACTIVATE_SCRIPT,
@@ -144,9 +145,10 @@ export async function locateRemoteArchive(
       try {
         await execa('gcloud', ['storage', 'stat', remotePath], {
           cwd: REPO_ROOT,
-          stdio: 'ignore',
+          stdio: 'inherit',
         });
       } catch (error) {
+        log.warning(`Failed to retrieve archive for sha ${sha}: ${format(error)}`);
         continue;
       }
 
