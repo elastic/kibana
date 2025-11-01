@@ -12,7 +12,7 @@ import type { monaco } from '@kbn/monaco';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { isEnterForeach } from '@kbn/workflows/graph';
 import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
-import { getCurrentPath, getStepNode } from '../../../../common/lib/yaml_utils';
+import { getCurrentPath, getStepNode } from '../../../../common/lib/yaml';
 import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import type { VariableItem } from '../model/types';
 

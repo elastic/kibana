@@ -9,7 +9,7 @@
 
 import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { getCompletionItemProvider } from '../../lib/get_completion_item_provider';
+import { getCompletionItemProvider } from '../../lib/autocomplete/get_completion_item_provider';
 import { selectDetailState } from '../../lib/store/selectors';
 import type { WorkflowDetailState } from '../../lib/store/types';
 

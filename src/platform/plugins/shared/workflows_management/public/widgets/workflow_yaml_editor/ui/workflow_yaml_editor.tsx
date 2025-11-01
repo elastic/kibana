@@ -58,13 +58,12 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import type { StepInfo } from '../lib/store';
 import {
   selectFocusedStepInfo,
-  selectSchemaLoose,
   selectYamlDocument,
   setCursorPosition,
   setStepExecutions,
   setYamlString,
 } from '../lib/store';
-import { selectHasChanges, selectWorkflow } from '../lib/store/selectors';
+import { selectHasChanges, selectSchema, selectWorkflow } from '../lib/store/selectors';
 import { setIsTestModalOpen } from '../lib/store/slice';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
@@ -174,7 +173,7 @@ export const WorkflowYAMLEditor = ({
   // Refs / Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
-  const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
+  const workflowYamlSchema = useSelector(selectSchema);
   // The current yaml document in the editor (could be unsaved)
   const currentYamlDocument = useSelector(selectYamlDocument);
 
@@ -237,7 +236,7 @@ export const WorkflowYAMLEditor = ({
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
     useMonacoMarkersChangedInterceptor({
       yamlDocumentRef,
-      workflowYamlSchema: workflowYamlSchemaLoose as z.ZodSchema,
+      workflowYamlSchema: workflowYamlSchema as z.ZodSchema,
     });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {

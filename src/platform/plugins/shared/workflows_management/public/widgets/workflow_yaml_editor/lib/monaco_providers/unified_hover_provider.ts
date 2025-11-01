@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import type { HoverContext, ProviderConfig } from './provider_interfaces';
 import { getMonacoConnectorHandler } from './provider_registry';
-import { getCurrentPath } from '../../../../../common/lib/yaml_utils';
+import { getCurrentPath } from '../../../../../common/lib/yaml';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
 
 /**

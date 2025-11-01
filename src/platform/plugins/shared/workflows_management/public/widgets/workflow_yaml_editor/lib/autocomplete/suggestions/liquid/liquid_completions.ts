@@ -477,12 +477,10 @@ export const LIQUID_FILTERS = [
  */
 export function createLiquidFilterCompletions(
   range: monaco.IRange,
-  filterPrefix?: string
+  prefix?: string
 ): monaco.languages.CompletionItem[] {
-  const filteredFilters = filterPrefix
-    ? LIQUID_FILTERS.filter((filter) =>
-        filter.name.toLowerCase().startsWith(filterPrefix.toLowerCase())
-      )
+  const filteredFilters = prefix
+    ? LIQUID_FILTERS.filter((filter) => filter.name.toLowerCase().startsWith(prefix.toLowerCase()))
     : LIQUID_FILTERS;
 
   return filteredFilters.map((filter) => ({

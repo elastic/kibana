@@ -17,7 +17,7 @@ import { configureMonacoYamlSchema } from '@kbn/monaco';
 // Configure Monaco YAML with completions and hover disabled
 // while keeping validation and hover information enabled
 const defaultMonacoYamlOptions: MonacoYamlOptions = {
-  completion: false, // Disable schema-based completions
+  completion: true, // Enable schema-based completions from monaco-yaml until we re-implement 'with' block completions in our own provider
   hover: false, // hover is handled by the custom providers
   validate: true, // Keep validation
 };

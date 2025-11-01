@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { DynamicStepContextSchema, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { validateVariable } from './validate_variable';
@@ -27,7 +25,7 @@ export function validateVariables(
 
     let context: typeof DynamicStepContextSchema;
     try {
-      context = getContextSchemaForPath(workflowDefinition, workflowGraph!, path);
+      context = getContextSchemaForPath(workflowDefinition, workflowGraph, path);
       const error = validateVariable(variableItem, context);
       if (error) {
         errors.push(error);

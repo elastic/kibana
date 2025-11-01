@@ -11,7 +11,7 @@
 
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { getCurrentPath } from '../../../../common/lib/yaml_utils';
+import { getCurrentPath } from '../../../../common/lib/yaml/yaml_utils';
 
 export interface StepInfo {
   stepIndex: number;
