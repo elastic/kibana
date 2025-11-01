@@ -107,6 +107,7 @@ export function StreamDetailRoutingImpl() {
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
+
   const isVerticalLayout = useIsWithinBreakpoints(['xs', 's']);
 
   return (
