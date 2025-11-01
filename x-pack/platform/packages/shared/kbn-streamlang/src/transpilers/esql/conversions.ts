@@ -18,6 +18,8 @@ import type {
   GrokProcessor,
   RenameProcessor,
   SetProcessor,
+  RemoveByPrefixProcessor,
+  RemoveProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { convertRenameProcessorToESQL } from './processors/rename';
@@ -27,6 +29,8 @@ import { convertDateProcessorToESQL } from './processors/date';
 import { convertDissectProcessorToESQL } from './processors/dissect';
 import { convertGrokProcessorToESQL } from './processors/grok';
 import { convertConvertProcessorToESQL } from './processors/convert';
+import { convertRemoveByPrefixProcessorToESQL } from './processors/remove_by_prefix';
+import { convertRemoveProcessorToESQL } from './processors/remove';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -50,6 +54,12 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'grok':
       return convertGrokProcessorToESQL(processor as GrokProcessor);
+
+    case 'remove_by_prefix':
+      return convertRemoveByPrefixProcessorToESQL(processor as RemoveByPrefixProcessor);
+
+    case 'remove':
+      return convertRemoveProcessorToESQL(processor as RemoveProcessor);
 
     case 'manual_ingest_pipeline':
       return [
