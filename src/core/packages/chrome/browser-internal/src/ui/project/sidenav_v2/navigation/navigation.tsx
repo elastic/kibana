@@ -22,6 +22,7 @@ import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import { NavigationTour } from '@kbn/core-chrome-navigation-tour';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import useObservable from 'react-use/lib/useObservable';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
@@ -67,7 +68,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const { navItems, logoItem, activeItemId, solutionId } = state;
 
   return (
-    <>
+    <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
       <NavigationTour
         tourManager={props.navigationTourManager}
         key={
@@ -89,7 +90,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         activeItemId={activeItemId}
         data-test-subj={classnames(dataTestSubj, 'projectSideNav', 'projectSideNavV2')}
       />
-    </>
+    </KibanaSectionErrorBoundary>
   );
 };
 
