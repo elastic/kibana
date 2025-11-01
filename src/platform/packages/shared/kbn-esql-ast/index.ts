@@ -36,14 +36,7 @@ export * from './src/ast/location';
 
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
-export {
-  parse,
-  Parser,
-  type ParseOptions,
-  type ParseResult,
-  ESQLErrorListener,
-  TIME_SPAN_UNITS,
-} from './src/parser';
+export * from './src/parser';
 
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
 
