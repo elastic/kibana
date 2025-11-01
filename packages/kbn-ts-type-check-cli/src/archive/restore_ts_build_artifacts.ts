@@ -71,9 +71,10 @@ const extractLocalArchive = async (archivePath: string) => {
   const tarArgs = buildExtractArgs(archivePath);
   await execa('tar', tarArgs, {
     cwd: REPO_ROOT,
-    stdout: 'inherit',
+    stdout: 'ignore',
     stderr: 'inherit',
     env: resolveTarEnvironment(),
+    buffer: false,
   });
 };
 
@@ -83,9 +84,10 @@ const withRemoteTarExtraction = async (remotePath: string, log: SomeDevLog) => {
     const tarProcess = execa('tar', tarArgs, {
       cwd: REPO_ROOT,
       stdin: 'pipe',
-      stdout: 'inherit',
+      stdout: 'ignore',
       stderr: 'inherit',
       env: resolveTarEnvironment(),
+      buffer: false,
     });
 
     const catProcess = execa('gcloud', ['storage', 'cat', remotePath], {

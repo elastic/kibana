@@ -69,6 +69,7 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
           stdout: 'pipe',
           stderr: 'inherit',
           env: resolveTarEnvironment(),
+          buffer: false,
         });
 
         const uploadProcess = execa('gcloud', ['storage', 'cp', '-', remotePath], {
@@ -101,6 +102,7 @@ export async function archiveTSBuildArtifacts(log: SomeDevLog) {
         stdout: 'inherit',
         stderr: 'inherit',
         env: resolveTarEnvironment(),
+        buffer: false,
       });
 
       const destinationPath = Path.join(LOCAL_CACHE_ROOT, `${commitSha}.tar`);
