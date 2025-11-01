@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { i18nNamespaceKey } from '../constants';
+import { PAGE_SIZE_BTN_TEST_ID } from '../test_ids';
 
 const rowsPerPageLabel = i18n.translate(`${i18nNamespaceKey}.rowsPerPageLabel`, {
   defaultMessage: 'Rows per page',
@@ -64,12 +65,13 @@ export const PaginationControls = ({
 
   const button = (
     <EuiButtonEmpty
+      data-test-subj={PAGE_SIZE_BTN_TEST_ID}
       size="xs"
       color="text"
       iconType="arrowDown"
       iconSide="right"
       onClick={onButtonClick}
-      aria-label="Rows per page"
+      aria-label={rowsPerPageLabel}
     >
       {`${rowsPerPageLabel}: ${rowSize}`}
     </EuiButtonEmpty>
@@ -95,7 +97,6 @@ export const PaginationControls = ({
     <EuiFlexGroup
       justifyContent="spaceBetween"
       alignItems="center"
-      responsive={false}
       wrap
       css={css`
         flex-grow: 0;

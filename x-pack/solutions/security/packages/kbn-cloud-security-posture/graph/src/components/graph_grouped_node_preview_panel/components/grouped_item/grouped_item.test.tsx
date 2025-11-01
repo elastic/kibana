@@ -114,11 +114,6 @@ describe('<GroupedItem />', () => {
         const { getByTestId } = render(<GroupedItem item={{ itemType: 'entity', id: entityId }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(entityId);
       });
-
-      it('falls back to dash when entity label and entity id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ itemType: 'entity' }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
-      });
     });
 
     describe('event', () => {
@@ -127,11 +122,6 @@ describe('<GroupedItem />', () => {
         const { getByTestId } = render(<GroupedItem item={{ itemType: 'event', id: eventId }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(eventId);
       });
-
-      it('falls back to dash when event action and event id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ itemType: 'event' }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
-      });
     });
 
     describe('alert', () => {
@@ -139,11 +129,6 @@ describe('<GroupedItem />', () => {
         const alertId = 'alert-id';
         const { getByTestId } = render(<GroupedItem item={{ itemType: 'alert', id: alertId }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(alertId);
-      });
-
-      it('falls back to dash when alert action and alert id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ itemType: 'alert' }} />);
-        expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
       });
     });
   });

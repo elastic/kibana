@@ -8,8 +8,15 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { ICON_TEST_ID, TOTAL_HITS_TEST_ID, GROUPED_ITEMS_TYPE_TEST_ID } from '../test_ids';
 
-export const Title = ({ icon, count, text }: { icon?: string; count?: number; text: string }) => {
+export interface TitleProps {
+  icon: string;
+  text: string;
+  count?: number;
+}
+
+export const Title = ({ icon, text, count }: TitleProps) => {
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -17,15 +24,15 @@ export const Title = ({ icon, count, text }: { icon?: string; count?: number; te
         flex-grow: 0;
       `}
     >
-      {icon && (
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} size="l" color="text" />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiIcon data-test-subj={ICON_TEST_ID} type={icon} size="l" color="text" />
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h2>
-            {count} {text}
+            {count ? <span data-test-subj={TOTAL_HITS_TEST_ID}>{count}</span> : null}
+            <span> </span>
+            <span data-test-subj={GROUPED_ITEMS_TYPE_TEST_ID}>{text}</span>
           </h2>
         </EuiTitle>
       </EuiFlexItem>
