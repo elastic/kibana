@@ -13,7 +13,7 @@ import { switchMap, combineLatest, BehaviorSubject, of } from 'rxjs';
 import type { CoreStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import { FileUploadTelemetryService } from '@kbn/file-upload-common';
+import { AbortError, FileUploadTelemetryService } from '@kbn/file-upload-common';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
@@ -50,6 +50,7 @@ export enum STATUS {
   STARTED,
   COMPLETED,
   FAILED,
+  ABORTED,
 }
 
 export interface Config<T = IndicesIndexSettings | MappingTypeMapping> {
@@ -120,6 +121,7 @@ export class FileUploadManager {
   private docCountService: DocCountService;
   private initializedWithExistingIndex: boolean = false;
   private fileUploadTelemetryService: FileUploadTelemetryService;
+  private importAbortController: AbortController | null = null;
 
   private readonly _uploadStatus$ = new BehaviorSubject<UploadStatus>({
     analysisStatus: STATUS.NOT_STARTED,
@@ -320,6 +322,17 @@ export class FileUploadManager {
     }
   }
 
+  async abortAnalysis() {
+    const files = this.getFiles();
+    files.forEach((file) => file.abortAnalysis());
+  }
+
+  async abortImport() {
+    if (this.importAbortController) {
+      this.importAbortController.abort();
+    }
+  }
+
   public async removeClashingFiles() {
     const fileClashes = this._uploadStatus$.getValue().fileClashes;
     const filesToDestroy: FileWrapper[] = [];
@@ -502,6 +515,9 @@ export class FileUploadManager {
     indexName: string,
     dataViewName?: string | null
   ): Promise<FileUploadResults | null> {
+    this.importAbortController = new AbortController();
+    const signal = this.importAbortController.signal;
+
     const mappings = this.getMappings().json;
     const pipelines = this.getPipelines();
 
@@ -539,7 +555,7 @@ export class FileUploadManager {
       this.setStatus({
         modelDeployed: STATUS.STARTED,
       });
-      await this.autoDeploy();
+      await this.autoDeploy(signal);
       this.setStatus({
         modelDeployed: STATUS.COMPLETED,
       });
@@ -568,8 +584,11 @@ export class FileUploadManager {
         this.getSettings().json,
         mappings,
         pipelines,
-        isExistingIndex
+        isExistingIndex,
+        signal
       );
+
+      this.checkImportAborted();
 
       this.docCountService.startIndexSearchableCheck(indexName);
 
@@ -587,6 +606,8 @@ export class FileUploadManager {
         throw initializeImportResp.error;
       }
     } catch (e) {
+      this.checkImportAborted();
+
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
         errors: [
@@ -599,6 +620,7 @@ export class FileUploadManager {
         ],
       });
       sendTelemetry(false);
+
       return null;
     }
 
@@ -615,7 +637,7 @@ export class FileUploadManager {
       fileImport: STATUS.STARTED,
     });
 
-    // import data
+    // import files
     const createdPipelineIds = initializeImportResp.pipelineIds;
 
     try {
@@ -625,7 +647,8 @@ export class FileUploadManager {
             indexName,
             mappings!,
             createdPipelineIds[i] ?? undefined,
-            this.getFileClashes(i) // passing in file clashes for telemetry
+            this.getFileClashes(i), // passing in file clashes for telemetry
+            signal
           );
         })
       );
@@ -645,6 +668,8 @@ export class FileUploadManager {
       return null;
     }
 
+    this.checkImportAborted();
+
     const totalDocCount = files.reduce((acc, file) => {
       const { docCount, failures } = file.getStatus();
       const count = docCount - failures.length;
@@ -662,7 +687,7 @@ export class FileUploadManager {
         this.setStatus({
           pipelinesDeleted: STATUS.STARTED,
         });
-        await this.importer.deletePipelines();
+        await this.importer.deletePipelines(signal);
         this.setStatus({
           pipelinesDeleted: STATUS.COMPLETED,
         });
@@ -683,6 +708,8 @@ export class FileUploadManager {
         });
       }
     }
+
+    this.checkImportAborted();
 
     let dataViewResp;
     if (this.autoCreateDataView && dataViewName !== null) {
@@ -716,11 +743,15 @@ export class FileUploadManager {
       }
     }
 
+    this.checkImportAborted();
+
     this.setStatus({
       overallImportStatus: STATUS.COMPLETED,
     });
 
     sendTelemetry(true);
+
+    this.importAbortController = null;
 
     return {
       index: indexName,
@@ -739,13 +770,13 @@ export class FileUploadManager {
     };
   }
 
-  private async autoDeploy() {
+  private async autoDeploy(signal?: AbortSignal) {
     if (this.inferenceId === null) {
       return;
     }
     try {
       const autoDeploy = new AutoDeploy(this.http, this.inferenceId);
-      await autoDeploy.deploy();
+      await autoDeploy.deploy(signal);
     } catch (error) {
       this.setStatus({
         modelDeployed: STATUS.FAILED,
@@ -850,6 +881,37 @@ export class FileUploadManager {
         contains_auto_added_semantic_text_field: containsAutoAddedSemanticTextField,
       });
     };
+  }
+
+  private checkImportAborted() {
+    if (this.importAbortController?.signal.aborted) {
+      this.setStatus({ overallImportStatus: STATUS.ABORTED });
+      const { modelDeployed, indexCreated, pipelineCreated, fileImport, dataViewCreated } =
+        this._uploadStatus$.getValue();
+      this.setStatus({
+        modelDeployed:
+          modelDeployed === STATUS.STARTED || modelDeployed === STATUS.NOT_STARTED
+            ? STATUS.ABORTED
+            : modelDeployed,
+        indexCreated:
+          indexCreated === STATUS.STARTED || indexCreated === STATUS.NOT_STARTED
+            ? STATUS.ABORTED
+            : indexCreated,
+        pipelineCreated:
+          pipelineCreated === STATUS.STARTED || pipelineCreated === STATUS.NOT_STARTED
+            ? STATUS.ABORTED
+            : pipelineCreated,
+        fileImport:
+          fileImport === STATUS.STARTED || fileImport === STATUS.NOT_STARTED
+            ? STATUS.ABORTED
+            : fileImport,
+        dataViewCreated:
+          dataViewCreated === STATUS.STARTED || dataViewCreated === STATUS.NOT_STARTED
+            ? STATUS.ABORTED
+            : dataViewCreated,
+      });
+      throw new AbortError();
+    }
   }
 }
 

@@ -102,6 +102,7 @@ export class FileWrapper {
 
   public readonly fileStatus$ = this.analyzedFile$.asObservable();
   private fileSizeChecker: FileSizeChecker;
+  private analysisAbortController: AbortController | null = null;
 
   constructor(
     private file: File,
@@ -127,6 +128,10 @@ export class FileWrapper {
   }
 
   public destroy() {
+    if (this.analysisAbortController) {
+      this.analysisAbortController.abort();
+    }
+
     this.analyzedFile$.complete();
     this.pipeline$.complete();
     this.pipelineJsonValid$.complete();
@@ -165,18 +170,37 @@ export class FileWrapper {
   }
 
   private async analyzeTika(data: ArrayBuffer, isRetry = false): Promise<AnalysisResults> {
-    const { tikaResults, standardResults } = await analyzeTikaFile(data, this.fileUpload);
-    const serverSettings = processResults(standardResults);
+    try {
+      this.analysisAbortController = new AbortController();
+      const { tikaResults, standardResults } = await analyzeTikaFile(
+        data,
+        this.fileUpload,
+        this.analysisAbortController.signal
+      );
+      const serverSettings = processResults(standardResults);
+      this.analysisAbortController = null;
 
-    return {
-      fileContents: tikaResults.content,
-      results: standardResults.results,
-      sampleDocs: [],
-      explanation: standardResults.results.explanation,
-      serverSettings,
-      overrides: {},
-      analysisStatus: STATUS.COMPLETED,
-    };
+      return {
+        fileContents: tikaResults.content,
+        results: standardResults.results,
+        sampleDocs: [],
+        explanation: standardResults.results.explanation,
+        serverSettings,
+        overrides: {},
+        analysisStatus: STATUS.COMPLETED,
+      };
+    } catch (e) {
+      return {
+        fileContents: '',
+        results: null,
+        sampleDocs: [],
+        explanation: undefined,
+        serverSettings: null,
+        analysisError: e,
+        overrides: {},
+        analysisStatus: STATUS.FAILED,
+      };
+    }
   }
 
   private async analyzeStandardFile(
@@ -185,14 +209,17 @@ export class FileWrapper {
     isRetry = false
   ): Promise<AnalysisResults> {
     try {
+      this.analysisAbortController = new AbortController();
       const resp = await this.fileUpload.analyzeFile(
         fileContents,
         overrides as Record<string, string>,
-        true
+        true,
+        this.analysisAbortController.signal
       );
 
       const serverSettings = processResults(resp);
       const sampleDocs = await getSampleDocs(this.data, resp, this.file.name);
+      this.analysisAbortController = null;
 
       return {
         fileContents,
@@ -215,6 +242,15 @@ export class FileWrapper {
         analysisStatus: STATUS.FAILED,
       };
     }
+  }
+
+  public abortAnalysis() {
+    if (this.analysisAbortController) {
+      this.analysisAbortController.abort();
+    }
+    this.setStatus({
+      analysisStatus: STATUS.NOT_STARTED,
+    });
   }
 
   private setStatus(status: Partial<FileAnalysis>) {
@@ -290,7 +326,8 @@ export class FileWrapper {
     index: string,
     mappings: MappingTypeMapping,
     pipelineId: string | undefined,
-    getFileClashes: () => FileClash | null
+    getFileClashes: () => FileClash | null,
+    signal?: AbortSignal
   ) {
     this.setStatus({ importStatus: STATUS.STARTED });
     const format = this.analyzedFile$.getValue().results!.format;
@@ -309,9 +346,14 @@ export class FileWrapper {
     importer.read(data);
     const startTime = new Date().getTime();
     try {
-      const resp = await importer.import(index, pipelineId, (p) => {
-        this.setStatus({ importProgress: p });
-      });
+      const resp = await importer.import(
+        index,
+        pipelineId,
+        (p) => {
+          this.setStatus({ importProgress: p });
+        },
+        signal
+      );
 
       this.setStatus({
         docCount: resp.docCount,
