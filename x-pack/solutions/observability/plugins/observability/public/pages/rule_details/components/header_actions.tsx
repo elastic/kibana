@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
@@ -18,12 +19,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
+import { sloDetailsLocatorID } from '../../..';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { useKibana } from '../../../utils/kibana_react';
 import { useEnableRule } from '../../../hooks/use_enable_rule';
 import { useDisableRule } from '../../../hooks/use_disable_rule';
 import { useRunRule } from '../../../hooks/use_run_rule';
 import { useUpdateAPIKey } from '../../../hooks/use_update_api_key';
+import { useAppLink } from '../../../hooks/use_app_link';
+
 interface HeaderActionsProps {
   ruleId: string;
   isLoading: boolean;
@@ -40,6 +44,11 @@ export function HeaderActions({
   onEditRule,
 }: HeaderActionsProps) {
   const { services } = useKibana();
+  const {
+    share: {
+      url: { locators },
+    },
+  } = services;
   const {
     triggersActionsUi: {
       getRuleSnoozeModal: RuleSnoozeModal,
@@ -118,6 +127,10 @@ export function HeaderActions({
   const { rule, refetch } = useFetchRule({
     ruleId,
   });
+
+  const locator = locators.get(sloDetailsLocatorID);
+
+  const { linkUrl, buttonText } = useAppLink({ rule, locator });
 
   if (!isRuleEditable || !rule) {
     return null;
@@ -221,6 +234,20 @@ export function HeaderActions({
             />
           </EuiPopover>
         </EuiFlexItem>
+        {linkUrl ? (
+          <EuiFlexItem grow={false} data-test-subj="ruleSidebarViewInAppAction">
+            <EuiButtonEmpty
+              color={'primary'}
+              href={linkUrl}
+              className="ruleViewLinkedObjectButton"
+              data-test-subj="ruleViewLinkedObjectButton"
+              iconType={'eye'}
+              aria-label={buttonText}
+            >
+              {buttonText}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={1}>
           <EuiButtonIcon
             className="snoozeButton"
