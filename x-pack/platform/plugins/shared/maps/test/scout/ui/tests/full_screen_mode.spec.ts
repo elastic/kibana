@@ -32,7 +32,7 @@ test.describe(
       const hiddenChrome = page.getByTestId(HIDDEN_CHROME);
       const baseMapBtn = page.getByRole('button', { name: 'Basemap' });
 
-      await expect(fullScreenBtn).toBeVisible();
+      await expect(fullScreenBtn).toBeHidden();
       await expect(exitFullScreenBtn).toBeHidden();
       await expect(visibleChrome).toBeVisible();
       await expect(hiddenChrome).toBeHidden();
