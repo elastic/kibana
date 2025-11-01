@@ -15,4 +15,5 @@ plugins:
 packages:
   enabled:
     - kbn-streamlang-tests
+    - kbn-scout-release-testing
   disabled:
