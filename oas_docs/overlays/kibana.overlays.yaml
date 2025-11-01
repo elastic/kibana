@@ -119,6 +119,7 @@ actions:
                 $ref: "../examples/copy_saved_objects_request2.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -143,6 +144,7 @@ actions:
                 $ref: "../examples/resolve_copy_saved_objects_request2.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -170,6 +172,7 @@ actions:
                 $ref: "../examples/update_saved_objects_spaces_request1.yaml"
       responses:
         200:
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
