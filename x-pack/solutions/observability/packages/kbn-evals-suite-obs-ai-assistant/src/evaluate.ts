@@ -12,11 +12,13 @@ import { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
 import type { EvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
 import { createEvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
 import { createScenarioSummaryReporter } from './scenario_summary_reporter';
+import { DocumentationClient } from './clients/documentation_client';
 
 export const evaluate = base.extend<
   {},
   {
     knowledgeBaseClient: KnowledgeBaseClient;
+    documentationClient: DocumentationClient;
     conversationsClient: ConversationsClient;
     chatClient: ObservabilityAIAssistantEvaluationChatClient;
     evaluateDataset: EvaluateObservabilityAIAssistantDataset;
@@ -27,6 +29,16 @@ export const evaluate = base.extend<
       const kbClient = new KnowledgeBaseClient(fetch, log, esClient);
 
       await use(kbClient);
+    },
+    {
+      scope: 'worker',
+    },
+  ],
+  documentationClient: [
+    async ({ fetch, log }, use) => {
+      const docClient = new DocumentationClient(fetch, log);
+
+      await use(docClient);
     },
     {
       scope: 'worker',

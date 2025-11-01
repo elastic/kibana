@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { RETRIEVE_ELASTIC_DOC_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
-import type {
-  InstallationStatusResponse,
-  PerformInstallResponse,
-  UninstallResponse,
-} from '@kbn/product-doc-base-plugin/common/http_api/installation';
 import { evaluate } from '../../src/evaluate';
 
 /**
@@ -20,44 +14,9 @@ import { evaluate } from '../../src/evaluate';
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
 
-const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
-const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
-const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
-const inferenceId = defaultInferenceEndpoints.ELSER;
-
 evaluate.describe('Retrieve documentation function', { tag: '@svlOblt' }, () => {
-  evaluate.beforeAll(async ({ kbnClient, log }) => {
-    const { data: status } = await kbnClient.request<InstallationStatusResponse>({
-      method: 'GET',
-      path: `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(
-        inferenceId
-      )}`,
-    });
-    if (status.overall === 'installed') {
-      log.success('Elastic documentation is already installed');
-    } else {
-      log.info('Installing Elastic documentation');
-      const { data: installResponse } = await kbnClient.request<PerformInstallResponse>({
-        method: 'POST',
-        path: ELASTIC_DOCS_INSTALL_ALL_API_PATH,
-        body: { inferenceId },
-      });
-
-      if (!installResponse.installed) {
-        log.error('Could not install Elastic documentation');
-        throw new Error('Documentation did not install successfully before running tests.');
-      }
-
-      const { data: installStatus } = await kbnClient.request<InstallationStatusResponse>({
-        method: 'GET',
-        path: `${ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH}?inferenceId=${encodeURIComponent(
-          inferenceId
-        )}`,
-      });
-      if (installStatus.overall !== 'installed') {
-        throw new Error('Documentation is not fully installed, cannot proceed with tests.');
-      }
-    }
+  evaluate.beforeAll(async ({ documentationClient }) => {
+    await documentationClient.ensureInstalled();
   });
 
   evaluate('retrieves ES documentation', async ({ evaluateDataset }) => {
@@ -134,18 +93,7 @@ evaluate.describe('Retrieve documentation function', { tag: '@svlOblt' }, () => 
     });
   });
 
-  evaluate.afterAll(async ({ kbnClient, log }) => {
-    log.info('Uninstalling Elastic documentation');
-    const { data: uninstallResponse } = await kbnClient.request<UninstallResponse>({
-      method: 'POST',
-      path: ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,
-      body: { inferenceId },
-    });
-
-    if (uninstallResponse.success) {
-      log.success('Uninstalled Elastic documentation');
-    } else {
-      log.error('Could not uninstall Elastic documentation');
-    }
+  evaluate.afterAll(async ({ documentationClient, log }) => {
+    await documentationClient.uninstall();
   });
 });
