@@ -73,6 +73,22 @@ async function unmuteAllWithOCC(context: RulesClientContext, params: UnmuteAllRu
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
+  const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
+  if (indices && indices.length > 0) {
+    try {
+      await context.alertsService?.unmuteAllAlerts({
+        ruleId: id,
+        indices,
+        logger: context.logger,
+      });
+    } catch (error) {
+      context.logger.error(
+        `Failed to unmute all alerts for rule ${id} in Elasticsearch: ${error.message}`
+      );
+    }
+  }
+
   const updateAttributes = updateMetaAttributes(context, {
     muteAll: false,
     mutedInstanceIds: [],
