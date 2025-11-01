@@ -83,6 +83,7 @@ export type FilterMeta = {
   key?: string;
   params?: FilterMetaParams;
   value?: string;
+  skipHighlight?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

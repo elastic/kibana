@@ -16,7 +16,8 @@ import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_
 
 export interface LogEventsResultContentProps {
   dependencies: LogEventsResultContentDependencies;
-  documentFilters: QueryDslQueryContainer[];
+  documentFilters?: QueryDslQueryContainer[];
+  nonHighlightingFilters?: QueryDslQueryContainer[];
   logsSource: ResolvedIndexNameLogsSourceConfiguration;
   timeRange: {
     start: string;
@@ -31,7 +32,7 @@ export interface LogEventsResultContentDependencies {
 }
 
 export const LogEventsResultContent = React.memo<LogEventsResultContentProps>(
-  ({ dependencies, documentFilters, logsSource, timeRange }) => {
+  ({ dependencies, documentFilters = [], nonHighlightingFilters = [], logsSource, timeRange }) => {
     const savedSearchDependencies = React.useMemo(
       () => ({
         embeddable: dependencies.embeddable,
@@ -50,18 +51,33 @@ export const LogEventsResultContent = React.memo<LogEventsResultContentProps>(
     );
 
     const savedSearchFilters = React.useMemo(
-      () =>
-        documentFilters.map((filter) =>
+      () => [
+        // Document filters (will be highlighted)
+        ...documentFilters.map((filter) =>
           buildCustomFilter(
             logsSource.indexName,
             filter,
             false,
             false,
             'Document Filters',
-            FilterStateStore.APP_STATE
+            FilterStateStore.APP_STATE,
+            false
           )
         ),
-      [documentFilters, logsSource.indexName]
+        // Non-highlighting filters (won't be highlighted)
+        ...nonHighlightingFilters.map((filter) =>
+          buildCustomFilter(
+            logsSource.indexName,
+            filter,
+            false,
+            false,
+            'Context Filters',
+            FilterStateStore.APP_STATE,
+            true
+          )
+        ),
+      ],
+      [documentFilters, nonHighlightingFilters, logsSource.indexName]
     );
 
     return (
