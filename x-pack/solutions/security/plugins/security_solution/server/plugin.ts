@@ -146,6 +146,9 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import { entityAnalyticsAgentCreator } from './lib/entity_analytics/agent_builder/siem_agent_creator';
+import { entityAnalyticsToolInternal } from './assistant/tools/entity_risk_score/entity_analytics';
+import { securitySolutionToolInternal } from './assistant/tools/entity_risk_score/security_solution';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -248,6 +251,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.ruleMonitoringService.setup(core, plugins);
+
+    // // Register onechat tools
+    plugins.onechat.tools.register(securitySolutionToolInternal(core.getStartServices));
+    plugins.onechat.tools.register(entityAnalyticsToolInternal(core.getStartServices));
+
+    plugins.onechat.agents.register(entityAnalyticsAgentCreator());
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
