@@ -144,6 +144,7 @@ export async function openSaveModal({
             onSave={onSaveAttempt}
             accessControl={accessControl}
             customModalTitle={getCustomModalTitle(viewMode)}
+            isDuplicateAction={Boolean(lastSavedId)}
           />
         );
       }
