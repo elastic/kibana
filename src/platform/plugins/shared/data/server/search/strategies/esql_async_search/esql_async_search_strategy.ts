@@ -160,7 +160,7 @@ export const esqlAsyncSearchStrategyProvider = (
         if (e.meta?.statusCode === 404) return;
 
         // Log all other (unexpected) error messages
-        logger.error(`cancelEsqlAsyncSearch error: ${e.message}`);
+        logger.error(`[esqlAsyncSearch] cancelEsqlAsyncSearch error: ${e.message}`);
       }
     };
 
@@ -184,7 +184,7 @@ export const esqlAsyncSearchStrategyProvider = (
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
-      logger.debug(() => `search ${JSON.stringify(request) || request.id}`);
+      logger.debug(() => `[esqlAsyncSearch] search ${JSON.stringify(request) || request.id}`);
       return esqlAsyncSearch(request, options, deps);
     },
 
@@ -197,7 +197,6 @@ export const esqlAsyncSearchStrategyProvider = (
      */
 
     cancel: async (id, options, deps) => {
-      logger.debug(`cancel ${id}`);
       try {
         await cancelEsqlAsyncSearch(id, deps);
       } catch (e) {
@@ -215,7 +214,7 @@ export const esqlAsyncSearchStrategyProvider = (
      * @throws `KbnServerError`
      */
     extend: async (id, keepAlive, options, { esClient }) => {
-      logger.debug(`extend ${id} by ${keepAlive}`);
+      logger.debug(`[esqlAsyncSearch] extend ${id} by ${keepAlive}`);
       try {
         await esClient.asCurrentUser.transport.request(
           {
