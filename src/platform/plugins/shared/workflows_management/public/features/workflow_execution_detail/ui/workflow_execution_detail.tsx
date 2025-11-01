@@ -17,7 +17,7 @@ import {
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
 import { useWorkflowExecutionPolling } from './hooks/use_workflow_execution_polling';
-import { WorkflowStepExecutionList } from './workflow_execution_list';
+import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
@@ -74,7 +74,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
         <ResizableLayout
           fixedPanel={
-            <WorkflowStepExecutionList
+            <WorkflowExecutionPanel
               definition={workflowDefinition}
               execution={workflowExecution ?? null}
               showBackButton={showBackButton}

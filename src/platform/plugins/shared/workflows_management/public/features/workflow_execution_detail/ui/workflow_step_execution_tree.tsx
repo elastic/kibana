@@ -241,8 +241,6 @@ export const WorkflowStepExecutionTree = ({
 
 const componentStyles = {
   treeViewContainer: ({ euiTheme }: UseEuiTheme) => css`
-    overflow-y: auto;
-
     & .euiTreeView__nodeLabel {
       flex-grow: 1;
       text-align: left;
