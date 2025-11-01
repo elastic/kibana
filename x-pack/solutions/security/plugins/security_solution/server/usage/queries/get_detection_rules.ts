@@ -52,6 +52,7 @@ export const getDetectionRules = async ({
 
   const query: SavedObjectsCreatePointInTimeFinderOptions = {
     type: 'alert',
+    fields: ['id', 'name', 'params'],
     perPage: maxPerPage,
     namespaces: ['*'],
     filter,
