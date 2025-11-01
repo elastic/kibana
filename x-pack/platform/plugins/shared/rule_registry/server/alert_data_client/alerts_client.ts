@@ -70,6 +70,11 @@ import { getRuleTypeIdsFilter } from '../lib/get_rule_type_ids_filter';
 import { getConsumersFilter } from '../lib/get_consumers_filter';
 import { mergeUniqueFieldsByName } from '../utils/unique_fields';
 import { getAlertFieldsFromIndexFetcher } from '../utils/get_alert_fields_from_index_fetcher';
+import {
+  ADD_TAGS_UPDATE_SCRIPT,
+  getStatusUpdateScript,
+  REMOVE_TAGS_UPDATE_SCRIPT,
+} from '../utils/alert_client_bulk_update_scripts';
 import type { GetAlertFieldsResponseV1 } from '../routes/get_alert_fields';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
@@ -113,9 +118,11 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
 
 export interface BulkUpdateOptions<Params extends RuleTypeParams> {
   ids?: string[] | null;
-  status: STATUS_VALUES;
+  status?: STATUS_VALUES;
   index: string;
   query?: object | string | null;
+  addTags?: string[];
+  removeTags?: string[];
 }
 
 interface MgetAndAuditAlert {
@@ -442,25 +449,6 @@ export class AlertsClient {
     }
   }
 
-  /**
-   * When an update by ids is requested, do a multi-get, ensure authz and audit alerts, then execute bulk update
-   */
-  private async mgetAlertsAuditOperateStatus({
-    alerts,
-    status,
-    operation,
-  }: {
-    alerts: MgetAndAuditAlert[];
-    status: STATUS_VALUES;
-    operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
-  }) {
-    return this.mgetAlertsAuditOperate({
-      alerts,
-      operation,
-      fieldToUpdate: (source) => this.getAlertStatusFieldUpdate(source, status),
-    });
-  }
-
   private async buildEsQueryWithAuthz(
     query: object | string | null | undefined,
     id: string | null | undefined,
@@ -549,6 +537,7 @@ export class AlertsClient {
           index,
           operation,
           lastSortIds,
+          size: 1000,
         });
 
         if (lastSortIds != null && result?.hits.hits.length === 0) {
@@ -810,16 +799,71 @@ export class AlertsClient {
     query,
     index,
     status,
+    addTags,
+    removeTags,
   }: BulkUpdateOptions<Params>) {
+    const scriptOps: string[] = [];
+    const params: Record<string, string[]> = {};
+
+    if (status != null) {
+      scriptOps.push(getStatusUpdateScript(status));
+    }
+
+    if (addTags != null && addTags.length > 0) {
+      params.addTags = addTags;
+      scriptOps.push(ADD_TAGS_UPDATE_SCRIPT);
+    }
+
+    if (removeTags != null && removeTags.length > 0) {
+      params.removeTags = removeTags;
+      scriptOps.push(REMOVE_TAGS_UPDATE_SCRIPT);
+    }
+
+    if (scriptOps.length === 0) {
+      return;
+    }
+
+    const script = {
+      source: scriptOps.join('\n'),
+      lang: 'painless',
+      params: Object.keys(params).length > 0 ? params : undefined,
+    };
+
     // rejects at the route level if more than 1000 id's are passed in
-    if (ids != null) {
+    if (ids && ids.length > 0) {
       const alerts = ids.map((id) => ({ id, index }));
-      return this.mgetAlertsAuditOperateStatus({
+      const mgetRes = await this.ensureAllAlertsAuthorized({
         alerts,
-        status,
         operation: WriteOperations.Update,
       });
-    } else if (query != null) {
+
+      const bulkUpdateRequest = [];
+
+      for (const item of mgetRes.docs) {
+        // @ts-expect-error doesn't handle error branch in MGetResponse
+        if (item.found) {
+          bulkUpdateRequest.push(
+            {
+              update: {
+                _index: item._index,
+                _id: item._id,
+              },
+            },
+            { script }
+          );
+        }
+      }
+
+      if (bulkUpdateRequest.length === 0) {
+        return;
+      }
+
+      const bulkUpdateResponse = await this.esClient.bulk({
+        refresh: 'wait_for',
+        body: bulkUpdateRequest,
+      });
+      return bulkUpdateResponse;
+    } else if (query) {
       try {
         // execute search after with query + authorization filter
         // audit results of that query
@@ -835,18 +879,11 @@ export class AlertsClient {
 
         // executes updateByQuery with query + authorization filter
         // used in the queryAndAuditAllAlerts function
+
         const result = await this.esClient.updateByQuery({
           index,
           conflicts: 'proceed',
-          script: {
-            source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
-                ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
-              }
-              if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                ctx._source.signal.status = '${status}'
-              }`,
-            lang: 'painless',
-          },
+          script,
           query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
           ignore_unavailable: true,
         });
