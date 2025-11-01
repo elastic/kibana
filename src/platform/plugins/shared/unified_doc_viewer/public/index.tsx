@@ -40,4 +40,7 @@ export { UnifiedDocViewerLogsOverview } from './components/lazy_doc_viewer_logs_
 export { UnifiedDocViewerObservabilityTracesOverview } from './components/observability/traces/doc_viewer_overview/lazy_doc_viewer_obs_traces_overview';
 export { UnifiedDocViewerObservabilityGenericOverview } from './components/observability/generic/doc_viewer_overview/lazy_doc_viewer_obs_generic_overview';
 export { UnifiedDocViewerObservabilityAttributesOverview } from './components/observability/attributes/doc_viewer_attributes_overview/lazy_doc_viewer_obs_attributes_overview';
+
+// Temporary for POC purposes, this component should not be in this plugin
+export { TraceWaterfallForChart } from './components/observability/traces/components/trace_waterfall_for_chart';
 export const plugin = () => new UnifiedDocViewerPublicPlugin();

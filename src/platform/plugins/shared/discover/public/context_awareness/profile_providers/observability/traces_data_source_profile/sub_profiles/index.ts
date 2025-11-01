@@ -9,3 +9,4 @@
 
 export { createTracesAPMDataSourceProfileProvider } from './apm';
 export { createTracesOtelDataSourceProfileProvider } from './otel';
+export { createTracesOnlyTraceDataSourceProfileProvider } from './only_trace';

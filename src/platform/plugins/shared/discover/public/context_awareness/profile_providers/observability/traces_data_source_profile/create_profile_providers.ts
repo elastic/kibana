@@ -11,6 +11,7 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createTracesDataSourceProfileProvider } from './profile';
 import {
   createTracesAPMDataSourceProfileProvider,
+  createTracesOnlyTraceDataSourceProfileProvider,
   createTracesOtelDataSourceProfileProvider,
 } from './sub_profiles';
 
@@ -20,6 +21,10 @@ export const createObservabilityTracesDataSourceProfileProviders = (
   const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider(providerServices);
 
   return [
+    createTracesOnlyTraceDataSourceProfileProvider(
+      providerServices,
+      tracesDataSourceProfileProvider
+    ),
     createTracesAPMDataSourceProfileProvider(tracesDataSourceProfileProvider),
     createTracesOtelDataSourceProfileProvider(tracesDataSourceProfileProvider),
     tracesDataSourceProfileProvider,
