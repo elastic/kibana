@@ -70,36 +70,31 @@ export const buildActionResultsQuery = ({
     index,
     ignore_unavailable: true,
     aggs: {
-      aggs: {
-        global: {},
+      responses_by_action_id: {
+        filter: {
+          bool: {
+            must: [
+              {
+                match: {
+                  action_id: actionId,
+                },
+              },
+            ],
+          },
+        },
         aggs: {
-          responses_by_action_id: {
-            filter: {
-              bool: {
-                must: [
-                  {
-                    match: {
-                      action_id: actionId,
-                    },
-                  },
-                ],
-              },
+          rows_count: {
+            sum: {
+              field: 'action_response.osquery.count',
             },
-            aggs: {
-              rows_count: {
-                sum: {
-                  field: 'action_response.osquery.count',
-                },
-              },
-              responses: {
-                terms: {
-                  script: {
-                    lang: 'painless',
-                    source:
-                      "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-                  } as const,
-                },
-              },
+          },
+          responses: {
+            terms: {
+              script: {
+                lang: 'painless',
+                source:
+                  "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
+              } as const,
             },
           },
         },
