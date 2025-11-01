@@ -28,7 +28,7 @@ export interface StreamsPluginSetup {}
 export interface StreamsPluginStart {
   streamsRepositoryClient: StreamsRepositoryClient;
   navigationStatus$: Observable<StreamsNavigationStatus>;
-  wiredStatus$: Observable<WiredStreamsStatus>;
+  getWiredStatus: () => Promise<WiredStreamsStatus>;
   enableWiredMode: (signal: AbortSignal) => Promise<EnableStreamsResponse>;
   disableWiredMode: (signal: AbortSignal) => Promise<DisableStreamsResponse>;
   config$: Observable<StreamsPublicConfig>;
