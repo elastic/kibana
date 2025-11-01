@@ -3327,7 +3327,7 @@
         "label": "ChartType",
         "description": [],
         "signature": [
-          "\"metric\" | \"table\" | \"heatmap\" | \"gauge\" | \"pie\" | \"donut\" | \"treemap\" | \"mosaic\" | \"tagcloud\" | \"regionmap\" | \"xy\""
+          "\"metric\" | \"table\" | \"heatmap\" | \"gauge\" | \"treemap\" | \"mosaic\" | \"pie\" | \"donut\" | \"tagcloud\" | \"regionmap\" | \"xy\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/types.ts",
         "deprecated": false,
