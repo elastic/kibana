@@ -218,5 +218,7 @@ export function EditorFrame(props: EditorFrameProps) {
 
 const componentStyles = {
   visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
-    css({ margin: `${euiTheme.size.base} ${euiTheme.size.base} 0 ${euiTheme.size.base}` }),
+    css({
+      margin: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base}`,
+    }),
 };

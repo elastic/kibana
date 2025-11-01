@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import type { DataGridDensity, DatatableVisualizationState, RowHeightMode } from '@kbn/lens-common';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
@@ -18,8 +18,7 @@ import {
   LENS_DATAGRID_DENSITY,
 } from '@kbn/lens-common';
 import { RowHeightSettings } from '@kbn/unified-data-table';
-import { DEFAULT_PAGE_SIZE } from '../table_basic';
-import { DensitySettings } from './density_settings';
+import { DEFAULT_PAGE_SIZE } from './table_basic';
 
 type LineCounts = {
   [key in keyof typeof ROW_HEIGHT_LINES_KEYS]: number;
@@ -167,3 +166,71 @@ export function DatatableAppearanceSettings({
     </>
   );
 }
+
+export interface DensitySettingsProps {
+  dataGridDensity: DataGridDensity;
+  onChange: (density: DataGridDensity) => void;
+}
+
+const densityValues = Object.values(LENS_DATAGRID_DENSITY);
+
+const getValidDensity = (density: string) => {
+  const isValidDensity = densityValues.includes(density as DataGridDensity);
+  return isValidDensity ? (density as DataGridDensity) : LENS_DATAGRID_DENSITY.NORMAL;
+};
+
+const densityLabel = i18n.translate('xpack.lens.table.densityLabel', {
+  defaultMessage: 'Density',
+});
+
+const densityOptions = [
+  {
+    id: LENS_DATAGRID_DENSITY.COMPACT,
+    label: i18n.translate('xpack.lens.table.labelCompact', {
+      defaultMessage: 'Compact',
+    }),
+  },
+  {
+    id: LENS_DATAGRID_DENSITY.NORMAL,
+    label: i18n.translate('xpack.lens.table.labelNormal', {
+      defaultMessage: 'Normal',
+    }),
+  },
+  {
+    id: LENS_DATAGRID_DENSITY.EXPANDED,
+    label: i18n.translate('xpack.lens.table.labelExpanded', {
+      defaultMessage: 'Expanded',
+    }),
+  },
+];
+
+const DensitySettings: React.FC<DensitySettingsProps> = ({ dataGridDensity, onChange }) => {
+  // Falls back to NORMAL density when an invalid density is provided
+  const validDensity = getValidDensity(dataGridDensity);
+
+  const setDensity = useCallback(
+    (density: string) => {
+      onChange(getValidDensity(density));
+    },
+    [onChange]
+  );
+
+  return (
+    <EuiFormRow
+      label={densityLabel}
+      aria-label={densityLabel}
+      display="columnCompressed"
+      data-test-subj="lnsDensitySettings"
+      fullWidth
+    >
+      <EuiButtonGroup
+        legend={densityLabel}
+        buttonSize="compressed"
+        isFullWidth
+        options={densityOptions}
+        onChange={setDensity}
+        idSelected={validDensity}
+      />
+    </EuiFormRow>
+  );
+};

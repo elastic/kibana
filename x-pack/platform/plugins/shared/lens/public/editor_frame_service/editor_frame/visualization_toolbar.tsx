@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import type { FramePublicAPI, Visualization } from '@kbn/lens-common';
+import { memo, useCallback } from 'react';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import {
   useLensDispatch,
   updateVisualizationState,
@@ -16,17 +16,25 @@ import {
 } from '../../state_management';
 import { useEditorFrameService } from '../editor_frame_service_context';
 
-const VisualizationToolbar = memo(function VisualizationToolbar({
-  activeVisualization,
+export const VisualizationToolbarWrapper = memo(function VisualizationToolbar({
   framePublicAPI,
-  enableFlyoutToolbar = false,
+  isInlineEditing = false,
+  enableFlyoutToolbar = true,
 }: {
-  activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
+  isInlineEditing?: boolean;
   enableFlyoutToolbar?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
-  const visualization = useLensSelector(selectVisualizationState);
+  const lensVisualization = useLensSelector(selectVisualization);
+  const visualizationState = useLensSelector(selectVisualizationState);
+
+  const { visualizationMap } = useEditorFrameService();
+
+  const activeVisualization = lensVisualization.activeId
+    ? visualizationMap[lensVisualization.activeId]
+    : null;
+
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -42,15 +50,16 @@ const VisualizationToolbar = memo(function VisualizationToolbar({
     [dispatchLens, activeVisualization]
   );
 
+  if (!activeVisualization || !visualizationState) {
+    return null;
+  }
+
   const { FlyoutToolbarComponent, ToolbarComponent: RegularToolbarComponent } =
     activeVisualization ?? {};
 
-  let ToolbarComponent;
-  if (enableFlyoutToolbar) {
-    ToolbarComponent = FlyoutToolbarComponent ?? RegularToolbarComponent;
-  } else {
-    ToolbarComponent = RegularToolbarComponent;
-  }
+  const ToolbarComponent = enableFlyoutToolbar
+    ? FlyoutToolbarComponent ?? RegularToolbarComponent
+    : RegularToolbarComponent;
 
   if (!ToolbarComponent) {
     return null;
@@ -58,27 +67,8 @@ const VisualizationToolbar = memo(function VisualizationToolbar({
 
   return ToolbarComponent({
     frame: framePublicAPI,
-    state: visualization.state,
+    state: visualizationState.state,
     setState: setVisualizationState,
+    isInlineEditing,
   });
 });
-
-export function VisualizationToolbarWrapper({
-  framePublicAPI,
-}: {
-  framePublicAPI: FramePublicAPI;
-}) {
-  const { visualizationMap } = useEditorFrameService();
-  const visualization = useLensSelector(selectVisualization);
-
-  const activeVisualization = visualization.activeId
-    ? visualizationMap[visualization.activeId]
-    : null;
-
-  return activeVisualization && visualization.state ? (
-    <VisualizationToolbar
-      framePublicAPI={framePublicAPI}
-      activeVisualization={activeVisualization}
-    />
-  ) : null;
-}

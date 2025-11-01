@@ -53,7 +53,7 @@ import {
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './toolbar';
-import { XyFlyoutToolbar } from './toolbar/flyout_toolbar';
+import { XyStyleSettings } from './toolbar/style_settings';
 import { updateLayer } from './toolbar';
 import {
   DataDimensionEditor,
@@ -142,6 +142,8 @@ import {
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel/annotations_panel';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel/reference_line_panel';
 import { convertToRuntimeState } from './runtime_state';
+import { XyLegendSettings } from './toolbar/legend_settings';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
 
 const XY_ID = 'lnsXY';
 
@@ -749,7 +751,15 @@ export const getXyVisualization = ({
   },
 
   FlyoutToolbarComponent(props) {
-    return <XyFlyoutToolbar {...props} />;
+    return (
+      <FlyoutToolbar
+        {...props}
+        contentMap={{
+          style: XyStyleSettings,
+          legend: XyLegendSettings,
+        }}
+      />
+    );
   },
 
   DimensionEditorComponent(props) {
