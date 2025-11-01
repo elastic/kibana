@@ -11,7 +11,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
-
+import { WORKFLOW_INDEX_NAME, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
@@ -99,12 +99,21 @@ export async function setupDependencies(
     stepExecutionRepository
   );
 
+  // Create WorkflowRepository for checking current workflow state
+  const workflowRepository = new WorkflowRepository({
+    esClient,
+    logger,
+    indexName: WORKFLOW_INDEX_NAME,
+  });
+
   // Create workflow runtime first (simpler, fewer dependencies)
   const workflowRuntime = new WorkflowExecutionRuntimeManager({
     workflowExecution: workflowExecution as EsWorkflowExecution,
     workflowExecutionGraph,
     workflowLogger,
     workflowExecutionState,
+    taskManager: taskManagerPlugin,
+    workflowRepository,
   });
 
   // Use user-scoped ES client if fakeRequest is available, otherwise fallback to regular client

@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Prefix of the workflows system indices.
- *
- * The Kibana system user has the same permission on those indices than it has on Kibana system indices.
- */
-export const workflowSystemIndexPrefix = '.workflows-';
-
-/**
- * Helper function to define workflow system indices.
- */
-export const workflowSystemIndex = (suffix: string): string => {
-  return `${workflowSystemIndexPrefix}${suffix}`;
-};
+// Re-export from shared package for backward compatibility
+export {
+  WORKFLOW_SYSTEM_INDEX_PREFIX as workflowSystemIndexPrefix,
+  createWorkflowSystemIndex as workflowSystemIndex,
+} from '@kbn/workflows';

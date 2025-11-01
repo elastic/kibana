@@ -78,6 +78,7 @@ export class WaitStepImpl implements NodeImplementation {
       runAt,
       workflowRunId: workflowExecution.id,
       spaceId: workflowExecution.spaceId,
+      workflowId: workflowExecution.workflowId,
     });
     this.workflowLogger.logDebug(
       `Scheduled resume execution task for wait step "${this.node.id}" with ID ${

@@ -9,10 +9,14 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { EsWorkflow } from '@kbn/workflows';
+import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
 import type { WorkflowTrigger } from '../lib/schedule_utils';
-import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
+import {
+  calculateNextRunTime,
+  convertWorkflowScheduleToTaskSchedule,
+  getScheduledTriggers,
+} from '../lib/schedule_utils';
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
@@ -39,7 +43,7 @@ export class WorkflowTaskScheduler {
 
     for (const trigger of scheduledTriggers) {
       try {
-        const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger, request);
+        const taskId = await this.scheduleWorkflowTask(workflow, spaceId, trigger, request);
         scheduledTaskIds.push(taskId);
         this.logger.info(
           `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
@@ -59,46 +63,77 @@ export class WorkflowTaskScheduler {
    * Schedules a single workflow task for a specific trigger
    */
   async scheduleWorkflowTask(
-    workflowId: string,
+    workflow: EsWorkflow,
     spaceId: string,
     trigger: WorkflowTrigger,
     request?: KibanaRequest
   ): Promise<string> {
-    const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
+    // First validate the trigger configuration by converting it
+    // This will throw the appropriate validation errors
+    convertWorkflowScheduleToTaskSchedule(trigger);
+
+    // Calculate next run time for one-time task
+    const nextRunTime = calculateNextRunTime(trigger);
+    if (!nextRunTime) {
+      throw new Error(`Could not calculate next run time for workflow ${workflow.id} trigger`);
+    }
 
     // Log RRule-specific scheduling details
-    if ('rrule' in schedule && schedule.rrule) {
-      const freqText = getReadableFrequency(schedule.rrule.freq);
-      const intervalText = getReadableInterval(schedule.rrule.freq, schedule.rrule.interval);
+    if (trigger.with && 'rrule' in trigger.with && trigger.with.rrule) {
+      const freqText = getReadableFrequency(trigger.with.rrule.freq);
+      const intervalText = getReadableInterval(
+        trigger.with.rrule.freq,
+        trigger.with.rrule.interval
+      );
 
       this.logger.info(
-        `RRule schedule created for workflow ${workflowId}: ${freqText} every ${schedule.rrule.interval} ${intervalText}`
+        `RRule schedule created for workflow ${workflow.id}: ${freqText} every ${
+          trigger.with.rrule.interval
+        } ${intervalText}, next run at ${nextRunTime.toISOString()}`
+      );
+    } else {
+      this.logger.info(
+        `Interval schedule created for workflow ${
+          workflow.id
+        }, next run at ${nextRunTime.toISOString()}`
       );
     }
 
+    // Convert workflow to execution model format
+    const workflowExecutionModel: WorkflowExecutionEngineModel = {
+      id: workflow.id,
+      name: workflow.name,
+      enabled: workflow.enabled,
+      definition: workflow.definition,
+      yaml: workflow.yaml,
+    };
+
+    // Use non-unique task ID for this workflow and trigger
     const taskInstance = {
-      id: `workflow:${workflowId}:${trigger.type}`,
+      id: `workflow:${workflow.id}:scheduled`,
       taskType: 'workflow:scheduled',
-      schedule,
+      runAt: nextRunTime,
       params: {
-        workflowId,
+        workflow: workflowExecutionModel,
         spaceId,
         triggerType: trigger.type,
+        trigger, // Store the original trigger for next run calculation
       },
       state: {
         lastRunAt: null,
         lastRunStatus: null,
         lastRunError: null,
       },
-      scope: ['workflows'],
+      scope: ['workflows', workflow.id], // Include workflowId for queryability
       enabled: true,
     };
 
+    // Use ensureScheduled which will update existing task if it exists
     // Use Task Manager's first-class API key support by passing the request
     // Task Manager will automatically create and manage the API key for user context
     const scheduledTask = request
-      ? await this.taskManager.schedule(taskInstance, { request })
-      : await this.taskManager.schedule(taskInstance);
+      ? await this.taskManager.ensureScheduled(taskInstance, { request })
+      : await this.taskManager.ensureScheduled(taskInstance);
 
     return scheduledTask.id;
   }
@@ -106,21 +141,19 @@ export class WorkflowTaskScheduler {
   /**
    * Unschedules all tasks for a workflow
    */
-
   async unscheduleWorkflowTasks(workflowId: string): Promise<void> {
     try {
-      // Find all tasks for this workflow
+      // Find all tasks for this workflow using scope-based query
       const tasks = await this.taskManager.fetch({
         query: {
           bool: {
             must: [
               { term: { 'task.taskType': 'workflow:scheduled' } },
-              { ids: { values: [`task:workflow:${workflowId}:scheduled`] } },
+              { term: { 'task.scope': workflowId } },
             ],
           },
         },
       });
-
       // Remove all tasks
       const taskIds = tasks.docs.map((task) => task.id);
       if (taskIds.length > 0) {
@@ -141,10 +174,47 @@ export class WorkflowTaskScheduler {
     spaceId: string,
     request?: KibanaRequest
   ): Promise<void> {
+    // Check if there are any running executions for this workflow
+    const hasWaitingExecutions = await this.hasWaitingExecutions(workflow.id);
+
+    if (hasWaitingExecutions) {
+      this.logger.info(
+        `Skipping scheduled task update for workflow ${workflow.id} - workflow has waiting executions`
+      );
+      return;
+    }
+
     // First, unschedule all existing tasks
     await this.unscheduleWorkflowTasks(workflow.id);
 
     // Then, schedule new tasks for scheduled triggers
     await this.scheduleWorkflowTasks(workflow, spaceId, request);
+  }
+
+  /**
+   * Check if there are any running executions for a workflow
+   */
+  private async hasWaitingExecutions(workflowId: string): Promise<boolean> {
+    try {
+      const response = await this.taskManager.fetch({
+        query: {
+          bool: {
+            must: [
+              { term: { 'task.taskType': 'workflow:resume' } },
+              { term: { 'task.scope': workflowId } },
+            ],
+          },
+        },
+        size: 1,
+      });
+
+      // If there are any resume tasks, there are running executions
+      return response.docs.length > 0;
+    } catch (error) {
+      this.logger.error(
+        `Failed to check for running executions for workflow ${workflowId}: ${error}`
+      );
+      return true;
+    }
   }
 }

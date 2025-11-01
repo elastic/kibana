@@ -27,9 +27,13 @@ const mockLogger: Logger = {
 // Mock TaskManager
 const mockTaskManager: TaskManagerStartContract = {
   schedule: jest.fn().mockResolvedValue({ id: 'test-task-id' }),
+  ensureScheduled: jest.fn().mockResolvedValue({ id: 'test-task-id' }),
   fetch: jest.fn().mockResolvedValue({ docs: [] }),
   bulkRemove: jest.fn().mockResolvedValue(undefined),
 } as any;
+
+// Cast fetch to Jest mock for proper typing
+const mockFetch = mockTaskManager.fetch as jest.MockedFunction<typeof mockTaskManager.fetch>;
 
 describe('WorkflowTaskScheduler RRule Validation', () => {
   let scheduler: WorkflowTaskScheduler;
@@ -63,7 +67,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
           ],
           steps: [],
           name: 'Test Workflow',
-          enabled: false,
+          enabled: true,
           version: '1',
         },
         yaml: '',
@@ -78,7 +82,35 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).resolves.toEqual([
         'test-task-id',
       ]);
-      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+
+      // Verify the task instance structure includes workflow object
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'workflow:test-workflow:scheduled', // Non-unique ID
+          taskType: 'workflow:scheduled',
+          runAt: expect.any(Date),
+          scope: ['workflows', 'test-workflow'],
+          enabled: true,
+          state: expect.objectContaining({
+            lastRunAt: null,
+            lastRunStatus: null,
+            lastRunError: null,
+          }),
+          params: expect.objectContaining({
+            workflow: expect.objectContaining({
+              id: 'test-workflow',
+              name: 'Test Workflow',
+              enabled: true,
+              definition: expect.any(Object),
+              yaml: '',
+            }),
+            spaceId: 'default',
+            triggerType: 'scheduled',
+            trigger: expect.any(Object),
+          }),
+        })
+      );
     });
 
     it('should reject invalid RRule frequency', async () => {
@@ -430,7 +462,7 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).resolves.toEqual([
         'test-task-id',
       ]);
-      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -475,6 +507,107 @@ describe('WorkflowTaskScheduler RRule Validation', () => {
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('RRule schedule created')
       );
+    });
+  });
+
+  describe('Running Execution Detection', () => {
+    it('should skip scheduling when workflow has running executions', async () => {
+      const workflow: EsWorkflow = {
+        id: 'test-workflow',
+        name: 'Test Workflow',
+        description: 'Test workflow with running execution',
+        enabled: true,
+        tags: [],
+        valid: true,
+        createdAt: new Date(),
+        createdBy: 'test-user',
+        lastUpdatedAt: new Date(),
+        lastUpdatedBy: 'test-user',
+        definition: {
+          triggers: [
+            {
+              type: 'scheduled',
+              with: {
+                rrule: {
+                  freq: 'DAILY',
+                  interval: 1,
+                  tzid: 'UTC',
+                  byhour: [9],
+                  byminute: [0],
+                },
+              },
+            },
+          ],
+          steps: [],
+          name: 'Test Workflow',
+          enabled: true,
+          version: '1',
+        },
+        yaml: '',
+        deleted_at: null,
+      };
+
+      // Mock that there are running executions (resume tasks)
+      mockFetch.mockResolvedValueOnce({
+        docs: [{ id: 'resume-task-1' }], // Simulate existing resume task
+      } as any);
+
+      await scheduler.updateWorkflowTasks(workflow, 'default');
+
+      // Should not schedule new tasks
+      expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Skipping scheduled task update for workflow test-workflow - workflow has running executions'
+        )
+      );
+    });
+
+    it('should schedule tasks when workflow has no running executions', async () => {
+      const workflow: EsWorkflow = {
+        id: 'test-workflow',
+        name: 'Test Workflow',
+        description: 'Test workflow without running execution',
+        enabled: true,
+        tags: [],
+        valid: true,
+        createdAt: new Date(),
+        createdBy: 'test-user',
+        lastUpdatedAt: new Date(),
+        lastUpdatedBy: 'test-user',
+        definition: {
+          triggers: [
+            {
+              type: 'scheduled',
+              with: {
+                rrule: {
+                  freq: 'DAILY',
+                  interval: 1,
+                  tzid: 'UTC',
+                  byhour: [9],
+                  byminute: [0],
+                },
+              },
+            },
+          ],
+          steps: [],
+          name: 'Test Workflow',
+          enabled: true,
+          version: '1',
+        },
+        yaml: '',
+        deleted_at: null,
+      };
+
+      // Mock that there are no running executions
+      mockFetch.mockResolvedValueOnce({
+        docs: [], // No resume tasks
+      } as any);
+
+      await scheduler.updateWorkflowTasks(workflow, 'default');
+
+      // Should schedule new tasks
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
     });
   });
 });
