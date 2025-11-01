@@ -8,16 +8,40 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { readLogFile, assertLogContains } from '../test_utils';
 
+function isPrWithLabel(match: string): boolean {
+  const labelsEnv = process.env.GITHUB_PR_LABELS ?? '';
+  const labels = labelsEnv
+    .split(',')
+    .map((label) => label.trim())
+    .filter(Boolean);
+
+  for (const label of labels) {
+    if (label === match) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('Log Correlation', () => {
     it('Emits "trace.id" into the logs', async () => {
+      if (isPrWithLabel('"ci:collect-apm"')) {
+        log.warning(`Skipping test as APM is enabled in FTR, which breaks this test`);
+        return;
+      }
+
       const response1 = await supertest.get('/emit_log_with_trace_id');
       expect(response1.status).to.be(200);
+
       expect(response1.body.traceId).to.be.a('string');
 
       const response2 = await supertest.get('/emit_log_with_trace_id');
+
       expect(response2.status).to.be(200);
       expect(response1.body.traceId).to.be.a('string');
 

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('../src/cli/apm')('functional-tests', []);
-require('@kbn/test').runTestsCli();
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-apm-utils'],
+  setupFiles: [],
+  setupFilesAfterEnv: [],
+};
