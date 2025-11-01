@@ -13,6 +13,7 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { Env } from '@kbn/config';
@@ -36,7 +37,7 @@ const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.
 beforeEach(async () => {
   logger = loggingSystemMock.create();
   server = createInternalHttpService({ logger });
-  await server.preboot({ context: contextServiceMock.createPrebootContract() });
+  await server.preboot({ context: contextServiceMock.createPrebootContract(), docLinks: docLinksServiceMock.createSetupContract() });
 });
 
 afterEach(async () => {
