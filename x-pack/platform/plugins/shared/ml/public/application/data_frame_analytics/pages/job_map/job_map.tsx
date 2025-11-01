@@ -18,9 +18,9 @@ import {
   type EuiThemeComputed,
 } from '@elastic/eui';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlKibana } from '../../../contexts/kibana';
 import { Controls, Cytoscape, JobMapLegend } from './components';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';

@@ -17,14 +17,10 @@ import {
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job, Detector, BucketSpan } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '../../../../services/ml_api_service';
 import { JobCreator } from './job_creator';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-  BucketSpan,
-} from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';

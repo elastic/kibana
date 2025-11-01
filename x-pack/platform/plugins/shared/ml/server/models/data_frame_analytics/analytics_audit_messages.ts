@@ -6,8 +6,8 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import type { JobMessage } from '../../../common/types/audit_message';
 
 const SIZE = 50;
 

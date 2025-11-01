@@ -8,8 +8,10 @@
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { AnalysisConfig } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import type { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {
@@ -28,7 +30,6 @@ import {
 } from '../models/job_validation';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
-import type { CombinedJob } from '../../common/types/anomaly_detection_jobs';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 

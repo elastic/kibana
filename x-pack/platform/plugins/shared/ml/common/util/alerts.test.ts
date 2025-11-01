@@ -10,7 +10,9 @@ import {
   getResultJobsHealthRuleConfig,
   resolveLookbackInterval,
 } from './alerts';
-import type { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 
 describe('resolveLookbackInterval', () => {
   test('resolves interval for bucket spans bigger than 1m', () => {

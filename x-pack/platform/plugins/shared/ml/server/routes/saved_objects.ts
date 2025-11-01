@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
@@ -19,7 +20,6 @@ import {
   itemTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import type { MlSavedObjectType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management

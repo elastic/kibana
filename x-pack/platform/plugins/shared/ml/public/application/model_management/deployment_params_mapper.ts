@@ -6,13 +6,15 @@
  */
 
 import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  TrainedModelDeploymentStatsResponse,
+  StartAllocationParams,
+} from '@kbn/ml-common-types/trained_models';
+import type { MlServerLimits } from '@kbn/ml-common-types/ml_server_info';
 import type { NLPSettings } from '../../../common/constants/app';
-import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import type { CloudInfo } from '../services/ml_server_info';
-import type { MlServerLimits } from '../../../common/types/ml_server_info';
 import type { AdaptiveAllocations } from '../../../server/lib/ml_client/types';
 import type { DeploymentParamsUI } from './deployment_setup';
-import type { StartAllocationParams } from '../services/ml_api_service/trained_models';
 
 export type MlStartTrainedModelDeploymentRequestNew = MlStartTrainedModelDeploymentRequest &
   AdaptiveAllocations;

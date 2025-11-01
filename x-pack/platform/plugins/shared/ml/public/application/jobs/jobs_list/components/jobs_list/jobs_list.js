@@ -35,7 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
 import { isManagedJob } from '../../../jobs_utils';
 import { MLSavedObjectsSpacesList } from '../../../../components/ml_saved_objects_spaces_list';
-import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
+import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 

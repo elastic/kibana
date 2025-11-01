@@ -13,9 +13,9 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { SeriesConfigWithMetadata } from '../../../common/types/results';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { SeriesConfigWithMetadata } from '@kbn/ml-common-types/results';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';

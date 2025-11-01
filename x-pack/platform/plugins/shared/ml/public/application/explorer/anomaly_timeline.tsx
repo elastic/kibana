@@ -40,7 +40,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import type { AnomalySwimLaneEmbeddableState } from '../..';

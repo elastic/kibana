@@ -24,9 +24,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { Module } from '../../../../../common/types/modules';
-import { useDataSource } from '../../../contexts/ml';
-import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import type { Module } from '@kbn/ml-common-types/modules';
 import type {
   DatafeedResponse,
   JobOverride,
@@ -35,15 +33,17 @@ import type {
   KibanaObjects,
   KibanaObjectResponse,
   ModuleJob,
-} from '../../../../../common/types/modules';
+} from '@kbn/ml-common-types/modules';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useDataSource } from '../../../contexts/ml';
+import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjectList } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
 import type { JobSettingsFormValues } from './components/job_settings_form';
 import { JobSettingsForm } from './components/job_settings_form';
 import type { TimeRange } from '../common/components';
-import type { JobId } from '../../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { MlPageHeader } from '../../../components/page_header';
 import { PageTitle } from '../../../components/page_title';

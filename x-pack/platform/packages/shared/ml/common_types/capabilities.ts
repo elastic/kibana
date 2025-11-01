@@ -8,13 +8,18 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { AlertConsumers, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { PLUGIN_ID } from '../constants/app';
+
+import { ML_ALERT_TYPES } from './alerts';
+
+// cannot import because of cyclic dependency
+// import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
+const PLUGIN_ID = 'ml';
+
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_MODULE_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
 } from './saved_objects';
-import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,
@@ -103,7 +108,7 @@ export const basicLicenseMlCapabilities: MlCapabilitiesKey[] = [
   'canGetMlInfo',
 ];
 
-export function getDefaultCapabilities(): MlCapabilities {
+export function getDefaultMlCapabilities(): MlCapabilities {
   return {
     ...featureMlCapabilities,
     ...userMlCapabilities,
