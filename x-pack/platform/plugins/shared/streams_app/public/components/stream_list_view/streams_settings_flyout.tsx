@@ -145,6 +145,10 @@ export function StreamsSettingsFlyout({
       id: `${shipperButtonGroupPrefix}__fleet`,
       label: 'Fleet',
     },
+    {
+      id: `${shipperButtonGroupPrefix}__curl`,
+      label: 'curl/HTTP',
+    },
   ];
   const [selectedShipperId, setSelectedShipperId] = React.useState(
     `${shipperButtonGroupPrefix}__otel`
@@ -188,6 +192,11 @@ output.elasticsearch:
     action => "create"
   }
 }`,
+    [`${shipperButtonGroupPrefix}__curl`]: `POST /logs/_bulk
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "body": { "text": "Hello world!" }, "resource": { "attributes": { "host.name": "my-host-name" } } }
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "message": "Hello world!", "host.name": "my-host-name" }`,
   };
 
   return (
@@ -352,14 +361,39 @@ output.elasticsearch:
                 </ul>
               </EuiText>
             ) : (
-              <EuiCodeBlock
-                language="yaml"
-                isCopyable
-                paddingSize="m"
-                data-test-subj="streamsShipperConfigExample"
-              >
-                {shipperConfigExamples[selectedShipperId]}
-              </EuiCodeBlock>
+              <>
+                {selectedShipperId.endsWith('__curl') && (
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.streams.streamsListView.shipperConfigCurlDescription"
+                        defaultMessage="Send data to the {logsEndpoint} endpoint using the {bulkApiLink}. Refer to the following example for more information:"
+                        values={{
+                          logsEndpoint: <code>/logs/</code>,
+                          bulkApiLink: (
+                            <EuiLink
+                              href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              external
+                            >
+                              Bulk API
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiText>
+                )}
+                <EuiCodeBlock
+                  language={selectedShipperId.endsWith('__curl') ? 'json' : 'yaml'}
+                  isCopyable
+                  paddingSize="m"
+                  data-test-subj="streamsShipperConfigExample"
+                >
+                  {shipperConfigExamples[selectedShipperId]}
+                </EuiCodeBlock>
+              </>
             )}
           </EuiFlexGroup>
         </EuiFlyoutBody>
