@@ -11,3 +11,4 @@ export * from './fleet_server_hosts';
 export * from './outputs';
 export * from './package_policies';
 export * from './actions';
+export * from './cloud_connectors';

@@ -31,8 +31,10 @@ import {
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
   CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
   ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
-  CLOUD_CONNECTOR_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
-  CLOUD_CONNECTOR_CSPM_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_AWS_CSPM_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION,
+  CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   AWS_PROVIDER,
   AZURE_PROVIDER,
   AWS_SINGLE_ACCOUNT,
@@ -67,7 +69,7 @@ export function isAwsCredentials(
 }
 
 export const isAzureCloudConnectorVars = (
-  vars: CloudConnectorVars,
+  vars: CloudConnectorVars | PackagePolicyConfigRecord,
   provider: string
 ): vars is AzureCloudConnectorVars => {
   return (
@@ -550,15 +552,30 @@ export const updatePolicyInputs = (
 };
 
 export const isCloudConnectorReusableEnabled = (
+  provider: string,
   packageInfoVersion: string,
   templateName: string
 ) => {
-  if (templateName === 'cspm') {
-    return semver.gte(packageInfoVersion, CLOUD_CONNECTOR_CSPM_REUSABLE_MIN_VERSION);
-  }
-
-  if (templateName === 'asset_inventory') {
-    return semver.gte(packageInfoVersion, CLOUD_CONNECTOR_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
+  if (provider === AWS_PROVIDER) {
+    if (templateName === 'cspm') {
+      return semver.gte(packageInfoVersion, CLOUD_CONNECTOR_AWS_CSPM_REUSABLE_MIN_VERSION);
+    }
+    if (templateName === 'asset_inventory') {
+      return semver.gte(
+        packageInfoVersion,
+        CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION
+      );
+    }
+  } else if (provider === AZURE_PROVIDER) {
+    if (templateName === 'cspm') {
+      return semver.gte(packageInfoVersion, CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION);
+    }
+    if (templateName === 'asset_inventory') {
+      return semver.gte(
+        packageInfoVersion,
+        CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION
+      );
+    }
   }
   return false;
 };

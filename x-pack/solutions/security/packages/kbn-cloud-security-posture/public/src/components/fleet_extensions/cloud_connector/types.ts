@@ -28,8 +28,8 @@ export interface AwsCloudConnectorCredentials extends BaseCloudConnectorCredenti
 }
 
 export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCredentials {
-  tenantId?: string;
-  clientId?: string;
+  tenantId?: string | CloudConnectorSecretReference;
+  clientId?: string | CloudConnectorSecretReference;
   azure_credentials_cloud_connector_id?: string;
 }
 
@@ -72,7 +72,7 @@ export interface AzureCloudConnectorOption {
   id: string;
   tenantId?: CloudConnectorSecretVar;
   clientId?: CloudConnectorSecretVar;
-  azure_credentials_cloud_connector_id?: CloudConnectorSecretVar;
+  azure_credentials_cloud_connector_id?: CloudConnectorVar;
 }
 
 // Interface for EuiComboBox options (only standard properties)

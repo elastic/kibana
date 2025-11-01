@@ -23048,6 +23048,18 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "cloudProvider",
+            "required": false,
+            "schema": {
+              "enum": [
+                "aws",
+                "azure"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -23083,8 +23095,167 @@
                             "type": "string"
                           },
                           "vars": {
-                            "additionalProperties": {},
-                            "type": "object"
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "external_id": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "frozen": {
+                                        "type": "boolean"
+                                      },
+                                      "type": {
+                                        "enum": [
+                                          "password"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "value": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          },
+                                          "isSecretRef": {
+                                            "type": "boolean"
+                                          }
+                                        },
+                                        "required": [
+                                          "isSecretRef",
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "role_arn": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "type": {
+                                        "enum": [
+                                          "text"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "value": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  }
+                                },
+                                "required": [
+                                  "role_arn",
+                                  "external_id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "azure_credentials_cloud_connector_id": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "type": {
+                                        "enum": [
+                                          "text"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "value": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "client_id": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "frozen": {
+                                        "type": "boolean"
+                                      },
+                                      "type": {
+                                        "enum": [
+                                          "password"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "value": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          },
+                                          "isSecretRef": {
+                                            "type": "boolean"
+                                          }
+                                        },
+                                        "required": [
+                                          "isSecretRef",
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "tenant_id": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "frozen": {
+                                        "type": "boolean"
+                                      },
+                                      "type": {
+                                        "enum": [
+                                          "password"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "value": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          },
+                                          "isSecretRef": {
+                                            "type": "boolean"
+                                          }
+                                        },
+                                        "required": [
+                                          "isSecretRef",
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      }
+                                    },
+                                    "required": [
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  }
+                                },
+                                "required": [
+                                  "tenant_id",
+                                  "client_id",
+                                  "azure_credentials_cloud_connector_id"
+                                ],
+                                "type": "object"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -23183,63 +23354,186 @@
                     "type": "string"
                   },
                   "vars": {
-                    "additionalProperties": {
-                      "anyOf": [
-                        {
-                          "maxLength": 1000,
-                          "type": "string"
-                        },
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "boolean"
-                        },
-                        {
-                          "additionalProperties": false,
-                          "properties": {
-                            "frozen": {
-                              "type": "boolean"
+                    "anyOf": [
+                      {
+                        "items": {},
+                        "type": "array"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "object"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ],
+                    "nullable": true,
+                    "oneOf": [
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "azure_credentials_cloud_connector_id": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "type": {
+                                "enum": [
+                                  "text"
+                                ],
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
                             },
-                            "type": {
-                              "maxLength": 50,
-                              "type": "string"
-                            },
-                            "value": {
-                              "anyOf": [
-                                {
-                                  "maxLength": 1000,
-                                  "type": "string"
-                                },
-                                {
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "id": {
-                                      "maxLength": 255,
-                                      "type": "string"
-                                    },
-                                    "isSecretRef": {
-                                      "type": "boolean"
-                                    }
-                                  },
-                                  "required": [
-                                    "isSecretRef",
-                                    "id"
-                                  ],
-                                  "type": "object"
-                                }
-                              ]
-                            }
+                            "required": [
+                              "value"
+                            ],
+                            "type": "object"
                           },
-                          "required": [
-                            "type",
-                            "value"
-                          ],
-                          "type": "object"
-                        }
-                      ]
-                    },
-                    "type": "object"
+                          "client_id": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "frozen": {
+                                "type": "boolean"
+                              },
+                              "type": {
+                                "enum": [
+                                  "password"
+                                ],
+                                "type": "string"
+                              },
+                              "value": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "isSecretRef": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "required": [
+                                  "isSecretRef",
+                                  "id"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "value"
+                            ],
+                            "type": "object"
+                          },
+                          "tenant_id": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "frozen": {
+                                "type": "boolean"
+                              },
+                              "type": {
+                                "enum": [
+                                  "password"
+                                ],
+                                "type": "string"
+                              },
+                              "value": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "isSecretRef": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "required": [
+                                  "isSecretRef",
+                                  "id"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "value"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "tenant_id",
+                          "client_id",
+                          "azure_credentials_cloud_connector_id"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "external_id": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "frozen": {
+                                "type": "boolean"
+                              },
+                              "type": {
+                                "enum": [
+                                  "password"
+                                ],
+                                "type": "string"
+                              },
+                              "value": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "isSecretRef": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "required": [
+                                  "isSecretRef",
+                                  "id"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "value"
+                            ],
+                            "type": "object"
+                          },
+                          "role_arn": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "type": {
+                                "enum": [
+                                  "text"
+                                ],
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "value"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "role_arn",
+                          "external_id"
+                        ],
+                        "type": "object"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -23284,8 +23578,167 @@
                           "type": "string"
                         },
                         "vars": {
-                          "additionalProperties": {},
-                          "type": "object"
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "external_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "frozen": {
+                                      "type": "boolean"
+                                    },
+                                    "type": {
+                                      "enum": [
+                                        "password"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "isSecretRef": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "isSecretRef",
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                },
+                                "role_arn": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "type": {
+                                      "enum": [
+                                        "text"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "role_arn",
+                                "external_id"
+                              ],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "azure_credentials_cloud_connector_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "type": {
+                                      "enum": [
+                                        "text"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                },
+                                "client_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "frozen": {
+                                      "type": "boolean"
+                                    },
+                                    "type": {
+                                      "enum": [
+                                        "password"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "isSecretRef": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "isSecretRef",
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                },
+                                "tenant_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "frozen": {
+                                      "type": "boolean"
+                                    },
+                                    "type": {
+                                      "enum": [
+                                        "password"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "isSecretRef": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "isSecretRef",
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "tenant_id",
+                                "client_id",
+                                "azure_credentials_cloud_connector_id"
+                              ],
+                              "type": "object"
+                            }
+                          ]
                         }
                       },
                       "required": [
@@ -23483,8 +23936,167 @@
                           "type": "string"
                         },
                         "vars": {
-                          "additionalProperties": {},
-                          "type": "object"
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "external_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "frozen": {
+                                      "type": "boolean"
+                                    },
+                                    "type": {
+                                      "enum": [
+                                        "password"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "isSecretRef": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "isSecretRef",
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                },
+                                "role_arn": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "type": {
+                                      "enum": [
+                                        "text"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "role_arn",
+                                "external_id"
+                              ],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "azure_credentials_cloud_connector_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "type": {
+                                      "enum": [
+                                        "text"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                },
+                                "client_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "frozen": {
+                                      "type": "boolean"
+                                    },
+                                    "type": {
+                                      "enum": [
+                                        "password"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "isSecretRef": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "isSecretRef",
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                },
+                                "tenant_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "frozen": {
+                                      "type": "boolean"
+                                    },
+                                    "type": {
+                                      "enum": [
+                                        "password"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "isSecretRef": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "isSecretRef",
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "tenant_id",
+                                "client_id",
+                                "azure_credentials_cloud_connector_id"
+                              ],
+                              "type": "object"
+                            }
+                          ]
                         }
                       },
                       "required": [
@@ -23581,63 +24193,167 @@
                     "type": "string"
                   },
                   "vars": {
-                    "additionalProperties": {
-                      "anyOf": [
-                        {
-                          "maxLength": 1000,
-                          "type": "string"
-                        },
-                        {
-                          "type": "number"
-                        },
-                        {
-                          "type": "boolean"
-                        },
-                        {
-                          "additionalProperties": false,
-                          "properties": {
-                            "frozen": {
-                              "type": "boolean"
-                            },
-                            "type": {
-                              "maxLength": 50,
-                              "type": "string"
-                            },
-                            "value": {
-                              "anyOf": [
-                                {
-                                  "maxLength": 1000,
-                                  "type": "string"
-                                },
-                                {
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "id": {
-                                      "maxLength": 255,
-                                      "type": "string"
-                                    },
-                                    "isSecretRef": {
-                                      "type": "boolean"
-                                    }
+                    "anyOf": [
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "external_id": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "frozen": {
+                                "type": "boolean"
+                              },
+                              "type": {
+                                "enum": [
+                                  "password"
+                                ],
+                                "type": "string"
+                              },
+                              "value": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
                                   },
-                                  "required": [
-                                    "isSecretRef",
-                                    "id"
-                                  ],
-                                  "type": "object"
-                                }
-                              ]
-                            }
+                                  "isSecretRef": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "required": [
+                                  "isSecretRef",
+                                  "id"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "value"
+                            ],
+                            "type": "object"
                           },
-                          "required": [
-                            "type",
-                            "value"
-                          ],
-                          "type": "object"
-                        }
-                      ]
-                    },
-                    "type": "object"
+                          "role_arn": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "type": {
+                                "enum": [
+                                  "text"
+                                ],
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "value"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "role_arn",
+                          "external_id"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "azure_credentials_cloud_connector_id": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "type": {
+                                "enum": [
+                                  "text"
+                                ],
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "value"
+                            ],
+                            "type": "object"
+                          },
+                          "client_id": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "frozen": {
+                                "type": "boolean"
+                              },
+                              "type": {
+                                "enum": [
+                                  "password"
+                                ],
+                                "type": "string"
+                              },
+                              "value": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "isSecretRef": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "required": [
+                                  "isSecretRef",
+                                  "id"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "value"
+                            ],
+                            "type": "object"
+                          },
+                          "tenant_id": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "frozen": {
+                                "type": "boolean"
+                              },
+                              "type": {
+                                "enum": [
+                                  "password"
+                                ],
+                                "type": "string"
+                              },
+                              "value": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "isSecretRef": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "required": [
+                                  "isSecretRef",
+                                  "id"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "value"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "tenant_id",
+                          "client_id",
+                          "azure_credentials_cloud_connector_id"
+                        ],
+                        "type": "object"
+                      }
+                    ]
                   }
                 },
                 "type": "object"
@@ -23677,8 +24393,167 @@
                           "type": "string"
                         },
                         "vars": {
-                          "additionalProperties": {},
-                          "type": "object"
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "external_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "frozen": {
+                                      "type": "boolean"
+                                    },
+                                    "type": {
+                                      "enum": [
+                                        "password"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "isSecretRef": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "isSecretRef",
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                },
+                                "role_arn": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "type": {
+                                      "enum": [
+                                        "text"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "role_arn",
+                                "external_id"
+                              ],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "azure_credentials_cloud_connector_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "type": {
+                                      "enum": [
+                                        "text"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                },
+                                "client_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "frozen": {
+                                      "type": "boolean"
+                                    },
+                                    "type": {
+                                      "enum": [
+                                        "password"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "isSecretRef": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "isSecretRef",
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                },
+                                "tenant_id": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "frozen": {
+                                      "type": "boolean"
+                                    },
+                                    "type": {
+                                      "enum": [
+                                        "password"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "isSecretRef": {
+                                          "type": "boolean"
+                                        }
+                                      },
+                                      "required": [
+                                        "isSecretRef",
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "value"
+                                  ],
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "tenant_id",
+                                "client_id",
+                                "azure_credentials_cloud_connector_id"
+                              ],
+                              "type": "object"
+                            }
+                          ]
                         }
                       },
                       "required": [

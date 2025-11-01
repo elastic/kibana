@@ -22,6 +22,8 @@ import {
   UpdateCloudConnectorResponseSchema,
   DeleteCloudConnectorRequestSchema,
   DeleteCloudConnectorResponseSchema,
+  CreateAgentPolicyWithCloudConnectorRequestSchema,
+  CreateAgentPolicyWithCloudConnectorResponseSchema,
 } from '../../types/rest_spec/cloud_connector';
 
 import {
@@ -30,6 +32,7 @@ import {
   getCloudConnectorHandler,
   updateCloudConnectorHandler,
   deleteCloudConnectorHandler,
+  createCloudConnectorWithPackagePolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -65,12 +68,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: CreateCloudConnectorRequestSchema,
           response: {
             200: {
-              body: () => CreateCloudConnectorResponseSchema,
               description: 'OK: A successful request.',
+              body: () => CreateCloudConnectorResponseSchema,
             },
             400: {
-              body: genericErrorResponse,
               description: 'A bad request.',
+              body: genericErrorResponse,
             },
           },
         },
@@ -110,12 +113,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetCloudConnectorsRequestSchema,
           response: {
             200: {
-              body: () => GetCloudConnectorsResponseSchema,
               description: 'OK: A successful request.',
+              body: () => GetCloudConnectorsResponseSchema,
             },
             400: {
-              body: genericErrorResponse,
               description: 'A bad request.',
+              body: genericErrorResponse,
             },
           },
         },
@@ -155,12 +158,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetCloudConnectorRequestSchema,
           response: {
             200: {
-              body: () => GetCloudConnectorResponseSchema,
               description: 'OK: A successful request.',
+              body: () => GetCloudConnectorResponseSchema,
             },
             400: {
-              body: genericErrorResponse,
               description: 'A bad request.',
+              body: genericErrorResponse,
             },
           },
         },
@@ -200,12 +203,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: UpdateCloudConnectorRequestSchema,
           response: {
             200: {
-              body: () => UpdateCloudConnectorResponseSchema,
               description: 'OK: A successful request.',
+              body: () => UpdateCloudConnectorResponseSchema,
             },
             400: {
-              body: genericErrorResponse,
               description: 'A bad request.',
+              body: genericErrorResponse,
             },
           },
         },
@@ -245,16 +248,48 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: DeleteCloudConnectorRequestSchema,
           response: {
             200: {
-              body: () => DeleteCloudConnectorResponseSchema,
               description: 'OK: A successful request.',
+              body: () => DeleteCloudConnectorResponseSchema,
             },
             400: {
-              body: genericErrorResponse,
               description: 'A bad request.',
+              body: genericErrorResponse,
             },
           },
         },
       },
       deleteCloudConnectorHandler
+    );
+
+  // POST /internal/fleet/cloud_connector_with_package_policy
+  // Internal API: Create cloud connector with agent policy and package policy
+  router.versioned
+    .post({
+      path: CLOUD_CONNECTOR_API_ROUTES.CREATE_WITH_PACKAGE_POLICY,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: CreateAgentPolicyWithCloudConnectorRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => CreateAgentPolicyWithCloudConnectorResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      createCloudConnectorWithPackagePolicyHandler
     );
 };

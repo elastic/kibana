@@ -67,4 +67,10 @@ export { checkAllowedPackages } from './check_allowed_packages';
 export { cloudConnectorService } from './cloud_connector';
 export type { CloudConnectorServiceInterface } from './cloud_connector';
 
+export { createAgentPolicyWithCloudConnector } from './agent_policy_with_cloud_connector';
+export type {
+  CreateAgentPolicyWithCloudConnectorParams,
+  CreateAgentPolicyWithCloudConnectorResult,
+} from './agent_policy_with_cloud_connector';
+
 export type { MessageSigningServiceInterface } from './security';

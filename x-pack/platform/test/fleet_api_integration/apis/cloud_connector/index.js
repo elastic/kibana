@@ -8,6 +8,7 @@
 export default function loadTests({ loadTestFile }) {
   describe('Cloud Connectors', () => {
     loadTestFile(require.resolve('./cloud_connector'));
+    loadTestFile(require.resolve('./create_with_package_policy'));
     loadTestFile(require.resolve('./privileges'));
   });
 }
