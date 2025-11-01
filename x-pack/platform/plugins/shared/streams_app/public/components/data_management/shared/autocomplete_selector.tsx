@@ -10,12 +10,12 @@ import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
-export interface FieldSuggestion {
+export interface Suggestion {
   name: string;
   type?: string;
 }
 
-export interface FieldSelectorProps {
+export interface AutocompleteSelectorProps {
   value?: string;
   onChange?: (value: string) => void;
   label?: string;
@@ -27,14 +27,15 @@ export interface FieldSelectorProps {
   dataTestSubj?: string;
   isInvalid?: boolean;
   error?: string;
-  suggestions?: FieldSuggestion[];
+  suggestions?: Suggestion[];
   autoFocus?: boolean;
+  hideSuggestions?: boolean;
 }
 
 /**
  * Generalized field selector component with autocomplete suggestions
  */
-export const FieldSelector = ({
+export const AutocompleteSelector = ({
   value,
   onChange,
   label,
@@ -43,18 +44,19 @@ export const FieldSelector = ({
   disabled = false,
   compressed = false,
   fullWidth = false,
-  dataTestSubj = 'streamsAppFieldSelector',
+  dataTestSubj = 'streamsAppAutocompleteSelector',
   isInvalid,
   error,
   suggestions = [],
   autoFocus,
-}: FieldSelectorProps) => {
+  hideSuggestions = false,
+}: AutocompleteSelectorProps) => {
   const comboBoxOptions = useMemo(
     () =>
       suggestions.map((suggestion) => ({
         label: suggestion.name,
         value: suggestion.name,
-        'data-test-subj': `field-suggestion-${suggestion.name}`,
+        'data-test-subj': `autocomplete-suggestion-${suggestion.name}`,
       })),
     [suggestions]
   );
@@ -85,9 +87,12 @@ export const FieldSelector = ({
     [handleSelectionChange]
   );
 
-  const defaultPlaceholder = i18n.translate('xpack.streams.fieldSelector.defaultPlaceholder', {
-    defaultMessage: 'Select or type a field name...',
-  });
+  const defaultPlaceholder = i18n.translate(
+    'xpack.streams.autocompleteSelector.defaultPlaceholder',
+    {
+      defaultMessage: 'Select or type...',
+    }
+  );
 
   return (
     <>
@@ -116,6 +121,7 @@ export const FieldSelector = ({
             values: { searchValue: '{searchValue}' },
           })}
           autoFocus={autoFocus}
+          noSuggestions={hideSuggestions}
         />
       </EuiFormRow>
     </>

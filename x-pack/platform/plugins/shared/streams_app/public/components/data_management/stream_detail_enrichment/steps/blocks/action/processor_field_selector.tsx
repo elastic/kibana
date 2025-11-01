@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import { useController } from 'react-hook-form';
-import { FieldSelector } from '../../../../shared/field_selector';
 import { useEnrichmentFieldSuggestions } from '../../../../../../hooks/use_field_suggestions';
+import { AutocompleteSelector } from '../../../../shared/autocomplete_selector';
 
 export interface ProcessorFieldSelectorProps {
   fieldKey?: string;
@@ -62,7 +62,7 @@ export const ProcessorFieldSelector = ({
   );
 
   return (
-    <FieldSelector
+    <AutocompleteSelector
       value={field.value}
       onChange={handleChange}
       label={label ?? defaultLabel}

@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ProcessorFieldSelector } from './processor_field_selector';
-import { FieldSelector } from '../../../../shared/field_selector';
+import { AutocompleteSelector } from '../../../../shared/autocomplete_selector';
 
 // Mock the field suggestions hook
 jest.mock('../../../../../../hooks/use_field_suggestions', () => ({
@@ -22,9 +22,9 @@ jest.mock('../../../../../../hooks/use_field_suggestions', () => ({
   ]),
 }));
 
-// Mock the FieldSelector component to focus on ProcessorFieldSelector-specific logic
-jest.mock('../../../../shared/field_selector', () => ({
-  FieldSelector: jest.fn(
+// Mock the AutocompleteSelector component to focus on ProcessorFieldSelector-specific logic
+jest.mock('../../../../shared/autocomplete_selector', () => ({
+  AutocompleteSelector: jest.fn(
     ({
       value,
       onChange,
@@ -155,7 +155,7 @@ describe('ProcessorFieldSelector', () => {
         placeholder: 'Custom placeholder',
       });
 
-      expect(FieldSelector).toHaveBeenCalledWith(
+      expect(AutocompleteSelector).toHaveBeenCalledWith(
         expect.objectContaining({
           placeholder: 'Custom placeholder',
           fullWidth: true,

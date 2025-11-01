@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+import { getFilterConditionField } from '../../../util/condition';
 import { useEnrichmentFieldSuggestions } from '../../../hooks/use_field_suggestions';
+import { useEnrichmentValueSuggestions } from '../../../hooks/use_value_suggestions';
 import type { ConditionEditorProps } from '../shared/condition_editor';
 import { ConditionEditor } from '../shared/condition_editor';
 
@@ -17,5 +19,14 @@ export type ProcessorConditionEditorProps = Omit<
 
 export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorProps) {
   const fieldSuggestions = useEnrichmentFieldSuggestions();
-  return <ConditionEditor status="enabled" {...props} fieldSuggestions={fieldSuggestions} />;
+  const valueSuggestions = useEnrichmentValueSuggestions(getFilterConditionField(props.condition));
+
+  return (
+    <ConditionEditor
+      status="enabled"
+      {...props}
+      fieldSuggestions={fieldSuggestions}
+      valueSuggestions={valueSuggestions}
+    />
+  );
 }
