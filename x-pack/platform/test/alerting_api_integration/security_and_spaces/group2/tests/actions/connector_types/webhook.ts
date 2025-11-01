@@ -104,7 +104,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     afterEach(() => objectRemover.removeAll());
 
-    it('should return 200 when creating a webhook connector successfully', async () => {
+    it('should return 200 when creating a webhook connector successfully with default method', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'test')
@@ -157,6 +157,51 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         is_connector_type_deprecated: false,
       });
     });
+
+    for (const method of ['post', 'put', 'patch', 'get', 'delete']) {
+      it(`should return 200 when creating a webhook connector successfully with ${method} method`, async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'test')
+          .send({
+            name: 'A generic Webhook action',
+            connector_type_id: '.webhook',
+            secrets: {
+              user: 'username',
+              password: 'mypassphrase',
+            },
+            config: {
+              url: webhookSimulatorURL,
+              method,
+            },
+          })
+          .expect(200);
+
+        const expectedResult = {
+          id: createdAction.id,
+          is_preconfigured: false,
+          is_system_action: false,
+          is_deprecated: false,
+          name: 'A generic Webhook action',
+          connector_type_id: '.webhook',
+          is_missing_secrets: false,
+          config: {
+            ...defaultValues,
+            url: webhookSimulatorURL,
+            method,
+          },
+          is_connector_type_deprecated: false,
+        };
+
+        expect(createdAction).to.eql(expectedResult);
+
+        const { body: fetchedAction } = await supertest
+          .get(`/api/actions/connector/${createdAction.id}`)
+          .expect(200);
+
+        expect(fetchedAction).to.eql(expectedResult);
+      });
+    }
 
     it('should remove headers when a webhook is updated', async () => {
       const { body: createdAction } = await supertest

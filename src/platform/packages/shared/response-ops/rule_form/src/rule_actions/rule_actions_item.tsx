@@ -193,7 +193,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     async (params: RuleActionParam) => {
       const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
         .get(action.actionTypeId)
-        ?.validateParams(params);
+        ?.validateParams(params, connector && 'config' in connector ? connector.config : undefined);
 
       dispatch({
         type: 'setActionParamsError',
@@ -203,7 +203,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         },
       });
     },
-    [actionTypeRegistry, action, dispatch]
+    [actionTypeRegistry, action, dispatch, connector]
   );
 
   const onStoredActionParamsChange = useCallback(

@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
+import { useLoadConnectors } from '@kbn/response-ops-rule-form/src/common/hooks';
 import { useFormWithWarnings } from '../../../common/hooks/use_form_with_warnings';
 import type {
   AboutStepRule,
@@ -40,7 +41,11 @@ export const useRuleForms = ({
 }: UseRuleFormsProps) => {
   const {
     triggersActionsUi: { actionTypeRegistry },
+    http,
   } = useKibana().services;
+
+  const { data: connectors } = useLoadConnectors({ http });
+
   // DEFINE STEP FORM
   const { form: defineStepForm } = useFormWithWarnings<DefineStepRule>({
     defaultValue: defineStepDefault,
@@ -81,7 +86,10 @@ export const useRuleForms = ({
     'interval' in scheduleStepFormData ? scheduleStepFormData : scheduleStepDefault;
 
   // ACTIONS STEP FORM
-  const schema = useMemo(() => getActionsRuleSchema({ actionTypeRegistry }), [actionTypeRegistry]);
+  const schema = useMemo(
+    () => getActionsRuleSchema({ actionTypeRegistry, connectors }),
+    [actionTypeRegistry, connectors]
+  );
   const { form: actionsStepForm } = useFormWithWarnings<ActionsStepRule>({
     defaultValue: actionsStepDefault,
     options: { stripEmptyFields: false, warningValidationCodes: VALIDATION_WARNING_CODES },
