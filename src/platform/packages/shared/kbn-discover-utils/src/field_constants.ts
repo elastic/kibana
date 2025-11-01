@@ -11,7 +11,9 @@
 export const TIMESTAMP_FIELD = '@timestamp';
 export const HOST_NAME_FIELD = 'host.name';
 export const LOG_LEVEL_FIELD = 'log.level';
+export const ERROR_LOG_LEVEL_FIELD = 'error.log.level';
 export const MESSAGE_FIELD = 'message';
+export const EXCEPTION_MESSAGE_FIELD = 'exception.message';
 export const ERROR_MESSAGE_FIELD = 'error.message';
 export const EVENT_ORIGINAL_FIELD = 'event.original';
 export const EVENT_OUTCOME_FIELD = 'event.outcome';
@@ -33,11 +35,15 @@ export const SPAN_TYPE_FIELD = 'span.type';
 export const SPAN_SUBTYPE_FIELD = 'span.subtype';
 export const SPAN_DESTINATION_SERVICE_RESOURCE_FIELD = 'span.destination.service.resource';
 export const PROCESSOR_EVENT_FIELD = 'processor.event';
+
 export const OTEL_SPAN_KIND = 'kind';
 export const OTEL_DURATION = 'duration';
 export const OTEL_STATUS_CODE = 'status.code';
 export const OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE =
   'resource.attributes.telemetry.sdk.language';
+export const OTEL_ATTRIBUTES_EXCEPTION_MESSAGE = 'attributes.exception.message';
+export const OTEL_ATTRIBUTES_EXCEPTION_STACKTRACE = 'attributes.exception.stacktrace';
+export const OTEL_EVENT_NAME_FIELD = 'event_name';
 
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';
@@ -76,5 +82,6 @@ export const DEGRADED_DOCS_FIELDS = [IGNORED_FIELD, IGNORED_FIELD_VALUES_FIELD] 
 
 // Error Stacktrace
 export const ERROR_STACK_TRACE = 'error.stack_trace';
+export const ERROR_EXCEPTION_MESSAGE = 'error.exception.message';
 export const ERROR_EXCEPTION_STACKTRACE_ABS_PATH = 'error.exception.stacktrace.abs_path';
 export const ERROR_LOG_STACKTRACE_ABS_PATH = 'error.log.stacktrace.abs_path';

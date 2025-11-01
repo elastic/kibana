@@ -19,6 +19,9 @@ export const getMessageFieldWithFallbacks = (
     fieldConstants.MESSAGE_FIELD,
     fieldConstants.ERROR_MESSAGE_FIELD,
     fieldConstants.EVENT_ORIGINAL_FIELD,
+    fieldConstants.EXCEPTION_MESSAGE_FIELD,
+    fieldConstants.ERROR_EXCEPTION_MESSAGE,
+    fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE,
   ] as const;
 
   for (const rank of rankingOrder) {
