@@ -126,19 +126,10 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
     if (!savedObjectsTaggingApi) return;
 
     return (
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="dashboard.embeddableApi.showSettings.flyout.form.tagsFormRowLabel"
-            defaultMessage="Tags"
-          />
-        }
-      >
-        <savedObjectsTaggingApi.ui.components.TagSelector
-          selected={localSettings.tags ?? []}
-          onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
-        />
-      </EuiFormRow>
+      <savedObjectsTaggingApi.ui.components.SavedObjectSaveModalTagSelector
+        initialSelection={localSettings.tags ?? []}
+        onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
+      />
     );
   };
 
