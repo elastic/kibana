@@ -865,6 +865,7 @@ paths:
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
       responses:
@@ -942,6 +943,7 @@ paths:
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
         - description: >-
