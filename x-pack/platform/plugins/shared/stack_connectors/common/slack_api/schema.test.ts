@@ -6,7 +6,7 @@
  */
 
 import type { z } from '@kbn/zod';
-import { validateBlockkit, validateChannelName } from './schema';
+import { validateBlockkit, validateChannelName, PostMessageSubActionParamsSchema } from './schema';
 
 const ctx = {
   addIssue: jest.fn(),
@@ -66,6 +66,7 @@ describe('Slack Api Schema validation', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
+
     test('should add error if the channel name does not start with #', () => {
       validateChannelName('general', ctx);
       expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
@@ -87,6 +88,7 @@ describe('Slack Api Schema validation', () => {
 
       expect(ctx.addIssue).not.toHaveBeenCalled();
     });
+
     test('should add error for empty strings', () => {
       validateChannelName('', ctx);
       expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
@@ -94,12 +96,35 @@ describe('Slack Api Schema validation', () => {
         message: 'Channel name cannot be empty',
       });
     });
+
     test('should add error for undefined values', () => {
       validateChannelName(undefined, ctx);
       expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
         code: 'custom',
         message: 'Channel name cannot be empty',
       });
+    });
+  });
+
+  describe('PostMessageSubActionParamsSchema', () => {
+    test('should throw if text is missing', () => {
+      expect(() => PostMessageSubActionParamsSchema.parse({})).toThrow();
+    });
+
+    test('should not throw if text is not missing', () => {
+      expect(() => PostMessageSubActionParamsSchema.parse({ text: 'hello' })).not.toThrow();
+    });
+
+    test('should throw if channelNames is too long', () => {
+      expect(() =>
+        PostMessageSubActionParamsSchema.parse({ text: 'hello', channelNames: ['#'.repeat(201)] })
+      ).toThrow();
+    });
+
+    test('should throw if channelNames does not start with #', () => {
+      expect(() =>
+        PostMessageSubActionParamsSchema.parse({ text: 'hello', channelNames: ['general'] })
+      ).toThrow();
     });
   });
 });

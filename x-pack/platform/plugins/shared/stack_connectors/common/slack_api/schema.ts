@@ -50,7 +50,7 @@ export const PostMessageSubActionParamsSchema = z
      */
     channels: z.array(z.string()).max(1).optional(),
     channelIds: z.array(z.string()).max(1).optional(),
-    channelNames: z.array(z.string().superRefine(validateChannelName)).max(1).optional(),
+    channelNames: z.array(z.string().max(200).superRefine(validateChannelName)).max(1).optional(),
     text: z.string().min(1),
   })
   .strict();
