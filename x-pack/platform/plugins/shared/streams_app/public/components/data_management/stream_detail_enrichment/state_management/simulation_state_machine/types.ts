@@ -73,6 +73,7 @@ export interface SimulationContext {
   };
   steps: StreamlangStepWithUIAttributes[];
   samples: SampleDocumentWithUIAttributes[];
+  hasReceivedSamples: boolean;
   simulation?: Simulation;
   streamName: string;
   streamType: 'wired' | 'classic' | 'unknown';

@@ -24,5 +24,8 @@ export function useDataSourceSelectorById<T>(
     snapshot.context.dataSourcesRefs.find((r) => r.id === dataSourceId)
   );
 
+  if (!childActorRef) {
+    return selector(undefined);
+  }
   return useSelector(childActorRef, selector);
 }

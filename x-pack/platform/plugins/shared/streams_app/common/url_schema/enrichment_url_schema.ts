@@ -9,6 +9,13 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import type { SampleDocument } from '@kbn/streams-schema/src/shared/record_types';
 import { sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
 import { z } from '@kbn/zod';
+import type { StreamlangProcessorDefinition, StreamlangStep } from '@kbn/streamlang';
+import { streamlangProcessorSchema, streamlangDSLSchema } from '@kbn/streamlang';
+
+const streamlangStepsSchema: z.ZodType<StreamlangStep[]> = z.custom<StreamlangStep[]>((val) => {
+  if (!Array.isArray(val)) return false;
+  return streamlangDSLSchema.safeParse({ steps: val }).success;
+}, { message: 'Invalid Streamlang steps' });
 
 /**
  * Base interface for all data source types with common properties
@@ -100,15 +107,49 @@ const enrichmentDataSourceSchema = z.union([
 /**
  * URL state for enrichment configuration
  */
-export interface EnrichmentUrlState {
+export interface EnrichmentUrlStateV1 {
   v: 1;
   dataSources: EnrichmentDataSource[];
 }
 
+export interface EnrichmentUrlStateV2 {
+  v: 2;
+  dataSources: EnrichmentDataSource[];
+  processorsToAppend?: StreamlangProcessorDefinition[];
+}
+
+export interface EnrichmentUrlStateV3 {
+  v: 3;
+  dataSources: EnrichmentDataSource[];
+  stepsToAppend?: StreamlangStep[];
+  processorsToAppend?: StreamlangProcessorDefinition[];
+}
+
+export type EnrichmentUrlState = EnrichmentUrlStateV1 | EnrichmentUrlStateV2 | EnrichmentUrlStateV3;
+
 /**
  * Schema for validating enrichment URL state
  */
-export const enrichmentUrlSchema = z.object({
+const enrichmentUrlSchemaV1 = z.object({
   v: z.literal(1),
   dataSources: z.array(enrichmentDataSourceSchema),
-}) satisfies z.Schema<EnrichmentUrlState>;
+}) satisfies z.Schema<EnrichmentUrlStateV1>;
+
+const enrichmentUrlSchemaV2 = z.object({
+  v: z.literal(2),
+  dataSources: z.array(enrichmentDataSourceSchema),
+  processorsToAppend: z.array(streamlangProcessorSchema).optional(),
+}) satisfies z.Schema<EnrichmentUrlStateV2>;
+
+const enrichmentUrlSchemaV3 = z.object({
+  v: z.literal(3),
+  dataSources: z.array(enrichmentDataSourceSchema),
+  stepsToAppend: streamlangStepsSchema.optional(),
+  processorsToAppend: z.array(streamlangProcessorSchema).optional(),
+}) satisfies z.Schema<EnrichmentUrlStateV3>;
+
+export const enrichmentUrlSchema = z.union([
+  enrichmentUrlSchemaV1,
+  enrichmentUrlSchemaV2,
+  enrichmentUrlSchemaV3,
+]);

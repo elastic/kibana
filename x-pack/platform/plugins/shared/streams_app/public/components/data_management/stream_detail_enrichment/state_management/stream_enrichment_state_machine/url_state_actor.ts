@@ -7,7 +7,7 @@
 
 import { fromCallback } from 'xstate5';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
+import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { ENRICHMENT_URL_STATE_KEY, enrichmentUrlSchema } from '../../../../../../common/url_schema';
 import type { StreamEnrichmentContextType, StreamEnrichmentServiceDependencies } from './types';
 import { defaultEnrichmentUrlState, defaultRandomSamplesDataSource } from './utils';
@@ -27,17 +27,20 @@ export function createUrlInitializerActor({
       });
     }
 
-    const urlState = enrichmentUrlSchema.safeParse(urlStateValues);
+    const parsed = enrichmentUrlSchema.safeParse(urlStateValues);
 
-    if (urlState.success) {
+    if (parsed.success) {
+      // Normalize to v3 shape internally, preserving any append fields
+      const normalized = normalizeUrlState(parsed.data);
+
       // Always add default random samples data source
-      if (!hasDefaultRandomSamplesDataSource(urlState.data.dataSources)) {
-        urlState.data.dataSources.push(defaultRandomSamplesDataSource);
+      if (!hasDefaultRandomSamplesDataSource(normalized.dataSources)) {
+        normalized.dataSources.push(defaultRandomSamplesDataSource);
       }
 
       sendBack({
         type: 'url.initialized',
-        urlState: urlState.data,
+        urlState: normalized,
       });
     } else {
       withNotifyOnErrors(core.notifications.toasts).onGetError(
@@ -49,6 +52,24 @@ export function createUrlInitializerActor({
       });
     }
   });
+}
+
+function normalizeUrlState(state: EnrichmentUrlState): EnrichmentUrlState {
+  if (state.v === 3) {
+    return state;
+  }
+  if (state.v === 2) {
+    return {
+      v: 3,
+      dataSources: state.dataSources,
+      processorsToAppend: state.processorsToAppend,
+    };
+  }
+  // v1
+  return {
+    v: 3,
+    dataSources: state.dataSources,
+  };
 }
 
 const hasDefaultRandomSamplesDataSource = (dataSources: EnrichmentDataSource[]) => {

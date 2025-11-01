@@ -12,6 +12,7 @@ import { streamlangDSLSchema } from '../../../types/streamlang';
 import { flattenSteps } from '../shared/flatten_steps';
 import { convertConditionToESQL, convertStreamlangDSLToESQLCommands } from './conversions';
 import type { Condition } from '../../../types/conditions';
+export * from './reverse';
 
 const DEFAULT_PIPE_TAB = '  ';
 
