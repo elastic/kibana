@@ -27,7 +27,7 @@ export const useBulkUntrackAlertsByQuery = ({
   return useMutation<
     string,
     string,
-    { query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>; ruleTypeIds: string[] }
+    { query: Pick<estypes.QueryDslQueryContainer, 'bool' | 'ids'>; ruleTypeIds: string[] }
   >(
     mutationKeys.bulkUntrackAlertsByQuery(),
     ({ query, ruleTypeIds }) => {
