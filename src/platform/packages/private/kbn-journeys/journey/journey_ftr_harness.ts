@@ -8,7 +8,7 @@
  */
 
 import Url from 'url';
-import { inspect, format } from 'util';
+import { inspect } from 'util';
 import { setTimeout as setTimer } from 'timers/promises';
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
@@ -118,35 +118,7 @@ export class JourneyFtrHarness {
     // Update labels before start for consistency b/w APM services
     await this.updateTelemetryAndAPMLabels(journeyLabels);
 
-    this.apm = apmNode.start({
-      serviceName: 'functional test runner',
-      environment: process.env.CI ? 'ci' : 'development',
-      active: kbnTestServerEnv.ELASTIC_APM_ACTIVE !== 'false',
-      serverUrl: kbnTestServerEnv.ELASTIC_APM_SERVER_URL,
-      secretToken: kbnTestServerEnv.ELASTIC_APM_SECRET_TOKEN,
-      globalLabels: kbnTestServerEnv.ELASTIC_APM_GLOBAL_LABELS,
-      transactionSampleRate: kbnTestServerEnv.ELASTIC_APM_TRANSACTION_SAMPLE_RATE,
-      logger: {
-        warn: (...args: any[]) => {
-          this.log.warning('APM WARN', ...args);
-        },
-        info: (...args: any[]) => {
-          this.log.info('APM INFO', ...args);
-        },
-        fatal: (...args: any[]) => {
-          this.log.error(format('APM FATAL', ...args));
-        },
-        error: (...args: any[]) => {
-          this.log.error(format('APM ERROR', ...args));
-        },
-        debug: (...args: any[]) => {
-          this.log.debug('APM DEBUG', ...args);
-        },
-        trace: (...args: any[]) => {
-          this.log.verbose('APM TRACE', ...args);
-        },
-      },
-    });
+    this.apm = apmNode;
 
     if (this.currentTransaction) {
       throw new Error(`Transaction exist, end prev transaction ${this.currentTransaction?.name}`);
