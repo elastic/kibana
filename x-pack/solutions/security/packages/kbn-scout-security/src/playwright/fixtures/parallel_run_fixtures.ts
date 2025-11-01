@@ -12,7 +12,12 @@ import type {
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures,
 } from './types';
-import { getDetectionRuleApiService } from './worker';
+import {
+  getDetectionRuleApiService,
+  getAssistantCleanupService,
+  getBrowserScopedAssistantService,
+  getConnectorsApiService,
+} from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
 const securityParallelFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
@@ -44,16 +49,28 @@ export const spaceTest = securityParallelFixtures.extend<
         kbnClient,
         log,
         scoutSpace,
+        esClient,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityParallelWorkerFixtures['kbnClient'];
         log: SecurityParallelWorkerFixtures['log'];
         scoutSpace: SecurityParallelWorkerFixtures['scoutSpace'];
+        esClient: SecurityParallelWorkerFixtures['esClient'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as SecurityApiServicesFixture;
       extendedApiServices.detectionRule = getDetectionRuleApiService({
+        kbnClient,
+        log,
+        scoutSpace,
+        esClient,
+      });
+      extendedApiServices.assistant = getAssistantCleanupService({
+        esClient,
+        scoutSpace,
+      });
+      extendedApiServices.connectors = getConnectorsApiService({
         kbnClient,
         log,
         scoutSpace,
@@ -63,4 +80,24 @@ export const spaceTest = securityParallelFixtures.extend<
     },
     { scope: 'worker' },
   ],
+  browserScopedApis: async (
+    {
+      page,
+      scoutSpace,
+      config,
+    }: {
+      page: SecurityParallelTestFixtures['page'];
+      scoutSpace: SecurityParallelWorkerFixtures['scoutSpace'];
+      config: SecurityParallelWorkerFixtures['config'];
+    },
+    use
+  ) => {
+    await use({
+      assistant: getBrowserScopedAssistantService({
+        page,
+        kbnUrl: config.hosts.kibana,
+        scoutSpace,
+      }),
+    });
+  },
 });
