@@ -11,14 +11,11 @@ import { renderHook } from '@testing-library/react';
 import type { UseQueryResult } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import {
-  PollingIntervalMs,
-  useWorkflowExecution,
-  useWorkflowExecutionPolling,
-} from '@kbn/workflows-ui';
+import { useWorkflowExecutionPolling, PollingIntervalMs } from './use_workflow_execution_polling';
+import { useWorkflowExecution } from './use_workflow_execution';
 
 // Mock the useWorkflowExecution hook
-jest.mock('@kbn/workflows-ui');
+jest.mock('./use_workflow_execution');
 const mockUseWorkflowExecution = useWorkflowExecution as jest.MockedFunction<
   typeof useWorkflowExecution
 >;
@@ -363,3 +360,4 @@ describe('useWorkflowExecutionPolling', () => {
     expect(mockRefetch).not.toHaveBeenCalled();
   });
 });
+

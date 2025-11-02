@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-workflows-ui'],
-  setupFilesAfterEnv: ['<rootDir>/src/platform/packages/shared/kbn-workflows-ui/setup_tests.ts'],
+import type { QueryClientConfig } from '@kbn/react-query';
+
+export const testQueryClientConfig: QueryClientConfig = {
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
 };

@@ -30,7 +30,7 @@ export interface WorkflowOption {
   data?: {
     secondaryContent?: string;
   };
-  [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  [key: string]: any; // Allow additional properties for EuiSelectable
 }
 
 export interface WorkflowSelectorConfig {
