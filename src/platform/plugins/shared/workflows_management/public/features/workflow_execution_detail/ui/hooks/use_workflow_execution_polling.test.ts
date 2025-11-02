@@ -15,10 +15,10 @@ import {
   PollingIntervalMs,
   useWorkflowExecution,
   useWorkflowExecutionPolling,
-} from '@kbn/workflows-ui-components';
+} from '@kbn/workflows-ui';
 
 // Mock the useWorkflowExecution hook
-jest.mock('@kbn/workflows-ui-components');
+jest.mock('@kbn/workflows-ui');
 const mockUseWorkflowExecution = useWorkflowExecution as jest.MockedFunction<
   typeof useWorkflowExecution
 >;

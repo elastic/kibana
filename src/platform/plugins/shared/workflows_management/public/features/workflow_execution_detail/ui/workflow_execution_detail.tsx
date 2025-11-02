@@ -16,7 +16,7 @@ import {
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
-import { useWorkflowExecutionPolling } from '@kbn/workflows-ui-components';
+import { useWorkflowExecutionPolling } from '@kbn/workflows-ui';
 import { WorkflowStepExecutionList } from './workflow_execution_list';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';

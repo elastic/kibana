@@ -11,7 +11,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { useWorkflowExecution } from '@kbn/workflows-ui-components';
+import { useWorkflowExecution } from '@kbn/workflows-ui';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import {

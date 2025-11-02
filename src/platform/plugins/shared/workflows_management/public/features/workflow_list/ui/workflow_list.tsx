@@ -26,7 +26,7 @@ import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
-import { useWorkflows } from '@kbn/workflows-ui-components';
+import { useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';

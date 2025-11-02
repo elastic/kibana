@@ -41,4 +41,3 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string) => {
 
   return { workflowExecution, isLoading, error };
 };
-

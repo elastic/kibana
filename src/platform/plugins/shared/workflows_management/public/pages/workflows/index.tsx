@@ -21,7 +21,7 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
-import { useWorkflows } from '@kbn/workflows-ui-components';
+import { useWorkflows } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
