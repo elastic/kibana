@@ -230,3 +230,39 @@ test('can visit COMPLETION command', () => {
 
   expect(list).toEqual(['COMPLETION']);
 });
+
+test('can visit FROM command with complex subqueries', () => {
+  const { ast } = EsqlQuery.fromSrc(`
+    FROM index1,
+         (FROM index2
+          | WHERE a > 10
+          | EVAL b = a * 2
+          | STATS cnt = COUNT(*) BY c
+          | SORT cnt desc
+          | LIMIT 10),
+         index3,
+         (FROM index4 | STATS count(*))
+    | WHERE d > 10
+    | STATS max = max(*) BY e
+    | SORT max desc
+  `);
+  const visitor = new Visitor()
+    .on('visitParensExpression', () => {
+      return 'SUBQUERY';
+    })
+    .on('visitExpression', () => {
+      return null;
+    })
+    .on('visitFromCommand', (ctx) => {
+      return [...ctx.visitArguments()];
+    })
+    .on('visitCommand', (ctx) => {
+      return null;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].flat();
+    });
+  const list = visitor.visitQuery(ast).flat().filter(Boolean);
+
+  expect(list).toEqual(['SUBQUERY', 'SUBQUERY']);
+});

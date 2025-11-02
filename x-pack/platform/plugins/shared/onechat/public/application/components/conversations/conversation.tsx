@@ -18,6 +18,7 @@ import { useSendMessage } from '../../context/send_message/send_message_context'
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { ConversationContent } from './conversation_grid';
+import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -34,6 +35,8 @@ export const Conversation: React.FC<{}> = () => {
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
   const shouldStickToBottom = useShouldStickToBottom();
+
+  useSendPredefinedInitialMessage();
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {
