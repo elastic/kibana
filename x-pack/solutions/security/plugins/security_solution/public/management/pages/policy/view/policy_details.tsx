@@ -75,7 +75,7 @@ export const PolicyDetails = React.memo(() => {
     if (policyApiError) {
       return (
         <EuiPageTemplate.Section grow={false} alignment="center">
-          <EuiCallOut color="danger" title={policyApiError?.error}>
+          <EuiCallOut announceOnMount={false} color="danger" title={policyApiError?.error}>
             <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
           </EuiCallOut>
         </EuiPageTemplate.Section>

@@ -158,6 +158,7 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
       {!isLoading && hasSelectedMultipleIndices && matchFieldOptions.length === 0 && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.noCommonFieldsFoundError', {
               defaultMessage: 'No common fields',
             })}

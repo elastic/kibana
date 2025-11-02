@@ -646,6 +646,7 @@ const staticConnectors: ConnectorContractUnion[] = [
       path: z.string(),
       body: z.any().optional(),
       params: z.any().optional(),
+      headers: z.any().optional(),
     }),
     outputSchema: z.any(),
     description: i18n.translate('workflows.connectors.elasticsearch.request.description', {

@@ -41,6 +41,7 @@ export function BlocklistForm({
         </EuiText>
       ) : (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.graph.blocklist.noEntriesDescription"

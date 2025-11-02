@@ -195,6 +195,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     if (!repositoryTypes.length) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.noRepositoryTypesErrorTitle"

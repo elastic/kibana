@@ -22,7 +22,7 @@ export const KIBANA_SEARCH_SOLUTION = 'search' as const;
 /**
  * Constant for the Kibana Workplace AI solution.
  */
-export const KIBANA_WORKPLACE_AI_SOLUTION = 'workplace_ai' as const;
+export const KIBANA_WORKPLACE_AI_SOLUTION = 'workplaceai' as const;
 
 /**
  * A list of all Kibana solutions.

@@ -13,13 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
-import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import type { SearchUsageCollector } from '../../../collectors';
 
 interface Props {
-  documentation: AsyncSearchIntroDocumentation;
   core: CoreStart;
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
@@ -30,7 +28,7 @@ interface Props {
   searchUsageCollector: SearchUsageCollector;
 }
 
-export function SearchSessionsMgmtMain({ documentation, share, ...tableProps }: Props) {
+export function SearchSessionsMgmtMain({ share, ...tableProps }: Props) {
   return (
     <>
       <EuiPageHeader

@@ -95,21 +95,21 @@ export function conditionToESQLAst(condition: Condition): ESQLSingleAstItem {
       return parts.reduce((acc, part) => Builder.expression.func.binary('and', [acc, part]));
     }
     if ('contains' in condition) {
-      return Builder.expression.func.call('LIKE', [
+      return Builder.expression.func.binary('like', [
         field,
-        Builder.expression.literal.string(`%${condition.contains}%`),
+        Builder.expression.literal.string(`*${condition.contains}*`),
       ]);
     }
     if ('startsWith' in condition) {
-      return Builder.expression.func.call('LIKE', [
+      return Builder.expression.func.binary('like', [
         field,
-        Builder.expression.literal.string(`${condition.startsWith}%`),
+        Builder.expression.literal.string(`${condition.startsWith}*`),
       ]);
     }
     if ('endsWith' in condition) {
-      return Builder.expression.func.call('LIKE', [
+      return Builder.expression.func.binary('like', [
         field,
-        Builder.expression.literal.string(`%${condition.endsWith}`),
+        Builder.expression.literal.string(`*${condition.endsWith}`),
       ]);
     }
   } else if (isAndCondition(condition)) {

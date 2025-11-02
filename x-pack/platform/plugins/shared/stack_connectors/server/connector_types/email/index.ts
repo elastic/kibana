@@ -29,6 +29,7 @@ import {
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
@@ -413,15 +414,31 @@ async function executor(
     transport.service = config.service;
   }
 
-  let actualMessage = params.message;
-  const actualHTMLMessage = params.messageHTML;
+  let actualMessage: string | null | undefined = params.message;
+  let actualHTMLMessage: string | null | undefined = params.messageHTML;
+
+  actualMessage = trimMessageIfRequired(
+    actionId,
+    logger,
+    'message',
+    actualMessage,
+    configurationUtilities
+  );
+
+  actualHTMLMessage = trimMessageIfRequired(
+    actionId,
+    logger,
+    'messageHTML',
+    actualHTMLMessage,
+    configurationUtilities
+  );
 
   if (configurationUtilities.enableFooterInEmail()) {
     const footerMessage = getFooterMessage({
       publicBaseUrl,
       kibanaFooterLink: params.kibanaFooterLink,
     });
-    actualMessage = `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
+    actualMessage = `${actualMessage}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
   }
 
   const sendEmailOptions: SendEmailOptions = {
@@ -435,7 +452,7 @@ async function executor(
     },
     content: {
       subject: params.subject,
-      message: actualMessage,
+      message: actualMessage || 'no message set',
       messageHTML: actualHTMLMessage,
     },
     hasAuth: config.hasAuth,
@@ -479,6 +496,29 @@ async function executor(
 }
 
 // utilities
+
+function trimMessageIfRequired(
+  connectorId: string,
+  logger: Logger,
+  paramName: string,
+  message: string | null | undefined,
+  configurationUtilities: ActionsConfigurationUtilities
+): string | null | undefined {
+  if (!message) return message;
+
+  const maxLength = configurationUtilities.getMaxEmailBodyLength();
+
+  if (message.length < maxLength) {
+    return message;
+  }
+
+  const logMessage = `connector "${connectorId}" email parameter ${paramName} length ${message.length} exceeds xpack.actions.email.maximum_body_length bytes (${maxLength}) and has been trimmed`;
+  logger.warn(logMessage);
+
+  const warningMessage = `Your message's length of ${message.length} exceeded the ${maxLength} bytes limit that is set for the connector "${connectorId}" and was trimmed. You can modify the limit by increasing the value specified for the xpack.actions.email.maximum_body_length setting.`;
+  const trimmedMessage = message.slice(0, maxLength);
+  return `${warningMessage}\n\n${trimmedMessage}`;
+}
 
 function getServiceNameHost(service: string): string | null {
   if (service === AdditionalEmailServices.ELASTIC_CLOUD) {

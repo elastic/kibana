@@ -9,7 +9,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiLink, EuiSpacer, EuiHighlight, useEuiTheme } from '@elastic/eui';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FavoriteButton } from '@kbn/content-management-favorites-public';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { css } from '@emotion/react';
@@ -52,17 +51,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
     references,
     attributes: { title, description },
   } = item;
-  const { navigateToUrl, currentAppId$, TagList, itemHasTags } = useServices();
-
-  const redirectAppLinksCoreStart = useMemo(
-    () => ({
-      application: {
-        navigateToUrl,
-        currentAppId$,
-      },
-    }),
-    [currentAppId$, navigateToUrl]
-  );
+  const { TagList, itemHasTags } = useServices();
 
   const onClickTitleHandler = useMemo(() => {
     const onClickTitle = getOnClickTitle?.(item);
@@ -85,7 +74,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
     }
 
     return (
-      <RedirectAppLinks coreStart={redirectAppLinksCoreStart}>
+      <>
         {/* eslint-disable-next-line  @elastic/eui/href-or-on-click */}
         <EuiLink
           href={getDetailViewLink?.(item)}
@@ -106,7 +95,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
             `}
           />
         )}
-      </RedirectAppLinks>
+      </>
     );
   }, [
     euiTheme,
@@ -115,7 +104,6 @@ export function ItemDetails<T extends UserContentCommonSchema>({
     id,
     item,
     onClickTitleHandler,
-    redirectAppLinksCoreStart,
     searchTerm,
     title,
     isFavoritesEnabled,

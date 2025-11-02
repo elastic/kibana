@@ -229,6 +229,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
               <>
                 <EuiSpacer />
                 <EuiCallOut
+                  announceOnMount
                   color="warning"
                   size="s"
                   title={i18n.translate(

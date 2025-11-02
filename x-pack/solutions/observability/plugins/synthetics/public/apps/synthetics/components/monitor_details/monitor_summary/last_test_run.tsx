@@ -91,6 +91,7 @@ export const LastTestRunComponent = ({
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
       {!(loading && !latestPing) && latestPing?.error ? (
         <EuiCallOut
+          announceOnMount
           data-test-subj="monitorTestRunErrorCallout"
           style={{
             marginTop: euiTheme.base,

@@ -103,6 +103,7 @@ export const Panel: FC<Props> = ({ selectedNode }) => {
     console.error(serializeError);
     return (
       <EuiCallOut
+        announceOnMount
         color="danger"
         iconType="cross"
         data-test-subj="sideNavPanelError"

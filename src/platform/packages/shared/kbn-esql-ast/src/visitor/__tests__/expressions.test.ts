@@ -263,3 +263,40 @@ test('"visitExpression" does visit identifier nodes', () => {
 
   expect(expressions.sort()).toEqual(['a', 'index']);
 });
+
+test('"visitParensExpression" can traverse complex subqueries with processing', () => {
+  const { ast } = parse(`
+    FROM index1,
+         (FROM index2
+          | WHERE a > 10
+          | EVAL b = a * 2
+          | STATS cnt = COUNT(*) BY c
+          | SORT cnt desc
+          | LIMIT 10),
+         index3,
+         (FROM index4 | STATS count(*))
+    | WHERE d > 10
+    | STATS max = max(*) BY e
+    | SORT max desc
+  `);
+  const visitor = new Visitor()
+    .on('visitParensExpression', (ctx) => {
+      const child = ctx.visitChild(undefined);
+      return `PARENS(${child})`;
+    })
+    .on('visitExpression', (ctx) => {
+      return 'E';
+    })
+    .on('visitCommand', (ctx) => {
+      const args = [...ctx.visitArguments()].join(', ');
+      return `${ctx.name()}${args ? ` ${args}` : ''}`;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].join(' | ');
+    });
+  const text = visitor.visitQuery(ast);
+
+  expect(text).toBe(
+    'FROM E, PARENS(FROM E | WHERE E | EVAL E | STATS E | SORT E | LIMIT E), E, PARENS(FROM E | STATS E) | WHERE E | STATS E | SORT E'
+  );
+});

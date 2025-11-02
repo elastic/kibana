@@ -1692,7 +1692,9 @@
             "ZodTypeAny",
             ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { features: ",
+            ", ",
+            "Observable",
+            "<{ features: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
@@ -1700,7 +1702,7 @@
               "section": "def-common.Feature",
               "text": "Feature"
             },
-            "[]; } & { type: \"identified_features\"; }, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
+            "[]; } & { type: \"identified_features\"; }>, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -4389,7 +4391,9 @@
           "ZodTypeAny",
           ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { features: ",
+          ", ",
+          "Observable",
+          "<{ features: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -4397,7 +4401,7 @@
             "section": "def-common.Feature",
             "text": "Feature"
           },
-          "[]; } & { type: \"identified_features\"; }, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
+          "[]; } & { type: \"identified_features\"; }>, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

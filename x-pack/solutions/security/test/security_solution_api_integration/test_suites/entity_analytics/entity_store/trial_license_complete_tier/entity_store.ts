@@ -217,7 +217,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('status', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240994
+    describe.skip('status', () => {
       afterEach(async () => {
         await utils.cleanEngines();
       });
@@ -344,7 +345,7 @@ export default ({ getService }: FtrProviderContext) => {
                   'test-*',
                   '.asset-criticality.asset-criticality-default',
                   'risk-score.risk-score-latest-default',
-                  '.entities.v1.reset.security_host_default',
+                  '.entities.v1.reset.security_host_default*',
                   '.entities.v1.updates.security_host_default*',
                 ],
               },

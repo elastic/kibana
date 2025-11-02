@@ -44,7 +44,7 @@ export interface TabProps {
   tabContentId: string;
   tabsSizeConfig: TabsSizeConfig;
   getTabMenuItems?: GetTabMenuItems;
-  getPreviewData: (item: TabItem) => TabPreviewData;
+  getPreviewData?: (item: TabItem) => TabPreviewData;
   services: TabsServices;
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;
@@ -52,7 +52,6 @@ export interface TabProps {
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
   disableCloseButton?: boolean;
   disableInlineLabelEditing?: boolean;
-  disablePreview?: boolean;
   disableDragAndDrop?: boolean;
 }
 
@@ -82,7 +81,6 @@ export const Tab: React.FC<TabProps> = (props) => {
     onSelectedTabKeyDown,
     disableCloseButton = false,
     disableInlineLabelEditing = false,
-    disablePreview = false,
     disableDragAndDrop = false,
   } = props;
   const { euiTheme } = useEuiTheme();
@@ -91,7 +89,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
-  const previewData = useMemo(() => getPreviewData(item), [getPreviewData, item]);
+  const previewData = useMemo(() => getPreviewData?.(item), [getPreviewData, item]);
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
 
@@ -218,7 +216,7 @@ export const Tab: React.FC<TabProps> = (props) => {
             />
           ) : (
             <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
-              {previewData.status === TabStatus.RUNNING && (
+              {previewData?.status === TabStatus.RUNNING && (
                 <EuiProgress size="xs" color="accent" position="absolute" />
               )}
               <EuiFlexGroup
@@ -279,7 +277,6 @@ export const Tab: React.FC<TabProps> = (props) => {
                   <EuiButtonIcon
                     // semantically role="tablist" does not allow other buttons in tabs
                     aria-hidden={true}
-                    tabIndex={-1}
                     color="text"
                     data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
                     iconType="cross"
@@ -294,22 +291,30 @@ export const Tab: React.FC<TabProps> = (props) => {
     </div>
   );
 
+  const tabWithBackground = (
+    <TabWithBackground
+      data-test-subj={`unifiedTabs_tab_${item.id}`}
+      isSelected={isSelected}
+      isDragging={isDragging}
+      services={services}
+    >
+      {mainTabContent}
+    </TabWithBackground>
+  );
+
+  if (!previewData) {
+    return tabWithBackground;
+  }
+
   return (
     <TabPreview
-      showPreview={!disablePreview && showPreview}
+      showPreview={showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
       tabItem={item}
       previewData={previewData}
     >
-      <TabWithBackground
-        data-test-subj={`unifiedTabs_tab_${item.id}`}
-        isSelected={isSelected}
-        isDragging={isDragging}
-        services={services}
-      >
-        {mainTabContent}
-      </TabWithBackground>
+      {tabWithBackground}
     </TabPreview>
   );
 };

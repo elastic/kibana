@@ -234,7 +234,88 @@ export function savedObjectsRoutes(
 
   router.versioned
     .post({
+      path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/update_jobs_spaces`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob', 'ml:canCreateDataFrameAnalytics'],
+        },
+      },
+      summary: 'Update what spaces jobs are assigned to',
+      description: 'Update a list of jobs to add and/or remove them from given spaces.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: updateJobsSpaces,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {
+        try {
+          const { jobType, jobIds, spacesToAdd, spacesToRemove } = request.body;
+
+          const body = await mlSavedObjectService.updateJobsSpaces(
+            jobType,
+            jobIds,
+            spacesToAdd,
+            spacesToRemove
+          );
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .post({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/update_trained_models_spaces`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateTrainedModels'],
+        },
+      },
+      summary: 'Update what spaces trained models are assigned to',
+      description: 'Update a list of trained models to add and/or remove them from given spaces.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: updateTrainedModelsSpaces,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {
+        try {
+          const { modelIds, spacesToAdd, spacesToRemove } = request.body;
+
+          const body = await mlSavedObjectService.updateTrainedModelsSpaces(
+            modelIds,
+            spacesToAdd,
+            spacesToRemove
+          );
+
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/update_trained_models_spaces`,
       access: 'internal',
       security: {
         authz: {

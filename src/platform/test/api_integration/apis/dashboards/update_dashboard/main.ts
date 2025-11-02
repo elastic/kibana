@@ -27,7 +27,6 @@ const updatedDashboard = {
     from: 'Wed Sep 16 2015 22:52:17 GMT-0700',
     to: 'Fri Sep 18 2015 12:24:38 GMT-0700',
   },
-  timeRestore: true,
   references: [
     {
       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',

@@ -251,7 +251,14 @@ export class ForecastsTable extends Component {
     }
 
     if (this.state.errorMessage !== undefined) {
-      return <EuiCallOut title={this.state.errorMessage} color="danger" iconType="cross" />;
+      return (
+        <EuiCallOut
+          announceOnMount
+          title={this.state.errorMessage}
+          color="danger"
+          iconType="cross"
+        />
+      );
     }
 
     const forecasts = this.state.forecasts;
@@ -259,6 +266,7 @@ export class ForecastsTable extends Component {
     if (forecasts.length === 0) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsTitle"

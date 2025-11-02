@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(400);
       expect(response.body.message).to.be(
-        '[request body.data.title]: expected value of type [string] but got [undefined]'
+        '[request body]: types that failed validation:\n- [request body.0.references]: expected value of type [array] but got [undefined]\n- [request body.1.references]: expected value of type [array] but got [undefined]'
       );
     });
   });

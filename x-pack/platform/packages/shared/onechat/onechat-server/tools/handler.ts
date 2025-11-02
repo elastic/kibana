@@ -64,7 +64,6 @@ export interface ToolHandlerContext {
   toolProvider: ToolProvider;
   /**
    * Onechat runner scoped to the current execution.
-   * Can be used to run other workchat primitive as part of the tool execution.
    */
   runner: ScopedRunner;
   /**

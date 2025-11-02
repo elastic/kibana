@@ -30,7 +30,7 @@ export function EditRoutingStreamEntry({
       data-test-subj={`routingRule-${routingRule.destination}`}
     >
       <EuiFlexGroup direction="column" gutterSize="m">
-        <StreamNameFormRow value={routingRule.destination} disabled />
+        <StreamNameFormRow value={routingRule.destination} readOnly />
         <RoutingConditionEditor
           condition={routingRule.where}
           status={routingRule.status}

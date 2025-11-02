@@ -97,7 +97,10 @@ export const JourneyScreenshotDialog = ({
   return isOpen ? (
     <EuiOutsideClickDetector onOutsideClick={onClose}>
       <EuiModal
-        onClose={(evt?: KeyboardEvent<HTMLDivElement> | MouseEvent<HTMLButtonElement>) => {
+        aria-label={i18n.translate('xpack.synthetics.monitor.screenshotDialog.ariaLabel', {
+          defaultMessage: 'Journey screenshot dialog',
+        })}
+        onClose={(evt) => {
           // for table row click to work
           evt?.stopPropagation?.();
           onClose();

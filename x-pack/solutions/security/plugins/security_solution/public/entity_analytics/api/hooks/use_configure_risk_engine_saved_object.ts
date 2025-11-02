@@ -9,12 +9,16 @@ import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import type { TaskManagerUnavailableResponse } from '../../../../common/api/entity_analytics/common';
 import { useEntityAnalyticsRoutes } from '../api';
-import type { ConfigureRiskEngineSavedObjectResponse } from '../../../../common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
+import type {
+  ConfigureRiskEngineSavedObjectRequestBody,
+  ConfigureRiskEngineSavedObjectResponse,
+} from '../../../../common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
 
 interface ConfigureRiskEngineParams {
   includeClosedAlerts: boolean;
   range: { start: string; end: string };
   enableResetToZero: boolean;
+  filters?: ConfigureRiskEngineSavedObjectRequestBody['filters'];
 }
 
 export const useConfigureSORiskEngineMutation = (
@@ -35,6 +39,7 @@ export const useConfigureSORiskEngineMutation = (
       exclude_alert_statuses: params.includeClosedAlerts ? [] : ['closed'],
       range: params.range,
       enable_reset_to_zero: params.enableResetToZero,
+      filters: params.filters,
     });
     return { risk_engine_saved_object_configured: true };
   }, options);

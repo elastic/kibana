@@ -51,7 +51,7 @@ const ArmTemplateSetup = ({
 }) => {
   if (!hasArmTemplateUrl) {
     return (
-      <EuiCallOut color="warning">
+      <EuiCallOut announceOnMount={false} color="warning">
         <FormattedMessage
           id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.armTemplateSetupStep.notSupported"
           defaultMessage="ARM Template is not supported on the current Integration version, please upgrade your integration to the latest version to use ARM Template"
@@ -225,7 +225,7 @@ export const AzureCredentialsForm = ({
     return (
       <>
         <EuiSpacer size="l" />
-        <EuiCallOut color="warning">
+        <EuiCallOut announceOnMount={false} color="warning">
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.azureNotSupportedMessage"
             defaultMessage="CIS Azure is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS Azure"

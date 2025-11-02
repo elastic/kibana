@@ -25,6 +25,7 @@ import {
   scanActionSubFeature,
   workflowInsightsSubFeature,
   trustedDevicesSubFeature,
+  socManagementSubFeature,
 } from '../kibana_sub_features';
 
 /**
@@ -45,6 +46,7 @@ export const getSecurityV4SubFeaturesMap = ({
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature()],
     [SecuritySubFeatureId.workflowInsights, workflowInsightsSubFeature()],
+    [SecuritySubFeatureId.socManagement, socManagementSubFeature()],
     [
       SecuritySubFeatureId.globalArtifactManagement,
       globalArtifactManagementSubFeature(experimentalFeatures),

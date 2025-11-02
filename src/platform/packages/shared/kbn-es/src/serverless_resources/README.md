@@ -4,7 +4,7 @@ The resources in this directory are used for seeding Elasticsearch Serverless im
 
 ## Roles
 
-Roles are defined in `roles.yml` for each project under 'es' | 'oblt' | 'security' | 'workplace_ai' folder respectively and intended to mock a Serverless deployment. It must be in sync with `elasticsearch-controller` defined roles and used in real (MKI) environments. In case of some differences tests may pass against Serverless snapshot environment but fail against MKI environments creating confusion.
+Roles are defined in `roles.yml` for each project under 'es' | 'oblt' | 'security' | 'workplaceai' folder respectively and intended to mock a Serverless deployment. It must be in sync with `elasticsearch-controller` defined roles and used in real (MKI) environments. In case of some differences tests may pass against Serverless snapshot environment but fail against MKI environments creating confusion.
 
 ### Why `security_roles.json` is here?
 

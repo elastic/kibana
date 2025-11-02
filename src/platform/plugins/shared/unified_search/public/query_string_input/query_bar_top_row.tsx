@@ -41,7 +41,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
-import { EuiIconBackgroundTask } from '@kbn/background-search';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -642,8 +641,7 @@ export const QueryBarTopRow = React.memo(
             onClick={onClickCancelButton}
             onSecondaryButtonClick={onClickSendToBackground}
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-            // TODO: Replace when the backgroundTask icon is available in EUI
-            secondaryButtonIcon={EuiIconBackgroundTask}
+            secondaryButtonIcon="backgroundTask"
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
             size="s"
           >
@@ -707,8 +705,7 @@ export const QueryBarTopRow = React.memo(
           onClick={onClickSubmitButton}
           onSecondaryButtonClick={onClickSendToBackground}
           secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-          // TODO: Replace when the backgroundTask icon is available in EUI
-          secondaryButtonIcon={EuiIconBackgroundTask}
+          secondaryButtonIcon="backgroundTask"
           secondaryButtonTitle={strings.getSendToBackgroundLabel()}
           size="s"
         >

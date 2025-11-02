@@ -563,6 +563,14 @@ soc_manager:
         - .entity_analytics.monitoring*
       privileges:
         - read
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .internal.alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - view_index_metadata
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -586,6 +594,7 @@ soc_manager:
         - feature_siemV4.execute_operations_all
         - feature_siemV4.scan_operations_all
         - feature_siemV4.workflow_insights_all
+        - feature_siemV4.soc_management_all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all

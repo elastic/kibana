@@ -28,7 +28,7 @@ import type {
   LensApi,
   LensSerializedState,
 } from '@kbn/lens-common';
-import { isTextBasedLanguage } from '../helper';
+import { isTextBasedLanguage, transformOutputState } from '../helper';
 
 import type { LensEmbeddableStartServices } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
@@ -132,12 +132,18 @@ export function initializeDashboardServices(
       canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
-        currentState.savedObjectId = newId;
-        return attributeService.extractReferences(currentState);
+        return {
+          rawState: {
+            ...currentState,
+            savedObjectId: newId,
+          },
+        };
       },
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return attributeService.extractReferences(byValueRuntimeState);
+        return {
+          rawState: transformOutputState(byValueRuntimeState),
+        };
       },
     },
     anyStateChange$: merge(

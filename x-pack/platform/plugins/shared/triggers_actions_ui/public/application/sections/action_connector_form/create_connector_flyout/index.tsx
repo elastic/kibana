@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -35,7 +36,6 @@ import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
 import type { ConnectorFormState, ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
-import type { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
@@ -270,6 +270,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             {showFormErrors && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   color="danger"
                   iconType="warning"

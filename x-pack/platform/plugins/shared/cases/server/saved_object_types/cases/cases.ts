@@ -25,6 +25,7 @@ import {
   modelVersion5,
   modelVersion6,
   modelVersion7,
+  modelVersion8,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 
@@ -204,6 +205,9 @@ export const createCaseSavedObjectType = (
       total_events: {
         type: 'integer',
       },
+      total_observables: {
+        type: 'integer',
+      },
       category: {
         type: 'keyword',
       },
@@ -278,6 +282,7 @@ export const createCaseSavedObjectType = (
     5: modelVersion5,
     6: modelVersion6,
     7: modelVersion7,
+    8: modelVersion8,
   },
   management: {
     importableAndExportable: true,

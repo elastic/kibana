@@ -21,7 +21,7 @@ import * as api from '../api';
 import { getMissingCapabilitiesToast } from '../../common/service/notifications/missing_capabilities_notification';
 import { getNoConnectorToast } from '../../common/service/notifications/no_connector_notification';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
-import { getSuccessToast } from './notification/success_notification';
+import { raiseSuccessToast } from './notification/success_notification';
 import type { CapabilitiesLevel, MissingCapability } from '../../common/service/capabilities';
 import { getMissingCapabilitiesChecker } from '../../common/service/capabilities';
 import { requiredDashboardMigrationCapabilities } from './capabilities';
@@ -221,7 +221,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
   }
 
   protected sendFinishedMigrationNotification(taskStats: DashboardMigrationStats) {
-    this.core.notifications.toasts.addSuccess(getSuccessToast(taskStats, this.core));
+    raiseSuccessToast(taskStats, this.core);
   }
 
   /** Deletes a dashboard migration by its ID, refreshing the stats to remove it from the list */

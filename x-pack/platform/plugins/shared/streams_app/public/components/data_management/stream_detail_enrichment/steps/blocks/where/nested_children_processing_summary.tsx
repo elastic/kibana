@@ -5,31 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import type { StepsProcessingSummaryMap } from '../../../state_management/use_steps_processing_summary';
-
-const statusLabels: Record<string, string> = {
-  pending: i18n.translate('xpack.streams.nestedChildrenProcessingSummary.pending', {
-    defaultMessage: 'pending',
-  }),
-  running: i18n.translate('xpack.streams.nestedChildrenProcessingSummary.running', {
-    defaultMessage: 'running',
-  }),
-  failed: i18n.translate('xpack.streams.nestedChildrenProcessingSummary.failed', {
-    defaultMessage: 'failed',
-  }),
-  successful: i18n.translate('xpack.streams.nestedChildrenProcessingSummary.successful', {
-    defaultMessage: 'successful',
-  }),
-  disabled: i18n.translate('xpack.streams.nestedChildrenProcessingSummary.disabled', {
-    defaultMessage: 'disabled',
-  }),
-  skipped: i18n.translate('xpack.streams.nestedChildrenProcessingSummary.skipped', {
-    defaultMessage: 'skipped',
-  }),
-};
+import { getNestedMessage } from './utils';
 
 export const NestedChildrenProcessingSummary = ({
   childIds,
@@ -41,37 +20,35 @@ export const NestedChildrenProcessingSummary = ({
   if (!stepsProcessingSummaryMap) return null;
 
   const statusCounts: Record<string, number> = {};
+  let stepsCount = 0;
+  let conditionsCount = 0;
 
   for (const id of childIds) {
     const status = stepsProcessingSummaryMap.get(id);
     if (status) {
       if (status === 'disabled.processorBeforePersisted') {
         statusCounts.disabled = (statusCounts.disabled || 0) + 1;
+        stepsCount++;
       } else if (
         status === 'skipped.followsProcessorBeingEdited' ||
         status === 'skipped.createdInPreviousSimulation'
       ) {
         statusCounts.skipped = (statusCounts.skipped || 0) + 1;
+        stepsCount++;
+      } else if (status === 'condition') {
+        conditionsCount++;
       } else {
         statusCounts[status] = (statusCounts[status] || 0) + 1;
+        stepsCount++;
       }
     }
   }
 
-  const total = Array.from(childIds).length;
+  const message = getNestedMessage(statusCounts, stepsCount, conditionsCount);
 
-  const summary = Object.entries(statusCounts)
-    .map(([status, count]) => `${count} ${statusLabels[status] || status}`)
-    .join(', ');
-
-  const stepsLabel = i18n.translate('xpack.streams.nestedChildrenProcessingSummary.stepsLabel', {
-    defaultMessage: '{count, plural, one {step} other {steps}}',
-    values: { count: total },
-  });
-
-  return summary ? (
+  return message ? (
     <EuiText size="xs" color="subdued">
-      {summary} {stepsLabel}
+      {message}
     </EuiText>
   ) : null;
 };

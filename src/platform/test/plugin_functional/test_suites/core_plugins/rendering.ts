@@ -253,7 +253,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (observability?|security?|search?|workplace_ai?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|workplaceai?)',
         'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.serverless.in_trial (boolean?)',

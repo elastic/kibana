@@ -257,7 +257,7 @@ export function registerAPIRoutes({
             limit,
           },
           {
-            fields: ['title', 'description', 'timeRestore'],
+            fields: ['title', 'description', 'timeRange'],
           }
         ));
       } catch (e) {

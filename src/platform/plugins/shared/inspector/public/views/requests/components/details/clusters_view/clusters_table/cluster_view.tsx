@@ -30,6 +30,7 @@ export function ClusterView({ clusterDetails }: Props) {
     <EuiText css={{ width: '100%' }} size="xs" data-test-subj="inspectorRequestClustersDetails">
       {clusterDetails.timed_out ? (
         <EuiCallOut
+          announceOnMount
           size="s"
           color="warning"
           title={i18n.translate('inspector.requests.clusters.timedOutMessage', {
@@ -42,6 +43,7 @@ export function ClusterView({ clusterDetails }: Props) {
 
       {clusterFailure ? (
         <EuiCallOut
+          announceOnMount
           size="s"
           color="warning"
           title={i18n.translate('inspector.requests.clusters.failedClusterMessage', {

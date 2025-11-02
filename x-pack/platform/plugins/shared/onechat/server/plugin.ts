@@ -77,6 +77,9 @@ export class OnechatPlugin
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
       },
+      attachments: {
+        registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
+      },
     };
   }
 

@@ -17,7 +17,7 @@ fi
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
-KIBANA_WORKPLACE_AI_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-workplace_ai"
+KIBANA_WORKPLACE_AI_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-workplaceai"
 export KIBANA_WORKPLACE_AI_IMAGE="$KIBANA_WORKPLACE_AI_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 KIBANA_OBSERVABILITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-observability"
@@ -77,7 +77,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
 
   echo "--- Tag images"
   retag_image_with_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
-  retag_image_with_architecture "$KIBANA_WORKPLACE_AI_IMAGE" "kibana-serverless-workplace_ai-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_WORKPLACE_AI_IMAGE" "kibana-serverless-workplaceai-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_OBSERVABILITY_IMAGE" "kibana-serverless-observability-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-search-$BASE_VERSION-docker-image"
   retag_image_with_architecture "$KIBANA_SECURITY_IMAGE" "kibana-serverless-security-$BASE_VERSION-docker-image"

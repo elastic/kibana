@@ -107,17 +107,17 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                         <EuiPanel hasBorder={true} paddingSize="s">
                           <EuiStat
                             css={styles.stat}
-                            title={
-                              <StatusBadge
-                                textProps={{ css: styles.statusBadge }}
-                                status={stepExecution.status}
-                              />
-                            }
+                            title={stepExecution.status}
                             titleSize="xxs"
                             textAlign="left"
                             isLoading={isLoading}
                             description="Status"
-                          />
+                          >
+                            <StatusBadge
+                              textProps={{ css: styles.statusBadge }}
+                              status={stepExecution.status}
+                            />
+                          </EuiStat>
                         </EuiPanel>
                       </EuiFlexItem>
                       <EuiFlexItem>

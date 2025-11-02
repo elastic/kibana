@@ -53,7 +53,7 @@ export const registerESQLExtensionsRoute = (
               schema.literal('es'),
               schema.literal('oblt'),
               schema.literal('security'),
-              schema.literal('chat'),
+              schema.literal('workplaceai'),
             ],
             {
               defaultValue: 'oblt', // Default to 'oblt' if no solutionId is provided

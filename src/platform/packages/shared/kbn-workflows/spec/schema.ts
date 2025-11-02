@@ -165,6 +165,16 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+// Fetcher configuration for HTTP request customization (shared across formats)
+export const FetcherConfigSchema = z
+  .object({
+    skip_ssl_verification: z.boolean().optional(),
+    follow_redirects: z.boolean().optional(),
+    max_redirects: z.number().optional(),
+    keep_alive: z.boolean().optional(),
+  })
+  .optional();
+
 export const HttpStepSchema = BaseStepSchema.extend({
   type: z.literal('http'),
   with: z.object({
@@ -176,6 +186,7 @@ export const HttpStepSchema = BaseStepSchema.extend({
       .default({}),
     body: z.any().optional(),
     timeout: z.string().optional().default('30s'),
+    fetcher: FetcherConfigSchema,
   }),
 })
   .merge(StepWithIfConditionSchema)
@@ -216,16 +227,6 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
   ]),
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
-
-// Fetcher configuration for HTTP request customization (shared across formats)
-export const FetcherConfigSchema = z
-  .object({
-    skip_ssl_verification: z.boolean().optional(),
-    follow_redirects: z.boolean().optional(),
-    max_redirects: z.number().optional(),
-    keep_alive: z.boolean().optional(),
-  })
-  .optional();
 
 // Generic Kibana step schema for backend validation
 export const KibanaStepSchema = BaseStepSchema.extend({
@@ -473,6 +474,7 @@ export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),
   isTestRun: z.boolean(),
   startedAt: z.date(),
+  url: z.string(),
 });
 export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
 
@@ -524,6 +526,7 @@ export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
+  kibanaUrl: z.string(),
   inputs: z
     .record(
       z.union([

@@ -158,7 +158,11 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       {overwrite && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut color="warning" data-test-subj="bulkEditRulesRuleActionsWarning">
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            data-test-subj="bulkEditRulesRuleActionsWarning"
+          >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.warningCalloutMessage"
               defaultMessage="You're about to overwrite rule actions for {rulesCount, plural, one {# selected rule} other {# selected rules}}. Click {saveButton} to apply changes."

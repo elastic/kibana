@@ -98,6 +98,7 @@ export const getCaseResponse = (): Case => ({
   version: 'test-version',
   category: null,
   observables: [],
+  total_observables: 0,
   incremental_id: undefined,
 });
 

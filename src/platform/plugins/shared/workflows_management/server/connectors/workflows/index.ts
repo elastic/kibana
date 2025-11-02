@@ -157,12 +157,9 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           );
         }
 
-        // Extract only new alerts for workflow execution (similar to Cases pattern)
-        const workflowAlerts = [...alerts.new.data];
-
         // Merge alert context with user inputs
         const alertContext = {
-          alerts: { new: alerts.new },
+          alerts: alerts.new.data,
           rule: {
             id: rule.id,
             name: rule.name,
@@ -179,7 +176,6 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           subAction: 'run' as const,
           subActionParams: {
             workflowId,
-            alerts: workflowAlerts,
             inputs: { event: alertContext },
             spaceId,
           },
@@ -189,7 +185,6 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           subAction: 'run' as const,
           subActionParams: {
             workflowId: params?.subActionParams?.workflowId || 'unknown',
-            alerts: [],
             spaceId,
           },
         };

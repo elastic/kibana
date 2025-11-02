@@ -1246,4 +1246,38 @@ describe('header commands', () => {
       expect(regularCommands.map((cmd) => cmd.name)).toStrictEqual(['from', 'limit']);
     });
   });
+
+  describe('parens (subquery)', () => {
+    test('can visit complex subqueries with processing', () => {
+      const src = `
+        FROM index1,
+             (FROM index2
+              | WHERE a > 10
+              | EVAL b = a * 2
+              | STATS cnt = COUNT(*) BY c
+              | SORT cnt desc
+              | LIMIT 10),
+             index3,
+             (FROM index4 | STATS count(*))
+        | WHERE d > 10
+        | STATS max = max(*) BY e
+        | SORT max desc
+      `;
+      const { ast } = parse(src);
+      let parensCount = 0;
+      const sources: string[] = [];
+
+      walk(ast, {
+        visitParens: (node) => {
+          parensCount++;
+        },
+        visitSource: (node) => {
+          sources.push(node.name);
+        },
+      });
+
+      expect(parensCount).toBe(2);
+      expect(sources).toEqual(['index1', 'index2', 'index3', 'index4']);
+    });
+  });
 });

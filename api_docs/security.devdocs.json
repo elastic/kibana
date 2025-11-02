@@ -6113,12 +6113,12 @@
               "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
             },
             {
-              "plugin": "cloudSecurityPosture",
-              "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
-            },
-            {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
+            },
+            {
+              "plugin": "cloudSecurityPosture",
+              "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
             }
           ]
         },

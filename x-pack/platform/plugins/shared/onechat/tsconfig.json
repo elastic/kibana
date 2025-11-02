@@ -90,6 +90,7 @@
     "@kbn/elastic-assistant",
     "@kbn/react-kibana-mount",
     "@kbn/react-query",
-    "@kbn/maps-plugin"
+    "@kbn/maps-plugin",
+    "@kbn/shared-ux-utility"
   ]
 }

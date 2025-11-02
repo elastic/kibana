@@ -8,7 +8,7 @@ import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate5';
 import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
-import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import { isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
@@ -107,7 +107,7 @@ export const streamRoutingMachine = setup({
     })),
   },
   guards: {
-    canForkStream: and(['hasManagePrivileges', 'isValidRouting']),
+    canForkStream: and(['hasManagePrivileges', 'isValidRouting', 'isValidChild']),
     canReorderRules: and(['hasManagePrivileges', 'hasMultipleRoutingRules']),
     canUpdateStream: and(['hasManagePrivileges', 'isValidRouting']),
     hasMultipleRoutingRules: ({ context }) => context.routing.length > 1,
@@ -116,6 +116,12 @@ export const streamRoutingMachine = setup({
     isAlreadyEditing: ({ context }, params: { id: string }) => context.currentRuleId === params.id,
     isValidRouting: ({ context }) =>
       isSchema(routingDefinitionListSchema, context.routing.map(routingConverter.toAPIDefinition)),
+    isValidChild: ({ context }) => {
+      const currentRule = selectCurrentRule(context);
+      const currentStream = context.definition.stream;
+
+      return isChildOf(currentStream.name, currentRule.destination);
+    },
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGVNkwBDAWwDo9sdSAbbALzygGIBtABgF1FQADqli1sqXPxAAPRACZZATkoA2AIwAWABwL1sgKybZG1bIA0IAJ6IAzKr2V1XLgs3WA7Jq7uFb5QF8-czQsViISCkpwiAs2WGIyKhIAYzBsADdIbj4kECERHHFJGQRVBS5ZSh9y8uU9PWtrPTdzKwRZdWVKTWVZQz0FOx7ZNz0AoIwcfDCEyLJo6gh6MDZgyagAJXQlyiTwzDAsyTzRQpzi9V1KPWUFAe1Pa2UevRbEVVLOrmv39W9DdTGIFWoXiESiFgWSxWE1Ym22kFohxyxwKEjONk09lkQ00vgMei4yk0rxKhK4lDcdzc1gGqlqdkBwKmoMScwh2EWyyZGy2YFmqGQEDAyCRgmEJzRoGKAFpVNYuuo3HYdKpCQplE5iZY3rIuOpKIpugomnpdN0AYEgTDmeFWaR5rsyGsAHJgADucL5SQAFqR8KxoSF8J6dn6UvRRblxaiim8vJouho9HLNJjk8p1CSbhUCXTGj51WprIzrYQWbN7RDHaQXe6Qz6-VAA9z6778AdeEdo2JJdI3o8lNZ1Ap3Lj2t0ta0iRVbCPDO9rJ4TCWg2XbRWHXtWK6Pbydm2m-hA2sQwjMJGUT3YyUMzm9L1hh03PpVCTKaoHNcDI0NNiRyu1mmME2R2Ld8B3VtG2bUsQwAMwFABrC9u1OKU41+FRHBpW5qWUIdM21Uk9QpDV500Ewbn-S1uSAu1Nydbc6z3eDkAQgMIHEPk8DSVAEL5FiENogBBJJMAFZD8ivdEEGpD8enKNxFMcZ8BjfYdKBpJpFEJG4mlUACQXXcFQIY8CmO2ASA2FNBkEoAR6BrFiqAE4TRPEztkRQ3tilVHwHGpLRVBGWx3jMQjtHsJofFqU03EVTQLXGVdaI3CEz1hPcG39I8W0yvYO2yMVJNQvsSkaTolQ8Wd3gSkcSVC-UPF1OpFRcPVi2o0sUuM9Lg0yg9oNXeswzACMPKKiVr0MeVXD1dV3D0lx6tNckOgUXUjC+dp5AMm0Zh6iBRD67YssPdhcpOg8Cq7YrvLeNxnEoPUCWxZQ4sVRd6rehMLmfDQuA8e9Rk65LywOo6eUuqCcpgvczwkybpLsIwHFUWbzX0Wd6pChwCwUh7XCaXa132kDeshr0Bphoa4cO89VEKqNbuvIKOieoldB6X5+n0erfiUfouA0dx3jnNxie6sm6YyqHsvO2HthIchUAyBGYyRoLOkcbp3Cedb1HqPn2hUP8Ae2g2EolsGpYhyC5ePGW+VgUhVfGpnEbQkoPgNXodF6AxdEeerfHJVVuiFgHbhMcWQcA63K0ocmQyVlXHbYDjcC43AeL4yghSWfZXLEkU3cvErikaNwunI-n4rUIKXkIkwLie75hcpf4raMm2Tz3FO0jT6yBTshzMCcvPRrAQuWRE4u1akz2TEUfy6gDnRasnN56i12bCXkWRGkMLvSYTpO93QAQIBrNOM6znO+Qv2BhUwIv3MZsu7oQSuDSCw+LnKRUFxg76EoHYU0Pg6RaHXsfYCp9pbHQfpfa+CC2BD1svZRyAoqCP2fq-Eu78vIs3kAmciGhfB-SGF9IcVxGh6QzN8PUMC6IQhIAKIUyBHawH5IKYUg1e6KzAGw4U89y79h6D7awAMCRaCHAoEkzVyRxV-v0OUdJ9Kx0MifeYrCeEcIQVwnR7C+GO1DLgcMIjP4Eh+joY0NIYqmkbq0XUQUnoAIaLoAGHQmGpW4UY-RvjeHU34U7F211PLMyRl8ckTxhw6BuAlRQyh5ENCrpRcoi40Z4UYRovasDtGCN0ZwygF8r5x1tOnTi1Bs68UQU-ZAL8Z5uXwTdD2pVA5XHXs+A+9Rky-HkUYTopR1ClEeIqL43jjKGMCRTLhJTkEkwoKg5ANkR6YOQNggQdSGm2lnm-Fp6tF6qnJLqDwHclRAMIvIR6AwMkJSVO4AIlpcCoCFPAHINEWT7IXqVWUj07nKmGWqDUr4m4t3oWUDwPhXDWHaN4mgdBGAsHwF80RbQ6RdCeEYIKQVPDDmsMkioSYyg3LRnmYGSUylaNaBNA5Py1AKiVP0QFNxgUkkXFXWcjgfAjHvOMnJCzmGQjACiz++glBqjuG1R4zwSQJQTD0P6DR1TkRjhSzReSqxgSgBBXkIrrxKnJF8LQwx9CeF6CSe8H5yIjluPoYZosJkgWrLWXcsszp6qRv7BwQxKTbVxORWVGgHANB+KmLa6i1W5MFc6xirr+KIVYB6z2IwExGsMM+Aw5RN4IG0PKOoeELiY2-AoR1cDba6vCa04oNwq4G3Ws+fM1I5FN01v5bmdqPH+H5ZLMtwT9zQygEm0qdJ5AaV9QYXwBtxzLRHBpGxdR1QE1VVaUG3de0mP7o7IdxQRgVCqvXOVcU9TY1VJUd6e94wDFLfMM+2w5nBO3YgOK9g60msbTSYOjwVBcExPofQ1JTSaGvSwgpfiZmPoQLpCkcVfC-qFsMfFTd5oGmGcaHl7hhyyGAwEvRMycOJsrbSnyki80UUUC4GkQ4kmXLId6-ouIyjOEkeSldlKNX4f8fe9V5AINxXlEpWDvLo6IacScroZR3AwphZSU0jy-BAA */

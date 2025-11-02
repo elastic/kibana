@@ -10,6 +10,5 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/shared-ux-router",
-    "@kbn/shared-ux-link-redirect-app"
   ]
 }

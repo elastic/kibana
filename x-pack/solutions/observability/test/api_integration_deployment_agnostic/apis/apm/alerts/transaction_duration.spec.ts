@@ -229,7 +229,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('create rule for opbeans-node using kql filter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240908
+    describe.skip('create rule for opbeans-node using kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 

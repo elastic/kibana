@@ -44,6 +44,7 @@ export const mount =
           />
         ) : (
           <EuiCallOut
+            announceOnMount
             title="Please define a default index pattern to use this demo"
             color="danger"
             iconType="warning"
