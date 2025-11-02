@@ -37,7 +37,7 @@ jest.mock('../../utils', () => ({
     .fn()
     .mockImplementation((kibanaUrl, spaceId, workflowId, executionId, stepExecutionId) => {
       const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-      const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/workflow-${workflowId}`;
+      const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
       const params = new URLSearchParams({
         executionId,
         tab: 'executions',
@@ -832,7 +832,7 @@ describe('WorkflowContextManager', () => {
             id: 'exec-123',
             isTestRun: false,
             startedAt: new Date('2023-01-01T00:00:00.000Z'),
-            url: 'http://localhost:5601/s/space-789/app/workflows/workflow-workflow-456?executionId=exec-123&tab=executions',
+            url: 'http://localhost:5601/s/space-789/app/workflows/workflow-456?executionId=exec-123&tab=executions',
           },
           workflow: {
             id: 'workflow-456',

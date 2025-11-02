@@ -69,7 +69,7 @@ describe('buildWorkflowExecutionUrl', () => {
     );
 
     expect(url).toBe(
-      'https://kibana.example.com/app/workflows/workflow-workflow-123?executionId=execution-456&tab=executions'
+      'https://kibana.example.com/app/workflows/workflow-123?executionId=execution-456&tab=executions'
     );
   });
 
@@ -82,7 +82,7 @@ describe('buildWorkflowExecutionUrl', () => {
     );
 
     expect(url).toBe(
-      'https://kibana.example.com/s/my-space/app/workflows/workflow-workflow-123?executionId=execution-456&tab=executions'
+      'https://kibana.example.com/s/my-space/app/workflows/workflow-123?executionId=execution-456&tab=executions'
     );
   });
 
@@ -96,7 +96,7 @@ describe('buildWorkflowExecutionUrl', () => {
     );
 
     expect(url).toBe(
-      'https://kibana.example.com/app/workflows/workflow-workflow-123?executionId=execution-456&tab=executions&stepExecutionId=step-789'
+      'https://kibana.example.com/app/workflows/workflow-123?executionId=execution-456&tab=executions&stepExecutionId=step-789'
     );
   });
 
@@ -110,7 +110,7 @@ describe('buildWorkflowExecutionUrl', () => {
     );
 
     expect(url).toBe(
-      'http://localhost:5601/fbi/app/workflows/workflow-8e737e4c-e9cf-422a-b690-0acb9368b050?executionId=050a6b75-59ef-4137-9708-e1c8a9a30e4c&tab=executions&stepExecutionId=99ce063eca45a6e84646538924fd2a989a6085a1fdf874c553deeae46d6ce13c'
+      'http://localhost:5601/fbi/app/workflows/8e737e4c-e9cf-422a-b690-0acb9368b050?executionId=050a6b75-59ef-4137-9708-e1c8a9a30e4c&tab=executions&stepExecutionId=99ce063eca45a6e84646538924fd2a989a6085a1fdf874c553deeae46d6ce13c'
     );
   });
 });
