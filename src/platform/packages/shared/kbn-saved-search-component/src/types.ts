@@ -28,7 +28,7 @@ export interface SavedSearchComponentDependencies {
  * that can be persisted externally (e.g., in URL params or local storage)
  *
  * This includes user customizations related to how the data table is displayed:
- * columns selection, sorting, grid layout, and row display options.
+ * columns selection, sorting, grid layout, row display options, and in-table search.
  */
 export interface SavedSearchTableConfig {
   columns?: string[];
@@ -37,6 +37,7 @@ export interface SavedSearchTableConfig {
   rowHeight?: number;
   rowsPerPage?: number;
   density?: DataGridDensity;
+  inTableSearchTerm?: string;
 }
 
 export interface SavedSearchComponentProps extends SavedSearchTableConfig {

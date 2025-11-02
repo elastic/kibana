@@ -15,6 +15,7 @@ import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils'
 import {
   type UnifiedDataTableProps,
   type DataTableColumnsMeta,
+  type InTableSearchRestorableState,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
@@ -37,16 +38,38 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   onRemoveColumn: (column: string) => void;
   savedSearchId?: string;
   enableDocumentViewer: boolean;
+  inTableSearchTerm?: string;
+  onInTableSearchTermChange?: (searchTerm: string | undefined) => void;
 }
 
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
+  const {
+    interceptedWarnings,
+    enableDocumentViewer,
+    inTableSearchTerm,
+    onInTableSearchTermChange,
+    ...gridProps
+  } = props;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
   const docViewerRef = useRef<DocViewerApi>(null);
+
+  // Create restorable state for in-table search
+  const inTableSearchRestorableState = useMemo<InTableSearchRestorableState | undefined>(() => {
+    return inTableSearchTerm ? { searchTerm: inTableSearchTerm } : undefined;
+  }, [inTableSearchTerm]);
+
+  const handleInTableSearchStateChange = useCallback(
+    (state: InTableSearchRestorableState) => {
+      if (onInTableSearchTermChange) {
+        onInTableSearchTermChange(state.searchTerm);
+      }
+    },
+    [onInTableSearchTermChange]
+  );
 
   const setExpandedDocWithInitialTab = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
@@ -156,6 +179,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         showColumnTokens
         showFullScreenButton={false}
         className="unifiedDataTable"
+        inTableSearchTermState={inTableSearchTerm}
+        onUpdateInTableSearchTerm={handleInTableSearchStateChange}
       />
     </SavedSearchEmbeddableBase>
   );

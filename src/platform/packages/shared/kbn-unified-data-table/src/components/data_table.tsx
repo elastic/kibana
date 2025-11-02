@@ -443,6 +443,14 @@ interface InternalUnifiedDataTableProps {
    */
   enableInTableSearch?: boolean;
   /**
+   * Optional controlled state for in-table search term
+   */
+  inTableSearchTermState?: string;
+  /**
+   * Optional callback when in-table search term changes
+   */
+  onUpdateInTableSearchTerm?: (searchTerm: string | undefined) => void;
+  /**
    * Optional extra props passed to the renderCellValue function/component.
    */
   cellContext?: EuiDataGridProps['cellContext'];
@@ -545,6 +553,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       customGridColumnsConfiguration,
       enableComparisonMode,
       enableInTableSearch = false,
+      inTableSearchTermState,
+      onUpdateInTableSearchTerm,
       cellContext,
       renderCellPopover,
       getRowIndicator,
@@ -804,13 +814,25 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
+    // Use controlled state if provided, otherwise fall back to internal restorable state
     const inTableSearchLatestStateRef = useRestorableRef('inTableSearch', undefined);
     const onInTableSearchInitialStateChange = useCallback(
       (newState: InTableSearchRestorableState) => {
         inTableSearchLatestStateRef.current = newState;
+        if (onUpdateInTableSearchTerm) {
+          onUpdateInTableSearchTerm(newState.searchTerm);
+        }
       },
-      [inTableSearchLatestStateRef]
+      [inTableSearchLatestStateRef, onUpdateInTableSearchTerm]
     );
+
+    // Prepare initial state from controlled prop or internal state
+    const initialInTableSearchState = useMemo(() => {
+      if (inTableSearchTermState !== undefined) {
+        return inTableSearchTermState ? { searchTerm: inTableSearchTermState } : undefined;
+      }
+      return inTableSearchLatestStateRef.current;
+    }, [inTableSearchTermState, inTableSearchLatestStateRef]);
 
     const {
       inTableSearchTermCss,
@@ -826,7 +848,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       renderCellValue,
       cellContext,
       pagination: paginationObj,
-      initialState: inTableSearchLatestStateRef.current,
+      initialState: initialInTableSearchState,
       onInitialStateChange: onInTableSearchInitialStateChange,
     });
 
