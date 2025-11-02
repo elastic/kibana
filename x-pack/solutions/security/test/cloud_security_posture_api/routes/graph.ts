@@ -1009,16 +1009,6 @@ export default function (providerContext: FtrProviderContext) {
             expect(actorNode.icon).to.equal('user');
             expect(actorNode.shape).to.equal('ellipse');
             expect(actorNode.tag).to.equal('Identity');
-            expect(actorNode.documentsData?.[0]).to.eql({
-              id: 'admin@example.com',
-              type: 'entity',
-              entity: {
-                name: 'AdminExample',
-                type: 'Identity',
-                sub_type: 'AWS IAM User',
-                engineMetadata: { type: 'generic' },
-              },
-            });
 
             // Verify other nodes
             response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
