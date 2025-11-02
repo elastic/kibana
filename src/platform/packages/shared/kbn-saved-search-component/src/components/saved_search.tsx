@@ -17,7 +17,7 @@ import type { SearchEmbeddableState } from '@kbn/discover-plugin/common';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { SavedSearchComponentProps, SavedSearchTableConfig } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
@@ -167,10 +167,7 @@ const SavedSearchComponentTable: React.FC<
     onTableConfigChange,
   } = props;
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
-  const [isEmbeddableAvailable, setIsEmbeddableAvailable] = useState(false);
-
-  // Note: sort, grid, rowHeight, rowsPerPage, and density are set via initialSerializedState
-  // and cannot be incrementally synced like columns. They are applied on component mount.
+  const [isEmbeddableApiAvailable, setIsEmbeddableApiAvailable] = useState(false);
 
   const parentApi = useMemo(() => {
     return {
@@ -217,7 +214,7 @@ const SavedSearchComponentTable: React.FC<
   useEffect(
     function syncQuery() {
       if (!embeddableApi.current) return;
-      (embeddableApi.current.setQuery as (q: Query | AggregateQuery | undefined) => void)(query);
+      embeddableApi.current.setQuery(query);
     },
     [query]
   );
@@ -269,7 +266,7 @@ const SavedSearchComponentTable: React.FC<
         subscription.unsubscribe();
       };
     },
-    [onTableConfigChange, isEmbeddableAvailable]
+    [onTableConfigChange, isEmbeddableApiAvailable]
   );
 
   return (
@@ -279,7 +276,7 @@ const SavedSearchComponentTable: React.FC<
       getParentApi={() => parentApi}
       onApiAvailable={(api) => {
         embeddableApi.current = api;
-        setIsEmbeddableAvailable(true);
+        setIsEmbeddableApiAvailable(true);
       }}
       hidePanelChrome
     />

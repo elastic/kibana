@@ -83,7 +83,6 @@ export function SearchEmbeddableGridComponent({
     savedSearchTitle,
     savedSearchDescription,
     esqlVariables,
-    inTableSearchTerm,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -100,8 +99,7 @@ export function SearchEmbeddableGridComponent({
     api.description$,
     api.defaultTitle$,
     api.defaultDescription$,
-    esqlVariables$ ?? emptyEsqlVariables$,
-    stateManager.inTableSearchTerm
+    esqlVariables$ ?? emptyEsqlVariables$
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -199,9 +197,6 @@ export function SearchEmbeddableGridComponent({
       onResize: (newGridSettings: { columnId: string; width: number | undefined }) => {
         stateManager.grid.next(onResizeGridColumn(newGridSettings, grid));
       },
-      onInTableSearchTermChange: (newSearchTerm: string | undefined) => {
-        stateManager.inTableSearchTerm.next(newSearchTerm);
-      },
     }),
     [
       onAddColumn,
@@ -215,7 +210,6 @@ export function SearchEmbeddableGridComponent({
       stateManager.sampleSize,
       stateManager.density,
       stateManager.grid,
-      stateManager.inTableSearchTerm,
       grid,
     ]
   );
@@ -264,8 +258,6 @@ export function SearchEmbeddableGridComponent({
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
-      inTableSearchTerm={inTableSearchTerm}
-      onInTableSearchTermChange={onStateEditedProps.onInTableSearchTermChange}
     />
   );
 }

@@ -55,7 +55,6 @@ export type SearchEmbeddablePublicState = Pick<
   columnsMeta: DataTableColumnsMeta | undefined;
   totalHitCount: number | undefined;
   inspectorAdapters: Record<string, unknown>;
-  inTableSearchTerm: string | undefined;
 };
 
 export type SearchEmbeddableStateManager = {

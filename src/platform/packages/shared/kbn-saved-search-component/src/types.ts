@@ -28,7 +28,7 @@ export interface SavedSearchComponentDependencies {
  * that can be persisted externally (e.g., in URL params or local storage)
  *
  * This includes user customizations related to how the data table is displayed:
- * columns selection, sorting, grid layout, row display options, and in-table search.
+ * columns selection, sorting, grid layout and row display options.
  */
 export interface SavedSearchTableConfig {
   columns?: string[];
@@ -49,10 +49,5 @@ export interface SavedSearchComponentProps extends SavedSearchTableConfig {
   timestampField?: string;
   height?: CSSProperties['height'];
   displayOptions?: NonPersistedDisplayOptions;
-  /**
-   * Callback that fires when the table configuration changes
-   * (e.g., when user customizes columns, sort, grid settings, etc.)
-   * This allows consumers to persist the table config externally
-   */
   onTableConfigChange?: (config: SavedSearchTableConfig) => void;
 }

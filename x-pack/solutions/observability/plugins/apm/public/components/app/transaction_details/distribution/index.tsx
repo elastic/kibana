@@ -129,11 +129,10 @@ export function TransactionDistribution({
       const currentQuery = toQuery(history.location.search);
 
       // Clean up sort configuration to only include columns that exist
-      // This prevents removed columns from being re-added on remount
       const cleanedSort = config.sort?.filter((sortEntry) => {
         const [fieldName] = sortEntry;
         // Keep sorts for fields that are in the current columns array
-        // Also keep @timestamp as it's a default field
+        // Also keep @timestamp as it's not removable
         return fieldName === '@timestamp' || (config.columns && config.columns.includes(fieldName));
       });
 
@@ -144,7 +143,7 @@ export function TransactionDistribution({
             columns: Object.fromEntries(
               Object.entries(config.grid.columns).filter(
                 ([fieldName]) =>
-                  fieldName === '@timestamp' ||
+                  fieldName === '@timestamp' || // `@timestamp` is always present
                   (config.columns && config.columns.includes(fieldName))
               )
             ),

@@ -34,6 +34,7 @@ export interface UrlParams {
   latencyAggregationType?: LatencyAggregationType;
   comparisonEnabled?: boolean;
   offset?: string;
+
   // Logs tab state (for persisting saved search customizations)
   logsColumns?: string;
   logsSort?: string;
