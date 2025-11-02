@@ -25,12 +25,12 @@ import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { StatusBadge } from '../../../shared/ui';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
-import { isTerminalStatus } from '../lib/execution_status';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;

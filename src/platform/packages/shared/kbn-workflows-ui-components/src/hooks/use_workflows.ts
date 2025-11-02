@@ -8,9 +8,8 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { WorkflowListDto } from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
-import type { WorkflowsSearchParams } from '../../../types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
 
 export function useWorkflows(params: WorkflowsSearchParams) {
   const { http } = useKibana().services;
@@ -18,7 +17,10 @@ export function useWorkflows(params: WorkflowsSearchParams) {
   return useQuery<WorkflowListDto>({
     networkMode: 'always',
     queryKey: ['workflows', params],
-    queryFn: () => {
+    queryFn: async () => {
+      if (!http) {
+        return Promise.reject(new Error('Http service is not available'));
+      }
       return http.post<WorkflowListDto>('/api/workflows/search', {
         body: JSON.stringify(params),
       });

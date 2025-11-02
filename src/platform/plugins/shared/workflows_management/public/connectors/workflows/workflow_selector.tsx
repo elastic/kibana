@@ -24,12 +24,12 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useWorkflows } from '@kbn/workflows-ui-components';
 import * as i18n from './translations';
 import { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
 import { getSelectedWorkflowDisabledError, processWorkflowsToOptions } from './workflow_utils';
 import type { WorkflowOption, WorkflowSelectorConfig } from './workflow_utils';
 import { IconDisabledWorkflow } from '../../assets/icons';
-import { useWorkflows } from '../../entities/workflows/model/use_workflows';
 
 interface WorkflowSelectorProps {
   selectedWorkflowId?: string;
