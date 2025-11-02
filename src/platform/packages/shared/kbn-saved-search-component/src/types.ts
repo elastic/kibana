@@ -11,7 +11,7 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/public';
+import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/common';
 import type { CSSProperties } from 'react';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';

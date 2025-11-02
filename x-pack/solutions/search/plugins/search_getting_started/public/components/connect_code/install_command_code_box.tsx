@@ -22,7 +22,7 @@ export const InstallCommandCodeBox = ({ selectedLanguage }: Props) => {
   if (!installCommand) return null;
 
   return (
-    <EuiCodeBlock isCopyable fontSize="m" language={selectedLanguage}>
+    <EuiCodeBlock isCopyable fontSize="m" language={'bash'}>
       {installCommand}
     </EuiCodeBlock>
   );
