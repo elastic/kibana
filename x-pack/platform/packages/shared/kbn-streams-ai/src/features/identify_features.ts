@@ -34,6 +34,7 @@ export async function identifyFeatures({
   kql,
   inferenceClient,
   logger,
+  signal,
   dropUnmapped = false,
 }: {
   stream: Streams.all.Definition;
@@ -44,6 +45,7 @@ export async function identifyFeatures({
   kql?: string;
   inferenceClient: BoundInferenceClient;
   logger: Logger;
+  signal: AbortSignal;
   dropUnmapped?: boolean;
 }): Promise<{ features: Feature[] }> {
   const [analysis, initialClustering] = await Promise.all([
@@ -123,6 +125,7 @@ export async function identifyFeatures({
         };
       },
     },
+    abortSignal: signal,
   });
 
   const limiter = pLimit(CONCURRENT_DESCRIPTION_REQUESTS);
