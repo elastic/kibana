@@ -15,18 +15,14 @@ import { createMLJobsWithSampleData } from '../../src/data_generators/load_sampl
 import { evaluate } from '../../src/evaluate';
 
 evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
-  const ANOMALY_DETECTION_INDEX = 'my-index-000001';
-  const APM_ML_JOB_ID = 'test-job-anomaly-detection';
-  const APM_ML_DATAFEED_ID = `datafeed-${APM_ML_JOB_ID}`;
-  const APM_SERVICE_NAME = 'web-api';
-  const CLOSED_ML_JOB_ID = 'response_time_anomaly_detection';
-  const CLOSED_ML_DATAFEED_ID = `datafeed-${CLOSED_ML_JOB_ID}`;
+  const APM_ML_JOB_ID = 'apm-service-anomaly-detector';
+  const APM_SERVICE_NAME = 'web-api-service';
+  const CLOSED_ML_JOB_ID = 'response-time-threshold-detector';
   let jobs: MlGetJobsResponse = { count: 0, jobs: [] };
   let jobIds: string[] = [];
 
   evaluate.beforeAll(async ({ apmSynthtraceEsClient, kbnClient, esClient, log }) => {
     await cleanupMachineLearningJobs({ esClient, log });
-    await esClient.indices.delete({ index: ANOMALY_DETECTION_INDEX, ignore_unavailable: true });
     await apmSynthtraceEsClient.clean();
     await createMLJobsWithSampleData({
       log,
@@ -39,17 +35,10 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
       apmSynthtraceEsClient,
       APM_SERVICE_NAME,
       APM_ML_JOB_ID,
-      APM_ML_DATAFEED_ID,
       log
     );
 
-    await createAnomalyDetectionJobWithNoData(
-      esClient,
-      ANOMALY_DETECTION_INDEX,
-      CLOSED_ML_JOB_ID,
-      CLOSED_ML_DATAFEED_ID,
-      log
-    );
+    await createAnomalyDetectionJobWithNoData(esClient, CLOSED_ML_JOB_ID, log);
 
     await esClient.ml.closeJob({ job_id: CLOSED_ML_JOB_ID, force: true });
 
@@ -59,7 +48,6 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
 
   evaluate.afterAll(async ({ apmSynthtraceEsClient, kbnClient, esClient, log }) => {
     await cleanupMachineLearningJobs({ esClient, log });
-    await esClient.indices.delete({ index: ANOMALY_DETECTION_INDEX, ignore_unavailable: true });
     await apmSynthtraceEsClient.clean();
   });
 

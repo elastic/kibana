@@ -13,6 +13,8 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
 import type { ApmFields } from '@kbn/apm-synthtrace-client';
 
+export const ANOMALY_DETECTION_INDEX = 'observability-ml-test-index';
+
 export async function cleanupMachineLearningJobs({
   esClient,
   log,
@@ -31,6 +33,7 @@ export async function cleanupMachineLearningJobs({
       }
       await esClient.ml.closeJob({ job_id: jobId, force: true });
       await esClient.ml.deleteJob({ job_id: jobId });
+      await esClient.indices.delete({ index: ANOMALY_DETECTION_INDEX, ignore_unavailable: true });
     }
   } catch (error) {
     log.info('Cleanup warning:', error);
@@ -57,10 +60,10 @@ export async function createApmJobWithNormalData(
   apmSynthtraceEsClient: Pick<SynthtraceEsClient<ApmFields>, 'index' | 'clean'>,
   serviceName: string,
   jobId: string,
-  datafeedId: string,
   log: ScoutLogger
 ) {
   log.debug('Generating APM data');
+  const datafeedId = `datafeed-${jobId}`;
 
   const range = timerange(moment().subtract(1, 'days'), moment());
 
@@ -99,13 +102,12 @@ export async function createApmJobWithNormalData(
 
 export async function createAnomalyDetectionJobWithNoData(
   esClient: Client,
-  index: string,
   jobId: string,
-  datafeedId: string,
   log: ScoutLogger
 ) {
+  const datafeedId = `datafeed-${jobId}`;
   await esClient.indices.create({
-    index,
+    index: ANOMALY_DETECTION_INDEX,
     mappings: {
       properties: {
         '@timestamp': { type: 'date' },
@@ -132,7 +134,7 @@ export async function createAnomalyDetectionJobWithNoData(
     },
     datafeed_config: {
       datafeed_id: datafeedId,
-      indices: [index],
+      indices: [ANOMALY_DETECTION_INDEX],
       query: { match_all: {} },
     },
   };
