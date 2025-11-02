@@ -9,6 +9,7 @@
 
 import React from 'react';
 import type { WorkflowListDto } from '@kbn/workflows';
+import * as i18n from './translations';
 import { TagsBadge } from './tags_badge';
 
 export interface WorkflowValidationResult {
@@ -84,7 +85,7 @@ export function processWorkflowsToOptions(
       append: <TagsBadge tags={workflow.definition?.tags || []} />,
       validationResult,
       data: {
-        secondaryContent: workflow.description || 'No description',
+        secondaryContent: workflow.description || i18n.WORKFLOW_EMPTY_DESCRIPTION,
       },
     } as WorkflowOption;
   });
@@ -99,6 +100,6 @@ export function getSelectedWorkflowDisabledError(
 
   const selectedWorkflow = workflows.find((w) => w.id === selectedWorkflowId);
   return selectedWorkflow && !selectedWorkflow.enabled
-    ? errorMessage || 'Selected workflow is disabled'
+    ? errorMessage || i18n.SELECTED_WORKFLOW_DISABLED_ERROR
     : null;
 }

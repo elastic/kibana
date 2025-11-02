@@ -10,8 +10,8 @@
 import React, { useCallback, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { WorkflowSelector } from '@kbn/workflows-ui';
 import type { WorkflowsActionParams } from './types';
-import { WorkflowSelector } from './workflow_selector';
 
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
   actionParams,

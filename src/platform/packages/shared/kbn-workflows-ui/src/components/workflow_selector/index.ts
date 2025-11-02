@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/hooks';
-export * from './src/components';
+export { WorkflowSelector } from './workflow_selector';
+export { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
+export * from './workflow_utils';
+export * from './tags_badge';
+export * from './translations';

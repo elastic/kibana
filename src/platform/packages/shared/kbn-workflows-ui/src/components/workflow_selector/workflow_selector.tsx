@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiPopoverFooter,
   EuiSelectable,
+  type EuiSelectableOption,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -24,7 +25,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useWorkflows } from '@kbn/workflows-ui';
+import { useWorkflows } from '../../hooks';
 import * as i18n from './translations';
 import { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
 import { getSelectedWorkflowDisabledError, processWorkflowsToOptions } from './workflow_utils';
@@ -246,7 +247,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       ) : (
         <EuiSelectable
           aria-label="Select workflow"
-          options={workflowOptions as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+          options={workflowOptions as EuiSelectableOption<WorkflowOption>[]}
           onChange={handleWorkflowChange}
           singleSelection
           searchable
