@@ -53,8 +53,7 @@ run(
         branch = process.env.BUILDKITE_BRANCH || '';
         pipeline = process.env.BUILDKITE_PIPELINE_SLUG || '';
         isPr = process.env.BUILDKITE_PULL_REQUEST === 'true';
-        // Allow GitHub updates for PRs for 1 time experiment
-        updateGithub = isPr || process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
+        updateGithub = process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
         prependTitle = process.env.PREPEND_FAILURE_TITLE || '';
       } else {
         // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
@@ -63,9 +62,8 @@ run(
         isPr = !!process.env.ghprbPullId;
 
         const isMainOrVersion = branch === 'main' || branch.match(/^\d+\.(x|\d+)$/);
-        // Allow GitHub updates for this PR
-        if (!isMainOrVersion && !isPr) {
-          log.info('Failure issues only created on main/version branch jobs and this PR');
+        if (!isMainOrVersion || isPr) {
+          log.info('Failure issues only created on main/version branch jobs');
           updateGithub = false;
         }
       }
