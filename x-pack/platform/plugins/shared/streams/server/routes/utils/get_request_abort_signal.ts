@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 export function getRequestAbortSignal(request: KibanaRequest) {
   const controller = new AbortController();
