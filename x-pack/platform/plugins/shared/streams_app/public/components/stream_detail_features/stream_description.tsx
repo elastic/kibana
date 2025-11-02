@@ -17,8 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
+import { ConnectorListButton } from '../connector_list_button/connector_list_button';
 import { useStreamDescriptionApi } from './stream_description/use_stream_description_api';
-import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
 
 export interface AISummaryProps {
   definition: Streams.all.GetResponse;
