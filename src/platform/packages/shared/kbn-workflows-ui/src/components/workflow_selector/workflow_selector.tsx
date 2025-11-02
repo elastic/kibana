@@ -290,7 +290,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
               disableFocusTrap
               closeOnScroll
               isOpen={isPopoverOpen}
-              input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
+              input={search!}
               panelPaddingSize="none"
               fullWidth
             >

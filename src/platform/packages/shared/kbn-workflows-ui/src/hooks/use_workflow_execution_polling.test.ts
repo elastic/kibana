@@ -360,4 +360,3 @@ describe('useWorkflowExecutionPolling', () => {
     expect(mockRefetch).not.toHaveBeenCalled();
   });
 });
-
