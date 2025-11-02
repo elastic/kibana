@@ -64,6 +64,8 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const alertEnd = alert.fields[ALERT_END];
   const groups = alert.fields[ALERT_GROUP];
   const additionalFilters = useMemo(() => getGroupFilters(groups), [groups]);
+  const hasEvaluationValues: boolean =
+    alert.fields[ALERT_EVALUATION_VALUES]?.some((value) => value != null) ?? false;
 
   const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
 
@@ -180,7 +182,9 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
           </EuiFlexItem>
         );
       })}
-      {aiopsEnabled && <LogRateAnalysis alert={alert} dataView={dataView} services={services} />}
+      {aiopsEnabled && hasEvaluationValues && (
+        <LogRateAnalysis alert={alert} dataView={dataView} services={services} />
+      )}
     </EuiFlexGroup>
   );
 }
