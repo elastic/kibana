@@ -277,7 +277,6 @@ describe('GraphVisualization', () => {
               name: 'Admin',
               type: 'Identity',
               sub_type: 'Test User',
-              engineMetadata: { type: 'generic' },
             },
           },
         ],
