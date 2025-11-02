@@ -9253,7 +9253,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/workflows-ui-components@link:src/platform/packages/shared/kbn-workflows-ui-components":
+"@kbn/workflows-ui@link:src/platform/packages/shared/kbn-workflows-ui":
   version "0.0.0"
   uid ""
 
