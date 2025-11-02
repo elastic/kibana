@@ -31,7 +31,7 @@ async function loadSampleDataAndGetIndex({
   return indexName;
 }
 
-export async function createSampleDataMLJobs({
+export async function createMLJobsWithSampleData({
   log,
   kbnClient,
   sampleDataId,
