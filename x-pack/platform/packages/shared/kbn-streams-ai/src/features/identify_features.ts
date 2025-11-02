@@ -148,6 +148,7 @@ export async function identifyFeatures({
               esClient,
               inferenceClient,
               feature,
+              signal,
             });
           });
 

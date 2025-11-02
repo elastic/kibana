@@ -392,6 +392,7 @@ export const describeStreamRoute = createServerRoute({
         inferenceClient: inferenceClient.bindTo({ connectorId }),
         start: start.valueOf(),
         end: end.valueOf(),
+        signal: getRequestAbortSignal(request),
       })
     ).pipe(
       map((description) => {
