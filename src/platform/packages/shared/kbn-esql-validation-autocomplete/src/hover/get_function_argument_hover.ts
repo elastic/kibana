@@ -7,16 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import {
-  TIME_SYSTEM_PARAMS,
-  type ESQLAstItem,
-  type ESQLAstQueryExpression,
-  type ESQLFunction,
-  within,
-} from '@kbn/esql-ast';
+import { TIME_SYSTEM_PARAMS, type ESQLAstItem, type ESQLFunction, within } from '@kbn/esql-ast';
 import { getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
 import { isESQLNamedParamLiteral } from '@kbn/esql-ast/src/types';
-import type { ESQLCallbacks } from '../shared/types';
 import { fromCache, setToCache } from './hover_cache';
 
 const TIME_SYSTEM_DESCRIPTIONS = {
@@ -49,10 +42,7 @@ const findArgumentAtOffset = (args: ESQLAstItem[], targetOffset: number): ESQLAs
 
 export async function getFunctionArgumentHover(
   fnNode: ESQLFunction,
-  root: ESQLAstQueryExpression,
-  query: string,
-  offset: number,
-  resourceRetriever?: ESQLCallbacks
+  offset: number
 ): Promise<Array<{ value: string }>> {
   const fnDefinition = getFunctionDefinition(fnNode.name);
   if (!fnDefinition) {

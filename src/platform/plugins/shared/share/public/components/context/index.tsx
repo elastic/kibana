@@ -47,7 +47,7 @@ export const ShareProvider = ({
   const value: IShareContext = {
     ...shareContext,
     isDirty: isStateful ? internalIsDirty : shareContext.isDirty,
-    isSaving: isStateful ? isSaving : undefined,
+    isSaving,
     onSave: isStateful ? handleSave : undefined,
   };
 
