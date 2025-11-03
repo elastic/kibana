@@ -303,13 +303,14 @@ export const useDiscoverHistogram = (
    * Data fetching
    */
   useEffect(() => {
-    if (!unifiedHistogramApi || !triggerUnifiedHistogramFetch.current) {
+    if (!unifiedHistogramApi) {
       return;
     }
 
-    const subscription = stateContainer.dataState.fetchChart$.subscribe(
-      triggerUnifiedHistogramFetch.current
-    );
+    const subscription = stateContainer.dataState.fetchChart$.subscribe((latestFetchDetails) => {
+      // console.debug('Use Unified Histogram - Fetch triggered');
+      triggerUnifiedHistogramFetch.current(latestFetchDetails);
+    });
 
     return () => {
       subscription.unsubscribe();
