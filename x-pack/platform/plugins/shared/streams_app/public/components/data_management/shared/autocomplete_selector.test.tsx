@@ -34,7 +34,7 @@ describe('AutocompleteSelector', () => {
     it('renders with default configuration', () => {
       render(<AutocompleteSelector {...defaultProps} />);
 
-      expect(screen.getByTestId('streamsAppFieldSelector')).toBeInTheDocument();
+      expect(screen.getByTestId('streamsAppAutocompleteSelector')).toBeInTheDocument();
     });
 
     it('renders with custom label and placeholder for target field selection', () => {
