@@ -207,6 +207,7 @@ export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
+  id: z.string().optional(),
 });
 
 export const UpdateWorkflowCommandSchema = z.object({
