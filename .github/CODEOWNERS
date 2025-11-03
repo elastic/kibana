@@ -32,6 +32,7 @@ examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 examples/response_stream @elastic/ml-ui
 examples/routing_example @elastic/kibana-core
+examples/saved_objects @elastic/kibana-core
 examples/screenshot_mode_example @elastic/response-ops
 examples/search_examples @elastic/kibana-data-discovery
 examples/share_examples @elastic/appex-sharedux
